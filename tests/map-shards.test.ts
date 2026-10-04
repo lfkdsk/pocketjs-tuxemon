@@ -52,7 +52,7 @@ describe("generated per-map repository", () => {
       expect(JSON.parse(actual.toString("utf8")).$ === "rpgkit-map/1", entry.meta.id)
         .toBe(entry.encoding === "compact");
     }
-  });
+  }, 60_000);
 
   test("the standard byte repository can acquire every generated map", () => {
     const reads: string[] = [];

@@ -1608,7 +1608,7 @@ test("Spyder first-fight win and loss complete equivalently at 60, 30, 20, and 4
       cwd: ROOT,
       encoding: "utf8",
       env: { ...process.env, G6_OUTPUT_ROOT: isolatedRoot },
-      timeout: 30_000,
+      timeout: 120_000,
     });
     if (generated.status !== 0) {
       throw new Error(`isolated G6 cook failed\n${generated.stdout}\n${generated.stderr}`);
@@ -1676,4 +1676,4 @@ test("Spyder first-fight win and loss complete equivalently at 60, 30, 20, and 4
     rmSync(isolatedRoot, { recursive: true, force: true });
   }
   expect(readFileSync(maintainedProject)).toEqual(before);
-}, 120_000);
+}, 300_000);

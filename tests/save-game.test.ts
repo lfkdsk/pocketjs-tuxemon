@@ -2,7 +2,7 @@
 // empty saves, the three storage channels, and the START menu runtime.
 // The whole-mainline resume check is `bun run verify:save`.
 
-import { afterEach, describe, expect, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { createRoot } from "solid-js";
 
 import { FIXED_INITIAL_CIVIL_TIME } from "../battle/time-weather.ts";
@@ -246,9 +246,20 @@ describe("bad, foreign and empty saves", () => {
 
 describe("storage channels", () => {
   const g = globalThis as { fs?: unknown; localStorage?: unknown };
+  // Other suites boot worlds that mount these host globals and do not tear
+  // them down, so start from a clean slate and put back what was there.
+  const keys = ["fs", "localStorage"] as const;
+  let saved: (PropertyDescriptor | undefined)[] = [];
+  beforeEach(() => {
+    saved = keys.map((key) => Object.getOwnPropertyDescriptor(globalThis, key));
+    for (const key of keys) delete g[key];
+  });
   afterEach(() => {
-    g.fs = undefined;
-    delete g.localStorage;
+    keys.forEach((key, i) => {
+      delete g[key];
+      const descriptor = saved[i];
+      if (descriptor) Object.defineProperty(globalThis, key, descriptor);
+    });
   });
 
   test("data.fs first, then browser storage, else save codes only", () => {
