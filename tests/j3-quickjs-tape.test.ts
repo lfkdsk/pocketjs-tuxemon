@@ -21,6 +21,6 @@ describe("J3 QuickJS continuation tape", () => {
       outcome: "won",
     });
     expect(tape.terminalStateSha256)
-      .toBe("9dd92c573dcb4f742c522513bccf68184efc691d1bedc8b8183a4f04652332c2");
+      .toBe("cc69291ff4eaa7af3f6e2b4a175c61b5b05ccdedbe733512698f8eb670d6d96b");
   });
 });

@@ -110,7 +110,7 @@ describe("real daycare import", () => {
     for (const map of BUILD.project.maps) {
       expect(map.events?.some((event) => event.id === "zz_tux_runtime_daycare_step")).toBe(false);
     }
-    expect(extensions.playerStep).toEqual({ call: "tux.daycare_step", args: {} });
+    expect(extensions.playerStep).toEqual({ call: "tux.player_step", args: {} });
   });
 });
 
@@ -296,7 +296,7 @@ describe("real imported per-tile hook", () => {
 
   test("unused sparse saves make the movement command a byte-preserving no-op", () => {
     const value = ext();
-    const result = extensions.commands!["tux.daycare_step"]!({
+    const result = extensions.commands!["tux.player_step"]!({
       ...context(value),
       random: () => 0.5,
     }, {});

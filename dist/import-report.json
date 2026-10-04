@@ -284,11 +284,11 @@
  "schemaErrors": [],
  "audioQoaPending": [],
  "byFate": {
-  "T1-lowered": 2728,
-  "T3-dropped": 114,
-  "T1": 36886,
-  "T2-dropped": 2017,
-  "T4-dropped": 1767,
+  "T1-lowered": 2927,
+  "T3-dropped": 111,
+  "T1": 37549,
+  "T4-dropped": 1761,
+  "T2-dropped": 1581,
   "structural": 792
  },
  "rows": [
@@ -307,7 +307,7 @@
   {
    "key": "act:add_item:T1",
    "fate": "T1",
-   "count": 114,
+   "count": 117,
    "note": "session item add/sub"
   },
   {
@@ -323,10 +323,10 @@
    "note": "tux.add_monster spawns into the persistent party"
   },
   {
-   "key": "act:add_step_tracker:T2-dropped",
-   "fate": "T2-dropped",
-   "count": 100,
-   "note": "the runtime exposes neither a saved step-counter state machine nor a movement-step update hook"
+   "key": "act:add_step_tracker:T1-lowered",
+   "fate": "T1-lowered",
+   "count": 199,
+   "note": "tux.add_step_tracker saves a countdown advanced by the kit playerStep hook: one per completed tile, where upstream applies the signed tile delta (dx+dy, so up/left steps and teleport jumps also count)"
   },
   {
    "key": "act:add_tech:T1",
@@ -385,7 +385,7 @@
   {
    "key": "act:char_face(after teleport):T1",
    "fate": "T1",
-   "count": 868,
+   "count": 871,
    "note": "folded into transfer direction"
   },
   {
@@ -493,7 +493,7 @@
   {
    "key": "act:clear_variable:T1",
    "fate": "T1",
-   "count": 35,
+   "count": 134,
    "note": "variable set 0"
   },
   {
@@ -533,10 +533,10 @@
    "note": "fadeoutBgm 1.000s + fading flag"
   },
   {
-   "key": "act:format_variable:T2-dropped",
-   "fate": "T2-dropped",
+   "key": "act:format_variable:T1",
+   "fate": "T1",
    "count": 221,
-   "note": "source int/float coercion needs raw numeric variables; story values are enum-coded and kit numeric writes floor fractions"
+   "note": "tux.format_variable: Python int()/float() (optionally negated) stored as str()"
   },
   {
    "key": "act:get_party_monster:T1",
@@ -599,6 +599,12 @@
    "note": "gold add/sub"
   },
   {
+   "key": "act:modify_monster_bond:T4-dropped",
+   "fate": "T4-dropped",
+   "count": 99,
+   "note": "presentation / meta"
+  },
+  {
    "key": "act:open_journal:T1-lowered",
    "fate": "T1-lowered",
    "count": 14,
@@ -613,7 +619,7 @@
   {
    "key": "act:park_experience:T3-dropped",
    "fate": "T3-dropped",
-   "count": 5,
+   "count": 8,
    "note": "Safari-park session (Eclipse park); not part of the Spyder campaign"
   },
   {
@@ -695,10 +701,10 @@
    "note": "local.npc.<slug> = 0"
   },
   {
-   "key": "act:remove_step_tracker:T2-dropped",
-   "fate": "T2-dropped",
-   "count": 1,
-   "note": "the runtime exposes neither a saved step-counter state machine nor a movement-step update hook"
+   "key": "act:remove_step_tracker:T1",
+   "fate": "T1",
+   "count": 103,
+   "note": "tux.remove_step_tracker deletes the saved tracker (missing tracker is a no-op)"
   },
   {
    "key": "act:remove_tech:T4-dropped",
@@ -773,10 +779,10 @@
    "note": "KV1 selects a prepackaged map overlay"
   },
   {
-   "key": "act:set_mission:T3-dropped",
-   "fate": "T3-dropped",
+   "key": "act:set_mission:T1",
+   "fate": "T1",
    "count": 6,
-   "note": "mission definitions, prerequisite graph, and per-step status are not imported"
+   "note": "upstream no-op: no mission is ever created, so none can meet its prerequisites"
   },
   {
    "key": "act:set_monster_attribute:T1",
@@ -815,6 +821,12 @@
    "note": "variable random enum code"
   },
   {
+   "key": "act:set_step_tracker_milestone_shown:T1",
+   "fate": "T1",
+   "count": 3,
+   "note": "tux.set_step_tracker_milestone_shown acknowledges a triggered milestone"
+  },
+  {
    "key": "act:set_teleport_faint:T1",
    "fate": "T1",
    "count": 29,
@@ -842,7 +854,7 @@
    "key": "act:set_variable:T1",
    "fate": "T1",
    "count": 1457,
-   "note": "variable set enum code"
+   "note": "variable set enum code (text variables: the literal string)"
   },
   {
    "key": "act:start_battle:T1",
@@ -883,7 +895,7 @@
   {
    "key": "act:transition_teleport:T1",
    "fate": "T1",
-   "count": 1037,
+   "count": 1040,
    "note": "transfer (terminal; dir from trailing char_face)"
   },
   {
@@ -895,7 +907,7 @@
   {
    "key": "act:translated_dialog:T1",
    "fate": "T1",
-   "count": 2222,
+   "count": 2225,
    "note": "text boxes from en_US .po (layout args ignored)"
   },
   {
@@ -935,10 +947,10 @@
    "note": "KV1 expands the source surface label to exact per-map passage overrides"
   },
   {
-   "key": "act:variable_math:T2-dropped",
-   "fate": "T2-dropped",
+   "key": "act:variable_math:T1",
+   "fate": "T1",
    "count": 9,
-   "note": "source operands may be floating-point or absent; the kit variable bank stores only safe integers and has no presence bit"
+   "note": "tux.variable_math: float arithmetic (floor-division to int) stored as Python str()"
   },
   {
    "key": "act:wait(after teleport):T4-dropped",
@@ -1217,10 +1229,10 @@
    "note": "trigger predicate unavailable in v1"
   },
   {
-   "key": "cond:is step_tracker:T2-dropped",
-   "fate": "T2-dropped",
+   "key": "cond:is step_tracker:T1",
+   "fate": "T1",
    "count": 105,
-   "note": "the runtime exposes neither a saved step counter nor a movement-step update hook"
+   "note": "tux.step_tracker: milestone triggered and not yet shown"
   },
   {
    "key": "cond:is tile_property_updated:T1",
@@ -1429,7 +1441,7 @@
   {
    "key": "trigger:guard:T1",
    "fate": "T1",
-   "count": 2393,
+   "count": 2498,
    "note": "parallel"
   },
   {
@@ -1453,7 +1465,7 @@
   {
    "key": "trigger:never-true guard:T4-dropped",
    "fate": "T4-dropped",
-   "count": 1513,
+   "count": 1408,
    "note": "fixed-false guard (is current_state: combat/menu/teleporter states do not run map fibers in the kit) prevents the source event from starting"
   },
   {
@@ -2875,15 +2887,15 @@
    "summary": {
     "types": 98,
     "uses": 13617,
-    "native": 12155,
-    "degraded": 1091,
+    "native": 12192,
+    "degraded": 1094,
     "placeholder": 0,
-    "dropped": 371,
-    "nativePercent": 89.3,
-    "executablePercent": 97.3,
+    "dropped": 331,
+    "nativePercent": 89.5,
+    "executablePercent": 97.6,
     "tier1": {
-     "uses": 6395,
-     "percent": 46.96,
+     "uses": 6405,
+     "percent": 47.04,
      "requiredUses": 6246,
      "requiredPercent": 45.9,
      "meetsBaseline": true
@@ -2906,17 +2918,16 @@
     {
      "type": "add_item",
      "total": 118,
-     "native": 114,
+     "native": 117,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 4,
+     "dropped": 1,
      "reasons": {
       "native": [
        "session item add/sub"
       ],
       "dropped": [
-       "NPC bags are combat-only",
-       "fixed-false guard (is step_tracker: the runtime exposes neither a saved step counter nor a movement-step update hook) prevents the source event from starting"
+       "NPC bags are combat-only"
       ]
      }
     },
@@ -2939,13 +2950,12 @@
      "type": "add_step_tracker",
      "total": 3,
      "native": 0,
-     "degraded": 0,
+     "degraded": 3,
      "placeholder": 0,
-     "dropped": 3,
+     "dropped": 0,
      "reasons": {
-      "dropped": [
-       "the runtime exposes neither a saved step-counter state machine nor a movement-step update hook",
-       "fixed-false guard (is step_tracker: the runtime exposes neither a saved step counter nor a movement-step update hook) prevents the source event from starting"
+      "degraded": [
+       "tux.add_step_tracker saves a countdown advanced by the kit playerStep hook: one per completed tile, where upstream applies the signed tile delta (dx+dy, so up/left steps and teleport jumps also count)"
       ]
      }
     },
@@ -3058,10 +3068,10 @@
     {
      "type": "char_face",
      "total": 2027,
-     "native": 1559,
+     "native": 1562,
      "degraded": 444,
      "placeholder": 0,
-     "dropped": 24,
+     "dropped": 21,
      "reasons": {
       "degraded": [
        "spawn facing becomes the NPC page route",
@@ -3075,7 +3085,6 @@
        "Tuxemon never starts an event without source conditions or behavior",
        "spawn target or direction is unavailable",
        "Tuxemon's integer tile boundary never contains a point for a zero-size TMX event",
-       "fixed-false guard (is step_tracker: the runtime exposes neither a saved step counter nor a movement-step update hook) prevents the source event from starting",
        "fixed-false guard prevents the source event from starting"
       ],
       "native": [
@@ -3229,16 +3238,13 @@
     {
      "type": "clear_variable",
      "total": 36,
-     "native": 35,
+     "native": 36,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 1,
+     "dropped": 0,
      "reasons": {
       "native": [
        "variable set 0"
-      ],
-      "dropped": [
-       "fixed-false guard (is step_tracker: the runtime exposes neither a saved step counter nor a movement-step update hook) prevents the source event from starting"
       ]
      }
     },
@@ -3339,13 +3345,15 @@
     {
      "type": "format_variable",
      "total": 10,
-     "native": 0,
+     "native": 7,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 10,
+     "dropped": 3,
      "reasons": {
+      "native": [
+       "tux.format_variable: Python int()/float() (optionally negated) stored as str()"
+      ],
       "dropped": [
-       "source int/float coercion needs raw numeric variables; story values are enum-coded and kit numeric writes floor fractions",
        "fixed-false guard prevents the source event from starting"
       ]
      }
@@ -3476,7 +3484,7 @@
      "dropped": 1,
      "reasons": {
       "dropped": [
-       "fixed-false guard (is step_tracker: the runtime exposes neither a saved step counter nor a movement-step update hook) prevents the source event from starting"
+       "presentation / meta"
       ]
      }
     },
@@ -3529,8 +3537,7 @@
      "dropped": 8,
      "reasons": {
       "dropped": [
-       "Safari-park session (Eclipse park); not part of the Spyder campaign",
-       "fixed-false guard (is step_tracker: the runtime exposes neither a saved step counter nor a movement-step update hook) prevents the source event from starting"
+       "Safari-park session (Eclipse park); not part of the Spyder campaign"
       ]
      }
     },
@@ -3755,14 +3762,13 @@
     {
      "type": "remove_step_tracker",
      "total": 5,
-     "native": 0,
+     "native": 5,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 5,
+     "dropped": 0,
      "reasons": {
-      "dropped": [
-       "the runtime exposes neither a saved step-counter state machine nor a movement-step update hook",
-       "fixed-false guard (is step_tracker: the runtime exposes neither a saved step counter nor a movement-step update hook) prevents the source event from starting"
+      "native": [
+       "tux.remove_step_tracker deletes the saved tracker (missing tracker is a no-op)"
       ]
      }
     },
@@ -3931,13 +3937,13 @@
     {
      "type": "set_mission",
      "total": 6,
-     "native": 0,
+     "native": 6,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 6,
+     "dropped": 0,
      "reasons": {
-      "dropped": [
-       "mission definitions, prerequisite graph, and per-step status are not imported"
+      "native": [
+       "upstream no-op: no mission is ever created, so none can meet its prerequisites"
       ]
      }
     },
@@ -4029,13 +4035,13 @@
     {
      "type": "set_step_tracker_milestone_shown",
      "total": 3,
-     "native": 0,
+     "native": 3,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 3,
+     "dropped": 0,
      "reasons": {
-      "dropped": [
-       "fixed-false guard (is step_tracker: the runtime exposes neither a saved step counter nor a movement-step update hook) prevents the source event from starting"
+      "native": [
+       "tux.set_step_tracker_milestone_shown acknowledges a triggered milestone"
       ]
      }
     },
@@ -4094,7 +4100,7 @@
      "dropped": 8,
      "reasons": {
       "native": [
-       "variable set enum code"
+       "variable set enum code (text variables: the literal string)"
       ],
       "dropped": [
        "fixed-false guard (is button_pressed: source button 'K_RETURN' is not a supported Tuxemon intention) prevents the source event from starting",
@@ -4171,10 +4177,10 @@
     {
      "type": "transition_teleport",
      "total": 1049,
-     "native": 1034,
+     "native": 1037,
      "degraded": 3,
      "placeholder": 0,
-     "dropped": 12,
+     "dropped": 9,
      "reasons": {
       "native": [
        "transfer (terminal; dir from trailing char_face)"
@@ -4186,18 +4192,17 @@
       "dropped": [
        "fixed-false guard (is char_facing: source direction 'bottom' is not up/down/left/right and can never equal Tuxemon's Direction) prevents the source event from starting",
        "fixed-false guard (is char_facing: source direction 'top' is not up/down/left/right and can never equal Tuxemon's Direction) prevents the source event from starting",
-       "Tuxemon's integer tile boundary never contains a point for a zero-size TMX event",
-       "fixed-false guard (is step_tracker: the runtime exposes neither a saved step counter nor a movement-step update hook) prevents the source event from starting"
+       "Tuxemon's integer tile boundary never contains a point for a zero-size TMX event"
       ]
      }
     },
     {
      "type": "translated_dialog",
      "total": 2068,
-     "native": 2054,
+     "native": 2057,
      "degraded": 1,
      "placeholder": 0,
-     "dropped": 13,
+     "dropped": 10,
      "reasons": {
       "native": [
        "text boxes from en_US .po (layout args ignored)"
@@ -4205,7 +4210,6 @@
       "dropped": [
        "fixed-false guard (is char_gender: no imported runtime state or predicate) prevents the source event from starting",
        "fixed-false guard (is button_pressed: source button 'K_RETURN' is not a supported Tuxemon intention) prevents the source event from starting",
-       "fixed-false guard (is step_tracker: the runtime exposes neither a saved step counter nor a movement-step update hook) prevents the source event from starting",
        "fixed-false guard (is char_facing_tile: surface-labelled facing tiles need a live player-cell terrain predicate) prevents the source event from starting",
        "fixed-false guard prevents the source event from starting",
        "fixed-false guard (is current_state: combat/menu/teleporter states do not run map fibers in the kit) prevents the source event from starting"
@@ -4294,14 +4298,16 @@
     {
      "type": "variable_math",
      "total": 5,
-     "native": 0,
+     "native": 3,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 5,
+     "dropped": 2,
      "reasons": {
       "dropped": [
-       "fixed-false guard prevents the source event from starting",
-       "source operands may be floating-point or absent; the kit variable bank stores only safe integers and has no presence bit"
+       "fixed-false guard prevents the source event from starting"
+      ],
+      "native": [
+       "tux.variable_math: float arithmetic (floor-division to int) stored as Python str()"
       ]
      }
     },
@@ -4345,15 +4351,15 @@
    "summary": {
     "types": 64,
     "uses": 8663,
-    "native": 8340,
+    "native": 8349,
     "degraded": 40,
     "placeholder": 0,
-    "dropped": 283,
-    "nativePercent": 96.3,
-    "executablePercent": 96.7,
+    "dropped": 274,
+    "nativePercent": 96.4,
+    "executablePercent": 96.8,
     "tier1": {
-     "uses": 4745,
-     "percent": 54.77,
+     "uses": 4747,
+     "percent": 54.8,
      "requiredUses": 4591,
      "requiredPercent": 53,
      "meetsBaseline": true
@@ -4686,16 +4692,15 @@
     {
      "type": "is has_item",
      "total": 53,
-     "native": 51,
+     "native": 52,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 2,
+     "dropped": 1,
      "reasons": {
       "native": [
        "session item count >= n"
       ],
       "dropped": [
-       "fixed-false guard (is step_tracker: the runtime exposes neither a saved step counter nor a movement-step update hook) prevents the source event from starting",
        "fixed-false guard (is char_facing_tile: surface-labelled facing tiles need a live player-cell terrain predicate) prevents the source event from starting"
       ]
      }
@@ -4853,13 +4858,13 @@
     {
      "type": "is step_tracker",
      "total": 7,
-     "native": 0,
+     "native": 7,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 7,
+     "dropped": 0,
      "reasons": {
-      "dropped": [
-       "fixed-false guard (is step_tracker: the runtime exposes neither a saved step counter nor a movement-step update hook) prevents the source event from starting"
+      "native": [
+       "tux.step_tracker: milestone triggered and not yet shown"
       ]
      }
     },
@@ -4892,17 +4897,16 @@
     {
      "type": "is variable_set",
      "total": 730,
-     "native": 719,
+     "native": 720,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 11,
+     "dropped": 10,
      "reasons": {
       "native": [
        "page/if variable compare on the enum code"
       ],
       "dropped": [
        "source event is not materialized by any map",
-       "fixed-false guard (is step_tracker: the runtime exposes neither a saved step counter nor a movement-step update hook) prevents the source event from starting",
        "fixed-false guard (is char_facing_tile: surface-labelled facing tiles need a live player-cell terrain predicate) prevents the source event from starting",
        "fixed-false guard prevents the source event from starting"
       ]

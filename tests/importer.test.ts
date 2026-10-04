@@ -76,10 +76,10 @@ test("all maps pass schema and reference valid transfer destinations", () => {
   expect(result.report.coverage.actions.summary).toMatchObject({
     types: 98,
     uses: 13_617,
-    native: 6_844,
+    native: 6_850,
     degraded: 2_820,
     placeholder: 708,
-    dropped: 3_245,
+    dropped: 3_239,
     nativePercent: 50.3,
     tier1: {
       uses: 6_316,
@@ -523,10 +523,10 @@ test("default import output remains byte-pinned", () => {
   // atlas metadata, the COV-B live NPC party staging and
   // NPC-versus-NPC resolver, the moving-guard step triggers, the live-clock
   // daytime filter, the map-entry layer reset, the runtime player-name
-  // condition and the per-domain NPC battle result codes are all in this
-  // combined pin.
+  // condition, the per-domain NPC battle result codes and the set_mission
+  // no-op are all in this combined pin.
   expect(createHash("sha256").update(bytes).digest("hex")).toBe(
-    "f568842584296431cfa92107864873b93e6501d06f0292a4bf0d7b6f2e341b15",
+    "02d8702b1901f23053c7966de63fa5a4224a0b47061ad805beb3e791f8090cd9",
   );
 });
 

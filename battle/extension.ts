@@ -12,6 +12,21 @@ import {
   DAYLIGHT_TINT_PROFILES,
 } from "./daylight.ts";
 import { advanceDaycareStep } from "./daycare.ts";
+import {
+  formatVariableCommand,
+  setVariableTextCommand,
+  variableMathCommand,
+  variableTextCondition,
+} from "./text-variables.ts";
+import {
+  addStepTracker,
+  markMilestoneShown,
+  milestonePending,
+  removeStepTracker,
+  stepCharacterTrackers,
+  stepTrackersProblem,
+  type StepTrackers,
+} from "./step-tracker.ts";
 import { battleDbToTuxemonBattleDb } from "./from-battle-db.ts";
 import { evolveMonsterSnapshot } from "./progression.ts";
 import { applyPendingOverrides, spawnMonster, spawnMonsterWithRandom } from "./spawn.ts";
@@ -132,6 +147,8 @@ export interface TuxemonExtensionState {
   shopSold?: Record<string, number>;
   /** Sparse two-slot daycare, created on first deposit. */
   daycare?: DaycareExtensionState;
+  /** Sparse per-character step trackers (character -> tracker id). */
+  stepTrackers?: StepTrackers;
 }
 
 export interface MonsterBox {
@@ -611,6 +628,10 @@ function tuxemonStateProblem(
       }
     }
     groups.push(["daycare.parents", daycare.parents]);
+  }
+  if (state.stepTrackers !== undefined) {
+    const problem = stepTrackersProblem(state.stepTrackers);
+    if (problem) return problem;
   }
   for (const [group, values] of groups) {
     for (let index = 0; index < values.length; index++) {
@@ -1584,26 +1605,101 @@ function setKennelVisibleCommand() {
   };
 }
 
-/** One invocation represents one completed player tile. The engine hook does
- * not mutate unused saves: without a sparse daycare payload this returns no
- * result at all. */
-function daycareStepCommand(source: BattleDbSource) {
+/** One invocation represents one completed player tile: it advances the
+ * daycare and the player's step trackers. The engine hook does not mutate
+ * unused saves: without either sparse payload this returns no result at all. */
+function playerStepCommand(source: BattleDbSource) {
   let cachedSource: BattleDb | null = null;
   let cachedRules: ReturnType<typeof battleDbToTuxemonBattleDb> | null = null;
   return (context: ExtensionCommandContext) => {
     const current = currentExtensionState(context.ext);
-    if (!current.daycare) return;
-    const db = resolveBattleDb(source);
-    if (db !== cachedSource || cachedRules === null) {
-      cachedSource = db;
-      cachedRules = battleDbToTuxemonBattleDb(db);
+    if (!current.daycare && !current.stepTrackers?.player) return;
+    let next = current;
+    let gold = context.gold;
+    if (current.daycare) {
+      const db = resolveBattleDb(source);
+      if (db !== cachedSource || cachedRules === null) {
+        cachedSource = db;
+        cachedRules = battleDbToTuxemonBattleDb(db);
+      }
+      const result = advanceDaycareStep(current.daycare, context.gold, cachedRules);
+      next = { ...next, daycare: result.daycare };
+      gold = result.gold;
     }
-    const result = advanceDaycareStep(current.daycare, context.gold, cachedRules);
+    const stepTrackers = stepCharacterTrackers(current.stepTrackers, "player");
+    if (stepTrackers) next = { ...next, stepTrackers };
     return {
-      ext: json({ ...current, daycare: result.daycare }),
-      ...(result.gold === context.gold ? {} : { gold: result.gold }),
+      ext: json(next),
+      ...(gold === context.gold ? {} : { gold }),
     };
   };
+}
+
+function finiteArg(value: unknown, call: string, name: string): number {
+  const parsed = typeof value === "number" ? value : typeof value === "string" && value.trim() !== "" ? Number(value) : NaN;
+  if (!Number.isFinite(parsed)) throw new Error(`${call}: ${name} must be a finite number`);
+  return parsed;
+}
+
+function trackerArgs(value: JsonValue, call: string): { args: Record<string, unknown>; character: string; tracker: string } {
+  const args = argsRecord(value, call);
+  const character = args.character === undefined ? "player" : args.character;
+  if (!nonEmptyString(character) || !nonEmptyString(args.tracker)) {
+    throw new Error(`${call}: character and tracker must be strings`);
+  }
+  return { args, character, tracker: args.tracker };
+}
+
+function withStepTrackers(current: TuxemonExtensionState, stepTrackers: StepTrackers): JsonValue {
+  const { stepTrackers: _old, ...rest } = current;
+  return json(Object.keys(stepTrackers).length ? { ...rest, stepTrackers } : rest);
+}
+
+function addStepTrackerCommand() {
+  return (context: ExtensionCommandContext, value: JsonValue) => {
+    const { args, character, tracker } = trackerArgs(value, "tux.add_step_tracker");
+    const milestones = args.milestones === undefined ? [] : args.milestones;
+    if (!Array.isArray(milestones)) throw new Error("tux.add_step_tracker: milestones must be an array");
+    if (args.autoReset !== undefined && typeof args.autoReset !== "boolean") {
+      throw new Error("tux.add_step_tracker: autoReset must be boolean");
+    }
+    const current = currentExtensionState(context.ext);
+    const next = addStepTracker(current.stepTrackers, character, tracker, {
+      countdown: finiteArg(args.countdown, "tux.add_step_tracker", "countdown"),
+      milestones: milestones.map((m) => finiteArg(m, "tux.add_step_tracker", "milestone")),
+      autoReset: args.autoReset === true,
+      ...(args.initialCountdown === undefined
+        ? {}
+        : { initialCountdown: finiteArg(args.initialCountdown, "tux.add_step_tracker", "initialCountdown") }),
+    });
+    return next ? { ext: withStepTrackers(current, next) } : undefined;
+  };
+}
+
+function removeStepTrackerCommand() {
+  return (context: ExtensionCommandContext, value: JsonValue) => {
+    const { character, tracker } = trackerArgs(value, "tux.remove_step_tracker");
+    const current = currentExtensionState(context.ext);
+    const next = removeStepTracker(current.stepTrackers, character, tracker);
+    return next ? { ext: withStepTrackers(current, next) } : undefined;
+  };
+}
+
+function milestoneShownCommand() {
+  return (context: ExtensionCommandContext, value: JsonValue) => {
+    const { args, character, tracker } = trackerArgs(value, "tux.set_step_tracker_milestone_shown");
+    const milestone = finiteArg(args.milestone, "tux.set_step_tracker_milestone_shown", "milestone");
+    const current = currentExtensionState(context.ext);
+    const next = markMilestoneShown(current.stepTrackers, character, tracker, milestone);
+    return next ? { ext: withStepTrackers(current, next) } : undefined;
+  };
+}
+
+function stepTrackerCondition(context: ExtensionReadContext, value: JsonValue): boolean {
+  const { args, character, tracker } = trackerArgs(value, "tux.step_tracker");
+  const milestone = finiteArg(args.milestone, "tux.step_tracker", "milestone");
+  const current = currentExtensionState(context.ext);
+  return negate(milestonePending(current.stepTrackers, character, tracker, milestone), args);
 }
 
 function boxOf(
@@ -2379,7 +2475,7 @@ export function createTuxemonExtensions(
       if (!handler) throw new Error(`unknown Tuxemon extension condition ${JSON.stringify(call)}`);
       return handler(context, args);
     },
-    playerStep: { call: "tux.daycare_step", args: {} },
+    playerStep: { call: "tux.player_step", args: {} },
     commands: {
       "tux.add_monster": addMonsterCommand(source),
       "tux.set_monster_health": healthCommand(),
@@ -2420,7 +2516,13 @@ export function createTuxemonExtensions(
       "tux.modify_bill": modifyBillCommand(),
       "tux.create_kennel": createKennelCommand(),
       "tux.set_kennel_visible": setKennelVisibleCommand(),
-      "tux.daycare_step": daycareStepCommand(source),
+      "tux.player_step": playerStepCommand(source),
+      "tux.add_step_tracker": addStepTrackerCommand(),
+      "tux.remove_step_tracker": removeStepTrackerCommand(),
+      "tux.set_step_tracker_milestone_shown": milestoneShownCommand(),
+      "tux.set_variable_text": setVariableTextCommand,
+      "tux.variable_math": variableMathCommand,
+      "tux.format_variable": formatVariableCommand,
       "tux.tick_time_weather": (context, value) => {
         const args = argsRecord(value, "tux.tick_time_weather");
         if (args.daylight !== undefined && typeof args.daylight !== "boolean") {
@@ -2610,6 +2712,8 @@ export function createTuxemonExtensions(
       "tux.check_max_tech": checkMaxTechCondition(source),
       "tux.party_infected": partyInfectedCondition(),
       "tux.bill_is": billIsCondition(),
+      "tux.step_tracker": stepTrackerCondition,
+      "tux.variable_text": variableTextCondition,
       // `kennel <character>,<box>,visible|hidden|exist`. A missing character
       // or option tests false, so the negated form is true.
       "tux.kennel": (context, value) => {

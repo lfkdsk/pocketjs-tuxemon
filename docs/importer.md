@@ -73,7 +73,11 @@ definitions below are the report's own:
 | Tuxemon | Kit output |
 |---|---|
 | `translated_dialog` | `text` boxes, translated from the en_US message catalog and word-wrapped. |
-| `set_variable` / `clear_variable` | `variable` commands; string values are enum-coded globally. |
+| `set_variable` / `clear_variable` | `variable` commands; string values are enum-coded globally. Variables that scripts compute with or print (`variable_math`, `format_variable`, `${{var:name}}`, joined through `copy_variable`) instead hold the literal text via `tux.set_variable_text`; their `variable_set` checks become `tux.variable_text` (only "not set" stays a native `== 0`). |
+| `variable_math` / `format_variable` | `tux.variable_math` / `tux.format_variable` store Python's `str()` of the CPython result (float arithmetic, floor division to int, `int()`/`float()` with optional negation); the type is read back from that text. Upstream's error paths (missing or non-numeric operand) leave the variable unchanged. |
+| `${{var:name}}` in dialogue | the kit's `{v:<id>}` text token (`system.textVariables`), printing the stored text. |
+| `set_mission <character>` | nothing: upstream only walks missions already held by the character, and nothing ever creates one, so the action always logs "no missions" and stops. |
+| `remove_step_tracker`, `set_step_tracker_milestone_shown`, `is step_tracker` | `tux.*` commands and condition over the saved per-character trackers: a milestone is pending while triggered and not yet shown. |
 | `lock_controls` / `unlock_controls` | `lockInput` / `unlockInput`. |
 | `transition_teleport` (player, in bounds) | `transfer`; a trailing facing action folds into the transfer direction. With battles on, `tux.clear_npc_parties` runs right before every transfer (also `teleport_faint`'s), and each map has one entry page (`e000_npc_parties`) that runs it once per visit for entries that are not transfers: as upstream `change_map`, every map change drops all non-persistent NPCs' parties. |
 | `start_battle` (player vs trainer) | `battle` with a trainer setup; literal trainer parties are folded in. |
@@ -109,6 +113,7 @@ definitions below are the report's own:
 |---|---|
 | `char_face player,<dir>` | one-step `moveRoute` (the kit has no face op); a `char_face` immediately after a `char_position` folds into the placement's `dir` instead. |
 | `add_tracker` | a `switch`; step counters are not modeled. |
+| `add_step_tracker player,…` | `tux.add_step_tracker`; the kit's `playerStep` hook (shared with the daycare) moves every player tracker by one per completed tile, where upstream subtracts the signed tile delta (dx+dy) and also counts teleports. |
 | `transition_teleport` with an out-of-range landing | coordinates clamped into the target map; an isolated landing is repaired to the nearest walkable cell by deterministic four-neighbour BFS. |
 | `char_wander` | `moveControl` random wander with a deterministic seed, a seconds-to-MV frequency grade and optional bounds. |
 | `char_speed` | `moveControl` speed; tiles/s maps to the nearest MV exponential grade. |
@@ -145,11 +150,10 @@ faint-point actions and environment checks are now native.
 | Tuxemon | Reason |
 |---|---|
 | `char_run` | upstream applies the absolute run rate only while the character is already moving and reverts on idle; the kit's run control is a persistent relative grade with no movement-scoped lifetime, so the action emits nothing. |
-| `check_char_parameter player,moving`, `char_in`, `char_facing_tile player,<surface>` | these read live movement or the player's current/facing terrain label; that state is not available to map conditions. The unlabelled facing-tile trigger remains native. Consequently the imported game cannot use its surfboard to begin or sustain surfing yet. |
+| `char_in`, `char_facing_tile player,<surface>` | these read the terrain label of the player's current or facing cell; neither map conditions nor extension conditions see the live player cell. The unlabelled facing-tile trigger remains native. Consequently the imported game cannot use its surfboard to begin or sustain surfing yet. (`check_char_parameter player,moving` is Degraded rather than dropped: it becomes a step trigger on the authored event cell.) |
 | `char_facing player,top/bottom`, `button_pressed K_RETURN` | these legacy source arguments are invalid in the pinned Tuxemon runtime: directions are `up/down/left/right`, and `K_RETURN` is not an intention constant. The guards are fixed false instead of being reported as native triggers. |
-| step-tracker actions and conditions | Tuxemon owns a saved per-character counter, milestone state and movement-step updates; the kit currently exposes none of those pieces. |
-| `variable_math`, `format_variable` | Tuxemon accepts absent variables, floats and runtime type coercion. Kit story variables are safe integers and string story values are enum-coded, so a partial numeric lowering would silently change semantics. |
-| `set_mission` | mission definitions, prerequisite graphs, per-step conditions and status are not imported. |
+| `add_step_tracker` and friends for a non-player character | the kit's step hook reports only the player's completed tiles (the pinned content tracks the player only). |
+| `copy_variable` between enum-coded variables | enum codes are numbered per variable, so only variables that hold text copy verbatim. |
 | `autosave` | a pure reducer event cannot request that the host persist autosave slot 0. |
 | `transition_teleport` targeting an NPC | only the player transfers. |
 | `modify_money` with a variable amount | only literal amounts are supported. |

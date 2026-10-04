@@ -61,13 +61,13 @@ summary:
   journal previews and the normal browser render monster details through the
   same indexed, lazily loaded battle-image shards as combat.
 - **Performance:** 260 compact map shards plus 3 canonical JSON shards use
-  5,245,837 B instead of 10,153,692 B for all-canonical JSON. The three
+  5,348,762 B instead of 10,270,416 B for all-canonical JSON. The three
   event-heavy maps cross a 128 KiB compact-decode cap, trading a small amount
   of storage for bounded first-visit latency on QuickJS. Indexed battle art
   plus its lazy database occupies 3,516,960 B in the pak. The current bilingual
-  Web game pak is 86,641,120 B, including English and Chinese content, CJK font
+  Web game pak is 86,848,752 B, including English and Chinese content, CJK font
   atlases, all content-resolvable audio, its attribution list and demo data; the
-  desktop pak is 73,889,920 B. Before compact
+  desktop pak is 74,097,552 B. Before compact
   maps and indexed battle art, an earlier English-only Web build was
   66,791,328 B. The all-image battle encoding is
   2,206,076 B on disk and 13,394,688 B if every PSM_T8 texture were decoded,
@@ -250,10 +250,11 @@ glyph-mask checks. The game-owned save footer (`o: select`, `x: back`,
 `UiTextTable`; these are the remaining English words in those captures.
 
 Known limitations:
-- Some dynamic text (dates, variables, monster names, and other
-  `${{...}}` templates) renders as `???` — the importer fills a handful of
-  templates (name, currency, map name, directions) and leaves the rest as
-  placeholders. This affects English and Chinese identically: 44 of the 46
+- Some dynamic text (dates, monster names, and other `${{...}}` templates)
+  renders as `???` — the importer fills a handful of templates (name,
+  currency, map name, directions), prints story variables
+  (`${{var:name}}`) through the kit's `{v:id}` token, and leaves the rest as
+  placeholders. This affects English and Chinese identically: 28 of the 30
   `???` occurrences are such dynamic-template placeholders, compared per
   entry (same event, same command position, same count) by
   `tests/placeholder-parity.test.ts`. The other 2 are upstream's own literal

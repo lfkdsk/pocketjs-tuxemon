@@ -1,5 +1,6 @@
 // Placeholder parity (B3): the importer's format() only fills a handful of
-// templates (name, NAME, currency, map_name, the four directions); every
+// templates (name, NAME, currency, map_name, the four directions) and prints
+// text variables (${{var:name}}) through the kit's {v:id} token; every
 // other ${{...}} template becomes "???" in BOTH language builds. That is a
 // known importer limitation, not a zh_CN regression.
 //
@@ -11,7 +12,7 @@
 //   - per entry: the full JSON path of every placeholder-bearing string is
 //     identical between the languages (a pagination guard proves no command
 //     index shifted, so the path comparison is exact on the current data);
-//   - the 46 occurrences split into 44 dynamic-template placeholders and
+//   - the 30 occurrences split into 28 dynamic-template placeholders and
 //     2 upstream literal anonymous-speaker markers ("???: ..." in
 //     cotton_town), which Chinese punctuation normalization renders as
 //     "？？？：...".
@@ -64,7 +65,8 @@ function collectStrings(value: Json, out: string[] = []): string[] {
 function findFragment(s: string): string | null {
   if (s.includes("${{")) return "${{";
   if (s.includes("}}")) return "}}";
-  if (/\$\{(?!\{)/.test(s)) return "${";
+  // "$" before a {v:id} variable token is the currency sign.
+  if (/\$\{(?!\{|v:)/.test(s)) return "${";
   if (/(^|[^$])\{\{/.test(s)) return "{{";
   return null;
 }
@@ -173,7 +175,7 @@ describe("??? placeholder parity between en_US and zh_CN projects", () => {
     expect(countPlaceholders("？？？：你想干什么？")).toBe(1);
   });
 
-  test("the 46 occurrences split into 44 dynamic templates and 2 literal speakers", () => {
+  test("the 30 occurrences split into 28 dynamic templates and 2 literal speakers", () => {
     const strings = collectStrings(en).filter((s) => countPlaceholders(s) > 0);
     const literal = strings.filter(isLiteralSpeaker);
     const dynamic = strings.filter((s) => !isLiteralSpeaker(s));
@@ -181,10 +183,10 @@ describe("??? placeholder parity between en_US and zh_CN projects", () => {
     expect(countPlaceholders(literal)).toBe(2);
     // Both literal markers are the anonymous doorman in cotton_town.
     expect(literal.every((s) => s.startsWith("???:"))).toBe(true);
-    expect(dynamic.length).toBe(42);
-    expect(countPlaceholders(dynamic)).toBe(44);
-    expect(strings.length).toBe(44);
-    expect(countPlaceholders(strings)).toBe(46);
+    expect(dynamic.length).toBe(27);
+    expect(countPlaceholders(dynamic)).toBe(28);
+    expect(strings.length).toBe(29);
+    expect(countPlaceholders(strings)).toBe(30);
     // The zh_CN build renders the same two lines as speaker labels; upstream
     // punctuation varies (half- or full-width), so only the label form is
     // asserted, not the exact glyphs.
@@ -299,7 +301,7 @@ describe("??? placeholder parity between en_US and zh_CN projects", () => {
     const zhPaths = pathCounts(zh);
     expect([...zhPaths.keys()].sort()).toEqual([...enPaths.keys()].sort());
     for (const [path, count] of enPaths) expect(zhPaths.get(path)).toBe(count);
-    expect(enPaths.size).toBe(44);
+    expect(enPaths.size).toBe(29);
   });
 
   test("neither project contains broken template fragments", () => {

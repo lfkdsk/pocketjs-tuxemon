@@ -27,9 +27,10 @@ describe("G6 generated game assets", () => {
       collisionBodies: 14,
       maxActors: 504,
       // The integrated importer recomputes this bound from every reachable
-      // map after world/time/name guards and quarantine events materialize.
+      // map after world/time/name guards, quarantine and bonding-tracker
+      // events materialize.
       // The excluded test_npcs stress map remains the global maximum.
-      runtimeMaxActors: 225,
+      runtimeMaxActors: 226,
       excludedActorStressMaps: [{ id: "test_npcs", slots: 504 }],
       options: {
         areas: true,
@@ -61,7 +62,7 @@ describe("G6 generated game assets", () => {
       playerSheet: `sprites/${appearances[0]!.template.sprite_name}.png`,
     });
     expect(GAME_ASSETS.order).toHaveLength(263);
-    expect(GAME_ASSETS.maxActors).toBe(225);
+    expect(GAME_ASSETS.maxActors).toBe(226);
     expect(NPC_SRC_INDEX).toHaveLength(183);
     for (const { id, entry } of NPC_SRC_INDEX) {
       const art = JSON.parse(readFileSync(resolve(ROOT, "dist", entry), "utf8")) as NpcArt;

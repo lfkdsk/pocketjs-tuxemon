@@ -51,6 +51,8 @@ test("Tuxemon dialog boxes hold movement and consume action input", () => {
   expect(project.system).toEqual({
     inventory: { maxKinds: 99 },
     messageBlocksPlayer: true,
+    // ${{var:name}} dialogue prints stored text variables through {v:id}.
+    textVariables: true,
   });
 
   // The opening parallel question freezes the first attempted step at its

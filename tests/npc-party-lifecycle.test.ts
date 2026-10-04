@@ -252,7 +252,7 @@ describe("NPC party lifecycle follows upstream", () => {
   });
 
   test("seamless and legacy transfers preserve map-entry semantics with documented clock differences", () => {
-    const daycareStep = extensions.commands!["tux.daycare_step"]!;
+    const daycareStep = extensions.commands!["tux.player_step"]!;
     const countedExtensions = {
       ...extensions,
       commands: {

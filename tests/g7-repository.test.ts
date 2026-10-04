@@ -53,7 +53,7 @@ const journey = JSON.parse(readFileSync(join(ROOT, "data/g6-journey.json"), "utf
 };
 const worldTraversal = journeyWorldTraversal(journey, "G7 maintained journey");
 const GAME_OPTIONS = { extensions: TUXEMON_EXTENSIONS, battle: TUXEMON_BATTLE_RULES, scenes: TUXEMON_SCENES } as const;
-const LEGACY_TERMINAL_STATE_SHA256 = "ce5b5706c70aa374553aa4f476f1cb73564ecc8e687c627c4e74312b5dc5064a";
+const LEGACY_TERMINAL_STATE_SHA256 = "7bdabffd08253e4167cfe239b6a4b2a250728cc7e4a87a00d59521c4e22698f0";
 const BEFORE_HANDOFF_FRAME = 3_964;
 const MID_HANDOFF_FRAME = 3_976;
 const AFTER_HANDOFF_FRAME = 3_980;

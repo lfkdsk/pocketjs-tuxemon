@@ -10,8 +10,8 @@
     "worldTraversal": "seamless-v1",
     "frames": 172873,
     "tapeSha256": "9b7c1c7dd3cdd7f041628cc2c9edcb60bfbf7a930b5f11265fd044fdea31254e",
-    "terminalStateSha256": "c95cb9045c6c911acd952ba492e36b5418c7f81e0e6403736ce040febdbe5145",
-    "terminalSnapshotSha256": "5e6a26299394b35764d045c19c4fe85c0593c221b639696c97f32031eac54daf",
+    "terminalStateSha256": "39dfc8d3959db7ff4dd3cf14b310a2414febcc78df87e0de2de75931b85ec872",
+    "terminalSnapshotSha256": "00291790f93322d816f93e62690f0de813b046090b9f048301a4ae71a70b6cba",
     "heldMask": 0,
     "timelineFrame": 172873,
     "map": "spyder_candy_hospital3",
@@ -14421,8 +14421,8 @@
       "maxHp": 137
     }
   ],
-  "initialStateSha256": "c95cb9045c6c911acd952ba492e36b5418c7f81e0e6403736ce040febdbe5145",
-  "terminalStateSha256": "9dd92c573dcb4f742c522513bccf68184efc691d1bedc8b8183a4f04652332c2",
+  "initialStateSha256": "39dfc8d3959db7ff4dd3cf14b310a2414febcc78df87e0de2de75931b85ec872",
+  "terminalStateSha256": "cc69291ff4eaa7af3f6e2b4a175c61b5b05ccdedbe733512698f8eb670d6d96b",
   "tapeSha256": "59725e7ad87d163b18eee66b6edfb6a6c8f8a1dac014aa128e2ec62e0e3ccfbb",
   "combinedTapeSha256": "a1d90a3c19b31b002e9e4e590c4d85e57e6762d95c161ff69fbf77be9281a4b8"
 }

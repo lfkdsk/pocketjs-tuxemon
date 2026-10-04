@@ -51,6 +51,7 @@ import {
   type WeatherEntry,
 } from "./time-weather.ts";
 import { audioAssetIds, audioId, audioTable } from "./audio.ts";
+import { pyFloatFromText } from "../battle/text-variables.ts";
 import { validateSchema } from "../vendor/pocket-rpgkit/src/engine/schema-validate.ts";
 import type {
   Command,
@@ -903,6 +904,66 @@ for (const map of allMaps.values()) {
   }
 }
 const enumTable = new Map([...enumValues.entries()].map(([k, s]) => [k, [...s].sort()]));
+
+// Variables that scripts treat as numbers (variable_math, format_variable)
+// or print in dialogue (${{var:name}}) keep Python's str() of their value in
+// the kit bank instead of an enum code; copy_variable joins both sides into
+// the set. Their writers and readers are lowered to the tux.*_variable
+// commands and the tux.variable_text condition. Any other enum writer on such
+// a variable would mix the two encodings, so the import refuses it.
+const TEXT_VARIABLES: ReadonlySet<string> = (() => {
+  const names = new Set<string>();
+  const placeholder = /\$\{\{var:([^}]*)\}\}/g;
+  const catalogs = [
+    join(TUXEMON_SRC, "mods/tuxemon/l18n/en_US/LC_MESSAGES/base.po"),
+    join(TUXEMON_SRC, "mods/tuxemon/l18n/zh_CN/LC_MESSAGES/base.po"),
+    join(import.meta.dir, "../l10n/zh_CN/supplement.po"),
+    join(import.meta.dir, "../l10n/zh_CN/overrides.po"),
+  ];
+  for (const path of catalogs) {
+    if (!existsSync(path)) continue;
+    for (const match of readFileSync(path, "utf8").matchAll(placeholder)) names.add(match[1]!);
+  }
+  const events = loadAllFileEvents();
+  for (const ev of events) for (const a of ev.acts) {
+    if (a.type === "variable_math") {
+      for (const name of [a.args[0], a.args[2], a.args[3]]) {
+        if (name && pyFloatFromText(name) === null) names.add(name);
+      }
+    }
+    if (a.type === "format_variable" && a.args[0]) names.add(a.args[0]);
+  }
+  for (let grew = true; grew;) {
+    grew = false;
+    for (const ev of events) for (const a of ev.acts) {
+      if (a.type !== "copy_variable" || !a.args[0] || !a.args[1]) continue;
+      if (names.has(a.args[0]) !== names.has(a.args[1])) {
+        names.add(a.args[0]);
+        names.add(a.args[1]);
+        grew = true;
+      }
+    }
+  }
+  for (const ev of events) {
+    for (const a of ev.acts) {
+      const index = a.type === "set_random_variable" ? 0 : DYNAMIC_VARIABLE_WRITERS[a.type];
+      const name = index === undefined || a.type === "copy_variable" || a.type === "format_variable"
+        ? undefined
+        : a.args[index];
+      if (name && names.has(name)) throw new Error(`${a.type} writes enum codes into text variable ${name}`);
+    }
+    for (const c of ev.conds) {
+      if (c.type === "variable_is" && [c.args[0], c.args[2]].some((name) => name && names.has(name))) {
+        throw new Error(`variable_is compares text variable in ${ev.name}`);
+      }
+    }
+  }
+  return names;
+})();
+/** Text variables are written by game-extension commands, so they exist only
+ *  in builds with the battle runtime; other builds keep enum codes. */
+let textVariablesOn = false;
+const isTextVariable = (name: string) => textVariablesOn && TEXT_VARIABLES.has(name);
 const varId = (name: string) => `v.${name.replace(/[^A-Za-z0-9_.-]/g, "_")}`;
 function code(name: string, value: string): number {
   const vals = enumTable.get(name);
@@ -1027,6 +1088,14 @@ function clauses(
         const i = p.indexOf(":");
         const k = i < 0 ? p : p.slice(0, i);
         const v = i < 0 ? "" : p.slice(i + 1);
+        if (isTextVariable(k) && (v !== "" || !not)) {
+          // A text variable is present while it holds a string; the kit's
+          // numeric compare is false for strings, so only "not set" (== 0)
+          // stays native.
+          return { k: "ext", call: "tux.variable_text", args: {
+            variable: varId(k), ...(v === "" ? {} : { value: v }), negate: not,
+          } } as Clause;
+        }
         if (v === "") return { k: "var", id: varId(k), op: not ? "==" : "!=", value: 0 } as Clause;
         return { k: "var", id: varId(k), op: not ? "!=" : "==", value: code(k, v) } as Clause;
       });
@@ -1089,9 +1158,19 @@ function clauses(
       return K(false, `${c.op} char_in: ${reason}`);
     }
     case "step_tracker": {
-      const reason = "the runtime exposes neither a saved step counter nor a movement-step update hook";
-      noteCondition(c, `${c.op} step_tracker`, "T2-dropped", reason);
-      return K(false, `${c.op} step_tracker: ${reason}`);
+      const [character, tracker, raw] = a;
+      const milestone = Number(raw);
+      if (!options.battle || character !== "player" || !tracker || raw === undefined || raw === "" || !Number.isFinite(milestone)) {
+        const reason = !options.battle
+          ? "step trackers live in the game extension state (P2 runtime)"
+          : character !== "player"
+            ? "only the player's completed tile steps reach the kit step hook"
+            : "tracker id or milestone is malformed";
+        noteCondition(c, `${c.op} step_tracker`, "T2-dropped", reason);
+        return K(false, `${c.op} step_tracker: ${reason}`);
+      }
+      noteCondition(c, `${c.op} step_tracker`, "T1", "tux.step_tracker: milestone triggered and not yet shown");
+      return [{ k: "ext", call: "tux.step_tracker", args: { character, tracker, milestone, negate: not } }];
     }
     case "tile_property_updated": {
       const label = a[0];
@@ -1499,6 +1578,7 @@ function format(s: string, m: TuxMap): string {
     .replace(/\$\{\{currency\}\}/g, "$")
     .replace(/\$\{\{map_name\}\}/g, po.get(m.props.slug ?? m.slug) ?? m.slug)
     .replace(/\$\{\{(north|south|east|west)\}\}/g, (_x, d: string) => po.get(m.props[d] ?? "") ?? m.props[d] ?? "")
+    .replace(/\$\{\{var:([^}]*)\}\}/g, (token, name: string) => isTextVariable(name) ? `{v:${varId(name)}}` : token)
     .replace(/\$\{\{[^}]*\}\}/g, "???");
 }
 
@@ -2042,14 +2122,19 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         out.push(enumChoice(opts, g[1]!));
         break;
       }
-      case "set_variable":
-        noteAction(a, a.type, "T1", "variable set enum code");
+      case "set_variable": {
+        noteAction(a, a.type, "T1", "variable set enum code (text variables: the literal string)");
+        const texts: Record<string, string> = {};
         for (const p of g) {
           const j = p.indexOf(":");
           const k = j < 0 ? p : p.slice(0, j);
-          out.push({ op: "variable", id: varId(k), set: { op: "set", value: code(k, j < 0 ? "" : p.slice(j + 1)) } });
+          const value = j < 0 ? "" : p.slice(j + 1);
+          if (isTextVariable(k)) texts[varId(k)] = value;
+          else out.push({ op: "variable", id: varId(k), set: { op: "set", value: code(k, value) } });
         }
+        if (Object.keys(texts).length) out.push({ op: "ext", call: "tux.set_variable_text", args: { writes: texts } });
         break;
+      }
       case "clear_variable":
         noteAction(a, a.type, "T1", "variable set 0");
         for (const p of g) out.push({ op: "variable", id: varId(p), set: { op: "set", value: 0 } });
@@ -3130,32 +3215,109 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         out.push({ op: "ext", call: "tux.modify_bill", args });
         break;
       }
-      case "variable_math":
+      case "variable_math": {
+        const [left, operator, right, result] = g;
+        const operand = (text: string | undefined): JsonValue | null => {
+          if (!text) return null;
+          const literal = pyFloatFromText(text);
+          return literal === null ? { variable: varId(text) } : { value: literal };
+        };
+        const l = operand(left);
+        const r = operand(right);
+        if (!ctx.options.battle) {
+          noteAction(a, a.type, "T3-dropped", "text variables are written by the game extension (P2 runtime)");
+          break;
+        }
+        if (!l || !r || !operator || !["+", "-", "*", "/", "="].includes(operator)
+          || (result === undefined || result === "" ? pyFloatFromText(left!) !== null : pyFloatFromText(result) !== null)) {
+          noteAction(a, a.type, "T4-dropped", "upstream raises on this operator or result");
+          break;
+        }
+        noteAction(a, a.type, "T1", "tux.variable_math: float arithmetic (floor-division to int) stored as Python str()");
+        out.push({ op: "ext", call: "tux.variable_math", args: {
+          left: l, operator, right: r, result: varId(result || left!),
+        } });
+        break;
+      }
+      case "format_variable": {
+        const [name, format] = g;
+        if (!ctx.options.battle) {
+          noteAction(a, a.type, "T3-dropped", "text variables are written by the game extension (P2 runtime)");
+          break;
+        }
+        if (!name || !format || !["int", "-int", "float", "-float"].includes(format)) {
+          noteAction(a, a.type, "T4-dropped", "upstream raises on this format");
+          break;
+        }
+        noteAction(a, a.type, "T1", "tux.format_variable: Python int()/float() (optionally negated) stored as str()");
+        out.push({ op: "ext", call: "tux.format_variable", args: { variable: varId(name), format } });
+        break;
+      }
+      case "copy_variable": {
+        const [target, source] = g;
+        if (!target || !source || !isTextVariable(target) || !isTextVariable(source)) {
+          noteAction(a, a.type, "T2-dropped", "enum codes are numbered per variable; only text variables copy verbatim");
+          break;
+        }
+        noteAction(a, a.type, "T1", "variable copy of the stored text");
+        out.push({ op: "variable", id: varId(target), set: { op: "copy", from: varId(source) } });
+        break;
+      }
+      case "add_step_tracker": case "remove_step_tracker": case "set_step_tracker_milestone_shown": {
+        const character = g[0];
+        const tracker = g[1];
+        if (!ctx.options.battle) {
+          noteAction(a, a.type, "T3-dropped", "step trackers live in the game extension state (P2 runtime)");
+          break;
+        }
+        if (character !== "player") {
+          noteAction(a, a.type, "T2-dropped", "only the player's completed tile steps reach the kit step hook");
+          break;
+        }
+        if (!tracker) { noteAction(a, a.type, "T4-dropped", "missing tracker id"); break; }
+        if (a.type === "remove_step_tracker") {
+          noteAction(a, a.type, "T1", "tux.remove_step_tracker deletes the saved tracker (missing tracker is a no-op)");
+          out.push({ op: "ext", call: "tux.remove_step_tracker", args: { character, tracker } });
+          break;
+        }
+        if (a.type === "set_step_tracker_milestone_shown") {
+          const milestone = Number(g[2]);
+          if (g[2] === undefined || g[2] === "" || !Number.isFinite(milestone)) {
+            noteAction(a, a.type, "T4-dropped", "milestone is not a number");
+            break;
+          }
+          noteAction(a, a.type, "T1", "tux.set_step_tracker_milestone_shown acknowledges a triggered milestone");
+          out.push({ op: "ext", call: "tux.set_step_tracker_milestone_shown", args: { character, tracker, milestone } });
+          break;
+        }
+        const countdown = Number(g[2]);
+        const milestones = g[3] ? g[3].split(":").map(Number) : [];
+        const autoReset = g[4] === undefined || g[4] === "" ? false : g[4] === "true" ? true : g[4] === "false" ? false : null;
+        const initial = g[5] === undefined || g[5] === "" ? undefined : Number(g[5]);
+        if (g[2] === undefined || g[2] === "" || !Number.isFinite(countdown) || !milestones.every(Number.isFinite)
+          || autoReset === null || (initial !== undefined && !Number.isFinite(initial))) {
+          noteAction(a, a.type, "T4-dropped", "countdown, milestones, auto-reset or initial countdown is malformed");
+          break;
+        }
         noteAction(
           a,
           a.type,
-          "T2-dropped",
-          "source operands may be floating-point or absent; the kit variable bank stores only safe integers and has no presence bit",
+          "T1-lowered",
+          "tux.add_step_tracker saves a countdown advanced by the kit playerStep hook: one per completed tile, where upstream applies the signed tile delta (dx+dy, so up/left steps and teleport jumps also count)",
         );
+        out.push({ op: "ext", call: "tux.add_step_tracker", args: {
+          character, tracker, countdown, milestones,
+          ...(autoReset ? { autoReset } : {}),
+          ...(initial === undefined ? {} : { initialCountdown: initial }),
+        } });
         break;
-      case "format_variable":
-        noteAction(
-          a,
-          a.type,
-          "T2-dropped",
-          "source int/float coercion needs raw numeric variables; story values are enum-coded and kit numeric writes floor fractions",
-        );
-        break;
-      case "add_step_tracker": case "remove_step_tracker": case "set_step_tracker_milestone_shown":
-        noteAction(
-          a,
-          a.type,
-          "T2-dropped",
-          "the runtime exposes neither a saved step-counter state machine nor a movement-step update hook",
-        );
-        break;
+      }
       case "set_mission":
-        noteAction(a, a.type, "T3-dropped", "mission definitions, prerequisite graph, and per-step status are not imported");
+        // Upstream only walks missions already held by the character's
+        // MissionManager, which is filled solely by decoding a save; no
+        // script or engine path creates a mission, so a game started from
+        // the pinned content never holds one and the action logs and stops.
+        noteAction(a, a.type, "T1", "upstream no-op: no mission is ever created, so none can meet its prerequisites");
         break;
       case "autosave":
         noteAction(a, a.type, "T4-dropped", "pure reducer event commands cannot request the host to persist save slot 0");
@@ -4269,6 +4431,7 @@ export function buildProject(
   providedSurfaceLabels?: TerrainSurfaceLabels,
 ): ImportBuild {
   const options = resolveOptions(requestedOptions);
+  textVariablesOn = options.battle;
   log.clear();
   items.clear();
   animationDefs.clear();
@@ -4373,7 +4536,7 @@ export function buildProject(
     tileSize: 16,
     // Tuxemon's dialog state consumes movement and interaction input no
     // matter which event fiber opened the box.
-    system: { messageBlocksPlayer: true, inventory: { maxKinds: 99 } },
+    system: { messageBlocksPlayer: true, ...(options.battle ? { textVariables: true } : {}), inventory: { maxKinds: 99 } },
     start: {
       map: startId,
       x: Math.min(4, startMap.width - 1),

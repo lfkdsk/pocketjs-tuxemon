@@ -5,7 +5,7 @@
   "maps": 263,
   "collisionBodies": 14,
   "maxActors": 504,
-  "runtimeMaxActors": 225,
+  "runtimeMaxActors": 226,
   "excludedActorStressMaps": [
    {
     "id": "test_npcs",
@@ -30,11 +30,11 @@
    "compact": 260,
    "json": 3
   },
-  "shellBytes": 201378,
-  "entryBytes": 5245837,
-  "canonicalJsonBytes": 10153692,
+  "shellBytes": 201399,
+  "entryBytes": 5348762,
+  "canonicalJsonBytes": 10270416,
   "entries": 263,
-  "manifestHash": "c05b3bac40381e7ba482ad3712da7567344051943c6764c8ef3e0ce7e46e8fd3",
+  "manifestHash": "c747a4a7d2d6d640f341f1cf93da97da61bbc0d373d61aaf7a6e8a537ae9c53a",
   "schemaHash": "c0e962138a1f12dc5627590869b99f7c9b2ced3040e3d05ed0ebd663142d4857"
  },
  "terrain": {
