@@ -15,6 +15,8 @@ where noted. Set `TUXEMON_SRC` first (or keep a repo-local `.tuxemon-src`).
 
 | Script | What it proves | Input | Rough duration |
 |---|---|---|---|
+| `verify:audio` | Two clean ffmpeg/QOA passes produce byte-identical files; all 27 committed audio containers match their manifest SHA-256, byte size, rate, channels, frame count, duration and loop bounds. | Tuxemon source, `assets/audio/manifest.json` | ~55 s |
+| `verify:web:audio` | A built web game streams three newly added map tracks in real Chrome: each resolves to its logical BGM, decodes non-zero QOA PCM, writes frames accepted by the host, runs an AudioWorklet-backed real-time context, and reports no underrun or console error. | built web site | ~10 s |
 | `verify:g6:determinism` | Two full imports into isolated roots produce byte-identical output (4,766 files). | Tuxemon source | ~25 s |
 | `verify:terrain:determinism` | The terrain corpus alone is byte-stable across two runs. | Tuxemon source | ~15 s |
 | `verify:terrain:collision` | Imported collision matches an independent Python oracle that mirrors Tuxemon's own movement code, cell by cell and direction by direction (default: 11 maps, 56,176 directed steps; `--all` for every map). | `data/terrain.json`, Tuxemon source, PyYAML | under a second for the default set; minutes for `--all` |

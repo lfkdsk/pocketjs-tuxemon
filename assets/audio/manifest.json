@@ -1,48 +1,20 @@
 {
-  "format": "pocket-tuxemon/audio-manifest/v1",
+  "format": "pocket-tuxemon/audio-manifest/v2",
   "ffmpeg": "ffmpeg version 9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
   "rate": 22050,
   "channels": 1,
   "files": {
-    "music/music_home.qoa": {
-      "slug": "music_home",
+    "music/music_07_town.qoa": {
+      "slug": "music_07_town",
       "kind": "music",
-      "source": "All of Us.ogg",
-      "pakKey": "audio:qoa.music/music_home.qoa",
-      "bytes": 1585808,
-      "sha256": "c5e29693c9fc2160c38700c39df088193dec789b855f569f20571530ef06d236"
-    },
-    "music/music_cathedral_theme.qoa": {
-      "slug": "music_cathedral_theme",
-      "kind": "music",
-      "source": "JRPG_royalCourt_loop.ogg",
-      "pakKey": "audio:qoa.music/music_cathedral_theme.qoa",
-      "bytes": 514272,
-      "sha256": "2f839afff3dfe13a6702a8b8deee373e2ec97b91e103e5815583048ca347af4f"
-    },
-    "music/music_town_theme.qoa": {
-      "slug": "music_town_theme",
-      "kind": "music",
-      "source": "JRPG_town_loop.ogg",
-      "pakKey": "audio:qoa.music/music_town_theme.qoa",
-      "bytes": 1204536,
-      "sha256": "ee2cd1f9c9d51660022c6152e4693c7b40d365a5b8ba3fc73aba2e103a6295da"
-    },
-    "music/music_the_wild_places.qoa": {
-      "slug": "music_the_wild_places",
-      "kind": "music",
-      "source": "peasant_kingdom.ogg",
-      "pakKey": "audio:qoa.music/music_the_wild_places.qoa",
-      "bytes": 1379464,
-      "sha256": "40f94693a5132867d0eb7f7766415711a7054f70a96d957812d81cc26ab929bb"
-    },
-    "music/music_city_park.qoa": {
-      "slug": "music_city_park",
-      "kind": "music",
-      "source": "back34.mp3",
-      "pakKey": "audio:qoa.music/music_city_park.qoa",
-      "bytes": 818424,
-      "sha256": "bb0dcea64b6f739652c7270de3d22a4aa6190dcf04cee4fc6232d464915568e6"
+      "source": "JRPG-OSTR2/07 - Town.ogg",
+      "pakKey": "audio:qoa.music/music_07_town.qoa",
+      "bytes": 440096,
+      "sha256": "fb578ce7c9be3b0481859ce9f652054eb125102d42df21aac0e9ad963ffe7ada",
+      "frames": 1087429,
+      "durationSeconds": 49.316508,
+      "loopStartFrame": 0,
+      "loopEndFrame": 1087429
     },
     "music/music_10_empire.qoa": {
       "slug": "music_10_empire",
@@ -50,15 +22,167 @@
       "source": "JRPG-OSTR2/10 - The Empire.ogg",
       "pakKey": "audio:qoa.music/music_10_empire.qoa",
       "bytes": 412744,
-      "sha256": "a7f8389d9c784197ee6965ea97ee04e5c30c84808cf4d5a2cb09f2c85276224a"
+      "sha256": "a7f8389d9c784197ee6965ea97ee04e5c30c84808cf4d5a2cb09f2c85276224a",
+      "frames": 1019821,
+      "durationSeconds": 46.250385,
+      "loopStartFrame": 0,
+      "loopEndFrame": 1019821
     },
-    "music/music_07_town.qoa": {
-      "slug": "music_07_town",
+    "music/music_18_nighttide_waltz.qoa": {
+      "slug": "music_18_nighttide_waltz",
       "kind": "music",
-      "source": "JRPG-OSTR2/07 - Town.ogg",
-      "pakKey": "audio:qoa.music/music_07_town.qoa",
-      "bytes": 440096,
-      "sha256": "fb578ce7c9be3b0481859ce9f652054eb125102d42df21aac0e9ad963ffe7ada"
+      "source": "JRPG-OSTR2/18 - Nighttide Waltz.ogg",
+      "pakKey": "audio:qoa.music/music_18_nighttide_waltz.qoa",
+      "bytes": 481184,
+      "sha256": "2f68e0cf0727457672198bd84eab5cdc23c6823a3986d21dfa778266d54ee302",
+      "frames": 1188950,
+      "durationSeconds": 53.920635,
+      "loopStartFrame": 0,
+      "loopEndFrame": 1188950
+    },
+    "music/music_adventure_begins.qoa": {
+      "slug": "music_adventure_begins",
+      "kind": "music",
+      "source": "TheAdventureBegins8bitRemix.ogg",
+      "pakKey": "audio:qoa.music/music_adventure_begins.qoa",
+      "bytes": 790896,
+      "sha256": "91a2cb99a72036d392dbabdfc76024a97de35d6a6bb3dba3d8829ff0b2436f1d",
+      "frames": 1954288,
+      "durationSeconds": 88.629841,
+      "loopStartFrame": 0,
+      "loopEndFrame": 1954288
+    },
+    "music/music_battle_loop.qoa": {
+      "slug": "music_battle_loop",
+      "kind": "music",
+      "source": "JRPGCollection/ogg/JRPG_battle_loop.ogg",
+      "pakKey": "audio:qoa.music/music_battle_loop.qoa",
+      "bytes": 828160,
+      "sha256": "b5dbb0a9f727f158896cefd1bcb15510a5ff9527ef9b50f54524a4b7c4cc85b8",
+      "frames": 2046378,
+      "durationSeconds": 92.806259,
+      "loopStartFrame": 0,
+      "loopEndFrame": 2046378
+    },
+    "music/music_cathedral_theme.qoa": {
+      "slug": "music_cathedral_theme",
+      "kind": "music",
+      "source": "JRPG_royalCourt_loop.ogg",
+      "pakKey": "audio:qoa.music/music_cathedral_theme.qoa",
+      "bytes": 514272,
+      "sha256": "2f839afff3dfe13a6702a8b8deee373e2ec97b91e103e5815583048ca347af4f",
+      "frames": 1270701,
+      "durationSeconds": 57.628163,
+      "loopStartFrame": 0,
+      "loopEndFrame": 1270701
+    },
+    "music/music_chibi_ninja.qoa": {
+      "slug": "music_chibi_ninja",
+      "kind": "music",
+      "source": "Chibi Ninja.ogg",
+      "pakKey": "audio:qoa.music/music_chibi_ninja.qoa",
+      "bytes": 1100728,
+      "sha256": "28dc581f6445c8e61e8c3bda2549164a4aff26ffc728ccb6b4bb525aaa5bc538",
+      "frames": 2719872,
+      "durationSeconds": 123.350204,
+      "loopStartFrame": 0,
+      "loopEndFrame": 2719872
+    },
+    "music/music_city_park.qoa": {
+      "slug": "music_city_park",
+      "kind": "music",
+      "source": "back34.mp3",
+      "pakKey": "audio:qoa.music/music_city_park.qoa",
+      "bytes": 818424,
+      "sha256": "bb0dcea64b6f739652c7270de3d22a4aa6190dcf04cee4fc6232d464915568e6",
+      "frames": 2022336,
+      "durationSeconds": 91.715918,
+      "loopStartFrame": 0,
+      "loopEndFrame": 2022336
+    },
+    "music/music_come_and_find_me.qoa": {
+      "slug": "music_come_and_find_me",
+      "kind": "music",
+      "source": "Come and Find Me.ogg",
+      "pakKey": "audio:qoa.music/music_come_and_find_me.qoa",
+      "bytes": 1781600,
+      "sha256": "82e9110f9bbda958634fc918e3f9eafd3fdd19bb5235da540bd9a7d1230f2f05",
+      "frames": 4402368,
+      "durationSeconds": 199.653878,
+      "loopStartFrame": 0,
+      "loopEndFrame": 4402368
+    },
+    "music/music_discovery.qoa": {
+      "slug": "music_discovery",
+      "kind": "music",
+      "source": "JRPGCollection2/ogg/JRPG_discovery.ogg",
+      "pakKey": "audio:qoa.music/music_discovery.qoa",
+      "bytes": 27048,
+      "sha256": "eff5764d9bc1f023b0fbf22697a4ba08467113667849af0420198923a42e4793",
+      "frames": 66748,
+      "durationSeconds": 3.02712,
+      "loopStartFrame": 0,
+      "loopEndFrame": 66748
+    },
+    "music/music_dojo_theme.qoa": {
+      "slug": "music_dojo_theme",
+      "kind": "music",
+      "source": "taking_poison.ogg",
+      "pakKey": "audio:qoa.music/music_dojo_theme.qoa",
+      "bytes": 1647160,
+      "sha256": "0dc8022dcb654de798ac4f438c4fa9a6d5c04cffdb7c37da9a1fdb3d27456031",
+      "frames": 4070176,
+      "durationSeconds": 184.588481,
+      "loopStartFrame": 0,
+      "loopEndFrame": 4070176
+    },
+    "music/music_dragons_cave.qoa": {
+      "slug": "music_dragons_cave",
+      "kind": "music",
+      "source": "stand_with_us.ogg",
+      "pakKey": "audio:qoa.music/music_dragons_cave.qoa",
+      "bytes": 2051760,
+      "sha256": "c77e11254ccecd48a02fbd706a3491293d1a16205b97eb4c7dcafe3debe35150",
+      "frames": 5069920,
+      "durationSeconds": 229.928345,
+      "loopStartFrame": 0,
+      "loopEndFrame": 5069920
+    },
+    "music/music_fields_loop.qoa": {
+      "slug": "music_fields_loop",
+      "kind": "music",
+      "source": "JRPGCollection/ogg/JRPG_fields_loop.ogg",
+      "pakKey": "audio:qoa.music/music_fields_loop.qoa",
+      "bytes": 1081528,
+      "sha256": "a53ef5d2386e4d0be68be65def5f7b2acb38ea05176cb74b68c6af35e2fb74e8",
+      "frames": 2672478,
+      "durationSeconds": 121.200816,
+      "loopStartFrame": 0,
+      "loopEndFrame": 2672478
+    },
+    "music/music_gameover.qoa": {
+      "slug": "music_gameover",
+      "kind": "music",
+      "source": "JRPGCollection/ogg/JRPG_gameOver.ogg",
+      "pakKey": "audio:qoa.music/music_gameover.qoa",
+      "bytes": 78248,
+      "sha256": "bce762ad541e88b85e74030050faeda3e19ef4fa5f7db4583423e2448a5d412f",
+      "frames": 193305,
+      "durationSeconds": 8.766667,
+      "loopStartFrame": 0,
+      "loopEndFrame": 193305
+    },
+    "music/music_home.qoa": {
+      "slug": "music_home",
+      "kind": "music",
+      "source": "All of Us.ogg",
+      "pakKey": "audio:qoa.music/music_home.qoa",
+      "bytes": 1585808,
+      "sha256": "c5e29693c9fc2160c38700c39df088193dec789b855f569f20571530ef06d236",
+      "frames": 3918528,
+      "durationSeconds": 177.71102,
+      "loopStartFrame": 0,
+      "loopEndFrame": 3918528
     },
     "music/music_jester_theme.qoa": {
       "slug": "music_jester_theme",
@@ -66,7 +190,107 @@
       "source": "Jester Theme.mp3",
       "pakKey": "audio:qoa.music/music_jester_theme.qoa",
       "bytes": 581144,
-      "sha256": "dd2f6880772818a66bf0a1230f4b63f3d8da9c0fd07f5ae6d842b16266bd4780"
+      "sha256": "dd2f6880772818a66bf0a1230f4b63f3d8da9c0fd07f5ae6d842b16266bd4780",
+      "frames": 1435968,
+      "durationSeconds": 65.123265,
+      "loopStartFrame": 0,
+      "loopEndFrame": 1435968
+    },
+    "music/music_mystic_island.qoa": {
+      "slug": "music_mystic_island",
+      "kind": "music",
+      "source": "JRPG_mysticIsle.ogg",
+      "pakKey": "audio:qoa.music/music_mystic_island.qoa",
+      "bytes": 1058000,
+      "sha256": "8a3dbb8a90b021c902fb3f5884a34a1a59b2d10333c40baefe0aa0cbfe0c589c",
+      "frames": 2614316,
+      "durationSeconds": 118.563084,
+      "loopStartFrame": 0,
+      "loopEndFrame": 2614316
+    },
+    "music/music_mystic_island_reverse.qoa": {
+      "slug": "music_mystic_island_reverse",
+      "kind": "music",
+      "source": "JRPG_mysticIsle_reverse.ogg",
+      "pakKey": "audio:qoa.music/music_mystic_island_reverse.qoa",
+      "bytes": 1058000,
+      "sha256": "a8cc65b48c21ab5aafc59b8ff777101ae72c6d6d5a38fb98451ff816b4cec55a",
+      "frames": 2614316,
+      "durationSeconds": 118.563084,
+      "loopStartFrame": 0,
+      "loopEndFrame": 2614316
+    },
+    "music/music_omnichannel.qoa": {
+      "slug": "music_omnichannel",
+      "kind": "music",
+      "source": "JRPG_docks_loop.ogg",
+      "pakKey": "audio:qoa.music/music_omnichannel.qoa",
+      "bytes": 856736,
+      "sha256": "d7b43efeeb57841a906c855e852df0713bfcdb4b55e207ca771b694905fcac0f",
+      "frames": 2116964,
+      "durationSeconds": 96.007438,
+      "loopStartFrame": 0,
+      "loopEndFrame": 2116964
+    },
+    "music/music_sphalian_theme.qoa": {
+      "slug": "music_sphalian_theme",
+      "kind": "music",
+      "source": "Digital Native.ogg",
+      "pakKey": "audio:qoa.music/music_sphalian_theme.qoa",
+      "bytes": 1755736,
+      "sha256": "e0893c196ccc94e3c99d92dc7fac7e255697fbd9588298a22ce4e1cfc2cf2533",
+      "frames": 4338432,
+      "durationSeconds": 196.754286,
+      "loopStartFrame": 0,
+      "loopEndFrame": 4338432
+    },
+    "music/music_the_princess.qoa": {
+      "slug": "music_the_princess",
+      "kind": "music",
+      "source": "JRPG_princess.ogg",
+      "pakKey": "audio:qoa.music/music_the_princess.qoa",
+      "bytes": 839416,
+      "sha256": "c2540256601642fddae1c3e6a5eb6c0b9e21fb3ce795dca58c2bd03ab0d973f6",
+      "frames": 2074147,
+      "durationSeconds": 94.065624,
+      "loopStartFrame": 0,
+      "loopEndFrame": 2074147
+    },
+    "music/music_the_wild_places.qoa": {
+      "slug": "music_the_wild_places",
+      "kind": "music",
+      "source": "peasant_kingdom.ogg",
+      "pakKey": "audio:qoa.music/music_the_wild_places.qoa",
+      "bytes": 1379464,
+      "sha256": "40f94693a5132867d0eb7f7766415711a7054f70a96d957812d81cc26ab929bb",
+      "frames": 3408671,
+      "durationSeconds": 154.588254,
+      "loopStartFrame": 0,
+      "loopEndFrame": 3408671
+    },
+    "music/music_town_theme.qoa": {
+      "slug": "music_town_theme",
+      "kind": "music",
+      "source": "JRPG_town_loop.ogg",
+      "pakKey": "audio:qoa.music/music_town_theme.qoa",
+      "bytes": 1204536,
+      "sha256": "ee2cd1f9c9d51660022c6152e4693c7b40d365a5b8ba3fc73aba2e103a6295da",
+      "frames": 2976386,
+      "durationSeconds": 134.983492,
+      "loopStartFrame": 0,
+      "loopEndFrame": 2976386
+    },
+    "music/music_win_battle_boss.qoa": {
+      "slug": "music_win_battle_boss",
+      "kind": "music",
+      "source": "JRPGCollection2/ogg/JRPG_winBattleBoss.ogg",
+      "pakKey": "audio:qoa.music/music_win_battle_boss.qoa",
+      "bytes": 109024,
+      "sha256": "5df14483e801f5f6454315bbbce4bda34a6f86541ad5b10270eda25f462daad2",
+      "frames": 269342,
+      "durationSeconds": 12.215057,
+      "loopStartFrame": 0,
+      "loopEndFrame": 269342
     },
     "sounds/japanese_temple_bell_small.wav": {
       "slug": "japanese_temple_bell_small",
@@ -74,7 +298,9 @@
       "source": "setting/japanese_temple_bell_small.mp3",
       "pakKey": "audio:wav.sounds/japanese_temple_bell_small.wav",
       "bytes": 169998,
-      "sha256": "abc07aac5b1f005ac23c427ded422239158be84e76e480a6745671495a6a7c21"
+      "sha256": "abc07aac5b1f005ac23c427ded422239158be84e76e480a6745671495a6a7c21",
+      "frames": 84977,
+      "durationSeconds": 3.853832
     },
     "sounds/sound_confirm.wav": {
       "slug": "sound_confirm",
@@ -82,7 +308,9 @@
       "source": "interface/confirm.ogg",
       "pakKey": "audio:wav.sounds/sound_confirm.wav",
       "bytes": 25094,
-      "sha256": "0ee4541d8c175362323bf596b389b3783d58715b919bc6ac8e0b7b349dd7ed20"
+      "sha256": "0ee4541d8c175362323bf596b389b3783d58715b919bc6ac8e0b7b349dd7ed20",
+      "frames": 12525,
+      "durationSeconds": 0.568027
     },
     "sounds/coinecho.wav": {
       "slug": "coinecho",
@@ -90,7 +318,9 @@
       "source": "setting/coinecho.wav",
       "pakKey": "audio:wav.sounds/coinecho.wav",
       "bytes": 75842,
-      "sha256": "e6867fc646984ed9de1a48360f771898826e96f2009b79c78f9655cb227671b1"
+      "sha256": "e6867fc646984ed9de1a48360f771898826e96f2009b79c78f9655cb227671b1",
+      "frames": 37899,
+      "durationSeconds": 1.718776
     }
   }
 }

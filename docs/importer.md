@@ -25,8 +25,8 @@ interpreter still does not perform seamless handoff.
 `bun run fetch:tuxemon` checks out Tuxemon at the pinned commit
 (`9e6258ff`, recorded in `tools/fetch-tuxemon.sh`) into the repo-local
 `.tuxemon-src/`. The checkout is blobless and sparse: fonts and docs are
-excluded, but the eight mainline music tracks and the three used SFX are
-included (see [verification](verification.md) for the audio pipeline). To
+excluded, but all 24 content-resolvable music tracks and the three used SFX
+are included (see [verification](verification.md) for the audio pipeline). To
 reuse an existing checkout instead, set `TUXEMON_SRC` to its path; the
 importer reads it from `importer/source.ts` and the art cookers, and
 battle art and events always come from the same checkout.
@@ -93,7 +93,7 @@ definitions below are the report's own:
 | `access_pc player` | the `tux.pc` monster-storage scene (Degraded: no item locker). |
 | `trading <variable>,<species>` | the `tux.trade` scene, which replaces the monster whose iid the variable holds. |
 | `create_kennel` / `set_kennel_visible`, `is kennel` / `is has_kennel` | `tux.create_kennel` / `tux.set_kennel_visible` commands and `tux.kennel` / `tux.has_kennel` conditions over the saved player boxes. |
-| `play_music` | `playBgm`; the slug resolves through the `Project.audio` table to a committed QOA pak entry (eight mainline tracks) or stays silent (the other 13 used tracks). |
+| `play_music` | `playBgm`; each of the 21 valid content slugs resolves through the `Project.audio` table to a committed QOA pak entry. Six authored arguments (eight actions) are raw filenames, misspellings or absent DB slugs and stay silent, matching Tuxemon's exact DB lookup. |
 | `fadeout_music` | `fadeoutBgm` (ms → seconds); `0` becomes `stopBgm`. |
 | `pause_music` / `unpause_music` | `pauseBgm` / `resumeBgm`. |
 | `play_sound` | `playSe` with the authored volume carried through; resolves through `Project.audio` to a WAV pak entry. |

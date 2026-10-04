@@ -12,7 +12,8 @@
         "input.buttons"
       ],
       "enhances": [
-        "data.fs"
+        "data.fs",
+        "audio.pcm"
       ]
     }
   },

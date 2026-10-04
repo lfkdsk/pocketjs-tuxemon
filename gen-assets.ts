@@ -518,10 +518,10 @@ if (demoData) {
   writeFileSync(join(ROOT, "ui/demo-index.ts"), demoIndexSource([], []));
 }
 
-// GM1: the committed transcoded audio (eight mainline QOA music tracks and
-// three SFX WAVs) ships as raw pak entries under the keys the audio manifest
-// declares; Project.audio maps logical ids to those keys. Hosts without an
-// audio module stay silent; QOA playback lands with the kit's streaming
+// Committed transcoded audio (all content-referenced QOA music tracks and the
+// three used SFX WAVs) ships as raw pak entries under the keys the audio
+// manifest declares; Project.audio maps logical ids to those keys. Hosts
+// without an audio module stay silent; QOA playback uses the kit's streaming
 // decoder.
 const audioManifest = JSON.parse(
   readFileSync(join(import.meta.dir, "assets/audio/manifest.json"), "utf8"),
@@ -529,6 +529,13 @@ const audioManifest = JSON.parse(
 const audioPakEntries: PakManifestEntry[] = Object.entries(audioManifest.files)
   .map(([path, entry]) => ({ key: entry.pakKey, file: `assets/audio/${path}` }))
   .sort((a, b) => a.key < b.key ? -1 : a.key > b.key ? 1 : 0);
+// Keep the complete per-file audio credits in every pak. This deliberately
+// does not use the kit's `license:` namespace: that namespace is reserved for
+// font licenses and the web packager labels every matching entry as such.
+const audioAttributionPakEntry: PakManifestEntry = {
+  key: "attribution:audio/AUDIO-ATTRIBUTIONS.md",
+  file: "licenses/AUDIO-ATTRIBUTIONS.md",
+};
 const audioBytes = Object.values(audioManifest.files).reduce((sum, f) => sum + f.bytes, 0);
 const pakEntries = [
   ...pakManifest(terrain.entries),
@@ -541,6 +548,7 @@ const pakEntries = [
   ...npcSrcPakEntries,
   ...terrain.streamPakEntries,
   ...audioPakEntries,
+  audioAttributionPakEntry,
   itemIconPakEntry,
   { key: "world-index.json", file: "dist/world-index.json" },
   ...(demoData?.pakEntries ?? []),

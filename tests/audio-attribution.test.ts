@@ -1,6 +1,6 @@
-// GM1 fix 1 (B1): every shipped audio file must be attributed correctly.
+// Every shipped audio file must be attributed correctly.
 //
-// Each of the 11 committed blobs was checked, file by file, against:
+// Each of the 27 committed blobs is checked, file by file, against:
 //   1. the Tuxemon sound/music DB (slug -> source file),
 //   2. the summary table in licenses/AUDIO-ATTRIBUTIONS.md,
 //   3. the verbatim upstream credits in licenses/TUXEMON-ATTRIBUTIONS.md.
@@ -25,14 +25,30 @@ interface Verified {
 }
 
 const VERIFIED: Verified[] = [
-  { file: "music/music_home.qoa", work: "All of Us", artist: "Eric Skiff", license: "CC-BY-SA 4.0", upstream: "All of Us" },
-  { file: "music/music_cathedral_theme.qoa", work: "JRPG_royalCourt_loop", artist: "Yubatake", license: "CC BY 3.0", upstream: "JRPG Collection" },
-  { file: "music/music_town_theme.qoa", work: "JRPG_town_loop", artist: "Yubatake", license: "CC BY 3.0", upstream: "JRPG Collection" },
-  { file: "music/music_the_wild_places.qoa", work: "Peasant Kingdom", artist: "Spring", license: "CC BY 3.0", upstream: "Peasant Kingdom" },
-  { file: "music/music_city_park.qoa", work: "back34", artist: "Tom Peter", license: "CC-BY-SA 3.0", upstream: "back34" },
-  { file: "music/music_10_empire.qoa", work: "10 - The Empire", artist: "AVGVSTA", license: "CC BY 3.0", upstream: "Generic 8-bit JRPG Soundtrack" },
   { file: "music/music_07_town.qoa", work: "07 - Town", artist: "AVGVSTA", license: "CC BY 3.0", upstream: "Generic 8-bit JRPG Soundtrack" },
+  { file: "music/music_10_empire.qoa", work: "10 - The Empire", artist: "AVGVSTA", license: "CC BY 3.0", upstream: "Generic 8-bit JRPG Soundtrack" },
+  { file: "music/music_18_nighttide_waltz.qoa", work: "18 - Nighttide Waltz", artist: "AVGVSTA", license: "CC BY 3.0", upstream: "Generic 8-bit JRPG Soundtrack" },
+  { file: "music/music_adventure_begins.qoa", work: "The Adventure Begins 8-bit Remix", artist: "bart", license: "CC BY 3.0", upstream: "The Adventure Begins 8-bit Remix" },
+  { file: "music/music_battle_loop.qoa", work: "JRPG_battle_loop", artist: "Yubatake", license: "CC BY 3.0", upstream: "JRPG Collection" },
+  { file: "music/music_cathedral_theme.qoa", work: "JRPG_royalCourt_loop", artist: "Yubatake", license: "CC BY 3.0", upstream: "JRPG Collection" },
+  { file: "music/music_chibi_ninja.qoa", work: "Chibi Ninja", artist: "Eric Skiff", license: "CC-BY-SA 4.0", upstream: "Chibi Ninja" },
+  { file: "music/music_city_park.qoa", work: "back34", artist: "Tom Peter", license: "CC-BY-SA 3.0", upstream: "back34" },
+  { file: "music/music_come_and_find_me.qoa", work: "Come and Find Me", artist: "Eric Skiff", license: "CC-BY-SA 4.0", upstream: "Come and Find Me" },
+  { file: "music/music_discovery.qoa", work: "JRPG_discovery", artist: "Yubatake", license: "CC BY 3.0", upstream: "JRPG Collection" },
+  { file: "music/music_dojo_theme.qoa", work: "Taking Poison", artist: "Trevor Lentz", license: "CC-BY-SA 3.0", upstream: "Taking Poison" },
+  { file: "music/music_dragons_cave.qoa", work: "Stand With Us", artist: "Trevor Lentz", license: "CC-BY-SA 3.0", upstream: "Stand With Us" },
+  { file: "music/music_fields_loop.qoa", work: "JRPG_fields_loop", artist: "Yubatake", license: "CC BY 3.0", upstream: "JRPG Collection" },
+  { file: "music/music_gameover.qoa", work: "JRPG_gameOver", artist: "Yubatake", license: "CC BY 3.0", upstream: "JRPG Collection" },
+  { file: "music/music_home.qoa", work: "All of Us", artist: "Eric Skiff", license: "CC-BY-SA 4.0", upstream: "All of Us" },
   { file: "music/music_jester_theme.qoa", work: "Jester Theme", artist: "Hydrogene", license: "CC0", upstream: "Jester Theme" },
+  { file: "music/music_mystic_island.qoa", work: "JRPG_mysticIsle", artist: "Yubatake", license: "CC BY 3.0", upstream: "JRPG Collection" },
+  { file: "music/music_mystic_island_reverse.qoa", work: "JRPG_mysticIsle_reverse", artist: "Yubatake", license: "CC BY 3.0", upstream: "JRPG Collection" },
+  { file: "music/music_omnichannel.qoa", work: "JRPG_docks_loop", artist: "Yubatake", license: "CC BY 3.0", upstream: "JRPG Collection" },
+  { file: "music/music_sphalian_theme.qoa", work: "Digital Native", artist: "Eric Skiff", license: "CC-BY-SA 4.0", upstream: "Digital Native" },
+  { file: "music/music_the_princess.qoa", work: "JRPG_princess", artist: "Yubatake", license: "CC BY 3.0", upstream: "JRPG Collection" },
+  { file: "music/music_the_wild_places.qoa", work: "Peasant Kingdom", artist: "Spring", license: "CC BY 3.0", upstream: "Peasant Kingdom" },
+  { file: "music/music_town_theme.qoa", work: "JRPG_town_loop", artist: "Yubatake", license: "CC BY 3.0", upstream: "JRPG Collection" },
+  { file: "music/music_win_battle_boss.qoa", work: "JRPG_winBattleBoss", artist: "Yubatake", license: "CC BY 3.0", upstream: "JRPG Collection" },
   { file: "sounds/japanese_temple_bell_small.wav", work: "Japanese Temple Bell Small", artist: "Mike Koenig", license: "CC BY 3.0", upstream: "Japanese Temple Bell Small" },
   { file: "sounds/sound_confirm.wav", work: "confirm.ogg", artist: "Kelvin Shadewing", license: "CC BY 3.0", upstream: "Kelvin Shadewing's Soundpacks" },
   { file: "sounds/coinecho.wav", work: "picked-coin-echo-2", artist: "NenadSimic", license: "CC BY 3.0", upstream: "picked-coin-echo-2" },
@@ -78,7 +94,18 @@ function readAttributionRows(): Record<string, string> {
 }
 
 describe("audio attribution (B1)", () => {
-  test("the manifest ships exactly the 11 verified files", () => {
+  test("the readable attribution list travels in every pak", () => {
+    const pak = JSON.parse(readFileSync(join(ROOT, "pak.json"), "utf8")) as Array<{
+      key: string;
+      file: string;
+    }>;
+    expect(pak.filter((entry) => entry.key.startsWith("attribution:"))).toEqual([{
+      key: "attribution:audio/AUDIO-ATTRIBUTIONS.md",
+      file: "licenses/AUDIO-ATTRIBUTIONS.md",
+    }]);
+  });
+
+  test("the manifest ships exactly the 27 verified files", () => {
     const files = Object.keys(readManifest()).sort();
     expect(files).toEqual(VERIFIED.map((v) => v.file).sort());
   });

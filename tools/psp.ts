@@ -230,6 +230,10 @@ await run(
 const target = join(framework, "hosts/psp/target/mipsel-sony-psp/release");
 copyFileSync(join(target, "pocketjs-psp.prx"), join(out, "pocket-tuxemon.prx"));
 copyFileSync(join(target, "EBOOT.PBP"), join(out, "EBOOT.PBP"));
+copyFileSync(
+  join(root, "licenses", "AUDIO-ATTRIBUTIONS.md"),
+  join(out, "AUDIO-ATTRIBUTIONS.md"),
+);
 
 const sha256 = (bytes: Uint8Array | string): string =>
   createHash("sha256").update(bytes).digest("hex");
@@ -273,6 +277,7 @@ writeFileSync(join(out, "build-receipt.json"), JSON.stringify({
     "assets.pak",
     "pocket-tuxemon.js",
     "pocket-tuxemon.pak",
+    "AUDIO-ATTRIBUTIONS.md",
   ].map((name) => {
     const bytes = readFileSync(join(out, name));
     return [name, { bytes: bytes.length, sha256: sha256(bytes) }];

@@ -1,6 +1,6 @@
 // Build the generated G6 project against the PocketJS pinned by RPG Kit.
 
-import { mkdirSync } from "node:fs";
+import { copyFileSync, mkdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 const root = resolve(import.meta.dir, "..");
@@ -19,4 +19,11 @@ const build = Bun.spawn({
   cwd: root,
   stdio: ["inherit", "inherit", "inherit"],
 });
-process.exit(await build.exited);
+const exitCode = await build.exited;
+if (exitCode === 0) {
+  copyFileSync(
+    join(root, "licenses", "AUDIO-ATTRIBUTIONS.md"),
+    join(root, "dist", "AUDIO-ATTRIBUTIONS.md"),
+  );
+}
+process.exit(exitCode);

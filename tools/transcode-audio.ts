@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-// tools/transcode-audio.ts — transcode the mainline music and the used SFX
+// tools/transcode-audio.ts — transcode all imported-content music and used SFX
 // from the Tuxemon source into the committed audio assets.
 //
 // Music: ffmpeg decodes ogg/mp3 to s16le mono 22.05 kHz PCM, then the QOA
@@ -7,14 +7,13 @@
 // as uncompressed s16 mono 22.05 kHz WAV. Outputs land in assets/audio/ and
 // are committed: ffmpeg output is not bit-exact across versions, so the
 // importer reads the committed files, never the source tree. A manifest
-// records the ffmpeg version and a per-file SHA-256; `bun run verify:audio`
-// both re-transcodes into a temp dir (pipeline reproducibility) and reads
-// each committed blob back, comparing its byte count and SHA-256 against
-// the manifest (blob integrity).
+// records the ffmpeg version, encoded dimensions, loop range and per-file
+// SHA-256. `bun run verify:audio` performs two clean scratch transcodes,
+// requires them to be byte-identical, then validates the committed blobs and
+// their container metadata against the manifest.
 //
-// The slug list is the eight mainline tracks (GM0 §1.1) plus the three SFX
-// slugs actually played by map events (GM0 §1.2). Keep it in sync with
-// tools/fetch-tuxemon.sh, which sparse-checks out the same music files.
+// The music list is derived from map and environment content. The three SFX
+// slugs are the complete set played by map events.
 //
 // Usage:
 //   bun tools/transcode-audio.ts
@@ -27,26 +26,19 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { verifyCommittedBlobs, type Manifest, type ManifestFile } from "./audio-manifest.ts";
+import {
+  durationSeconds,
+  verifyCommittedBlobs,
+  type Manifest,
+  type ManifestFile,
+} from "./audio-manifest.ts";
+import { buildMusicCatalog } from "./music-catalog.ts";
 import { encodeQoa } from "./qoa.ts";
 
 const ROOT = resolve(import.meta.dir, "..");
 const SRC = process.env.TUXEMON_SRC ?? resolve(ROOT, ".tuxemon-src");
 const OUT = join(ROOT, "assets", "audio");
 const RATE = 22050;
-
-// GM0 §1.1: the eight tracks the GB6 + J1 mainline journeys play, in
-// first-appearance order.
-const MUSIC_SLUGS = [
-  "music_home",
-  "music_cathedral_theme",
-  "music_town_theme",
-  "music_the_wild_places",
-  "music_city_park",
-  "music_10_empire",
-  "music_07_town",
-  "music_jester_theme",
-];
 
 // GM0 §1.2: the only three SFX slugs any map event plays.
 const SFX_SLUGS = [
@@ -111,7 +103,8 @@ function sha256(bytes: Uint8Array): string {
 }
 
 function transcode(outDir: string): Manifest {
-  const musicDb = loadSlugIndex(join(SRC, "mods", "tuxemon", "db", "music"));
+  const musicCatalog = buildMusicCatalog(SRC);
+  const musicDb = new Map(musicCatalog.resolved.map((entry) => [entry.slug, entry.source]));
   const soundsDb = loadSlugIndex(join(SRC, "mods", "tuxemon", "db", "sounds"));
   mkdirSync(join(outDir, "music"), { recursive: true });
   mkdirSync(join(outDir, "sounds"), { recursive: true });
@@ -138,15 +131,18 @@ function transcode(outDir: string): Manifest {
       pakKey: kind === "music" ? `audio:qoa.${rel}` : `audio:wav.${rel}`,
       bytes: bytes.length,
       sha256: sha256(bytes),
+      frames: pcm.length,
+      durationSeconds: durationSeconds(pcm.length, RATE),
+      ...(kind === "music" ? { loopStartFrame: 0, loopEndFrame: pcm.length } : {}),
     };
     console.log(`${rel}: ${(bytes.length / 1024).toFixed(0)} KB (${(pcm.length / RATE).toFixed(1)} s)`);
   };
 
-  for (const slug of MUSIC_SLUGS) transcodeOne(slug, "music");
+  for (const entry of musicCatalog.resolved) transcodeOne(entry.slug, "music");
   for (const slug of SFX_SLUGS) transcodeOne(slug, "sfx");
 
   return {
-    format: "pocket-tuxemon/audio-manifest/v1",
+    format: "pocket-tuxemon/audio-manifest/v2",
     ffmpeg: ffmpegVersion(),
     rate: RATE,
     channels: 1,
@@ -155,47 +151,78 @@ function transcode(outDir: string): Manifest {
 }
 
 const verify = process.argv.includes("--verify");
-const outDir = verify ? join(ROOT, "assets", "audio-verify-tmp") : OUT;
-if (verify) rmSync(outDir, { recursive: true, force: true });
+// Per-process scratch path avoids collisions when Bun runs test files in
+// parallel. dist/ is ignored and the finally block removes this directory.
+const verifyRoot = join(ROOT, "dist", `audio-verify-${process.pid}`);
 
-const manifest = transcode(outDir);
-const manifestPath = join(outDir, "manifest.json");
-writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + "\n");
+function writeManifest(outDir: string, manifest: Manifest): void {
+  writeFileSync(join(outDir, "manifest.json"), JSON.stringify(manifest, null, 2) + "\n");
+}
 
-if (verify) {
-  const committedPath = join(OUT, "manifest.json");
-  const committed = JSON.parse(readFileSync(committedPath, "utf8")) as Manifest;
+function compareTranscodes(firstDir: string, first: Manifest, secondDir: string, second: Manifest): string[] {
+  const errors: string[] = [];
+  const paths = [...new Set([...Object.keys(first.files), ...Object.keys(second.files)])].sort();
+  for (const rel of paths) {
+    const a = first.files[rel];
+    const b = second.files[rel];
+    if (!a || !b) {
+      errors.push(`scratch manifest differs: ${rel}`);
+      continue;
+    }
+    if (JSON.stringify(a) !== JSON.stringify(b)) errors.push(`scratch metadata differs: ${rel}`);
+    const aBytes = readFileSync(join(firstDir, rel));
+    const bBytes = readFileSync(join(secondDir, rel));
+    if (!aBytes.equals(bBytes)) errors.push(`scratch bytes differ: ${rel}`);
+  }
+  return errors;
+}
+
+if (!verify) {
+  const manifest = transcode(OUT);
+  writeManifest(OUT, manifest);
+  const total = Object.values(manifest.files).reduce((n, file) => n + file.bytes, 0);
+  console.log(`wrote ${Object.keys(manifest.files).length} files, ${(total / 1024 / 1024).toFixed(2)} MB to ${OUT}`);
+} else {
+  rmSync(verifyRoot, { recursive: true, force: true });
   let failures = 0;
-  for (const [rel, entry] of Object.entries(manifest.files)) {
-    const want = committed.files[rel];
-    if (!want) {
-      console.error(`missing in committed manifest: ${rel}`);
-      failures++;
-    } else if (want.sha256 !== entry.sha256) {
-      console.error(`hash mismatch: ${rel}\n  committed ${want.sha256}\n  reencoded ${entry.sha256}`);
-      failures++;
-    }
-  }
-  for (const rel of Object.keys(committed.files)) {
-    if (!manifest.files[rel]) {
-      console.error(`extra in committed manifest: ${rel}`);
+  try {
+    const firstDir = join(verifyRoot, "pass-1");
+    const secondDir = join(verifyRoot, "pass-2");
+    const first = transcode(firstDir);
+    const second = transcode(secondDir);
+    writeManifest(firstDir, first);
+    writeManifest(secondDir, second);
+    for (const error of compareTranscodes(firstDir, first, secondDir, second)) {
+      console.error(error);
       failures++;
     }
+
+    const committedPath = join(OUT, "manifest.json");
+    const committed = JSON.parse(readFileSync(committedPath, "utf8")) as Manifest;
+    for (const rel of [...new Set([...Object.keys(first.files), ...Object.keys(committed.files)])].sort()) {
+      const generated = first.files[rel];
+      const shipped = committed.files[rel];
+      if (!generated) {
+        console.error(`extra in committed manifest: ${rel}`);
+        failures++;
+      } else if (!shipped) {
+        console.error(`missing in committed manifest: ${rel}`);
+        failures++;
+      } else if (JSON.stringify(generated) !== JSON.stringify(shipped)) {
+        console.error(`committed metadata differs: ${rel}`);
+        failures++;
+      }
+    }
+    for (const error of verifyCommittedBlobs(OUT, committed)) {
+      console.error(error);
+      failures++;
+    }
+  } finally {
+    rmSync(verifyRoot, { recursive: true, force: true });
   }
-  // Independently read the blobs that actually ship and compare their byte
-  // counts and SHA-256 against the committed manifest. The re-encode check
-  // above cannot notice a corrupted or swapped committed blob; this one can.
-  for (const err of verifyCommittedBlobs(OUT, committed)) {
-    console.error(err);
-    failures++;
-  }
-  rmSync(outDir, { recursive: true, force: true });
   if (failures > 0) {
-    console.error(`verify:audio: ${failures} mismatch(es) — ffmpeg version drift? re-run transcode-audio.ts and commit`);
+    console.error(`verify:audio: ${failures} mismatch(es) — re-run transcode:audio and commit`);
     process.exit(1);
   }
-  console.log("verify:audio: all hashes match");
-} else {
-  const total = Object.values(manifest.files).reduce((n, f) => n + f.bytes, 0);
-  console.log(`wrote ${Object.keys(manifest.files).length} files, ${(total / 1024 / 1024).toFixed(2)} MB to ${OUT}`);
+  console.log("verify:audio: two scratch passes are byte-identical; all committed hashes, durations and loop ranges match");
 }

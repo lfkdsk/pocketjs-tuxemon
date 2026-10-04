@@ -143,6 +143,8 @@ jobs:
         run: bun tools/verify-web-zh.ts
       - name: Play the demo controls in headless Chrome
         run: bun tools/verify-web-demo.ts
+      - name: Play three imported music tracks in headless Chrome
+        run: bun run verify:web:audio
       - name: Keep the web site
         uses: actions/upload-artifact@v7
         with:
@@ -206,6 +208,7 @@ jobs:
             dist/psp/EBOOT.PBP
             dist/psp/assets.pak
             dist/psp/pocket-tuxemon.prx
+            dist/psp/AUDIO-ATTRIBUTIONS.md
             dist/psp/build-receipt.json
           retention-days: 14
 

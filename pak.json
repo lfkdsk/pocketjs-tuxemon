@@ -192,6 +192,10 @@
     "file": "dist/animated/water_volcano_path.json"
   },
   {
+    "key": "attribution:audio/AUDIO-ATTRIBUTIONS.md",
+    "file": "licenses/AUDIO-ATTRIBUTIONS.md"
+  },
+  {
     "key": "audio:qoa.music/music_07_town.qoa",
     "file": "assets/audio/music/music_07_town.qoa"
   },
@@ -200,12 +204,52 @@
     "file": "assets/audio/music/music_10_empire.qoa"
   },
   {
+    "key": "audio:qoa.music/music_18_nighttide_waltz.qoa",
+    "file": "assets/audio/music/music_18_nighttide_waltz.qoa"
+  },
+  {
+    "key": "audio:qoa.music/music_adventure_begins.qoa",
+    "file": "assets/audio/music/music_adventure_begins.qoa"
+  },
+  {
+    "key": "audio:qoa.music/music_battle_loop.qoa",
+    "file": "assets/audio/music/music_battle_loop.qoa"
+  },
+  {
     "key": "audio:qoa.music/music_cathedral_theme.qoa",
     "file": "assets/audio/music/music_cathedral_theme.qoa"
   },
   {
+    "key": "audio:qoa.music/music_chibi_ninja.qoa",
+    "file": "assets/audio/music/music_chibi_ninja.qoa"
+  },
+  {
     "key": "audio:qoa.music/music_city_park.qoa",
     "file": "assets/audio/music/music_city_park.qoa"
+  },
+  {
+    "key": "audio:qoa.music/music_come_and_find_me.qoa",
+    "file": "assets/audio/music/music_come_and_find_me.qoa"
+  },
+  {
+    "key": "audio:qoa.music/music_discovery.qoa",
+    "file": "assets/audio/music/music_discovery.qoa"
+  },
+  {
+    "key": "audio:qoa.music/music_dojo_theme.qoa",
+    "file": "assets/audio/music/music_dojo_theme.qoa"
+  },
+  {
+    "key": "audio:qoa.music/music_dragons_cave.qoa",
+    "file": "assets/audio/music/music_dragons_cave.qoa"
+  },
+  {
+    "key": "audio:qoa.music/music_fields_loop.qoa",
+    "file": "assets/audio/music/music_fields_loop.qoa"
+  },
+  {
+    "key": "audio:qoa.music/music_gameover.qoa",
+    "file": "assets/audio/music/music_gameover.qoa"
   },
   {
     "key": "audio:qoa.music/music_home.qoa",
@@ -216,12 +260,36 @@
     "file": "assets/audio/music/music_jester_theme.qoa"
   },
   {
+    "key": "audio:qoa.music/music_mystic_island.qoa",
+    "file": "assets/audio/music/music_mystic_island.qoa"
+  },
+  {
+    "key": "audio:qoa.music/music_mystic_island_reverse.qoa",
+    "file": "assets/audio/music/music_mystic_island_reverse.qoa"
+  },
+  {
+    "key": "audio:qoa.music/music_omnichannel.qoa",
+    "file": "assets/audio/music/music_omnichannel.qoa"
+  },
+  {
+    "key": "audio:qoa.music/music_sphalian_theme.qoa",
+    "file": "assets/audio/music/music_sphalian_theme.qoa"
+  },
+  {
+    "key": "audio:qoa.music/music_the_princess.qoa",
+    "file": "assets/audio/music/music_the_princess.qoa"
+  },
+  {
     "key": "audio:qoa.music/music_the_wild_places.qoa",
     "file": "assets/audio/music/music_the_wild_places.qoa"
   },
   {
     "key": "audio:qoa.music/music_town_theme.qoa",
     "file": "assets/audio/music/music_town_theme.qoa"
+  },
+  {
+    "key": "audio:qoa.music/music_win_battle_boss.qoa",
+    "file": "assets/audio/music/music_win_battle_boss.qoa"
   },
   {
     "key": "audio:wav.sounds/coinecho.wav",

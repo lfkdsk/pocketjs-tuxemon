@@ -30,11 +30,11 @@
    "compact": 260,
    "json": 3
   },
-  "shellBytes": 200354,
+  "shellBytes": 201378,
   "entryBytes": 5245837,
   "canonicalJsonBytes": 10153692,
   "entries": 263,
-  "manifestHash": "e49b0d404fd404025f99721888446798700f54e4f23f32f328775d5188d0e66a",
+  "manifestHash": "c05b3bac40381e7ba482ad3712da7567344051943c6764c8ef3e0ce7e46e8fd3",
   "schemaHash": "c0e962138a1f12dc5627590869b99f7c9b2ced3040e3d05ed0ebd663142d4857"
  },
  "terrain": {
@@ -68,8 +68,8 @@
   "entryBytes": 125878
  },
  "audio": {
-  "entries": 11,
-  "entryBytes": 7207422
+  "entries": 27,
+  "entryBytes": 22752646
  },
  "characters": {
   "source": "https://github.com/Tuxemon/Tuxemon",

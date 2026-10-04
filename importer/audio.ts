@@ -1,13 +1,11 @@
 // importer/audio.ts — audio asset resolution for the importer.
 //
-// The transcode pipeline (tools/transcode-audio.ts) commits the eight
-// mainline music tracks (QOA) and the three used SFX (s16 WAV) to
-// assets/audio/, with a manifest recording each file's slug, pak key and
-// SHA-256. The importer reads that manifest to build the Project.audio
-// table: a logical audio id -> pak key map. Slugs without a committed asset
-// (the non-mainline tracks Tuxemon events still reference) get no entry, so
-// playBgm/playSe commands for them stay silent while the reducer state
-// machine still tracks them.
+// The transcode pipeline (tools/transcode-audio.ts) commits every music track
+// referenced by imported map/environment content (QOA) and the three used
+// SFX (s16 WAV) to assets/audio/. The importer reads its manifest to build the
+// Project.audio table: a logical audio id -> pak key map. Invalid upstream
+// music arguments get no entry, so they stay silent just as they do in
+// Tuxemon while the reducer state machine still tracks them.
 
 import { readFileSync } from "node:fs";
 
@@ -18,10 +16,14 @@ export interface AudioManifestFile {
   pakKey: string;
   bytes: number;
   sha256: string;
+  frames: number;
+  durationSeconds: number;
+  loopStartFrame?: number;
+  loopEndFrame?: number;
 }
 
 interface AudioManifest {
-  format: "pocket-tuxemon/audio-manifest/v1";
+  format: "pocket-tuxemon/audio-manifest/v2";
   ffmpeg: string;
   rate: number;
   channels: 1;

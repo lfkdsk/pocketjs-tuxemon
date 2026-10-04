@@ -14,14 +14,30 @@ WAV, 22.05 kHz mono) but the audio content is otherwise unchanged.
 
 | File | Track | Artist | License |
 | --- | --- | --- | --- |
-| `music_home.qoa` | [All of Us](http://EricSkiff.com/music) | Eric Skiff | CC-BY-SA 4.0 |
-| `music_cathedral_theme.qoa` | JRPG_royalCourt_loop ([JRPG Collection](https://opengameart.org/content/jrpg-collection)) | Yubatake | CC BY 3.0 |
-| `music_town_theme.qoa` | JRPG_town_loop ([JRPG Collection](https://opengameart.org/content/jrpg-collection)) | Yubatake | CC BY 3.0 |
-| `music_the_wild_places.qoa` | [Peasant Kingdom](https://opengameart.org/content/peasant-kingdom) | Spring | CC BY 3.0 |
-| `music_city_park.qoa` | [back34](https://opengameart.org/content/8bit-style-music) | Tom Peter | CC-BY-SA 3.0 |
-| `music_10_empire.qoa` | 10 - The Empire ([Generic 8-bit JRPG Soundtrack](https://opengameart.org/content/generic-8-bit-jrpg-soundtrack)) | AVGVSTA | CC BY 3.0 |
 | `music_07_town.qoa` | 07 - Town ([Generic 8-bit JRPG Soundtrack](https://opengameart.org/content/generic-8-bit-jrpg-soundtrack)) | AVGVSTA | CC BY 3.0 |
+| `music_10_empire.qoa` | 10 - The Empire ([Generic 8-bit JRPG Soundtrack](https://opengameart.org/content/generic-8-bit-jrpg-soundtrack)) | AVGVSTA | CC BY 3.0 |
+| `music_18_nighttide_waltz.qoa` | 18 - Nighttide Waltz ([Generic 8-bit JRPG Soundtrack](https://opengameart.org/content/generic-8-bit-jrpg-soundtrack)) | AVGVSTA | CC BY 3.0 |
+| `music_adventure_begins.qoa` | [The Adventure Begins 8-bit Remix](https://opengameart.org/content/the-adventure-begins-8-bit-remix) | bart | CC BY 3.0 |
+| `music_battle_loop.qoa` | JRPG_battle_loop ([JRPG Collection](https://opengameart.org/content/jrpg-collection)) | Yubatake | CC BY 3.0 |
+| `music_cathedral_theme.qoa` | JRPG_royalCourt_loop ([JRPG Collection](https://opengameart.org/content/jrpg-collection)) | Yubatake | CC BY 3.0 |
+| `music_chibi_ninja.qoa` | [Chibi Ninja](http://EricSkiff.com/music) | Eric Skiff | CC-BY-SA 4.0 |
+| `music_city_park.qoa` | [back34](https://opengameart.org/content/8bit-style-music) | Tom Peter | CC-BY-SA 3.0 |
+| `music_come_and_find_me.qoa` | [Come and Find Me](http://EricSkiff.com/music) | Eric Skiff | CC-BY-SA 4.0 |
+| `music_discovery.qoa` | JRPG_discovery ([JRPG Collection 2](https://opengameart.org/content/jrpg-collection-2)) | Yubatake | CC BY 3.0 |
+| `music_dojo_theme.qoa` | [Taking Poison](https://opengameart.org/content/taking-poison) | Trevor Lentz | CC-BY-SA 3.0 |
+| `music_dragons_cave.qoa` | [Stand With Us](https://opengameart.org/content/stand-with-us) | Trevor Lentz | CC-BY-SA 3.0 |
+| `music_fields_loop.qoa` | JRPG_fields_loop ([JRPG Collection](https://opengameart.org/content/jrpg-collection)) | Yubatake | CC BY 3.0 |
+| `music_gameover.qoa` | JRPG_gameOver ([JRPG Collection](https://opengameart.org/content/jrpg-collection)) | Yubatake | CC BY 3.0 |
+| `music_home.qoa` | [All of Us](http://EricSkiff.com/music) | Eric Skiff | CC-BY-SA 4.0 |
 | `music_jester_theme.qoa` | [Jester Theme](https://hydrogene.itch.io/high-quality-8-bit-musics) | Hydrogene | CC0 |
+| `music_mystic_island.qoa` | JRPG_mysticIsle ([JRPG Collection](https://opengameart.org/content/jrpg-collection)) | Yubatake | CC BY 3.0 |
+| `music_mystic_island_reverse.qoa` | JRPG_mysticIsle_reverse ([JRPG Collection](https://opengameart.org/content/jrpg-collection)) | Yubatake | CC BY 3.0 |
+| `music_omnichannel.qoa` | JRPG_docks_loop ([JRPG Collection](https://opengameart.org/content/jrpg-collection)) | Yubatake | CC BY 3.0 |
+| `music_sphalian_theme.qoa` | [Digital Native](http://EricSkiff.com/music) | Eric Skiff | CC-BY-SA 4.0 |
+| `music_the_princess.qoa` | JRPG_princess ([JRPG Collection](https://opengameart.org/content/jrpg-collection)) | Yubatake | CC BY 3.0 |
+| `music_the_wild_places.qoa` | [Peasant Kingdom](https://opengameart.org/content/peasant-kingdom) | Spring | CC BY 3.0 |
+| `music_town_theme.qoa` | JRPG_town_loop ([JRPG Collection](https://opengameart.org/content/jrpg-collection)) | Yubatake | CC BY 3.0 |
+| `music_win_battle_boss.qoa` | JRPG_winBattleBoss ([JRPG Collection 2](https://opengameart.org/content/jrpg-collection-2)) | Yubatake | CC BY 3.0 |
 
 ## Sound effects (`assets/audio/sounds/`, from `mods/tuxemon/sounds/`)
 

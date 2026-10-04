@@ -514,8 +514,9 @@ test("default import output remains byte-pinned", () => {
   // its runtime WorldLayout projection, seamless traversal identity and safe
   // transfer handoff metadata, and the indoor-map list for the weather
   // particle overlay.
-  // The deterministic clock, native presentation/terrain mappings, GM1 audio
-  // commands, sys.music_fading fadeout guard, GI scene lowering, and the
+  // The deterministic clock, native presentation/terrain mappings, the full
+  // content-derived GM1 audio table and commands, sys.music_fading fadeout
+  // guard, GI scene lowering, and the
   // GI-1b movement/party lowering (choice_npc icon rows, dropped char_run,
   // get_party_monster iid slots, NPC-lifetime party clears), choice portrait
   // metadata, the GI-2b storage/trade/shop dispositions, imported item icon
@@ -525,7 +526,7 @@ test("default import output remains byte-pinned", () => {
   // condition and the per-domain NPC battle result codes are all in this
   // combined pin.
   expect(createHash("sha256").update(bytes).digest("hex")).toBe(
-    "304086836d7aa106f805fe7bfbdb002d2c9b0dcfeb253bad2d64118d8eeae479",
+    "f568842584296431cfa92107864873b93e6501d06f0292a4bf0d7b6f2e341b15",
   );
 });
 

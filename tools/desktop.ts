@@ -1,6 +1,6 @@
 // Build and launch Pocket Tuxemon in PocketJS's portable desktop host.
 
-import { cpSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, cpSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { $ } from "bun";
 import { desktopHostFeatures } from "../vendor/pocket-rpgkit/tools/lib/desktop.ts";
@@ -87,6 +87,10 @@ const planPath = join(root, ".pocket", target, `${plan.app.output}.plan.json`);
 mkdirSync(resolve(planPath, ".."), { recursive: true });
 await Bun.write(planPath, JSON.stringify(plan, null, 2) + "\n");
 await $`bun ${join(pocketjs, "tools", "build.ts")} --plan=${planPath} --project-root=${root} --outdir=${outdir}`.cwd(root);
+copyFileSync(
+  join(root, "licenses", "AUDIO-ATTRIBUTIONS.md"),
+  join(outdir, "AUDIO-ATTRIBUTIONS.md"),
+);
 await $`cargo build --release ${desktopHostFeatures()}`.cwd(join(pocketjs, "hosts", "desktop"));
 
 const bin = join(pocketjs, "hosts", "desktop", "target", "release", "pocket-desktop-host");
