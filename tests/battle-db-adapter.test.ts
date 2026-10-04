@@ -78,7 +78,9 @@ describe("GB1 battle-db, adapted, drives the GB2 reducer", () => {
       if (difference !== null) differences.push(`${golden.id}: ${difference}`);
     }
     expect(differences).toEqual([]);
-  }, 30_000);
+    // About 7 s alone; a busy shared host has stretched it past 30 s, so the
+    // limit only guards against a hang, not against slow CPU time.
+  }, 180_000);
 
   // GB1's `spyder` scope is a curated subset of the oracle's full upstream
   // export (which the Python exporter dumps unfiltered: 411 monsters vs
