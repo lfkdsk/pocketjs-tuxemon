@@ -1,8 +1,8 @@
 // Demo chapter tape and snapshot packaging for the web demo menu.
 //
-// The complete mainline tape is ~186k u16 button masks.
+// The complete mainline tape is ~199k u16 button masks.
 // Inlining it in the JS bundle would bloat every page load, so the importer
-// packs it as a compact binary and the 15 chapter snapshots as a JSON map;
+// packs it as a compact binary and the 20 chapter snapshots as a JSON map;
 // both become pak entries the game reads on demand when a chapter is first
 // selected (see ui/demo-tape.ts). Only the tiny chapter index (id, title,
 // tape offset) is inline.
@@ -52,7 +52,7 @@ interface ChapterRecord {
 interface ChaptersFile {
   format: string;
   worldTraversal?: unknown;
-  tape?: Partial<Record<"gb6" | "j1" | "j2" | "j3", { worldTraversal?: unknown }>>;
+  tape?: Partial<Record<"gb6" | "j1" | "j2" | "j3" | "j4", { worldTraversal?: unknown }>>;
   chapters: ChapterRecord[];
 }
 
@@ -138,7 +138,7 @@ export function encodeTape(
   return out;
 }
 
-/** Read the committed chapter snapshots and the four journey tapes, pack
+/** Read the committed chapter snapshots and the five journey tapes, pack
  *  them, and return the pak entries plus the inline chapter index. The warp
  *  index contributes the non-blocked spawns (blocked maps have no standable
  *  event-free cell and are left to the runtime's visible-error path). */
@@ -152,7 +152,7 @@ export function buildDemoData(root: string, warp: WarpIndex): DemoDataBuild {
   if (worldTraversal !== "seamless-v1") {
     throw new Error(`demo-data: new demo artifacts require seamless-v1 chapters, got ${worldTraversal}`);
   }
-  for (const segment of ["gb6", "j1", "j2", "j3"] as const) {
+  for (const segment of ["gb6", "j1", "j2", "j3", "j4"] as const) {
     const metadata = chaptersFile.tape?.[segment];
     if (!metadata) throw new Error(`demo-data: chapters file has no ${segment} tape metadata`);
     const segmentTraversal = demoWorldTraversal(metadata.worldTraversal, `chapters ${segment} segment`);
@@ -165,6 +165,7 @@ export function buildDemoData(root: string, warp: WarpIndex): DemoDataBuild {
     "data/j1-captainreturns-journey.json",
     "data/j2-hospitalcure-journey.json",
     "data/j3-omnichannelradioannounce-journey.json",
+    "data/j4-kernelquestdone-journey.json",
   ];
   const masks: number[] = [];
   for (const file of tapeFiles) {

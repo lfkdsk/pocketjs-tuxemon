@@ -238,12 +238,13 @@ drives PocketJS's builder directly.
    - `bun run test`;
    - the maintained journeys: `bun run verify:gb6:mainline`,
      `bun run verify:j1:mainline`, `bun run verify:j2:mainline`,
-     `bun run verify:j3:mainline`,
+     `bun run verify:j3:mainline`, `bun run verify:j4:mainline`,
      `bun run verify:gb6:failures`,
      `bun run verify:g6:locks`, `bun run verify:g6:frozen`;
    - `bun run web` plus `bun tools/verify-web-journey.ts` in headless Chrome;
    - the QuickJS benches (`bun run bench:g6:quickjs`,
-     `bun run bench:gb6:quickjs`, `bun run bench:j3:quickjs`): the terminal
+     `bun run bench:gb6:quickjs`, `bun run bench:j3:quickjs`,
+     `bun run bench:j4:quickjs`): the terminal
      state hashes must match the pinned tapes and frame budgets must hold.
 4. If the import output changed, commit the regenerated files in the same
    change as the pointer bump.

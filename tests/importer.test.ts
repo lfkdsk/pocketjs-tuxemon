@@ -76,14 +76,14 @@ test("all maps pass schema and reference valid transfer destinations", () => {
   expect(result.report.coverage.actions.summary).toMatchObject({
     types: 98,
     uses: 13_617,
-    native: 6_850,
-    degraded: 2_820,
+    native: 6_851,
+    degraded: 2_826,
     placeholder: 708,
-    dropped: 3_239,
+    dropped: 3_232,
     nativePercent: 50.3,
     tier1: {
-      uses: 6_316,
-      percent: 46.38,
+      uses: 6_318,
+      percent: 46.4,
       requiredUses: 6_246,
       meetsBaseline: true,
     },
@@ -91,14 +91,14 @@ test("all maps pass schema and reference valid transfer destinations", () => {
   expect(result.report.coverage.conditions.summary).toMatchObject({
     types: 64,
     uses: 8_663,
-    native: 4_356,
-    degraded: 1_229,
+    native: 4_371,
+    degraded: 1_245,
     placeholder: 859,
-    dropped: 2_219,
-    nativePercent: 50.3,
+    dropped: 2_188,
+    nativePercent: 50.5,
     tier1: {
-      uses: 4_297,
-      percent: 49.6,
+      uses: 4_308,
+      percent: 49.73,
       requiredUses: 4_591,
       meetsBaseline: false,
     },
@@ -115,13 +115,13 @@ test("all maps pass schema and reference valid transfer destinations", () => {
     dropped: 717,
   });
   expect(coverageRows.find((row) => row.type === "char_move")).toMatchObject({
-    degraded: 9,
-    dropped: 68,
+    degraded: 13,
+    dropped: 64,
   });
   expect(coverageRows.find((row) => row.type === "is char_facing")).toMatchObject({
     native: 0,
-    degraded: 0,
-    dropped: 1_008,
+    degraded: 4,
+    dropped: 1_004,
   });
   expect(coverageRows.find((row) => row.type === "set_monster_health")).toMatchObject({
     placeholder: 0,
@@ -380,7 +380,9 @@ test("KV1 imports overlays, runtime appearances, and exact surface passage updat
     sprite: "swimmer",
   });
 
-  const tileCommands = nodes.filter((node) => node.op === "tileProperty");
+  const surfaceWriters = result.project.maps.flatMap((map) => map.events ?? [])
+    .filter((event) => event.name === "Allow Swim" || event.name === "Forbid Swim");
+  const tileCommands = objectNodes(surfaceWriters).filter((node) => node.op === "tileProperty");
   expect(tileCommands).toHaveLength(46);
   expect(tileCommands.filter((node) => node.passage === "pass")).toHaveLength(23);
   expect(tileCommands.filter((node) => node.passage === null)).toHaveLength(23);
@@ -523,19 +525,27 @@ test("default import output remains byte-pinned", () => {
   // atlas metadata, the COV-B live NPC party staging and
   // NPC-versus-NPC resolver, the moving-guard step triggers, the live-clock
   // daytime filter, the map-entry layer reset, the runtime player-name
-  // condition, the per-domain NPC battle result codes and the set_mission
-  // no-op are all in this combined pin.
+  // condition, the per-domain NPC battle result codes, COV-C step trackers,
+  // text-valued numeric transforms and set_mission no-op, and the Spyder-only
+  // collision-folded Surf boundary pages are all in this combined pin.
   expect(createHash("sha256").update(bytes).digest("hex")).toBe(
-    "02d8702b1901f23053c7966de63fa5a4224a0b47061ad805beb3e791f8090cd9",
+    "141a8ec16b8f86b4cedce67b09de5bdb5ca5aedadf4a47d8d1e76dbd18ffd5ad",
   );
 });
 
 test("ImportOptions.areas emits a K1 rectangular event", () => {
   const result = buildProject(["spyder_candy_town"], { areas: true });
-  const event = result.project.maps[0]!.events?.find((candidate) =>
-    candidate.name === "Entry Candy"
-  ) as (Record<string, unknown> | undefined);
-  expect(event).toMatchObject({ x: 14, y: 3, w: 22, h: 1 });
+  const events = result.project.maps[0]!.events?.filter((candidate) =>
+    candidate.name?.includes("Entry Candy")
+  ) ?? [];
+  const covered = new Set<number>();
+  for (const event of events) {
+    if (event.y !== 3) continue;
+    for (let x = event.x; x < event.x + (event.w ?? 1); x++) covered.add(x);
+  }
+  expect([...covered].sort((a, b) => a - b)).toEqual(
+    Array.from({ length: 22 }, (_, index) => index + 14),
+  );
   expect(result.report.options?.areas).toBeTrue();
 });
 
@@ -1206,10 +1216,9 @@ test("imports live player-name guards and rejects impossible legacy triggers", (
   const underwater = result.project.maps.find((map) => map.id === "water_underwater")!;
   expect(underwater.events?.some((event) => event.name === "Water Gemuar Battle")).toBeFalse();
 
-  // These shared Spyder events require a terrain-label predicate that the
-  // runtime does not expose. They must not silently become unconditional
-  // dialogue, movement or appearance changes.
-  const spyder = buildProject(["spyder_dryadsgrove"], G6_IMPORT_OPTIONS).project.maps[0]!;
+  // Maps without authored surfable cells must not gain unconditional shared
+  // scenario dialogue, movement, or appearance changes.
+  const spyder = buildProject(["spyder_cotton_cafe"], G6_IMPORT_OPTIONS).project.maps[0]!;
   for (const name of [
     "Choice Surf",
     "Push Into Water Down",
@@ -1217,17 +1226,135 @@ test("imports live player-name guards and rejects impossible legacy triggers", (
     "Push Into Water Right",
     "Push Into Water Up",
     "Surfable",
+    "Not surfable",
   ]) {
     expect(spyder.events?.some((event) => event.name === name), name).toBeFalse();
   }
-  const reset = spyder.events?.find((event) => event.name === "Not surfable");
-  expect(reset?.pages[0]?.condition).toEqual({
-    all: [{ kind: "appearance", target: "player", sprite: "swimmer" }],
+});
+
+test("Spyder surf boundaries require the Surfboard, enter water, and dismount", () => {
+  const result = buildProject([
+    "spyder_timber_town",
+    "spyder_routee",
+    "spyder_route1",
+    "spyder_routed",
+  ], G6_IMPORT_OPTIONS);
+  const timber = result.project.maps.find((map) => map.id === "spyder_timber_town")!;
+  const route1 = result.project.maps.find((map) => map.id === "spyder_route1")!;
+  // Generated Surf boundaries are intentionally outside the source-authored
+  // area partition. Otherwise their cells split and renumber frozen rNNN ids
+  // even before the player owns a Surfboard.
+  expect(route1.events?.some((event) => event.id === "e003_teleport_to_route1_r046")).toBeTrue();
+  expect(route1.events?.filter((event) => event.id.startsWith("tux_surf_"))
+    .every((event) => event.name === "Choice Surf" || event.name === "Not surfable")).toBeTrue();
+  const entry = timber.events?.find((event) =>
+    event.name?.includes("Choice Surf") &&
+    event.x <= 33 && 33 < event.x + (event.w ?? 1) &&
+    event.y <= 38 && 38 < event.y + (event.h ?? 1)
+  );
+  expect(entry?.pages[0]?.condition).toEqual({
+    all: [
+      { kind: "item", id: "surfboard", count: 1 },
+      { kind: "variable", id: "v.swimming", op: "!=", value: 2 },
+    ],
   });
-  expect(objectNodes(reset)).toContainEqual({ op: "appearance", target: "player", sprite: null });
-  expect(objectNodes(reset).some((node) =>
-    node.op === "appearance" && node.sprite === "swimmer"
-  )).toBeFalse();
+  expect(objectNodes(entry)).toContainEqual({
+    op: "tileProperty",
+    x: 33,
+    y: 38,
+    passage: "pass",
+  });
+  expect(objectNodes(entry)).toContainEqual({
+    op: "appearance",
+    target: "player",
+    sprite: "swimmer",
+  });
+  expect(objectNodes(entry)).toContainEqual(expect.objectContaining({
+    op: "moveRoute",
+    target: "player",
+    route: expect.objectContaining({ steps: ["stepForward"] }),
+  }));
+
+  result.project.start = { map: "spyder_timber_town", x: 32, y: 38, dir: "right" };
+  const session = createSession(result.project, 60, {
+    extensions: TUXEMON_EXTENSIONS,
+    battle: TUXEMON_BATTLE_RULES,
+    scenes: TUXEMON_SCENES,
+  });
+  let state = startSession(result.project, session);
+  for (let frame = 0; frame < 20; frame++) state = stepSession(session, state, { buttons: 0 });
+
+  state = stepSession(session, state, { buttons: 0, confirmEdge: true });
+  for (let frame = 0; frame < 10; frame++) state = stepSession(session, state, { buttons: 0 });
+  expect(state.interp.modal).toBeNull();
+  expect([state.move.tx, state.move.ty]).toEqual([32, 38]);
+
+  state.sw.items.surfboard = 1;
+  state = stepSession(session, state, { buttons: 0, confirmEdge: true });
+  for (let frame = 0; frame < 180; frame++) {
+    const modal = state.interp.modal;
+    const confirm = modal?.kind === "choices" || (modal?.kind === "text" && modal.complete);
+    state = stepSession(session, state, { buttons: 0, confirmEdge: confirm });
+  }
+  expect([state.move.tx, state.move.ty]).toEqual([33, 38]);
+  expect(numericVariable(state, "v.swimming")).toBe(2);
+  expect(state.sw.playerAppearance?.sprite).toBe("swimmer");
+  expect(Object.keys(state.interp.tileProperties ?? {})).toHaveLength(144);
+
+  state = stepSession(session, state, { buttons: BTN_BITS.LEFT });
+  for (let frame = 0; frame < 30; frame++) state = stepSession(session, state, { buttons: 0 });
+  expect([state.move.tx, state.move.ty]).toEqual([32, 38]);
+  expect(numericVariable(state, "v.swimming")).toBe(1);
+  expect(state.sw.playerAppearance?.sprite).toBeUndefined();
+  expect(state.interp.tileProperties).toBeUndefined();
+
+  // Route D has an authored moving-guard encounter on (8,0) and a generated
+  // Surf dismount rectangle covering that same playerTouch cell. The importer
+  // folds dismount into the source guard-latch/body chain and removes (8,0)
+  // from the standalone Surf event, so one completed-step edge runs both.
+  const routed = result.project.maps.find((map) => map.id === "spyder_routed")!;
+  const encounter = routed.events?.find((event) =>
+    event.id.startsWith("e011_swim_encounters_day") &&
+    event.x === 8 && event.y === 0
+  );
+  const competingDismount = routed.events?.find((event) =>
+    event.id.startsWith("tux_surf_dismount") &&
+    event.x <= 8 && 8 < event.x + (event.w ?? 1) &&
+    event.y <= 0 && 0 < event.y + (event.h ?? 1)
+  );
+  expect(encounter?.pages[0]?.trigger).toBe("playerTouch");
+  expect(competingDismount).toBeUndefined();
+  expect(objectNodes(encounter)).toContainEqual({
+    op: "appearance",
+    target: "player",
+    sprite: null,
+  });
+  expect(objectNodes(encounter)).toContainEqual({
+    op: "variable",
+    id: "v.swimming",
+    set: { op: "set", value: 1 },
+  });
+
+  result.project.start = { map: "spyder_routed", x: 7, y: 0, dir: "right" };
+  const routedSession = createSession(result.project, 60, {
+    extensions: TUXEMON_EXTENSIONS,
+    battle: TUXEMON_BATTLE_RULES,
+    scenes: TUXEMON_SCENES,
+  });
+  let routedState = startSession(result.project, routedSession);
+  for (let frame = 0; frame < 20; frame++) {
+    routedState = stepSession(routedSession, routedState, { buttons: 0 });
+  }
+  routedState.sw.playerAppearance = { sprite: "swimmer" };
+  routedState.sw.variables["v.swimming"] = 2;
+  routedState = stepSession(routedSession, routedState, { buttons: BTN_BITS.RIGHT });
+  for (let frame = 0; frame < 30; frame++) {
+    routedState = stepSession(routedSession, routedState, { buttons: 0 });
+  }
+  expect([routedState.move.tx, routedState.move.ty]).toEqual([8, 0]);
+  expect(routedState.sw.switches["tracker.routed"]).toBeTrue();
+  expect(numericVariable(routedState, "v.swimming")).toBe(1);
+  expect(routedState.sw.playerAppearance?.sprite).toBeUndefined();
 });
 
 test("real Benden and Dryad's Grove conversations follow caught and healed state", () => {

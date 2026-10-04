@@ -3472,8 +3472,23 @@ interface SpatialPage {
   trigger: "playerTouch" | "action";
   cls: Clause[];
   cmds: Command[];
+  /** Commands whose coordinates follow the final coalesced rectangle. */
+  regionCommands?: (x: number, y: number, w: number, h: number) => Command[];
   cells: readonly [number, number][];
 }
+
+const SPYDER_SURF_EVENTS = new Set([
+  "Choice Surf",
+  "Push Into Water Down",
+  "Push Into Water Left",
+  "Push Into Water Right",
+  "Push Into Water Up",
+  "Surfable",
+  "Not surfable",
+]);
+
+const isSpyderSurfEvent = (event: TuxEvent): boolean =>
+  event.source === "spyder.yaml" && SPYDER_SURF_EVENTS.has(event.name);
 
 function convertMap(
   m: TuxMap,
@@ -3484,6 +3499,8 @@ function convertMap(
   const events: GameEvent[] = [];
   const sprites: Record<string, SpriteDef> = {};
   const npcs = new Map<string, NpcAgg>();
+  const hasSpyderSurfScenario = m.props.scenario === "spyder" &&
+    m.events.some(isSpyderSurfEvent);
   const npcOf = (s: string, x = 0, y = 0): NpcAgg => npcs.get(s) ?? npcs.set(s, { slug: s, x, y, wander: false, talks: [] }).get(s)!;
   let n = 0;
   const nextId = (name: string) => `e${String(++n).padStart(3, "0")}_${slug(name)}`;
@@ -3496,6 +3513,14 @@ function convertMap(
    *  rectangles keep Tuxemon's "sample every guard, then run every matching
    *  body" semantics without expanding otherwise-disjoint large areas. */
   const spatialPages: SpatialPage[] = [];
+  /** Surf boundaries are emitted after the source-authored partition. Keeping
+   *  them separate preserves every pre-existing region id and keeps their
+   *  false pages out of legacy saves made before the Surfboard is acquired. */
+  const surfSpatialPages: SpatialPage[] = [];
+  /** Authored cells whose `player,moving,1` guard becomes playerTouch. A Surf
+   *  dismount on the same cell must join that source page's latch/body chain:
+   *  two independent playerTouch events would compete for one step edge. */
+  const movingTouchCells = new Set<string>();
   const collisionRegions = readCollisionRegions(join(MAPS_DIR, `${m.slug}.tmx`));
   const economies = new Map<string, string>();
   for (const event of m.events) {
@@ -3516,6 +3541,40 @@ function convertMap(
     const eventCoverage = new EventCoverage(e);
     activeCoverage = eventCoverage;
     try {
+      // The shared Spyder scenario expresses surfing through dynamic
+      // `char_in` / `char_facing_tile` terrain predicates. Project v1 has no
+      // live-player-cell condition, but the imported terrain already exposes
+      // the exact surfable cell set. Lower the seven cooperating source
+      // events together into boundary action/touch pages below instead of
+      // dropping them or (worse) allowing their remaining guards to run
+      // unconditionally.
+      if (isSpyderSurfEvent(e)) {
+        // Before surf lowering, the partially convertible Not surfable page
+        // occupied one sequential source-event id on every Spyder map. Keep
+        // that slot reserved so adding this capability cannot renumber any
+        // unrelated imported page or invalidate frozen journey ancestry.
+        if (e.name === "Not surfable") nextId(e.name);
+        if (!(surfaceLabels.surfable?.length)) {
+          const reason = "this map has no authored surfable cells";
+          eventCoverage.dropAll(reason);
+          note("trigger", "surf(no surface)", "T4-dropped", reason);
+          continue;
+        }
+        const reason = "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow";
+        for (const action of e.acts) {
+          const exact = action.type === "translated_dialog" ||
+            action.type === "translated_dialog_choice" || action.type === "set_variable";
+          noteAction(action, action.type, exact ? "T1" : "T1-lowered", reason);
+        }
+        for (const condition of e.conds) {
+          const exact = condition.type === "has_item" || condition.type === "button_pressed" ||
+            condition.type === "variable_set" || condition.type === "tile_property_updated" ||
+            condition.type === "current_state" || condition.type === "char_sprite";
+          noteCondition(condition, `${condition.op} ${condition.type}`, exact ? "T1" : "T1-lowered", reason);
+        }
+        note("trigger", "surf(boundary lowering)", "T1-lowered", reason);
+        continue;
+      }
       if (!e.conds.some((condition) => !condition.synthetic) && !e.behavs.length) {
         const reason = "Tuxemon never starts an event without source conditions or behavior";
         eventCoverage.dropAll(reason);
@@ -3655,6 +3714,12 @@ function convertMap(
           continue;
         }
         if (options.areas) {
+          if (e.conds.some((condition) => condition.op === "is" &&
+            condition.type === "check_char_parameter" &&
+            condition.args[0] === "player" && condition.args[1] === "moving" &&
+            condition.args[2] === "1")) {
+            for (const [x, y] of cells) movingTouchCells.add(`${x},${y}`);
+          }
           spatialPages.push({
             id: nextId(e.name),
             name: e.name,
@@ -3685,9 +3750,14 @@ function convertMap(
           continue;
         }
         const base = nextId(e.name);
+        const movingTouch = e.conds.some((condition) => condition.op === "is" &&
+          condition.type === "check_char_parameter" &&
+          condition.args[0] === "player" && condition.args[1] === "moving" &&
+          condition.args[2] === "1");
         cells.forEach(([x, y], i) => {
           const key = `${trigger}|${x},${y}`;
           const list = cellPages.get(key) ?? cellPages.set(key, []).get(key)!;
+          if (movingTouch) movingTouchCells.add(`${x},${y}`);
           list.push({ id: cells.length > 1 ? `${base}_${i}` : base, name: e.name, x, y, trigger, cls: live, cmds });
         });
         note("trigger", k, cells.length > 1 ? "T1-lowered" : "T1", cells.length > 1 ? "area expanded to one event per cell" : trigger);
@@ -3721,6 +3791,176 @@ function convertMap(
       conversionCoverage.commit(eventCoverage);
       activeCoverage = undefined;
     }
+  }
+
+  const surfable = surfaceLabels.surfable ?? [];
+  if (hasSpyderSurfScenario && surfable.length) {
+    const surface = new Set(surfable);
+    // The action side may cover every surfable cell: its not-swimming guard
+    // means ordinary play can only reach it from shore. Keep the touch side
+    // to adjacent land, however, so a false swimmer guard never creates a
+    // movement-trigger fiber in the middle of unrelated land routes.
+    const waterBoundary = [...surfable].sort((a, b) => a - b);
+    const neighbors = (index: number): number[] => {
+      const x = index % m.width;
+      const y = Math.floor(index / m.width);
+      const out: number[] = [];
+      if (x > 0) out.push(index - 1);
+      if (x + 1 < m.width) out.push(index + 1);
+      if (y > 0) out.push(index - m.width);
+      if (y + 1 < m.height) out.push(index + m.width);
+      return out;
+    };
+    const shorelineWater = surfable.filter((index) =>
+      neighbors(index).some((neighbor) => !surface.has(neighbor))
+    );
+    const landBoundary = [...new Set(shorelineWater.flatMap((index) =>
+      neighbors(index).filter((neighbor) => !surface.has(neighbor))
+    ))].sort((a, b) => a - b);
+    const swimmingYes = code("swimming", "yes");
+    const swimmingNo = code("swimming", "no");
+    const addCellPage = (page: Omit<SpatialPage, "cells">, x: number, y: number): void => {
+      if (options.areas) {
+        surfSpatialPages.push({ ...page, cells: [[x, y]] });
+        return;
+      }
+      const { cond, rest } = pageCondition(page.cls, options);
+      events.push({
+        id: `${page.id}_${String(y * m.width + x).padStart(5, "0")}`,
+        name: page.name,
+        x,
+        y,
+        pages: [{
+          trigger: page.trigger,
+          condition: cond,
+          sprite: null,
+          commands: guard(rest, page.cmds),
+        }],
+      });
+    };
+
+    const enterCommands = (x: number, y: number, w: number, h: number): Command[] => [
+      { op: "variable", id: varId("swimming"), set: { op: "set", value: swimmingYes } },
+      // Open this coalesced shoreline rectangle before the source's automatic
+      // push. The upstream Allow Swim page opens the whole label on the next
+      // world tick; rectangle-local commands avoid repeating a map-wide cell
+      // list in every boundary event.
+      ...Array.from({ length: w * h }, (_, index): Command => ({
+        op: "tileProperty",
+        x: x + index % w,
+        y: y + Math.floor(index / w),
+        passage: "pass",
+      })),
+      { op: "appearance", target: "player", sprite: "swimmer" },
+      {
+        op: "moveRoute",
+        target: "player",
+        wait: true,
+        route: { steps: ["stepForward"], repeat: false, skippable: true },
+      },
+    ];
+    const commandsFor = (x: number, y: number, w: number, h: number): Command[] => [
+      ...dialog("itsswimmingtime", m),
+      {
+        op: "choices",
+        prompt: "",
+        options: [
+          { text: (po.get("yes") ?? "Yes").slice(0, 24), commands: enterCommands(x, y, w, h) },
+          {
+            text: (po.get("no") ?? "No").slice(0, 24),
+            commands: [{ op: "variable", id: varId("swimming"), set: { op: "set", value: swimmingNo } }],
+          },
+        ],
+      },
+    ];
+    const enter: Omit<SpatialPage, "cells"> = {
+      id: "tux_surf_enter",
+      name: "Choice Surf",
+      trigger: "action",
+      cls: [
+        { k: "item", id: "surfboard", count: 1, has: true },
+        { k: "var", id: varId("swimming"), op: "!=", value: swimmingYes },
+      ],
+      cmds: [],
+      regionCommands: commandsFor,
+    };
+    if (options.areas) {
+      surfSpatialPages.push({
+        ...enter,
+        cells: waterBoundary.map((index) => [
+          index % m.width,
+          Math.floor(index / m.width),
+        ] as [number, number]),
+      });
+    } else {
+      for (const index of waterBoundary) {
+        const x = index % m.width;
+        const y = Math.floor(index / m.width);
+        addCellPage({ ...enter, cmds: commandsFor(x, y, 1, 1), regionCommands: undefined }, x, y);
+      }
+    }
+
+    const dismount: Omit<SpatialPage, "cells"> = {
+      id: "tux_surf_dismount",
+      name: "Not surfable",
+      trigger: "playerTouch",
+      cls: [{
+        k: "native",
+        condition: { kind: "appearance", target: "player", sprite: "swimmer" },
+        negate: false,
+      }],
+      cmds: [
+        { op: "appearance", target: "player", sprite: null },
+        { op: "variable", id: varId("swimming"), set: { op: "set", value: swimmingNo } },
+      ],
+    };
+    if (options.areas) {
+      const contended = landBoundary.filter((index) =>
+        movingTouchCells.has(`${index % m.width},${Math.floor(index / m.width)}`)
+      );
+      const standalone = landBoundary.filter((index) =>
+        !movingTouchCells.has(`${index % m.width},${Math.floor(index / m.width)}`)
+      );
+      // Tuxemon samples all matching guards before running their bodies. Fold
+      // a colliding completed-step encounter and Surf dismount into the same
+      // source partition so both run in order from one playerTouch edge. The
+      // remaining Surf cells stay separate to preserve source region IDs.
+      if (contended.length) {
+        spatialPages.push({
+          ...dismount,
+          cells: contended.map((index) => [
+            index % m.width,
+            Math.floor(index / m.width),
+          ] as [number, number]),
+        });
+      }
+      if (standalone.length) {
+        surfSpatialPages.push({
+          ...dismount,
+          cells: standalone.map((index) => [
+            index % m.width,
+            Math.floor(index / m.width),
+          ] as [number, number]),
+        });
+      }
+    } else {
+      for (const index of landBoundary) {
+        const x = index % m.width;
+        const y = Math.floor(index / m.width);
+        const sourcePages = cellPages.get(`playerTouch|${x},${y}`);
+        if (movingTouchCells.has(`${x},${y}`) && sourcePages?.length) {
+          sourcePages.push({ ...dismount, x, y });
+        } else {
+          addCellPage(dismount, x, y);
+        }
+      }
+    }
+    note(
+      "trigger",
+      "surf(boundary pages)",
+      "T1-lowered",
+      `${waterBoundary.length} water entry cells and ${landBoundary.length} adjacent dismount cells`,
+    );
   }
 
   // A transfer rebuilds the map interpreter, so commands authored after
@@ -3793,7 +4033,7 @@ function convertMap(
           if (pages.length === 1) {
             const page = pageCondition(first.cls, options);
             condition = page.cond;
-            commands = guard(page.rest, first.cmds);
+            commands = guard(page.rest, first.regionCommands?.(x, y, w, h) ?? first.cmds);
           } else {
             const flag = (i: number) => `local.area.${m.slug}.${region}.${i}`;
             commands = [];
@@ -3807,8 +4047,12 @@ function convertMap(
             });
             pages.forEach((page, i) => commands.push(...(
               page.cls.length
-                ? [{ op: "if", if: { kind: "switch", id: flag(i), value: true }, then: page.cmds } as Command]
-                : page.cmds
+                ? [{
+                    op: "if",
+                    if: { kind: "switch", id: flag(i), value: true },
+                    then: page.regionCommands?.(x, y, w, h) ?? page.cmds,
+                  } as Command]
+                : (page.regionCommands?.(x, y, w, h) ?? page.cmds)
             )));
             note("trigger", "stacked event areas", "T1-lowered", "partitioned: match flags then bodies");
           }
@@ -3820,6 +4064,54 @@ function convertMap(
             w,
             h,
             pages: [{ trigger, condition, sprite: null, commands }],
+          }));
+        }
+      }
+    }
+
+    // Surf's generated boundaries must not participate in the source-page
+    // membership signatures above: doing so splits old rectangles and
+    // renumbers their stable rNNN ids. Each Surf page has its own trigger, so
+    // it can be coalesced independently and appended under a reserved id.
+    let surfRegion = 0;
+    for (const source of surfSpatialPages) {
+      const cells = new Set(source.cells.map(([x, y]) => y * m.width + x));
+      const visited = new Set<number>();
+      for (let y = 0; y < m.height; y++) {
+        for (let x = 0; x < m.width; x++) {
+          const cell = y * m.width + x;
+          if (!cells.has(cell) || visited.has(cell)) continue;
+          let w = 1;
+          while (x + w < m.width) {
+            const next = y * m.width + x + w;
+            if (!cells.has(next) || visited.has(next)) break;
+            w++;
+          }
+          let h = 1;
+          rows: while (y + h < m.height) {
+            for (let dx = 0; dx < w; dx++) {
+              const next = (y + h) * m.width + x + dx;
+              if (!cells.has(next) || visited.has(next)) break rows;
+            }
+            h++;
+          }
+          for (let dy = 0; dy < h; dy++) {
+            for (let dx = 0; dx < w; dx++) visited.add((y + dy) * m.width + x + dx);
+          }
+          const page = pageCondition(source.cls, options);
+          events.push(gameEvent({
+            id: `${source.id}_r${String(++surfRegion).padStart(3, "0")}`,
+            name: source.name,
+            x,
+            y,
+            w,
+            h,
+            pages: [{
+              trigger: source.trigger,
+              condition: page.cond,
+              sprite: null,
+              commands: guard(page.rest, source.regionCommands?.(x, y, w, h) ?? source.cmds),
+            }],
           }));
         }
       }

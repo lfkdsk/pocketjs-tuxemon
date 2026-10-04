@@ -27,32 +27,33 @@ where noted. Set `TUXEMON_SRC` first (or keep a repo-local `.tuxemon-src`).
 | `verify:j1:mainline` | The Captain-return continuation, concatenated with the GB6 tape and replayed from frame zero (122,386 frames), ends at the mansion with the captain's return and all 14 battles (10 trainer, 4 wild) intact. | `data/gb6-mainline-journey.json`, `data/j1-captainreturns-journey.json` | ~67 s |
 | `verify:j2:mainline` | The hospital-cure continuation, concatenated with GB6 and J1 and replayed from frame zero (172,873 frames), ends in the Candy Town hospital with the cure granted and all 54 battles (50 trainer, 4 wild) won. | `data/gb6-mainline-journey.json`, `data/j1-captainreturns-journey.json`, `data/j2-hospitalcure-journey.json` | ~130 s |
 | `verify:j3:mainline` | The Radio Tower continuation, concatenated with GB6, J1 and J2 and replayed from frame zero (185,802 frames), ends at the broadcast with all 13 new trainer battles won and the Omnichannel story flags intact. | the four maintained mainline tapes through `data/j3-omnichannelradioannounce-journey.json` | ~140 s |
+| `verify:j4:mainline` | The Kernel continuation replays twice from the exact J3 production-save boundary, then concatenates all five segments and replays 199,189 frames from frame zero. It pins 14 wins (12 trainer plus Cataspike and Kernel), all seven correct Data Center answers and the `kernelquest=done` epilogue. | the five maintained mainline tapes through `data/j4-kernelquestdone-journey.json` | ~30 s |
 | `verify:chapters` | The demo chapters re-bake byte-identical: each save envelope passes the kit's save validator (decode + map-aware restore), the 480×272 thumbnails re-render from the built game to the committed PNG hashes, and every envelope restored and resumed at its `timelineFrame` suffix-replays to the full-tape terminal state. Fails with the rebake command when the kit, the tape or the importer moves a checkpoint. | `data/chapters.json`, `docs/screenshots/chapters/`, built bundle | ~12 min |
 | `verify:save` | Five saves through the game's own save path (save-point check, slot store or save code, content identity, decode, restore): after a battle, after a map change and after a late battle in the 09:00 GB6 replay, and one minute before noon plus mid-tint-tween right after the daylight stage turns in an 11:52 replay. Each restored state equals the live state at its save frame (one frame later for the rebuilt NPC table), and each resumed replay ends at the uninterrupted terminal state hash. Only the host frame counter `SessionState.frame`, which the reducer never reads, is set back for hashing. Report in `reports/save-resume.json`. | GB6 tape, generated shards | ~4 min |
 
 Durations are wall-clock measured on a current developer machine; the CI
 machines fold the mainline tapes in about a minute each.
 
-### Modes of the four big verifiers
+### Modes of the five big verifiers
 
-`verify-gb6-mainline.ts`, `verify-j1-mainline.ts`, `verify-j2-mainline.ts` and
-`verify-j3-mainline.ts`
+`verify-gb6-mainline.ts`, `verify-j1-mainline.ts`, `verify-j2-mainline.ts`,
+`verify-j3-mainline.ts` and `verify-j4-mainline.ts`
 share the same modes, each selected by its own env var (`GB6_VERIFY_MODE`,
-`J1_VERIFY_MODE`, `J2_VERIFY_MODE`, `J3_VERIFY_MODE`); the `:mainline` script
+`J1_VERIFY_MODE`, `J2_VERIFY_MODE`, `J3_VERIFY_MODE`, `J4_VERIFY_MODE`); the `:mainline` script
 runs the CI default:
 
 | Mode | What it adds |
 |---|---|
 | `ci` (default) | One 60 Hz replay of the frozen tape against the production reducer. This is the CI leg. |
-| `segment` (J1, J2, J3) | Replays just the continuation segment from a rebuilt ancestor terminal snapshot. |
-| `stateful` | Saves mid-journey, restores the snapshot, and continues to the frozen terminal; J1, J2 and J3 also verify the battle rewind. |
+| `segment` (J1, J2, J3, J4) | Replays just the continuation segment from a rebuilt ancestor terminal snapshot. |
+| `stateful` | Saves mid-journey, restores the snapshot, and continues to the frozen terminal; J1, J2, J3 and J4 also verify the battle rewind. |
 | `rate-60`, `rate-30`, `rate-20` | Replays the same 60 Hz-authored tape at a lower host tick rate and compares the full session state against an independent 60 Hz fold, source frame by source frame. |
 | `full` | Standalone/merged replay plus save/load, rewind and all three rates. The release/acceptance gate; about ten minutes for GB6. |
 
 ### Traversal identity and the seamless migration
 
 Every maintained tape now carries `worldTraversal: "seamless-v1"`. The chapter
-manifest repeats that identity at its root and for each GB6/J1/J2/J3 segment,
+manifest repeats that identity at its root and for each GB6/J1/J2/J3/J4 segment,
 and the demo binary encodes it. A tape with no identity retains the historical
 `legacy-transfer` meaning; unknown identities and a chapter manifest whose
 segments disagree are rejected instead of being guessed.
@@ -72,7 +73,8 @@ legacy terminal hash, preserving the other half of the compatibility contract.
 
 ### The QuickJS benches
 
-`bench:g6:quickjs`, `bench:gb6:quickjs` and `bench:j3:quickjs` measure
+`bench:g6:quickjs`, `bench:gb6:quickjs`, `bench:j3:quickjs` and
+`bench:j4:quickjs` measure
 real-frame CPU performance
 inside the actual desktop host's QuickJS guest (not Bun's JavaScriptCore):
 they build the vendored Rust host with a benchmark harness, boot the built
@@ -152,6 +154,7 @@ bun run bench:g6:quickjs
 bun run bench:gb6:quickjs
 bun run bench:gb6:quickjs:cold
 bun run bench:j3:quickjs
+bun run bench:j4:quickjs
 bun run bench:j3:quickjs:cold
 bun run bench:indoor-fast-path
 bun run verify:world-cache
@@ -174,6 +177,11 @@ It exercises
 13 battles including Beaverbrook and checks the Radio Tower terminal hash at
 both 480×272 and 960×544. This also keeps chapter restore honest in the
 QuickJS guest, where browser-only globals such as `TextDecoder` do not exist.
+
+The J4 benchmark restores the production `radio-broadcast` chapter snapshot,
+replays the remaining 23 J3 masks and all 13,387 J4 masks (13,410 total),
+exercises 14 battles including Kernel, and checks the complete-mainline
+terminal hash at both supported viewports.
 
 The world-cache gate boots the same production bundle and session path at
 480×272 and 960×544. It follows bidirectional authored openings through every
@@ -268,11 +276,13 @@ fail on any mismatch, so a silently corrupted tape is a red build.
 | `data/j1-captainreturns-journey.json` | 11,520 (122,386 combined with GB6) | Wayfarer Inn -> Route 4 -> Flower City -> Route A -> Mansion -> basement -> the captain's return | 14 (10 trainer, 4 wild) | `spyder_mansion @1,13` |
 | `data/j2-hospitalcure-journey.json` | 50,487 (172,873 combined) | Mansion -> Candy Town -> Greenwash -> hospital password -> the cure | 54 (50 trainer, 4 wild) | `spyder_candy_hospital3 @5,7` |
 | `data/j3-omnichannelradioannounce-journey.json` | 12,929 (185,802 combined) | hospital cure -> Paper Town -> Cotton Town -> Omnichannel floors 1–4 -> Radio Tower broadcast | 13 trainer | `spyder_radiotower @9,5` |
+| `data/j4-kernelquestdone-journey.json` | 13,387 (199,189 combined) | Radio Tower -> Cotton Town briefing -> Surfboard -> Route E -> Route B -> Data Center -> Kernel | 14 (12 trainer, 2 wild) | `spyder_datacenter @7,4` |
 | `data/zh-smoke-journey.json` | 3,201 | Chinese bedroom opening -> downstairs dialogue -> Paper Town -> first battle | 1 | `spyder_paper_town @26,9` |
 
 Terminal state hashes and per-checkpoint expectations live in the tapes or
 their verifiers (`tools/verify-gb6-mainline.ts`, `tools/verify-j1-mainline.ts`,
 `tools/verify-j2-mainline.ts`, `tools/verify-j3-mainline.ts`,
+`tools/verify-j4-mainline.ts`,
 `tools/verify-gb6-failures.ts`) and are asserted on every run.
 
 ### Re-recording a tape
@@ -281,10 +291,11 @@ Tapes are recorded by driving the game with the same deterministic driver the
 verifiers use:
 
 ```sh
-# J1, J2 and J3 continuations
+# J1, J2, J3 and J4 continuations
 bun run record:j1:mainline        # writes data/j1-captainreturns-journey.json
 bun run record:j2:mainline        # writes data/j2-hospitalcure-journey.json
 bun run record:j3:mainline        # writes data/j3-omnichannelradioannounce-journey.json
+bun run record:j4:mainline        # writes data/j4-kernelquestdone-journey.json
 
 # GB6 mainline
 GB6_JOURNEY_OUT=data/gb6-mainline-journey.json bun tools/gb6-journey.ts
@@ -307,14 +318,15 @@ change to the game's contract, not a test fixture refresh.
 
 The web demo menu's data lives in two committed files:
 
-- `data/chapters.json` — fifteen named checkpoints along the GB6+J1+J2+J3 mainline
+- `data/chapters.json` — twenty named checkpoints along the GB6+J1+J2+J3+J4 mainline
   (new-game bedroom, Paper Town, before the first Billie battle, starter
   chosen, Route 1, Cotton Town, City Park, the Route 3 north end, Flower
   City, the captain's return, Candy Town, Greenwash with the Aardant, the
-  recovered hospital cure, the opened Omnichannel passage and the Radio
-  Tower broadcast). Each entry is a kit save envelope taken at a
+  recovered hospital cure, the opened Omnichannel passage, the Radio Tower
+  broadcast, the Kernel briefing, the Surfboard, Route B, the Data Center
+  and Kernel's defeat). Each entry is a kit save envelope taken at a
   safe point (`canSave`, no input lock, no fade), the frame where its tape
-  suffix starts (an offset into the concatenated GB6+J1+J2+J3 masks), and the
+  suffix starts (an offset into the concatenated GB6+J1+J2+J3+J4 masks), and the
   480×272 thumbnail hash.
 - `data/warp.json` — one safe spawn per imported map: a clear incoming
   transfer landing when one exists, otherwise the standable cell nearest
@@ -358,6 +370,7 @@ a single differing pixel fails.
 | `bun run goldens:j1` | The three Captain-return keyframes at both viewports and `data/j1-goldens.json`. |
 | `bun run goldens:j2` | The hospital-cure keyframes (Aardant acquired, hospital password, the cure) at both viewports and `data/j2-goldens.json`. |
 | `bun run goldens:j3` | The Omnichannel wall, Radio Tower entry and completed broadcast at both viewports, plus `data/j3-goldens.json`. |
+| `bun run goldens:j4` | The acquired Surfboard, Data Center terminal floor and completed Kernel quest at both viewports, plus `data/j4-goldens.json`. |
 | `bun run goldens:world` | Phase 0–7 plus landing for one horizontal and one vertical production handoff at both viewports, plus two contact sheets and `docs/screenshots/world-seam/manifest.json`. The manifest pins PNG/RGBA hashes, visible-map ownership, camera/player geometry and cache counts; the test also asserts no fade or black frame and correct player/upper-layer compositing. |
 | `bun run goldens:daylight` | The same Paper Town checkpoint at fixed 09:00 and 21:00 starts, plus `data/daylight-goldens.json`. The test recomputes luminance, blue bias and per-pixel day/night differences from the decoded PNGs. |
 

@@ -106,6 +106,11 @@ jobs:
           # from frame zero through the Omnichannel Radio Tower broadcast.
           - name: Radio-broadcast journey from frame zero at 60 Hz
             run: bun run verify:j3:mainline
+          # J4 additionally replays its continuation twice from the exact J3
+          # production-save boundary, then replays all five segments from
+          # frame zero through the Kernel/Billie Data Center epilogue.
+          - name: Kernel-quest journey from J3 save and frame zero
+            run: bun run verify:j4:mainline
           - name: Battle defeat and recovery journeys
             run: bun run verify:gb6:failures
           - name: Every imported input lock is executed to its unlock

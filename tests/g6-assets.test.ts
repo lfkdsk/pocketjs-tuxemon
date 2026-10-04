@@ -28,9 +28,10 @@ describe("G6 generated game assets", () => {
       maxActors: 504,
       // The integrated importer recomputes this bound from every reachable
       // map after world/time/name guards, quarantine and bonding-tracker
-      // events materialize.
-      // The excluded test_npcs stress map remains the global maximum.
-      runtimeMaxActors: 226,
+      // events materialize. Independently coalesced Surf rectangles keep
+      // Dryad's Grove within this playable bound; test_npcs remains the
+      // excluded global maximum.
+      runtimeMaxActors: 292,
       excludedActorStressMaps: [{ id: "test_npcs", slots: 504 }],
       options: {
         areas: true,
@@ -62,7 +63,7 @@ describe("G6 generated game assets", () => {
       playerSheet: `sprites/${appearances[0]!.template.sprite_name}.png`,
     });
     expect(GAME_ASSETS.order).toHaveLength(263);
-    expect(GAME_ASSETS.maxActors).toBe(226);
+    expect(GAME_ASSETS.maxActors).toBe(292);
     expect(NPC_SRC_INDEX).toHaveLength(183);
     for (const { id, entry } of NPC_SRC_INDEX) {
       const art = JSON.parse(readFileSync(resolve(ROOT, "dist", entry), "utf8")) as NpcArt;

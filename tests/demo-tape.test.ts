@@ -35,7 +35,8 @@ describe("demo chapter tapes", () => {
     .worldTraversal ?? "legacy-transfer");
 
   test("one shared provider, read once, windowed without copies", () => {
-    expect(DEMO_CHAPTER_INDEX.length as number).toBe(15);
+    expect(DEMO_CHAPTER_INDEX.length as number).toBe(20);
+    expect((DEMO_CHAPTER_INDEX.at(-1) as { id: string } | undefined)?.id).toBe("kernel-defeated");
     const reads: string[] = [];
     const options = createDemoOptions((entry) => {
       reads.push(entry);

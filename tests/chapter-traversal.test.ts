@@ -7,6 +7,7 @@ const segments = (worldTraversal?: unknown) => ({
   j1: { worldTraversal },
   j2: { worldTraversal },
   j3: { worldTraversal },
+  j4: { worldTraversal },
 });
 
 describe("chapter traversal identity", () => {

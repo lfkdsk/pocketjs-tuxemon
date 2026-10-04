@@ -145,12 +145,42 @@ switches). Real battles replaced them: `start_battle`, `random_encounter`,
 `wild_encounter`, `add_monster`, party and battle-outcome conditions,
 faint-point actions and environment checks are now native.
 
+The shared Spyder Surf scenario is a corpus-level terrain lowering rather
+than a new engine condition. The terrain import already has every exact
+`surfable` cell, so the event importer coalesces the Spyder scenario's water
+cells into action areas and adjacent land into touch areas. The former is only
+reachable from shore while not swimming; it requires the Surfboard, shows the
+upstream translated Yes/No choice, opens the facing water rectangle, switches
+to the swimmer appearance and performs the authored forward step. The existing
+whole-label passage pages then open the rest of the water for that map visit.
+The latter restores the walking appearance and closes the label on shore.
+Generated shoreline pages are coalesced separately from source-authored event
+areas, so adding Surf does not split or renumber existing area-event IDs; their
+item/appearance guards also keep them absent from pre-Surfboard runtime state.
+This preserves the seven cooperating `char_in` uses and five surface-facing
+uses without pretending the project schema has a general live-player-cell
+predicate. Two unrelated surface-facing uses remain dropped.
+
+The 38 `is check_char_parameter player,moving,1` encounter guards use one
+separate, consistent lowering. Trigger classification turns each source event
+into a completed-step `playerTouch` page on its authored cells, and condition
+conversion consumes the moving guard instead of emitting another condition or
+page. This is deterministic across tick rates and cannot double-fire, but it
+is narrower than Tuxemon's map-wide velocity test, so coverage reports it as
+Degraded. The Spyder Surf events above are intercepted as a complete cluster
+before this generic path and therefore cannot also emit source-derived pages.
+At the one Route D cell where a generated land boundary overlaps a moving-
+encounter page, the importer folds the dismount guard and body into that
+source page's existing guard-latch chain and removes the cell from the
+standalone boundary. Both matching source behaviors run once from the same
+completed-step edge; neither page can consume the edge before the other.
+
 ### Dropped examples
 
 | Tuxemon | Reason |
 |---|---|
 | `char_run` | upstream applies the absolute run rate only while the character is already moving and reverts on idle; the kit's run control is a persistent relative grade with no movement-scoped lifetime, so the action emits nothing. |
-| `char_in`, `char_facing_tile player,<surface>` | these read the terrain label of the player's current or facing cell; neither map conditions nor extension conditions see the live player cell. The unlabelled facing-tile trigger remains native. Consequently the imported game cannot use its surfboard to begin or sustain surfing yet. (`check_char_parameter player,moving` is Degraded rather than dropped: it becomes a step trigger on the authored event cell.) |
+| unsupported live-cell terrain predicates outside the Spyder Surf cluster | project conditions still do not expose a general current/facing terrain-label query; the two remaining unrelated surface-facing uses emit nothing. Completed-step movement guards and the known Surf cluster use the specialized lowerings described above. |
 | `char_facing player,top/bottom`, `button_pressed K_RETURN` | these legacy source arguments are invalid in the pinned Tuxemon runtime: directions are `up/down/left/right`, and `K_RETURN` is not an intention constant. The guards are fixed false instead of being reported as native triggers. |
 | `add_step_tracker` and friends for a non-player character | the kit's step hook reports only the player's completed tiles (the pinned content tracks the player only). |
 | `copy_variable` between enum-coded variables | enum codes are numbered per variable, so only variables that hold text copy verbatim. |
@@ -184,8 +214,8 @@ Current coverage (G6 profile):
 
 | Kind | Types | Uses | Native | Degraded | Placeholder | Dropped | Executable |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Actions | 98 | 13,617 | 12,155 | 1,091 | 0 | 371 | 97.3% |
-| Conditions | 64 | 8,663 | 8,340 | 40 | 0 | 283 | 96.7% |
+| Actions | 98 | 13,617 | 12,193 | 1,100 | 0 | 324 | 97.6% |
+| Conditions | 64 | 8,663 | 8,364 | 56 | 0 | 243 | 97.2% |
 
 ## Adding or changing a mapping
 

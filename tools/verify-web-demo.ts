@@ -1,7 +1,7 @@
 // tools/verify-web-demo.ts — drive the built web site's demo controls in
 // headless Chrome and prove every acceptance behavior:
 //
-//   1. HTML chapter buttons (>=3, including the final radio-broadcast chapter)
+//   1. HTML chapter buttons (>=3, including the final Kernel chapter)
 //      jump the running game in place — no page reload — and highlight.
 //   2. Deep links ?chapter=, ?map=&x=&y=, ?autoplay=&speed=2 each apply.
 //   3. An invalid chapter id is a visible error, not a crash or a reload.
@@ -81,11 +81,14 @@ function loadChapters(): {
   const j1 = JSON.parse(readFileSync(join(ROOT, "data/j1-captainreturns-journey.json"), "utf8"));
   const j2 = JSON.parse(readFileSync(join(ROOT, "data/j2-hospitalcure-journey.json"), "utf8"));
   const j3 = JSON.parse(readFileSync(join(ROOT, "data/j3-omnichannelradioannounce-journey.json"), "utf8"));
+  const j4 = JSON.parse(readFileSync(join(ROOT, "data/j4-kernelquestdone-journey.json"), "utf8"));
   const worldTraversal = chapterWorldTraversal(file, "web demo chapters");
   if (worldTraversal !== "seamless-v1") {
     throw new Error(`verify-web-demo: chapters use ${worldTraversal}; expected seamless-v1`);
   }
-  for (const [label, journey] of [["GB6", gb6], ["J1", j1], ["J2", j2], ["J3", j3]] as const) {
+  for (const [label, journey] of [
+    ["GB6", gb6], ["J1", j1], ["J2", j2], ["J3", j3], ["J4", j4],
+  ] as const) {
     const actual = journeyWorldTraversal(journey, `${label} journey`);
     if (actual !== worldTraversal) {
       throw new Error(`verify-web-demo: ${label} traversal ${actual} != chapters ${worldTraversal}`);
@@ -96,7 +99,7 @@ function loadChapters(): {
       id: c.id, map: c.map, frame: c.frame, timelineFrame: c.timelineFrame,
       held: c.held, suffixFrames: c.suffixFrames,
     })),
-    combined: [...gb6.masks, ...j1.masks, ...j2.masks, ...j3.masks],
+    combined: [...gb6.masks, ...j1.masks, ...j2.masks, ...j3.masks, ...j4.masks],
     worldTraversal,
   };
 }
@@ -304,6 +307,8 @@ const chapterClicks: [string, string][] = [
   ["starter", "spyder_paper_town"],
   ["hospital-cure", "spyder_candy_hospital3"],
   ["radio-broadcast", "spyder_radiotower"],
+  ["data-center", "spyder_datacenter"],
+  ["kernel-defeated", "spyder_datacenter"],
 ];
 for (const [chapterId, wantMap] of chapterClicks) {
   const before = await evaluate(`globalThis.__rpgSessionState.frame`);
@@ -334,11 +339,15 @@ for (const [chapterId, wantMap] of chapterClicks) {
   const story = await evaluate(`({
     announce: __rpgSessionState.sw.variables["v.omnichannelradioannounce"] || 0,
     kernel: __rpgSessionState.sw.variables["v.kernelquest"] || 0,
-    won: __rpgSessionState.sw.switches["bo.spyder_omnichannel_beaverbrook.won"] === true
+    screens: [1,2,3,4,5,6,7].map((n) => __rpgSessionState.sw.variables["v.datascreen" + n] || 0),
+    billie: __rpgSessionState.sw.variables["v.datacenterbillie"] || 0,
+    beaverbrookWon: __rpgSessionState.sw.switches["bo.spyder_omnichannel_beaverbrook.won"] === true
   })`);
-  check("radio-broadcast chapter carries the J3 terminal story state",
-    story.announce === 1 && story.kernel === 2 && story.won === true,
-    `announce=${story.announce} kernel=${story.kernel} Beaverbrook=${story.won}`);
+  check("kernel-defeated chapter carries the complete mainline story state",
+    story.announce === 1 && story.kernel === 1 && story.screens.every((value: number) => value === 1)
+      && story.billie === 1 && story.beaverbrookWon === true,
+    `announce=${story.announce} kernel=${story.kernel} screens=${story.screens.join("")}`
+      + ` Billie=${story.billie} Beaverbrook=${story.beaverbrookWon}`);
 }
 
 // --- 2. Deep links ----------------------------------------------------------

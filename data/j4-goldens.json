@@ -1,0 +1,326 @@
+{
+  "format": "pocket-tuxemon/j4-goldens/v1",
+  "baseFrames": 185802,
+  "segmentTapeSha256": "08c88566e1da8c7c86816175403152f2f15fbb771d60b2a0756a32c9061987b1",
+  "combinedTapeSha256": "ab36b36094bae1fb20340d9b80453bf1a301d24995dc77317f809fa07176a477",
+  "frames": [
+    {
+      "name": "surfboard-collected",
+      "frame": 3239,
+      "mergedFrame": 189041,
+      "map": "spyder_candy_town",
+      "position": [
+        28,
+        30
+      ],
+      "width": 480,
+      "height": 272,
+      "file": "j4-surfboard-collected.480x272.png",
+      "rgbaFnv1a": "e9f8e8e4",
+      "pngSha256": "3daa5f2d162b957b072e5ed6ba86e3750a85fdf0d6fb486052389f6fb2e1d6c6",
+      "camera": [
+        536,
+        2592
+      ],
+      "story": {
+        "kernelQuest": 2,
+        "omnichannelRadioAnnounce": 1,
+        "bumpIntoMom": 1,
+        "kernelQuestBegin": 1,
+        "timberMom": 1,
+        "routeBBillie": 0,
+        "dataScreen1": 0,
+        "dataScreen2": 0,
+        "dataScreen3": 0,
+        "dataScreen4": 0,
+        "dataScreen5": 0,
+        "dataScreen6": 0,
+        "dataScreen7": 0,
+        "dataCenterBillie": 0,
+        "spyderPass": 1,
+        "surfboard": 1,
+        "swimming": 0,
+        "goldPass": 0
+      },
+      "player": {
+        "tile": [
+          28,
+          30
+        ],
+        "pixel": [
+          448,
+          480
+        ],
+        "facing": 2,
+        "phase": 0,
+        "image": "assets/characters/player-adventurer-idle-2.png",
+        "height": 32
+      }
+    },
+    {
+      "name": "datacenter-upper-screens",
+      "frame": 12464,
+      "mergedFrame": 198266,
+      "map": "spyder_datacenter",
+      "position": [
+        14,
+        4
+      ],
+      "width": 480,
+      "height": 272,
+      "file": "j4-datacenter-upper-screens.480x272.png",
+      "rgbaFnv1a": "454e78a7",
+      "pngSha256": "8d82584d6a0144c17aa0df1cc1cc6f7db24a5e064ce543145de33ff8cd373852",
+      "camera": [
+        0,
+        0
+      ],
+      "story": {
+        "kernelQuest": 2,
+        "omnichannelRadioAnnounce": 1,
+        "bumpIntoMom": 1,
+        "kernelQuestBegin": 1,
+        "timberMom": 1,
+        "routeBBillie": 1,
+        "dataScreen1": 1,
+        "dataScreen2": 1,
+        "dataScreen3": 1,
+        "dataScreen4": 1,
+        "dataScreen5": 1,
+        "dataScreen6": 1,
+        "dataScreen7": 1,
+        "dataCenterBillie": 0,
+        "spyderPass": 1,
+        "surfboard": 1,
+        "swimming": 1,
+        "goldPass": 0
+      },
+      "player": {
+        "tile": [
+          14,
+          4
+        ],
+        "pixel": [
+          224,
+          64
+        ],
+        "facing": 1,
+        "phase": 0,
+        "image": "assets/characters/player-adventurer-idle-1.png",
+        "height": 32
+      }
+    },
+    {
+      "name": "kernel-defeated",
+      "frame": 13386,
+      "mergedFrame": 199188,
+      "map": "spyder_datacenter",
+      "position": [
+        7,
+        4
+      ],
+      "width": 480,
+      "height": 272,
+      "file": "j4-kernel-defeated.480x272.png",
+      "rgbaFnv1a": "907dd8ec",
+      "pngSha256": "271b1c4cf1520633d367ce28235fd2251d9e9dcbfe1da3bfbcac8d3e5da8730e",
+      "camera": [
+        0,
+        0
+      ],
+      "story": {
+        "kernelQuest": 1,
+        "omnichannelRadioAnnounce": 1,
+        "bumpIntoMom": 1,
+        "kernelQuestBegin": 1,
+        "timberMom": 1,
+        "routeBBillie": 1,
+        "dataScreen1": 1,
+        "dataScreen2": 1,
+        "dataScreen3": 1,
+        "dataScreen4": 1,
+        "dataScreen5": 1,
+        "dataScreen6": 1,
+        "dataScreen7": 1,
+        "dataCenterBillie": 1,
+        "spyderPass": 1,
+        "surfboard": 1,
+        "swimming": 1,
+        "goldPass": 0
+      },
+      "player": {
+        "tile": [
+          7,
+          4
+        ],
+        "pixel": [
+          112,
+          64
+        ],
+        "facing": 3,
+        "phase": 0,
+        "image": "assets/characters/player-adventurer-idle-3.png",
+        "height": 32
+      }
+    },
+    {
+      "name": "surfboard-collected",
+      "frame": 3239,
+      "mergedFrame": 189041,
+      "map": "spyder_candy_town",
+      "position": [
+        28,
+        30
+      ],
+      "width": 960,
+      "height": 544,
+      "file": "j4-surfboard-collected.960x544.png",
+      "rgbaFnv1a": "efecf2a9",
+      "pngSha256": "4cc3d092da1e23ce477ea1a2f8ba091c68beb6925fc98e50729e8f581f60a47a",
+      "camera": [
+        296,
+        2456
+      ],
+      "story": {
+        "kernelQuest": 2,
+        "omnichannelRadioAnnounce": 1,
+        "bumpIntoMom": 1,
+        "kernelQuestBegin": 1,
+        "timberMom": 1,
+        "routeBBillie": 0,
+        "dataScreen1": 0,
+        "dataScreen2": 0,
+        "dataScreen3": 0,
+        "dataScreen4": 0,
+        "dataScreen5": 0,
+        "dataScreen6": 0,
+        "dataScreen7": 0,
+        "dataCenterBillie": 0,
+        "spyderPass": 1,
+        "surfboard": 1,
+        "swimming": 0,
+        "goldPass": 0
+      },
+      "player": {
+        "tile": [
+          28,
+          30
+        ],
+        "pixel": [
+          448,
+          480
+        ],
+        "facing": 2,
+        "phase": 0,
+        "image": "assets/characters/player-adventurer-idle-2.png",
+        "height": 32
+      }
+    },
+    {
+      "name": "datacenter-upper-screens",
+      "frame": 12464,
+      "mergedFrame": 198266,
+      "map": "spyder_datacenter",
+      "position": [
+        14,
+        4
+      ],
+      "width": 960,
+      "height": 544,
+      "file": "j4-datacenter-upper-screens.960x544.png",
+      "rgbaFnv1a": "d3b6fdd7",
+      "pngSha256": "f8cd99bd16d7252c6c57cd6b3b852f73674bb4074833137f9badea344f25a890",
+      "camera": [
+        0,
+        0
+      ],
+      "story": {
+        "kernelQuest": 2,
+        "omnichannelRadioAnnounce": 1,
+        "bumpIntoMom": 1,
+        "kernelQuestBegin": 1,
+        "timberMom": 1,
+        "routeBBillie": 1,
+        "dataScreen1": 1,
+        "dataScreen2": 1,
+        "dataScreen3": 1,
+        "dataScreen4": 1,
+        "dataScreen5": 1,
+        "dataScreen6": 1,
+        "dataScreen7": 1,
+        "dataCenterBillie": 0,
+        "spyderPass": 1,
+        "surfboard": 1,
+        "swimming": 1,
+        "goldPass": 0
+      },
+      "player": {
+        "tile": [
+          14,
+          4
+        ],
+        "pixel": [
+          224,
+          64
+        ],
+        "facing": 1,
+        "phase": 0,
+        "image": "assets/characters/player-adventurer-idle-1.png",
+        "height": 32
+      }
+    },
+    {
+      "name": "kernel-defeated",
+      "frame": 13386,
+      "mergedFrame": 199188,
+      "map": "spyder_datacenter",
+      "position": [
+        7,
+        4
+      ],
+      "width": 960,
+      "height": 544,
+      "file": "j4-kernel-defeated.960x544.png",
+      "rgbaFnv1a": "c46118a8",
+      "pngSha256": "6231f8a40be5f17c1fe364ce8d64460d62a3e79af07e60b0b340c37369623ebb",
+      "camera": [
+        0,
+        0
+      ],
+      "story": {
+        "kernelQuest": 1,
+        "omnichannelRadioAnnounce": 1,
+        "bumpIntoMom": 1,
+        "kernelQuestBegin": 1,
+        "timberMom": 1,
+        "routeBBillie": 1,
+        "dataScreen1": 1,
+        "dataScreen2": 1,
+        "dataScreen3": 1,
+        "dataScreen4": 1,
+        "dataScreen5": 1,
+        "dataScreen6": 1,
+        "dataScreen7": 1,
+        "dataCenterBillie": 1,
+        "spyderPass": 1,
+        "surfboard": 1,
+        "swimming": 1,
+        "goldPass": 0
+      },
+      "player": {
+        "tile": [
+          7,
+          4
+        ],
+        "pixel": [
+          112,
+          64
+        ],
+        "facing": 3,
+        "phase": 0,
+        "image": "assets/characters/player-adventurer-idle-3.png",
+        "height": 32
+      }
+    }
+  ]
+}

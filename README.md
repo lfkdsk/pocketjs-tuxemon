@@ -25,8 +25,9 @@ summary:
   campaign plays from the bedroom through Paper Town, Cotton Town, City Park,
   the north end of Route 3, Route 4 and Flower City to the Captain's return
   in the Mansion and on through Candy Town, the hospital cure and Omnichannel
-  to the Radio Tower broadcast — 185,802 frames at 60 Hz for the full
-  mainline, driven by
+  Radio Tower broadcast, then across Routes E and B to the Data Center and
+  Kernel's defeat — the complete 199,189-frame Spyder mainline at 60 Hz,
+  driven by
   deterministic autoplay tapes — and every imported input lock is executed
   to its unlock. On the 67 placed outdoor maps, the streamed renderer paints
   neighbouring ground, upper layers and animated tiles across authored seams,
@@ -39,11 +40,12 @@ summary:
   textures are imported from Tuxemon's YAML, and `battle/` is a pure
   reducer whose results match Tuxemon's own Python engine on 8,560 recorded
   battles; monsters spawn draw-for-draw like Tuxemon's. The mainline is
-  played for real end to end: the autoplay tapes fight 188 real battles
+  played for real end to end: the autoplay tapes fight 202 real battles
   (107 on the Route 3 mainline — 22 trainer + 85 wild — 14 on the
   Captain-return continuation — 10 trainer + 4 wild — and 54 on the way to
   the hospital cure — 50 trainer + 4 wild — and 13 more trainers through
-  Omnichannel and the Radio Tower), and every trainer
+  Omnichannel and the Radio Tower, and 14 on the Kernel quest — 12 trainer +
+  2 wild), and every trainer
   battle enters Battle Processing and ends `won` with its `battle_outcome`
   written back. The frozen 31-minute 60 Hz tape (110,866 frames / 30 min 48 s)
   replays byte-identical at 60, 30 and 20 Hz, and both failure paths are
@@ -278,8 +280,8 @@ The game has an in-game demo menu (**SELECT**) with three pages. The web
 player's **Demo controls** panel below the game covers chapters and autoplay;
 map warp is in the in-game menu, or use a `?map=` link (below).
 
-- **Chapters** — fifteen buttons from the new-game bedroom to the Radio Tower
-  broadcast. Click one (or pick it in the menu) to restore that save and
+- **Chapters** — twenty buttons from the new-game bedroom to the completed
+  Kernel quest. Click one (or pick it in the menu) to restore that save and
   keep playing from there, without reloading the page. The active chapter
   stays highlighted.
 - **Map warp** — jump to any of the 263 imported maps. Maps with a safe
@@ -291,13 +293,13 @@ map warp is in the in-game menu, or use a `?map=` link (below).
 The same actions are available as deep links, so a specific scene can be
 bookmarked or shared:
 
-- `?chapter=<id>` — restore a chapter for live play (e.g. `?chapter=radio-broadcast`)
+- `?chapter=<id>` — restore a chapter for live play (e.g. `?chapter=kernel-defeated`)
 - `?map=<id>&x=<tile>&y=<tile>` — warp to a map (e.g. `?map=spyder_cotton_town&x=16&y=17`)
 - `?autoplay=<id>&speed=<1|2|4>` — start a chapter on autoplay (e.g. `?autoplay=starter&speed=2`)
 
 An invalid id (e.g. `?chapter=missing`) is a visible `BAD DEMO LINK` error,
-not a crash. The chapter snapshots and the 185,802-frame tape are packed into
-the pak (a nibble-dictionary tape binary, 92,929 B) and read on demand, so the
+not a crash. The chapter snapshots and the 199,189-frame tape are packed into
+the pak (a nibble-dictionary tape binary, 99,623 B) and read on demand, so the
 JS bundle keeps only a tiny chapter index; the tape is decoded once, on the
 first chapter selection, and every chapter plays a window of it.
 `bun tools/verify-web-demo.ts` drives all of the above in headless Chrome,
@@ -325,10 +327,12 @@ bun run verify:gb6:mainline     # replay the Route 3 mainline tape
 bun run verify:j1:mainline      # replay the Captain-return tape
 bun run verify:j2:mainline      # replay the hospital-cure tape
 bun run verify:j3:mainline      # replay through the Radio Tower broadcast
+bun run verify:j4:mainline      # replay the complete mainline through Kernel
 bun run bench:g6:quickjs        # short two-viewport QuickJS performance gate
 bun run bench:gb6:quickjs       # full QuickJS journey, both viewports
 bun run bench:gb6:quickjs:cold  # five fresh processes at each viewport
 bun run bench:j3:quickjs        # hospital chapter -> radio, both viewports
+bun run bench:j4:quickjs        # radio chapter -> Kernel, both viewports
 bun run bench:j3:quickjs:cold   # five fresh processes at each viewport
 bun run bench:indoor-fast-path  # production-entry indoor single-map probe
 bun run verify:world-cache      # visit all 67 outdoor maps twice at both viewports

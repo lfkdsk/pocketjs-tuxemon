@@ -284,11 +284,11 @@
  "schemaErrors": [],
  "audioQoaPending": [],
  "byFate": {
-  "T1-lowered": 2927,
+  "T1-lowered": 3343,
   "T3-dropped": 111,
-  "T1": 37549,
-  "T4-dropped": 1761,
-  "T2-dropped": 1581,
+  "T1": 35640,
+  "T4-dropped": 1748,
+  "T2-dropped": 393,
   "structural": 792
  },
  "rows": [
@@ -427,7 +427,7 @@
   {
    "key": "act:char_move:T1-lowered",
    "fate": "T1-lowered",
-   "count": 9,
+   "count": 73,
    "note": "moveRoute steps"
   },
   {
@@ -835,14 +835,14 @@
   {
    "key": "act:set_template:T1",
    "fate": "T1",
-   "count": 115,
+   "count": 16,
    "note": "KV1 restores the character's saved race/page appearance baseline"
   },
   {
    "key": "act:set_template:T1-lowered",
    "fate": "T1-lowered",
-   "count": 12,
-   "note": "KV1 saves the race walking baseline; its combat-sheet choice remains battle-owned"
+   "count": 44,
+   "note": "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
   },
   {
    "key": "act:set_tuxepedia:T1-lowered",
@@ -853,7 +853,7 @@
   {
    "key": "act:set_variable:T1",
    "fate": "T1",
-   "count": 1457,
+   "count": 1374,
    "note": "variable set enum code (text variables: the literal string)"
   },
   {
@@ -907,7 +907,7 @@
   {
    "key": "act:translated_dialog:T1",
    "fate": "T1",
-   "count": 2225,
+   "count": 2241,
    "note": "text boxes from en_US .po (layout args ignored)"
   },
   {
@@ -925,7 +925,7 @@
   {
    "key": "act:translated_dialog_choice:T1",
    "fate": "T1",
-   "count": 157,
+   "count": 173,
    "note": "choices -> enum code"
   },
   {
@@ -1009,7 +1009,7 @@
   {
    "key": "cond:is button_pressed:T1",
    "fate": "T1",
-   "count": 540,
+   "count": 457,
    "note": "consumed by trigger selection"
   },
   {
@@ -1039,8 +1039,14 @@
   {
    "key": "cond:is char_facing:T1",
    "fate": "T1",
-   "count": 1489,
+   "count": 1093,
    "note": "K1 facing page condition"
+  },
+  {
+   "key": "cond:is char_facing:T1-lowered",
+   "fate": "T1-lowered",
+   "count": 64,
+   "note": "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
   },
   {
    "key": "cond:is char_facing:T2-dropped",
@@ -1055,10 +1061,10 @@
    "note": "consumed by trigger selection"
   },
   {
-   "key": "cond:is char_facing_tile:T2-dropped",
-   "fate": "T2-dropped",
-   "count": 495,
-   "note": "surface-labelled facing tiles need a live player-cell terrain predicate"
+   "key": "cond:is char_facing_tile:T1-lowered",
+   "fate": "T1-lowered",
+   "count": 80,
+   "note": "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
   },
   {
    "key": "cond:is char_gender:T3-dropped",
@@ -1073,10 +1079,10 @@
    "note": "tux.char_healed reads every saved player monster's current/max HP"
   },
   {
-   "key": "cond:is char_in:T2-dropped",
-   "fate": "T2-dropped",
-   "count": 99,
-   "note": "the condition context has no live player cell or terrain-surface label"
+   "key": "cond:is char_in:T1-lowered",
+   "fate": "T1-lowered",
+   "count": 16,
+   "note": "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
   },
   {
    "key": "cond:is char_moved:T1",
@@ -1087,7 +1093,7 @@
   {
    "key": "cond:is char_sprite:T1",
    "fate": "T1",
-   "count": 331,
+   "count": 248,
    "note": "KV1 effective walking appearance condition"
   },
   {
@@ -1135,7 +1141,7 @@
   {
    "key": "cond:is current_state:T1",
    "fate": "T1",
-   "count": 1129,
+   "count": 797,
    "note": "WorldState arm -> derived worldIdle condition; scene/menu alternatives freeze map fibers"
   },
   {
@@ -1153,7 +1159,7 @@
   {
    "key": "cond:is has_item:T1",
    "fate": "T1",
-   "count": 347,
+   "count": 264,
    "note": "session item count >= n"
   },
   {
@@ -1237,14 +1243,8 @@
   {
    "key": "cond:is tile_property_updated:T1",
    "fate": "T1",
-   "count": 332,
-   "note": "empty source label keeps all([]) truth semantics"
-  },
-  {
-   "key": "cond:is tile_property_updated:T1-lowered",
-   "fate": "T1-lowered",
    "count": 64,
-   "note": "KV1 representative cell under the corpus's atomic whole-label invariant"
+   "note": "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
   },
   {
    "key": "cond:is time_is:T1",
@@ -1255,7 +1255,7 @@
   {
    "key": "cond:is variable_set:T1",
    "fate": "T1",
-   "count": 1694,
+   "count": 1362,
    "note": "page/if variable compare on the enum code"
   },
   {
@@ -1301,15 +1301,15 @@
    "note": "tux.char_healed reads every saved player monster's current/max HP"
   },
   {
-   "key": "cond:not char_in:T2-dropped",
-   "fate": "T2-dropped",
-   "count": 594,
-   "note": "the condition context has no live player cell or terrain-surface label"
+   "key": "cond:not char_in:T1-lowered",
+   "fate": "T1-lowered",
+   "count": 96,
+   "note": "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
   },
   {
    "key": "cond:not char_sprite:T1",
    "fate": "T1",
-   "count": 127,
+   "count": 44,
    "note": "KV1 effective walking appearance condition"
   },
   {
@@ -1441,7 +1441,7 @@
   {
    "key": "trigger:guard:T1",
    "fate": "T1",
-   "count": 2498,
+   "count": 2399,
    "note": "parallel"
   },
   {
@@ -1465,7 +1465,7 @@
   {
    "key": "trigger:never-true guard:T4-dropped",
    "fate": "T4-dropped",
-   "count": 1408,
+   "count": 814,
    "note": "fixed-false guard (is current_state: combat/menu/teleporter states do not run map fibers in the kit) prevents the source event from starting"
   },
   {
@@ -1491,6 +1491,24 @@
    "fate": "T1-lowered",
    "count": 489,
    "note": "partitioned: match flags then bodies"
+  },
+  {
+   "key": "trigger:surf(boundary lowering):T1-lowered",
+   "fate": "T1-lowered",
+   "count": 112,
+   "note": "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
+  },
+  {
+   "key": "trigger:surf(boundary pages):T1-lowered",
+   "fate": "T1-lowered",
+   "count": 16,
+   "note": "348 water entry cells and 58 adjacent dismount cells"
+  },
+  {
+   "key": "trigger:surf(no surface):T4-dropped",
+   "fate": "T4-dropped",
+   "count": 581,
+   "note": "this map has no authored surfable cells"
   },
   {
    "key": "trigger:talk:T1",
@@ -2887,15 +2905,15 @@
    "summary": {
     "types": 98,
     "uses": 13617,
-    "native": 12192,
-    "degraded": 1094,
+    "native": 12193,
+    "degraded": 1100,
     "placeholder": 0,
-    "dropped": 331,
+    "dropped": 324,
     "nativePercent": 89.5,
     "executablePercent": 97.6,
     "tier1": {
-     "uses": 6405,
-     "percent": 47.04,
+     "uses": 6407,
+     "percent": 47.05,
      "requiredUses": 6246,
      "requiredPercent": 45.9,
      "meetsBaseline": true
@@ -3099,18 +3117,16 @@
      "type": "char_move",
      "total": 77,
      "native": 64,
-     "degraded": 9,
+     "degraded": 13,
      "placeholder": 0,
-     "dropped": 4,
+     "dropped": 0,
      "reasons": {
       "degraded": [
-       "moveRoute steps"
+       "moveRoute steps",
+       "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
       ],
       "native": [
        "moveRoute steps"
-      ],
-      "dropped": [
-       "fixed-false guard (is char_facing_tile: surface-labelled facing tiles need a live player-cell terrain predicate) prevents the source event from starting"
       ]
      }
     },
@@ -4061,19 +4077,17 @@
     {
      "type": "set_template",
      "total": 24,
-     "native": 17,
-     "degraded": 6,
+     "native": 16,
+     "degraded": 8,
      "placeholder": 0,
-     "dropped": 1,
+     "dropped": 0,
      "reasons": {
       "native": [
        "KV1 restores the character's saved race/page appearance baseline",
        "KV1 selects a runtime walking appearance"
       ],
-      "dropped": [
-       "fixed-false guard (is char_in: the condition context has no live player cell or terrain-surface label) prevents the source event from starting"
-      ],
       "degraded": [
+       "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow",
        "KV1 saves the race walking baseline; its combat-sheet choice remains battle-owned"
       ]
      }
@@ -4100,7 +4114,8 @@
      "dropped": 8,
      "reasons": {
       "native": [
-       "variable set enum code (text variables: the literal string)"
+       "variable set enum code (text variables: the literal string)",
+       "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
       ],
       "dropped": [
        "fixed-false guard (is button_pressed: source button 'K_RETURN' is not a supported Tuxemon intention) prevents the source event from starting",
@@ -4199,18 +4214,18 @@
     {
      "type": "translated_dialog",
      "total": 2068,
-     "native": 2057,
+     "native": 2058,
      "degraded": 1,
      "placeholder": 0,
-     "dropped": 10,
+     "dropped": 9,
      "reasons": {
       "native": [
-       "text boxes from en_US .po (layout args ignored)"
+       "text boxes from en_US .po (layout args ignored)",
+       "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
       ],
       "dropped": [
        "fixed-false guard (is char_gender: no imported runtime state or predicate) prevents the source event from starting",
        "fixed-false guard (is button_pressed: source button 'K_RETURN' is not a supported Tuxemon intention) prevents the source event from starting",
-       "fixed-false guard (is char_facing_tile: surface-labelled facing tiles need a live player-cell terrain predicate) prevents the source event from starting",
        "fixed-false guard prevents the source event from starting",
        "fixed-false guard (is current_state: combat/menu/teleporter states do not run map fibers in the kit) prevents the source event from starting"
       ],
@@ -4222,17 +4237,17 @@
     {
      "type": "translated_dialog_choice",
      "total": 149,
-     "native": 137,
+     "native": 138,
      "degraded": 10,
      "placeholder": 0,
-     "dropped": 2,
+     "dropped": 1,
      "reasons": {
       "native": [
-       "choices -> enum code"
+       "choices -> enum code",
+       "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
       ],
       "dropped": [
-       "fixed-false guard (is char_gender: no imported runtime state or predicate) prevents the source event from starting",
-       "fixed-false guard (is char_facing_tile: surface-labelled facing tiles need a live player-cell terrain predicate) prevents the source event from starting"
+       "fixed-false guard (is char_gender: no imported runtime state or predicate) prevents the source event from starting"
       ],
       "degraded": [
        "nested choice pages retain every option"
@@ -4351,15 +4366,15 @@
    "summary": {
     "types": 64,
     "uses": 8663,
-    "native": 8349,
-    "degraded": 40,
+    "native": 8364,
+    "degraded": 56,
     "placeholder": 0,
-    "dropped": 274,
-    "nativePercent": 96.4,
-    "executablePercent": 96.8,
+    "dropped": 243,
+    "nativePercent": 96.5,
+    "executablePercent": 97.2,
     "tier1": {
-     "uses": 4747,
-     "percent": 54.8,
+     "uses": 4758,
+     "percent": 54.92,
      "requiredUses": 4591,
      "requiredPercent": 53,
      "meetsBaseline": true
@@ -4411,18 +4426,18 @@
     {
      "type": "is button_pressed",
      "total": 419,
-     "native": 415,
+     "native": 416,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 4,
+     "dropped": 3,
      "reasons": {
       "native": [
-       "consumed by trigger selection"
+       "consumed by trigger selection",
+       "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
       ],
       "dropped": [
        "every action was removed, so no project event was emitted",
-       "fixed-false guard (is button_pressed: source button 'K_RETURN' is not a supported Tuxemon intention) prevents the source event from starting",
-       "fixed-false guard (is char_facing_tile: surface-labelled facing tiles need a live player-cell terrain predicate) prevents the source event from starting"
+       "fixed-false guard (is button_pressed: source button 'K_RETURN' is not a supported Tuxemon intention) prevents the source event from starting"
       ]
      }
     },
@@ -4477,9 +4492,9 @@
      "type": "is char_facing",
      "total": 1008,
      "native": 995,
-     "degraded": 0,
+     "degraded": 4,
      "placeholder": 0,
-     "dropped": 13,
+     "dropped": 9,
      "reasons": {
       "native": [
        "K1 facing page condition"
@@ -4487,8 +4502,10 @@
       "dropped": [
        "fixed-false guard (is char_facing: source direction 'bottom' is not up/down/left/right and can never equal Tuxemon's Direction) prevents the source event from starting",
        "fixed-false guard (is char_facing: source direction 'top' is not up/down/left/right and can never equal Tuxemon's Direction) prevents the source event from starting",
-       "Tuxemon's integer tile boundary never contains a point for a zero-size TMX event",
-       "fixed-false guard (is char_facing_tile: surface-labelled facing tiles need a live player-cell terrain predicate) prevents the source event from starting"
+       "Tuxemon's integer tile boundary never contains a point for a zero-size TMX event"
+      ],
+      "degraded": [
+       "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
       ]
      }
     },
@@ -4496,16 +4513,18 @@
      "type": "is char_facing_tile",
      "total": 344,
      "native": 337,
-     "degraded": 0,
+     "degraded": 5,
      "placeholder": 0,
-     "dropped": 7,
+     "dropped": 2,
      "reasons": {
       "native": [
        "consumed by trigger selection"
       ],
       "dropped": [
-       "every action was removed, so no project event was emitted",
-       "fixed-false guard (is char_facing_tile: surface-labelled facing tiles need a live player-cell terrain predicate) prevents the source event from starting"
+       "every action was removed, so no project event was emitted"
+      ],
+      "degraded": [
+       "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
       ]
      }
     },
@@ -4539,12 +4558,12 @@
      "type": "is char_in",
      "total": 1,
      "native": 0,
-     "degraded": 0,
+     "degraded": 1,
      "placeholder": 0,
-     "dropped": 1,
+     "dropped": 0,
      "reasons": {
-      "dropped": [
-       "fixed-false guard (is char_in: the condition context has no live player cell or terrain-surface label) prevents the source event from starting"
+      "degraded": [
+       "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
       ]
      }
     },
@@ -4570,7 +4589,8 @@
      "dropped": 0,
      "reasons": {
       "native": [
-       "KV1 effective walking appearance condition"
+       "KV1 effective walking appearance condition",
+       "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
       ]
      }
     },
@@ -4661,17 +4681,17 @@
     {
      "type": "is current_state",
      "total": 78,
-     "native": 66,
+     "native": 70,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 12,
+     "dropped": 8,
      "reasons": {
       "native": [
-       "WorldState arm -> derived worldIdle condition; scene/menu alternatives freeze map fibers"
+       "WorldState arm -> derived worldIdle condition; scene/menu alternatives freeze map fibers",
+       "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
       ],
       "dropped": [
        "source event is not materialized by any map",
-       "fixed-false guard (is char_facing_tile: surface-labelled facing tiles need a live player-cell terrain predicate) prevents the source event from starting",
        "fixed-false guard (is current_state: combat/menu/teleporter states do not run map fibers in the kit) prevents the source event from starting"
       ]
      }
@@ -4692,16 +4712,14 @@
     {
      "type": "is has_item",
      "total": 53,
-     "native": 52,
+     "native": 53,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 1,
+     "dropped": 0,
      "reasons": {
       "native": [
-       "session item count >= n"
-      ],
-      "dropped": [
-       "fixed-false guard (is char_facing_tile: surface-labelled facing tiles need a live player-cell terrain predicate) prevents the source event from starting"
+       "session item count >= n",
+       "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
       ]
      }
     },
@@ -4871,13 +4889,13 @@
     {
      "type": "is tile_property_updated",
      "total": 4,
-     "native": 0,
+     "native": 4,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 4,
+     "dropped": 0,
      "reasons": {
-      "dropped": [
-       "fixed-false guard (is char_facing_tile: surface-labelled facing tiles need a live player-cell terrain predicate) prevents the source event from starting"
+      "native": [
+       "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
       ]
      }
     },
@@ -4897,17 +4915,17 @@
     {
      "type": "is variable_set",
      "total": 730,
-     "native": 720,
+     "native": 724,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 10,
+     "dropped": 6,
      "reasons": {
       "native": [
-       "page/if variable compare on the enum code"
+       "page/if variable compare on the enum code",
+       "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
       ],
       "dropped": [
        "source event is not materialized by any map",
-       "fixed-false guard (is char_facing_tile: surface-labelled facing tiles need a live player-cell terrain predicate) prevents the source event from starting",
        "fixed-false guard prevents the source event from starting"
       ]
      }
@@ -5013,29 +5031,26 @@
      "type": "not char_in",
      "total": 6,
      "native": 0,
-     "degraded": 0,
+     "degraded": 6,
      "placeholder": 0,
-     "dropped": 6,
+     "dropped": 0,
      "reasons": {
-      "dropped": [
-       "fixed-false guard (is char_facing_tile: surface-labelled facing tiles need a live player-cell terrain predicate) prevents the source event from starting",
-       "the condition context has no live player cell or terrain-surface label"
+      "degraded": [
+       "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
       ]
      }
     },
     {
      "type": "not char_sprite",
      "total": 29,
-     "native": 28,
+     "native": 29,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 1,
+     "dropped": 0,
      "reasons": {
       "native": [
-       "KV1 effective walking appearance condition"
-      ],
-      "dropped": [
-       "fixed-false guard (is char_in: the condition context has no live player cell or terrain-surface label) prevents the source event from starting"
+       "KV1 effective walking appearance condition",
+       "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
       ]
      }
     },

@@ -2,7 +2,7 @@
 
 CI is a single workflow, `.github/workflows/ci.yml`. Five jobs run in
 parallel from the shared prepare action — `import`, `test` (four matrix
-legs), `journey` (nine matrix legs), `web` and `psp`, sixteen runners in all —
+legs), `journey` (ten matrix legs), `web` and `psp`, seventeen runners in all —
 and `deploy` publishes Pages once all but `psp` pass. The slowest journey leg
 (`verify:chapters`, which re-bakes and suffix-replays every chapter) sets
 the wall-clock. It runs on pushes to `main`, on pull requests, and on
@@ -48,7 +48,7 @@ bunch the slow battle and replay suites together:
 | `importer` | `tests/importer.test.ts` |
 | `replays` | `tests/g7-repository.test.ts`, `tests/g6-golden.test.ts` |
 | `locks, battle data and terrain` | `tests/g6-locks.test.ts`, `tests/battle-db-adapter.test.ts`, `tests/battle-golden.test.ts`, `tests/terrain.test.ts` |
-| `rest` | every other `tests/*.test.ts` (66 files), selected by an exclusion grep over the seven files above |
+| `rest` | every other `tests/*.test.ts` (85 files), selected by an exclusion grep over the seven files above |
 
 New test files land in `rest` automatically — no workflow edit is needed.
 If a new file is slow enough to deserve an explicit group, add it to that
@@ -57,7 +57,7 @@ it runs twice.
 
 ### journey — the maintained tapes
 
-Nine parallel legs, one `bun run verify:*` script each:
+Ten parallel legs, one `bun run verify:*` script each:
 
 | Leg | Script | What it proves |
 |---|---|---|
@@ -65,15 +65,16 @@ Nine parallel legs, one `bun run verify:*` script each:
 | Captain-return journey from frame zero at 60 Hz | `verify:j1:mainline` | the J1 continuation, concatenated with the GB6 tape and replayed from frame zero, ends at the Captain's return. |
 | Hospital-cure journey from frame zero at 60 Hz | `verify:j2:mainline` | the J2 continuation, concatenated with GB6 and J1 and replayed from frame zero (172,873 frames), ends with the hospital cure. |
 | Radio-broadcast journey from frame zero at 60 Hz | `verify:j3:mainline` | the J3 continuation, concatenated with GB6, J1 and J2 and replayed from frame zero (185,802 frames), ends after 13 new trainer wins and the Omnichannel Radio Tower broadcast. |
+| Kernel-quest journey from J3 save and frame zero | `verify:j4:mainline` | the J4 continuation replays twice from its J3 production-save boundary, then all five segments replay from frame zero (199,189 frames) through 14 new wins, the seven correct terminal answers, Kernel and Billie's epilogue. |
 | Battle defeat and recovery journeys | `verify:gb6:failures` | both committed defeat tapes replay with their visible recovery order. |
 | Every imported input lock is executed to its unlock | `verify:g6:locks` | every `lockInput` page releases its lock. |
 | No permanent input lock or blocking fiber on any imported map | `verify:g6:frozen` | a corpus-wide stuck/lock scan over all 263 maps; an interpreter-liveness result, not a proof that a wanderer can never spatially block the player. |
-| Chapter snapshots and thumbnails | `verify:chapters` | the fifteen demo chapters re-bake byte-identical: save envelopes pass the kit's save validator, the 480×272 thumbnails match the committed PNGs, and every envelope restored and resumed at its timeline frame suffix-replays to the full-tape terminal state. |
+| Chapter snapshots and thumbnails | `verify:chapters` | the twenty demo chapters re-bake byte-identical: save envelopes pass the kit's save validator, the 480×272 thumbnails match the committed PNGs, and every envelope restored and resumed at its timeline frame suffix-replays to the full-tape terminal state. |
 | Save mid-journey, load, finish the tape | `verify:save` | five saves along GB6 (one run crossing noon) each restore to the live state and finish the tape at the uninterrupted terminal state hash. |
 
 The full 60/30/20 Hz alignment, save/load and rewind checks stay in
-`bun run verify:gb6:full`, `bun run verify:j1:full`, `bun run verify:j2:full`
-and `bun run verify:j3:full`
+`bun run verify:gb6:full`, `bun run verify:j1:full`, `bun run verify:j2:full`,
+`bun run verify:j3:full` and `bun run verify:j4:full`
 as release gates; they are too slow for every push. See [verification.md](verification.md).
 
 ### web — the site and a real browser
@@ -83,7 +84,7 @@ as release gates; they are too slow for every push. See [verification.md](verifi
 the first battle to Route 1) in headless Chrome against the built site,
 comparing checkpoint states and framebuffer hashes against the committed
 goldens; `bun tools/verify-web-demo.ts` then exercises chapter selection,
-deep links and autoplay through the Radio Tower endpoint. Any console error
+deep links and autoplay through the complete Kernel endpoint. Any console error
 fails the run. The site is uploaded as the
 `web-site` artifact (14-day retention), and the journey screenshots as
 `web-journey`. On pushes to `main` the site is also staged as the Pages
@@ -155,6 +156,7 @@ bun run verify:gb6:mainline
 bun run verify:j1:mainline
 bun run verify:j2:mainline
 bun run verify:j3:mainline
+bun run verify:j4:mainline
 bun run verify:gb6:failures
 bun run verify:g6:locks
 bun run verify:g6:frozen

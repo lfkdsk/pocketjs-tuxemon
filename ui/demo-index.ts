@@ -10,7 +10,7 @@ export const DEMO_CHAPTER_INDEX = [
     "title": "Bedroom (new game)",
     "worldTraversal": "seamless-v1",
     "frame": 0,
-    "suffixFrames": 185802,
+    "suffixFrames": 199189,
     "timelineFrame": 0
   },
   {
@@ -18,7 +18,7 @@ export const DEMO_CHAPTER_INDEX = [
     "title": "Paper Town",
     "worldTraversal": "seamless-v1",
     "frame": 1399,
-    "suffixFrames": 184403,
+    "suffixFrames": 197790,
     "timelineFrame": 1399
   },
   {
@@ -26,7 +26,7 @@ export const DEMO_CHAPTER_INDEX = [
     "title": "Before the first Billie battle",
     "worldTraversal": "seamless-v1",
     "frame": 1924,
-    "suffixFrames": 183878,
+    "suffixFrames": 197265,
     "timelineFrame": 1924
   },
   {
@@ -34,7 +34,7 @@ export const DEMO_CHAPTER_INDEX = [
     "title": "Starter chosen",
     "worldTraversal": "seamless-v1",
     "frame": 3692,
-    "suffixFrames": 182110,
+    "suffixFrames": 195497,
     "timelineFrame": 3692
   },
   {
@@ -42,7 +42,7 @@ export const DEMO_CHAPTER_INDEX = [
     "title": "Route 1",
     "worldTraversal": "seamless-v1",
     "frame": 3980,
-    "suffixFrames": 181822,
+    "suffixFrames": 195209,
     "timelineFrame": 3980
   },
   {
@@ -50,7 +50,7 @@ export const DEMO_CHAPTER_INDEX = [
     "title": "Cotton Town",
     "worldTraversal": "seamless-v1",
     "frame": 5392,
-    "suffixFrames": 180410,
+    "suffixFrames": 193797,
     "timelineFrame": 5392
   },
   {
@@ -58,7 +58,7 @@ export const DEMO_CHAPTER_INDEX = [
     "title": "City Park",
     "worldTraversal": "seamless-v1",
     "frame": 45301,
-    "suffixFrames": 140501,
+    "suffixFrames": 153888,
     "timelineFrame": 45301
   },
   {
@@ -66,7 +66,7 @@ export const DEMO_CHAPTER_INDEX = [
     "title": "Route 3 north end",
     "worldTraversal": "seamless-v1",
     "frame": 110866,
-    "suffixFrames": 74936,
+    "suffixFrames": 88323,
     "timelineFrame": 110866
   },
   {
@@ -74,7 +74,7 @@ export const DEMO_CHAPTER_INDEX = [
     "title": "Flower City",
     "worldTraversal": "seamless-v1",
     "frame": 115624,
-    "suffixFrames": 70178,
+    "suffixFrames": 83565,
     "timelineFrame": 115624
   },
   {
@@ -82,7 +82,7 @@ export const DEMO_CHAPTER_INDEX = [
     "title": "Captain's return",
     "worldTraversal": "seamless-v1",
     "frame": 122386,
-    "suffixFrames": 63416,
+    "suffixFrames": 76803,
     "timelineFrame": 122386
   },
   {
@@ -90,7 +90,7 @@ export const DEMO_CHAPTER_INDEX = [
     "title": "Candy Town",
     "worldTraversal": "seamless-v1",
     "frame": 165037,
-    "suffixFrames": 20765,
+    "suffixFrames": 34152,
     "timelineFrame": 165037
   },
   {
@@ -98,7 +98,7 @@ export const DEMO_CHAPTER_INDEX = [
     "title": "Greenwash (Aardant acquired)",
     "worldTraversal": "seamless-v1",
     "frame": 171423,
-    "suffixFrames": 14379,
+    "suffixFrames": 27766,
     "timelineFrame": 171423
   },
   {
@@ -106,7 +106,7 @@ export const DEMO_CHAPTER_INDEX = [
     "title": "Hospital cure",
     "worldTraversal": "seamless-v1",
     "frame": 172862,
-    "suffixFrames": 12940,
+    "suffixFrames": 26327,
     "timelineFrame": 172862
   },
   {
@@ -114,7 +114,7 @@ export const DEMO_CHAPTER_INDEX = [
     "title": "Omnichannel passage opened",
     "worldTraversal": "seamless-v1",
     "frame": 180619,
-    "suffixFrames": 5183,
+    "suffixFrames": 18570,
     "timelineFrame": 180619
   },
   {
@@ -122,8 +122,48 @@ export const DEMO_CHAPTER_INDEX = [
     "title": "Radio Tower broadcast",
     "worldTraversal": "seamless-v1",
     "frame": 185779,
-    "suffixFrames": 23,
+    "suffixFrames": 13410,
     "timelineFrame": 185779
+  },
+  {
+    "id": "kernel-briefing",
+    "title": "Kernel quest briefing",
+    "worldTraversal": "seamless-v1",
+    "frame": 187650,
+    "suffixFrames": 11539,
+    "timelineFrame": 187650
+  },
+  {
+    "id": "surfboard",
+    "title": "Surfboard acquired",
+    "worldTraversal": "seamless-v1",
+    "frame": 189031,
+    "suffixFrames": 10158,
+    "timelineFrame": 189031
+  },
+  {
+    "id": "route-b",
+    "title": "Route B",
+    "worldTraversal": "seamless-v1",
+    "frame": 191210,
+    "suffixFrames": 7979,
+    "timelineFrame": 191210
+  },
+  {
+    "id": "data-center",
+    "title": "Data Center",
+    "worldTraversal": "seamless-v1",
+    "frame": 194722,
+    "suffixFrames": 4467,
+    "timelineFrame": 194722
+  },
+  {
+    "id": "kernel-defeated",
+    "title": "Kernel quest complete",
+    "worldTraversal": "seamless-v1",
+    "frame": 199178,
+    "suffixFrames": 11,
+    "timelineFrame": 199178
   }
 ] as const;
 

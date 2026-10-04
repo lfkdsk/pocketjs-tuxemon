@@ -13,6 +13,8 @@ test("every G6 lockInput page dynamically releases or transfers", () => {
   // dropped by the time_is date const-false fold), adding one lockInput page.
   // COV-B materializes the spyder_candy_town plague-confiscation event (its
   // is party_infected ...,all guard used to fold false), adding one more.
+  // Surf's independently coalesced shoreline pages no longer split eight
+  // existing locked source areas; every remaining lock still releases.
   expect(report.lockCommands).toBe(336);
   expect(report.dynamicChecks).toBe(336);
   expect(report.pages).toBe(331);

@@ -65,6 +65,7 @@ const laterLoss = readTape("data/gb6-later-loss-journey.json");
 const j1 = readTape("data/j1-captainreturns-journey.json");
 const j2 = readTape("data/j2-hospitalcure-journey.json");
 const j3 = readTape("data/j3-omnichannelradioannounce-journey.json");
+const j4 = readTape("data/j4-kernelquestdone-journey.json");
 
 function endpoint(document: TapeDocument): { map: string; position: [number, number] } {
   const value = document.end ?? (document.map && document.position
@@ -105,6 +106,13 @@ const cases = [
     "data/j2-hospitalcure-journey.json",
     "data/j3-omnichannelradioannounce-journey.json",
   ], [gb6, j1, j2, j3]),
+  tapeCase("J4", [
+    "data/gb6-mainline-journey.json",
+    "data/j1-captainreturns-journey.json",
+    "data/j2-hospitalcure-journey.json",
+    "data/j3-omnichannelradioannounce-journey.json",
+    "data/j4-kernelquestdone-journey.json",
+  ], [gb6, j1, j2, j3, j4]),
 ] as const;
 
 function input(mask: number, previous: number): SessionInput {

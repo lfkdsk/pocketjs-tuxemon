@@ -1,6 +1,6 @@
 // Bake chapter snapshots and thumbnails for the web demo menu.
 //
-// One reducer replay of the combined GB6+J1+J2+J3 mainline tape picks named
+// One reducer replay of the combined GB6+J1+J2+J3+J4 mainline tape picks named
 // checkpoints at safe points (canSave, no input lock, no fade). Each
 // checkpoint becomes a kit save envelope (validated through the same
 // decode/restore gate the game uses) plus the frame where its tape suffix
@@ -14,7 +14,8 @@
 //
 // The demo menu concatenates data/gb6-mainline-journey.json,
 // data/j1-captainreturns-journey.json, data/j2-hospitalcure-journey.json and
-// data/j3-omnichannelradioannounce-journey.json masks and slices at `frame`:
+// data/j3-omnichannelradioannounce-journey.json and
+// data/j4-kernelquestdone-journey.json masks and slices at `frame`:
 // restore the envelope, set the global reducer
 // frame to `timelineFrame` (the envelope carries only the per-map
 // interpreter clock, not the global frame), then replay the suffix.
@@ -56,6 +57,7 @@ import { journeyWorldTraversal, type Gb6JourneyResult } from "./gb6-journey.ts";
 import type { J1JourneyResult } from "./j1-journey.ts";
 import type { J2JourneyResult } from "./j2-journey.ts";
 import type { J3JourneyResult } from "./j3-journey.ts";
+import type { J4JourneyResult } from "./j4-journey.ts";
 import { readInlineProject } from "./generated-project.ts";
 
 export const ROOT = resolve(import.meta.dir, "..");
@@ -64,6 +66,7 @@ const GB6_PATH = join(ROOT, "data/gb6-mainline-journey.json");
 const J1_PATH = join(ROOT, "data/j1-captainreturns-journey.json");
 const J2_PATH = join(ROOT, "data/j2-hospitalcure-journey.json");
 const J3_PATH = join(ROOT, "data/j3-omnichannelradioannounce-journey.json");
+const J4_PATH = join(ROOT, "data/j4-kernelquestdone-journey.json");
 export const CHAPTERS_PATH = join(ROOT, "data/chapters.json");
 export const THUMB_DIR = join(ROOT, "docs/screenshots/chapters");
 export const THUMB_REL = "docs/screenshots/chapters";
@@ -80,7 +83,7 @@ export interface ChapterRecord {
   map: string;
   position: [number, number];
   /** First mask of the tape suffix: the offset into the concatenated
-   *  GB6+J1+J2+J3 mask array the demo menu replays after restoring. */
+   *  GB6+J1+J2+J3+J4 mask array the demo menu replays after restoring. */
   frame: number;
   /** Global reducer frame at the checkpoint. The envelope carries only
    *  the per-map interpreter clock (interp.frame), so the chapter resume
@@ -106,6 +109,7 @@ export interface ChaptersFile {
     j1: { file: string; frames: number; tapeSha256: string; worldTraversal: WorldTraversalMode };
     j2: { file: string; frames: number; tapeSha256: string; worldTraversal: WorldTraversalMode };
     j3: { file: string; frames: number; tapeSha256: string; worldTraversal: WorldTraversalMode };
+    j4: { file: string; frames: number; tapeSha256: string; worldTraversal: WorldTraversalMode };
     frames: number;
     sha256: string;
   };
@@ -149,11 +153,11 @@ function sha256(value: string): string {
  * with the manifest: mixing timelines would make the concatenated masks
  * meaningless. */
 export function chapterWorldTraversal(
-  file: { worldTraversal?: unknown; tape?: Partial<Record<"gb6" | "j1" | "j2" | "j3", { worldTraversal?: unknown }>> },
+  file: { worldTraversal?: unknown; tape?: Partial<Record<"gb6" | "j1" | "j2" | "j3" | "j4", { worldTraversal?: unknown }>> },
   label = "chapters file",
 ): WorldTraversalMode {
   const worldTraversal = journeyWorldTraversal(file, label);
-  for (const segment of ["gb6", "j1", "j2", "j3"] as const) {
+  for (const segment of ["gb6", "j1", "j2", "j3", "j4"] as const) {
     const metadata = file.tape?.[segment];
     expect(`${label}: missing ${segment} tape metadata`, metadata !== undefined);
     const segmentTraversal = journeyWorldTraversal(metadata!, `${label} ${segment} segment`);
@@ -194,6 +198,7 @@ function loadTape(): {
   j1: J1JourneyResult;
   j2: J2JourneyResult;
   j3: J3JourneyResult;
+  j4: J4JourneyResult;
   combined: number[];
   worldTraversal: WorldTraversalMode;
 } {
@@ -201,6 +206,7 @@ function loadTape(): {
   const j1 = JSON.parse(readFileSync(J1_PATH, "utf8")) as J1JourneyResult;
   const j2 = JSON.parse(readFileSync(J2_PATH, "utf8")) as J2JourneyResult;
   const j3 = JSON.parse(readFileSync(J3_PATH, "utf8")) as J3JourneyResult;
+  const j4 = JSON.parse(readFileSync(J4_PATH, "utf8")) as J4JourneyResult;
   expect("wrong GB6 format", gb6.format === "pocket-tuxemon/gb6-mainline/v1");
   expect("GB6 is not 60 Hz", gb6.hz === 60);
   expect("GB6 frame count differs from masks", gb6.frames === gb6.masks.length);
@@ -222,21 +228,32 @@ function loadTape(): {
   expect("J3 tape hash changed", sha256(JSON.stringify(j3.masks)) === j3.tapeSha256);
   expect("J3 base does not continue the J2 combined tape",
     j3.base.frames === j2.combinedFrames && j3.base.tapeSha256 === j2.combinedTapeSha256);
+  expect("wrong J4 format", j4.format === "pocket-tuxemon/j4-kernelquestdone/v1");
+  expect("J4 is not 60 Hz", j4.hz === 60);
+  expect("J4 frame count differs from masks", j4.frames === j4.masks.length);
+  expect("J4 tape hash changed", sha256(JSON.stringify(j4.masks)) === j4.tapeSha256);
+  expect("J4 base does not continue the J3 combined tape",
+    j4.base.frames === j3.combinedFrames && j4.base.tapeSha256 === j3.combinedTapeSha256);
   const j2Combined = [...gb6.masks, ...j1.masks, ...j2.masks];
-  const combined = [...j2Combined, ...j3.masks];
+  const j3Combined = [...j2Combined, ...j3.masks];
+  const combined = [...j3Combined, ...j4.masks];
   expect("J1 combined frame count changed", j1.combinedFrames === gb6.frames + j1.frames);
   expect("J1 combined tape hash changed", sha256(JSON.stringify([...gb6.masks, ...j1.masks])) === j1.combinedTapeSha256);
   expect("J2 combined frame count changed", j2.combinedFrames === j2Combined.length);
   expect("J2 combined tape hash changed", sha256(JSON.stringify(j2Combined)) === j2.combinedTapeSha256);
-  expect("J3 combined frame count changed", j3.combinedFrames === combined.length);
-  expect("J3 combined tape hash changed", sha256(JSON.stringify(combined)) === j3.combinedTapeSha256);
+  expect("J3 combined frame count changed", j3.combinedFrames === j3Combined.length);
+  expect("J3 combined tape hash changed", sha256(JSON.stringify(j3Combined)) === j3.combinedTapeSha256);
+  expect("J4 combined frame count changed", j4.combinedFrames === combined.length);
+  expect("J4 combined tape hash changed", sha256(JSON.stringify(combined)) === j4.combinedTapeSha256);
   const worldTraversal = journeyWorldTraversal(gb6, "GB6 journey");
   const j1Traversal = journeyWorldTraversal(j1, "J1 journey");
   const j2Traversal = journeyWorldTraversal(j2, "J2 journey");
   const j3Traversal = journeyWorldTraversal(j3, "J3 journey");
+  const j4Traversal = journeyWorldTraversal(j4, "J4 journey");
   const j1BaseTraversal = journeyWorldTraversal(j1.base, "J1 base");
   const j2BaseTraversal = journeyWorldTraversal(j2.base, "J2 base");
   const j3BaseTraversal = journeyWorldTraversal(j3.base, "J3 base");
+  const j4BaseTraversal = journeyWorldTraversal(j4.base, "J4 base");
   expect(`J1 traversal ${j1Traversal} != GB6 traversal ${worldTraversal}`,
     j1Traversal === worldTraversal);
   expect(`J1 base traversal ${j1BaseTraversal} != GB6 traversal ${worldTraversal}`,
@@ -249,7 +266,11 @@ function loadTape(): {
     j3Traversal === j2Traversal);
   expect(`J3 base traversal ${j3BaseTraversal} != J2 traversal ${j2Traversal}`,
     j3BaseTraversal === j2Traversal);
-  return { gb6, j1, j2, j3, combined, worldTraversal };
+  expect(`J4 traversal ${j4Traversal} != J3 traversal ${j3Traversal}`,
+    j4Traversal === j3Traversal);
+  expect(`J4 base traversal ${j4BaseTraversal} != J3 traversal ${j3Traversal}`,
+    j4BaseTraversal === j3Traversal);
+  return { gb6, j1, j2, j3, j4, combined, worldTraversal };
 }
 
 function defineCheckpoints(gb6: Gb6JourneyResult): Checkpoint[] {
@@ -369,6 +390,48 @@ function defineCheckpoints(gb6: Gb6JourneyResult): Checkpoint[] {
         state.mapId === "spyder_radiotower"
         && (state.sw.variables["v.omnichannelradioannounce"] ?? 0) !== 0 && safe(state),
     },
+    // --- J4 continuation: the Kernel quest ---------------------------
+    {
+      id: "kernel-briefing",
+      title: "Kernel quest briefing",
+      mode: "first",
+      select: (_frame, state) =>
+        state.mapId === "spyder_cotton_town"
+        && (state.sw.variables["v.kernelquestbegin"] ?? 0) !== 0 && safe(state),
+    },
+    {
+      id: "surfboard",
+      title: "Surfboard acquired",
+      mode: "first",
+      select: (_frame, state) =>
+        state.mapId === "spyder_candy_town"
+        && (state.sw.variables["v.timbermom"] ?? 0) !== 0
+        && (state.sw.items.surfboard ?? 0) >= 1 && safe(state),
+    },
+    {
+      id: "route-b",
+      title: "Route B",
+      mode: "first",
+      select: (_frame, state) => state.mapId === "spyder_routeb" && safe(state),
+    },
+    {
+      id: "data-center",
+      title: "Data Center",
+      mode: "first",
+      select: (_frame, state) =>
+        state.mapId === "spyder_datacenter"
+        && (state.sw.variables["v.routebbillie"] ?? 0) !== 0
+        && (state.sw.variables["v.datascreen1"] ?? 0) === 0 && safe(state),
+    },
+    {
+      id: "kernel-defeated",
+      title: "Kernel quest complete",
+      mode: "first",
+      select: (_frame, state) =>
+        state.mapId === "spyder_datacenter"
+        && (state.sw.variables["v.kernelquest"] ?? 0) === 1
+        && (state.sw.variables["v.datacenterbillie"] ?? 0) !== 0 && safe(state),
+    },
   ];
 }
 
@@ -456,6 +519,7 @@ function buildChaptersFile(
   j1: J1JourneyResult,
   j2: J2JourneyResult,
   j3: J3JourneyResult,
+  j4: J4JourneyResult,
   combined: readonly number[],
   captures: Map<string, Capture>,
   worldTraversal: WorldTraversalMode,
@@ -500,6 +564,7 @@ function buildChaptersFile(
       j1: { file: "data/j1-captainreturns-journey.json", frames: j1.frames, tapeSha256: j1.tapeSha256, worldTraversal },
       j2: { file: "data/j2-hospitalcure-journey.json", frames: j2.frames, tapeSha256: j2.tapeSha256, worldTraversal },
       j3: { file: "data/j3-omnichannelradioannounce-journey.json", frames: j3.frames, tapeSha256: j3.tapeSha256, worldTraversal },
+      j4: { file: "data/j4-kernelquestdone-journey.json", frames: j4.frames, tapeSha256: j4.tapeSha256, worldTraversal },
       frames: combined.length,
       sha256: sha256(JSON.stringify(combined)),
     },
@@ -564,7 +629,7 @@ export async function bakeChapters(
   const project = readInlineProject(root);
   expect(`new chapter bake requires ${NEW_CHAPTER_WORLD_TRAVERSAL} project traversal`,
     project.worldTraversal === NEW_CHAPTER_WORLD_TRAVERSAL && project.worldLayout !== undefined);
-  const { gb6, j1, j2, j3, combined, worldTraversal } = loadTape();
+  const { gb6, j1, j2, j3, j4, combined, worldTraversal } = loadTape();
   expect(`new chapter bake requires ${NEW_CHAPTER_WORLD_TRAVERSAL} journey traversal, got ${worldTraversal}`,
     worldTraversal === NEW_CHAPTER_WORLD_TRAVERSAL);
   const checkpoints = defineCheckpoints(gb6);
@@ -576,7 +641,7 @@ export async function bakeChapters(
 
   const session = createSession(project, 60, createTuxemonSessionOptions(project, worldTraversal));
   const captures = replayReducer(session, project, combined, checkpoints);
-  const chapters = buildChaptersFile(project, gb6, j1, j2, j3, combined, captures, worldTraversal);
+  const chapters = buildChaptersFile(project, gb6, j1, j2, j3, j4, combined, captures, worldTraversal);
   const thumbnails = options.renderThumbnails === false
     ? new Map<string, Uint8Array>()
     : await renderThumbnails(combined, captures);
@@ -637,9 +702,9 @@ export function verifyChapterSuffixes(root: string = ROOT): ChapterSuffixResult[
     previous = mask;
   }
   const terminalHash = sha256(canonicalJson(terminal));
-  const j3 = JSON.parse(readFileSync(J3_PATH, "utf8")) as { terminalStateSha256?: string };
-  expect("full-replay terminal hash != the J3 journey pin",
-    typeof j3.terminalStateSha256 === "string" && terminalHash === j3.terminalStateSha256);
+  const j4 = JSON.parse(readFileSync(J4_PATH, "utf8")) as { terminalStateSha256?: string };
+  expect("full-replay terminal hash != the J4 journey pin",
+    typeof j4.terminalStateSha256 === "string" && terminalHash === j4.terminalStateSha256);
 
   const results: ChapterSuffixResult[] = [];
   for (const chapter of file.chapters) {

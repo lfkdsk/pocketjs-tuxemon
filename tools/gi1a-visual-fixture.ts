@@ -139,8 +139,11 @@ function appearanceCommand(project: RawProject): RawCommand {
 }
 
 function mapAnimationCommand(project: RawProject): RawCommand {
-  const event = eventOf(mapOf(project, "spyder_route1"), "e007_encounters_r027");
-  const command = commandOf(event, "mapAnim");
+  const map = mapOf(project, "spyder_route1");
+  const command = map.events?.flatMap((event) => event.pages)
+    .flatMap((page) => page.commands)
+    .find((candidate) => candidate.op === "mapAnim");
+  if (!command) throw new Error(`GI1a visuals: ${map.id} has no mapAnim command`);
   if (
     command.anim !== "tux_grass_100000us" || command.target !== "player" ||
     command.follow !== false || command.layer !== "above" || command.loop !== false

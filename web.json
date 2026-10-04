@@ -4,7 +4,7 @@
   "games": {
     "pocket-tuxemon": {
       "title": "Pocket Tuxemon",
-      "description": "Play the Spyder campaign from the new-game bedroom through the Omnichannel Radio Tower broadcast — 263 imported maps with NPCs, dialogue, shops and real battles. Use the chapter buttons to jump into any story beat, or warp to any map.",
+      "description": "Play the complete Spyder campaign from the new-game bedroom through the Omnichannel Radio Tower broadcast and the Kernel showdown — 263 imported maps with NPCs, dialogue, shops and real battles. Use the chapter buttons to jump into any story beat, or warp to any map.",
       "controls": [
         {
           "button": "DPAD",
@@ -133,6 +133,41 @@
           "title": "Radio Tower broadcast",
           "description": "Defeat Beaverbrook and make the Omnichannel broadcast.",
           "preview": "docs/screenshots/chapters/radio-broadcast-480x272.png",
+          "autoplay": true
+        },
+        {
+          "id": "kernel-briefing",
+          "title": "Kernel quest",
+          "description": "Hear the network-outage briefing in Cotton Town.",
+          "preview": "docs/screenshots/chapters/kernel-briefing-480x272.png",
+          "autoplay": true
+        },
+        {
+          "id": "surfboard",
+          "title": "Surfboard acquired",
+          "description": "Collect the Surfboard in Candy Town and head for Route E.",
+          "preview": "docs/screenshots/chapters/surfboard-480x272.png",
+          "autoplay": true
+        },
+        {
+          "id": "route-b",
+          "title": "Route B",
+          "description": "Cross Route B toward the GoodChat Data Center.",
+          "preview": "docs/screenshots/chapters/route-b-480x272.png",
+          "autoplay": true
+        },
+        {
+          "id": "data-center",
+          "title": "Data Center",
+          "description": "Answer all seven terminal questions and fight the Data Center trainers.",
+          "preview": "docs/screenshots/chapters/data-center-480x272.png",
+          "autoplay": true
+        },
+        {
+          "id": "kernel-defeated",
+          "title": "Kernel quest complete",
+          "description": "The complete mainline after defeating Kernel and finishing Billie's epilogue.",
+          "preview": "docs/screenshots/chapters/kernel-defeated-480x272.png",
           "autoplay": true
         }
       ]
