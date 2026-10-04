@@ -53,6 +53,7 @@ test("Tuxemon dialog boxes hold movement and consume action input", () => {
     messageBlocksPlayer: true,
     // ${{var:name}} dialogue prints stored text variables through {v:id}.
     textVariables: true,
+    textTokens: ["today", "map_desc", "monster_0_name", "monster_0_level", "money"],
   });
 
   // The opening parallel question freezes the first attempted step at its

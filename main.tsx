@@ -39,6 +39,9 @@ import {
 } from "./ui/gp1-data-stage.ts";
 import { canSwitchLang, detectLang } from "./ui/language.ts";
 import { setBattleSceneLang } from "./ui/battle-scene-locale.ts";
+import { createTuxemonTextTokens } from "./battle/text-tokens.ts";
+import enMapDescriptions from "./dist/map-descriptions.json";
+import enMonthNames from "./data/month-names.json";
 import { createAnimatedProvider } from "./ui/animated-repository.ts";
 import { createSaveMenu } from "./ui/save-menu.tsx";
 import { createLangMenu } from "./ui/lang-menu.tsx";
@@ -85,6 +88,16 @@ import { createGameEffects } from "./ui/weather-effects.tsx";
 const lang = zhData.project ? detectLang() : "en_US";
 setBattleSceneLang(lang);
 const project = (lang === "zh_CN" ? rawProjectZh : rawProject) as unknown as ProjectShell;
+// The {x:} text-token resolver for the boot language. GameView forwards it
+// to both the live session and the attract/demo controller, so a demo, a
+// rewind and a re-fold expand text identically. The zh_CN descriptions come
+// from the zh data bundle (absent in the English-only PSP build).
+const textTokens = createTuxemonTextTokens(lang, {
+  mapDescriptions: (lang === "zh_CN"
+    ? zhData.mapDescriptions
+    : enMapDescriptions) as Record<string, string>,
+  monthNames: (lang === "zh_CN" ? zhData.monthNames : enMonthNames) as string[],
+});
 // splitProjectMaps/splitBattleRuntimeDb/splitAnimatedTiles/splitNpcSrc/
 // splitStreamRefs emit ASCII JSON. Desktop reads map entries through the
 // optional native UTF-8 text channel (KP2) and every other shard through
@@ -263,6 +276,7 @@ mount(() => (
       overlay={overlay}
       effects={Effects}
       theme={TUXEMON_UI_THEME}
+      textTokens={textTokens}
     />
     {weatherOverlayEnabled && (
       <WeatherOverlay

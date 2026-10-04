@@ -131,6 +131,11 @@ export const ZH_BUILTIN_STRINGS: Readonly<Record<string, string>> = {
 export interface TextCatalog {
   readonly lang: ImportLang;
   get(key: string): string | undefined;
+  /** Look up a key WITHOUT recording it in the fallback/missing gap sets.
+   *  For metadata lookups (e.g. map descriptions) that are not dialog text
+   *  and must not pollute the l10n gap report. Returns the en_US fallback
+   *  for a zh build, like get() does. */
+  peek(key: string): string | undefined;
   /** Non-empty keys looked up in a zh build that fell back to en_US. */
   readonly fallbackKeys: Set<string>;
   /** Non-empty keys looked up but absent from every catalog. */
@@ -157,6 +162,13 @@ class Catalog implements TextCatalog {
       }
     }
     this.missingKeys.add(key);
+    return undefined;
+  }
+  peek(key: string): string | undefined {
+    if (key === "") return undefined;
+    const hit = this.resolved.get(key);
+    if (hit !== undefined) return hit;
+    if (this.en) return this.en.get(key);
     return undefined;
   }
 }

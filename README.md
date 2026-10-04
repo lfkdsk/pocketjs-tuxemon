@@ -207,8 +207,9 @@ strings has a Chinese rendering. The complete 2,098-entry upstream review is
 recorded in `l10n/zh_CN/upstream-review.jsonl`; corrections retain their review
 category, reason and the exact English source snapshot. Punctuation is
 normalized to Chinese convention next to CJK text. The Noto Sans CJK subset
-covering exactly the characters the Chinese build uses is baked into the font
-atlases at build time.
+covering exactly the characters the Chinese build uses — catalog text, the
+runtime resolver tables (map descriptions, battle names) and the game-drawn
+strings — is baked into the font atlases at build time.
 
 - **Web:** open the player with `?lang=zh`
   (<https://lfkdsk.github.io/pocketjs-tuxemon/pocket-tuxemon/?lang=zh>), or
@@ -247,21 +248,25 @@ merged text (with reasoned, key-specific exceptions). `bun run check:cjk`
 verifies glyph subset coverage. `bun test tests/ui-text-zh-visual.test.ts`
 boots the production bundle and pins save, keyboard, demo, shop, button-hint,
 event-error and battle-status frames at 480×272 and 960×544, including Chinese
-glyph-mask checks. The game-owned save footer (`o: select`, `x: back`,
-`START: close`) and the English demo chapter-row titles are outside
+glyph-mask checks. The English demo chapter-row titles are outside
 `UiTextTable`; these are the remaining English words in those captures.
 
 Known limitations:
-- Some dynamic text (dates, monster names, and other `${{...}}` templates)
-  renders as `???` — the importer fills a handful of templates (name,
-  currency, map name, directions), prints story variables
-  (`${{var:name}}`) through the kit's `{v:id}` token, and leaves the rest as
-  placeholders. This affects English and Chinese identically: 28 of the 30
-  `???` occurrences are such dynamic-template placeholders, compared per
-  entry (same event, same command position, same count) by
-  `tests/placeholder-parity.test.ts`. The other 2 are upstream's own literal
+- Dynamic dialog templates resolve at runtime. The importer maps Tuxemon's
+  `${{var:X}}` to the kit's `{v:v.X}` variable token and its
+  `${{today}}`, `${{map_desc}}`, `${{monster_0_name}}`, `${{monster_0_level}}`
+  and `${{money_formatted}}` templates to `{x:}` tokens answered by the
+  game's resolver (`battle/text-tokens.ts`): the date comes from the
+  deterministic in-session clock, the map description from the importer's
+  `dist/map-descriptions(.zh_CN).json` table, the lead monster's name and
+  level from the party, and money with Tuxemon's `$`-width-4 format. The
+  project declares `system.textVariables` and the `system.textTokens`
+  allowlist. The only `???` left are upstream's own 2 literal
   anonymous-speaker lines (`???: ...` in cotton_town), which the Chinese
-  build renders with full-width punctuation.
+  build renders with full-width punctuation; `tests/placeholder-parity.test.ts`
+  pins both. Variables with no imported writer (`scoop_price`,
+  `party_lost_hp`, `cathedral_share_full`, `cathedral_interest_full`) render
+  the kit's unset-variable default (`0`).
 - The battle menu is localized: root commands (Fight/Item/Forfeit/…), the
   technique/item/party submenus, monster names, and the battle narration all
   render in Chinese from the generated `data/battle-names.zh_CN.json` table.

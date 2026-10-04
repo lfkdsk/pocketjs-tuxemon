@@ -9,4 +9,8 @@ export interface ZhData {
   project: ProjectShell;
   battleShell: BattleRuntimeShell;
   names: BattleNames;
+  /** Kit map id -> zh_CN map description, for the {x:map_desc} resolver. */
+  mapDescriptions: Record<string, string>;
+  /** The 12 translated month names, for the {x:today} resolver. */
+  monthNames: string[];
 }

@@ -9,5 +9,5 @@ import { zhData } from "../tools/psp-stubs/zh-data.ts";
 test("the PSP zh-data stub is an object whose data fields are null", () => {
   expect(zhData).not.toBeNull();
   expect(typeof zhData).toBe("object");
-  expect(zhData).toEqual({ project: null, battleShell: null, names: null });
+  expect(zhData).toEqual({ project: null, battleShell: null, names: null, mapDescriptions: null, monthNames: null });
 });

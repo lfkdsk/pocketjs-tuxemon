@@ -468,13 +468,21 @@ writeFileSync(join(DIST, "project-shell.zh_CN.json"), zhSplit.shellText);
 assertShellManifestFresh(JSON.parse(readFileSync(join(DIST, "project-shell.zh_CN.json"), "utf8")));
 writeFileSync(join(DIST, "project.zh_CN.json"), jsonBytes(zhProject));
 writeFileSync(join(DIST, "import-report.zh_CN.json"), jsonBytes(zhImported.report));
+// zh_CN slug -> description table for the {x:map_desc} resolver.
+writeFileSync(join(DIST, "map-descriptions.zh_CN.json"), jsonBytes(zhImported.mapDescriptions));
 // The CJK subset baker scans this file for every character the zh build
 // displays (map and battle shards are not imported by the bundle, so the
-// baker's module scan does not see them).
+// baker's module scan does not see them). The {x:map_desc} resolver reads
+// dist/map-descriptions.zh_CN.json and the battle UI / {x:monster_0_name}
+// token read data/battle-names.zh_CN.json; both are bundled into the JS via
+// ui/zh-data.ts, so they are added here explicitly or their glyphs (e.g.
+// 尺, 粮) are missing from the baked font.
 const zhTextParts: string[] = [
   zhSplit.shellText,
   ...zhSplit.entries.map((entry) => new TextDecoder().decode(entry.bytes)),
   readFileSync(join(DIST, "battle-runtime-shell.zh_CN.json"), "utf8"),
+  readFileSync(join(DIST, "map-descriptions.zh_CN.json"), "utf8"),
+  readFileSync(join(ROOT, "data/battle-names.zh_CN.json"), "utf8"),
 ];
 for (const entry of battleZh.battleRepository.pakEntries) {
   zhTextParts.push(readFileSync(join(ROOT, entry.file), "utf8"));
@@ -581,6 +589,8 @@ assertShellManifestFresh(JSON.parse(readFileSync(join(DIST, "project-shell.json"
 writeFileSync(join(DIST, "variable-enums.json"), jsonBytes(imported.variables));
 writeFileSync(join(DIST, "world-index.json"), jsonBytes(imported.worldIndex));
 writeFileSync(join(DIST, "import-report.json"), jsonBytes(imported.report));
+// Slug -> localized map description for the {x:map_desc} text-token resolver.
+writeFileSync(join(DIST, "map-descriptions.json"), jsonBytes(imported.mapDescriptions));
 writeFileSync(join(DIST, "weather.json"), jsonBytes({
   format: "pocket-tuxemon/weather/v1",
   source: imported.report.weather.source,

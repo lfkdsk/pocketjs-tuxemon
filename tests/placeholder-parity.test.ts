@@ -1,8 +1,11 @@
-// Placeholder parity (B3): the importer's format() only fills a handful of
-// templates (name, NAME, currency, map_name, the four directions) and prints
-// text variables (${{var:name}}) through the kit's {v:id} token; every
-// other ${{...}} template becomes "???" in BOTH language builds. That is a
-// known importer limitation, not a zh_CN regression.
+// Placeholder parity: the importer's format() fills every Tuxemon dialog
+// template — name/NAME/currency/map_name/directions, ${{var:X}} as {v:v.X}
+// (the stored Python str() text, see battle/text-variables.ts), and
+// ${{today}}/${{map_desc}}/${{monster_0_*}}/${{money_formatted}} as {x:}
+// tokens answered by the game's resolver (battle/text-tokens.ts). The only
+// "???" left in BOTH language builds are the 2 upstream literal anonymous-
+// speaker markers ("???: ..." in cotton_town), which Chinese punctuation
+// normalization renders as "？？？：...".
 //
 // This test compares the two generated projects per entry:
 //   - per (map, event, page): dialog groups (consecutive text ops) keep the
@@ -12,10 +15,7 @@
 //   - per entry: the full JSON path of every placeholder-bearing string is
 //     identical between the languages (a pagination guard proves no command
 //     index shifted, so the path comparison is exact on the current data);
-//   - the 30 occurrences split into 28 dynamic-template placeholders and
-//     2 upstream literal anonymous-speaker markers ("???: ..." in
-//     cotton_town), which Chinese punctuation normalization renders as
-//     "？？？：...".
+//   - the 2 occurrences are the 2 upstream literal anonymous-speaker markers.
 // It also asserts neither project contains broken template fragments (a half
 // "${{", a bare "}}", a bare "${" — including one at the very end of a
 // string — or a "{{" not preceded by "$").
@@ -61,12 +61,14 @@ function collectStrings(value: Json, out: string[] = []): string[] {
 
 /** A broken template fragment: an unreplaced ${{...}} start, a bare "}}",
  *  a bare "${" (not followed by "{", including one ending the string), or a
- *  "{{" not preceded by "$". */
+ *  "{{" not preceded by "$". A literal currency "$" may sit immediately
+ *  before a kit token ({name}/{v:…}/{x:…}) — e.g. upstream "$${{var:X}}"
+ *  imports as "${v:v.X}" — so that pairing is not a fragment. */
 function findFragment(s: string): string | null {
   if (s.includes("${{")) return "${{";
   if (s.includes("}}")) return "}}";
-  // "$" before a {v:id} variable token is the currency sign.
-  if (/\$\{(?!\{|v:)/.test(s)) return "${";
+  const withoutKitTokens = s.replace(/\$\{(name\}|v:[^{}]*\}|x:[^{}]*\})/g, "");
+  if (/\$\{(?!\{)/.test(withoutKitTokens)) return "${";
   if (/(^|[^$])\{\{/.test(s)) return "{{";
   return null;
 }
@@ -175,7 +177,7 @@ describe("??? placeholder parity between en_US and zh_CN projects", () => {
     expect(countPlaceholders("？？？：你想干什么？")).toBe(1);
   });
 
-  test("the 30 occurrences split into 28 dynamic templates and 2 literal speakers", () => {
+  test("the 2 occurrences are the 2 upstream literal anonymous speakers", () => {
     const strings = collectStrings(en).filter((s) => countPlaceholders(s) > 0);
     const literal = strings.filter(isLiteralSpeaker);
     const dynamic = strings.filter((s) => !isLiteralSpeaker(s));
@@ -183,10 +185,11 @@ describe("??? placeholder parity between en_US and zh_CN projects", () => {
     expect(countPlaceholders(literal)).toBe(2);
     // Both literal markers are the anonymous doorman in cotton_town.
     expect(literal.every((s) => s.startsWith("???:"))).toBe(true);
-    expect(dynamic.length).toBe(27);
-    expect(countPlaceholders(dynamic)).toBe(28);
-    expect(strings.length).toBe(29);
-    expect(countPlaceholders(strings)).toBe(30);
+    // No dynamic-template placeholders remain: every ${{...}} template is
+    // now mapped to a kit token ({v:}/{x:}) and resolved at runtime.
+    expect(dynamic.length).toBe(0);
+    expect(strings.length).toBe(2);
+    expect(countPlaceholders(strings)).toBe(2);
     // The zh_CN build renders the same two lines as speaker labels; upstream
     // punctuation varies (half- or full-width), so only the label form is
     // asserted, not the exact glyphs.
@@ -301,7 +304,8 @@ describe("??? placeholder parity between en_US and zh_CN projects", () => {
     const zhPaths = pathCounts(zh);
     expect([...zhPaths.keys()].sort()).toEqual([...enPaths.keys()].sort());
     for (const [path, count] of enPaths) expect(zhPaths.get(path)).toBe(count);
-    expect(enPaths.size).toBe(29);
+    // Only the 2 literal anonymous-speaker strings carry a placeholder now.
+    expect(enPaths.size).toBe(2);
   });
 
   test("neither project contains broken template fragments", () => {
@@ -320,5 +324,11 @@ describe("??? placeholder parity between en_US and zh_CN projects", () => {
     expect(findFragment("costs ${{x}}")).toBe("${{");
     expect(findFragment("plain text")).toBeNull();
     expect(findFragment("use {name} here")).toBeNull();
+    // A literal currency "$" before a kit token is not a broken template.
+    expect(findFragment("costs ${v:v.scoop_price}")).toBeNull();
+    expect(findFragment("costs ${x:money}")).toBeNull();
+    expect(findFragment("costs ${name}")).toBeNull();
+    // ...but a "$" before a non-token brace still is.
+    expect(findFragment("costs ${other}")).toBe("${");
   });
 });

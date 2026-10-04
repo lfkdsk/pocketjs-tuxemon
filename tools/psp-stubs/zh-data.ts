@@ -12,4 +12,6 @@ export const zhData: {
   project: unknown;
   battleShell: unknown;
   names: unknown;
-} = { project: null, battleShell: null, names: null };
+  mapDescriptions: unknown;
+  monthNames: unknown;
+} = { project: null, battleShell: null, names: null, mapDescriptions: null, monthNames: null };

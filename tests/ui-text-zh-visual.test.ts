@@ -145,6 +145,8 @@ function assertSurfaceText(tree: unknown): void {
   expect(nodeText(requireNode(tree, "rpgkit-save-root-1"))).toBe("  从存档位加载");
   expect(nodeText(requireNode(tree, "rpgkit-save-root-2"))).toBe("  导出存档码");
   expect(nodeText(requireNode(tree, "rpgkit-save-root-3"))).toBe("  导入存档码");
+  // The game-owned footer legend (outside the kit's UiTextTable) is localized.
+  expect(nodeText(requireNode(tree, "rpgkit-save-legend"))).toBe("o: 选择   x: 返回   START: 关闭");
 }
 
 describe("Simplified Chinese kit interface visuals", () => {

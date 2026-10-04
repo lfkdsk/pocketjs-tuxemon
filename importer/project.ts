@@ -964,6 +964,8 @@ const TEXT_VARIABLES: ReadonlySet<string> = (() => {
  *  in builds with the battle runtime; other builds keep enum codes. */
 let textVariablesOn = false;
 const isTextVariable = (name: string) => textVariablesOn && TEXT_VARIABLES.has(name);
+// The {x:<key>} resolver (battle/text-tokens.ts) ships with the battle runtime.
+let textTokensOn = false;
 const varId = (name: string) => `v.${name.replace(/[^A-Za-z0-9_.-]/g, "_")}`;
 function code(name: string, value: string): number {
   const vals = enumTable.get(name);
@@ -1579,6 +1581,11 @@ function format(s: string, m: TuxMap): string {
     .replace(/\$\{\{map_name\}\}/g, po.get(m.props.slug ?? m.slug) ?? m.slug)
     .replace(/\$\{\{(north|south|east|west)\}\}/g, (_x, d: string) => po.get(m.props[d] ?? "") ?? m.props[d] ?? "")
     .replace(/\$\{\{var:([^}]*)\}\}/g, (token, name: string) => isTextVariable(name) ? `{v:${varId(name)}}` : token)
+    .replace(/\$\{\{today\}\}/g, () => textTokensOn ? "{x:today}" : "???")
+    .replace(/\$\{\{map_desc\}\}/g, () => textTokensOn ? "{x:map_desc}" : "???")
+    .replace(/\$\{\{monster_0_name\}\}/g, () => textTokensOn ? "{x:monster_0_name}" : "???")
+    .replace(/\$\{\{monster_0_level\}\}/g, () => textTokensOn ? "{x:monster_0_level}" : "???")
+    .replace(/\$\{\{money_formatted\}\}/g, () => textTokensOn ? "{x:money}" : "???")
     .replace(/\$\{\{[^}]*\}\}/g, "???");
 }
 
@@ -4521,6 +4528,9 @@ export interface ImportBuild {
   worldIndex: OutdoorWorldIndex;
   /** Sorted map ids whose TMX declares inside=true; weather particles skip these. */
   indoorMaps: string[];
+  /** Kit map id -> localized map description (the <slug>_description catalog
+   *  entry), for the {x:map_desc} text-token resolver. */
+  mapDescriptions: Record<string, string>;
   presentation: {
     backdrops: BackdropSource[];
     overlays: OverlaySource[];
@@ -4724,6 +4734,7 @@ export function buildProject(
 ): ImportBuild {
   const options = resolveOptions(requestedOptions);
   textVariablesOn = options.battle;
+  textTokensOn = options.battle;
   log.clear();
   items.clear();
   animationDefs.clear();
@@ -4762,12 +4773,20 @@ export function buildProject(
 
   const mapDefs: MapDef[] = [];
   const sprites: Record<string, SpriteDef> = {};
+  // ${{map_desc}} resolves to the current map's description, which upstream
+  // stores as the <slug>_description translation (Tuxemon's MapManager). The
+  // kit project format has no description field, so the importer emits this
+  // slug->description table for the game's {x:map_desc} resolver.
+  const mapDescriptions = new Map<string, string>();
   for (const s of want) {
     const m = allMaps.get(s);
     if (!m) throw new Error(`no map ${s}`);
     const r = convertMap(m, options, surfaceLabels[s] ?? {}, seamlessPortalIds);
     mapDefs.push(r.map);
     Object.assign(sprites, r.sprites);
+    const tuxemonSlug = m.props.slug ?? m.slug;
+    const description = po.peek(`${tuxemonSlug}_description`);
+    if (description) mapDescriptions.set(m.slug, description);
   }
   Object.assign(sprites, Object.fromEntries([...appearanceSpriteDefs.entries()].sort(([a], [b]) =>
     a < b ? -1 : a > b ? 1 : 0
@@ -4828,7 +4847,18 @@ export function buildProject(
     tileSize: 16,
     // Tuxemon's dialog state consumes movement and interaction input no
     // matter which event fiber opened the box.
-    system: { messageBlocksPlayer: true, ...(options.battle ? { textVariables: true } : {}), inventory: { maxKinds: 99 } },
+    // textVariables switches on {v:<id>} (the ${{var:X}} templates);
+    // textTokens is the {x:<key>} allowlist answered by the game's resolver
+    // (battle/text-tokens.ts). Both are battle-runtime features, so a project
+    // without the battle extension keeps the literal-braces behavior.
+    system: {
+      messageBlocksPlayer: true,
+      inventory: { maxKinds: 99 },
+      ...(options.battle ? {
+        textVariables: true,
+        textTokens: ["today", "map_desc", "monster_0_name", "monster_0_level", "money"],
+      } : {}),
+    },
     start: {
       map: startId,
       x: Math.min(4, startMap.width - 1),
@@ -4901,6 +4931,7 @@ export function buildProject(
       .filter((m) => m.props.inside === "true")
       .map((m) => m.slug)
       .sort(),
+    mapDescriptions: Object.fromEntries([...mapDescriptions.entries()].sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)),
     presentation: {
       backdrops: [...backdropSources.values()].sort((a, b) =>
         a.variant < b.variant ? -1 : a.variant > b.variant ? 1 : 0

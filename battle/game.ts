@@ -1,10 +1,13 @@
 import battleDbJson from "../data/battle-db.json";
 import variableEnumsJson from "../dist/variable-enums.json";
+import mapDescriptionsJson from "../dist/map-descriptions.json";
+import monthNamesJson from "../data/month-names.json";
 
 import { validateBattleDb } from "../importer/battle-schema.ts";
 import { createTuxemonExtensions } from "./extension.ts";
 import { createTuxemonBattleRules, type VariableEnums } from "./runtime.ts";
 import { createTuxemonScenes } from "./scenes.ts";
+import { createTuxemonTextTokens } from "./text-tokens.ts";
 import type { SessionOptions } from "../vendor/pocket-rpgkit/src/engine/session.ts";
 import type { ProjectSource, WorldTraversalMode } from "../vendor/pocket-rpgkit/src/engine/types.ts";
 import { createWorldHandoffResolver } from "../vendor/pocket-rpgkit/src/engine/world-handoff.ts";
@@ -20,10 +23,18 @@ export const TUXEMON_BATTLE_RULES = createTuxemonBattleRules(
 const TUXEMON_SCENE_BUNDLE = createTuxemonScenes(TUXEMON_BATTLE_DB);
 export const TUXEMON_SCENES = TUXEMON_SCENE_BUNDLE.rules;
 export const TUXEMON_SCENE_CATALOG = TUXEMON_SCENE_BUNDLE.catalog;
+/** The {x:} text-token resolver for the English build. Headless recorders
+ *  and verifiers get it through createTuxemonSessionOptions; the live GameView
+ *  and its attract/demo controller receive the same instance as a prop. */
+export const TUXEMON_TEXT_TOKENS = createTuxemonTextTokens("en_US", {
+  mapDescriptions: mapDescriptionsJson as Record<string, string>,
+  monthNames: monthNamesJson as string[],
+});
 export const TUXEMON_SESSION_OPTIONS = Object.freeze({
   extensions: TUXEMON_EXTENSIONS,
   battle: TUXEMON_BATTLE_RULES,
   scenes: TUXEMON_SCENES,
+  textTokens: TUXEMON_TEXT_TOKENS,
 });
 
 /** Build the complete game session wiring for a concrete generated project.

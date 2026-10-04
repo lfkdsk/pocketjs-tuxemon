@@ -1577,6 +1577,15 @@ export function writeBattleArtifacts(options: BattleImportOptions): BattleBuild 
     items: Object.fromEntries(Object.keys(db.items).sort().map((slug) => [slug, po.get(slug) ?? slug])),
   };
   writeFileSync(join(outputRoot, `data/battle-names${suffix}.json`), jsonBytes(battleNames));
+  // Upstream's today_string is T.translate(month_key) + " " + day for every
+  // language (tuxemon/time_handler.py). The resolver (battle/text-tokens.ts)
+  // reads these 12 names so the date format matches upstream instead of a
+  // hardcoded per-language layout. For zh_CN `po` is the merged catalog
+  // (buildZhCatalog: overrides -> Weblate -> supplement -> importer -> en_US);
+  // the supplement supplies the month names, so zh_CN dates use e.g. "六月".
+  const monthKeys = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+  const monthNames = monthKeys.map((m) => po.get(`month_${m}`) ?? `month_${m}`);
+  writeFileSync(join(outputRoot, `data/month-names${suffix}.json`), jsonBytes(monthNames));
   for (const asset of cookedAssets) {
     const path = join(outputRoot, asset.pakFile);
     mkdirSync(dirname(path), { recursive: true });

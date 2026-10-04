@@ -367,7 +367,15 @@ export function createSaveMenuRuntime(
     slots: slotInfo,
     saveCode,
     toast,
-    legend: () => (menu().kind === "message" ? "o: ok   x: back" : "o: select   x: back   START: close"),
+    legend: () => {
+      // Game-owned footer text (not in the kit's UiTextTable); match the
+      // kit's button-hint wording (确定/返回) for the Chinese build.
+      const zh = options.lang === "zh_CN";
+      if (menu().kind === "message") {
+        return zh ? "o: 确定   x: 返回" : "o: ok   x: back";
+      }
+      return zh ? "o: 选择   x: 返回   START: 关闭" : "o: select   x: back   START: close";
+    },
     osk,
     hasSlots,
     title: channelTitle(slots),

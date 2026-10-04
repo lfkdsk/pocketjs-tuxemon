@@ -19,7 +19,7 @@ import { BTN_BITS } from "../vendor/pocket-rpgkit/src/engine/camera.ts";
 import { canonicalJson } from "../vendor/pocket-rpgkit/src/engine/save.ts";
 import { searchWalk } from "../vendor/pocket-rpgkit/src/engine/journey-search.ts";
 import { readShardedProject } from "./generated-project.ts";
-import { TUXEMON_BATTLE_RULES_ZH, TUXEMON_EXTENSIONS_ZH, TUXEMON_SCENES_ZH } from "../battle/game-zh.ts";
+import { TUXEMON_BATTLE_RULES_ZH, TUXEMON_EXTENSIONS_ZH, TUXEMON_SCENES_ZH, TUXEMON_TEXT_TOKENS_ZH } from "../battle/game-zh.ts";
 import { tuxemonExtensionState } from "../battle/extension.ts";
 import { TUXEMON_BATTLE_DB_ZH } from "../battle/game-zh.ts";
 import { buildZhCatalog } from "../importer/l10n.ts";
@@ -41,6 +41,7 @@ const sess = createSession(project, HZ, createTuxemonSessionOptions(project, WOR
   extensions: TUXEMON_EXTENSIONS_ZH,
   battle: TUXEMON_BATTLE_RULES_ZH,
   scenes: TUXEMON_SCENES_ZH,
+  textTokens: TUXEMON_TEXT_TOKENS_ZH,
 }));
 let st: SessionState = startSession(project, sess);
 

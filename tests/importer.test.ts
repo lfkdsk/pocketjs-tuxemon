@@ -526,11 +526,69 @@ test("default import output remains byte-pinned", () => {
   // NPC-versus-NPC resolver, the moving-guard step triggers, the live-clock
   // daytime filter, the map-entry layer reset, the runtime player-name
   // condition, the per-domain NPC battle result codes, COV-C step trackers,
-  // text-valued numeric transforms and set_mission no-op, and the Spyder-only
-  // collision-folded Surf boundary pages are all in this combined pin.
+  // text-valued numeric transforms and set_mission no-op, the Spyder-only
+  // collision-folded Surf boundary pages, and the dialog template mapping
+  // (${{var:X}} to {v:v.X}, the
+  // ${{today}}/${{map_desc}}/${{monster_0_*}}/${{money_formatted}} to {x:}
+  // tokens), the system.textVariables/textTokens declarations and the
+  // slug->description table for the {x:map_desc} resolver are all in this
+  // combined pin.
   expect(createHash("sha256").update(bytes).digest("hex")).toBe(
-    "141a8ec16b8f86b4cedce67b09de5bdb5ca5aedadf4a47d8d1e76dbd18ffd5ad",
+    "f4656862404a35a4490c01f9587eae5a852580e821890a32ed4685913f5a6a7b",
   );
+});
+
+test("dialog templates map to kit text tokens and the project declares them", () => {
+  // One map per template family: today (calendar), money (wallet), map_desc
+  // (welcome sign), monster_0_* (TV flavor), and var: (cathedral/gym).
+  const result = buildProject([
+    "taba_house1",
+    "spyder_cotton_artshop",
+    "spyder_cotton_town",
+    "sphalian_town_house",
+    "spyder_leather_gym",
+  ], G6_IMPORT_OPTIONS);
+  const system = result.project.system as Record<string, unknown>;
+  expect(system.textVariables).toBe(true);
+  expect(system.textTokens).toEqual(["today", "map_desc", "monster_0_name", "monster_0_level", "money"]);
+
+  // Every text/choices string under every map, flattened.
+  const strings: string[] = [];
+  const walk = (value: unknown): void => {
+    if (typeof value === "string") strings.push(value);
+    else if (Array.isArray(value)) value.forEach(walk);
+    else if (value && typeof value === "object") Object.values(value).forEach(walk);
+  };
+  result.project.maps.forEach((m) => walk(m.events));
+
+  // No unknown template survives as "???" and no ${{...}} fragment remains.
+  expect(strings.some((s) => s.includes("???") && !s.startsWith("???"))).toBe(false);
+  expect(strings.some((s) => s.includes("${{"))).toBe(false);
+  // Each token family is present on its map.
+  const all = strings.join("\n");
+  expect(all).toContain("{x:today}");
+  expect(all).toContain("{x:money}");
+  expect(all).toContain("{x:map_desc}");
+  expect(all).toContain("{x:monster_0_name}");
+  expect(all).toContain("{x:monster_0_level}");
+  expect(all).toContain("{v:v.chad_points}");
+  expect(all).toContain("{v:v.brad_points}");
+  // The cathedral_fee variable is written by the spyder scenario; its token
+  // resolves at runtime. scoop_price/party_lost_hp/cathedral_share_full/
+  // cathedral_interest_full have no imported writer and render the kit's
+  // unset-variable default ("0").
+});
+
+test("the importer emits a slug->description table for {x:map_desc}", () => {
+  const result = buildProject(["spyder_cotton_town", "spyder_route1", "taba_house1"]);
+  // spyder_cotton_town's tuxemon slug is cotton_town, whose description is
+  // "A growing force!"; route1 has one too. taba_house1 is an interior with
+  // no <slug>_description catalog entry, so it is absent from the table.
+  expect(result.mapDescriptions["spyder_cotton_town"]).toBe("A growing force!");
+  expect(result.mapDescriptions["spyder_route1"]).toBe("Take care!");
+  expect(result.mapDescriptions["taba_house1"]).toBeUndefined();
+  // The table is keyed by kit map id, not tuxemon slug.
+  expect(result.mapDescriptions["cotton_town"]).toBeUndefined();
 });
 
 test("ImportOptions.areas emits a K1 rectangular event", () => {
