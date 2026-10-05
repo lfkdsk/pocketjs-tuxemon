@@ -7,7 +7,6 @@
 // ui/gp1-kit-stage.ts's "engine" mark and before main.tsx's own body (which
 // marks "battle-registration" and "mount").
 import rawProject from "../dist/project-shell.json";
-import { zhData } from "./zh-data.ts";
 import { GAME_ASSETS, ANIMATED_INDEX, NPC_SRC_INDEX } from "./game-assets.ts";
 import {
   TERRAIN_STREAM_META,
@@ -41,13 +40,8 @@ import { TUXEMON_DAYCARE_SCENE_ID } from "../battle/daycare-scenes.ts";
 import { TuxemonDaycareScene } from "./daycare-scene.tsx";
 import { gp1Mark } from "./gp1-marks.ts";
 
-// The zh_CN project shell comes from the consolidated zh-data module so the
-// PSP build can swap it for an English-only stub (tools/psp.ts).
-const rawProjectZh = zhData.project;
-
 export {
   rawProject,
-  rawProjectZh,
   GAME_ASSETS,
   ANIMATED_INDEX,
   NPC_SRC_INDEX,

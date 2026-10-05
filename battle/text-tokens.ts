@@ -39,7 +39,7 @@
 import type { TextTokenResolver, TextTokenView } from "../vendor/pocket-rpgkit/src/engine/interpreter.ts";
 import { tuxemonExtensionState, type GameLang, type TuxemonExtensionState } from "./extension.ts";
 import { snapshotFromClock } from "./time-weather.ts";
-import { battleDisplayNameFor } from "./battle-names.ts";
+import { battleDisplayNameFor, type BattleNames } from "./battle-names.ts";
 
 /** Static tables the resolver needs beyond the session view. */
 export interface TuxemonTextTokenTables {
@@ -47,6 +47,8 @@ export interface TuxemonTextTokenTables {
   mapDescriptions: Record<string, string>;
   /** The 12 translated month names (data/month-names*.json), index 0 = Jan. */
   monthNames: string[];
+  /** Optional localized names for headless/lazy-loaded zh_CN sessions. */
+  battleNames?: BattleNames;
 }
 
 /** Decode the session's extension state (the packed wire string the kit
@@ -98,7 +100,7 @@ export function createTuxemonTextTokens(
       case "monster_0_name": {
         const lead = leadMonster(view);
         if (!lead) return undefined;
-        return lead.nickname ?? battleDisplayNameFor(lang, "monster", lead.slug);
+        return lead.nickname ?? battleDisplayNameFor(lang, "monster", lead.slug, tables.battleNames);
       }
       case "monster_0_level": {
         const lead = leadMonster(view);

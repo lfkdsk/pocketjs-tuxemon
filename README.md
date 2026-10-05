@@ -62,14 +62,20 @@ summary:
   saved, rewindable game scenes. Seen/caught status is persistent and monotonic;
   journal previews and the normal browser render monster details through the
   same indexed, lazily loaded battle-image shards as combat.
-- **Performance:** 260 compact map shards plus 3 canonical JSON shards use
-  5,348,762 B instead of 10,270,416 B for all-canonical JSON. The three
-  event-heavy maps cross a 128 KiB compact-decode cap, trading a small amount
-  of storage for bounded first-visit latency on QuickJS. Indexed battle art
-  plus its lazy database occupies 3,516,960 B in the pak. The current bilingual
-  Web game pak is 86,848,752 B, including English and Chinese content, CJK font
-  atlases, all content-resolvable audio, its attribution list and demo data; the
-  desktop pak is 74,097,552 B. Before compact
+- **Performance:** each language uses 260 compact map shards plus 3 canonical
+  JSON shards, occupying 5,348,762 B for English and 5,582,139 B for Chinese.
+  The three event-heavy
+  maps cross a 128 KiB compact-decode cap, trading a small amount of storage
+  for bounded first-visit latency on QuickJS. Indexed battle art plus its lazy
+  database occupies 3,516,960 B in the pak. The current bilingual Web game pak
+  is 87,551,040 B, including English and Chinese content, CJK font atlases, all
+  content-resolvable audio, its attribution list and demo data. The desktop
+  launcher removes the 24 QOA music payloads (22,481,712 B) from that target's
+  startup read: its pak is 52,316,544 B and those files retain their exact
+  `audio:qoa.*` keys under the companion `dist/runtime-data` tree. The three
+  small WAV effects remain packed for immediate one-shot playback; QOA files
+  are copied from `data.fs` one 64 KiB page per frame before playback starts.
+  Before compact
   maps and indexed battle art, an earlier English-only Web build was
   66,791,328 B. The all-image battle encoding is
   2,206,076 B on disk and 13,394,688 B if every PSM_T8 texture were decoded,
@@ -85,10 +91,13 @@ summary:
   unreliable: the unchanged 250 ms gate rejected both five-process GB6 groups
   before replay and four of five J3 480×272 starts, so separately labelled
   500 ms startup diagnostics supplied those production-frame distributions
-  without being counted as startup passes. The Chinese smoke tape also stayed
-  below 50 ms in three diagnostic processes at each viewport (49.258 ms worst),
-  although it did not always meet the stricter 45 ms line. Cold/hot medians,
-  exact startup counts, load ranges, bundle identities and attribution are in
+  without being counted as startup passes. A separate post-merge closure ran
+  five fresh short-English G6 and Chinese-smoke processes at each viewport with
+  the default limits: all 20 passed, with 209.961 ms as the largest startup and
+  32.787 ms as the largest production frame. Two same-core/storage-contention
+  attempts failed startup at 308.911 and 282.272 ms and remain recorded; they
+  do not change the longer GB6/J3 limitation above. Cold/hot medians, exact
+  startup counts, load ranges, bundle identities and attribution are in
   [the verification guide](docs/verification.md#the-quickjs-benches).
 - **Import coverage:** 89.3% of Tuxemon action uses and 96.3% of condition
   uses map natively to kit commands; 97.3% / 96.7% are executable (native,
@@ -211,6 +220,14 @@ covering exactly the characters the Chinese build uses — catalog text, the
 runtime resolver tables (map descriptions, battle names) and the game-drawn
 strings — is baked into the font atlases at build time.
 
+The Chinese project shell, battle shell, battle-name table, map descriptions
+and month names are raw pak entries rather than JavaScript literals. Web and
+console builds read them from the pak, while desktop stages the same keys in
+`data.fs`; they are decoded, parsed and cached only when a Chinese boot is
+selected. An English boot does not read or parse any of those five documents. Chinese map shards use the same
+128 KiB compact-decode cap as English, so the three oversized event-heavy maps
+are stored as canonical JSON in both languages.
+
 - **Web:** open the player with `?lang=zh`
   (<https://lfkdsk.github.io/pocketjs-tuxemon/pocket-tuxemon/?lang=zh>), or
   press **R** in the game to open the language switcher. The choice is
@@ -275,9 +292,11 @@ Known limitations:
 - **PSP is English-only.** The PSP package does not include the CJK font
   subset (the six baked font blobs would add ~4.4 MB of residency on top of
   the Latin set, and the PSP allocator's power-of-two size classes push the
-  real cost to ~10.9 MB) or the zh_CN shards, and the language switcher is
-  hidden (PSP has no localStorage or data.fs to persist a choice). A Chinese
-  PSP build is deferred until the font residency is measured on device.
+  real cost to ~10.9 MB), the zh_CN shards or the five raw Chinese startup
+  documents. Its build-time locale-loader stub always selects English, and the
+  language switcher is hidden (PSP has no localStorage or data.fs to persist a
+  choice). A Chinese PSP build is deferred until the font residency is measured
+  on device.
 
 ## Web demo controls
 
@@ -321,7 +340,7 @@ bun run import          # Tuxemon -> project, maps, art and battle data
 bun run verify:audio    # reproduce every audio transcode twice and verify metadata
 bun run build           # import + generic bundle into dist/
 bun run build:wasm      # the wasm core (needs the Rust wasm32 target)
-bun tools/desktop.ts --build-only  # prepare the desktop bundle and host
+bun tools/desktop.ts --build-only  # prepare the desktop bundle, runtime-data sidecars and host
 bun run desktop         # play on the desktop host
 bun run web             # build the web version into dist/web
 bun run verify:web:audio # stream three imported tracks in headless Chrome

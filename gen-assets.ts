@@ -447,10 +447,9 @@ zhProject = {
 };
 const zhCharacters = await cookCharacters(zhProject, { outputRoot: ROOT });
 zhProject = zhCharacters.project;
-const zhSplit = splitProjectMaps(zhProject, {
+const zhSplit = splitGameProjectMaps(zhProject, undefined, {
   shellEntry: "project-shell.zh_CN.json",
-  entryEncoding: "auto",
-  mapEntry: (id) => `maps-zh/${id}.rkm`,
+  mapEntry: (id, extension) => `maps-zh/${id}.${extension}`,
 });
 const mapsZhDir = join(DIST, "maps-zh");
 rmSync(mapsZhDir, { recursive: true, force: true });
@@ -474,9 +473,9 @@ writeFileSync(join(DIST, "map-descriptions.zh_CN.json"), jsonBytes(zhImported.ma
 // displays (map and battle shards are not imported by the bundle, so the
 // baker's module scan does not see them). The {x:map_desc} resolver reads
 // dist/map-descriptions.zh_CN.json and the battle UI / {x:monster_0_name}
-// token read data/battle-names.zh_CN.json; both are bundled into the JS via
-// ui/zh-data.ts, so they are added here explicitly or their glyphs (e.g.
-// 尺, 粮) are missing from the baked font.
+// token read data/battle-names.zh_CN.json. These tables are loaded on demand
+// through ui/zh-data.ts, so they are added here explicitly or their glyphs
+// (e.g. 尺, 粮) are missing from the baked font.
 const zhTextParts: string[] = [
   zhSplit.shellText,
   ...zhSplit.entries.map((entry) => new TextDecoder().decode(entry.bytes)),
@@ -545,6 +544,17 @@ const audioAttributionPakEntry: PakManifestEntry = {
   file: "licenses/AUDIO-ATTRIBUTIONS.md",
 };
 const audioBytes = Object.values(audioManifest.files).reduce((sum, f) => sum + f.bytes, 0);
+// Chinese startup documents stay out of the shared JS bundle. Web/console
+// read these raw entries from pak; tools/desktop.ts stages the same keys in
+// data.fs. Keeping zh_CN in every key also lets the English-only PSP filter
+// remove them with the rest of the Chinese content.
+const zhStartupPakEntries: PakManifestEntry[] = [
+  { key: "l10n/zh_CN/project-shell.json", file: "dist/project-shell.zh_CN.json" },
+  { key: "l10n/zh_CN/battle-runtime-shell.json", file: "dist/battle-runtime-shell.zh_CN.json" },
+  { key: "l10n/zh_CN/battle-names.json", file: "data/battle-names.zh_CN.json" },
+  { key: "l10n/zh_CN/map-descriptions.json", file: "dist/map-descriptions.zh_CN.json" },
+  { key: "l10n/zh_CN/month-names.json", file: "data/month-names.zh_CN.json" },
+];
 const pakEntries = [
   ...pakManifest(terrain.entries),
   ...mapPakEntries,
@@ -552,6 +562,7 @@ const pakEntries = [
   ...battle.rawPakEntries,
   ...battle.battleRepository.pakEntries,
   ...battleZh.battleRepository.pakEntries,
+  ...zhStartupPakEntries,
   ...animatedPakEntries,
   ...npcSrcPakEntries,
   ...terrain.streamPakEntries,

@@ -4,6 +4,7 @@ import {
   createGameWorldCacheDriver,
   createWorldLookaheadIndex,
   GAME_WORLD_ENTRY_SETTLE_FRAMES,
+  GAME_WORLD_PREFETCH_AUDIO_COOLDOWN_FRAMES,
   GAME_WORLD_PREFETCH_BUDGET_MS,
   withTwoHopWorldLookahead,
 } from "../ui/game-world-cache-driver.ts";
@@ -140,9 +141,11 @@ describe("two-hop game world-cache lookahead", () => {
   test("the driver reports two-hop keep-sets and advances only one cold stage", () => {
     const session = setupSession();
     const stats: WorldCacheStats[] = [];
+    const activity: boolean[] = [];
     const driver = createGameWorldCacheDriver(session, layout, {
       now: () => 0,
       onStats: (snapshot) => stats.push(snapshot),
+      onPrefetchActivity: (active) => activity.push(active),
     });
     const state = {
       mapId: "a",
@@ -158,14 +161,47 @@ describe("two-hop game world-cache lookahead", () => {
     expect(session.preparingMaps.has("b")).toBe(true);
     expect(session.preparingMaps.get("b")!.map).toBeUndefined();
     expect(session.preparingMaps.has("c")).toBe(false);
+    expect(activity).toEqual([true]);
   });
 
-  test("transition frames retain lookahead without advancing a cold stage", () => {
+  test("deferred work waits through two settled frames after prefetch completes", () => {
     const session = setupSession();
     const stats: WorldCacheStats[] = [];
+    const activity: boolean[] = [];
     const driver = createGameWorldCacheDriver(session, layout, {
       now: () => 0,
       onStats: (snapshot) => stats.push(snapshot),
+      onPrefetchActivity: (active) => activity.push(active),
+    });
+    const state = {
+      mapId: "a",
+      move: { tx: 8, ty: 1, facing: 3 },
+    } as SessionState;
+    const camera: CameraState = { x: 0, y: 0, facing: 3 };
+
+    for (let frame = 0; frame < 64; frame++) {
+      driver.sync(state, camera, { w: 160, h: 160 });
+      const current = stats.at(-1)!;
+      if (current.pending === 0 && current.staged > 0) break;
+    }
+    expect(stats.at(-1)!.staged).toBe(5);
+    expect(activity.at(-1)).toBeTrue();
+    for (let frame = 0; frame < GAME_WORLD_PREFETCH_AUDIO_COOLDOWN_FRAMES; frame++) {
+      driver.sync(state, camera, { w: 160, h: 160 });
+      expect(activity.at(-1)).toBeTrue();
+    }
+    driver.sync(state, camera, { w: 160, h: 160 });
+    expect(activity.at(-1)).toBeFalse();
+  });
+
+  test("transition frames retain lookahead and reserve deferred work", () => {
+    const session = setupSession();
+    const stats: WorldCacheStats[] = [];
+    const activity: boolean[] = [];
+    const driver = createGameWorldCacheDriver(session, layout, {
+      now: () => 0,
+      onStats: (snapshot) => stats.push(snapshot),
+      onPrefetchActivity: (active) => activity.push(active),
     });
     const state = {
       mapId: "a",
@@ -179,6 +215,7 @@ describe("two-hop game world-cache lookahead", () => {
     expect(stats[0]!.pending).toBe(5);
     expect(stats[0]!.preparing).toBe(0);
     expect(session.preparingMaps.size).toBe(0);
+    expect(activity).toEqual([true]);
   });
 
   test("the first frame after a map change retains lookahead without stacking a cold stage", () => {
@@ -224,7 +261,11 @@ describe("two-hop game world-cache lookahead", () => {
 
   test("map-change eviction waits until the destination entry has settled", () => {
     const session = setupSession();
-    const driver = createGameWorldCacheDriver(session, layout, { now: () => 0 });
+    const activity: boolean[] = [];
+    const driver = createGameWorldCacheDriver(session, layout, {
+      now: () => 0,
+      onPrefetchActivity: (active) => activity.push(active),
+    });
     const camera: CameraState = { x: 0, y: 0, facing: 3 };
     driver.sync({ mapId: "a", move: { tx: 1, ty: 1, facing: 3 } } as SessionState, camera, { w: 160, h: 160 });
     acquireSessionMap(session, "inside");
@@ -242,6 +283,14 @@ describe("two-hop game world-cache lookahead", () => {
       interp: { frame: GAME_WORLD_ENTRY_SETTLE_FRAMES },
     } as SessionState, camera, { w: 160, h: 160 });
     expect([...session.maps.keys()]).toEqual(["inside"]);
+    expect(activity.at(-1)).toBeTrue();
+
+    driver.sync({
+      mapId: "inside",
+      move: { tx: 1, ty: 1, facing: 3 },
+      interp: { frame: GAME_WORLD_ENTRY_SETTLE_FRAMES + 1 },
+    } as SessionState, camera, { w: 160, h: 160 });
+    expect(activity.at(-1)).toBeFalse();
   });
 
   test("player movement does not stack prefetch on the reducer", () => {

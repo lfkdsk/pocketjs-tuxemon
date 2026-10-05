@@ -8,7 +8,7 @@ import {
   NAME_INPUT_SCENE_ID,
   NameInputScene,
 } from "./ui/gp1-kit-stage.ts";
-import { createGameMapRepository } from "./ui/entry-readers.ts";
+import { createGameEntryReaders, createGameMapRepository } from "./ui/entry-readers.ts";
 import type { ProjectShell } from "./vendor/pocket-rpgkit/src/engine/types.ts";
 import {
   rawProject,
@@ -35,7 +35,6 @@ import {
   TUXEMON_TRADE_SCENE_ID,
   TUXEMON_DAYCARE_SCENE_ID,
   TuxemonDaycareScene,
-  rawProjectZh,
 } from "./ui/gp1-data-stage.ts";
 import { canSwitchLang, detectLang } from "./ui/language.ts";
 import { setBattleSceneLang } from "./ui/battle-scene-locale.ts";
@@ -81,22 +80,31 @@ import { createGameEffects } from "./ui/weather-effects.tsx";
 // tools/bench-g6-quickjs.sh can read globalThis.__gp1Marks after boot and
 // report which startup stage — engine/kit bundle, JSON literals/module
 // init, battle-rule registration, or GameView mount — actually costs time.
-// Both content languages ship in one bundle; the boot language (URL ?lang=,
-// the desktop lang.json, or localStorage) picks the shell and its shards.
-// A build without the zh_CN data (the English-only PSP package) boots in
-// English whatever the stored or requested language says.
-const lang = zhData.project ? detectLang() : "en_US";
+// The boot language (URL ?lang=, desktop lang.json, or localStorage) selects
+// the shell and its shards. Chinese startup documents are synchronous raw
+// pak/data.fs entries: they are decoded only for a Chinese boot and cached
+// for battle display-name lookups. The PSP stub reports them unavailable and
+// therefore boots English regardless of stored or requested language.
+const host = fsHost();
+const requestedLang = zhData.available ? detectLang() : "en_US";
+const bootReaders = requestedLang === "zh_CN" ? createGameEntryReaders(host) : null;
+const localizedData = bootReaders
+  ? zhData.load((entry) => bootReaders.readText?.(entry) ?? bootReaders.read(entry))
+  : null;
+const lang = localizedData ? requestedLang : "en_US";
+gp1Mark("language-data");
 setBattleSceneLang(lang);
-const project = (lang === "zh_CN" ? rawProjectZh : rawProject) as unknown as ProjectShell;
+const project = (localizedData?.project ?? rawProject) as unknown as ProjectShell;
 // The {x:} text-token resolver for the boot language. GameView forwards it
 // to both the live session and the attract/demo controller, so a demo, a
 // rewind and a re-fold expand text identically. The zh_CN descriptions come
-// from the zh data bundle (absent in the English-only PSP build).
+// from the on-demand zh data (absent in the English-only PSP build).
 const textTokens = createTuxemonTextTokens(lang, {
   mapDescriptions: (lang === "zh_CN"
-    ? zhData.mapDescriptions
+    ? localizedData!.mapDescriptions
     : enMapDescriptions) as Record<string, string>,
-  monthNames: (lang === "zh_CN" ? zhData.monthNames : enMonthNames) as string[],
+  monthNames: (lang === "zh_CN" ? localizedData!.monthNames : enMonthNames) as string[],
+  battleNames: localizedData?.names,
 });
 // splitProjectMaps/splitBattleRuntimeDb/splitAnimatedTiles/splitNpcSrc/
 // splitStreamRefs emit ASCII JSON. Desktop reads map entries through the
@@ -104,7 +112,7 @@ const textTokens = createTuxemonTextTokens(lang, {
 // data.fs bytes; web and consoles use the pak installed before this bundle
 // runs. ui/entry-readers.ts wires both paths for the map repository and
 // the battle/animated/npc-src/terrain-stream providers.
-const { repository, readEntry } = createGameMapRepository(project.mapIndex, fsHost());
+const { repository, readEntry } = createGameMapRepository(project.mapIndex, host);
 // The effect shell samples local wall time exactly once for a fresh game.
 // Reducer, render, save/restore, and rewind only see the resulting plain
 // state. Simulators and CI inject the fixed override before bundle eval.
@@ -169,6 +177,7 @@ if (worldDiagnostics) {
   }
   worldDiagnostics.links = links;
 }
+let deferredAudioIdle = true;
 const worldAssetCache = createGameWorldAssetCache(project.worldLayout!, {
   stream,
   animated,
@@ -176,7 +185,12 @@ const worldAssetCache = createGameWorldAssetCache(project.worldLayout!, {
 }, worldDiagnostics
   ? (stats) => { worldDiagnostics.cache = stats; }
   : undefined);
-const { Effects, bridge: weatherBridge } = createGameEffects(project.audio ?? {});
+const { Effects, bridge: weatherBridge } = createGameEffects(
+  project.audio ?? {},
+  readEntry,
+  host,
+  () => deferredAudioIdle,
+);
 
 // Allocation-regression switch: when false, the particle overlay is not
 // mounted at all, so the QuickJS mem-walk probe can diff overlay on/off on
@@ -252,6 +266,7 @@ mount(() => (
       world={createWorldRenderer()}
       createWorldCacheDriver={(session, layout) => createGameWorldCacheDriver(session, layout, {
         onStats: worldAssetCache.onWorldCacheStats,
+        onPrefetchActivity: (active) => { deferredAudioIdle = !active; },
       })}
       onMapChange={(mapId, map) => {
         frameProfileMark("map-change-assets:start");

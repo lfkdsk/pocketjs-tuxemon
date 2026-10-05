@@ -6,6 +6,7 @@ import battleDbJson from "../data/battle-db.zh_CN.json";
 import variableEnumsJson from "../dist/variable-enums.json";
 import mapDescriptionsJson from "../dist/map-descriptions.zh_CN.json";
 import monthNamesJson from "../data/month-names.zh_CN.json";
+import battleNamesJson from "../data/battle-names.zh_CN.json";
 
 import { validateBattleDb } from "../importer/battle-schema.ts";
 import { createTuxemonExtensions } from "./extension.ts";
@@ -31,6 +32,7 @@ export const TUXEMON_SCENE_CATALOG_ZH = TUXEMON_SCENE_BUNDLE_ZH.catalog;
 export const TUXEMON_TEXT_TOKENS_ZH = createTuxemonTextTokens("zh_CN", {
   mapDescriptions: mapDescriptionsJson as Record<string, string>,
   monthNames: monthNamesJson as string[],
+  battleNames: battleNamesJson,
 });
 export const TUXEMON_SESSION_OPTIONS_ZH = Object.freeze({
   extensions: TUXEMON_EXTENSIONS_ZH,

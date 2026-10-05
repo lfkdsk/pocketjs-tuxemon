@@ -33,8 +33,18 @@ export const GAME_WORLD_PREFETCH_BUDGET_MS = 0;
  * Keep derived-cache parse/compile work off those ticks, while leaving 52 of
  * the 64 pressure-route frames available for the bounded two-hop prefetch. */
 export const GAME_WORLD_ENTRY_SETTLE_FRAMES = 12;
+/** Keep the two confirmation frames after the final prefetch stage clear, so
+ * deferred sidecar decoding cannot refill the heap while the prepared map is
+ * first presented. */
+export const GAME_WORLD_PREFETCH_AUDIO_COOLDOWN_FRAMES = 2;
 
 export type WorldLookaheadIndex = ReadonlyMap<string, readonly string[]>;
+
+export interface GameWorldCacheDriverOptions extends WorldCacheDriverOptions {
+  /** Reports whether transition settling or synchronous prefetch work owns
+   * this frame, so unrelated deferred work can yield. */
+  onPrefetchActivity?(active: boolean): void;
+}
 
 /** Stable direct-neighbour index for the immutable outdoor topology. */
 export function createWorldLookaheadIndex(layout: Readonly<WorldLayout>): WorldLookaheadIndex {
@@ -120,7 +130,7 @@ export function withTwoHopWorldLookahead(
 export function createGameWorldCacheDriver(
   sess: Session,
   layout: Readonly<WorldLayout>,
-  options: WorldCacheDriverOptions = {},
+  options: GameWorldCacheDriverOptions = {},
 ): WorldCacheDriver {
   const tile = sess.cfg.tile;
   const lookahead = createWorldLookaheadIndex(layout);
@@ -130,6 +140,7 @@ export function createGameWorldCacheDriver(
   });
   let lastActive: string | null = null;
   let releaseDeferred = false;
+  let audioCooldownFrames = 0;
 
   return {
     sync(state: Readonly<SessionState>, camera: Readonly<CameraState>, viewport) {
@@ -143,6 +154,7 @@ export function createGameWorldCacheDriver(
       const releaseNow = releaseDeferred && !transitionBusy;
       const component = componentOfMap(layout, state.mapId);
       if (!component) {
+        options.onPrefetchActivity?.(transitionBusy || releaseDeferred);
         if ((changed && !releaseDeferred) || releaseNow) {
           releaseSessionMapsExcept(sess, [state.mapId]);
           releaseDeferred = false;
@@ -151,7 +163,10 @@ export function createGameWorldCacheDriver(
         return;
       }
       const placement = component.placements.find((entry) => entry.mapId === state.mapId);
-      if (!placement) return;
+      if (!placement) {
+        options.onPrefetchActivity?.(transitionBusy || releaseDeferred);
+        return;
+      }
       const base = workingSet(
         layout,
         state.mapId,
@@ -179,6 +194,17 @@ export function createGameWorldCacheDriver(
       const prefetchStats = busyFrame
         ? pausedPrefetchStats(sess, set, prefetcher)
         : prefetcher.update(set);
+      const prefetchActive = prefetchStats.stages > 0;
+      let audioCooldownActive = false;
+      if (prefetchActive) {
+        audioCooldownFrames = GAME_WORLD_PREFETCH_AUDIO_COOLDOWN_FRAMES;
+      } else if (audioCooldownFrames > 0) {
+        audioCooldownFrames--;
+        audioCooldownActive = true;
+      }
+      options.onPrefetchActivity?.(
+        transitionBusy || releaseDeferred || prefetchActive || audioCooldownActive,
+      );
       if (!releaseDeferred || releaseNow) {
         releaseSessionMapLayers(sess, set.parsedKeep, set.compiledKeep, set.active);
         releaseDeferred = false;

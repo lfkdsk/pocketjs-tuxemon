@@ -117,6 +117,12 @@ for viewport in "${viewports[@]}"; do
     G6_DIST="$app_dist" G6_JOURNEY="$journey" \
       G6_MAPS="$root/dist/maps" G6_BATTLE="$root/dist/battle" \
       G6_MAPS_ZH="$root/dist/maps-zh" G6_BATTLE_ZH="$root/dist/battle-zh" \
+      G6_ZH_PROJECT="$root/dist/project-shell.zh_CN.json" \
+      G6_ZH_BATTLE_SHELL="$root/dist/battle-runtime-shell.zh_CN.json" \
+      G6_ZH_NAMES="$root/data/battle-names.zh_CN.json" \
+      G6_ZH_MAP_DESCRIPTIONS="$root/dist/map-descriptions.zh_CN.json" \
+      G6_ZH_MONTH_NAMES="$root/data/month-names.zh_CN.json" \
+      G6_AUDIO_ROOT="$root/assets/audio" G6_AUDIO_MANIFEST="$root/assets/audio/manifest.json" \
       G6_ANIMATED="$root/dist/animated" G6_NPC_SRC="$root/dist/npc-src" \
       G6_TERRAIN_STREAM="$root/dist/terrain-stream" G6_DEMO="$root/dist/demo" \
       G6_BENCH_ROOT="$bench_root" G6_RUN_LABEL="$run" \

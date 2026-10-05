@@ -5612,6 +5612,26 @@
     "file": "data/battle-db.json"
   },
   {
+    "key": "l10n/zh_CN/battle-names.json",
+    "file": "data/battle-names.zh_CN.json"
+  },
+  {
+    "key": "l10n/zh_CN/battle-runtime-shell.json",
+    "file": "dist/battle-runtime-shell.zh_CN.json"
+  },
+  {
+    "key": "l10n/zh_CN/map-descriptions.json",
+    "file": "dist/map-descriptions.zh_CN.json"
+  },
+  {
+    "key": "l10n/zh_CN/month-names.json",
+    "file": "data/month-names.zh_CN.json"
+  },
+  {
+    "key": "l10n/zh_CN/project-shell.json",
+    "file": "dist/project-shell.zh_CN.json"
+  },
+  {
     "key": "license:NotoSansCJK.txt",
     "file": "fonts/LICENSE-NotoSansCJK.txt"
   },
@@ -6220,8 +6240,8 @@
     "file": "dist/maps-zh/spyder_dragonscave.rkm"
   },
   {
-    "key": "maps-zh/spyder_dryadsgrove.rkm",
-    "file": "dist/maps-zh/spyder_dryadsgrove.rkm"
+    "key": "maps-zh/spyder_dryadsgrove.json",
+    "file": "dist/maps-zh/spyder_dryadsgrove.json"
   },
   {
     "key": "maps-zh/spyder_flower_center.rkm",
@@ -6412,8 +6432,8 @@
     "file": "dist/maps-zh/spyder_routeb.rkm"
   },
   {
-    "key": "maps-zh/spyder_routec.rkm",
-    "file": "dist/maps-zh/spyder_routec.rkm"
+    "key": "maps-zh/spyder_routec.json",
+    "file": "dist/maps-zh/spyder_routec.json"
   },
   {
     "key": "maps-zh/spyder_routed.rkm",
@@ -6580,8 +6600,8 @@
     "file": "dist/maps-zh/tabathas.rkm"
   },
   {
-    "key": "maps-zh/test_npcs.rkm",
-    "file": "dist/maps-zh/test_npcs.rkm"
+    "key": "maps-zh/test_npcs.json",
+    "file": "dist/maps-zh/test_npcs.json"
   },
   {
     "key": "maps-zh/timber_town.rkm",

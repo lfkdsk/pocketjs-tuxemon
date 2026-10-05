@@ -78,6 +78,20 @@ describe("generated per-map repository", () => {
     expect(reads).toEqual(shell.mapIndex.map((entry) => entry.entry));
   });
 
+  test("custom-language paths retain the same large-map decode cap", () => {
+    const localized = splitGameProjectMaps(inline, MAX_COMPACT_MAP_ENTRY_BYTES, {
+      shellEntry: "project-shell.zh_CN.json",
+      mapEntry: (id, extension) => `maps-zh/${id}.${extension}`,
+    });
+    const routec = localized.entries.find((entry) => entry.meta.id === "spyder_routec")!;
+    expect(routec.encoding).toBe("json");
+    expect(routec.path).toBe("maps-zh/spyder_routec.json");
+    expect(routec.meta.entry).toBe(routec.path);
+    expect(localized.shell.mapIndex.find((entry) => entry.id === "spyder_routec")?.entry)
+      .toBe(routec.path);
+    expect(localized.files[0]?.path).toBe("project-shell.zh_CN.json");
+  });
+
   test("the packaged shell's declared mapManifestHash is fresh", () => {
     // The runtime trusts the declared hash instead of rehashing at startup,
     // so the build pipeline must prove the packaged shell is fresh. The real

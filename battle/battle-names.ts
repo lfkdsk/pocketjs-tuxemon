@@ -16,9 +16,7 @@ export interface BattleNames {
   items: Record<string, string>;
 }
 
-const zhNames = zhData.names as unknown as BattleNames;
 const enNames = enNamesJson as unknown as BattleNames;
-
 const titleCase = (slug: string): string => slug
   .split("_")
   .map((part) => part ? part[0]!.toUpperCase() + part.slice(1) : part)
@@ -32,8 +30,13 @@ const TABLE_KEY: Record<BattleNameKind, keyof BattleNames> = {
   item: "items",
 };
 
-function tableFor(lang: GameLang, kind: BattleNameKind): Record<string, string> {
-  return (lang === "zh_CN" ? zhNames : enNames)[TABLE_KEY[kind]];
+function tableFor(
+  lang: GameLang,
+  kind: BattleNameKind,
+  localized?: BattleNames,
+): Record<string, string> | undefined {
+  const names = lang === "zh_CN" ? (localized ?? zhData.current()?.names) : enNames;
+  return names?.[TABLE_KEY[kind]];
 }
 
 /** Resolve a battle slug to its display name in the active language. */
@@ -45,8 +48,13 @@ export function battleDisplayName(kind: BattleNameKind, slug: string): string {
  *  text-token resolver uses this instead of battleDisplayName() so a headless
  *  zh_CN session (which does not call setBattleSceneLang) still resolves
  *  monster names in Chinese. */
-export function battleDisplayNameFor(lang: GameLang, kind: BattleNameKind, slug: string): string {
-  const hit = tableFor(lang, kind)[slug];
+export function battleDisplayNameFor(
+  lang: GameLang,
+  kind: BattleNameKind,
+  slug: string,
+  localized?: BattleNames,
+): string {
+  const hit = tableFor(lang, kind, localized)?.[slug];
   if (hit) return hit;
   return titleCase(slug);
 }

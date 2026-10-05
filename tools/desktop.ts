@@ -5,6 +5,7 @@ import { join, resolve } from "node:path";
 import { $ } from "bun";
 import { desktopHostFeatures } from "../vendor/pocket-rpgkit/tools/lib/desktop.ts";
 import { validateAndResolveBuildPlan } from "../vendor/pocket-rpgkit/vendor/pocketjs/framework/src/manifest/resolve.ts";
+import { externalizeDesktopAudio } from "./desktop-audio.ts";
 
 const root = resolve(import.meta.dir, "..");
 const pocketjs = join(root, "vendor", "pocket-rpgkit", "vendor", "pocketjs");
@@ -78,6 +79,21 @@ const battleZhData = join(dataRoot, plan.app.id, "data", "battle-zh");
 rmSync(battleZhData, { recursive: true, force: true });
 mkdirSync(resolve(battleZhData, ".."), { recursive: true });
 cpSync(join(root, "dist", "battle-zh"), battleZhData, { recursive: true });
+// The five Chinese startup documents are raw pak entries on web/consoles.
+// Stage their exact keys in data.fs so the desktop's synchronous reader sees
+// the same layout without putting their JSON text back in the JS bundle.
+const l10nZhData = join(dataRoot, plan.app.id, "data", "l10n", "zh_CN");
+rmSync(l10nZhData, { recursive: true, force: true });
+mkdirSync(l10nZhData, { recursive: true });
+for (const [name, source] of [
+  ["project-shell.json", join(root, "dist", "project-shell.zh_CN.json")],
+  ["battle-runtime-shell.json", join(root, "dist", "battle-runtime-shell.zh_CN.json")],
+  ["battle-names.json", join(root, "data", "battle-names.zh_CN.json")],
+  ["map-descriptions.json", join(root, "dist", "map-descriptions.zh_CN.json")],
+  ["month-names.json", join(root, "data", "month-names.zh_CN.json")],
+] as const) {
+  copyFileSync(source, join(l10nZhData, name));
+}
 // --lang stages the boot language the bundle reads from data.fs.
 if (lang !== undefined) {
   const normalized = lang === "zh" ? "zh_CN" : lang === "en" ? "en_US" : lang;
@@ -87,6 +103,15 @@ const planPath = join(root, ".pocket", target, `${plan.app.output}.plan.json`);
 mkdirSync(resolve(planPath, ".."), { recursive: true });
 await Bun.write(planPath, JSON.stringify(plan, null, 2) + "\n");
 await $`bun ${join(pocketjs, "tools", "build.ts")} --plan=${planPath} --project-root=${root} --outdir=${outdir}`.cwd(root);
+const desktopPak = join(outdir, `${plan.app.output}.pak`);
+const audioSidecar = externalizeDesktopAudio(
+  desktopPak,
+  join(dataRoot, plan.app.id, "data"),
+);
+console.log(
+  `desktop: staged ${audioSidecar.entries} audio entries (${audioSidecar.audioBytes} bytes) in data.fs; ` +
+    `startup pak ${audioSidecar.fullPakBytes} -> ${audioSidecar.startupPakBytes} bytes`,
+);
 copyFileSync(
   join(root, "licenses", "AUDIO-ATTRIBUTIONS.md"),
   join(outdir, "AUDIO-ATTRIBUTIONS.md"),

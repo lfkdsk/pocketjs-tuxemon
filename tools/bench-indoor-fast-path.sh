@@ -48,6 +48,8 @@ for viewport in "${viewports[@]}"; do
   G6_DIST="$app_dist" \
     G6_MAPS="$app_root/dist/maps" \
     G6_BATTLE="$app_root/dist/battle" \
+    G6_AUDIO_ROOT="$app_root/assets/audio" \
+    G6_AUDIO_MANIFEST="$app_root/assets/audio/manifest.json" \
     G6_ANIMATED="$app_root/dist/animated" \
     G6_NPC_SRC="$app_root/dist/npc-src" \
     G6_TERRAIN_STREAM="$app_root/dist/terrain-stream" \

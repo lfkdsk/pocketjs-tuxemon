@@ -117,9 +117,9 @@ const fontsJsonPath = join(root, "fonts.json");
 const savedFontsJson = readFileSync(fontsJsonPath, "utf8");
 const englishOnlyFonts = JSON.stringify({ fallback: [], characterFiles: [] }, null, 2) + "\n";
 writeFileSync(fontsJsonPath, englishOnlyFonts);
-// The three zh_CN JSON blobs (project shell ~206 KB, battle runtime shell
-// ~259 KB, battle names ~20 KB) are statically imported through ui/zh-data.ts;
-// swapping it for the English-only stub keeps them out of the PSP JS bundle.
+// Normal web/desktop builds read the five zh_CN startup documents through
+// ui/zh-data.ts. Swapping in the English-only stub makes Chinese unavailable
+// during PSP compilation; the matching pak entries are filtered below.
 const zhDataPath = join(root, "ui", "zh-data.ts");
 const savedZhData = readFileSync(zhDataPath, "utf8");
 const stubZhData = readFileSync(join(root, "tools", "psp-stubs", "zh-data.ts"), "utf8");

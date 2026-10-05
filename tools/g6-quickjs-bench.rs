@@ -231,10 +231,11 @@ mod g6_quickjs_bench {
     /// regression (a wrapper stopped importing what it used to, or a new
     /// stage was inserted without updating this list) and must fail the
     /// bench, not print a silently-ignored partial table.
-    const EXPECTED_GP1_MARKS: [&str; 5] = [
+    const EXPECTED_GP1_MARKS: [&str; 6] = [
         "module-start",
         "engine",
         "json-literals",
+        "language-data",
         "battle-registration",
         "mount",
     ];
@@ -1307,8 +1308,8 @@ mod g6_quickjs_bench {
     /// startup breakdown: host init, bundle compile, bundle eval split
     /// into "before module-start" (solid-js + framework top-level init,
     /// invisible to the marks alone — see `gp1_eval_staged`) and the four
-    /// `ui/gp1-marks.ts` stages (engine/json-literals/battle-registration/
-    /// mount), then the small post-eval host tail. `stages` (host_init_ms,
+    /// `ui/gp1-marks.ts` stages (engine/json-literals/language-data/
+    /// battle-registration/mount), then the small post-eval host tail. `stages` (host_init_ms,
     /// compile_ms, eval_ms, host_finish_ms) all come from `Instant` at the
     /// real host call boundaries in `boot_staged` — nanosecond resolution.
     /// The four named JS stages still come from `Date.now()` marks (integer
@@ -1724,6 +1725,87 @@ mod g6_quickjs_bench {
         );
     }
 
+    /// Mirrors tools/desktop.ts's five raw zh_CN startup entries. They are
+    /// staged before boot (outside the timed interval), exactly like a real
+    /// desktop launcher's persistent data.fs tree.
+    fn seed_zh_startup(data_root: &Path) {
+        let destination = data_root
+            .join(BENCH_APP_ID)
+            .join("data")
+            .join("l10n")
+            .join("zh_CN");
+        let _ = std::fs::remove_dir_all(&destination);
+        std::fs::create_dir_all(&destination).expect("create benchmark zh startup directory");
+        for (env_name, file_name) in [
+            ("G6_ZH_PROJECT", "project-shell.json"),
+            ("G6_ZH_BATTLE_SHELL", "battle-runtime-shell.json"),
+            ("G6_ZH_NAMES", "battle-names.json"),
+            ("G6_ZH_MAP_DESCRIPTIONS", "map-descriptions.json"),
+            ("G6_ZH_MONTH_NAMES", "month-names.json"),
+        ] {
+            let source = PathBuf::from(std::env::var(env_name).unwrap_or_else(|_| {
+                panic!("{env_name} must name a zh_CN startup document")
+            }));
+            std::fs::copy(&source, destination.join(file_name)).unwrap_or_else(|error| {
+                panic!("copy {} to zh_CN startup data: {error}", source.display())
+            });
+        }
+    }
+
+    /// Stage every audio manifest entry under its exact resource key. The
+    /// production desktop build removes these lazy payloads from the startup
+    /// pak and resolves them through data.fs; benchmark boots mirror that
+    /// layout so audio playback exercises the shipped path.
+    fn seed_audio(data_root: &Path) {
+        let source_root = PathBuf::from(
+            std::env::var("G6_AUDIO_ROOT").expect("G6_AUDIO_ROOT"),
+        );
+        let manifest_path = PathBuf::from(
+            std::env::var("G6_AUDIO_MANIFEST").expect("G6_AUDIO_MANIFEST"),
+        );
+        let manifest: serde_json::Value = serde_json::from_slice(
+            &std::fs::read(&manifest_path).expect("read audio manifest"),
+        )
+        .expect("parse audio manifest");
+        let files = manifest
+            .get("files")
+            .and_then(serde_json::Value::as_object)
+            .expect("audio manifest files object");
+        let app_data = data_root.join(BENCH_APP_ID).join("data");
+        std::fs::create_dir_all(&app_data).expect("create benchmark app data directory");
+        for entry in std::fs::read_dir(&app_data).expect("read benchmark app data directory") {
+            let entry = entry.expect("read benchmark app data entry");
+            if entry.file_name().to_string_lossy().starts_with("audio:") {
+                let _ = std::fs::remove_dir_all(entry.path());
+                let _ = std::fs::remove_file(entry.path());
+            }
+        }
+        let mut copied = 0usize;
+        for (relative, metadata) in files {
+            let key = metadata
+                .get("pakKey")
+                .and_then(serde_json::Value::as_str)
+                .expect("audio manifest pakKey");
+            assert!(
+                key.starts_with("audio:")
+                    && !key.split('/').any(|part| part.is_empty() || part == ".."),
+                "unsafe benchmark audio key: {key}",
+            );
+            assert!(
+                !relative.split('/').any(|part| part.is_empty() || part == ".."),
+                "unsafe benchmark audio path: {relative}",
+            );
+            let destination = app_data.join(key);
+            std::fs::create_dir_all(destination.parent().unwrap())
+                .expect("create benchmark audio directory");
+            std::fs::copy(source_root.join(relative), &destination).unwrap_or_else(|error| {
+                panic!("copy audio entry {relative} to {key}: {error}")
+            });
+            copied += 1;
+        }
+        assert!(copied > 0, "benchmark must stage at least one audio entry");
+    }
+
     /// Stages the sharded animated-tile tree (`dist/animated/<mapId>.json`)
     /// the same way maps and battle shards are
     /// staged: readFileSync on desktop resolves against data.fs, so any map
@@ -1806,6 +1888,20 @@ mod g6_quickjs_bench {
                 &data.join(BENCH_APP_ID).join("data").join("battle-zh"),
             );
         }
+        let zh_requested = std::env::var("G6_LANG")
+            .is_ok_and(|lang| lang == "zh" || lang == "zh_CN");
+        if zh_requested {
+            seed_zh_startup(&data);
+        } else {
+            // This is an integration guard over the actual production entry:
+            // an English boot gets no zh_CN files at all, so an accidental
+            // eager zhData.load() fails here instead of being hidden by the
+            // benchmark fixture seeding every locale unconditionally.
+            assert!(
+                !data.join(BENCH_APP_ID).join("data/l10n/zh_CN").exists(),
+                "English benchmark must not stage zh_CN startup documents",
+            );
+        }
         let animated = PathBuf::from(std::env::var("G6_ANIMATED").expect("G6_ANIMATED"));
         seed_animated(&animated, &data);
         let npc_src = PathBuf::from(std::env::var("G6_NPC_SRC").expect("G6_NPC_SRC"));
@@ -1813,6 +1909,7 @@ mod g6_quickjs_bench {
         let terrain_stream =
             PathBuf::from(std::env::var("G6_TERRAIN_STREAM").expect("G6_TERRAIN_STREAM"));
         seed_terrain_stream(&terrain_stream, &data);
+        seed_audio(&data);
         if std::env::var("G6_START_CHAPTER").is_ok() {
             let demo = PathBuf::from(std::env::var("G6_DEMO").expect("G6_DEMO"));
             seed_demo(&demo, &data);
@@ -2248,6 +2345,7 @@ mod g6_quickjs_bench {
         let terrain_stream =
             PathBuf::from(std::env::var("G6_TERRAIN_STREAM").expect("G6_TERRAIN_STREAM"));
         seed_terrain_stream(&terrain_stream, &data);
+        seed_audio(&data);
 
         let (runtime, _stages) =
             boot_staged(args(&dist, "pocket-tuxemon", data.clone(), width, height)).unwrap();
@@ -2372,6 +2470,7 @@ mod g6_quickjs_bench {
         let terrain_stream =
             PathBuf::from(std::env::var("G6_TERRAIN_STREAM").expect("G6_TERRAIN_STREAM"));
         seed_terrain_stream(&terrain_stream, &data);
+        seed_audio(&data);
 
         let (runtime, _stages) =
             boot_staged(args(&dist, "pocket-tuxemon", data, width, height)).unwrap();
@@ -3037,6 +3136,7 @@ mod g6_quickjs_bench {
             &PathBuf::from(std::env::var("G6_TERRAIN_STREAM").expect("G6_TERRAIN_STREAM")),
             &data,
         );
+        seed_audio(&data);
 
         let (runtime, _) =
             boot_staged(args(&dist, "pocket-tuxemon", data.clone(), width, height)).unwrap();

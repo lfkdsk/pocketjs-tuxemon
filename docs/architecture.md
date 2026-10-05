@@ -104,9 +104,13 @@ registered as eager runtime images. Two full imports into isolated roots must
 be byte-identical (`bun run verify:g6:determinism`).
 
 `bun run build` re-runs the import and then bundles the game with PocketJS's
-builder for the desktop target. `bun run web` re-runs the import and builds
-the static site into `dist/web`. Both are self-contained: they need
-`TUXEMON_SRC` available (or a repo-local `.tuxemon-src`).
+builder for the desktop target. `bun run desktop` additionally prepares the
+game-owned portable desktop layout: the target bundle lives in
+`dist/linux-app` or `dist/macos-app`, and lazy files live under the matching
+app id in `dist/runtime-data`. The launcher passes that tree to the host with
+`--data-root`, on both Linux and macOS. `bun run web` re-runs the import and
+builds the static site into `dist/web`. Building any target needs `TUXEMON_SRC`
+available (or a repo-local `.tuxemon-src`).
 
 At runtime, `main.tsx` loads the project shell and a lazy map repository
 (desktop reads entries through the data-fs channel; web and consoles read
@@ -140,11 +144,27 @@ build time, so the import is byte-stable across ffmpeg versions:
    frame count, duration, whole-track loop bounds and per-file SHA-256.
    `bun run verify:audio` performs two clean transcodes, requires byte-identical
    output, and independently parses every committed container and manifest row.
-3. `gen-assets.ts` reads the manifest and packs each blob as a raw pak entry
-   (`audio:qoa.*` / `audio:wav.*`); the importer's `Project.audio` table maps
-   sanitized slugs to those pak keys. The per-file audio credits travel in the
-   same pak under `attribution:audio/AUDIO-ATTRIBUTIONS.md` and are also copied
-   beside desktop, web and PSP package outputs for direct reading.
+3. `gen-assets.ts` reads the manifest and registers each blob as a raw pak
+   entry (`audio:qoa.*` / `audio:wav.*`); the importer's `Project.audio` table
+   maps sanitized slugs to those keys. Web and PSP keep the payloads in their
+   pak. The desktop launcher writes the 24 QOA keys under `data.fs` and repacks
+   its startup pak without them, so the native host does not synchronously read
+   22,481,712 B of music before compiling the bundle. Its staged reader copies
+   at most one 64 KiB `data.fs` page on a frame where a requested file is still
+   incomplete and neither map-entry settling nor world prefetch owns the
+   frame; two settled confirmation frames after prefetch also stay clear. It
+   owns at most one in-flight or
+   ready file, rejects declarations above 4 MiB (about twice the largest
+   shipped QOA), hands the completed buffer to the decoder once, and releases
+   its staging reference immediately. The audio driver is replaced once when
+   that requested file becomes ready, never once per frame. A paged-read error
+   retries through the host's whole-file path; if both paths fail, the game
+   records and logs the combined diagnostic instead of silently disabling all
+   later music. The three small WAV effects remain in the pak for immediate
+   one-shot cues.
+   The per-file audio credits
+   stay in every pak under `attribution:audio/AUDIO-ATTRIBUTIONS.md` and are
+   also copied beside desktop, web and PSP package outputs for direct reading.
 4. The importer maps `play_music` → `playBgm`, `fadeout_music` →
    `fadeoutBgm`/`stopBgm`, `pause_music`/`unpause_music` → `pauseBgm`/
    `resumeBgm`, `play_sound` → `playSe`, and `music_playing` → `bgmPlaying`.
@@ -159,7 +179,8 @@ build time, so the import is byte-stable across ffmpeg versions:
 `main.tsx` opts `GameView` in to the kit's `createAudioEffects`, which
 bridges reducer audio intent to each host's PCM module. The web player feeds an
 AudioWorklet; desktop uses CPAL when available and otherwise keeps time through
-a silent sink; PSP has its own fixed-capacity mixer. The QOA decoder streams a
+a silent sink; PSP has its own fixed-capacity mixer. Desktop sidecar loading is
+incremental, while the QOA decoder itself streams a
 bounded number of frames into those hosts. `bun run verify:web:audio` drives
 three newly added map tracks in Chrome and checks decoded non-zero PCM, accepted
 host frames, a running real-time context, the AudioWorklet and underruns.

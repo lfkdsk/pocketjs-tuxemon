@@ -61,6 +61,7 @@ run_mem_walk() {
   shift 2
   env G6_COUNT_ALLOCS=1 G6_DIST="$app_dist" G6_JOURNEY="$journey" \
     G6_MAPS="$root/dist/maps" G6_BATTLE="$root/dist/battle" \
+    G6_AUDIO_ROOT="$root/assets/audio" G6_AUDIO_MANIFEST="$root/assets/audio/manifest.json" \
     G6_ANIMATED="$root/dist/animated" G6_NPC_SRC="$root/dist/npc-src" \
     G6_TERRAIN_STREAM="$root/dist/terrain-stream" G6_BENCH_ROOT="$bench_root" \
     G6_BENCH_W=480 G6_BENCH_H=272 G6_WEATHER=rain \

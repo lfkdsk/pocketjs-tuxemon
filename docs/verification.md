@@ -130,10 +130,12 @@ for attribution, but does not turn an over-250 ms startup into a pass.
 `BUILD_INPUT` identifies the exact JavaScript, pak, generated project shell and
 map-manifest hash used by each batch. `HOST_INPUT` hashes the journey harness
 and vendored PocketJS inputs. `PROCESS_COLD` identifies each process sample.
-`STAGE` and `BOOT` split bundle startup, `TEMP_CASE` reports cold/hot p95 and
-maximum thread CPU, `SLOW_FRAME` reports the ranked frames, `IDLEGC_CPU`
-separates production work from GC, and `WORLD_PLATEAU` proves the second
-outdoor pass did not grow native nodes or textures.
+`STAGE` and `BOOT` split bundle startup. In particular, `language-data`
+separates the five zh_CN raw-entry reads and JSON parses from shared bundle
+evaluation; it is effectively zero on an English boot. `TEMP_CASE` reports
+cold/hot p95 and maximum thread CPU, `SLOW_FRAME` reports the ranked frames,
+`IDLEGC_CPU` separates production work from GC, and `WORLD_PLATEAU` proves the
+second outdoor pass did not grow native nodes or textures.
 
 `G6_REUSE_HOST=1` may reuse only the compiled Rust test host. The wrapper
 rejects it unless the saved `HOST_INPUT` stamp still matches, and every sample
@@ -200,65 +202,87 @@ build and long replay are too expensive for the normal push pipeline, and
 startup plus all-map first-visit measurements still contain wall-clock
 sensitivity on shared runners.
 
-The current fixed-CPU matrix below reports the median and worst per-process
-maximum QuickJS-plus-core CPU frame, in milliseconds. It uses the component
-release containing the reducer entry-page cache and deferred seamless
-eviction, CPU 6, the `powersave` governor, and recorded one-minute load
-averages of 1.30–4.89. Five fresh processes were started for every formal
-cell. The 250 ms startup gate stopped both GB6 cells before replay and stopped
-four of five J3 480×272 processes; those failures remain in the record. A
-separate five-process diagnostic with only `G6_STARTUP_MS=500` supplied the
-missing production distributions. This does not turn an over-250 ms startup
-into a pass. J3 960×544 and both world-cache rows are unmodified formal runs.
+### Cold startup and Chinese first-open investigation
 
-| Route / viewport | Production source | Formal completed / started | Cold median / worst | Hot median / worst |
-| --- | --- | ---: | ---: | ---: |
-| GB6 480×272 | 500 ms startup diagnostic | 0 / 5 | 19.802 / 22.578 | 34.088 / 39.913 |
-| GB6 960×544 | 500 ms startup diagnostic | 0 / 5 | 22.513 / 22.636 | 28.674 / 32.960 |
-| J3 480×272 | 500 ms startup diagnostic | 1 / 5 | 36.311 / 41.500 | 19.470 / 19.545 |
-| J3 960×544 | formal | 5 / 5 | 36.764 / 41.595 | 19.693 / 20.205 |
-| world cache 480×272 | formal | 5 / 5 | 31.880 / 38.294 | 31.989 / 32.362 |
-| world cache 960×544 | formal | 5 / 5 | 33.666 / 36.249 | 37.250 / 42.287 |
+An interleaved five-process comparison at 480×272 isolates the localization
+regression. Before the Chinese build (`e65dbdb`), English startup-to-first had
+a 195.158 ms median. Immediately after localization (`a7f809e`), its median
+was 233.433 ms. Median host initialization increased by 13.538 ms and QuickJS
+compilation by 24.991 ms; together they account for almost all of the 38.275 ms
+startup increase. The application-side engine, JSON-literal, battle-registration
+and mount marks changed little.
 
-Every completed production frame is below the stricter 45 ms low-load line.
-The global maximum is a hot world-cache frame at 960×544, 42.287 ms. This is
-0.199 ms below the previous five-run result (42.486 ms) and 0.371 ms above its
-three-run review result (41.916 ms), leaving 2.713 ms to 45 ms and 7.713 ms to
-the normal 50 ms gate. Every completed journey process retained its canonical
-terminal hash.
+The five Chinese startup documents now live as raw pak/data.fs entries rather
+than shared JavaScript literals. An English boot does not read them. A Chinese
+boot reads and parses them at the dedicated `language-data` stage, then caches
+the result for the project, battle-name/runtime and text-token consumers. This removed
+494,028 B from the desktop JavaScript bundle (2,866,673 B to 2,372,645 B).
 
-Formal startup was much less reliable than production replay. The median /
-worst startup-to-first-paint times were 269.968 / 299.410 ms for GB6 480×272,
-283.591 / 294.595 ms for GB6 960×544, 272.358 / 286.976 ms for J3 480×272 and
-211.897 / 232.970 ms for J3 960×544. The misses happened before frame zero.
-They continued the known shared-host sensitivity: CPU affinity fixes process
-placement but not `powersave` frequency, page-cache state or other host work.
-The current gate is intentionally unchanged.
+The initial accepted fixed-CPU matrix used five fresh processes per cell. No
+application prewarm or raised diagnostic limit was used:
 
-The Chinese smoke tape was also run in three new processes at both viewports.
-The formal startup gate completed zero of three 480×272 processes and one of
-three 960×544 processes, so separate 500 ms startup diagnostics retained all
-six production replays. The first long-dialog frame now stayed below 50 ms:
+| Language | Viewport | One-minute load, start → end | Startup-to-first median / worst |
+| --- | --- | --- | ---: |
+| en_US | 480×272 | 5.10 → 5.59 | 208.162 / 226.979 ms |
+| en_US | 960×544 | 5.25 → 5.61 | 208.319 / 210.684 ms |
+| zh_CN | 480×272 | 4.61 → 4.63 | 218.324 / 225.105 ms |
+| zh_CN | 960×544 | 3.95 → 3.97 | 205.961 / 215.071 ms |
 
-| Viewport | Cold median / worst | Hot median / worst |
-| --- | ---: | ---: |
-| 480×272 | 9.956 / 11.629 | 41.700 / 49.258 |
-| 960×544 | 10.510 / 12.495 | 46.340 / 46.847 |
+Every accepted sample is below 250 ms and every cell median is below 230 ms.
 
-This is better than the earlier 43–64 ms range, but the 480×272 maximum still
-misses the optional 45 ms low-load target. All six processes produced the same
-Chinese terminal hash.
+One retained English 960×544 attempt started at one-minute load 5.79 and
+failed at 254.155 ms when its compile stage spiked to 152.299 ms. The gate
+stopped before replay, the result was kept rather than overwritten, and no
+diagnostic startup limit was used.
 
-The world-cache second pass has zero native-node and texture growth in every
-clean matrix sample, with only 1,467 B and 2,915 B of post-GC heap growth at
-the two viewports. One discarded 480×272 batch coincided with another worktree
-starting a many-core release build: one-minute load rose from 5.32 to 10.37
-and its third process exceeded 50 ms. The foreign build was identified and
-allowed to finish; the clean five-process batch above started only after its
-compiler processes had exited and load returned below 6. Boundary collection
-is not performed inside production work (`in_tick_gc=0` throughout). See the
-[cold-path performance report](../findings/PERF-COLD.md) for the original
-reducer attribution and component patch measurements.
+The earlier “first long-dialog” attribution was incorrect. On the Chinese
+smoke tape, f1302 is the first text-modal open, f1358 is an ordinary idle
+frame after entering downstairs, and f1446 is a background prefetch after
+entering Paper Town. A nested 960×544 profile put 47.932 ms of a 50.452 ms
+f1446 frame inside the repository load of `spyder_routec`; reducer, working-set,
+release, signals and core work were all small. The Chinese import had bypassed
+the English 128 KiB compact-decode cap. Applying the same hybrid rule leaves
+260 compact and 3 canonical maps in each language and reduced a targeted
+post-fix 960×544 f1446 sample to 4.145 ms. In that run the actual first modal,
+f1302, was 1.848 ms including core; f1358 was 0.972 ms.
+
+The same twenty processes enforce the 50 ms production-frame CPU limit across
+the whole replay. Their per-process QuickJS-plus-core maxima summarize as:
+
+| Language | Viewport | Median / worst whole-replay maximum |
+| --- | --- | ---: |
+| en_US | 480×272 | 18.625 / 24.802 ms |
+| en_US | 960×544 | 18.374 / 19.728 ms |
+| zh_CN | 480×272 | 17.927 / 20.999 ms |
+| zh_CN | 960×544 | 19.061 / 26.879 ms |
+
+Thus all five Chinese processes at each viewport keep every frame, including
+f1302/f1358/f1446, below 50 ms. A targeted post-fix profile measures those
+three 960×544 frames at 1.848, 0.972 and 4.145 ms respectively.
+
+A post-merge release closure repeated the short English G6 and Chinese-smoke
+tapes at both viewports with five fresh processes per cell, pinned to CPU 6.
+The profile and budget overrides were unset and the normal 250/50 ms limits
+were unchanged:
+
+| Language | Viewport | One-minute load, start → end | CPU 6 idle, start → end | Startup median / worst | Replay-maximum CPU median / worst |
+| --- | --- | --- | --- | ---: | ---: |
+| en_US | 480×272 | 5.81 → 6.13 | 94.95% → 100.00% | 193.888 / 202.540 ms | 31.616 / 32.787 ms |
+| en_US | 960×544 | 5.56 → 5.51 | 93.00% → 89.80% | 194.399 / 205.770 ms | 32.615 / 32.620 ms |
+| zh_CN | 480×272 | 4.81 → 5.22 | 96.00% → 92.00% | 196.757 / 206.865 ms | 31.118 / 32.303 ms |
+| zh_CN | 960×544 | 6.59 → 6.56 | 98.99% → 99.00% | 206.464 / 209.961 ms | 31.969 / 32.712 ms |
+
+All 20 processes passed. The largest individual startup was 209.961 ms and the
+largest production-frame CPU value was 32.787 ms. A separate English attempt
+failed at 308.911 ms with CPU 6 only 58.42% idle. A separate Chinese attempt
+passed three processes and then failed at 282.272 ms while closing I/O wait
+reached 32.65%. Both failures remain in the raw record and neither used a
+diagnostic startup override.
+
+See the [cold-start and Chinese frame report](../findings/PERF-BOOT-ZH.md) for
+the complete stage tables, per-process results, load record, artifact hashes
+and compatibility gates. See the [cold-path performance report](../findings/PERF-COLD.md)
+for the preceding reducer and cache optimizations.
 
 ## The tapes
 

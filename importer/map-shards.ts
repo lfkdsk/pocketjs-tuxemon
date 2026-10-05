@@ -15,22 +15,32 @@ import type { Project, ProjectShell } from "../vendor/pocket-rpgkit/src/engine/t
  */
 export const MAX_COMPACT_MAP_ENTRY_BYTES = 128 * 1024;
 
+export interface GameMapShardPaths {
+  shellEntry?: string;
+  mapEntry?: (id: string, extension: "rkm" | "json") => string;
+}
+
 export function splitGameProjectMaps(
   project: Project,
   maxCompactBytes = MAX_COMPACT_MAP_ENTRY_BYTES,
+  paths: GameMapShardPaths = {},
 ): SplitProjectMaps {
   if (!Number.isSafeInteger(maxCompactBytes) || maxCompactBytes < 0) {
     throw new Error("map shards: maxCompactBytes must be a non-negative safe integer");
   }
   const auto = splitProjectMaps(project, {
-    shellEntry: "project-shell.json",
+    shellEntry: paths.shellEntry ?? "project-shell.json",
     entryEncoding: "auto",
-    mapEntry: (id) => `maps/${id}.rkm`,
+    mapEntry: paths.mapEntry
+      ? (id) => paths.mapEntry!(id, "rkm")
+      : (id) => `maps/${id}.rkm`,
   });
   const canonical = splitProjectMaps(project, {
-    shellEntry: "project-shell.json",
+    shellEntry: paths.shellEntry ?? "project-shell.json",
     entryEncoding: "json",
-    mapEntry: (id) => `maps/${id}.json`,
+    mapEntry: paths.mapEntry
+      ? (id) => paths.mapEntry!(id, "json")
+      : (id) => `maps/${id}.json`,
   });
   const canonicalById = new Map(canonical.entries.map((entry) => [entry.meta.id, entry]));
   const entries = auto.entries.map((entry) =>
@@ -54,7 +64,7 @@ export function splitGameProjectMaps(
     shellText,
     entries,
     files: [
-      { path: "project-shell.json", bytes: utf8Encode(shellText) },
+      { path: paths.shellEntry ?? "project-shell.json", bytes: utf8Encode(shellText) },
       ...entries.map((entry) => ({ path: entry.path, bytes: entry.bytes })),
     ],
   };
