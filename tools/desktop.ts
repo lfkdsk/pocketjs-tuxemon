@@ -63,6 +63,18 @@ const npcSrcData = join(dataRoot, plan.app.id, "data", "npc-src");
 rmSync(npcSrcData, { recursive: true, force: true });
 mkdirSync(resolve(npcSrcData, ".."), { recursive: true });
 cpSync(join(root, "dist", "npc-src"), npcSrcData, { recursive: true });
+// Monster-intro portrait backdrops (on-demand IMG entries) are read the same
+// way — readFileSync from data.fs on desktop.
+const portraitData = join(dataRoot, plan.app.id, "data", "portraits");
+rmSync(portraitData, { recursive: true, force: true });
+mkdirSync(resolve(portraitData, ".."), { recursive: true });
+cpSync(join(root, "dist", "portraits"), portraitData, { recursive: true });
+// choice_monster menu icons (on-demand IMG entries) are read the same way —
+// readFileSync from data.fs on desktop.
+const choiceIconData = join(dataRoot, plan.app.id, "data", "choice-icons");
+rmSync(choiceIconData, { recursive: true, force: true });
+mkdirSync(resolve(choiceIconData, ".."), { recursive: true });
+cpSync(join(root, "dist", "choice-icons"), choiceIconData, { recursive: true });
 // GP1 fix 1: the sharded terrain-stream ground/upper chunk-ref tables
 // (dist/terrain-stream/{ground,upper}/<mapId>.json) are read the same way.
 const terrainStreamData = join(dataRoot, plan.app.id, "data", "terrain-stream");

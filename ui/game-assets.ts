@@ -951,6 +951,38 @@ export const NPC_SRC_INDEX: readonly { id: string; entry: string }[] = [
   {
     "id": "swimmer",
     "entry": "npc-src/swimmer.json"
+  },
+  {
+    "id": "tux_monster_menu_budaye",
+    "entry": "npc-src/tux_monster_menu_budaye.json"
+  },
+  {
+    "id": "tux_monster_menu_dollfin",
+    "entry": "npc-src/tux_monster_menu_dollfin.json"
+  },
+  {
+    "id": "tux_monster_menu_fruitera",
+    "entry": "npc-src/tux_monster_menu_fruitera.json"
+  },
+  {
+    "id": "tux_monster_menu_grintot",
+    "entry": "npc-src/tux_monster_menu_grintot.json"
+  },
+  {
+    "id": "tux_monster_menu_hydrone",
+    "entry": "npc-src/tux_monster_menu_hydrone.json"
+  },
+  {
+    "id": "tux_monster_menu_ignibus",
+    "entry": "npc-src/tux_monster_menu_ignibus.json"
+  },
+  {
+    "id": "tux_monster_menu_memnomnom",
+    "entry": "npc-src/tux_monster_menu_memnomnom.json"
+  },
+  {
+    "id": "tux_monster_menu_rockitten",
+    "entry": "npc-src/tux_monster_menu_rockitten.json"
   }
 ] as const;
 
@@ -1073,6 +1105,12 @@ export const GAME_ASSETS: Omit<GameAssets, "npcSrc" | "animated" | "stream"> = {
       "bg_gradient_blue_aeble_character": {
         "image": "assets/screen-layers/tux-backdrop-bg_gradient_blue_aeble_character.png"
       },
+      "bg_gradient_blue_budaye_monster": {},
+      "bg_gradient_blue_dollfin_monster": {},
+      "bg_gradient_blue_grintot_monster": {},
+      "bg_gradient_blue_ignibus_monster": {},
+      "bg_gradient_blue_memnomnom_monster": {},
+      "bg_gradient_blue_rockitten_monster": {},
       "bg_gradient_blue_spyder_monsters_image": {
         "image": "assets/screen-layers/tux-backdrop-bg_gradient_blue_spyder_monsters_image.png"
       },

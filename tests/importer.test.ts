@@ -114,10 +114,13 @@ test("all maps pass schema and reference valid transfer destinations", () => {
     sourceEvents: 4_578,
   });
   expect(result.report.coverage.actions.summary).toMatchObject({
+    // Merged counts: G-COV-C step/numeric work, translated_dialog layout
+    // args lowered natively to the kit's text-window layout, and the starter
+    // portrait backdrops (change_bg_monster) now native.
     types: 98,
     uses: 13_617,
-    native: 6_857,
-    degraded: 2_826,
+    native: 6_864,
+    degraded: 2_819,
     placeholder: 708,
     dropped: 3_226,
     nativePercent: 50.4,
@@ -167,6 +170,14 @@ test("all maps pass schema and reference valid transfer destinations", () => {
     placeholder: 0,
     dropped: 83,
   });
+  // Dialogs with upstream position/alignment args lower natively to the
+  // kit's text-window layout, in the same row as the other dialogs.
+  expect(coverageRows.find((row) => row.type === "translated_dialog")).toMatchObject({
+    native: 2019,
+    degraded: 0,
+    dropped: 49,
+  });
+  expect(coverageRows.find((row) => row.type === "translated_dialog(layout)")).toBeUndefined();
   expect(coverageRows.find((row) => row.type === "set_monster_status")).toMatchObject({
     placeholder: 0,
     dropped: 83,
@@ -323,6 +334,41 @@ test("KS1 imports fades, scripted camera, balloons, and blocking backdrops", () 
     loop: true,
   });
   expect(result.presentation.backdrops).toEqual([
+    {
+      variant: "bg_gradient_blue_budaye_monster",
+      background: "gfx/ui/background/gradient_blue.png",
+      foreground: "gfx/sprites/battle/budaye-sheet.png",
+      foregroundCrop: { x: 0, y: 0, w: 64, h: 64 },
+      lazy: true,
+    },
+    {
+      variant: "bg_gradient_blue_dollfin_monster",
+      background: "gfx/ui/background/gradient_blue.png",
+      foreground: "gfx/sprites/battle/dollfin-sheet.png",
+      foregroundCrop: { x: 0, y: 0, w: 64, h: 64 },
+      lazy: true,
+    },
+    {
+      variant: "bg_gradient_blue_grintot_monster",
+      background: "gfx/ui/background/gradient_blue.png",
+      foreground: "gfx/sprites/battle/grintot-sheet.png",
+      foregroundCrop: { x: 0, y: 0, w: 64, h: 64 },
+      lazy: true,
+    },
+    {
+      variant: "bg_gradient_blue_ignibus_monster",
+      background: "gfx/ui/background/gradient_blue.png",
+      foreground: "gfx/sprites/battle/ignibus-sheet.png",
+      foregroundCrop: { x: 0, y: 0, w: 64, h: 64 },
+      lazy: true,
+    },
+    {
+      variant: "bg_gradient_blue_memnomnom_monster",
+      background: "gfx/ui/background/gradient_blue.png",
+      foreground: "gfx/sprites/battle/memnomnom-sheet.png",
+      foregroundCrop: { x: 0, y: 0, w: 64, h: 64 },
+      lazy: true,
+    },
     {
       variant: "bg_gradient_blue_spyder_monsters_image",
       background: "gfx/ui/background/gradient_blue.png",
@@ -579,21 +625,24 @@ test("default import output remains byte-pinned", () => {
   // content-derived GM1 audio table and commands, sys.music_fading fadeout
   // guard, GI scene lowering, and the
   // GI-1b movement/party lowering (choice_npc icon rows, dropped char_run,
-  // get_party_monster iid slots, NPC-lifetime party clears), choice portrait
-  // metadata, the GI-2b storage/trade/shop dispositions, imported item icon
-  // atlas metadata, the COV-B live NPC party staging and
-  // NPC-versus-NPC resolver, the moving-guard step triggers, the live-clock
-  // daytime filter, the map-entry layer reset, the runtime player-name
-  // condition, the per-domain NPC battle result codes, COV-C step trackers,
-  // text-valued numeric transforms and set_mission no-op, the Spyder-only
-  // collision-folded Surf boundary pages, and the dialog template mapping
-  // (${{var:X}} to {v:v.X}, the
+  // get_party_monster iid slots, NPC-lifetime party clears), the G-PORTRAIT
+  // monster backdrops and choice_monster menu-face icons (lazy on-demand IMG
+  // entries), the GI-2b storage/trade/shop dispositions, imported item icon
+  // atlas metadata, the COV-B live NPC party staging and NPC-versus-NPC
+  // resolver, the moving-guard step triggers, the live-clock daytime filter,
+  // the map-entry layer reset, the runtime player-name condition, the
+  // per-domain NPC battle result codes, COV-C step trackers, text-valued
+  // numeric transforms and set_mission no-op, the Spyder-only collision-folded
+  // Surf boundary pages, native text-window layout for dialogs that carry
+  // upstream position/alignment args, the starter portrait backdrops, and
+  // the dialog
+  // template mapping (${{var:X}} to {v:v.X}, the
   // ${{today}}/${{map_desc}}/${{monster_0_*}}/${{money_formatted}} to {x:}
   // tokens), the system.textVariables/textTokens declarations and the
   // slug->description table for the {x:map_desc} resolver are all in this
   // combined pin.
   expect(createHash("sha256").update(bytes).digest("hex")).toBe(
-    "3e4d58d4afa09351d0c4ee5b09e3ffeab97812d95b2fe11bd3ae2f12ce9f31af",
+    "910c6bf0f17c70ad80dd8050960dc98564dcb06aa7d9a692363ce5754ca6f138",
   );
 });
 
@@ -955,16 +1004,96 @@ test("an unfiltered get_player_monster is non-cancellable", () => {
   expect(unfiltered?.cancel).toBeUndefined();
 });
 
-test("choice_monster becomes a KC1 static extChoice writing enum codes", () => {
-  const nodes = objectNodes(buildProject(["spyder_paper_scoop"], { extChoice: true, battle: true }).project);
-  const choice = nodes.find((node) =>
+test("choice_monster becomes authored choices whose rows show the monster menu face", () => {
+  const result = buildProject(["spyder_paper_scoop", "manhattan_beach"], { extChoice: true, battle: true });
+  const nodes = objectNodes(result.project);
+  // The static extChoice path is gone: both uses are authored choices.
+  expect(nodes.some((node) =>
     node.op === "extChoice" && (node as { call?: string }).call === "tux.enum_choice"
-  ) as { args?: { variable?: string; options?: Array<{ key: string; code: number }> } } | undefined;
-  expect(choice).toBeDefined();
-  expect(choice?.args?.variable).toBe("v.myintrochoice");
-  expect(choice?.args?.options?.map((o) => o.key)).toEqual(["budaye", "dollfin", "grintot", "ignibus", "memnomnom"]);
-  // every option carries a positive enum code for the variable_set conditions
-  expect(choice?.args?.options?.every((o) => o.code > 0)).toBeTrue();
+  )).toBeFalse();
+  const scoop = nodes.find((node) =>
+    node.op === "choices" && ((node as { options?: unknown[] }).options?.length ?? 0) === 5
+  ) as {
+    options?: Array<{ text: string; icon?: { sprite: string }; commands: Array<Record<string, unknown>> }>;
+  } | undefined;
+  expect(scoop).toBeDefined();
+  const options = scoop!.options!;
+  // Upstream's ChoiceMonster draws each monster's animated 24x24 menu face;
+  // the kit's 16 px icon cell bakes menu frame 1 (menu1_rect).
+  expect(options.map((o) => o.icon?.sprite)).toEqual([
+    "tux_monster_menu_budaye",
+    "tux_monster_menu_dollfin",
+    "tux_monster_menu_grintot",
+    "tux_monster_menu_ignibus",
+    "tux_monster_menu_memnomnom",
+  ]);
+  for (const option of options) {
+    expect(result.project.sprites?.[option.icon!.sprite]).toEqual({
+      kind: "image",
+      src: `gfx/sprites/battle/${option.icon!.sprite.slice("tux_monster_menu_".length)}-sheet.png`,
+    });
+  }
+  // Every row writes its positive enum code into myintrochoice.
+  const codes = options.map((o) => (o.commands[0] as { id?: string; set?: { value?: number } }));
+  expect(codes.every((c) => c.id === "v.myintrochoice" && (c.set?.value ?? 0) > 0)).toBeTrue();
+  expect(new Set(codes.map((c) => c.set?.value)).size).toBe(5);
+  // The manhattan_beach use (hydrone:rockitten:fruitera) gets icons too.
+  const manhattan = result.presentation.monsterMenuIcons.filter((icon) =>
+    ["hydrone", "rockitten", "fruitera"].includes(icon.sprite.slice("tux_monster_menu_".length))
+  );
+  expect(manhattan).toHaveLength(3);
+  for (const icon of manhattan) {
+    expect(icon.crop).toEqual({ x: 0, y: 64, w: 24, h: 24 });
+  }
+  // Every registered icon has a cooker entry with the default menu1 crop.
+  const scoopIcons = result.presentation.monsterMenuIcons.filter((icon) =>
+    ["budaye", "dollfin", "grintot", "ignibus", "memnomnom"].includes(icon.sprite.slice("tux_monster_menu_".length))
+  );
+  expect(scoopIcons).toHaveLength(5);
+  for (const icon of scoopIcons) {
+    expect(icon.sheet).toBe(`gfx/sprites/battle/${icon.sprite.slice("tux_monster_menu_".length)}-sheet.png`);
+    expect(icon.crop).toEqual({ x: 0, y: 64, w: 24, h: 24 });
+  }
+});
+
+test("change_bg_monster shows the front battle sprite on the story backdrop", () => {
+  const result = buildProject(["player_house_bedroom", "spyder_bedroom"], G6_IMPORT_OPTIONS);
+  const nodes = objectNodes(result.project);
+  const backdrops = nodes.filter((node) =>
+    node.op === "screenBackdrop" && (node as { variant?: string }).variant?.endsWith("_monster")
+  ) as Array<{ layer: string; variant: string }>;
+  // rockitten (player_house_bedroom, twice) + the five Spyder starters.
+  expect(backdrops.map((b) => b.variant).sort()).toEqual([
+    "bg_gradient_blue_budaye_monster",
+    "bg_gradient_blue_dollfin_monster",
+    "bg_gradient_blue_grintot_monster",
+    "bg_gradient_blue_ignibus_monster",
+    "bg_gradient_blue_memnomnom_monster",
+    "bg_gradient_blue_rockitten_monster",
+    "bg_gradient_blue_rockitten_monster",
+  ]);
+  for (const backdrop of backdrops) expect(backdrop.layer).toBe("tux_backdrop");
+  // The old name card is gone. player_house_bedroom has no
+  // `translated_dialog rockitten`, so any "Rockitten" text there would be
+  // the removed name card; spyder_bedroom keeps the five `translated_dialog
+  // <starter>` lines that open on top of each portrait (one per starter).
+  const bedroom = objectNodes(result.project.maps.find((m) => m.id === "player_house_bedroom")!);
+  const rockittenCards = bedroom.filter((node) =>
+    node.op === "text" && (node as { lines?: string[] }).lines?.[0] === "Rockitten"
+  );
+  expect(rockittenCards).toEqual([]);
+  const spyder = objectNodes(result.project.maps.find((m) => m.id === "spyder_bedroom")!);
+  const starterDialogs = spyder.filter((node) =>
+    node.op === "text" && ((node as { lines?: string[] }).lines?.length ?? 0) === 1 &&
+    ["Dollfin", "Ignibus", "Memnomnom", "Budaye", "Grintot"].includes(
+      (node as { lines?: string[] }).lines![0]!,
+    )
+  );
+  expect(starterDialogs).toHaveLength(5);
+  // Every portrait variant has a composited backdrop source.
+  for (const variant of new Set(backdrops.map((b) => b.variant))) {
+    expect(result.presentation.backdrops).toContainEqual(expect.objectContaining({ variant }));
+  }
 });
 
 test("choice_npc shows each appearance with its walker icon", () => {

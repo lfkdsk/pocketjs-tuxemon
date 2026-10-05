@@ -50,6 +50,7 @@ export function coverageMarkdown(report: ImportReport): string {
   const openShop = actions.rows.find((row) => row.type === "open_shop");
   const partyMonster = actions.rows.find((row) => row.type === "get_party_monster");
   const playerMonster = actions.rows.find((row) => row.type === "get_player_monster");
+  const choiceMonster = actions.rows.find((row) => row.type === "choice_monster");
   const worldRows = report.world.worlds.map((world) =>
     `| ${world.worldId} | ${world.outdoorMaps} / ${world.sourceMembers} | ${world.bboxTiles.width}×${world.bboxTiles.height} | ${world.geometricContacts} | ${world.acceptedSeams} | ${world.coordinatePreservingSeams} / ${world.mixedHandoffSeams} / ${world.portalOnlySeams} / ${world.directionOnlySeams} | ${world.rejectedGeometricContacts} | ${world.rejectedGaps} | ${world.dimensionCorrections} | ${world.componentSizes.join(" + ")} |`
   ).join("\n");
@@ -135,8 +136,11 @@ the fighter (challenger) trainer code as a deterministic fallback. The
 other rows are global or legacy content. \`get_player_monster\` has
 ${playerMonster?.native ?? 0} Native uses (the KC1 \`extChoice\` over the live
 party) and ${playerMonster?.degraded ?? 0} Degraded uses (the party picker that
-feeds an adjacent \`rename_monster\`); \`choice_monster\` is Native via the same
-party extension. \`choice_npc\` is Native: a choice box whose rows show each
+feeds an adjacent \`rename_monster\`); \`choice_monster\` has
+${choiceMonster?.native ?? 0} Native uses: authored \`choices\` boxes whose rows
+show the monster's static menu-face icon beside its translated name (upstream's
+animated 24 px menu faces are baked to one 16 px frame, a visual downgrade).
+\`choice_npc\` is Native: a choice box whose rows show each
 appearance's front walker frame as an icon, beside the shared label and the
 option's own name. \`remove_monster\` deletes an iid
 from its owner. An NPC's party lives as long as the NPC, as upstream: it is

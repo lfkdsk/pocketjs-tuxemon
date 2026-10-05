@@ -70,10 +70,10 @@ summary:
   maps cross a 128 KiB compact-decode cap, trading a small amount of storage
   for bounded first-visit latency on QuickJS. Indexed battle art plus its lazy
   database occupies 3,516,960 B in the pak. The current bilingual Web game pak
-  is 88,768,672 B, including English and Chinese content, CJK font atlases, all
+  is 90,354,272 B, including English and Chinese content, CJK font atlases, all
   content-resolvable audio, its attribution list and demo data. The desktop
   launcher removes the 24 QOA music payloads (22,481,712 B) from that target's
-  startup read: its pak is 53,331,856 B and those files retain their exact
+  startup read: its pak is 54,917,456 B and those files retain their exact
   `audio:qoa.*` keys under the companion `dist/runtime-data` tree. The three
   small WAV effects remain packed for immediate one-shot playback; QOA files
   are copied from `data.fs` one 64 KiB page per frame before playback starts.

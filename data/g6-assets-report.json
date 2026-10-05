@@ -30,11 +30,11 @@
    "compact": 260,
    "json": 3
   },
-  "shellBytes": 201476,
-  "entryBytes": 5698404,
-  "canonicalJsonBytes": 10662779,
+  "shellBytes": 202196,
+  "entryBytes": 5699332,
+  "canonicalJsonBytes": 10663867,
   "entries": 263,
-  "manifestHash": "53184f15dbf932676ce1f3d828c5a0051558aecc918cf71a8ca3f4efa48d7c80",
+  "manifestHash": "196bc0b391b2f1d2f06e6a5f9cfec838e0ca06322e9d99993ecbfe904becbd96",
   "schemaHash": "1127febbfb43f2f33b1bd7a2df8c554efbbdc56e1e9a35f26558dbda4f8261b9"
  },
  "terrain": {
@@ -55,17 +55,17 @@
  },
  "screenLayers": {
   "layers": 2,
-  "variants": 10,
+  "variants": 16,
   "imageVariants": 7,
-  "imageBytes": 24927
+  "imageBytes": 43544
  },
  "animatedRepository": {
   "entries": 48,
   "entryBytes": 505687
  },
  "npcSrcRepository": {
-  "entries": 183,
-  "entryBytes": 125878
+  "entries": 191,
+  "entryBytes": 126194
  },
  "audio": {
   "entries": 27,
@@ -73,10 +73,11 @@
  },
  "characters": {
   "source": "https://github.com/Tuxemon/Tuxemon",
-  "spriteKeys": 183,
+  "spriteKeys": 191,
   "walkers": 160,
   "staticObjects": 22,
   "tallStaticObjects": 12,
+  "monsterMenuIcons": 8,
   "placeholders": 1,
   "playerSheet": "sprites/adventurer.png",
   "imageFiles": 1955,

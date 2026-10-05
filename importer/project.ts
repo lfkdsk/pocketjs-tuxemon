@@ -328,12 +328,23 @@ export interface BackdropSource {
   foreground?: string;
   foregroundCrop?: { x: number; y: number; w: number; h: number };
   color?: string;
+  /** Lazy backdrops ship as on-demand IMG entries (data.fs / pak blob) and
+   * are uploaded only when first shown, so they never enter the boot path. */
+  lazy?: boolean;
 }
 
 export interface OverlaySource {
   variant: string;
   image?: string;
   color?: string;
+}
+
+/** A choice_monster row icon: the sheet rect (menu1_rect) the cooker crops
+ *  and scales to the kit's 16 px icon cell. */
+export interface MonsterMenuIconSource {
+  sprite: string;
+  sheet: string;
+  crop: { x: number; y: number; w: number; h: number };
 }
 
 const backdropSources = new Map<string, BackdropSource>();
@@ -456,6 +467,112 @@ function ensureBackdrop(
   }
   backdropSources.set(variant, next);
   return variant;
+}
+
+/** Monster sprite geometry, mirroring upstream's MonsterSpritesModel
+ *  defaults (tuxemon/db.py): sheet gfx/sprites/battle/<slug>-sheet.png,
+ *  front (0,0,64,64), menu1 (0,64,24,24), menu2 (24,64,24,24). An explicit
+ *  `sprites:` section in db/monster/<slug>.yaml overrides any field. */
+interface MonsterSpriteDef {
+  sheet: string;
+  frontRect: { x: number; y: number; w: number; h: number };
+  menu1Rect: { x: number; y: number; w: number; h: number };
+  menu2Rect: { x: number; y: number; w: number; h: number };
+}
+
+const monsterSpriteCache = new Map<string, MonsterSpriteDef | null>();
+
+function monsterSpriteDef(slug: string): MonsterSpriteDef | null {
+  const cached = monsterSpriteCache.get(slug);
+  if (cached !== undefined) return cached;
+  const readRect = (
+    value: unknown,
+    fallback: readonly [number, number, number, number],
+  ): { x: number; y: number; w: number; h: number } => {
+    if (Array.isArray(value) && value.length === 4 &&
+        value.every((n) => Number.isInteger(n) && Number(n) >= 0)) {
+      const [x, y, w, h] = value as number[];
+      if (w > 0 && h > 0) return { x, y, w, h };
+    }
+    const [x, y, w, h] = fallback;
+    return { x, y, w, h };
+  };
+  let def: MonsterSpriteDef | null = null;
+  const path = join(TUXEMON_SRC, "mods/tuxemon/db/monster", `${slug}.yaml`);
+  if (existsSync(path)) {
+    const doc = Bun.YAML.parse(readFileSync(path, "utf8")) as {
+      sprites?: {
+        sheet?: unknown;
+        front_rect?: unknown;
+        menu1_rect?: unknown;
+        menu2_rect?: unknown;
+      };
+    } | null;
+    const sprites = doc?.sprites;
+    const rawSheet = typeof sprites?.sheet === "string" && sprites.sheet
+      ? sprites.sheet
+      : `gfx/sprites/battle/${slug}-sheet`;
+    const sheet = rawSheet.endsWith(".png") ? rawSheet : `${rawSheet}.png`;
+    if (existsSync(join(TUXEMON_SRC, "mods/tuxemon", sheet))) {
+      def = {
+        sheet,
+        frontRect: readRect(sprites?.front_rect, [0, 0, 64, 64]),
+        menu1Rect: readRect(sprites?.menu1_rect, [0, 64, 24, 24]),
+        menu2Rect: readRect(sprites?.menu2_rect, [24, 64, 24, 24]),
+      };
+    }
+  }
+  monsterSpriteCache.set(slug, def);
+  return def;
+}
+
+/** change_bg_monster: the monster's front battle sprite, centered on the
+ *  blocking screen backdrop — the kit's form of upstream's
+ *  MonsterImageState (background + front sprite, dialog opens on top). */
+function ensureMonsterBackdrop(background: string, monster: string): string | null {
+  const sprites = monsterSpriteDef(monster);
+  if (!sprites) return null;
+  const backgroundPath = `gfx/ui/background/${background}.png`;
+  if (!existsSync(join(TUXEMON_SRC, "mods/tuxemon", backgroundPath))) return null;
+  const dimensions = pngDimensions(join(TUXEMON_SRC, "mods/tuxemon", sprites.sheet));
+  const { x, y, w, h } = sprites.frontRect;
+  if (!dimensions || x + w > dimensions.width || y + h > dimensions.height) return null;
+  const variant = ["bg", background, monster, "monster"].map(safeAssetId).join("_");
+  const next: BackdropSource = {
+    variant,
+    background: backgroundPath,
+    foreground: sprites.sheet,
+    foregroundCrop: { x, y, w, h },
+    lazy: true,
+  };
+  const previous = backdropSources.get(variant);
+  if (previous && JSON.stringify(previous) !== JSON.stringify(next)) {
+    throw new Error(`conflicting backdrop source ${variant}`);
+  }
+  backdropSources.set(variant, next);
+  return variant;
+}
+
+/** choice_monster row icon: the monster's animated menu face reduced to the
+ *  kit's single static 16 px picture. Returns the registered sprite key, or
+ *  null when the sheet or menu rect is unavailable (a text-only row). */
+const monsterMenuIconSources = new Map<string, MonsterMenuIconSource>();
+
+function ensureMonsterMenuIcon(slug: string): string | null {
+  const sprites = monsterSpriteDef(slug);
+  if (!sprites) return null;
+  const dimensions = pngDimensions(join(TUXEMON_SRC, "mods/tuxemon", sprites.sheet));
+  const { x, y, w, h } = sprites.menu1Rect;
+  if (!dimensions || x + w > dimensions.width || y + h > dimensions.height) return null;
+  const sprite = `tux_monster_menu_${slug}`;
+  appearanceSpriteDefs.set(sprite, { kind: "image", src: sprites.sheet });
+  const next = { sprite, sheet: sprites.sheet, crop: { x, y, w, h } };
+  const previous = monsterMenuIconSources.get(sprite);
+  if (previous && JSON.stringify(previous) !== JSON.stringify(next)) {
+    throw new Error(`conflicting monster menu icon ${sprite}`);
+  }
+  monsterMenuIconSources.set(sprite, next);
+  return sprite;
 }
 
 function ensureCharacterBackdrop(background: string, character: string): string | null {
@@ -650,6 +767,8 @@ function note(kind: "act" | "cond" | "behav" | "trigger", type: string, fate: Fa
 interface RecordedDisposition {
   disposition: Disposition;
   reason: string;
+  /** Override the coverage row type (defaults to the source rule type). */
+  type?: string;
 }
 
 export interface DialogLayoutCoverageReport {
@@ -680,8 +799,8 @@ class EventCoverage {
 
   constructor(readonly event: TuxEvent) {}
 
-  action(rule: Rule, fate: Fate, reason: string): void {
-    if (!rule.synthetic) this.actions.set(rule, { disposition: dispositionFor(fate), reason });
+  action(rule: Rule, fate: Fate, reason: string, type?: string): void {
+    if (!rule.synthetic) this.actions.set(rule, { disposition: dispositionFor(fate), reason, ...(type ? { type } : {}) });
   }
 
   condition(rule: Cond, fate: Fate, reason: string): void {
@@ -702,7 +821,7 @@ class EventCoverage {
     return [
       ...this.event.acts.filter((rule) => !rule.synthetic).map((rule) => ({
         kind: "action" as const,
-        type: rule.type,
+        type: this.actions.get(rule)?.type ?? rule.type,
         sourceType: rule.type,
         ...(this.actions.get(rule) ?? { disposition: "dropped" as const, reason: missing }),
       })),
@@ -840,9 +959,9 @@ class ConversionCoverage {
 const conversionCoverage = new ConversionCoverage(loadAllFileEvents());
 let activeCoverage: EventCoverage | undefined;
 
-function noteAction(rule: Rule, type: string, fate: Fate, why: string): void {
+function noteAction(rule: Rule, type: string, fate: Fate, why: string, coverageType?: string): void {
   note("act", type, fate, why);
-  activeCoverage?.action(rule, fate, why);
+  activeCoverage?.action(rule, fate, why, coverageType);
 }
 
 function noteCondition(rule: Cond, type: string, fate: Fate, why: string): void {
@@ -2205,6 +2324,25 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
             });
             break;
           }
+          if (a.type === "choice_monster") {
+            // Each option is a monster slug; its menu face (menu1_rect) is
+            // the option icon, the static 16 px form of upstream's animated
+            // ChoiceMonster faces.
+            noteAction(a, a.type, "T1", "choices with each monster's menu face as its icon");
+            out.push({
+              op: "choices",
+              prompt: "",
+              options: options.map((option) => {
+                const iconSprite = ensureMonsterMenuIcon(option.key);
+                return {
+                  text: option.label,
+                  ...(iconSprite ? { icon: { sprite: iconSprite } } : {}),
+                  commands: [{ op: "variable" as const, id: varId(variable), set: { op: "set" as const, value: option.code } }],
+                };
+              }),
+            });
+            break;
+          }
           noteAction(a, a.type, "T1", "KC1 extChoice static list -> enum code via the resolver");
           out.push(command({
             op: "extChoice",
@@ -3524,11 +3662,19 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         break;
       }
       case "change_bg_monster": {
+        const background = g[0]!;
         const monster = g[1]!;
-        if (!monster) { noteAction(a, a.type, "T4-dropped", "missing monster slug"); break; }
-        const name = (po.get(monster) ?? monster.replaceAll("_", " ")).slice(0, 52);
-        noteAction(a, a.type, "T1-lowered", "starter portrait shown as a name card; the full-screen sprite scene is a future presentation upgrade");
-        out.push({ op: "text", lines: [name] });
+        if (!background || !monster) {
+          noteAction(a, a.type, "T4-dropped", "missing background or monster slug");
+          break;
+        }
+        const variant = ensureMonsterBackdrop(background, monster);
+        if (!variant) {
+          noteAction(a, a.type, "T4-dropped", "background or monster front sprite is unavailable");
+          break;
+        }
+        noteAction(a, a.type, "T1", "monster front battle sprite centered on the blocking screen backdrop; the following dialog opens on top, like the upstream MonsterImageState");
+        out.push({ op: "screenBackdrop", layer: SCREEN_BACKDROP_LAYER, variant });
         break;
       }
       default:
@@ -4635,6 +4781,7 @@ export interface ImportBuild {
   presentation: {
     backdrops: BackdropSource[];
     overlays: OverlaySource[];
+    monsterMenuIcons: MonsterMenuIconSource[];
   };
   report: ImportReport;
 }
@@ -4842,6 +4989,7 @@ export function buildProject(
   backdropSources.clear();
   overlaySources.clear();
   appearanceSpriteDefs.clear();
+  monsterMenuIconSources.clear();
   for (const id of [...itemDb.keys()].sort()) ensureItem(id);
   transferRepairs.length = 0;
   conversionCoverage.reset();
@@ -5039,6 +5187,9 @@ export function buildProject(
       ),
       overlays: [...overlaySources.values()].sort((a, b) =>
         a.variant < b.variant ? -1 : a.variant > b.variant ? 1 : 0
+      ),
+      monsterMenuIcons: [...monsterMenuIconSources.values()].sort((a, b) =>
+        a.sprite < b.sprite ? -1 : a.sprite > b.sprite ? 1 : 0
       ),
     },
     report: {

@@ -11,7 +11,7 @@ When conversion discards a whole event, every source rule in it is Dropped.
 
 | Kind | Kinds | Uses | Native | Degraded | Placeholder | Dropped | S1 T1 baseline |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Actions | 98 | 13617 | 12199 | 1100 | 0 | 318 | 6407 / 6246 (47.05% / 45.9%) |
+| Actions | 98 | 13617 | 12206 | 1093 | 0 | 318 | 6407 / 6246 (47.05% / 45.9%) |
 | Conditions | 64 | 8663 | 8364 | 56 | 0 | 243 | 4758 / 4591 (54.92% / 53.0%) |
 
 The S1 acceptance baselines are 6,246 action uses (45.9%) and 4,591
@@ -21,7 +21,7 @@ Degraded count toward them. This import records 6407
 (54.92%), respectively: 161 above
 for actions and 167 above for conditions. The old
 type-table Native figure was 5,448 / 13,617 (40.0%); conversion-path accounting
-supersedes it with 12199 / 13617
+supersedes it with 12206 / 13617
 (89.6%). “Executable”
 (native + degraded + deliberate P1 placeholder) is
 97.7% for actions and
@@ -74,8 +74,11 @@ the fighter (challenger) trainer code as a deterministic fallback. The
 other rows are global or legacy content. `get_player_monster` has
 15 Native uses (the KC1 `extChoice` over the live
 party) and 2 Degraded uses (the party picker that
-feeds an adjacent `rename_monster`); `choice_monster` is Native via the same
-party extension. `choice_npc` is Native: a choice box whose rows show each
+feeds an adjacent `rename_monster`); `choice_monster` has
+2 Native uses: authored `choices` boxes whose rows
+show the monster's static menu-face icon beside its translated name (upstream's
+animated 24 px menu faces are baked to one 16 px frame, a visual downgrade).
+`choice_npc` is Native: a choice box whose rows show each
 appearance's front walker frame as an icon, beside the shared label and the
 option's own name. `remove_monster` deletes an iid
 from its owner. An NPC's party lives as long as the NPC, as upstream: it is
@@ -229,7 +232,7 @@ four-neighbour BFS with fixed tie-breaking selects the nearest walkable cell:
 | Action | `camera_position` | 6 | 0 | 0 | 0 | 6 |
 | Action | `change_bg` | 15 | 0 | 0 | 0 | 15 |
 | Action | `change_bg_char` | 4 | 0 | 0 | 0 | 4 |
-| Action | `change_bg_monster` | 0 | 7 | 0 | 0 | 7 |
+| Action | `change_bg_monster` | 7 | 0 | 0 | 0 | 7 |
 | Action | `change_taste` | 0 | 0 | 0 | 2 | 2 |
 | Action | `char_face` | 1562 | 444 | 0 | 21 | 2027 |
 | Action | `char_move` | 64 | 13 | 0 | 0 | 77 |

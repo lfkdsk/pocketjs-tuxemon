@@ -9,6 +9,7 @@ import type { PlayerFrames } from "../vendor/pocket-rpgkit/src/ui/PlayerSprite.t
 import type { Project, SpriteDef } from "../vendor/pocket-rpgkit/src/engine/types.ts";
 import { decodePng } from "./png.ts";
 import { DEFAULT_TUXEMON_SRC } from "./terrain.ts";
+import type { MonsterMenuIconSource } from "./project.ts";
 
 const PSM_8888 = 3;
 
@@ -20,6 +21,7 @@ export interface CharacterReport {
   walkers: number;
   staticObjects: number;
   tallStaticObjects: number;
+  monsterMenuIcons: number;
   placeholders: number;
   playerSheet: string;
   imageFiles: number;
@@ -31,12 +33,18 @@ export interface CharacterBuild {
   npcSrc: Record<string, NpcArt>;
   player: PlayerFrames;
   imagesJson: Record<string, { psm: number }>;
+  /** choice_monster row icons as raw RGBA: gen-assets writes them as on-demand
+   *  IMG pak entries (dist/choice-icons/<sprite>.img) instead of eager ui:img. */
+  menuIcons: Record<string, { rgba: Uint8Array; w: number; h: number }>;
   report: CharacterReport;
 }
 
 export interface CharacterCookOptions {
   outputRoot: string;
   sourceRoot?: string;
+  /** choice_monster row icons: crop each sheet rect (the monster's menu1
+   *  face) and nearest-neighbour scale it to the kit's 16 px icon cell. */
+  monsterMenuIcons?: readonly MonsterMenuIconSource[];
 }
 
 function safeName(value: string): string {
@@ -81,6 +89,30 @@ function portablePng(rgba: Uint8Array, width: number, height: number): Uint8Arra
   return encodePNG(padded, outWidth, outHeight);
 }
 
+/** Nearest-neighbour crop+scale of a sheet rect into a size×size RGBA icon.
+ *  The destination pixel (dx, dy) samples the rect's centre-weighted source
+ *  pixel, the same mapping gen-assets' portableStaticPng uses. */
+function cropScaleIcon(
+  image: { width: number; height: number; rgba: Uint8Array },
+  crop: { x: number; y: number; w: number; h: number },
+  size: number,
+): Uint8Array {
+  const out = new Uint8Array(size * size * 4);
+  for (let dy = 0; dy < size; dy++) {
+    const sy = crop.y + Math.min(crop.h - 1, Math.floor((dy + 0.5) * crop.h / size));
+    for (let dx = 0; dx < size; dx++) {
+      const sx = crop.x + Math.min(crop.w - 1, Math.floor((dx + 0.5) * crop.w / size));
+      const src = (sy * image.width + sx) * 4;
+      const dst = (dy * size + dx) * 4;
+      out[dst] = image.rgba[src]!;
+      out[dst + 1] = image.rgba[src + 1]!;
+      out[dst + 2] = image.rgba[src + 2]!;
+      out[dst + 3] = image.rgba[src + 3]!;
+    }
+  }
+  return out;
+}
+
 interface AppearanceOption {
   template?: { sprite_name?: unknown };
 }
@@ -107,11 +139,16 @@ export async function cookCharacters(project: Project, options: CharacterCookOpt
   const npcSrc: Record<string, NpcArt> = {};
   const imagesJson: Record<string, { psm: number }> = {};
   const rewritten: Record<string, SpriteDef> = {};
+  const menuIcons: Record<string, { rgba: Uint8Array; w: number; h: number }> = {};
   let walkers = 0;
   let staticObjects = 0;
   let tallStaticObjects = 0;
+  let monsterMenuIcons = 0;
   let placeholders = 0;
   let imageBytes = 0;
+  const menuIconBySprite = new Map(
+    (options.monsterMenuIcons ?? []).map((icon) => [icon.sprite, icon]),
+  );
 
   const writeImage = (relative: string, bytes: Uint8Array): string => {
     writeFileSync(join(outputRoot, relative), bytes);
@@ -144,6 +181,28 @@ export async function cookCharacters(project: Project, options: CharacterCookOpt
   };
 
   for (const [key, def] of Object.entries(project.sprites ?? {}).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)) {
+    const menuIcon = def.kind === "image" ? menuIconBySprite.get(key) : undefined;
+    if (menuIcon) {
+      // A choice_monster row icon: the monster's menu1 face cropped from its
+      // battle sheet and scaled to the kit's 16 px icon cell. It ships as an
+      // on-demand IMG entry (gen-assets writes dist/choice-icons/<sprite>.img),
+      // NOT as an eager ui:img, so it is decoded/uploaded only when a choice
+      // menu first resolves it. npcSrc carries the texture name the game's
+      // choice-icon provider registers on first access (ui/choice-icon-provider.ts).
+      const source = join(modRoot, menuIcon.sheet);
+      const sheet = decodePng(new Uint8Array(readFileSync(source)), source);
+      const { x, y, w, h } = menuIcon.crop;
+      if (x + w > sheet.width || y + h > sheet.height) {
+        throw new Error(`${source}: monster menu crop ${x},${y},${w},${h} exceeds the ${sheet.width}x${sheet.height} sheet`);
+      }
+      const rgba = cropScaleIcon(sheet, menuIcon.crop, 16);
+      menuIcons[key] = { rgba, w: 16, h: 16 };
+      npcSrc[key] = `choice-icon:${key}`;
+      rewritten[key] = def;
+      monsterMenuIcons++;
+      continue;
+    }
+
     if (def.kind === "image" && def.src.startsWith("sprites/")) {
       const source = join(modRoot, def.src);
       const art = await writeWalker(`npc-${safeName(key)}`, source);
@@ -206,6 +265,7 @@ export async function cookCharacters(project: Project, options: CharacterCookOpt
     npcSrc,
     player,
     imagesJson,
+    menuIcons,
     report: {
       // Upstream repository, not the local checkout path (see terrain.ts).
       source: "https://github.com/Tuxemon/Tuxemon",
@@ -213,6 +273,7 @@ export async function cookCharacters(project: Project, options: CharacterCookOpt
       walkers,
       staticObjects,
       tallStaticObjects,
+      monsterMenuIcons,
       placeholders,
       playerSheet,
       imageFiles: Object.keys(imagesJson).length,

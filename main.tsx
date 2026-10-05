@@ -47,6 +47,7 @@ import { persistAutosave } from "./ui/save-game.ts";
 import { createLangMenu } from "./ui/lang-menu.tsx";
 import { createCompositeOverlay } from "./ui/game-overlay.tsx";
 import { createNpcSrcProvider } from "./ui/npc-src-repository.ts";
+import { createChoiceIconNpcSrc } from "./ui/choice-icon-provider.ts";
 import { createTerrainStreamProvider } from "./ui/terrain-stream-repository.ts";
 import { createGameWorldAssetCache } from "./ui/world-cache.ts";
 import {
@@ -74,6 +75,7 @@ import {
 import { WeatherOverlay } from "./ui/weather-overlay.tsx";
 import { weatherOverlaySuspended } from "./ui/weather-overlay-policy.ts";
 import { createGameEffects } from "./ui/weather-effects.tsx";
+import { PortraitBackdropEffects } from "./ui/portrait-backdrop.tsx";
 
 // ui/gp1-kit-stage.ts and ui/gp1-data-stage.ts are thin re-export wrappers:
 // each one's trailing gp1Mark() call fires right
@@ -145,7 +147,13 @@ void NPC_SRC_ASSET_PATHS;
 // Same reason: ANIMATED's atlas names now live in dist/animated shards.
 void ANIMATED_ATLAS_NAMES;
 const animated = createAnimatedProvider(ANIMATED_INDEX, { read: readEntry });
-const npcSrc = createNpcSrcProvider(NPC_SRC_INDEX, { read: readEntry });
+// The choice_monster menu icons are lazy IMG entries: the wrapper uploads a
+// sprite's texture on its first npcSrc read (GameView's choice-icon resolver
+// and npcFrame both index by sprite), so they never enter the boot upload
+// path. The world-asset cache keeps the unwrapped table — its residency and
+// eviction controls key off the original lazy proxy (ui/world-cache.ts).
+const npcSrcLazy = createNpcSrcProvider(NPC_SRC_INDEX, { read: readEntry });
+const npcSrc = createChoiceIconNpcSrc(npcSrcLazy);
 const stream = createTerrainStreamProvider(
   TERRAIN_STREAM_META,
   TERRAIN_STREAM_GROUND_INDEX,
@@ -182,7 +190,7 @@ let deferredAudioIdle = true;
 const worldAssetCache = createGameWorldAssetCache(project.worldLayout!, {
   stream,
   animated,
-  npcSrc,
+  npcSrc: npcSrcLazy,
 }, worldDiagnostics
   ? (stats) => { worldDiagnostics.cache = stats; }
   : undefined);
@@ -291,6 +299,10 @@ mount(() => (
       demo={demo}
       overlay={overlay}
       effects={Effects}
+      screenPresentation={{
+        fingerprint: () => "",
+        effects: PortraitBackdropEffects,
+      }}
       theme={TUXEMON_UI_THEME}
       textTokens={textTokens}
       hostActions={{

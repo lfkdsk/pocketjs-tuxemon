@@ -4,6 +4,8 @@
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { encodePNG } from "./vendor/pocket-rpgkit/vendor/pocketjs/tests/png.ts";
+import { encodeImageEntry } from "./vendor/pocket-rpgkit/vendor/pocketjs/framework/compiler/pak.ts";
+import { PSM } from "./vendor/pocket-rpgkit/vendor/pocketjs/contracts/spec/spec.ts";
 import { cookAnimationAtlases } from "./vendor/pocket-rpgkit/tools/lib/animated.ts";
 import { loadAnimationSheet } from "./vendor/pocket-rpgkit/tools/lib/anim-sheet.ts";
 import { splitProjectMaps } from "./vendor/pocket-rpgkit/tools/lib/map-project.ts";
@@ -48,8 +50,29 @@ project = {
   maps: project.maps.map((map) => ({ ...map, sheets: map.sheets?.filter((sheet) => sheet !== "tux") })),
 };
 
-const characters = await cookCharacters(project, { outputRoot: ROOT });
+const characters = await cookCharacters(project, {
+  outputRoot: ROOT,
+  monsterMenuIcons: imported.presentation.monsterMenuIcons,
+});
 project = characters.project;
+
+// Lazy choice_monster menu icons: like the monster-intro portraits, they ship
+// as on-demand IMG entries (data.fs on desktop, pak blob on web/console) and
+// are uploaded only when a choice menu first resolves the sprite — never as
+// eager ui:img at boot. npcSrc carries the `choice-icon:<sprite>` texture name
+// the game's provider registers on first access (ui/choice-icon-provider.ts).
+const choiceIconDir = join(DIST, "choice-icons");
+rmSync(choiceIconDir, { recursive: true, force: true });
+mkdirSync(choiceIconDir, { recursive: true });
+const choiceIconPakEntries: PakManifestEntry[] = [];
+const choiceIconRegistry: Record<string, { entry: string }> = {};
+for (const [sprite, icon] of Object.entries(characters.menuIcons).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)) {
+  const img = encodeImageEntry({ width: icon.w, height: icon.h, rgba: icon.rgba }, PSM.PSM_8888);
+  const entry = `choice-icons/${sprite}.img`;
+  writeFileSync(join(DIST, "choice-icons", `${sprite}.img`), img);
+  choiceIconPakEntries.push({ key: entry, file: `dist/choice-icons/${sprite}.img` });
+  choiceIconRegistry[sprite] = { entry };
+}
 
 // Item icons: the importer plans one declared sheet (16x16 cells) with a
 // cell per upstream icon file plus one shared placeholder. Cook the same
@@ -73,14 +96,14 @@ function portableStaticPng(image: {
   width: number;
   height: number;
   rgba: Uint8Array;
-}): { png: Uint8Array; width: number; height: number } {
+}): { png: Uint8Array; width: number; height: number; rgba: Uint8Array } {
   const width = nextPowerOfTwo(image.width);
   const height = nextPowerOfTwo(image.height);
   if (width > 512 || height > 512) {
     throw new Error(`static image ${image.width}x${image.height} exceeds PocketJS's 512px texture limit`);
   }
   if (width === image.width && height === image.height) {
-    return { png: encodePNG(image.rgba, width, height), width, height };
+    return { png: encodePNG(image.rgba, width, height), width, height, rgba: image.rgba };
   }
   const rgba = new Uint8Array(width * height * 4);
   for (let y = 0; y < height; y++) {
@@ -91,7 +114,7 @@ function portableStaticPng(image: {
       rgba.set(image.rgba.subarray(sourceOffset, sourceOffset + 4), (y * width + x) * 4);
     }
   }
-  return { png: encodePNG(rgba, width, height), width, height };
+  return { png: encodePNG(rgba, width, height), width, height, rgba };
 }
 
 // KA1 reducer-driven map animations use static per-frame images rather than
@@ -184,6 +207,15 @@ function compositeBackdrop(
   return encodePNG(rgba, background.width, background.height);
 }
 
+// Lazy (monster-intro) backdrops ship as on-demand IMG entries: they are
+// uploaded only when the screen first shows them, so their 256x256 RGBA never
+// enters the boot path (feed_pak eagerly uploads every ui:img.* pak entry).
+const portraitDir = join(DIST, "portraits");
+rmSync(portraitDir, { recursive: true, force: true });
+mkdirSync(portraitDir, { recursive: true });
+const portraitPakEntries: PakManifestEntry[] = [];
+const portraitRegistry: Record<string, { entry: string; w: number; h: number }> = {};
+
 for (const source of imported.presentation.backdrops) {
   if (source.color) {
     backdropVariants[source.variant] = { color: source.color };
@@ -194,12 +226,25 @@ for (const source of imported.presentation.backdrops) {
     compositeBackdrop(source.background, source.foreground, source.foregroundCrop),
     source.variant,
   );
-  const { png } = portableStaticPng(composed);
+  const { png, rgba, width, height } = portableStaticPng(composed);
   const relative = `assets/screen-layers/tux-backdrop-${source.variant}.png`;
   writeFileSync(join(ROOT, relative), png);
-  screenLayerImages[relative] = { psm: 3 };
   screenLayerBytes += png.byteLength;
-  backdropVariants[source.variant] = { image: relative };
+  if (source.lazy) {
+    // On-demand: write a self-contained IMG entry (same bytes the eager path
+    // would bake) as a raw pak blob / data.fs file, and leave the screen-layer
+    // variant imageless so the kit's backdrop view paints nothing — the game's
+    // PortraitBackdropEffects paints the texture from the registry instead.
+    const img = encodeImageEntry({ width, height, rgba }, PSM.PSM_8888);
+    const entry = `portraits/${source.variant}.img`;
+    writeFileSync(join(DIST, "portraits", `${source.variant}.img`), img);
+    portraitPakEntries.push({ key: entry, file: `dist/portraits/${source.variant}.img` });
+    portraitRegistry[source.variant] = { entry, w: width, h: height };
+    backdropVariants[source.variant] = {};
+  } else {
+    screenLayerImages[relative] = { psm: 3 };
+    backdropVariants[source.variant] = { image: relative };
+  }
 }
 
 const overlayVariants: Record<string, { color?: string; image?: string }> = {};
@@ -445,7 +490,10 @@ zhProject = {
   sheets: zhProject.sheets.filter((sheet) => sheet.id !== "tux"),
   maps: zhProject.maps.map((map) => ({ ...map, sheets: map.sheets?.filter((sheet) => sheet !== "tux") })),
 };
-const zhCharacters = await cookCharacters(zhProject, { outputRoot: ROOT });
+const zhCharacters = await cookCharacters(zhProject, {
+  outputRoot: ROOT,
+  monsterMenuIcons: zhImported.presentation.monsterMenuIcons,
+});
 zhProject = zhCharacters.project;
 const zhSplit = splitGameProjectMaps(zhProject, undefined, {
   shellEntry: "project-shell.zh_CN.json",
@@ -565,6 +613,8 @@ const pakEntries = [
   ...zhStartupPakEntries,
   ...animatedPakEntries,
   ...npcSrcPakEntries,
+  ...portraitPakEntries,
+  ...choiceIconPakEntries,
   ...terrain.streamPakEntries,
   ...audioPakEntries,
   audioAttributionPakEntry,
@@ -660,6 +710,29 @@ writeFileSync(
     mapAnimationAssets,
     screenLayers,
   ),
+);
+
+// Monster-intro portrait backdrops: on-demand IMG entries (data.fs on desktop,
+// pak blob on web/console) uploaded only when first shown. The kit's backdrop
+// view paints nothing for these imageless variants; ui/portrait-backdrop.tsx
+// paints the texture from this registry instead.
+writeFileSync(
+  join(ROOT, "ui/portrait-backdrops.ts"),
+  "// AUTO-GENERATED by gen-assets.ts — do not edit.\n" +
+  "// Lazy monster-intro backdrops: variant -> on-demand IMG entry. The texture\n" +
+  "// is uploaded only when the screen first shows the variant.\n" +
+  `export const PORTRAIT_BACKDROPS: Readonly<Record<string, { entry: string; w: number; h: number }>> = ${JSON.stringify(portraitRegistry, null, 2)};\n`,
+);
+
+// choice_monster row icons: on-demand IMG entries (data.fs on desktop, pak
+// blob on web/console) uploaded only when a choice menu first resolves the
+// sprite. ui/choice-icon-provider.ts binds the texture from this registry.
+writeFileSync(
+  join(ROOT, "ui/choice-icon-textures.ts"),
+  "// AUTO-GENERATED by gen-assets.ts — do not edit.\n" +
+  "// Lazy choice_monster row icons: sprite -> on-demand IMG entry. The texture\n" +
+  "// is uploaded only when a choice menu first resolves the sprite.\n" +
+  `export const CHOICE_ICON_TEXTURES: Readonly<Record<string, { entry: string }>> = ${JSON.stringify(choiceIconRegistry, null, 2)};\n`,
 );
 
 const collisionBodies = project.maps.reduce(

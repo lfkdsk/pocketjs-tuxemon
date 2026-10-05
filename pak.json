@@ -5600,6 +5600,38 @@
     "file": "dist/battle/techniques/woodsmash.json"
   },
   {
+    "key": "choice-icons/tux_monster_menu_budaye.img",
+    "file": "dist/choice-icons/tux_monster_menu_budaye.img"
+  },
+  {
+    "key": "choice-icons/tux_monster_menu_dollfin.img",
+    "file": "dist/choice-icons/tux_monster_menu_dollfin.img"
+  },
+  {
+    "key": "choice-icons/tux_monster_menu_fruitera.img",
+    "file": "dist/choice-icons/tux_monster_menu_fruitera.img"
+  },
+  {
+    "key": "choice-icons/tux_monster_menu_grintot.img",
+    "file": "dist/choice-icons/tux_monster_menu_grintot.img"
+  },
+  {
+    "key": "choice-icons/tux_monster_menu_hydrone.img",
+    "file": "dist/choice-icons/tux_monster_menu_hydrone.img"
+  },
+  {
+    "key": "choice-icons/tux_monster_menu_ignibus.img",
+    "file": "dist/choice-icons/tux_monster_menu_ignibus.img"
+  },
+  {
+    "key": "choice-icons/tux_monster_menu_memnomnom.img",
+    "file": "dist/choice-icons/tux_monster_menu_memnomnom.img"
+  },
+  {
+    "key": "choice-icons/tux_monster_menu_rockitten.img",
+    "file": "dist/choice-icons/tux_monster_menu_rockitten.img"
+  },
+  {
     "key": "demo/chapters.json",
     "file": "dist/demo/chapters.json"
   },
@@ -8470,6 +8502,62 @@
   {
     "key": "npc-src/swimmer.json",
     "file": "dist/npc-src/swimmer.json"
+  },
+  {
+    "key": "npc-src/tux_monster_menu_budaye.json",
+    "file": "dist/npc-src/tux_monster_menu_budaye.json"
+  },
+  {
+    "key": "npc-src/tux_monster_menu_dollfin.json",
+    "file": "dist/npc-src/tux_monster_menu_dollfin.json"
+  },
+  {
+    "key": "npc-src/tux_monster_menu_fruitera.json",
+    "file": "dist/npc-src/tux_monster_menu_fruitera.json"
+  },
+  {
+    "key": "npc-src/tux_monster_menu_grintot.json",
+    "file": "dist/npc-src/tux_monster_menu_grintot.json"
+  },
+  {
+    "key": "npc-src/tux_monster_menu_hydrone.json",
+    "file": "dist/npc-src/tux_monster_menu_hydrone.json"
+  },
+  {
+    "key": "npc-src/tux_monster_menu_ignibus.json",
+    "file": "dist/npc-src/tux_monster_menu_ignibus.json"
+  },
+  {
+    "key": "npc-src/tux_monster_menu_memnomnom.json",
+    "file": "dist/npc-src/tux_monster_menu_memnomnom.json"
+  },
+  {
+    "key": "npc-src/tux_monster_menu_rockitten.json",
+    "file": "dist/npc-src/tux_monster_menu_rockitten.json"
+  },
+  {
+    "key": "portraits/bg_gradient_blue_budaye_monster.img",
+    "file": "dist/portraits/bg_gradient_blue_budaye_monster.img"
+  },
+  {
+    "key": "portraits/bg_gradient_blue_dollfin_monster.img",
+    "file": "dist/portraits/bg_gradient_blue_dollfin_monster.img"
+  },
+  {
+    "key": "portraits/bg_gradient_blue_grintot_monster.img",
+    "file": "dist/portraits/bg_gradient_blue_grintot_monster.img"
+  },
+  {
+    "key": "portraits/bg_gradient_blue_ignibus_monster.img",
+    "file": "dist/portraits/bg_gradient_blue_ignibus_monster.img"
+  },
+  {
+    "key": "portraits/bg_gradient_blue_memnomnom_monster.img",
+    "file": "dist/portraits/bg_gradient_blue_memnomnom_monster.img"
+  },
+  {
+    "key": "portraits/bg_gradient_blue_rockitten_monster.img",
+    "file": "dist/portraits/bg_gradient_blue_rockitten_monster.img"
   },
   {
     "key": "terrain-stream/ground/37707_tower.json",

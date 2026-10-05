@@ -30,9 +30,11 @@ function jsonBytes(value: unknown): Uint8Array {
 /** GP1 fix 2: the asset paths one NPC's art entry references, for
  *  cross-checking against NPC_SRC_ASSET_PATHS (ui/npc-src-assets.ts) — the
  *  literal list that keeps PocketJS's pass-1 scanner baking every NPC
- *  sprite texture named here into the app pak. */
+ *  sprite texture named here into the app pak. Lazy texture names (the
+ *  `choice-icon:` entries) are not baked PNGs, so they are excluded. */
 export function collectNpcSrcAssetPaths(art: NpcArt): readonly string[] {
-  return typeof art === "string" ? [art] : [...art.idle, ...art.walkL, ...art.walkR];
+  const paths = typeof art === "string" ? [art] : [...art.idle, ...art.walkL, ...art.walkR];
+  return paths.filter((path) => path.startsWith("assets/"));
 }
 
 export function splitNpcSrc(npcSrc: Readonly<Record<string, NpcArt>>): NpcSrcSplit {

@@ -284,9 +284,9 @@
  "schemaErrors": [],
  "audioQoaPending": [],
  "byFate": {
-  "T1-lowered": 3343,
+  "T1-lowered": 3336,
   "T3-dropped": 111,
-  "T1": 35646,
+  "T1": 35653,
   "T4-dropped": 1742,
   "T2-dropped": 393,
   "structural": 792
@@ -365,10 +365,10 @@
    "note": "KV1 combat-sheet front art on a blocking screen backdrop"
   },
   {
-   "key": "act:change_bg_monster:T1-lowered",
-   "fate": "T1-lowered",
+   "key": "act:change_bg_monster:T1",
+   "fate": "T1",
    "count": 7,
-   "note": "starter portrait shown as a name card; the full-screen sprite scene is a future presentation upgrade"
+   "note": "monster front battle sprite centered on the blocking screen backdrop; the following dialog opens on top, like the upstream MonsterImageState"
   },
   {
    "key": "act:change_taste:T4-dropped",
@@ -482,7 +482,7 @@
    "key": "act:choice_monster:T1",
    "fate": "T1",
    "count": 2,
-   "note": "KC1 extChoice static list -> enum code via the resolver"
+   "note": "choices with each monster's menu face as its icon"
   },
   {
    "key": "act:choice_npc:T1",
@@ -2905,8 +2905,8 @@
    "summary": {
     "types": 98,
     "uses": 13617,
-    "native": 12199,
-    "degraded": 1100,
+    "native": 12206,
+    "degraded": 1093,
     "placeholder": 0,
     "dropped": 318,
     "nativePercent": 89.6,
@@ -3060,13 +3060,13 @@
     {
      "type": "change_bg_monster",
      "total": 7,
-     "native": 0,
-     "degraded": 7,
+     "native": 7,
+     "degraded": 0,
      "placeholder": 0,
      "dropped": 0,
      "reasons": {
-      "degraded": [
-       "starter portrait shown as a name card; the full-screen sprite scene is a future presentation upgrade"
+      "native": [
+       "monster front battle sprite centered on the blocking screen backdrop; the following dialog opens on top, like the upstream MonsterImageState"
       ]
      }
     },
@@ -3234,7 +3234,7 @@
      "dropped": 0,
      "reasons": {
       "native": [
-       "KC1 extChoice static list -> enum code via the resolver"
+       "choices with each monster's menu face as its icon"
       ]
      }
     },

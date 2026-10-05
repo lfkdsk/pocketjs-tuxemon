@@ -92,7 +92,8 @@ definitions below are the report's own:
 | `is/not char_healed player` | `tux.char_healed` requires a non-empty party whose members are all at full HP; status ailments do not change the answer. |
 | `add_monster`, `set_monster_health`, `set_monster_status`, `evolution`, `remove_monster` | the matching `tux.*` extension command; `remove_monster` resolves the iid globally and deletes from the player party, kennel, or an NPC party. A trainer's battle party stays in `npcParties` for the rest of the NPC's lifetime. |
 | `get_party_monster` (Nimrod `Zircon Back`, ApexPlayer cheat) | `tux.get_party_monsters` writes the selected trainer's or player's iids into `iid_slot_*`, which the following `remove_monster` consumes. |
-| `get_player_monster`, `choice_monster` | `extChoice` over the live party or a static enum-coded list. |
+| `get_player_monster` | `extChoice` over the live party (the KC1 enum picker), or the saved party-picker scene for the two uses that feed an adjacent `rename_monster`. |
+| `choice_monster` | an authored `choices` box whose rows show the monster's static menu-face icon beside its translated name; each row writes its positive enum code into the result variable. |
 | `open_shop` (item economy) | the kit `shop` command with imported goods, prices and stock. |
 | `open_shop …,buy_monster` | the `tux.monsterShop` scene with the economy's monster rows (price, level, stock); purchases are saved per stock label. |
 | `access_pc player` | the `tux.pc` monster-storage scene (Degraded: no item locker). |
