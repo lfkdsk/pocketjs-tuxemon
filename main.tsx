@@ -46,6 +46,7 @@ import { createSaveMenu } from "./ui/save-menu.tsx";
 import { persistAutosave } from "./ui/save-game.ts";
 import { createLangMenu } from "./ui/lang-menu.tsx";
 import { createCompositeOverlay } from "./ui/game-overlay.tsx";
+import { createBootSnapshotOverlay } from "./ui/boot-snapshot-overlay.tsx";
 import { createNpcSrcProvider } from "./ui/npc-src-repository.ts";
 import { createChoiceIconNpcSrc } from "./ui/choice-icon-provider.ts";
 import { createTerrainStreamProvider } from "./ui/terrain-stream-repository.ts";
@@ -252,6 +253,32 @@ const langMenu: GameViewOverlayConfig = {
   },
 };
 const overlay = langSwitchable ? createCompositeOverlay(saveMenu, langMenu) : saveMenu;
+// The boot-snapshot overlay runs first so a PSP segment build can restore a
+// chapter save before the tape replay starts. Production builds leave its
+// global unset and it is inert after the first frame.
+const bootSnapshotOverlay = createBootSnapshotOverlay();
+const overlayWithBoot: GameViewOverlayConfig = {
+  create(host) {
+    const boot = bootSnapshotOverlay.create(host);
+    const rest = overlay.create(host);
+    return {
+      step(buttons, pressed) {
+        const bootResult = boot.step(buttons, pressed);
+        if (bootResult.consumed || bootResult.stateChanged) return bootResult;
+        return rest.step(buttons, pressed);
+      },
+      isOpen: () => boot.isOpen() || rest.isOpen(),
+      render(theme, uiText) {
+        return (
+          <>
+            {boot.render(theme, uiText)}
+            {rest.render(theme, uiText)}
+          </>
+        );
+      },
+    };
+  },
+};
 
 mount(() => (
   <>
@@ -303,7 +330,7 @@ mount(() => (
       }}
       choiceIcons={ChoiceIconBox}
       demo={demo}
-      overlay={overlay}
+      overlay={overlayWithBoot}
       effects={Effects}
       screenPresentation={{
         fingerprint: () => "",

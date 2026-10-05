@@ -1,6 +1,12 @@
 // Compare the newest completed PSP journey session with a fresh production
 // replay. The build receipt and session marker prevent an appended stale log
 // from satisfying a newer build or an incomplete latest run.
+//
+// Opening builds (--journey) replay the full opening tape. Segment builds
+// (--journey-segment) carry their envelope, frame range and desktop terminal
+// pin in the receipt's journeySegment block; the verifier re-derives the pin
+// from the committed tape and the receipt's envelope, then compares it with
+// both the receipt's pin and the PSP terminal snapshot.
 
 import { createHash } from "node:crypto";
 import { readFileSync, statSync } from "node:fs";
@@ -17,44 +23,62 @@ import {
 import type { JsonValue } from "../vendor/pocket-rpgkit/src/engine/types.ts";
 import { readShardedProject } from "./generated-project.ts";
 import { journeyWorldTraversal } from "./gb6-journey.ts";
-
-interface LogEntry {
-  kind?: unknown;
-  passed?: unknown;
-  buildId?: unknown;
-  frame?: unknown;
-  state?: unknown;
-}
+import { checkBuildArtifact, verifySegmentProfile, type ProfileEntry } from "./psp-segment.ts";
 
 interface BuildReceipt {
   target?: unknown;
   journey?: unknown;
   journeyBuildId?: unknown;
+  journeySegment?: unknown;
+  artifacts?: Record<string, { sha256?: unknown }>;
 }
 
 const root = resolve(import.meta.dir, "..");
 const profilePath = process.argv[2];
 if (!profilePath) {
-  throw new Error("Usage: bun tools/verify-psp-journey.ts <PSPLINK profile.jsonl>");
+  throw new Error("Usage: bun tools/verify-psp-journey.ts <PSPLINK profile.jsonl> [--prx=<path>]");
 }
+const prxArg = process.argv.find((a) => a.startsWith("--prx="));
+const prxPath = prxArg ? resolve(prxArg.slice("--prx=".length)) : join(root, "dist/psp/pocket-tuxemon.prx");
 const receiptPath = join(root, "dist/psp/build-receipt.json");
-const ebootPath = join(root, "dist/psp/EBOOT.PBP");
 const receipt = JSON.parse(readFileSync(receiptPath, "utf8")) as BuildReceipt;
 if (receipt.target !== "psp" || receipt.journey !== true ||
     typeof receipt.journeyBuildId !== "string") {
   throw new Error("dist/psp is not a journey-enabled PSP build");
 }
-if (statSync(profilePath).mtimeMs < statSync(ebootPath).mtimeMs) {
-  throw new Error("PSP profile predates the journey EBOOT; run the current build first");
+// The PRX must hash to the receipt's artifact hash, or the profile cannot be
+// tied to the verified build.
+checkBuildArtifact(receipt.artifacts, "pocket-tuxemon.prx",
+  createHash("sha256").update(readFileSync(prxPath)).digest("hex"));
+if (statSync(profilePath).mtimeMs < statSync(prxPath).mtimeMs) {
+  throw new Error("PSP profile predates the journey PRX; run the current build first");
 }
 
 const entries = readFileSync(profilePath, "utf8").trim().split("\n").map((line, index) => {
   try {
-    return JSON.parse(line) as LogEntry;
+    return JSON.parse(line) as ProfileEntry;
   } catch {
     throw new Error(`Malformed PSP profile JSON on line ${index + 1}`);
   }
 });
+
+// Segment builds: verify against the receipt's envelope + desktop pin.
+if (receipt.journeySegment !== undefined) {
+  const result = verifySegmentProfile(
+    root,
+    receipt.journeySegment as Parameters<typeof verifySegmentProfile>[1],
+    receipt.journeyBuildId,
+    entries,
+  );
+  console.log(
+    `PSP SEGMENT PASS segment=${(receipt.journeySegment as { chapter?: string }).chapter} ` +
+      `frames=${result.frames} end=${result.endMap}@${result.endPosition[0]},${result.endPosition[1]} ` +
+      `sha256=${result.terminalSha256}`,
+  );
+  process.exit(0);
+}
+
+// Opening build: replay the full opening tape and compare.
 const sessionIndex = entries.findLastIndex((entry) => entry.kind === "session");
 if (sessionIndex < 0) throw new Error("No PSP journey session marker found");
 const session = entries[sessionIndex]!;

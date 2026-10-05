@@ -401,6 +401,97 @@ area; the eighteen `blocked` maps have no standable event-free cell) and by
 the import job's cleanliness check. Open the rebaked thumbnails and look at
 them before committing, the same as goldens.
 
+## PSP emulator verification (manual, not CI)
+
+`bun run verify:psp:emu` runs an already-built English PSP journey package
+under PPSSPPHeadless (software renderer, 333 MHz) and verifies the terminal
+state against the desktop replay. Build the package first with
+`bun run build:psp --journey`. The gate needs a local PPSSPPHeadless build
+(`HEADLESS_CROSS=1`; override the path with `PPSSPP_HEADLESS`).
+
+The gate runs the bare `dist/psp/pocket-tuxemon.prx` (ELF), not
+`EBOOT.PBP`: the journey `EBOOT.PBP` does not complete under PPSSPP
+(cause not diagnosed — the SFO lacks `MEMSIZE`, yet PPSSPP grants ~46 MiB
+arena in at least one PBP build, so the earlier 24 MiB / ~15 MiB OOM root
+cause was withdrawn). A bare ELF takes the full PSP-2000 memory path
+(arena ~46 MiB), matching what a `MEMSIZE=1` PARAM.SFO would give on real
+PSP-2000+ hardware. The `.prx` is byte-identical to the PBP's `DATA.PSP`
+section.
+
+The gate prints PSP-side metrics from the host's bench JSONL: eval time,
+frame intervals, slowest frames, arena high-water and QuickJS peak heap.
+Env knobs: `PSP_EMU_TIMEOUT` (wall seconds, default 240), `PSP_EMU_MEMSTICK`
+(isolated memstick dir).
+
+### Mainline segments
+
+`bun run build:psp --journey-segment=<chapter>` bakes a chapter save
+envelope and a suffix of the concatenated mainline tape, so the full
+GB6+J1+J2+J3+J4 mainline can run under the emulator in bounded chapter-to-
+chapter pieces. The boot-snapshot overlay restores the chapter state and
+corrects the frame to the chapter's global `timelineFrame` before replaying
+the suffix. The build receipt's `journeySegment` block carries the chapter,
+frame range, suffix length, snapshot/tape hashes, the desktop terminal pin
+and the envelope itself; `bun tools/verify-psp-journey.ts <profile.jsonl>`
+re-derives the pin from the committed tape and the receipt's envelope, then
+compares it with both the receipt pin and the PSP terminal snapshot.
+Available chapters are in `data/chapters.json`.
+
+The three chapter windows longer than ~15,000 frames are split with
+generated intermediate envelopes (deterministic desktop-replay snapshots in
+`.psp-segments/`, not committed). `bun tools/psp-mainline.ts` orchestrates
+the full 198,568-frame mainline as 28 bounded segments: `snapshots`
+generates the intermediate envelopes, `build` builds and stashes all
+segments, `run --jobs=4` runs up to 4 PPSSPPHeadless instances in parallel
+(taskset affinity, isolated memsticks), verifies each terminal and collects
+per-segment profile/bench/metrics into `reports/psp-mainline/`, and `report`
+aggregates the high-waters. The runner is strict: a missing bench, an
+incomplete bench window, a non-zero emulator exit, a verifier FAIL or a
+PRX/receipt hash mismatch fails the segment, and any failed segment fails
+the whole run. Each segment build bakes a single bench window covering the
+boot frame plus the whole suffix, so the completed segments cover the whole
+suffix (the rotating 300-frame windows lost every segment tail).
+
+The full-run evidence (per-segment terminal hashes, wall times and bench
+windows) is recorded in `findings/PSP-EMU.md`. Segment
+`06-cotton-town-a` previously hung when the PSP host stopped collecting
+garbage once the arena's bump tail was spent and ran out of memory; the
+PocketJS GC fix ("keep collecting once the arena's bump tail is spent")
+resolved it, and the segment now reaches its desktop terminal. The
+retained assets are content-addressed (a sha256-named store copy plus a
+hardlink per segment), so the evidence tree is portable. `bun
+tools/psp-mainline.ts verify` (no flags) is the four-way consistency gate:
+retained PRX and assets.pak hash to their receipts, each receipt is bound
+to its plan entry (segment id, chapter, start frame, window length and the
+end boundary: `endFrame` equals the plan entry's end, `terminalFrame`
+equals `endFrame`), the profile's newest session and its terminal match the
+receipt's build/segment/frame and desktop pin (state compared
+byte-for-byte), the bench window covers `[0, frames+1)`, and `metrics.json`
+recomputes from the benches. The current run's verdict and per-segment
+evidence are recorded in `findings/PSP-EMU.md`. `--known-incomplete=<id>`
+(or `--known-incomplete <id>`) tolerates a segment that ran but did not
+finish (no terminal marker and/or no bench); it is fail-closed: an empty
+id, an id outside the plan, a flagged segment that actually completed, or
+any other bench/retention problem still fails.
+The plan itself is guarded by independent invariants (28 segments, a fixed
+id/chapter/start/end identity table, continuous coverage `[0, 198568)`, no
+gap or overlap) enforced before plan/build/run/verify.
+
+### Same-moment captures
+
+`bun tools/psp-capture.ts` renders six key shots (bedroom, Paper Town, the
+first Billie battle, the Route 1 seam, Cotton Town, the radio-tower
+segment) on both targets from the same chapter save and tape: `desktop`
+renders through the sim host, `psp` builds a capture PRX and dumps the
+framebuffer under PPSSPPHeadless. `bun tools/psp-capture.ts verify` checks
+the PRX/receipt hash chain **and** the receipt's source provenance: a
+capture built from a dirty worktree (non-empty `source.diffSha256` or
+`changedFiles`) fails, and a capture whose source commit differs from HEAD
+by artifact-affecting paths fails; commits drifting only by docs, reports,
+findings, CI and top-level meta files are allowed. The captures and their
+receipts live in `dist/captures/` (gitignored); the evidence log is in
+`findings/PSP-EMU.md`.
+
 ## Goldens
 
 `tests/goldens/` holds the keyframe PNGs (480x272 and 960x544) and the

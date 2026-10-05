@@ -416,21 +416,30 @@ the pinned PSP GCC wrapper by default. Set `POCKETJS_PSP_C_COMPILER` to
 `clang` or `gcc` to choose explicitly.
 
 For a deterministic device or emulator check, build with
-`bun run build:psp --journey`, run that EBOOT, retain its `profile.jsonl`, and
-compare the completed session with a fresh production replay:
+`bun run build:psp --journey` and run the bare `dist/psp/pocket-tuxemon.prx`
+under PPSSPP (the journey `EBOOT.PBP` does not complete under PPSSPP — see
+[docs/verification.md](docs/verification.md#psp-emulator-verification-manual-not-ci)),
+then compare the completed session with a fresh production replay:
 
 ```sh
-bun run verify:psp:journey -- path/to/profile.jsonl
+bun run verify:psp:emu          # builds nothing; runs the already-built .prx
 ```
 
-The opening journey (bedroom through the Billie battle to Route 1) passed this
-check under PPSSPP on an earlier recording of the opening tape, including its
-PSP double-ABI probe; it has not been re-run on the current 3,982-frame tape.
-A captured 480×272 framebuffer was also checked for the bedroom and dialogue
-UI. Emulator
-timings are not hardware results: doodlewind's 333 MHz, firmware 6.61 device
-run reports 43–60 displayed fps, with map transitions and texture loads still
-causing stalls. The full 107-battle mainline has not been run on physical PSP.
+The complete GB6+J1+J2+J3+J4 mainline (198,568 frames) runs under
+PPSSPPHeadless as 28 bounded chapter-to-chapter segments: the no-argument
+retained-evidence gate (`bun tools/psp-mainline.ts verify`) reports 28/28
+PASS with no exemptions, each segment's receipt bound to its plan entry by
+id, chapter, start frame, window length and end frame, with its terminal
+state matching the desktop replay byte-for-byte. Six same-moment
+desktop/PSP framebuffer captures (bedroom, Paper Town, the first Billie
+battle, the Route 1 seam, Cotton Town, the radio-tower segment) are
+re-taken at a clean HEAD; five are byte-identical between desktop and PSP
+and the battle is the same semantic moment with PSP rasterizer
+differences in the background, status icons and text edges.
+Emulator timings are not hardware results: the full mainline has not been
+run on physical PSP. The only hardware data point is doodlewind's 333 MHz,
+firmware 6.61 device run of an earlier build, which reported 43–60
+displayed fps with map transitions and texture loads causing stalls.
 
 ## Documentation
 

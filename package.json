@@ -92,6 +92,7 @@
     "tsc": "bunx tsc --noEmit",
     "build:psp": "bun tools/psp.ts",
     "verify:psp:journey": "bun tools/verify-psp-journey.ts",
+    "verify:psp:emu": "bun tools/verify-psp-emu.ts",
     "check:l10n": "bun tools/check-l10n.ts",
     "update:l10n-overrides": "bun tools/build-zh-overrides.ts",
     "verify:web:zh": "bun tools/verify-web-zh.ts",

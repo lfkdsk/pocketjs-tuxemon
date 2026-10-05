@@ -6,6 +6,7 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { DEFAULT_TUXEMON_SRC } from "../importer/terrain.ts";
 import {
@@ -16,7 +17,11 @@ import {
 } from "../tools/audio-manifest.ts";
 import { encodeQoa } from "../tools/qoa.ts";
 
-const TMP = join(import.meta.dir, "..", ".tmp-audio-verify-test");
+// Fixtures live in the system temp dir (unique per process), never under the
+// repo root: a run killed mid-test must not leave a stray directory in the
+// working tree. writeFixture wipes it before each test and afterAll removes
+// whatever remains.
+const TMP = join(tmpdir(), `pocket-tuxemon-audio-verify-${process.pid}`);
 const ROOT = resolve(import.meta.dir, "..");
 
 function manifestFor(files: Record<string, Uint8Array>): Manifest {

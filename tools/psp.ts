@@ -21,25 +21,37 @@ import {
   unpack,
 } from "../vendor/pocket-rpgkit/vendor/pocketjs/framework/compiler/pak.ts";
 import { checkExternalPak } from "./psp-external-check.ts";
+import { bakeSegmentBundle, resolveSegment, replaySuffixTerminal } from "./psp-segment.ts";
+
+const sha256 = (bytes: Uint8Array | string): string =>
+  createHash("sha256").update(bytes).digest("hex");
 
 const args = new Set(process.argv.slice(2));
 const allowed = new Set(["--skip-assets", "--bench", "--journey", "--capture", "--help"]);
 for (const arg of args) {
-  if (!allowed.has(arg)) throw new Error(`Unknown PSP option: ${arg}`);
+  if (!allowed.has(arg) && !arg.startsWith("--journey-segment=")
+      && !arg.startsWith("--journey-segment-end=")) {
+    throw new Error(`Unknown PSP option: ${arg}`);
+  }
 }
 if (args.has("--help")) {
   console.log(
-    "bun run build:psp [--skip-assets] [--bench] [--journey] [--capture]\n" +
+    "bun run build:psp [--skip-assets] [--bench] [--journey] [--journey-segment=<chapter>] [--journey-segment-end=<frame>] [--capture]\n" +
       "Normal builds accept live controls. --bench enables timing logs. " +
       "--journey replays the maintained opening and implies --bench. " +
-      "--capture writes a short PPSSPP framebuffer sequence and exits.",
+      "--journey-segment replays a mainline chapter suffix from a chapter save and implies --bench. " +
+      "--capture writes a short PPSSPP framebuffer sequence and exits; it may combine with " +
+      "--journey or --journey-segment to capture the replayed tape (PSP_CAP_START is tape- or " +
+      "suffix-relative, PSP_CAP_N is the frame count).",
   );
   process.exit(0);
 }
-const benchmark = args.has("--bench") || args.has("--journey");
-if (benchmark && args.has("--capture")) {
-  throw new Error("Build timing journeys and framebuffer captures separately");
+const segmentArg = [...args].find((a) => a.startsWith("--journey-segment="));
+const segmentChapter = segmentArg?.slice("--journey-segment=".length);
+if (segmentChapter !== undefined && args.has("--journey")) {
+  throw new Error("--journey and --journey-segment are mutually exclusive");
 }
+const benchmark = args.has("--bench") || args.has("--journey") || segmentChapter !== undefined;
 const root = resolve(import.meta.dir, "..");
 const framework = join(root, "vendor/pocket-rpgkit/vendor/pocketjs");
 const out = join(root, "dist/psp");
@@ -198,17 +210,102 @@ if (args.has("--journey")) {
     `var s=globalThis.__rpgSessionState;` +
     `if(n%300===0)__pspLog(JSON.stringify({frame:n,map:s.mapId,pos:[s.move.tx,s.move.ty],` +
     `scene:s.scene?.kind,modal:s.interp.modal,error:s.interp.error,buildId:id}));` +
-    `if(n===tape.length)__pspLog(JSON.stringify({kind:"terminal",frame:n,state:s,buildId:id}));};})();\n`;
+    `if(n===tape.length)__pspLog(JSON.stringify({kind:"terminal",frame:n,state:s,buildId:id}));` +
+    `if(n===tape.length&&typeof __pspExit==="function")__pspExit();};})();\n`;
   writeFileSync(bundlePath, prefix + original + suffix);
+}
+
+// Segment build: replay a mainline chapter suffix from a chapter save, so the
+// full GB6+J1+J2+J3+J4 mainline can run under the emulator in bounded pieces.
+// The boot-snapshot overlay (ui/boot-snapshot-overlay.tsx) restores the
+// chapter envelope before the first tape mask is folded. The build receipt
+// carries the segment's frame range, the desktop terminal pin (replayed
+// through the same reducer path as tools/bake-chapters.ts) and the envelope
+// itself, so tools/verify-psp-journey.ts can verify a run from the receipt
+// alone — for committed chapters and for generated intermediate envelopes.
+let segmentReceipt: Record<string, unknown> | undefined;
+let segmentSuffix: number[] | undefined;
+if (segmentChapter !== undefined) {
+  const bundlePath = join(out, "pocket-tuxemon.js");
+  const segmentEndArg = [...args].find((a) => a.startsWith("--journey-segment-end="));
+  const segmentEnd = segmentEndArg
+    ? Number(segmentEndArg.slice("--journey-segment-end=".length))
+    : undefined;
+  const spec = resolveSegment(root, segmentChapter, segmentEnd);
+  const pin = replaySuffixTerminal(root, spec);
+  const suffix = spec.suffix;
+  segmentSuffix = suffix;
+  const { bundle, journeyBuildId: segmentBuildId } = bakeSegmentBundle(
+    readFileSync(bundlePath, "utf8"),
+    spec,
+    FIXED_INITIAL_CIVIL_TIME,
+  );
+  journeyBuildId = segmentBuildId;
+  writeFileSync(bundlePath, bundle);
+  segmentReceipt = {
+    chapter: spec.chapter,
+    generated: spec.generated,
+    startFrame: spec.startFrame,
+    endFrame: spec.endFrame,
+    frames: suffix.length,
+    snapshotSha256: sha256(spec.envelope.snapshot),
+    tapeSha256: sha256(JSON.stringify(suffix)),
+    terminalSha256: pin.terminalSha256,
+    endMap: pin.endMap,
+    endPosition: pin.endPosition,
+    terminalFrame: pin.endFrame,
+    envelope: spec.envelope,
+  };
+}
+
+// Capture builds dump the framebuffer and exit after their bounded window;
+// they may combine with --journey/--journey-segment so the dumped frames come
+// from the same tape path the terminal gate verifies. PSP_CAP_START is
+// tape-relative (opening) or suffix-relative (segment): a segment feeds its
+// first suffix mask on host frame 1 (frame 0 restores the chapter save), so
+// the host's capture window is offset by one there.
+//
+// A capture that replays a journey needs BOTH host features: capture (the
+// framebuffer dump) and bench (which registers __pspLog/__pspRoundTrip/
+// __pspExit the journey wrapper calls). The vendor's --bench flag enables
+// both; POCKETJS_BENCH_DUMP_FRAMES=1 makes the dump path write frames
+// instead of exiting silently after the window. A plain capture (no tape)
+// keeps --capture alone.
+const captureWithJourney = args.has("--capture") &&
+  (args.has("--journey") || segmentChapter !== undefined);
+const captureEnv: Record<string, string> = {};
+if (args.has("--capture")) {
+  const capStart = Number(process.env.PSP_CAP_START ?? "16");
+  const capN = Number(process.env.PSP_CAP_N ?? "32");
+  captureEnv.POCKETJS_CAP_START = String(capStart + (segmentChapter !== undefined ? 1 : 0));
+  captureEnv.POCKETJS_CAP_N = String(capN);
+  if (captureWithJourney) captureEnv.POCKETJS_BENCH_DUMP_FRAMES = "1";
+}
+
+// Segment perf builds (no --capture) bake the bench window to cover the whole
+// segment: host frame 0 restores the chapter save, frames 1..L replay the L
+// suffix masks, so the single window [0, L+1) flushes at the terminal frame
+// instead of losing the <300-frame tail the rotating 300-frame windows left
+// unlogged. The vendor --bench flag enables capture+bench; with
+// BENCH_DUMP_FRAMES unset the host dumps no framebuffers and exits cleanly at
+// the window end (the journey wrapper delays __pspExit by one frame so the
+// terminal frame's window flushes first).
+const segmentPerf = segmentChapter !== undefined && !args.has("--capture");
+const perfEnv: Record<string, string> = {};
+if (segmentPerf) {
+  perfEnv.POCKETJS_CAP_START = "0";
+  perfEnv.POCKETJS_CAP_N = String(segmentSuffix!.length + 1);
 }
 
 // Hardware timing needs the bench functions, but not the capture feature:
 // capture intentionally exits after its bounded framebuffer window.
-const hostFeatures = benchmark
-  ? ["--features=bench"]
-  : args.has("--capture")
-    ? ["--capture"]
-    : [];
+const hostFeatures = args.has("--capture")
+  ? (captureWithJourney ? ["--bench"] : ["--capture"])
+  : segmentPerf
+    ? ["--bench"]
+    : benchmark
+      ? ["--features=bench"]
+      : [];
 await run(
   [
     join(framework, "tools/psp.ts"),
@@ -224,6 +321,8 @@ await run(
     ...(!pspLlvmBin
       ? {}
       : { POCKETJS_LLVM_BIN: pspLlvmBin }),
+    ...captureEnv,
+    ...perfEnv,
   },
 );
 
@@ -235,8 +334,6 @@ copyFileSync(
   join(out, "AUDIO-ATTRIBUTIONS.md"),
 );
 
-const sha256 = (bytes: Uint8Array | string): string =>
-  createHash("sha256").update(bytes).digest("hex");
 const identity = (cwd: string) => {
   const changed = execFileSync(
     "git",
@@ -268,8 +365,19 @@ writeFileSync(join(out, "build-receipt.json"), JSON.stringify({
   cCompiler,
   benchmark,
   capture: args.has("--capture"),
-  journey: args.has("--journey"),
+  journey: args.has("--journey") || segmentChapter !== undefined,
+  ...(segmentReceipt === undefined ? {} : { journeySegment: segmentReceipt }),
   ...(journeyBuildId === undefined ? {} : { journeyBuildId }),
+  ...(!segmentPerf ? {} : {
+    benchWindow: { start: 0, n: segmentSuffix!.length + 1 },
+  }),
+  ...(!args.has("--capture") ? {} : {
+    captureWindow: {
+      start: Number(process.env.PSP_CAP_START ?? "16") + (segmentChapter !== undefined ? 1 : 0),
+      n: Number(process.env.PSP_CAP_N ?? "32"),
+      tapeRelativeStart: Number(process.env.PSP_CAP_START ?? "16"),
+    },
+  }),
   source: identity(root),
   rpgkit: identity(join(root, "vendor/pocket-rpgkit")),
   pocketjs: identity(framework),
