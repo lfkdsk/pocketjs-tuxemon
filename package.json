@@ -77,6 +77,7 @@
     "bench:j3:quickjs:cold": "J3_COLD_RUNS=5 bash tools/bench-j3-quickjs.sh",
     "bench:indoor-fast-path": "bash tools/bench-indoor-fast-path.sh",
     "verify:preview:coverage": "bun tools/verify-preview-coverage.ts",
+    "bench:cotton:quickjs": "bash tools/bench-cotton-quickjs.sh",
     "verify:world-cache": "bash tools/verify-world-cache-quickjs.sh",
     "verify:world-cache:cold": "WORLD_CACHE_COLD_RUNS=5 bash tools/verify-world-cache-quickjs.sh",
     "verify:weather-alloc": "bash tools/weather-alloc-regression.sh",

@@ -6,6 +6,7 @@ import {
   GAME_WORLD_ENTRY_SETTLE_FRAMES,
   GAME_WORLD_PREFETCH_AUDIO_COOLDOWN_FRAMES,
   GAME_WORLD_PREFETCH_BUDGET_MS,
+  GAME_WORLD_PREFETCH_RECOVERY_MS,
   withTwoHopWorldLookahead,
 } from "../ui/game-world-cache-driver.ts";
 import { createJsonMapRepository } from "../vendor/pocket-rpgkit/src/engine/map-repository.ts";
@@ -111,7 +112,7 @@ describe("two-hop game world-cache lookahead", () => {
     expect(index.get("f")).toEqual([]);
   });
 
-  test("every direct exit contributes a stable second hop", () => {
+  test("every direct exit retains a stable second hop without eagerly preparing it", () => {
     const base: WorldWorkingSet = {
       active: "a",
       visible: ["a", "b"],
@@ -122,7 +123,7 @@ describe("two-hop game world-cache lookahead", () => {
     const expanded = withTwoHopWorldLookahead(base, createWorldLookaheadIndex(layout));
     expect(expanded.parsedKeep).toEqual(["a", "b", "c", "d", "e", "f"]);
     expect(expanded.compiledKeep).toEqual(["a", "b", "c", "d", "e", "f"]);
-    expect(expanded.imminent.map((entry) => entry.mapId)).toEqual(["b", "c", "d", "e", "f"]);
+    expect(expanded.imminent).toBe(base.imminent);
     expect(base.compiledKeep).toEqual(["a", "b", "c"]);
   });
 
@@ -164,6 +165,103 @@ describe("two-hop game world-cache lookahead", () => {
     expect(activity).toEqual([true]);
   });
 
+  test("stable tile windows reuse retention while pending prefetch still advances", () => {
+    const session = setupSession();
+    const repository = session.repository!;
+    const releaseExcept = repository.releaseExcept.bind(repository);
+    let releases = 0;
+    repository.releaseExcept = (ids) => {
+      releases++;
+      releaseExcept(ids);
+    };
+    const stats: WorldCacheStats[] = [];
+    const driver = createGameWorldCacheDriver(session, layout, {
+      now: () => 0,
+      onStats: (snapshot) => stats.push(snapshot),
+    });
+    const state = {
+      mapId: "a",
+      move: { tx: 8, ty: 1, facing: 3 },
+    } as SessionState;
+
+    driver.sync(state, { x: 1, y: 1, facing: 3 }, { w: 128, h: 128 });
+    expect(session.preparingMaps.get("b")?.map).toBeUndefined();
+    driver.sync(state, { x: 2, y: 2, facing: 3 }, { w: 128, h: 128 });
+
+    expect(session.preparingMaps.get("b")?.map).toBeDefined();
+    expect(stats[1]!.compiledKeep).toBe(stats[0]!.compiledKeep);
+    expect(releases).toBe(1);
+
+    driver.sync({
+      ...state,
+      move: { ...state.move, facing: 1 },
+    } as SessionState, { x: 2, y: 2, facing: 1 }, { w: 128, h: 128 });
+
+    expect(stats[2]!.compiledKeep).not.toBe(stats[1]!.compiledKeep);
+    expect(stats[2]!.compiledKeep).toEqual(stats[1]!.compiledKeep);
+    expect(releases).toBe(1);
+  });
+
+  test("an expensive preparation stage leaves one frame for boundary GC", () => {
+    const session = setupSession();
+    const stats: WorldCacheStats[] = [];
+    const activity: boolean[] = [];
+    let now = 0;
+    const driver = createGameWorldCacheDriver(session, layout, {
+      now: () => {
+        const value = now;
+        now += GAME_WORLD_PREFETCH_RECOVERY_MS;
+        return value;
+      },
+      onStats: (snapshot) => stats.push(snapshot),
+      onPrefetchActivity: (active) => activity.push(active),
+    });
+    const state = {
+      mapId: "a",
+      move: { tx: 8, ty: 1, facing: 3 },
+    } as SessionState;
+    const camera: CameraState = { x: 0, y: 0, facing: 3 };
+
+    driver.sync(state, camera, { w: 160, h: 160 });
+    expect(session.preparingMaps.get("b")?.map).toBeUndefined();
+    driver.sync(state, camera, { w: 160, h: 160 });
+    expect(session.preparingMaps.get("b")?.map).toBeUndefined();
+    driver.sync(state, camera, { w: 160, h: 160 });
+    expect(session.preparingMaps.get("b")?.map).toBeDefined();
+
+    expect(stats).toHaveLength(3);
+    expect(activity).toEqual([true, true, true]);
+  });
+
+  test("crossing a camera tile boundary recomputes and releases a changed keep-set", () => {
+    const session = setupSession();
+    const repository = session.repository!;
+    const releaseExcept = repository.releaseExcept.bind(repository);
+    let releases = 0;
+    repository.releaseExcept = (ids) => {
+      releases++;
+      releaseExcept(ids);
+    };
+    const stats: WorldCacheStats[] = [];
+    const driver = createGameWorldCacheDriver(session, layout, {
+      now: () => 0,
+      onStats: (snapshot) => stats.push(snapshot),
+    });
+    const state = {
+      mapId: "f",
+      move: { tx: 1, ty: 1, facing: 3 },
+    } as SessionState;
+
+    driver.sync(state, { x: 1, y: 1, facing: 3 }, { w: 128, h: 128 });
+    driver.sync(state, { x: 2, y: 2, facing: 3 }, { w: 128, h: 128 });
+    expect(stats[1]!.visible).toBe(stats[0]!.visible);
+    expect(releases).toBe(1);
+
+    driver.sync(state, { x: 161, y: 1, facing: 3 }, { w: 128, h: 128 });
+    expect(stats[2]!.visible).toEqual(["b"]);
+    expect(releases).toBe(2);
+  });
+
   test("deferred work waits through two settled frames after prefetch completes", () => {
     const session = setupSession();
     const stats: WorldCacheStats[] = [];
@@ -184,7 +282,10 @@ describe("two-hop game world-cache lookahead", () => {
       const current = stats.at(-1)!;
       if (current.pending === 0 && current.staged > 0) break;
     }
-    expect(stats.at(-1)!.staged).toBe(5);
+    expect(stats.at(-1)!.staged).toBe(2);
+    expect(session.preparingMaps.has("d")).toBeFalse();
+    expect(session.preparingMaps.has("e")).toBeFalse();
+    expect(session.preparingMaps.has("f")).toBeFalse();
     expect(activity.at(-1)).toBeTrue();
     for (let frame = 0; frame < GAME_WORLD_PREFETCH_AUDIO_COOLDOWN_FRAMES; frame++) {
       driver.sync(state, camera, { w: 160, h: 160 });
@@ -212,7 +313,7 @@ describe("two-hop game world-cache lookahead", () => {
     driver.sync(state, { x: 0, y: 0, facing: 3 }, { w: 160, h: 160 });
 
     expect(stats[0]!.compiledKeep).toEqual(["a", "b", "c", "d", "e", "f"]);
-    expect(stats[0]!.pending).toBe(5);
+    expect(stats[0]!.pending).toBe(2);
     expect(stats[0]!.preparing).toBe(0);
     expect(session.preparingMaps.size).toBe(0);
     expect(activity).toEqual([true]);
@@ -307,7 +408,7 @@ describe("two-hop game world-cache lookahead", () => {
 
     driver.sync(state, { x: 0, y: 0, facing: 3 }, { w: 160, h: 160 });
 
-    expect(stats[0]!.pending).toBe(5);
+    expect(stats[0]!.pending).toBe(2);
     expect(stats[0]!.preparing).toBe(0);
     expect(session.preparingMaps.size).toBe(0);
   });

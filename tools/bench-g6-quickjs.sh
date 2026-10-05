@@ -116,6 +116,7 @@ for viewport in "${viewports[@]}"; do
     echo "PROCESS_COLD suite=journey viewport=${width}x${height} run=$run/$cold_runs prewarm=none"
     G6_DIST="$app_dist" G6_JOURNEY="$journey" \
       G6_MAPS="$root/dist/maps" G6_BATTLE="$root/dist/battle" \
+      G6_PORTRAITS="$root/dist/portraits" G6_CHOICE_ICONS="$root/dist/choice-icons" \
       G6_MAPS_ZH="$root/dist/maps-zh" G6_BATTLE_ZH="$root/dist/battle-zh" \
       G6_ZH_PROJECT="$root/dist/project-shell.zh_CN.json" \
       G6_ZH_BATTLE_SHELL="$root/dist/battle-runtime-shell.zh_CN.json" \

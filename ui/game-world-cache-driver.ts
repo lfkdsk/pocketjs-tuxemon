@@ -4,7 +4,6 @@ import {
   type WorldPrefetcher,
 } from "../vendor/pocket-rpgkit/src/engine/world-prefetch.ts";
 import {
-  componentOfMap,
   workingSet,
   type ImminentMap,
   type WorldWorkingSet,
@@ -18,20 +17,24 @@ import {
 import type {
   CameraState,
   WorldLayout,
+  WorldPlacement,
 } from "../vendor/pocket-rpgkit/src/engine/types.ts";
 import type {
   WorldCacheDriver,
   WorldCacheDriverOptions,
 } from "../vendor/pocket-rpgkit/src/ui/world-cache-driver.ts";
-
-/** Zero makes the prefetcher advance exactly one indivisible preparation
- * stage per production frame. The 12-map two-hop set therefore settles within
- * the pressure route's 64-frame bound without bunching parse/validation and
- * world compilation on one frame. */
+/** Zero makes the prefetcher advance exactly one indivisible direct-neighbour
+ * preparation stage per production frame, without bunching parse/validation
+ * and world compilation on one frame. */
 export const GAME_WORLD_PREFETCH_BUDGET_MS = 0;
+/** A stage that consumes at least half of a 60 Hz frame is followed by one
+ * preparation-free frame. That leaves the host's boundary idle collector a
+ * useful window instead of letting the next indivisible stage cross the
+ * QuickJS hard threshold and collect inside gameplay. */
+export const GAME_WORLD_PREFETCH_RECOVERY_MS = 8;
 /** Entry autoruns/parallels are most expensive during their first few ticks.
- * Keep derived-cache parse/compile work off those ticks, while leaving 52 of
- * the 64 pressure-route frames available for the bounded two-hop prefetch. */
+ * Keep derived-cache parse/compile work off those ticks, while leaving ample
+ * room in the pressure route's 64-frame bound for direct-neighbour prefetch. */
 export const GAME_WORLD_ENTRY_SETTLE_FRAMES = 12;
 /** Keep the two confirmation frames after the final prefetch stage clear, so
  * deferred sidecar decoding cannot refill the heap while the prepared map is
@@ -44,6 +47,52 @@ export interface GameWorldCacheDriverOptions extends WorldCacheDriverOptions {
   /** Reports whether transition settling or synchronous prefetch work owns
    * this frame, so unrelated deferred work can yield. */
   onPrefetchActivity?(active: boolean): void;
+}
+
+interface CachedWorkingSet {
+  mapId: string;
+  cameraLeft: number;
+  cameraTop: number;
+  cameraRight: number;
+  cameraBottom: number;
+  viewportW: number;
+  viewportH: number;
+  playerX: number;
+  playerY: number;
+  facing: number;
+  set: WorldWorkingSet;
+  prefetchSet: WorldWorkingSet;
+}
+
+function sameStrings(a: readonly string[], b: readonly string[]): boolean {
+  if (a === b) return true;
+  if (a.length !== b.length) return false;
+  for (let index = 0; index < a.length; index++) {
+    if (a[index] !== b[index]) return false;
+  }
+  return true;
+}
+
+function sameRetention(
+  a: Readonly<WorldWorkingSet>,
+  b: Readonly<WorldWorkingSet> | null,
+): boolean {
+  return b !== null && (
+    a === b || (
+      a.active === b.active &&
+      sameStrings(a.parsedKeep, b.parsedKeep) &&
+      sameStrings(a.compiledKeep, b.compiledKeep)
+    )
+  );
+}
+
+function hasParallelWork(state: Readonly<SessionState>): boolean {
+  const parallels = state.interp?.parallels;
+  if (!parallels) return false;
+  for (const id in parallels) {
+    if (Object.prototype.hasOwnProperty.call(parallels, id)) return true;
+  }
+  return false;
 }
 
 /** Stable direct-neighbour index for the immutable outdoor topology. */
@@ -89,10 +138,10 @@ function pausedPrefetchStats(
   };
 }
 
-/** Add one stable lookahead hop through every direct exit. The kit already
- * keeps those direct neighbours; retaining their targets prevents player
- * facing changes from repeatedly evicting and recompiling the same second-hop
- * worlds while still bounding residency to two graph hops. */
+/** Retain one stable lookahead hop through every direct exit. The kit already
+ * prepares direct neighbours; keeping their targets prevents player-facing
+ * changes from evicting previously compiled second-hop worlds without eagerly
+ * compiling every speculative branch. */
 export function withTwoHopWorldLookahead(
   set: Readonly<WorldWorkingSet>,
   index: WorldLookaheadIndex,
@@ -117,16 +166,15 @@ export function withTwoHopWorldLookahead(
   const extra = lookahead.map((entry) => entry.mapId);
   return {
     ...set,
-    imminent: [...set.imminent, ...lookahead],
     parsedKeep: sortedUnique([...set.parsedKeep, ...extra]),
     compiledKeep: sortedUnique([...set.compiledKeep, ...extra]),
   };
 }
 
 /** Game-specific seamless cache policy: preserve the kit's authoritative
- * active/visible/direct-neighbour sets, add one bounded two-hop lookahead
- * hop, and advance synchronous preparation within a narrow frame budget. All
- * touched data is derived cache state and never enters reducer snapshots. */
+ * active/visible/direct-neighbour sets, add one bounded two-hop retention
+ * ring, and advance direct-neighbour preparation within a narrow frame budget.
+ * All touched data is derived cache state and never enters reducer snapshots. */
 export function createGameWorldCacheDriver(
   sess: Session,
   layout: Readonly<WorldLayout>,
@@ -134,6 +182,12 @@ export function createGameWorldCacheDriver(
 ): WorldCacheDriver {
   const tile = sess.cfg.tile;
   const lookahead = createWorldLookaheadIndex(layout);
+  const placementByMap = new Map<string, Readonly<WorldPlacement>>();
+  for (const component of layout.components) {
+    for (const placement of component.placements) {
+      placementByMap.set(placement.mapId, placement);
+    }
+  }
   const prefetcher = createWorldPrefetcher(sess, {
     budgetMs: options.budgetMs ?? GAME_WORLD_PREFETCH_BUDGET_MS,
     now: options.now,
@@ -141,6 +195,9 @@ export function createGameWorldCacheDriver(
   let lastActive: string | null = null;
   let releaseDeferred = false;
   let audioCooldownFrames = 0;
+  let prefetchRecoveryFrames = 0;
+  let cached: CachedWorkingSet | null = null;
+  let released: WorldWorkingSet | null = null;
 
   return {
     sync(state: Readonly<SessionState>, camera: Readonly<CameraState>, viewport) {
@@ -152,33 +209,71 @@ export function createGameWorldCacheDriver(
       const transitionBusy = mapChanged || entrySettling ||
         state.fade != null || state.handoff !== undefined || state.scene != null;
       const releaseNow = releaseDeferred && !transitionBusy;
-      const component = componentOfMap(layout, state.mapId);
-      if (!component) {
+      const placement = placementByMap.get(state.mapId);
+      if (!placement) {
         options.onPrefetchActivity?.(transitionBusy || releaseDeferred);
         if ((changed && !releaseDeferred) || releaseNow) {
           releaseSessionMapsExcept(sess, [state.mapId]);
           releaseDeferred = false;
+          released = null;
         }
+        cached = null;
         lastActive = state.mapId;
         return;
       }
-      const placement = component.placements.find((entry) => entry.mapId === state.mapId);
-      if (!placement) {
-        options.onPrefetchActivity?.(transitionBusy || releaseDeferred);
-        return;
+      const cameraLeft = Math.floor(camera.x / tile);
+      const cameraTop = Math.floor(camera.y / tile);
+      const cameraRight = Math.ceil((camera.x + viewport.w) / tile);
+      const cameraBottom = Math.ceil((camera.y + viewport.h) / tile);
+      // Placements are tile-aligned, so sub-tile camera motion cannot change
+      // visibility while these four inclusive/exclusive tile bounds stay
+      // fixed. Player proximity changes only when its map-local tile or
+      // facing changes. Reuse the immutable derived set between those edges.
+      const reusable = cached !== null &&
+        cached.mapId === state.mapId &&
+        cached.cameraLeft === cameraLeft &&
+        cached.cameraTop === cameraTop &&
+        cached.cameraRight === cameraRight &&
+        cached.cameraBottom === cameraBottom &&
+        cached.viewportW === viewport.w &&
+        cached.viewportH === viewport.h &&
+        cached.playerX === state.move.tx &&
+        cached.playerY === state.move.ty &&
+        cached.facing === state.move.facing;
+      let set: WorldWorkingSet;
+      let prefetchSet: WorldWorkingSet;
+      if (reusable) {
+        set = cached!.set;
+        prefetchSet = cached!.prefetchSet;
+      } else {
+        const base = workingSet(
+          layout,
+          state.mapId,
+          { x: camera.x, y: camera.y, w: viewport.w, h: viewport.h },
+          tile,
+          {
+            x: placement.originTileX + state.move.tx,
+            y: placement.originTileY + state.move.ty,
+          },
+          state.move.facing,
+        );
+        prefetchSet = base;
+        set = withTwoHopWorldLookahead(base, lookahead);
+        cached = {
+          mapId: state.mapId,
+          cameraLeft,
+          cameraTop,
+          cameraRight,
+          cameraBottom,
+          viewportW: viewport.w,
+          viewportH: viewport.h,
+          playerX: state.move.tx,
+          playerY: state.move.ty,
+          facing: state.move.facing,
+          set,
+          prefetchSet,
+        };
       }
-      const base = workingSet(
-        layout,
-        state.mapId,
-        { x: camera.x, y: camera.y, w: viewport.w, h: viewport.h },
-        tile,
-        {
-          x: placement.originTileX + state.move.tx,
-          y: placement.originTileY + state.move.ty,
-        },
-        state.move.facing,
-      );
-      const set = withTwoHopWorldLookahead(base, lookahead);
       // Fade-out already prepares its transfer target one stage per reducer
       // tick. Seam handoffs and full-screen scenes are likewise transition
       // frames, so do not stack unrelated derived-cache compilation on top.
@@ -190,10 +285,21 @@ export function createGameWorldCacheDriver(
         state.playerRoute != null ||
         state.interp?.main != null ||
         state.interp?.modal != null ||
-        Object.keys(state.interp?.parallels ?? {}).length > 0;
-      const prefetchStats = busyFrame
-        ? pausedPrefetchStats(sess, set, prefetcher)
-        : prefetcher.update(set);
+        hasParallelWork(state);
+      const recoveryFrame = !busyFrame && prefetchRecoveryFrames > 0;
+      let prefetchStats: WorldPrefetchStats;
+      if (busyFrame || recoveryFrame) {
+        prefetchStats = pausedPrefetchStats(sess, prefetchSet, prefetcher);
+        if (recoveryFrame) prefetchRecoveryFrames--;
+      } else {
+        prefetchStats = prefetcher.update(prefetchSet);
+        if (
+          prefetchStats.stages > 0 &&
+          prefetchStats.stageMs >= GAME_WORLD_PREFETCH_RECOVERY_MS
+        ) {
+          prefetchRecoveryFrames = 1;
+        }
+      }
       const prefetchActive = prefetchStats.stages > 0;
       let audioCooldownActive = false;
       if (prefetchActive) {
@@ -203,10 +309,15 @@ export function createGameWorldCacheDriver(
         audioCooldownActive = true;
       }
       options.onPrefetchActivity?.(
-        transitionBusy || releaseDeferred || prefetchActive || audioCooldownActive,
+        transitionBusy || releaseDeferred || prefetchActive || recoveryFrame || audioCooldownActive,
       );
       if (!releaseDeferred || releaseNow) {
-        releaseSessionMapLayers(sess, set.parsedKeep, set.compiledKeep, set.active);
+        if (releaseNow || !sameRetention(set, released)) {
+          releaseSessionMapLayers(sess, set.parsedKeep, set.compiledKeep, set.active);
+        }
+        // Point at the newest equivalent set as well, keeping the ordinary
+        // stable-frame comparison on the identity fast path.
+        released = set;
         releaseDeferred = false;
       }
       lastActive = state.mapId;

@@ -1725,6 +1725,35 @@ mod g6_quickjs_bench {
         );
     }
 
+    /// Stage on-demand IMG directories that the desktop launcher keeps in
+    /// data.fs. The filesystem host intentionally wins over pak lookup, so a
+    /// benchmark fixture must mirror these sidecar entries as well.
+    fn seed_img_entries(source: &Path, directory: &str, data_root: &Path) {
+        let destination = data_root.join(BENCH_APP_ID).join("data").join(directory);
+        let _ = std::fs::remove_dir_all(&destination);
+        std::fs::create_dir_all(&destination)
+            .unwrap_or_else(|error| panic!("create benchmark {directory} directory: {error}"));
+        let mut copied = 0usize;
+        for entry in std::fs::read_dir(source)
+            .unwrap_or_else(|error| panic!("read benchmark {directory} directory: {error}"))
+        {
+            let entry = entry.expect("read benchmark IMG entry");
+            let path = entry.path();
+            if !entry
+                .file_type()
+                .expect("read benchmark IMG entry type")
+                .is_file()
+                || path.extension().and_then(|value| value.to_str()) != Some("img")
+            {
+                continue;
+            }
+            std::fs::copy(&path, destination.join(entry.file_name()))
+                .unwrap_or_else(|error| panic!("copy benchmark {directory} entry: {error}"));
+            copied += 1;
+        }
+        assert!(copied > 0, "benchmark must stage {directory} IMG entries");
+    }
+
     /// Mirrors tools/desktop.ts's five raw zh_CN startup entries. They are
     /// staged before boot (outside the timed interval), exactly like a real
     /// desktop launcher's persistent data.fs tree.
@@ -1882,6 +1911,11 @@ mod g6_quickjs_bench {
         }
         let battle = PathBuf::from(std::env::var("G6_BATTLE").expect("G6_BATTLE"));
         seed_battle(&battle, &data);
+        let portraits = PathBuf::from(std::env::var("G6_PORTRAITS").expect("G6_PORTRAITS"));
+        seed_img_entries(&portraits, "portraits", &data);
+        let choice_icons =
+            PathBuf::from(std::env::var("G6_CHOICE_ICONS").expect("G6_CHOICE_ICONS"));
+        seed_img_entries(&choice_icons, "choice-icons", &data);
         if let Ok(battle_zh) = std::env::var("G6_BATTLE_ZH") {
             copy_dir_recursive(
                 Path::new(&battle_zh),
@@ -3166,6 +3200,15 @@ mod g6_quickjs_bench {
             "world-cache route contains duplicate maps"
         );
         let route = world_stress_route(&initial_diagnostics);
+        let focus_map = std::env::var("G6_WORLD_FOCUS_MAP")
+            .ok()
+            .filter(|value| !value.is_empty());
+        if let Some(target) = &focus_map {
+            assert!(
+                route.iter().any(|(map_id, _)| map_id == target),
+                "G6_WORLD_FOCUS_MAP names a map outside the world-cache route: {target}"
+            );
+        }
 
         let mut timed_frames = Vec::new();
         let mut cross_map_frames = Vec::new();
@@ -3176,10 +3219,13 @@ mod g6_quickjs_bench {
         let mut heap_after_gc = Vec::new();
         let mut frame = 0usize;
         let mut seq = 0usize;
-        for pass in 1..=2 {
+        let mut focus_complete = false;
+        let passes = if focus_map.is_some() { 1 } else { 2 };
+        'passes: for pass in 1..=passes {
             let mut peak = WorldStressPeak::default();
             let mut unique = HashSet::new();
             for (map_id, authored_edge) in &route {
+                let collect = focus_map.as_ref().is_none_or(|target| target == map_id);
                 unique.insert(map_id);
                 let before = world_stress_diagnostics(&bench);
                 let prefetched = before.cache.as_ref().is_some_and(|cache| {
@@ -3206,10 +3252,9 @@ mod g6_quickjs_bench {
                 let mut settled = false;
                 let mut entry_presented = false;
                 let mut sampled_cross_frame = false;
-                // A stable two-hop outdoor keep-set can contain 12 maps.
-                // Each synchronous map preparation has at most four fixed
-                // stages, followed by two settled confirmation frames; 64
-                // preserves a finite deadline without conflating that bounded
+                // Direct-neighbour preparation has at most four fixed stages
+                // per map. Expensive stages may reserve one recovery frame;
+                // 64 preserves a finite deadline without conflating bounded
                 // staging latency with the per-frame 50 ms CPU gate below.
                 for attempt in 0..64 {
                     let mut sample = bench.frame(frame, 0, None, true);
@@ -3222,20 +3267,22 @@ mod g6_quickjs_bench {
                         format!("world-render-p{pass}-a{attempt}")
                     };
                     let sample_cpu = sample.js_cpu_ms + sample.core_cpu_ms + sample.draw_cpu_ms;
-                    if attempt == 0 {
+                    if collect && attempt == 0 {
                         // The diagnostics overlay performs startSession in
                         // this control frame. It is not a gameplay transfer;
                         // time the first ordinary production frame after the
                         // replacement as the cross-map rendering frame.
                         direct_entry_frames.push(sample.clone());
-                    } else {
+                    } else if collect {
                         timed_frames.push(sample.clone());
                         if entry_presented && !sampled_cross_frame {
                             cross_map_frames.push(sample.clone());
                             sampled_cross_frame = true;
                         }
                     }
-                    world_all_frames.push(sample.clone());
+                    if collect {
+                        world_all_frames.push(sample.clone());
+                    }
                     let diagnostic = world_stress_diagnostics(&bench);
                     if sample_cpu > 45.0 {
                         let cache = diagnostic
@@ -3281,6 +3328,10 @@ mod g6_quickjs_bench {
                     settled,
                     "map {map_id} did not settle within 64 production frames"
                 );
+                if focus_map.as_ref().is_some_and(|target| target == map_id) {
+                    focus_complete = true;
+                    break 'passes;
+                }
             }
             force_qjs_gc(&bench.rt.guest);
             let (used, _, _) = qjs_memory(&bench.rt.guest);
@@ -3307,6 +3358,30 @@ mod g6_quickjs_bench {
                 heap_after_gc.last().unwrap(),
             );
             peaks.push(peak);
+        }
+
+        if let Some(target) = focus_map {
+            assert!(focus_complete, "focused world-cache map {target} was not visited");
+            let first = world_all_frames.first().expect("focused world-cache first frame");
+            let last = world_all_frames.last().expect("focused world-cache last frame");
+            println!(
+                "WORLD_FOCUS viewport={viewport} timeline=synthetic target={target} first_frame={} last_frame={} frames={}",
+                first.frame,
+                last.frame,
+                world_all_frames.len(),
+            );
+            report(&viewport, "world-focus-cross-map", &cross_map_frames);
+            report(&viewport, "world-focus-render", &timed_frames);
+            report(
+                &viewport,
+                "world-focus-direct-control",
+                &direct_entry_frames,
+            );
+            report_temperature(&viewport, "world-focus", &world_all_frames);
+            report_slowest(&viewport, "world-focus", &world_all_frames);
+            assert_frame_budget("world-focus", &world_all_frames, 45.0);
+            let _ = std::fs::remove_dir_all(data);
+            return;
         }
 
         report(&viewport, "world-stress-cross-map", &cross_map_frames);

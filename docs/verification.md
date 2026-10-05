@@ -83,8 +83,8 @@ legacy terminal hash, preserving the other half of the compatibility contract.
 
 ### The QuickJS benches
 
-`bench:g6:quickjs`, `bench:gb6:quickjs`, `bench:j3:quickjs` and
-`bench:j4:quickjs` measure
+`bench:g6:quickjs`, `bench:gb6:quickjs`, `bench:j3:quickjs`,
+`bench:j4:quickjs` and `bench:cotton:quickjs` measure
 real-frame CPU performance
 inside the actual desktop host's QuickJS guest (not Bun's JavaScriptCore):
 they build the vendored Rust host with a benchmark harness, boot the built
@@ -123,6 +123,7 @@ BENCH_CPU=6
 uptime
 taskset -c "$BENCH_CPU" bun run bench:gb6:quickjs:cold
 taskset -c "$BENCH_CPU" bun run bench:j3:quickjs:cold
+taskset -c "$BENCH_CPU" bun run bench:cotton:quickjs
 taskset -c "$BENCH_CPU" bun run verify:world-cache:cold
 uptime
 ```
@@ -169,6 +170,7 @@ bun run bench:j3:quickjs
 bun run bench:j4:quickjs
 bun run bench:j3:quickjs:cold
 bun run bench:indoor-fast-path
+bun run bench:cotton:quickjs
 bun run verify:world-cache
 bun run verify:world-cache:cold
 ```
@@ -182,6 +184,18 @@ isolated Rust host build adds about 40–60 seconds. GB6 reads its expected
 terminal SHA-256 from the tape,
 so re-pinning the tape cannot leave a second stale literal in the wrapper.
 JavaScript compile/evaluation failures include the original message and stack.
+
+The Cotton Town benchmark is a bounded version of the production world-cache
+route. It starts from the same fresh session, advances through the same prior
+maps so allocation and GC history are preserved, collects the target map from
+its diagnostic control frame through cache settlement, and then stops. It
+runs three fresh OS processes at both 480×272 and 960×544 by default and
+applies a stricter 45 ms QuickJS-plus-core CPU gate to every collected frame.
+Use `COTTON_COLD_RUNS` to request more repetitions, and pin the wrapper with
+`taskset` as shown above. This is the fast regression gate for Cotton-specific
+cache work; the complete two-pass `verify:world-cache` remains the residency
+and all-outdoor-map gate. See the [Cotton Town performance report](../findings/GP-COTTON.md)
+for the attribution and reference measurements.
 
 The J3 benchmark restores the production `hospital-cure` chapter snapshot,
 then replays the 11 remaining J2 masks plus all 12,930 J3 masks (12,941 total).
@@ -289,10 +303,9 @@ passed three processes and then failed at 282.272 ms while closing I/O wait
 reached 32.65%. Both failures remain in the raw record and neither used a
 diagnostic startup override.
 
-See the [cold-start and Chinese frame report](../findings/PERF-BOOT-ZH.md) for
-the complete stage tables, per-process results, load record, artifact hashes
-and compatibility gates. See the [cold-path performance report](../findings/PERF-COLD.md)
-for the preceding reducer and cache optimizations.
+The tables above preserve the cold-start and Chinese-frame measurements. See
+the [Cotton Town performance report](../findings/GP-COTTON.md) for the newer
+outdoor-cache attribution, per-process measurements and compatibility gates.
 
 ## The tapes
 

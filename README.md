@@ -98,8 +98,12 @@ summary:
   the default limits: all 20 passed, with 209.961 ms as the largest startup and
   32.787 ms as the largest production frame. Two same-core/storage-contention
   attempts failed startup at 308.911 and 282.272 ms and remain recorded; they
-  do not change the longer GB6/J3 limitation above. Cold/hot medians, exact
-  startup counts, load ranges, bundle identities and attribution are in
+  do not change the longer GB6/J3 limitation above. A dedicated Cotton Town
+  short-window gate now preserves the preceding outdoor-cache allocation
+  history while avoiding a full mainline replay. Its latest three-process
+  runs at each viewport stayed at or below 15.046 ms (480×272) and 16.045 ms
+  (960×544), against a 45 ms limit. Cold/hot medians, exact startup counts,
+  load ranges, bundle identities and attribution are in
   [the verification guide](docs/verification.md#the-quickjs-benches).
 - **Import coverage:** 89.6% of Tuxemon action uses and 96.5% of condition
   uses map natively to kit commands; 97.7% / 97.2% are executable (native,
@@ -377,6 +381,7 @@ bun run bench:j3:quickjs        # hospital chapter -> radio, both viewports
 bun run bench:j4:quickjs        # radio chapter -> Kernel, both viewports
 bun run bench:j3:quickjs:cold   # five fresh processes at each viewport
 bun run bench:indoor-fast-path  # production-entry indoor single-map probe
+bun run bench:cotton:quickjs    # three fresh Cotton Town windows per viewport
 bun run verify:world-cache      # visit all 67 outdoor maps twice at both viewports
 bun run verify:world-cache:cold # five fresh cache walks at each viewport
 bun run build:psp               # release EBOOT plus external asset pak
