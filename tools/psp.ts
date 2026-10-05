@@ -255,7 +255,9 @@ const identity = (cwd: string) => {
     diffSha256: sha256(execFileSync(
       "git",
       ["diff", "HEAD", "--binary", "--ignore-submodules=dirty"],
-      { cwd },
+      // An uncommitted merge with binary assets easily passes the default
+      // 1 MiB buffer and would abort the build with ENOBUFS.
+      { cwd, maxBuffer: 1 << 30 },
     )),
     changedFiles: files,
   };
