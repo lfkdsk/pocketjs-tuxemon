@@ -28,6 +28,7 @@ where noted. Set `TUXEMON_SRC` first (or keep a repo-local `.tuxemon-src`).
 | `verify:j2:mainline` | The hospital-cure continuation, concatenated with GB6 and J1 and replayed from frame zero (172,251 frames), ends in the Candy Town hospital with the cure granted and all 54 battles (50 trainer, 4 wild) won. | `data/gb6-mainline-journey.json`, `data/j1-captainreturns-journey.json`, `data/j2-hospitalcure-journey.json` | ~130 s |
 | `verify:j3:mainline` | The Radio Tower continuation, concatenated with GB6, J1 and J2 and replayed from frame zero (185,181 frames), ends at the broadcast with all 13 new trainer battles won and the Omnichannel story flags intact. | the four maintained mainline tapes through `data/j3-omnichannelradioannounce-journey.json` | ~140 s |
 | `verify:j4:mainline` | The Kernel continuation replays twice from the exact J3 production-save boundary, then concatenates all five segments and replays 198,568 frames from frame zero. It pins 14 wins (12 trainer plus Cataspike and Kernel), all seven correct Data Center answers and the `kernelquest=done` epilogue. | the five maintained mainline tapes through `data/j4-kernelquestdone-journey.json` | ~30 s |
+| `verify:goldens:sync` | Validates the GB6/J1/J2/J3/J4 ancestry and tape hashes, derives all 11 GB6 route, J1, J4 and daylight checkpoints, and replays the authoritative reducer to assert the exact map, tile, reducer frame, world-idle and saveable state. It does not boot the renderer or write files. | the five maintained mainline tapes, the G6 tape and generated project | ~14 s |
 | `verify:chapters` | The demo chapters re-bake byte-identical: each save envelope passes the kit's save validator (decode + map-aware restore), the 480×272 thumbnails re-render from the built game to the committed PNG hashes, and every envelope restored and resumed at its `timelineFrame` suffix-replays to the full-tape terminal state. Fails with the rebake command when the kit, the tape or the importer moves a checkpoint. | `data/chapters.json`, `docs/screenshots/chapters/`, built bundle | ~12 min |
 | `verify:save` | Five saves through the game's own save path (save-point check, slot store or save code, content identity, decode, restore): after a battle, after a map change and after a late battle in the 09:00 GB6 replay, and one minute before noon plus mid-tint-tween right after the daylight stage turns in an 11:52 replay. Each restored state equals the live state at its save frame (one frame later for the rebuilt NPC table), and each resumed replay ends at the uninterrupted terminal state hash. Only the host frame counter `SessionState.frame`, which the reducer never reads, is set back for hashing. Report in `reports/save-resume.json`. | GB6 tape, generated shards | ~4 min |
 | `verify:preview:coverage` | The neighbour NPC preview by sandboxed map entry, for every map at the new-game state and at all 20 chapter snapshots: no mainline (`spyder_*`) event is rejected, the sandbox never changes the live state, and the new-game result equals the import report. Writes `reports/preview-coverage.md` (and `.zh_CN.md`). | `dist/project.json`, `data/chapters.json`, `dist/import-report.json` | ~15 s |
@@ -395,6 +396,23 @@ decoded-RGBA hash, per-opaque-pixel sprite matches at the reducer-derived
 positions, and semantic colour-region counts per map. There is no tolerance:
 a single differing pixel fails.
 
+The GB6 route, J1, J4 and daylight tools share the checkpoint authority in
+`tools/golden-sync.ts`. It verifies every segment's format, frame count, tape
+hash, ancestry and traversal mode before replaying the pure reducer. At each
+checkpoint it asserts the map, tile, reducer frame (`maskFrame + 1`),
+world-idle state and saveability. The three long-tape generators encode that
+validated state through the normal save contract, restore it into the built
+production GameView, assert the restored map/tile/frame again, and only then
+paint. This keeps the reducer-authored recording authoritative even when the
+production UI paginates a dialog into more pages than the recorder did. The
+short daylight capture still replays the production bundle to its G6 Paper
+Town checkpoint, using the same tape identity and state expectations.
+
+`bun run verify:goldens:sync` executes the shared tape and reducer checks for
+all 11 checkpoints without booting the renderer or writing a manifest or PNG.
+CI runs it as a journey-matrix leg. The regression test also shifts one real
+checkpoint by one mask frame and requires the state assertion to reject it.
+
 | Command | Regenerates |
 |---|---|
 | `bun run goldens:g6` | The four opening keyframes and `data/g6-goldens.json`, by re-driving the opening tape (it runs the recorder first, because the PNGs are only valid for the current tape). Also rewrites `data/g6-journey.json`. |
@@ -409,10 +427,12 @@ a single differing pixel fails.
 | `bun run goldens:daylight` | The same Paper Town checkpoint at fixed 09:00 and 21:00 starts, plus `data/daylight-goldens.json`. The test recomputes luminance, blue bias and per-pixel day/night differences from the decoded PNGs. |
 
 Regenerate goldens only when the rendering change is intentional, and always
-open the regenerated PNGs and look at them. A hash pins the bytes; it cannot
-tell a correct picture from a consistently wrong one. Several past rendering
-bugs (a same-tick resize that only extended black borders, a wrong depth
-composite) were caught by eye, not by the assertions.
+run `bun run verify:goldens:sync`, open every regenerated PNG at an enlarged
+scale and look at it. A hash pins the bytes; it cannot tell a correct picture
+from a consistently wrong one. Compare changed images with the previous
+version as well as checking their map, player and landmark semantics. Several
+past rendering bugs (a same-tick resize that only extended black borders, a
+wrong depth composite) were caught by eye, not by the assertions.
 
 ## Multi-Hz, save/restore and rewind
 

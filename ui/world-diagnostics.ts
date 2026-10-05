@@ -1,4 +1,7 @@
 import { startSession } from "../vendor/pocket-rpgkit/src/engine/session.ts";
+import { MapNotReadyError } from "../vendor/pocket-rpgkit/src/engine/map-repository.ts";
+import { decodeEnvelopeText, type SaveSnapshot } from "../vendor/pocket-rpgkit/src/engine/save.ts";
+import { restoreSessionSnapshot } from "../vendor/pocket-rpgkit/src/engine/save-restore.ts";
 import type { AnimatedTilesStats } from "../vendor/pocket-rpgkit/src/ui/AnimatedTiles.tsx";
 import type { GameViewOverlayConfig } from "../vendor/pocket-rpgkit/src/ui/demo-contract.ts";
 import type { WorldStreamedTerrainStats } from "../vendor/pocket-rpgkit/src/ui/WorldStreamedTerrain.tsx";
@@ -11,6 +14,16 @@ export interface WorldVisitRequest {
   y?: number;
 }
 
+/** Sim-only request used by screenshot tooling. `snapshot` has already been
+ * produced by the same pure reducer replay as the mainline verifier; the
+ * production bundle decodes and restores it through the ordinary save gate
+ * before it paints the requested frame. */
+export interface WorldRestoreRequest {
+  seq: number;
+  snapshot: string;
+  timelineFrame: number;
+}
+
 /** Mutable diagnostics object installed by sim/QuickJS verification before
  * the production bundle evaluates. Normal launches leave it undefined, so
  * GameView receives none of the diagnostic callbacks or overlay wrapper. */
@@ -21,6 +34,8 @@ export interface PocketTuxemonWorldDiagnostics {
   enableZhDemo?: boolean;
   request?: WorldVisitRequest;
   acknowledged?: number;
+  restoreRequest?: WorldRestoreRequest;
+  restoreAcknowledged?: number;
   maps?: readonly string[];
   links?: Readonly<Record<string, readonly string[]>>;
   cache?: GameWorldCacheSnapshot;
@@ -45,10 +60,59 @@ export function withWorldDiagnostics(
     create(host) {
       const runtime = base.create(host);
       let handled = diagnostics.acknowledged ?? -1;
+      let restoreHandled = diagnostics.restoreAcknowledged ?? -1;
+      let pendingRestore: {
+        request: WorldRestoreRequest;
+        snapshot: SaveSnapshot;
+        ready: boolean;
+        error?: unknown;
+      } | null = null;
+
+      const restore = (
+        request: WorldRestoreRequest,
+        snapshot: SaveSnapshot,
+      ): { consumed: true; stateChanged: true } | null => {
+        try {
+          const restored = restoreSessionSnapshot(host.session, snapshot);
+          host.replaceState({ ...restored, frame: request.timelineFrame }, snapshot.held);
+          restoreHandled = request.seq;
+          diagnostics.restoreAcknowledged = request.seq;
+          pendingRestore = null;
+          return { consumed: true, stateChanged: true };
+        } catch (error) {
+          const repository = host.session.repository;
+          if (!(error instanceof MapNotReadyError) || !repository?.prepare) throw error;
+          const pending = { request, snapshot, ready: false, error: undefined as unknown };
+          pendingRestore = pending;
+          void repository.prepare(error.mapId).then(
+            () => { pending.ready = true; },
+            (reason) => { pending.error = reason ?? new Error(`world diagnostics: failed to prepare ${error.mapId}`); },
+          );
+          return null;
+        }
+      };
       return {
         isOpen: () => runtime.isOpen(),
         render: (theme, uiText) => runtime.render(theme, uiText),
         step(buttons, pressed) {
+          const restoreRequest = diagnostics.restoreRequest;
+          if (restoreRequest && restoreRequest.seq !== restoreHandled) {
+            if (!Number.isInteger(restoreRequest.timelineFrame) || restoreRequest.timelineFrame < 0) {
+              throw new Error("world diagnostics: restore timelineFrame must be a non-negative integer");
+            }
+            if (!pendingRestore || pendingRestore.request.seq !== restoreRequest.seq) {
+              pendingRestore = null;
+              const snapshot = decodeEnvelopeText(restoreRequest.snapshot);
+              const restored = restore(restoreRequest, snapshot);
+              if (restored) return restored;
+            }
+            if (pendingRestore?.error !== undefined) throw pendingRestore.error;
+            if (pendingRestore?.ready) {
+              const restored = restore(pendingRestore.request, pendingRestore.snapshot);
+              if (restored) return restored;
+            }
+            return { consumed: true, stateChanged: false };
+          }
           const request = diagnostics.request;
           if (request && request.seq !== handled) {
             const meta = host.session.mapIndex?.get(request.mapId);

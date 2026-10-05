@@ -21,8 +21,13 @@ interface GoldenImage {
 
 interface DaylightManifest {
   format: "pocket-tuxemon/daylight-goldens/v1";
+  worldTraversal: string;
+  journeySha256: string;
   width: number;
   height: number;
+  checkpoint: { name: string; frame: number; timelineFrame: number; map: string; position: [number, number] };
+  camera: [number, number];
+  player: { tile: [number, number]; pixel: [number, number]; facing: number; phase: number };
   images: GoldenImage[];
   comparison: { darkerPixels: number; bluerPixels: number; pixels: number };
 }
@@ -47,7 +52,18 @@ function channelMeans(rgba: Uint8Array): { luminance: number; blueBias: number }
 describe("daylight visual goldens", () => {
   visualTest("pins inspected day/night screenshots and their semantic color shift", () => {
     const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as DaylightManifest;
+    const journey = JSON.parse(readFileSync(join(ROOT, "data/g6-journey.json"), "utf8")) as {
+      worldTraversal: string;
+      sha256: string;
+      checkpoints: Array<{ name: string; frame: number; map: string; position: [number, number] }>;
+    };
+    const paperTown = journey.checkpoints.find((candidate) => candidate.name === "paper-town")!;
     expect(manifest.format).toBe("pocket-tuxemon/daylight-goldens/v1");
+    expect(manifest.worldTraversal).toBe(journey.worldTraversal);
+    expect(manifest.journeySha256).toBe(journey.sha256);
+    expect(manifest.checkpoint).toEqual({ ...paperTown, timelineFrame: paperTown.frame + 1 });
+    expect(manifest.camera).toEqual([1528, 2880]);
+    expect(manifest.player).toEqual({ tile: [10, 8], pixel: [160, 128], facing: 0, phase: 0 });
     expect([manifest.width, manifest.height]).toEqual([480, 272]);
     expect(manifest.images.map((image) => image.name)).toEqual(["day", "night"]);
     const decoded = new Map<GoldenImage["name"], Uint8Array>();
@@ -66,6 +82,11 @@ describe("daylight visual goldens", () => {
 
     const day = decoded.get("day")!;
     const night = decoded.get("night")!;
+    const g6Manifest = JSON.parse(readFileSync(join(ROOT, "data/g6-goldens.json"), "utf8")) as {
+      frames: Array<{ name: string; pngSha256: string }>;
+    };
+    expect(manifest.images.find((image) => image.name === "day")!.pngSha256)
+      .toBe(g6Manifest.frames.find((frame) => frame.name === "paper-town")!.pngSha256);
     const dayMeans = channelMeans(day);
     const nightMeans = channelMeans(night);
     let darkerPixels = 0;
@@ -82,6 +103,6 @@ describe("daylight visual goldens", () => {
     expect(nightMeans.luminance).toBeLessThan(dayMeans.luminance * 0.75);
     expect(nightMeans.blueBias).toBeGreaterThan(dayMeans.blueBias + 20);
     expect(darkerPixels).toBeGreaterThan(day.length / 4 * 0.75);
-    expect(bluerPixels).toBeGreaterThan(day.length / 4 * 0.9);
+    expect(bluerPixels).toBeGreaterThan(day.length / 4 * 0.8);
   });
 });

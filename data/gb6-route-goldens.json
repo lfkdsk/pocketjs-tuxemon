@@ -1,9 +1,12 @@
 {
   "format": "pocket-tuxemon/gb6-route-goldens/v1",
+  "worldTraversal": "seamless-v1",
+  "tapeSha256": "529d93c91d9c05055b0d57dc3ebfd9586a6fdb4494a965c144ad5ef781300eda",
   "frames": [
     {
       "name": "cotton-town",
-      "frame": 5408,
+      "frame": 5406,
+      "timelineFrame": 5407,
       "map": "spyder_cotton_town",
       "position": [
         21,
@@ -12,8 +15,8 @@
       "width": 480,
       "height": 272,
       "file": "gb6-mainline-cotton-town.480x272.png",
-      "rgbaFnv1a": "ae9c8920",
-      "pngSha256": "305670b8cf7bab40668a92fbc0974bf7dd49048dfe00872b89e9e4b2dd06deb2",
+      "rgbaFnv1a": "1cbcd034",
+      "pngSha256": "7d521dd48a3e1d514053a88b674c40a9937250c239030e18b40e94774eb4b271",
       "camera": [
         1704,
         2416
@@ -33,7 +36,8 @@
     },
     {
       "name": "route-2",
-      "frame": 10614,
+      "frame": 10550,
+      "timelineFrame": 10551,
       "map": "spyder_route2",
       "position": [
         0,
@@ -42,8 +46,8 @@
       "width": 480,
       "height": 272,
       "file": "gb6-mainline-route-2.480x272.png",
-      "rgbaFnv1a": "6cc33293",
-      "pngSha256": "2878aa0de1b192e627d2d9b3aaa9c66f4cb3bcce51c45660d25184a4d67637b8",
+      "rgbaFnv1a": "b8d985a3",
+      "pngSha256": "c598767373459bfa7ef62630bb655371a45cf6acd5d2efc2277ee51478475f91",
       "camera": [
         2008,
         2240
@@ -63,7 +67,8 @@
     },
     {
       "name": "city-park",
-      "frame": 45315,
+      "frame": 44975,
+      "timelineFrame": 44976,
       "map": "spyder_citypark",
       "position": [
         10,
@@ -72,8 +77,8 @@
       "width": 480,
       "height": 272,
       "file": "gb6-mainline-city-park.480x272.png",
-      "rgbaFnv1a": "88549b95",
-      "pngSha256": "aaacbac5fe0b9749349c35706587a637f559ca1e3518f20fd139256842882c8b",
+      "rgbaFnv1a": "5b87fe36",
+      "pngSha256": "d3da1f8775e980e0b5fed16925edc2ff1025a68e50fa42fc14454a51ba4edf22",
       "camera": [
         2168,
         2096
@@ -93,7 +98,8 @@
     },
     {
       "name": "route-3-end",
-      "frame": 110863,
+      "frame": 110243,
+      "timelineFrame": 110244,
       "map": "spyder_route3",
       "position": [
         4,
@@ -123,7 +129,8 @@
     },
     {
       "name": "cotton-town",
-      "frame": 5408,
+      "frame": 5406,
+      "timelineFrame": 5407,
       "map": "spyder_cotton_town",
       "position": [
         21,
@@ -132,8 +139,8 @@
       "width": 960,
       "height": 544,
       "file": "gb6-mainline-cotton-town.960x544.png",
-      "rgbaFnv1a": "45fa58af",
-      "pngSha256": "98c9d1e2d8d2dd28a90a42958020db3c179358f3648dcc78bbd53ebb9b3a365d",
+      "rgbaFnv1a": "43fe194a",
+      "pngSha256": "f687b7b4ef6b13bc9bdd20d1fc06be7a74f0c86dfd753d0fae5d98bd63099eeb",
       "camera": [
         1464,
         2280
@@ -153,7 +160,8 @@
     },
     {
       "name": "route-2",
-      "frame": 10614,
+      "frame": 10550,
+      "timelineFrame": 10551,
       "map": "spyder_route2",
       "position": [
         0,
@@ -162,8 +170,8 @@
       "width": 960,
       "height": 544,
       "file": "gb6-mainline-route-2.960x544.png",
-      "rgbaFnv1a": "d3463258",
-      "pngSha256": "781dd75ba8ab42b55e83a06cddd182fde1c7e3d28fc43525f947edd6087865fb",
+      "rgbaFnv1a": "6aeb0888",
+      "pngSha256": "def048e092dc344a750c1755a60355dd447beb1bff7803ef8b70b1ef54855dc4",
       "camera": [
         1768,
         2104
@@ -183,7 +191,8 @@
     },
     {
       "name": "city-park",
-      "frame": 45315,
+      "frame": 44975,
+      "timelineFrame": 44976,
       "map": "spyder_citypark",
       "position": [
         10,
@@ -192,8 +201,8 @@
       "width": 960,
       "height": 544,
       "file": "gb6-mainline-city-park.960x544.png",
-      "rgbaFnv1a": "c01b882c",
-      "pngSha256": "f8292deb9c7658f20bdd239f6ed47bd5b3ba50960db2719732b353db9848883f",
+      "rgbaFnv1a": "81b9e67a",
+      "pngSha256": "e47f66148b85ec6ed3189ed847eadc0b16fbea23529a4eb4a06682b8ab87f5e1",
       "camera": [
         1920,
         1960
@@ -213,7 +222,8 @@
     },
     {
       "name": "route-3-end",
-      "frame": 110863,
+      "frame": 110243,
+      "timelineFrame": 110244,
       "map": "spyder_route3",
       "position": [
         4,
@@ -222,8 +232,8 @@
       "width": 960,
       "height": 544,
       "file": "gb6-mainline-route-3-end.960x544.png",
-      "rgbaFnv1a": "356e00ec",
-      "pngSha256": "6bdf48306d94b1d1f8b1628faf3ee57a68892eb0c83465e151433929ca4e5b74",
+      "rgbaFnv1a": "56151326",
+      "pngSha256": "6f3e185fa8b365cad1f085f12e58d7ed2ad53eca4d12c361b5d93d12e38a0b3e",
       "camera": [
         1192,
         472

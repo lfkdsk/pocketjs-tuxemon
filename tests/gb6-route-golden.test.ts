@@ -11,6 +11,7 @@ import { PLAYER } from "../ui/game-assets.ts";
 interface GoldenFrame {
   name: string;
   frame: number;
+  timelineFrame: number;
   map: string;
   position: [number, number];
   width: number;
@@ -30,7 +31,14 @@ interface GoldenFrame {
 const ROOT = resolve(import.meta.dir, "..");
 const manifest = JSON.parse(readFileSync(join(ROOT, "data/gb6-route-goldens.json"), "utf8")) as {
   format: string;
+  worldTraversal: string;
+  tapeSha256: string;
   frames: GoldenFrame[];
+};
+const journey = JSON.parse(readFileSync(join(ROOT, "data/gb6-mainline-journey.json"), "utf8")) as {
+  worldTraversal: string;
+  tapeSha256: string;
+  masks: number[];
 };
 const project = JSON.parse(readFileSync(join(ROOT, "dist/project.json"), "utf8")) as {
   maps: { id: string; width: number; height: number }[];
@@ -122,19 +130,23 @@ function matchingPlayerPixels(frame: GoldenFrame): { opaque: number; matching: n
 describe("GB6 Route 3 mainline map goldens", () => {
   test("manifest pins four clear-map checkpoints at both resolutions", () => {
     expect(manifest.format).toBe("pocket-tuxemon/gb6-route-goldens/v1");
+    expect(manifest.worldTraversal).toBe(journey.worldTraversal);
+    expect(manifest.tapeSha256).toBe(journey.tapeSha256);
+    expect(manifest.tapeSha256).toBe(createHash("sha256").update(JSON.stringify(journey.masks)).digest("hex"));
     expect(manifest.frames.map(({ name, map, frame, width, height }) =>
       [name, map, frame, width, height]
     )).toEqual([
-      ["cotton-town", "spyder_cotton_town", 5_408, 480, 272],
-      ["route-2", "spyder_route2", 10_614, 480, 272],
-      ["city-park", "spyder_citypark", 45_315, 480, 272],
-      ["route-3-end", "spyder_route3", 110_863, 480, 272],
-      ["cotton-town", "spyder_cotton_town", 5_408, 960, 544],
-      ["route-2", "spyder_route2", 10_614, 960, 544],
-      ["city-park", "spyder_citypark", 45_315, 960, 544],
-      ["route-3-end", "spyder_route3", 110_863, 960, 544],
+      ["cotton-town", "spyder_cotton_town", 5_406, 480, 272],
+      ["route-2", "spyder_route2", 10_550, 480, 272],
+      ["city-park", "spyder_citypark", 44_975, 480, 272],
+      ["route-3-end", "spyder_route3", 110_243, 480, 272],
+      ["cotton-town", "spyder_cotton_town", 5_406, 960, 544],
+      ["route-2", "spyder_route2", 10_550, 960, 544],
+      ["city-park", "spyder_citypark", 44_975, 960, 544],
+      ["route-3-end", "spyder_route3", 110_243, 960, 544],
     ]);
     for (const frame of manifest.frames) {
+      expect(frame.timelineFrame, frame.file).toBe(frame.frame + 1);
       const loaded = load(frame.name, frame.width);
       expect([loaded.image.width, loaded.image.height], frame.file).toEqual([frame.width, frame.height]);
       expect(createHash("sha256").update(loaded.bytes).digest("hex"), frame.file).toBe(frame.pngSha256);

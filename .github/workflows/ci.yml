@@ -111,6 +111,10 @@ jobs:
           # frame zero through the Kernel/Billie Data Center epilogue.
           - name: Kernel-quest journey from J3 save and frame zero
             run: bun run verify:j4:mainline
+          # No renderer or PNG writes: replay the authoritative tapes once
+          # and reject any golden checkpoint whose map/tile/frame drifted.
+          - name: Golden screenshot checkpoints match their tapes
+            run: bun run verify:goldens:sync
           - name: Battle defeat and recovery journeys
             run: bun run verify:gb6:failures
           - name: Every imported input lock is executed to its unlock

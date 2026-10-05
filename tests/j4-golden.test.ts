@@ -40,6 +40,7 @@ interface GoldenFrame {
   name: string;
   frame: number;
   mergedFrame: number;
+  timelineFrame: number;
   map: string;
   position: [number, number];
   width: number;
@@ -236,6 +237,7 @@ describe("J4 Surfboard and Data Center location goldens", () => {
       expect(mark, `${frame.name} journey mark`).toBeDefined();
       expect([frame.frame, frame.mergedFrame], frame.file)
         .toEqual([mark!.frame, manifest.baseFrames + mark!.frame]);
+      expect(frame.timelineFrame, frame.file).toBe(frame.mergedFrame + 1);
       expect([frame.map, frame.position], frame.file).toEqual([mark!.map, mark!.position]);
       expect(frame.story, frame.file).toEqual(expectedStory[frame.name]);
     }

@@ -27,6 +27,7 @@ interface GoldenFrame {
   name: string;
   frame: number;
   mergedFrame: number;
+  timelineFrame: number;
   map: string;
   position: [number, number];
   width: number;
@@ -192,6 +193,7 @@ describe("J1 captain-return location goldens", () => {
       expect(sha256(loaded.bytes), frame.file).toBe(frame.pngSha256);
       expect(fnv1a(loaded.image.rgba), frame.file).toBe(frame.rgbaFnv1a);
       expect(frame.mergedFrame, frame.file).toBe(manifest.baseFrames + frame.frame);
+      expect(frame.timelineFrame, frame.file).toBe(frame.mergedFrame + 1);
       expect(frame.story, frame.file).toEqual(expectedStory[frame.name]);
       expect(frame.player.tile, frame.file).toEqual(frame.position);
       expect(frame.player.pixel, frame.file)

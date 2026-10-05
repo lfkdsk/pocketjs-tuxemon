@@ -1,5 +1,6 @@
 // Capture three clear-map J1 checkpoints at both supported logical
-// resolutions from frame-zero replays of the production bundle.
+// resolutions. The pure mainline reducer selects and serializes each exact
+// tape state; the production bundle restores it only to paint the image.
 
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -9,11 +10,16 @@ import { bootWorld, fnv1a } from "../vendor/pocket-rpgkit/vendor/pocketjs/hosts/
 import { FIXED_TIME_HOST_GLOBALS } from "../battle/time-weather.ts";
 import { encodePNG } from "../vendor/pocket-rpgkit/vendor/pocketjs/tests/png.ts";
 import { walkPose } from "../vendor/pocket-rpgkit/src/engine/movement.ts";
-import { isSessionWorldIdle, type SessionState } from "../vendor/pocket-rpgkit/src/engine/session.ts";
 import type { CameraState, Project } from "../vendor/pocket-rpgkit/src/engine/types.ts";
 import { NPC_SRC_INDEX, PLAYER } from "../ui/game-assets.ts";
 import { createNpcSrcProvider } from "../ui/npc-src-repository.ts";
+import type { PocketTuxemonWorldDiagnostics } from "../ui/world-diagnostics.ts";
 import type { Gb6JourneyResult } from "./gb6-journey.ts";
+import {
+  captureGoldenCheckpoints,
+  loadGoldenSyncPlan,
+  restoreGoldenCheckpoint,
+} from "./golden-sync.ts";
 import type { J1JourneyResult } from "./j1-journey.ts";
 
 const ROOT = resolve(import.meta.dir, "..");
@@ -31,13 +37,12 @@ if (!existsSync(BUNDLE + ".js") || !existsSync(BUNDLE + ".pak")) {
 
 const base = JSON.parse(readFileSync(join(ROOT, "data/gb6-mainline-journey.json"), "utf8")) as Gb6JourneyResult;
 const journey = JSON.parse(readFileSync(join(ROOT, "data/j1-captainreturns-journey.json"), "utf8")) as J1JourneyResult;
-const combined = [...base.masks, ...journey.masks];
-const checkpoints = NAMES.map((name) => {
-  const mark = journey.maps.find((candidate) => candidate.name === name);
-  if (!mark) throw new Error(`J1 goldens: missing ${name} journey checkpoint`);
-  return { ...mark, mergedFrame: base.frames + mark.frame };
-});
-const wanted = new Map(checkpoints.map((checkpoint) => [checkpoint.mergedFrame, checkpoint]));
+const plan = loadGoldenSyncPlan(ROOT);
+const checkpoints = plan.mainline.filter((checkpoint) => checkpoint.suite === "j1");
+const captures = captureGoldenCheckpoints(plan.mainlineMasks, checkpoints, plan.worldTraversal, ROOT);
+if (captures.length !== NAMES.length || captures.some((capture, index) => capture.checkpoint.name !== NAMES[index])) {
+  throw new Error("J1 goldens: shared checkpoint plan changed");
+}
 const project = JSON.parse(readFileSync(join(ROOT, "dist/project.json"), "utf8")) as Project;
 const npcSrc = createNpcSrcProvider(NPC_SRC_INDEX, {
   read: (entry) => readFileSync(join(ROOT, "dist", entry)),
@@ -52,24 +57,15 @@ const imageKey = (phase: number, facing: number, frames: typeof PLAYER): string 
 mkdirSync(OUT, { recursive: true });
 const frames: Record<string, unknown>[] = [];
 for (const viewport of VIEWPORTS) {
-  // Camera bounds and streamed terrain nodes are derived during a tick. A
-  // fresh world per viewport keeps both images on the exact tape frame while
-  // exercising the same startup path as the real host.
-  const world = await bootWorld(BUNDLE, 60, FIXED_TIME_HOST_GLOBALS, undefined, viewport);
-  for (let frame = 0; frame <= checkpoints.at(-1)!.mergedFrame; frame++) {
-    world.frame(combined[frame]!);
-    world.tick();
-    const checkpoint = wanted.get(frame);
-    if (!checkpoint) continue;
-    const state = globalThis.__rpgSessionState as SessionState | undefined;
-    if (!state || state.mapId !== checkpoint.map || state.move.tx !== checkpoint.position[0] ||
-        state.move.ty !== checkpoint.position[1]) {
-      throw new Error(`J1 goldens: ${checkpoint.name} diverged at merged f${frame}: ` +
-        `${state?.mapId}@${state?.move.tx},${state?.move.ty}`);
-    }
-    if (!isSessionWorldIdle(state)) {
-      throw new Error(`J1 goldens: ${checkpoint.name} is not a world-idle frame`);
-    }
+  const diagnostics: PocketTuxemonWorldDiagnostics = {};
+  const world = await bootWorld(BUNDLE, 60, {
+    ...FIXED_TIME_HOST_GLOBALS,
+    __pocketTuxemonWorldDiagnostics: diagnostics,
+  }, undefined, viewport);
+  for (let index = 0; index < captures.length; index++) {
+    const capture = captures[index]!;
+    const checkpoint = capture.checkpoint;
+    const state = await restoreGoldenCheckpoint(world, diagnostics, capture, index + 1);
 
     const actorId = ACTOR_AT[checkpoint.name];
     const character = actorId ? state.chars.chars[actorId] : undefined;
@@ -100,8 +96,9 @@ for (const viewport of VIEWPORTS) {
     writeFileSync(join(OUT, file), png);
     frames.push({
       name: checkpoint.name,
-      frame: checkpoint.frame,
-      mergedFrame: checkpoint.mergedFrame,
+      frame: checkpoint.localFrame,
+      mergedFrame: checkpoint.maskFrame,
+      timelineFrame: capture.timelineFrame,
       map: checkpoint.map,
       position: checkpoint.position,
       ...viewport,
@@ -127,7 +124,7 @@ for (const viewport of VIEWPORTS) {
       ...(actor ? { actor } : {}),
     });
     console.log(`${checkpoint.name} ${viewport.width}x${viewport.height}: ` +
-      `merged f${frame} rgba=${fnv1a(rgba)} -> ${file}`);
+      `mask f${checkpoint.maskFrame} reducer f${capture.timelineFrame} rgba=${fnv1a(rgba)} -> ${file}`);
   }
 }
 
