@@ -11,7 +11,7 @@ When conversion discards a whole event, every source rule in it is Dropped.
 
 | Kind | Kinds | Uses | Native | Degraded | Placeholder | Dropped | S1 T1 baseline |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Actions | 98 | 13617 | 12193 | 1100 | 0 | 324 | 6407 / 6246 (47.05% / 45.9%) |
+| Actions | 98 | 13617 | 12199 | 1100 | 0 | 318 | 6407 / 6246 (47.05% / 45.9%) |
 | Conditions | 64 | 8663 | 8364 | 56 | 0 | 243 | 4758 / 4591 (54.92% / 53.0%) |
 
 The S1 acceptance baselines are 6,246 action uses (45.9%) and 4,591
@@ -21,10 +21,10 @@ Degraded count toward them. This import records 6407
 (54.92%), respectively: 161 above
 for actions and 167 above for conditions. The old
 type-table Native figure was 5,448 / 13,617 (40.0%); conversion-path accounting
-supersedes it with 12193 / 13617
-(89.5%). “Executable”
+supersedes it with 12199 / 13617
+(89.6%). “Executable”
 (native + degraded + deliberate P1 placeholder) is
-97.6% for actions and
+97.7% for actions and
 97.2% for conditions.
 
 Definitions:
@@ -36,6 +36,22 @@ Definitions:
 - **Dropped**: no equivalent output, including rules inside an event that the
   converter proves cannot start or otherwise omits. Per-disposition reasons are
   retained in `dist/import-report.json`.
+
+## Dialogue layout parameter coverage
+
+Tuxemon's `translated_dialog` carries optional position and word-alignment
+parameters in addition to its translation key. All
+255 source-file actions that carry at least
+one layout parameter are Native; none are discarded. Missing/default parameters
+remain absent from generated `text` commands, preserving the existing default
+box bytes.
+
+| Scope | Source uses | Native | Dropped |
+|---|---:|---:|---:|
+| Actions with any layout parameter | 255 | 255 | 0 |
+| `position` | 249 | 249 | 0 |
+| `h_alignment` | 110 | 110 | 0 |
+| `v_alignment` | 102 | 102 | 0 |
 
 ## P2 battle and monster placeholder audit
 
@@ -209,7 +225,7 @@ four-neighbour BFS with fixed tie-breaking selects the nearest walkable cell:
 | Action | `add_step_tracker` | 0 | 3 | 0 | 0 | 3 |
 | Action | `add_tech` | 12 | 0 | 0 | 0 | 12 |
 | Action | `add_tracker` | 0 | 24 | 0 | 0 | 24 |
-| Action | `autosave` | 0 | 0 | 0 | 6 | 6 |
+| Action | `autosave` | 6 | 0 | 0 | 0 | 6 |
 | Action | `camera_position` | 6 | 0 | 0 | 0 | 6 |
 | Action | `change_bg` | 15 | 0 | 0 | 0 | 15 |
 | Action | `change_bg_char` | 4 | 0 | 0 | 0 | 4 |

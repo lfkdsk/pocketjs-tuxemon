@@ -4,8 +4,8 @@
 // checkpoints at safe points (canSave, no input lock, no fade). Each
 // checkpoint becomes a kit save envelope (validated through the same
 // decode/restore gate the game uses) plus the frame where its tape suffix
-// starts. A second replay through the built game bundle renders one
-// 480x272 thumbnail per chapter.
+// starts. The built game then restores each chapter through its public demo
+// hook and renders one 480x272 thumbnail from the production UI.
 //
 //   bun tools/bake-chapters.ts --metadata-only # bootstrap a changed tape identity before rebuilding
 //   bun tools/bake-chapters.ts          # rewrite data/chapters.json + docs/screenshots/chapters
@@ -572,48 +572,57 @@ function buildChaptersFile(
   };
 }
 
-async function renderThumbnails(combined: readonly number[], captures: Map<string, Capture>): Promise<Map<string, Uint8Array>> {
+async function renderThumbnails(captures: Map<string, Capture>): Promise<Map<string, Uint8Array>> {
   if (!existsSync(BUNDLE + ".js") || !existsSync(BUNDLE + ".pak")) {
     throw new Error("bake-chapters: missing dist/main.{js,pak}; run `bun run build && bun run build:wasm`");
   }
   const ordered = [...captures.values()].sort((a, b) => a.frame - b.frame);
   const thumbnails = new Map<string, Uint8Array>();
-  const reducerAt = new Map(ordered.map((cap) => [cap.frame, cap]));
-  let next = 0;
-  const capture = (world: Awaited<ReturnType<typeof bootWorld>>, frame: number): void => {
-    const cap = reducerAt.get(frame)!;
-    const live = globalThis.__rpgSessionState as SessionState | undefined;
-    expect(`thumbnail ${cap.id} f${frame}: missing built-game session state`, live !== undefined);
-    expect(`thumbnail ${cap.id} f${frame}: built game is on ${live!.mapId}@${live!.move.tx},${live!.move.ty}, `
-      + `reducer on ${cap.state.mapId}@${cap.state.move.tx},${cap.state.move.ty}`,
-      live!.mapId === cap.state.mapId && live!.move.tx === cap.state.move.tx && live!.move.ty === cap.state.move.ty);
-    const rgba = world.render().slice();
-    thumbnails.set(cap.id, encodePNG(rgba, THUMB_W, THUMB_H));
-    if (DEBUG) console.log(`thumbnail ${cap.id} f${frame} ${live!.mapId}@${live!.move.tx},${live!.move.ty}`);
-    next++;
-  };
+  for (const cap of ordered) {
+    // Presentation-only pagination can consume a different number of host
+    // button presses than the reducer replay used to author the journey.
+    // Restore the already-validated chapter through the production demo
+    // path instead of replaying those presentation inputs from frame zero.
+    // This keeps thumbnail rendering faithful to the built game while the
+    // reducer suffix proof below remains the authority for story continuity.
+    const world = await bootWorld(BUNDLE, 60, FIXED_TIME_HOST_GLOBALS, undefined, {
+      width: THUMB_W,
+      height: THUMB_H,
+    });
+    const demo = globalThis.__rpgkitDemo;
+    expect(`thumbnail ${cap.id}: built game did not install the demo hook`, demo !== undefined);
+    demo!.jump(cap.id);
 
-  // A frame-0 chapter (the new-game bedroom) is the only safe point before
-  // the intro modal opens, and the sim surface is blank before its first
-  // frame step. Render it from its own boot with idle frames so the map and
-  // intro text are visible; the snapshot still belongs to frame 0.
-  const first = ordered[0]!;
-  if (first.frame === 0) {
-    const world = await bootWorld(BUNDLE, 60, FIXED_TIME_HOST_GLOBALS, undefined, { width: THUMB_W, height: THUMB_H });
-    for (let i = 0; i < first.thumbnailIdle; i++) {
+    let live: SessionState | undefined;
+    for (let attempt = 0; attempt < 64; attempt++) {
+      // The external jump owns this host frame. If its sharded destination is
+      // not resident, subsequent zero-input frames present it once prepare()
+      // settles; no reducer frame is folded during either path.
+      world.frame(0);
+      world.tick();
+      live = globalThis.__rpgSessionState as SessionState | undefined;
+      if (live?.frame === cap.state.frame
+        && live.mapId === cap.state.mapId
+        && live.move.tx === cap.state.move.tx
+        && live.move.ty === cap.state.move.ty) break;
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    }
+    expect(`thumbnail ${cap.id} f${cap.frame}: built game did not restore `
+      + `${cap.state.mapId}@${cap.state.move.tx},${cap.state.move.ty} on reducer frame ${cap.state.frame}`,
+      live?.frame === cap.state.frame
+      && live.mapId === cap.state.mapId
+      && live.move.tx === cap.state.move.tx
+      && live.move.ty === cap.state.move.ty);
+
+    // The frame-0 bedroom snapshot intentionally idles after restoration so
+    // the map and intro text are visible instead of a blank pre-frame surface.
+    for (let i = 0; i < cap.thumbnailIdle; i++) {
       world.frame(0);
       world.tick();
     }
-    capture(world, 0);
+    thumbnails.set(cap.id, encodePNG(world.render().slice(), THUMB_W, THUMB_H));
+    if (DEBUG) console.log(`thumbnail ${cap.id} f${cap.frame} ${cap.state.mapId}@${cap.state.move.tx},${cap.state.move.ty}`);
   }
-
-  const world = await bootWorld(BUNDLE, 60, FIXED_TIME_HOST_GLOBALS, undefined, { width: THUMB_W, height: THUMB_H });
-  for (let frame = 1; frame <= combined.length && next < ordered.length; frame++) {
-    world.frame(combined[frame - 1]!);
-    world.tick();
-    if (reducerAt.has(frame)) capture(world, frame);
-  }
-  expect(`rendered ${next}/${ordered.length} thumbnails`, next === ordered.length);
   return thumbnails;
 }
 
@@ -644,7 +653,7 @@ export async function bakeChapters(
   const chapters = buildChaptersFile(project, gb6, j1, j2, j3, j4, combined, captures, worldTraversal);
   const thumbnails = options.renderThumbnails === false
     ? new Map<string, Uint8Array>()
-    : await renderThumbnails(combined, captures);
+    : await renderThumbnails(captures);
   for (const chapter of chapters.chapters) {
     chapter.thumbnail = `${THUMB_REL}/${chapter.id}-${THUMB_W}x${THUMB_H}.png`;
     const png = thumbnails.get(chapter.id);

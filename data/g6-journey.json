@@ -2,7 +2,7 @@
   "format": "pocket-tuxemon/g6-journey/v1",
   "worldTraversal": "seamless-v1",
   "hz": 60,
-  "frames": 3990,
+  "frames": 3982,
   "map": "spyder_route1",
   "position": [
     14,
@@ -38,7 +38,7 @@
     },
     {
       "name": "route-1",
-      "frame": 3989,
+      "frame": 3981,
       "map": "spyder_route1",
       "position": [
         14,
@@ -3991,6 +3991,7 @@
     0,
     0,
     0,
+    0,
     8192,
     0,
     8192,
@@ -4018,17 +4019,8 @@
     0,
     0,
     0,
-    0,
-    64,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
+    32,
+    16,
     0,
     0,
     0,
@@ -4054,6 +4046,6 @@
     "billie_won": true,
     "billie_lost": false
   },
-  "terminalStateSha256": "079627a38324553af4ee897c4dbaf26a1f0ddd0c1e3a68cc299f2716ba8281a8",
-  "sha256": "3a12214652142fd617d20a3f681b000a2bd8203bf1c535d500435f3342476eb0"
+  "terminalStateSha256": "b008d7b6a700a90f4c1b6bda0ecbb891f110a2c568119d5c227994f319ac515f",
+  "sha256": "d5071381e674595507601acf33ef08fd9c6df5773bdb3062696db8bf924c99db"
 }

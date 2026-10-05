@@ -56,6 +56,45 @@ export const DIALOG_SHOTS: readonly DialogShot[] = [
     fastForward: true,
   },
   {
+    // The imported bottom-left placement is intentionally narrower than the
+    // default band. Keep a dedicated layout shot so documentation can show
+    // the authored corner window without depending on a token-test slug.
+    slug: "layout-corner-left-en",
+    lang: "en_US",
+    mapId: "maple_bedroom",
+    eventId: "e006_stop_27apr_r003",
+    trigger: "touch",
+    stand: { x: 8, y: 5, dir: "up" },
+    seedDate: { year: 2024, month: 4, day: 27 },
+    expect: "I have to go",
+    fastForward: true,
+  },
+  {
+    // This is the second page emitted by one long translated_dialog action.
+    // Reaching it proves the narrow imported window continues rather than
+    // clipping the Chinese text after its first page.
+    slug: "layout-continuation-zh",
+    lang: "zh_CN",
+    mapId: "maple_bedroom",
+    eventId: "e006_stop_27apr_r003",
+    trigger: "touch",
+    stand: { x: 8, y: 5, dir: "up" },
+    seedDate: { year: 2024, month: 4, day: 27 },
+    expect: "我不能冒险留在这儿",
+    fastForward: true,
+  },
+  {
+    slug: "layout-corner-right-zh",
+    lang: "zh_CN",
+    mapId: "maple_bedroom",
+    eventId: "e006_stop_27apr_r003",
+    trigger: "touch",
+    stand: { x: 8, y: 5, dir: "up" },
+    seedDate: { year: 2024, month: 4, day: 27 },
+    expect: "你走之前至少跟我谈谈",
+    fastForward: true,
+  },
+  {
     slug: "mapdesc-timber-en",
     lang: "en_US",
     mapId: "spyder_timber_town",

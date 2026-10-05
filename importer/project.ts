@@ -73,6 +73,8 @@ import type {
   RouteTarget,
   ShopGood,
   SpriteDef,
+  TextBoxLayout,
+  TextBoxPosition,
   WanderBounds,
 } from "../vendor/pocket-rpgkit/src/engine/types.ts";
 
@@ -650,6 +652,17 @@ interface RecordedDisposition {
   reason: string;
 }
 
+export interface DialogLayoutCoverageReport {
+  actionsWithLayout: number;
+  native: number;
+  dropped: number;
+  parameters: {
+    position: { source: number; native: number; dropped: number };
+    hAlignment: { source: number; native: number; dropped: number };
+    vAlignment: { source: number; native: number; dropped: number };
+  };
+}
+
 function dispositionFor(fate: Fate): Disposition {
   if (fate === "T1") return "native";
   if (fate === "T1-lowered") return "degraded";
@@ -770,6 +783,57 @@ class ConversionCoverage {
       }
     }
     return buildCoverageReport(this.canonical.length, entries);
+  }
+
+  /** Parameter-level audit over the same canonical event materialization as
+   * action coverage. A layout parameter is Native only when the selected
+   * translated_dialog branch itself is Native; structurally absent events
+   * remain Dropped instead of being promoted by the source-type capability. */
+  dialogLayoutReport(): DialogLayoutCoverageReport {
+    const report: DialogLayoutCoverageReport = {
+      actionsWithLayout: 0,
+      native: 0,
+      dropped: 0,
+      parameters: {
+        position: { source: 0, native: 0, dropped: 0 },
+        hAlignment: { source: 0, native: 0, dropped: 0 },
+        vAlignment: { source: 0, native: 0, dropped: 0 },
+      },
+    };
+    const count = (
+      row: { source: number; native: number; dropped: number },
+      native: boolean,
+    ): void => {
+      row.source++;
+      if (native) row.native++;
+      else row.dropped++;
+    };
+    for (const source of this.canonical) {
+      const selected = this.selected.get(sourceEventKey(source));
+      for (let index = 0; index < source.acts.length; index++) {
+        const action = source.acts[index]!;
+        if (action.synthetic || action.type !== "translated_dialog") continue;
+        const fields = [Boolean(action.args[2]), Boolean(action.args[3]), Boolean(action.args[4])] as const;
+        if (!fields.some(Boolean)) continue;
+        const selectedAction = selected?.event.acts[index];
+        const native = selected !== undefined && selectedAction !== undefined &&
+          selected.actions.get(selectedAction)?.disposition === "native";
+        report.actionsWithLayout++;
+        if (native) report.native++;
+        else report.dropped++;
+        if (fields[0]) count(report.parameters.position, native);
+        if (fields[1]) count(report.parameters.hAlignment, native);
+        if (fields[2]) count(report.parameters.vAlignment, native);
+      }
+    }
+    const rows = [
+      { source: report.actionsWithLayout, native: report.native, dropped: report.dropped },
+      ...Object.values(report.parameters),
+    ];
+    if (rows.some((row) => row.native + row.dropped !== row.source)) {
+      throw new Error("dialog layout coverage does not balance");
+    }
+    return report;
   }
 }
 
@@ -1592,16 +1656,49 @@ function format(s: string, m: TuxMap): string {
 /** A translation key -> text boxes: pages split at "\n" (Tuxemon's
  *  paginator), each page word-wrapped to 52 columns and cut into <=4-line
  *  boxes (the kit's text command limits). */
-function dialog(key: string, m: TuxMap): Command[] {
+const DIALOG_POSITIONS: Readonly<Record<string, TextBoxPosition>> = Object.freeze({
+  top: "top",
+  center: "center",
+  bottom: "bottom",
+  topleft: "topLeft",
+  topright: "topRight",
+  bottomleft: "bottomLeft",
+  bottomright: "bottomRight",
+  left: "left",
+  right: "right",
+});
+const DIALOG_H_ALIGN = new Set(["left", "center", "right"] as const);
+const DIALOG_V_ALIGN = new Set(["top", "center", "bottom"] as const);
+
+/** Translate Tuxemon's dialog enum spellings to the kit's optional layout.
+ * Invalid values follow upstream safe_enum_value and fall back to defaults.
+ * Defaults stay absent so content without layout parameters remains byte-for-
+ * byte identical. */
+export function dialogLayout(args: readonly string[]): TextBoxLayout {
+  const layout: TextBoxLayout = {};
+  const position = DIALOG_POSITIONS[args[2] ?? ""] ?? "bottom";
+  if (position !== "bottom") layout.position = position;
+  const align = DIALOG_H_ALIGN.has(args[3] as "left" | "center" | "right")
+    ? args[3] as "left" | "center" | "right"
+    : "left";
+  if (align !== "left") layout.align = align;
+  const valign = DIALOG_V_ALIGN.has(args[4] as "top" | "center" | "bottom")
+    ? args[4] as "top" | "center" | "bottom"
+    : "top";
+  if (valign !== "top") layout.valign = valign;
+  return layout;
+}
+
+function dialog(key: string, m: TuxMap, layout: TextBoxLayout = {}): Command[] {
   dialogLookupKeys.add(key);
   const raw = po.get(key);
-  if (raw === undefined) { note("act", "translated_dialog(missing key)", "T4-dropped", "msgid absent from en_US"); return [{ op: "text", lines: [key.slice(0, 52)] }]; }
+  if (raw === undefined) { note("act", "translated_dialog(missing key)", "T4-dropped", "msgid absent from en_US"); return [{ op: "text", lines: [key.slice(0, 52)], ...layout }]; }
   const out: Command[] = [];
   for (const page of format(raw, m).replace(/\\n/g, "\n").split("\n").map((p) => p.trim()).filter(Boolean)) {
     const lines = wrap(page);
-    for (let i = 0; i < lines.length; i += 4) out.push({ op: "text", lines: lines.slice(i, i + 4) });
+    for (let i = 0; i < lines.length; i += 4) out.push({ op: "text", lines: lines.slice(i, i + 4), ...layout });
   }
-  return out.length ? out : [{ op: "text", lines: [" "] }];
+  return out.length ? out : [{ op: "text", lines: [" "], ...layout }];
 }
 
 function enumChoice(options: readonly string[], variable: string): Command {
@@ -2064,8 +2161,8 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         if (i > 0 && acts[i - 1]!.type === "teleport_faint" && g[0] === "heal_before_leave") {
           noteAction(a, a.type, "T1-lowered", "post-transfer faint notice runs on the destination map");
         } else {
-          noteAction(a, a.type, "T1", "text boxes from en_US .po (layout args ignored)");
-          out.push(...dialog(g[0]!, ctx.m));
+          noteAction(a, a.type, "T1", "text boxes from the active .po catalog with native position and alignment");
+          out.push(...dialog(g[0]!, ctx.m, dialogLayout(g)));
         }
         break;
       case "translated_dialog_choice": case "choice_monster": case "choice_npc": {
@@ -3327,7 +3424,8 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         noteAction(a, a.type, "T1", "upstream no-op: no mission is ever created, so none can meet its prerequisites");
         break;
       case "autosave":
-        noteAction(a, a.type, "T4-dropped", "pure reducer event commands cannot request the host to persist save slot 0");
+        noteAction(a, a.type, "T1", "kit autosave command publishes an exact-tick snapshot to the host's dedicated slot");
+        out.push({ op: "autosave" });
         break;
       case "access_pc":
         if (ctx.options.battle && g[0] === "player") {
@@ -4466,6 +4564,9 @@ export interface ImportReport {
   seamlessHandoff: SeamlessHandoffReport;
   world: WorldImportReport;
   coverage: CoverageReport;
+  /** Source-file parameter coverage for Tuxemon's translated dialog layout.
+   * Counts overlap: one action can carry position and both alignments. */
+  dialogLayout: DialogLayoutCoverageReport;
   /** D1: the 10-entry weather table exported from mods/tuxemon/db/weather. */
   weather: {
     source: "mods/tuxemon/db/weather/weathers.yaml";
@@ -4994,6 +5095,7 @@ export function buildProject(
       ),
       world: world.report,
       coverage: conversionCoverage.report(),
+      dialogLayout: conversionCoverage.dialogLayoutReport(),
       weather: {
         source: "mods/tuxemon/db/weather/weathers.yaml",
         entries: loadWeatherTable(),

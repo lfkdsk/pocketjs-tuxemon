@@ -15,6 +15,7 @@ import { restoreSessionSnapshot } from "../vendor/pocket-rpgkit/src/engine/save-
 import { startSession, stepSession, type Session, type SessionState } from "../vendor/pocket-rpgkit/src/engine/session.ts";
 import { createOsk } from "../vendor/pocket-rpgkit/vendor/pocketjs/framework/src/osk-controller.ts";
 import { createSimFsHost } from "../vendor/pocket-rpgkit/vendor/pocketjs/hosts/sim/fs.ts";
+import { createSimAutosaveBridge } from "../vendor/pocket-rpgkit/src/host/autosave.ts";
 import {
   afterBattle,
   afterMapChange,
@@ -28,13 +29,17 @@ import {
   BROWSER_SAVE_KEY_PREFIX,
   browserSaveStore,
   describeLoadError,
+  detectAutosaveChannel,
   detectSlotStore,
   exportSaveCode,
   importSaveCode,
+  inspectAutosaveSlot,
   isLegacySaveExt,
   LEGACY_SAVE_EXT_FORMAT,
   listSlots,
+  loadAutosaveSlot,
   loadSlot,
+  persistAutosave,
   restoreSave,
   saveBlockReason,
   SaveRefused,
@@ -245,10 +250,10 @@ describe("bad, foreign and empty saves", () => {
 });
 
 describe("storage channels", () => {
-  const g = globalThis as { fs?: unknown; localStorage?: unknown };
+  const g = globalThis as { fs?: unknown; localStorage?: unknown; __rpgkitAutosave?: unknown };
   // Other suites boot worlds that mount these host globals and do not tear
   // them down, so start from a clean slate and put back what was there.
-  const keys = ["fs", "localStorage"] as const;
+  const keys = ["fs", "localStorage", "__rpgkitAutosave"] as const;
   let saved: (PropertyDescriptor | undefined)[] = [];
   beforeEach(() => {
     saved = keys.map((key) => Object.getOwnPropertyDescriptor(globalThis, key));
@@ -282,6 +287,30 @@ describe("storage channels", () => {
     g.localStorage = { getItem: () => null, setItem: () => { throw new Error("quota"); }, removeItem: () => {} };
     expect(detectSlotStore()).toBeNull();
   });
+
+  test("autosave chooses desktop data.fs, then the browser bridge, else a quiet no-op", () => {
+    const snapshot = takeSaveSnapshot(sampled.session, sampled.states.safe, 0);
+    expect(detectAutosaveChannel()).toBeNull();
+    expect(persistAutosave(snapshot, sampled.session.content)).toBe(false);
+
+    const bridge = createSimAutosaveBridge();
+    g.__rpgkitAutosave = bridge;
+    expect(detectAutosaveChannel()).toBe("browser");
+    expect(persistAutosave(snapshot, sampled.session.content)).toBe(true);
+    expect(inspectAutosaveSlot(sampled.session.content)).toMatchObject({
+      slot: 0,
+      map: sampled.states.safe.mapId,
+    });
+    expect(loadAutosaveSlot(sampled.session.content)?.map).toBe(sampled.states.safe.mapId);
+
+    const host = createSimFsHost();
+    g.fs = host.ns;
+    expect(detectAutosaveChannel()).toBe("desktop");
+    expect(persistAutosave(snapshot, sampled.session.content)).toBe(true);
+    expect(host.log.some((line) => line.startsWith("op write save/autosave.json"))).toBe(true);
+    expect(inspectAutosaveSlot(sampled.session.content)).toMatchObject({ slot: 0 });
+    host.dispose();
+  });
 });
 
 /** A live session behind the overlay host, folded like GameView without
@@ -294,7 +323,7 @@ interface LiveView {
 }
 
 describe("START menu runtime", () => {
-  const mount = (): { live: LiveView; menu: SaveMenuRuntime; dispose: () => void; storage: ReturnType<typeof memoryStorage> } => {
+  const mount = (withSlots = true): { live: LiveView; menu: SaveMenuRuntime; dispose: () => void; storage: ReturnType<typeof memoryStorage> } => {
     const { project, session } = createGameSession(FIXED_INITIAL_CIVIL_TIME);
     const live: LiveView = {
       session,
@@ -310,7 +339,7 @@ describe("START menu runtime", () => {
     const menu = createRoot((d) => {
       dispose = d;
       return createSaveMenuRuntime(
-        { slots: { channel: "browser", store: browserSaveStore(storage) } },
+        { slots: withSlots ? { channel: "browser", store: browserSaveStore(storage) } : null },
         {
           project,
           session,
@@ -459,6 +488,99 @@ describe("START menu runtime", () => {
     expect(menu.toast()).toBe("Loaded save code");
     expect(digest({ ...live.state, frame: 0 })).toBe(digest({ ...sampledAt(saveFrame), frame: 0 }));
     dispose();
+  }, 60_000);
+
+  test("the read-only autosave row loads without becoming a manual save target", () => {
+    const descriptor = Object.getOwnPropertyDescriptor(globalThis, "__rpgkitAutosave");
+    const bridge = createSimAutosaveBridge();
+    globalThis.__rpgkitAutosave = bridge;
+    const { live, menu, dispose, storage } = mount();
+    try {
+      const saveFrame = foldToSavePoint(live);
+      const at = digest(live.state);
+      expect(persistAutosave(
+        takeSaveSnapshot(live.session, live.state, live.held),
+        live.session.content,
+      )).toBe(true);
+      fold(live, saveFrame, saveFrame + 200);
+      expect(digest(live.state)).not.toBe(at);
+
+      press(menu, BTN_START);
+      expect(menu.autosave()).toMatchObject({ slot: 0 });
+      press(menu, BTN_DOWN); // root: Load from slot
+      press(menu, BTN_CIRCLE);
+      expect(menu.menu()).toEqual({ kind: "slots-load", index: 0 });
+      const { result } = press(menu, BTN_CIRCLE); // automatic row
+      expect(result).toEqual({ consumed: true, stateChanged: true });
+      expect(menu.toast()).toBe("Loaded autosave");
+      expect(digest({ ...live.state, frame: 0 })).toBe(digest({ ...sampledAt(saveFrame), frame: 0 }));
+      expect(storage.map.has(`${BROWSER_SAVE_KEY_PREFIX}0`)).toBe(false);
+    } finally {
+      dispose();
+      delete globalThis.__rpgkitAutosave;
+      if (descriptor) Object.defineProperty(globalThis, "__rpgkitAutosave", descriptor);
+    }
+  }, 60_000);
+
+  test("an autosave-only browser keeps root navigation aligned and exposes no manual target", () => {
+    const descriptor = Object.getOwnPropertyDescriptor(globalThis, "__rpgkitAutosave");
+    globalThis.__rpgkitAutosave = createSimAutosaveBridge();
+    const { live, menu, dispose, storage } = mount(false);
+    try {
+      const saveFrame = foldToSavePoint(live);
+      expect(persistAutosave(
+        takeSaveSnapshot(live.session, live.state, live.held),
+        live.session.content,
+      )).toBe(true);
+
+      press(menu, BTN_START);
+      expect(menu.hasSlots).toBe(false);
+      expect(globalThis.__pocketTuxemonSave?.channel()).toBe("code");
+      expect(menu.menu()).toEqual({ kind: "root", index: 0 });
+
+      press(menu, BTN_CIRCLE); // the only load row is the automatic slot
+      expect(menu.menu()).toEqual({ kind: "slots-load", index: 0 });
+      press(menu, BTN_DOWN);
+      expect(menu.menu()).toEqual({ kind: "slots-load", index: 0 });
+      press(menu, BTN_CROSS);
+      expect(menu.menu()).toEqual({ kind: "root", index: 0 });
+
+      press(menu, BTN_DOWN); // code export
+      press(menu, BTN_CIRCLE);
+      expect(menu.menu()).toEqual({ kind: "code-export", page: 0 });
+      press(menu, BTN_CROSS);
+      expect(menu.menu()).toEqual({ kind: "root", index: 1 });
+
+      press(menu, BTN_DOWN); // code import
+      press(menu, BTN_CIRCLE);
+      expect(menu.menu()).toEqual({ kind: "code-import" });
+      globalThis.__pocketTuxemonSave!.importCode("not-a-save-code");
+      expect(menu.menu()).toMatchObject({
+        kind: "message",
+        title: "CAN'T LOAD THAT CODE",
+        back: { kind: "root", index: 2 },
+      });
+      press(menu, 0); // consume the keyboard-close fence
+      press(menu, BTN_CROSS);
+      expect(menu.menu()).toEqual({ kind: "root", index: 2 });
+
+      press(menu, BTN_START);
+      fold(live, saveFrame, saveFrame + 200);
+      expect(digest({ ...live.state, frame: 0 })).not.toBe(digest({ ...sampledAt(saveFrame), frame: 0 }));
+
+      press(menu, BTN_START);
+      expect(menu.menu()).toEqual({ kind: "root", index: 0 });
+      press(menu, BTN_CIRCLE);
+      const { result } = press(menu, BTN_CIRCLE);
+      expect(result).toEqual({ consumed: true, stateChanged: true });
+      expect(menu.toast()).toBe("Loaded autosave");
+      expect(digest({ ...live.state, frame: 0 })).toBe(digest({ ...sampledAt(saveFrame), frame: 0 }));
+      expect(storage.map.size).toBe(0);
+    } finally {
+      dispose();
+      delete globalThis.__rpgkitAutosave;
+      if (descriptor) Object.defineProperty(globalThis, "__rpgkitAutosave", descriptor);
+    }
   }, 60_000);
 });
 

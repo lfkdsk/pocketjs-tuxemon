@@ -22,6 +22,7 @@
   "save.codeImport": "导入存档码",
   "save.slotsSaveTitle": "选择保存位置",
   "save.slotsLoadTitle": "选择加载位置",
+  "save.autosave": "自动存档",
   "save.slotEmpty": "— 空存档位",
   "save.slotDamaged": "！存档已损坏",
   "save.slotSummary": "{map}  第 {frame} 帧",

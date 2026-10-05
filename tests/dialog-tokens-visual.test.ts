@@ -135,6 +135,94 @@ function cropBand(rgba: Uint8Array): Uint8Array {
   return crop;
 }
 
+interface PixelBounds {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  count: number;
+}
+
+function colourBounds(
+  rgba: Uint8Array,
+  width: number,
+  height: number,
+  colour: readonly [number, number, number],
+): PixelBounds | null {
+  let minX = width;
+  let minY = height;
+  let maxX = -1;
+  let maxY = -1;
+  let count = 0;
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const i = (y * width + x) * 4;
+      if (rgba[i] !== colour[0] || rgba[i + 1] !== colour[1] || rgba[i + 2] !== colour[2]) continue;
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x);
+      maxY = Math.max(maxY, y);
+      count++;
+    }
+  }
+  return count === 0 ? null : {
+    x: minX,
+    y: minY,
+    width: maxX - minX + 1,
+    height: maxY - minY + 1,
+    count,
+  };
+}
+
+function rgbAt(rgba: Uint8Array, width: number, x: number, y: number): [number, number, number] {
+  const i = (y * width + x) * 4;
+  return [rgba[i]!, rgba[i + 1]!, rgba[i + 2]!];
+}
+
+const LAYOUT_SHOTS = [
+  { slug: "layout-corner-left-en", side: "left" },
+  { slug: "layout-continuation-zh", side: "left" },
+  { slug: "layout-corner-right-zh", side: "right" },
+] as const;
+
+for (const viewport of [VP, { width: 960, height: 544 }] as const) {
+  for (const expected of LAYOUT_SHOTS) {
+    const shot = DIALOG_SHOTS.find((candidate) => candidate.slug === expected.slug)!;
+    testIfBuilt(`${expected.slug} keeps imported corner geometry at ${viewport.width}x${viewport.height}`, async () => {
+      const rendered = await driveDialog(shot, viewport);
+      const boxWidth = Math.floor(viewport.width * 0.8);
+      const boxHeight = Math.floor(viewport.height * 0.25);
+      const x = expected.side === "left" ? 2 : viewport.width - boxWidth + 2;
+      const border = colourBounds(rendered.rgba, viewport.width, viewport.height, [101, 213, 195]);
+      expect(border).not.toBeNull();
+      expect(border).toMatchObject({
+        x,
+        y: viewport.height - boxHeight + 2,
+        width: boxWidth - 4,
+        height: boxHeight - 4,
+      });
+
+      // The unused fifth of the bottom band must remain uncovered. This
+      // distinguishes the authored corner window from the legacy full-width
+      // default even if its text happens to fit in one line.
+      const outsideX = expected.side === "left" ? viewport.width - 4 : 4;
+      expect(rgbAt(rendered.rgba, viewport.width, outsideX, viewport.height - Math.floor(boxHeight / 2)))
+        .toEqual([0, 0, 0]);
+
+      // The target is rendered, not merely present in reducer state: count
+      // light glyph pixels in the interior while excluding the cyan frame.
+      let glyphPixels = 0;
+      for (let py = border!.y + 8; py < border!.y + border!.height - 8; py++) {
+        for (let px = border!.x + 8; px < border!.x + border!.width - 8; px++) {
+          const [r, g, b] = rgbAt(rendered.rgba, viewport.width, px, py);
+          if (r >= 170 && g >= 170 && b >= 170) glyphPixels++;
+        }
+      }
+      expect(glyphPixels).toBeGreaterThan(40);
+    });
+  }
+}
+
 for (const { slug, shot } of KEY_SHOTS) {
   testIfBuilt(`${slug} renders the resolved dialog text (golden band)`, async () => {
     const { rgba } = await driveDialog(shot, VP);

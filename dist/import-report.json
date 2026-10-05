@@ -286,8 +286,8 @@
  "byFate": {
   "T1-lowered": 3343,
   "T3-dropped": 111,
-  "T1": 35640,
-  "T4-dropped": 1748,
+  "T1": 35646,
+  "T4-dropped": 1742,
   "T2-dropped": 393,
   "structural": 792
  },
@@ -341,10 +341,10 @@
    "note": "switch tracker.<map>"
   },
   {
-   "key": "act:autosave:T4-dropped",
-   "fate": "T4-dropped",
+   "key": "act:autosave:T1",
+   "fate": "T1",
    "count": 6,
-   "note": "pure reducer event commands cannot request the host to persist save slot 0"
+   "note": "kit autosave command publishes an exact-tick snapshot to the host's dedicated slot"
   },
   {
    "key": "act:camera_position:T1",
@@ -908,7 +908,7 @@
    "key": "act:translated_dialog:T1",
    "fate": "T1",
    "count": 2241,
-   "note": "text boxes from en_US .po (layout args ignored)"
+   "note": "text boxes from the active .po catalog with native position and alignment"
   },
   {
    "key": "act:translated_dialog:T1-lowered",
@@ -2905,12 +2905,12 @@
    "summary": {
     "types": 98,
     "uses": 13617,
-    "native": 12193,
+    "native": 12199,
     "degraded": 1100,
     "placeholder": 0,
-    "dropped": 324,
-    "nativePercent": 89.5,
-    "executablePercent": 97.6,
+    "dropped": 318,
+    "nativePercent": 89.6,
+    "executablePercent": 97.7,
     "tier1": {
      "uses": 6407,
      "percent": 47.05,
@@ -3006,13 +3006,13 @@
     {
      "type": "autosave",
      "total": 6,
-     "native": 0,
+     "native": 6,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 6,
+     "dropped": 0,
      "reasons": {
-      "dropped": [
-       "pure reducer event commands cannot request the host to persist save slot 0"
+      "native": [
+       "kit autosave command publishes an exact-tick snapshot to the host's dedicated slot"
       ]
      }
     },
@@ -4220,7 +4220,7 @@
      "dropped": 9,
      "reasons": {
       "native": [
-       "text boxes from en_US .po (layout args ignored)",
+       "text boxes from the active .po catalog with native position and alignment",
        "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
       ],
       "dropped": [
@@ -5287,6 +5287,28 @@
      }
     }
    ]
+  }
+ },
+ "dialogLayout": {
+  "actionsWithLayout": 255,
+  "native": 255,
+  "dropped": 0,
+  "parameters": {
+   "position": {
+    "source": 249,
+    "native": 249,
+    "dropped": 0
+   },
+   "hAlignment": {
+    "source": 110,
+    "native": 110,
+    "dropped": 0
+   },
+   "vAlignment": {
+    "source": 102,
+    "native": 102,
+    "dropped": 0
+   }
   }
  },
  "weather": {

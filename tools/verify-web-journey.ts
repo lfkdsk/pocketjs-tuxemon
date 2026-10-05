@@ -263,6 +263,9 @@ const saveLeg = await evaluate(`(() => {
   press(START);
   press(DOWN);
   press(CIRCLE);
+  // An imported autosave exists by this point and occupies the read-only
+  // first row. Move to the first manual slot before confirming the restore.
+  press(DOWN);
   press(CIRCLE);
   for (let i = 0; i < 4; i++) p.step();
   out.closed = menu.menu().kind;

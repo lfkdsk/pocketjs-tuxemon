@@ -54,10 +54,10 @@ const journey = JSON.parse(readFileSync(join(ROOT, "data/g6-journey.json"), "utf
 };
 const worldTraversal = journeyWorldTraversal(journey, "G7 maintained journey");
 const GAME_OPTIONS = { extensions: TUXEMON_EXTENSIONS, battle: TUXEMON_BATTLE_RULES, scenes: TUXEMON_SCENES } as const;
-const LEGACY_TERMINAL_STATE_SHA256 = "7bdabffd08253e4167cfe239b6a4b2a250728cc7e4a87a00d59521c4e22698f0";
+const LEGACY_TERMINAL_STATE_SHA256 = "1ddcc7e23ce64953e5d1d8bbad2a8259638a82b6100463198fee2d4ac8cdc14b";
 const BEFORE_HANDOFF_FRAME = 3_964;
-const MID_HANDOFF_FRAME = 3_976;
-const AFTER_HANDOFF_FRAME = 3_980;
+const MID_HANDOFF_FRAME = 3_978;
+const AFTER_HANDOFF_FRAME = 3_982;
 const BTN_LTRIGGER = 0x0100;
 const VIEWPORT = { w: 480, h: 272 } as const;
 
@@ -397,6 +397,10 @@ describe("G6 production map repository", () => {
       state = stepSession(session, state, input(mask, previous));
       previous = mask;
     }
+    // Seamless traversal completes atomically at the end of the recorded
+    // crossing. The explicit legacy timeline needs its historical neutral
+    // transfer tick before both modes can be compared at Route 1.
+    state = stepSession(session, state, input(0, previous));
     expect([state.mapId, state.move.tx, state.move.ty]).toEqual(["spyder_route1", 14, 19]);
     expect(createHash("sha256").update(canonicalJson(state)).digest("hex"))
       .toBe(LEGACY_TERMINAL_STATE_SHA256);

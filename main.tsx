@@ -43,6 +43,7 @@ import enMapDescriptions from "./dist/map-descriptions.json";
 import enMonthNames from "./data/month-names.json";
 import { createAnimatedProvider } from "./ui/animated-repository.ts";
 import { createSaveMenu } from "./ui/save-menu.tsx";
+import { persistAutosave } from "./ui/save-game.ts";
 import { createLangMenu } from "./ui/lang-menu.tsx";
 import { createCompositeOverlay } from "./ui/game-overlay.tsx";
 import { createNpcSrcProvider } from "./ui/npc-src-repository.ts";
@@ -292,6 +293,11 @@ mount(() => (
       effects={Effects}
       theme={TUXEMON_UI_THEME}
       textTokens={textTokens}
+      hostActions={{
+        autosave(host, snapshot) {
+          persistAutosave(snapshot, host.session.content);
+        },
+      }}
     />
     {weatherOverlayEnabled && (
       <WeatherOverlay

@@ -2,7 +2,7 @@
   "format": "pocket-tuxemon/gb6-first-loss/v1",
   "worldTraversal": "seamless-v1",
   "hz": 60,
-  "frames": 3325,
+  "frames": 3317,
   "map": "spyder_route1",
   "position": [
     14,
@@ -38,7 +38,7 @@
     },
     {
       "name": "route-1",
-      "frame": 3324,
+      "frame": 3316,
       "map": "spyder_route1",
       "position": [
         14,
@@ -3326,6 +3326,7 @@
     0,
     0,
     0,
+    0,
     8192,
     0,
     8192,
@@ -3353,17 +3354,8 @@
     0,
     0,
     0,
-    0,
-    64,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
+    32,
+    16,
     0,
     0,
     0,
@@ -3389,7 +3381,7 @@
     "billie_won": false,
     "billie_lost": true
   },
-  "tapeSha256": "e57de3e775a6facc2537064b8f3a60762a0348134969aaca0a9f8209c28ceb7c",
-  "terminalStateSha256": "8a1da4b9523a6fd2ab3eb78b19359281995d1e9b9b66504db46dc70163fbe4ed",
-  "sha256": "61fea8011f4f152c180a852d79d015e72ac8b7c9191a5433fe1a177624253d3a"
+  "tapeSha256": "8bbe409f114641c89675a1fd905145ef1a8124b319f49eaf4620fc4b5cfea854",
+  "terminalStateSha256": "1fb79c9de4b842911e6ae642493473502d961fafafc57443dd2d00887681c679",
+  "sha256": "9687e4dc25a2b71ca762b1859098ab60b266a604b9cee979cef893e20e0be877"
 }

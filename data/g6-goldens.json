@@ -111,15 +111,15 @@
     },
     {
       "name": "route-1",
-      "frame": 3989,
+      "frame": 3981,
       "map": "spyder_route1",
       "position": [
         14,
         19
       ],
-      "file": "g6-route-1.3989.png",
-      "rgbaFnv1a": "02bd7088",
-      "pngSha256": "f7355775c9be821eff046342b4397849fea2f1bbbd0c4423cedcce7f9406349e",
+      "file": "g6-route-1.3981.png",
+      "rgbaFnv1a": "8c8e0153",
+      "pngSha256": "0763b03c6d966b126ceb0553b97b9ea624bbad72b1304688603611a849f96f90",
       "camera": [
         1592,
         2736

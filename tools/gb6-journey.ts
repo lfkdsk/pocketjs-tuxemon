@@ -415,6 +415,26 @@ export class Driver {
       + `battles=${JSON.stringify(this.battles.slice(-3))}`);
   }
 
+  /** Cross a facing-gated playerTouch transfer from the adjacent tile.
+   * Journey search intentionally avoids states that leave the requested map,
+   * so targeting the transfer cell itself can find a sideways non-transfer
+   * route. Raw input preserves the authored approach direction. */
+  crossTo(tx: number, ty: number, direction: Dir4): void {
+    const sourceMap = this.state.mapId;
+    const sx = tx - DX[direction];
+    const sy = ty - DY[direction];
+    this.goTo(sx, sy);
+    // A direction change consumes one tick before walking. Hold through the
+    // tile step instead of pulsing, or a player facing sideways can merely
+    // turn on the staging cell and never enter the transfer strip.
+    for (let guard = 0; guard < this.hz * 2 && this.state.mapId === sourceMap
+      && this.state.move.tx === sx && this.state.move.ty === sy; guard++) {
+      this.tick(BTN_OF[direction]);
+    }
+    this.tick();
+    this.settle();
+  }
+
   interact(direction: Dir4): void {
     this.pulse(BTN_OF[direction] | BTN_CONFIRM);
     this.settle();
@@ -530,8 +550,7 @@ export function runGb6Journey(hz = 60): Gb6JourneyResult {
 
   // Route 1 -> Cotton Town; the required Cotton battle is an action choice
   // followed by a parallel Battle Processing event.
-  driver.goTo(21, 0);
-  driver.settle();
+  driver.crossTo(21, 0, 2);
   driver.expect("entered Cotton Town", driver.state.mapId === "spyder_cotton_town");
   driver.fightNpc("spyder_confusedperson", "npc_spyder_confusedperson", ["Yes"]);
 
@@ -549,11 +568,9 @@ export function runGb6Journey(hz = 60): Gb6JourneyResult {
   driver.settle();
   driver.expect("returned to Cotton Town", driver.state.mapId === "spyder_cotton_town");
 
-  driver.goTo(22, 39);
-  driver.settle();
+  driver.crossTo(22, 39, 0);
   driver.expect("returned south on Route 1", driver.state.mapId === "spyder_route1");
-  driver.goTo(14, 19);
-  driver.settle();
+  driver.crossTo(14, 19, 0);
   driver.expect("returned to Paper Town", driver.state.mapId === "spyder_paper_town");
   driver.goTo(10, 6);
   driver.settle();
@@ -564,11 +581,9 @@ export function runGb6Journey(hz = 60): Gb6JourneyResult {
   driver.goTo(4, 6);
   driver.settle();
   driver.expect("left protagonist house", driver.state.mapId === "spyder_paper_town");
-  driver.goTo(14, 0);
-  driver.settle();
+  driver.crossTo(14, 0, 2);
   driver.expect("returned north on Route 1", driver.state.mapId === "spyder_route1");
-  driver.goTo(21, 0);
-  driver.settle();
+  driver.crossTo(21, 0, 2);
   driver.expect("returned north to Cotton Town", driver.state.mapId === "spyder_cotton_town");
   driver.goTo(25, 37);
   driver.settle();
@@ -586,12 +601,10 @@ export function runGb6Journey(hz = 60): Gb6JourneyResult {
   driver.settle();
   driver.expect("left Cotton Cafe", driver.state.mapId === "spyder_cotton_town");
 
-  driver.goTo(39, 28);
-  driver.settle();
+  driver.crossTo(39, 28, 3);
   driver.expect("entered Route 2", driver.state.mapId === "spyder_route2");
   const healFromRoute2 = (): void => {
-    driver.goTo(0, 9);
-    driver.settle();
+    driver.crossTo(0, 9, 1);
     driver.expect("backtracked to Cotton Town", driver.state.mapId === "spyder_cotton_town");
     driver.goTo(31, 16);
     driver.settle();
@@ -601,8 +614,7 @@ export function runGb6Journey(hz = 60): Gb6JourneyResult {
     driver.goTo(7, 11);
     driver.settle();
     driver.expect("left Cotton Cafe after healing", driver.state.mapId === "spyder_cotton_town");
-    driver.goTo(39, 28);
-    driver.settle();
+    driver.crossTo(39, 28, 3);
     driver.expect("returned to Route 2 after healing", driver.state.mapId === "spyder_route2");
   };
   const trainOnRoute2 = (minimumLevel: number): void => {
@@ -629,8 +641,7 @@ export function runGb6Journey(hz = 60): Gb6JourneyResult {
   healFromRoute2();
   driver.fightTouch("spyder_route2_graf", 29, 4);
 
-  driver.goTo(10, 0);
-  driver.settle();
+  driver.crossTo(10, 0, 2);
   driver.expect("entered City Park", driver.state.mapId === "spyder_citypark");
   driver.healAtCityPark();
   driver.fightNpc("spyder_citypark_frances");
@@ -647,8 +658,7 @@ export function runGb6Journey(hz = 60): Gb6JourneyResult {
   }
   driver.healAtCityPark();
 
-  driver.goTo(0, 13);
-  driver.settle();
+  driver.crossTo(0, 13, 1);
   driver.expect("entered Leather Town", driver.state.mapId === "spyder_leather_town");
   driver.goTo(23, 9);
   driver.settle();
@@ -658,13 +668,11 @@ export function runGb6Journey(hz = 60): Gb6JourneyResult {
   driver.goTo(6, 10);
   driver.settle();
   driver.expect("returned to Leather Town", driver.state.mapId === "spyder_leather_town");
-  driver.goTo(7, 0);
-  driver.settle();
+  driver.crossTo(7, 0, 2);
   driver.expect("entered Route 3", driver.state.mapId === "spyder_route3");
 
   const healFromRoute3 = (): void => {
-    driver.goTo(7, 39);
-    driver.settle();
+    driver.crossTo(7, 39, 0);
     driver.expect("backtracked to Leather Town", driver.state.mapId === "spyder_leather_town");
     driver.goTo(23, 9);
     driver.settle();
@@ -674,8 +682,7 @@ export function runGb6Journey(hz = 60): Gb6JourneyResult {
     driver.goTo(6, 10);
     driver.settle();
     driver.expect("left Leather Center after healing", driver.state.mapId === "spyder_leather_town");
-    driver.goTo(7, 0);
-    driver.settle();
+    driver.crossTo(7, 0, 2);
     driver.expect("returned to Route 3 after healing", driver.state.mapId === "spyder_route3");
   };
   const fightRequiredTouch = (opponent: string, x: number, y: number): void => {

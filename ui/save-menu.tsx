@@ -46,6 +46,7 @@ export function createSaveMenu(options: SaveMenuOptions = {}): GameViewOverlayCo
                 menu={menu.menu}
                 hasFs={menu.hasSlots}
                 slots={menu.slots}
+                autosave={menu.autosave}
                 saveCode={menu.saveCode}
                 osk={menu.osk}
                 legend={menu.legend}

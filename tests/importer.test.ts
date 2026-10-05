@@ -9,7 +9,9 @@ import {
   buildProject,
   DEFAULT_IMPORT_OPTIONS,
   G6_IMPORT_OPTIONS,
+  KIT_V2_IMPORT_OPTIONS,
   K1_IMPORT_OPTIONS,
+  dialogLayout,
   lowerCurrentStateCondition,
 } from "../importer/project.ts";
 import { jsonBytes } from "../importer/index.ts";
@@ -30,6 +32,22 @@ import type { Command, Condition, JsonValue } from "../vendor/pocket-rpgkit/src/
 
 const ROOT = resolve(import.meta.dir, "..");
 const BTN_CONFIRM = 0x2000;
+
+test("dialog layout maps Tuxemon enums and preserves absent/default bytes", () => {
+  expect(dialogLayout(["key"])).toEqual({});
+  expect(dialogLayout(["key", "", "bottom", "left", "top"])).toEqual({});
+  expect(dialogLayout(["key", "", "topleft", "center", "bottom"])).toEqual({
+    position: "topLeft",
+    align: "center",
+    valign: "bottom",
+  });
+  expect(dialogLayout(["key", "", "bottomright", "right", "center"])).toEqual({
+    position: "bottomRight",
+    align: "right",
+    valign: "center",
+  });
+  expect(dialogLayout(["key", "", "not-a-position", "sideways", "middle"])).toEqual({});
+});
 
 type TransferCommand = Extract<Command, { op: "transfer" }>;
 type LiteralTransferCommand = TransferCommand & { map: string; x: number; y: number };
@@ -62,6 +80,28 @@ function objectNodes(value: unknown, out: Record<string, unknown>[] = []): Recor
   return out;
 }
 
+test("imported opening names and corner flashbacks retain authored dialog layout", () => {
+  const result = buildProject(["spyder_bedroom", "spyder_nimrod_room"], KIT_V2_IMPORT_OPTIONS);
+  const bedroom = result.project.maps.find((map) => map.id === "spyder_bedroom")!;
+  const opening = bedroom.events?.find((event) => event.name === "Spyder Intro")!;
+  const openingNames = objectNodes(opening.pages.flatMap((page) => page.commands))
+    .filter((node) => node.op === "text" && node.align === "center" && ["Dollfin", "Ignibus", "Memnomnom", "Budaye", "Grintot"]
+      .includes((node.lines as string[] | undefined)?.[0] ?? ""));
+  expect(openingNames).toHaveLength(5);
+  expect(openingNames.map(({ position, align, valign }) => ({ position, align, valign }))).toEqual(
+    Array.from({ length: 5 }, () => ({ position: undefined, align: "center", valign: "center" })),
+  );
+
+  const nimrod = result.project.maps.find((map) => map.id === "spyder_nimrod_room")!;
+  const flashback = nimrod.events?.find((event) => event.name === "Enforcers Rapid Response")!;
+  const texts = objectNodes(flashback.pages.flatMap((page) => page.commands))
+    .filter((node) => node.op === "text");
+  expect(texts.map((node) => node.position)).toEqual([
+    "top", "top", "topLeft", "top", "top", undefined, undefined,
+    "top", "top", "bottomLeft", "top",
+  ]);
+});
+
 test("all maps pass schema and reference valid transfer destinations", () => {
   const result = buildProject(availableMapIds());
   expect(result.project.system).toEqual({ messageBlocksPlayer: true, inventory: { maxKinds: 99 } });
@@ -76,11 +116,11 @@ test("all maps pass schema and reference valid transfer destinations", () => {
   expect(result.report.coverage.actions.summary).toMatchObject({
     types: 98,
     uses: 13_617,
-    native: 6_851,
+    native: 6_857,
     degraded: 2_826,
     placeholder: 708,
-    dropped: 3_232,
-    nativePercent: 50.3,
+    dropped: 3_226,
+    nativePercent: 50.4,
     tier1: {
       uses: 6_318,
       percent: 46.4,
@@ -131,6 +171,25 @@ test("all maps pass schema and reference valid transfer destinations", () => {
     placeholder: 0,
     dropped: 83,
   });
+  expect(coverageRows.find((row) => row.type === "autosave")).toMatchObject({
+    total: 6,
+    native: 6,
+    degraded: 0,
+    placeholder: 0,
+    dropped: 0,
+  });
+  const autosaveMaps = result.project.maps
+    .filter((map) => objectNodes(map.events).some((node) => node.op === "autosave"))
+    .map((map) => map.id)
+    .sort();
+  expect(autosaveMaps).toEqual([
+    "spyder_omnichannel1",
+    "spyder_paper_town",
+    "spyder_route2",
+    "spyder_route3",
+    "spyder_route6",
+    "spyder_routec",
+  ]);
   for (const [type, total] of [
     ["screen_transition", 25],
     ["camera_position", 6],
@@ -534,7 +593,7 @@ test("default import output remains byte-pinned", () => {
   // slug->description table for the {x:map_desc} resolver are all in this
   // combined pin.
   expect(createHash("sha256").update(bytes).digest("hex")).toBe(
-    "f4656862404a35a4490c01f9587eae5a852580e821890a32ed4685913f5a6a7b",
+    "3e4d58d4afa09351d0c4ee5b09e3ffeab97812d95b2fe11bd3ae2f12ce9f31af",
   );
 });
 
@@ -986,6 +1045,16 @@ test("create_npc and remove_npc bound the NPC's party lifetime", () => {
 
 test("open_shop imports item economies and monster shop scenes", () => {
   const result = buildProject(availableMapIds(), G6_IMPORT_OPTIONS);
+  expect(result.report.dialogLayout).toEqual({
+    actionsWithLayout: 255,
+    native: 255,
+    dropped: 0,
+    parameters: {
+      position: { source: 249, native: 249, dropped: 0 },
+      hAlignment: { source: 110, native: 110, dropped: 0 },
+      vAlignment: { source: 102, native: 102, dropped: 0 },
+    },
+  });
   const row = result.report.coverage.actions.rows.find((candidate) => candidate.type === "open_shop");
   expect(row).toMatchObject({ total: 28, native: 28, degraded: 0, placeholder: 0, dropped: 0 });
   expect(result.report.coverage.actions.rows.find((candidate) => candidate.type === "set_economy"))

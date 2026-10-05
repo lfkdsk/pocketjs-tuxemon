@@ -2,18 +2,18 @@
   "format": "pocket-tuxemon/j3-omnichannelradioannounce/v1",
   "worldTraversal": "seamless-v1",
   "hz": 60,
-  "frames": 12929,
-  "combinedFrames": 185802,
-  "durationSeconds": 215.483,
+  "frames": 12930,
+  "combinedFrames": 185181,
+  "durationSeconds": 215.5,
   "base": {
     "format": "pocket-tuxemon/j2-hospitalcure/v1",
     "worldTraversal": "seamless-v1",
-    "frames": 172873,
-    "tapeSha256": "9b7c1c7dd3cdd7f041628cc2c9edcb60bfbf7a930b5f11265fd044fdea31254e",
-    "terminalStateSha256": "39dfc8d3959db7ff4dd3cf14b310a2414febcc78df87e0de2de75931b85ec872",
-    "terminalSnapshotSha256": "00291790f93322d816f93e62690f0de813b046090b9f048301a4ae71a70b6cba",
+    "frames": 172251,
+    "tapeSha256": "d86c1d243e12d0daac269e372d0ee8d126c588da0c1fb608a3436210d7b6a362",
+    "terminalStateSha256": "aef5f7ad5e1d6043cc54cf032ee6a7341565533d93ad19176f4938883412e8f9",
+    "terminalSnapshotSha256": "b0c2ed6520856d691df2af6fd9946e8a30703034bda32e9aabdcaeda1d635622",
     "heldMask": 0,
-    "timelineFrame": 172873,
+    "timelineFrame": 172251,
     "map": "spyder_candy_hospital3",
     "position": [
       5,
@@ -4826,6 +4826,7 @@
     8192,
     0,
     8192,
+    0,
     0,
     0,
     0,
@@ -13058,7 +13059,7 @@
     },
     {
       "name": "omnichannel2",
-      "frame": 5676,
+      "frame": 5677,
       "map": "spyder_omnichannel2",
       "position": [
         2,
@@ -13067,7 +13068,7 @@
     },
     {
       "name": "omnichannel1",
-      "frame": 7420,
+      "frame": 7421,
       "map": "spyder_omnichannel1",
       "position": [
         1,
@@ -13076,7 +13077,7 @@
     },
     {
       "name": "omnichannel-wall",
-      "frame": 7758,
+      "frame": 7759,
       "map": "spyder_omnichannel1",
       "position": [
         3,
@@ -13085,7 +13086,7 @@
     },
     {
       "name": "omnichannel2",
-      "frame": 8015,
+      "frame": 8016,
       "map": "spyder_omnichannel2",
       "position": [
         2,
@@ -13094,7 +13095,7 @@
     },
     {
       "name": "omnichannel3",
-      "frame": 9362,
+      "frame": 9363,
       "map": "spyder_omnichannel3",
       "position": [
         1,
@@ -13103,7 +13104,7 @@
     },
     {
       "name": "omnichannel4",
-      "frame": 11398,
+      "frame": 11399,
       "map": "spyder_omnichannel4",
       "position": [
         2,
@@ -13112,7 +13113,7 @@
     },
     {
       "name": "radiotower",
-      "frame": 11579,
+      "frame": 11580,
       "map": "spyder_radiotower",
       "position": [
         2,
@@ -13121,7 +13122,7 @@
     },
     {
       "name": "radio-tower-entry",
-      "frame": 11599,
+      "frame": 11600,
       "map": "spyder_radiotower",
       "position": [
         2,
@@ -13130,7 +13131,7 @@
     },
     {
       "name": "beaverbrook-defeated",
-      "frame": 12662,
+      "frame": 12663,
       "map": "spyder_radiotower",
       "position": [
         9,
@@ -13139,7 +13140,7 @@
     },
     {
       "name": "radio-broadcast",
-      "frame": 12928,
+      "frame": 12929,
       "map": "spyder_radiotower",
       "position": [
         9,
@@ -13437,7 +13438,7 @@
     {
       "opponent": "spyder_omnichannel_william",
       "kind": "trainer",
-      "startFrame": 5053,
+      "startFrame": 5054,
       "before": [
         {
           "slug": "arthrobolt",
@@ -13486,7 +13487,7 @@
           "level": 41
         }
       ],
-      "endFrame": 5467,
+      "endFrame": 5468,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -13531,7 +13532,7 @@
     {
       "opponent": "spyder_omnichannel_schwartz",
       "kind": "trainer",
-      "startFrame": 5779,
+      "startFrame": 5780,
       "before": [
         {
           "slug": "arthrobolt",
@@ -13580,7 +13581,7 @@
           "level": 40
         }
       ],
-      "endFrame": 6193,
+      "endFrame": 6194,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -13625,7 +13626,7 @@
     {
       "opponent": "spyder_omnichannel_bettger",
       "kind": "trainer",
-      "startFrame": 6280,
+      "startFrame": 6281,
       "before": [
         {
           "slug": "arthrobolt",
@@ -13674,7 +13675,7 @@
           "level": 40
         }
       ],
-      "endFrame": 6744,
+      "endFrame": 6745,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -13719,7 +13720,7 @@
     {
       "opponent": "spyder_omnichannel_tohei",
       "kind": "trainer",
-      "startFrame": 6871,
+      "startFrame": 6872,
       "before": [
         {
           "slug": "arthrobolt",
@@ -13764,7 +13765,7 @@
           "level": 45
         }
       ],
-      "endFrame": 7149,
+      "endFrame": 7150,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -13809,7 +13810,7 @@
     {
       "opponent": "spyder_omnichannel_crane",
       "kind": "trainer",
-      "startFrame": 8174,
+      "startFrame": 8175,
       "before": [
         {
           "slug": "arthrobolt",
@@ -13858,7 +13859,7 @@
           "level": 40
         }
       ],
-      "endFrame": 8588,
+      "endFrame": 8589,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -13903,7 +13904,7 @@
     {
       "opponent": "spyder_omnichannel_dempsey",
       "kind": "trainer",
-      "startFrame": 8711,
+      "startFrame": 8712,
       "before": [
         {
           "slug": "arthrobolt",
@@ -13952,7 +13953,7 @@
           "level": 25
         }
       ],
-      "endFrame": 9157,
+      "endFrame": 9158,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -13997,7 +13998,7 @@
     {
       "opponent": "spyder_omnichannel_strauss",
       "kind": "trainer",
-      "startFrame": 9521,
+      "startFrame": 9522,
       "before": [
         {
           "slug": "arthrobolt",
@@ -14046,7 +14047,7 @@
           "level": 45
         }
       ],
-      "endFrame": 9965,
+      "endFrame": 9966,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -14091,7 +14092,7 @@
     {
       "opponent": "spyder_omnichannel_carnegie",
       "kind": "trainer",
-      "startFrame": 10204,
+      "startFrame": 10205,
       "before": [
         {
           "slug": "arthrobolt",
@@ -14140,7 +14141,7 @@
           "level": 43
         }
       ],
-      "endFrame": 10618,
+      "endFrame": 10619,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -14185,7 +14186,7 @@
     {
       "opponent": "spyder_omnichannel_byrne",
       "kind": "trainer",
-      "startFrame": 10753,
+      "startFrame": 10754,
       "before": [
         {
           "slug": "arthrobolt",
@@ -14234,7 +14235,7 @@
           "level": 45
         }
       ],
-      "endFrame": 11217,
+      "endFrame": 11218,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -14279,7 +14280,7 @@
     {
       "opponent": "spyder_omnichannel_beaverbrook",
       "kind": "trainer",
-      "startFrame": 11903,
+      "startFrame": 11904,
       "before": [
         {
           "slug": "arthrobolt",
@@ -14328,7 +14329,7 @@
           "level": 55
         }
       ],
-      "endFrame": 12318,
+      "endFrame": 12319,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -14421,8 +14422,8 @@
       "maxHp": 137
     }
   ],
-  "initialStateSha256": "39dfc8d3959db7ff4dd3cf14b310a2414febcc78df87e0de2de75931b85ec872",
-  "terminalStateSha256": "cc69291ff4eaa7af3f6e2b4a175c61b5b05ccdedbe733512698f8eb670d6d96b",
-  "tapeSha256": "59725e7ad87d163b18eee66b6edfb6a6c8f8a1dac014aa128e2ec62e0e3ccfbb",
-  "combinedTapeSha256": "a1d90a3c19b31b002e9e4e590c4d85e57e6762d95c161ff69fbf77be9281a4b8"
+  "initialStateSha256": "aef5f7ad5e1d6043cc54cf032ee6a7341565533d93ad19176f4938883412e8f9",
+  "terminalStateSha256": "0ef285e93cda4445a619c03c473104a03a5ee9195a2d8d5386ae07c1250ca6f1",
+  "tapeSha256": "472c748926ce7cb232023f071ecf8caf552f6bc01a3a25ee40443e92e3345be3",
+  "combinedTapeSha256": "5c397ae0139eef7f089b46341057f0bb101d80bfe9b24f61ef85de6deacb3223"
 }

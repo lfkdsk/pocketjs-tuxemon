@@ -61,11 +61,11 @@ Ten parallel legs, one `bun run verify:*` script each:
 
 | Leg | Script | What it proves |
 |---|---|---|
-| Route 3 battle journey at 60 Hz | `verify:gb6:mainline` | the 110,866-frame mainline tape replays to the frozen terminal state with every map and battle checkpoint intact. |
+| Route 3 battle journey at 60 Hz | `verify:gb6:mainline` | the 110,244-frame mainline tape replays to the frozen terminal state with every map and battle checkpoint intact. |
 | Captain-return journey from frame zero at 60 Hz | `verify:j1:mainline` | the J1 continuation, concatenated with the GB6 tape and replayed from frame zero, ends at the Captain's return. |
-| Hospital-cure journey from frame zero at 60 Hz | `verify:j2:mainline` | the J2 continuation, concatenated with GB6 and J1 and replayed from frame zero (172,873 frames), ends with the hospital cure. |
-| Radio-broadcast journey from frame zero at 60 Hz | `verify:j3:mainline` | the J3 continuation, concatenated with GB6, J1 and J2 and replayed from frame zero (185,802 frames), ends after 13 new trainer wins and the Omnichannel Radio Tower broadcast. |
-| Kernel-quest journey from J3 save and frame zero | `verify:j4:mainline` | the J4 continuation replays twice from its J3 production-save boundary, then all five segments replay from frame zero (199,189 frames) through 14 new wins, the seven correct terminal answers, Kernel and Billie's epilogue. |
+| Hospital-cure journey from frame zero at 60 Hz | `verify:j2:mainline` | the J2 continuation, concatenated with GB6 and J1 and replayed from frame zero (172,251 frames), ends with the hospital cure. |
+| Radio-broadcast journey from frame zero at 60 Hz | `verify:j3:mainline` | the J3 continuation, concatenated with GB6, J1 and J2 and replayed from frame zero (185,181 frames), ends after 13 new trainer wins and the Omnichannel Radio Tower broadcast. |
+| Kernel-quest journey from J3 save and frame zero | `verify:j4:mainline` | the J4 continuation replays twice from its J3 production-save boundary, then all five segments replay from frame zero (198,568 frames) through 14 new wins, the seven correct terminal answers, Kernel and Billie's epilogue. |
 | Battle defeat and recovery journeys | `verify:gb6:failures` | both committed defeat tapes replay with their visible recovery order. |
 | Every imported input lock is executed to its unlock | `verify:g6:locks` | every `lockInput` page releases its lock. |
 | No permanent input lock or blocking fiber on any imported map | `verify:g6:frozen` | a corpus-wide stuck/lock scan over all 263 maps; an interpreter-liveness result, not a proof that a wanderer can never spatially block the player. |

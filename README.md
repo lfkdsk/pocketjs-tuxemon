@@ -26,7 +26,7 @@ summary:
   the north end of Route 3, Route 4 and Flower City to the Captain's return
   in the Mansion and on through Candy Town, the hospital cure and Omnichannel
   Radio Tower broadcast, then across Routes E and B to the Data Center and
-  Kernel's defeat — the complete 199,189-frame Spyder mainline at 60 Hz,
+  Kernel's defeat — the complete 198,568-frame Spyder mainline at 60 Hz,
   driven by
   deterministic autoplay tapes — and every imported input lock is executed
   to its unlock. On the 67 placed outdoor maps, the streamed renderer paints
@@ -35,7 +35,9 @@ summary:
   working set. The project now opts into `seamless-v1`: 253 of the 258
   coordinate-preserving outdoor openings cross atomically in eight ticks with
   no fade. Portal-only, gap, rejected, indoor, faint and story transfers keep
-  their legacy transition, and neighbouring-map NPC preview remains planned.
+  their legacy transition. Neighbouring maps preview statically decidable
+  NPCs, and a completed handoff saves a frozen snapshot of the map just left
+  so actors behind the player do not jump back to their entry poses.
 - **Battles (P2, complete):** the battle database and 590 battle
   textures are imported from Tuxemon's YAML, and `battle/` is a pure
   reducer whose results match Tuxemon's own Python engine on 8,560 recorded
@@ -47,7 +49,7 @@ summary:
   Omnichannel and the Radio Tower, and 14 on the Kernel quest — 12 trainer +
   2 wild), and every trainer
   battle enters Battle Processing and ends `won` with its `battle_outcome`
-  written back. The frozen 31-minute 60 Hz tape (110,866 frames / 30 min 48 s)
+  written back. The frozen 31-minute 60 Hz tape (110,244 frames / 30 min 37 s)
   replays byte-identical at 60, 30 and 20 Hz, and both failure paths are
   verified — the first loss against Billie, and a later loss on Route 3
   with the faint-point teleport, the heal-before-leaving block and the
@@ -68,10 +70,10 @@ summary:
   maps cross a 128 KiB compact-decode cap, trading a small amount of storage
   for bounded first-visit latency on QuickJS. Indexed battle art plus its lazy
   database occupies 3,516,960 B in the pak. The current bilingual Web game pak
-  is 87,551,040 B, including English and Chinese content, CJK font atlases, all
+  is 88,768,672 B, including English and Chinese content, CJK font atlases, all
   content-resolvable audio, its attribution list and demo data. The desktop
   launcher removes the 24 QOA music payloads (22,481,712 B) from that target's
-  startup read: its pak is 52,316,544 B and those files retain their exact
+  startup read: its pak is 53,331,856 B and those files retain their exact
   `audio:qoa.*` keys under the companion `dist/runtime-data` tree. The three
   small WAV effects remain packed for immediate one-shot playback; QOA files
   are copied from `data.fs` one 64 KiB page per frame before playback starts.
@@ -99,8 +101,8 @@ summary:
   do not change the longer GB6/J3 limitation above. Cold/hot medians, exact
   startup counts, load ranges, bundle identities and attribution are in
   [the verification guide](docs/verification.md#the-quickjs-benches).
-- **Import coverage:** 89.3% of Tuxemon action uses and 96.3% of condition
-  uses map natively to kit commands; 97.3% / 96.7% are executable (native,
+- **Import coverage:** 89.6% of Tuxemon action uses and 96.5% of condition
+  uses map natively to kit commands; 97.7% / 97.2% are executable (native,
   degraded, or a deliberate placeholder). The full per-type breakdown is in
   [reports/G1-coverage.md](reports/G1-coverage.md).
 - **Day/night:** a saved, rewindable calendar drives Tuxemon's time conditions
@@ -116,6 +118,11 @@ runtime; right: an independent render of the same Tuxemon TMX map, used as
 the reference in the terrain tests (0 differing pixels).
 
 ![Taba Town: runtime and reference](docs/screenshots/taba-town-runtime-vs-reference.png)
+
+Imported dialogue placement is visible at both supported viewport sizes: the
+Maple flashback uses 0.8W×0.25H left/right corner windows, and its Chinese long
+line continues onto a second page instead of clipping. See the
+[480×272 and 960×544 captures](docs/screenshots/dialog-layout/).
 
 The first trainer battle, played for real: Billie's Budaye against Nut,
 with sprites, HUD and backgrounds imported from Tuxemon and the rules
@@ -177,6 +184,15 @@ world is paused while the menu is open.
 - **Save to slot / Load from slot:** three slots. The desktop build writes
   `save/slot-1.json` … `save/slot-3.json` in the app's data folder. The browser
   build keeps them in the page's local storage.
+- **Automatic Save:** a read-only slot separate from the three manual slots.
+  The six imported story commands write `save/autosave.json` on desktop and an
+  app-scoped local-storage key in the browser; loading resumes immediately
+  after the autosave command. A recoverable command tick, including one with a
+  text, choices or shop modal, is published immediately; an unrecoverable tick
+  such as an active transfer, battle or scene is deferred to the first safe
+  reference tick. PSP currently has no writable save bridge, so those commands
+  are quiet no-ops there. Focused reducer/host tests cover all six authored
+  boundaries and the maintained production tape crosses four of them once.
 - **Save code (export) / Load code (import):** the same save as URL-safe text,
   paged on screen. Hosts with no file system or browser storage (PSP) have only
   these two rows. Codes are compressed, but still a few thousand characters
@@ -186,8 +202,8 @@ world is paused while the menu is open.
   runtime accepts compatible older schema identities and rewrites the next
   save under the current identity.
 
-You can save only when nothing is in progress. During dialogue, a battle, a
-scripted scene, a map change or a step, the menu says why it can't save.
+You can save manually only when nothing is in progress. During dialogue, a
+battle, a scripted scene, a map change or a step, the menu says why it can't save.
 Damaged saves, saves from another build of the game and empty slots show an
 error and leave the game as it was. A load picks up exactly where the save was
 made; `bun run verify:save` checks this at five points along the GB6 mainline.
@@ -200,7 +216,7 @@ Screens: [menu](docs/screenshots/save/save-menu.480x272.png),
 (960×544 versions alongside; `bun run screens:save` re-renders them from the
 built game).
 
-CI also plays the 3,990-frame opening journey — bedroom, Paper Town, the
+CI also plays the 3,982-frame opening journey — bedroom, Paper Town, the
 first battle, Route 1 — in headless Chrome against the built site
 (`bun tools/verify-web-journey.ts`) and checks every checkpoint's state and
 pixels against the goldens.
@@ -322,10 +338,12 @@ bookmarked or shared:
 - `?autoplay=<id>&speed=<1|2|4>` — start a chapter on autoplay (e.g. `?autoplay=starter&speed=2`)
 
 An invalid id (e.g. `?chapter=missing`) is a visible `BAD DEMO LINK` error,
-not a crash. The chapter snapshots and the 199,189-frame tape are packed into
-the pak (a nibble-dictionary tape binary, 99,623 B) and read on demand, so the
-JS bundle keeps only a tiny chapter index; the tape is decoded once, on the
-first chapter selection, and every chapter plays a window of it.
+not a crash. Chapter snapshots and the nibble-dictionary tape are packed into
+the pak and read on demand, so the JS bundle keeps only a tiny chapter index;
+the tape is decoded once, on the first chapter selection, and every chapter
+plays a window of it. The committed chapter pack and all twenty thumbnails are
+rebaked against the current 198,568-frame recording; every chapter envelope
+passes decode, map-aware restore and suffix replay to the production terminal.
 `bun tools/verify-web-demo.ts` drives all of the above in headless Chrome,
 including a 600-frame autoplay that must reach a state byte-identical to a
 reducer-level suffix replay, and checks that each chapter click repaints the
@@ -402,7 +420,7 @@ bun run verify:psp:journey -- path/to/profile.jsonl
 
 The opening journey (bedroom through the Billie battle to Route 1) passed this
 check under PPSSPP on an earlier recording of the opening tape, including its
-PSP double-ABI probe; it has not been re-run on the current 3,990-frame tape.
+PSP double-ABI probe; it has not been re-run on the current 3,982-frame tape.
 A captured 480×272 framebuffer was also checked for the bedroom and dialogue
 UI. Emulator
 timings are not hardware results: doodlewind's 333 MHz, firmware 6.61 device

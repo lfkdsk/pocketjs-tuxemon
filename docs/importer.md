@@ -72,7 +72,8 @@ definitions below are the report's own:
 
 | Tuxemon | Kit output |
 |---|---|
-| `translated_dialog` | `text` boxes, translated from the en_US message catalog and word-wrapped. |
+| `translated_dialog` | `text` boxes, translated from the selected message catalog and word-wrapped. Authored `position`, `h_alignment` and `v_alignment` values become the kit's placement/alignment fields on every continued page; omitted or default values remain omitted, so ordinary dialogs keep their previous bytes. |
+| `autosave` | the native `autosave` command. After the fiber advances, the host receives that command-tick snapshot when it is recoverable (including text, choices and shop modals); otherwise publication waits for the first recoverable reference tick. Browser and desktop persist it in a separate read-only automatic slot. |
 | `set_variable` / `clear_variable` | `variable` commands; string values are enum-coded globally. Variables that scripts compute with or print (`variable_math`, `format_variable`, `${{var:name}}`, joined through `copy_variable`) instead hold the literal text via `tux.set_variable_text`; their `variable_set` checks become `tux.variable_text` (only "not set" stays a native `== 0`). |
 | `variable_math` / `format_variable` | `tux.variable_math` / `tux.format_variable` store Python's `str()` of the CPython result (float arithmetic, floor division to int, `int()`/`float()` with optional negation); the type is read back from that text. Upstream's error paths (missing or non-numeric operand) leave the variable unchanged. |
 | `${{var:name}}` in dialogue | the kit's `{v:<id>}` text token (`system.textVariables`), printing the stored text. |
@@ -184,7 +185,6 @@ completed-step edge; neither page can consume the edge before the other.
 | `char_facing player,top/bottom`, `button_pressed K_RETURN` | these legacy source arguments are invalid in the pinned Tuxemon runtime: directions are `up/down/left/right`, and `K_RETURN` is not an intention constant. The guards are fixed false instead of being reported as native triggers. |
 | `add_step_tracker` and friends for a non-player character | the kit's step hook reports only the player's completed tiles (the pinned content tracks the player only). |
 | `copy_variable` between enum-coded variables | enum codes are numbered per variable, so only variables that hold text copy verbatim. |
-| `autosave` | a pure reducer event cannot request that the host persist autosave slot 0. |
 | `transition_teleport` targeting an NPC | only the player transfers. |
 | `modify_money` with a variable amount | only literal amounts are supported. |
 | rules inside structurally discarded events | the event never starts (inert, zero-size, fixed-false guard, trigger area outside the map, or over the 64-cell area cap), or it is not materialized by any map. |
@@ -203,7 +203,8 @@ report contains:
 - a per-source-type table with the four tallies, so a regression in any
   mapping shows up as a row change;
 - audits: the remaining battle/monster placeholders, the economy and item
-  catalog, the outdoor world index, and transfer repairs.
+  catalog, the outdoor world index, transfer repairs, and source/native/drop
+  counts for each optional dialogue-layout parameter.
 
 The committed report is generated with the full G6 import profile (all
 maps, routes, input locks, battles). Running `importer/index.ts` directly
@@ -214,7 +215,7 @@ Current coverage (G6 profile):
 
 | Kind | Types | Uses | Native | Degraded | Placeholder | Dropped | Executable |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Actions | 98 | 13,617 | 12,193 | 1,100 | 0 | 324 | 97.6% |
+| Actions | 98 | 13,617 | 12,199 | 1,100 | 0 | 318 | 97.7% |
 | Conditions | 64 | 8,663 | 8,364 | 56 | 0 | 243 | 97.2% |
 
 ## Adding or changing a mapping

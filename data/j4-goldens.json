@@ -1,13 +1,13 @@
 {
   "format": "pocket-tuxemon/j4-goldens/v1",
-  "baseFrames": 185802,
+  "baseFrames": 185181,
   "segmentTapeSha256": "08c88566e1da8c7c86816175403152f2f15fbb771d60b2a0756a32c9061987b1",
-  "combinedTapeSha256": "ab36b36094bae1fb20340d9b80453bf1a301d24995dc77317f809fa07176a477",
+  "combinedTapeSha256": "a1dde2471f1b66df83683813de996837ec8b558fc1bd16ba0f1d47f13d4a7e3c",
   "frames": [
     {
       "name": "surfboard-collected",
       "frame": 3239,
-      "mergedFrame": 189041,
+      "mergedFrame": 188420,
       "map": "spyder_candy_town",
       "position": [
         28,
@@ -60,7 +60,7 @@
     {
       "name": "datacenter-upper-screens",
       "frame": 12464,
-      "mergedFrame": 198266,
+      "mergedFrame": 197645,
       "map": "spyder_datacenter",
       "position": [
         14,
@@ -113,7 +113,7 @@
     {
       "name": "kernel-defeated",
       "frame": 13386,
-      "mergedFrame": 199188,
+      "mergedFrame": 198567,
       "map": "spyder_datacenter",
       "position": [
         7,
@@ -166,7 +166,7 @@
     {
       "name": "surfboard-collected",
       "frame": 3239,
-      "mergedFrame": 189041,
+      "mergedFrame": 188420,
       "map": "spyder_candy_town",
       "position": [
         28,
@@ -219,7 +219,7 @@
     {
       "name": "datacenter-upper-screens",
       "frame": 12464,
-      "mergedFrame": 198266,
+      "mergedFrame": 197645,
       "map": "spyder_datacenter",
       "position": [
         14,
@@ -272,7 +272,7 @@
     {
       "name": "kernel-defeated",
       "frame": 13386,
-      "mergedFrame": 199188,
+      "mergedFrame": 198567,
       "map": "spyder_datacenter",
       "position": [
         7,

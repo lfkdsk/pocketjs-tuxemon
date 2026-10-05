@@ -43,7 +43,21 @@ import type { JsonValue } from "../vendor/pocket-rpgkit/src/engine/types.ts";
 import { isBusy } from "../vendor/pocket-rpgkit/src/engine/interpreter.ts";
 import type { MapContentIdentity } from "../vendor/pocket-rpgkit/src/engine/map-repository.ts";
 import type { Session, SessionState } from "../vendor/pocket-rpgkit/src/engine/session.ts";
-import { fsSaveStore, type FsSlotInfo } from "../vendor/pocket-rpgkit/src/host/save-fs.ts";
+import {
+  hasFsSave,
+  inspectAutosaveFs,
+  loadAutosaveFs,
+  saveAutosaveFs,
+  fsSaveStore,
+  type FsSlotInfo,
+} from "../vendor/pocket-rpgkit/src/host/save-fs.ts";
+import {
+  autosaveBridge,
+  inspectAutosaveHost,
+  loadAutosaveHost,
+  writeAutosaveHost,
+  type AutosaveSlotStatus,
+} from "../vendor/pocket-rpgkit/src/host/autosave.ts";
 
 export const SAVE_SLOTS = 3;
 export const BROWSER_SAVE_KEY_PREFIX = "pocket-tuxemon/save/slot-";
@@ -57,6 +71,9 @@ export interface SlotStore {
   readonly channel: SaveChannel;
   readonly store: SaveStore;
 }
+
+export type AutosaveChannel = "desktop" | "browser";
+export type AutosaveListing = AutosaveSlotStatus | FsSlotInfo | { slot: 0; error: string };
 
 /** The subset of the Web Storage API the browser channel needs. */
 export interface StorageLike {
@@ -188,6 +205,43 @@ export function detectSlotStore(): SlotStore | null {
   if (fs) return { channel: "desktop", store: fs };
   const storage = reachableStorage();
   return storage ? { channel: "browser", store: browserSaveStore(storage) } : null;
+}
+
+/** Dedicated automatic-save channel. Desktop uses data.fs; the generated web
+ * player installs the app-scoped browser bridge. PSP currently exposes
+ * neither and deliberately treats the command as a quiet no-op. */
+export function detectAutosaveChannel(): AutosaveChannel | null {
+  if (hasFsSave()) return "desktop";
+  return autosaveBridge() ? "browser" : null;
+}
+
+/** Persist an engine-owned recoverable autosave without entering a numbered
+ * manual slot. False means this target has no channel or storage refused it. */
+export function persistAutosave(
+  snapshot: Readonly<SaveSnapshot>,
+  content: MapContentIdentity | null,
+): boolean {
+  if (hasFsSave()) {
+    try {
+      saveAutosaveFs(snapshot as SaveSnapshot, content);
+      return true;
+    } catch (error) {
+      globalThis.console?.debug?.("pocket-tuxemon: desktop autosave write failed", error);
+      return false;
+    }
+  }
+  return writeAutosaveHost(snapshot, content);
+}
+
+/** Decode the target's automatic slot. Passing null peeks without applying
+ * the content identity, used to show a language mismatch before build skew. */
+export function loadAutosaveSlot(content: MapContentIdentity | null): SaveSnapshot | null {
+  return hasFsSave() ? loadAutosaveFs(content) : loadAutosaveHost(content);
+}
+
+/** Menu summary of the read-only automatic slot, including visible damage. */
+export function inspectAutosaveSlot(content: MapContentIdentity | null): AutosaveListing {
+  return hasFsSave() ? inspectAutosaveFs(content) : inspectAutosaveHost(content);
 }
 
 export function saveSlot(

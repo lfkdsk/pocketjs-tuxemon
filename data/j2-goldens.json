@@ -1,13 +1,13 @@
 {
   "format": "pocket-tuxemon/j2-goldens/v1",
-  "baseFrames": 122386,
+  "baseFrames": 121764,
   "segmentTapeSha256": "c23c8722c4a537b625fb598c41896bdaf3dd79416a5f50ba528b09eda5e70c3c",
-  "combinedTapeSha256": "9b7c1c7dd3cdd7f041628cc2c9edcb60bfbf7a930b5f11265fd044fdea31254e",
+  "combinedTapeSha256": "d86c1d243e12d0daac269e372d0ee8d126c588da0c1fb608a3436210d7b6a362",
   "frames": [
     {
       "name": "aardant-acquired",
       "frame": 49049,
-      "mergedFrame": 171435,
+      "mergedFrame": 170813,
       "map": "spyder_greenwash",
       "position": [
         7,
@@ -72,7 +72,7 @@
     {
       "name": "hospital-password",
       "frame": 49688,
-      "mergedFrame": 172074,
+      "mergedFrame": 171452,
       "map": "spyder_candy_hospital2",
       "position": [
         11,
@@ -121,7 +121,7 @@
     {
       "name": "hospital-cure",
       "frame": 50486,
-      "mergedFrame": 172872,
+      "mergedFrame": 172250,
       "map": "spyder_candy_hospital3",
       "position": [
         5,
@@ -170,7 +170,7 @@
     {
       "name": "aardant-acquired",
       "frame": 49049,
-      "mergedFrame": 171435,
+      "mergedFrame": 170813,
       "map": "spyder_greenwash",
       "position": [
         7,
@@ -235,7 +235,7 @@
     {
       "name": "hospital-password",
       "frame": 49688,
-      "mergedFrame": 172074,
+      "mergedFrame": 171452,
       "map": "spyder_candy_hospital2",
       "position": [
         11,
@@ -284,7 +284,7 @@
     {
       "name": "hospital-cure",
       "frame": 50486,
-      "mergedFrame": 172872,
+      "mergedFrame": 172250,
       "map": "spyder_candy_hospital3",
       "position": [
         5,

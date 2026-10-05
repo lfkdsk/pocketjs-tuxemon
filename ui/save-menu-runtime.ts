@@ -13,7 +13,12 @@ import { createSignal, onCleanup, type Accessor } from "solid-js";
 import { BTN } from "@pocketjs/framework/input";
 import type { CreateOskOptions, OskController } from "@pocketjs/framework/osk";
 import { MapNotReadyError } from "../vendor/pocket-rpgkit/src/engine/map-repository.ts";
-import { menuStep, type MenuAction, type MenuState } from "../vendor/pocket-rpgkit/src/engine/save-menu.ts";
+import {
+  menuStep,
+  saveMenuRootRows,
+  type MenuAction,
+  type MenuState,
+} from "../vendor/pocket-rpgkit/src/engine/save-menu.ts";
 import type { SaveSnapshot } from "../vendor/pocket-rpgkit/src/engine/save.ts";
 import type { UiTextOverrides } from "../vendor/pocket-rpgkit/src/engine/ui-text.ts";
 import type {
@@ -27,7 +32,9 @@ import {
   detectSlotStore,
   exportSaveCode,
   importSaveCode,
+  inspectAutosaveSlot,
   listSlots,
+  loadAutosaveSlot,
   loadSlot,
   peekSaveCode,
   peekSlot,
@@ -38,6 +45,7 @@ import {
   takeSaveSnapshot,
   type SlotListing,
   type SlotStore,
+  type AutosaveListing,
 } from "./save-game.ts";
 
 /** Frames a "Saved" / "Loaded" notice stays on screen after the menu closes. */
@@ -108,6 +116,8 @@ export interface SaveMenuRuntime {
   isOpen: GameViewDemoRuntime["isOpen"];
   menu: Accessor<MenuState>;
   slots: Accessor<SlotListing>;
+  /** Dedicated read-only automatic slot, or null before the first autosave. */
+  autosave: Accessor<AutosaveListing>;
   saveCode: Accessor<string>;
   toast: Accessor<string | null>;
   legend: Accessor<string>;
@@ -136,9 +146,12 @@ export function createSaveMenuRuntime(
 
   const [menu, setMenu] = createSignal<MenuState>({ kind: "closed" });
   const [slotInfo, setSlotInfo] = createSignal<SlotListing>([null, null, null]);
+  const [autosaveInfo, setAutosaveInfo] = createSignal<AutosaveListing>(null);
   const [saveCode, setSaveCode] = createSignal("");
   const [typed, setTyped] = createSignal("");
   const [toast, setToast] = createSignal<string | null>(null);
+  const rootIndex = (id: string): number => Math.max(0,
+    saveMenuRootRows(hasSlots, autosaveInfo() !== null).findIndex((row) => row.id === id));
   let toastFrames = 0;
   // After the menu closes, hold the world until every button is released so
   // the closing press never reaches the reducer as a fresh edge.
@@ -151,6 +164,7 @@ export function createSaveMenuRuntime(
 
   const refreshSlots = (): void => {
     setSlotInfo(listSlots(slots, content, options.lang ?? "en_US"));
+    setAutosaveInfo(inspectAutosaveSlot(content));
   };
   const showToast = (text: string): void => {
     setToast(text);
@@ -208,7 +222,7 @@ export function createSaveMenuRuntime(
     setValue: setTyped,
     onCommit(text) {
       keyboardClosed = true;
-      const back: MenuState = { kind: "root", index: hasSlots ? 3 : 1 };
+      const back: MenuState = { kind: "root", index: rootIndex("code-import") };
       // Same language pre-check as the slot path: a foreign-language save
       // code has a different map manifest and must show the mismatch prompt
       // instead of the "another build" refusal.
@@ -232,7 +246,7 @@ export function createSaveMenuRuntime(
     },
     onClose() {
       keyboardClosed = true;
-      if (menu().kind === "code-import") setMenu({ kind: "root", index: hasSlots ? 3 : 1 });
+      if (menu().kind === "code-import") setMenu({ kind: "root", index: rootIndex("code-import") });
     },
   });
 
@@ -279,8 +293,30 @@ export function createSaveMenuRuntime(
         }
         return load(snapshot, `slot ${command.slot}`, back);
       }
+      case "load-autosave": {
+        const back: MenuState = { kind: "slots-load", index: 0 };
+        try {
+          const peeked = loadAutosaveSlot(null);
+          if (!peeked) throw new Error("automatic save is empty");
+          if (options.lang && snapshotLang(peeked) !== options.lang) {
+            setMenu(languageMismatchMessage(snapshotLang(peeked), back));
+            return false;
+          }
+        } catch (error) {
+          setMenu(message("CAN'T LOAD AUTOSAVE", describeLoadError(error), back));
+          return false;
+        }
+        try {
+          const snapshot = loadAutosaveSlot(content);
+          if (!snapshot) throw new Error("automatic save is empty");
+          return load(snapshot, "autosave", back);
+        } catch (error) {
+          setMenu(message("CAN'T LOAD AUTOSAVE", describeLoadError(error), back));
+          return false;
+        }
+      }
       case "open-export": {
-        const back: MenuState = { kind: "root", index: hasSlots ? 2 : 0 };
+        const back: MenuState = { kind: "root", index: rootIndex("code-export") };
         const snapshot = snapshotNow(back);
         if (!snapshot) return false;
         setSaveCode(exportSaveCode(host.session, snapshot));
@@ -348,6 +384,7 @@ export function createSaveMenuRuntime(
       if (action === null) return { consumed: true };
       const result = menuStep(current, action, {
         hasFs: hasSlots,
+        autosaveAvailable: autosaveInfo() !== null,
         slotNonEmpty: slotInfo().map((slot) => slot !== null),
         codePages: Math.max(1, Math.ceil(saveCode().length / CODE_PAGE_CHARS)),
         text: uiText(),
@@ -365,6 +402,7 @@ export function createSaveMenuRuntime(
     isOpen: () => menu().kind !== "closed" || pending !== null,
     menu,
     slots: slotInfo,
+    autosave: autosaveInfo,
     saveCode,
     toast,
     legend: () => {

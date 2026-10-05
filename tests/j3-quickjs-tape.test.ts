@@ -8,7 +8,7 @@ describe("J3 QuickJS continuation tape", () => {
     const tape = buildJ3QuickjsTape();
     expect(tape.format).toBe("pocket-tuxemon/j3-quickjs/v1");
     expect(tape.worldTraversal).toBe("seamless-v1");
-    expect(tape.frames).toBe(12_940);
+    expect(tape.frames).toBe(12_941);
     expect(tape.frames).toBe(tape.masks.length);
     expect(tape.tapeSha256)
       .toBe(createHash("sha256").update(JSON.stringify(tape.masks)).digest("hex"));
@@ -21,6 +21,6 @@ describe("J3 QuickJS continuation tape", () => {
       outcome: "won",
     });
     expect(tape.terminalStateSha256)
-      .toBe("cc69291ff4eaa7af3f6e2b4a175c61b5b05ccdedbe733512698f8eb670d6d96b");
+      .toBe("0ef285e93cda4445a619c03c473104a03a5ee9195a2d8d5386ae07c1250ca6f1");
   });
 });

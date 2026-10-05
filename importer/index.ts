@@ -98,6 +98,22 @@ Definitions:
   converter proves cannot start or otherwise omits. Per-disposition reasons are
   retained in \`dist/import-report.json\`.
 
+## Dialogue layout parameter coverage
+
+Tuxemon's \`translated_dialog\` carries optional position and word-alignment
+parameters in addition to its translation key. All
+${report.dialogLayout.actionsWithLayout} source-file actions that carry at least
+one layout parameter are Native; none are discarded. Missing/default parameters
+remain absent from generated \`text\` commands, preserving the existing default
+box bytes.
+
+| Scope | Source uses | Native | Dropped |
+|---|---:|---:|---:|
+| Actions with any layout parameter | ${report.dialogLayout.actionsWithLayout} | ${report.dialogLayout.native} | ${report.dialogLayout.dropped} |
+| \`position\` | ${report.dialogLayout.parameters.position.source} | ${report.dialogLayout.parameters.position.native} | ${report.dialogLayout.parameters.position.dropped} |
+| \`h_alignment\` | ${report.dialogLayout.parameters.hAlignment.source} | ${report.dialogLayout.parameters.hAlignment.native} | ${report.dialogLayout.parameters.hAlignment.dropped} |
+| \`v_alignment\` | ${report.dialogLayout.parameters.vAlignment.source} | ${report.dialogLayout.parameters.vAlignment.native} | ${report.dialogLayout.parameters.vAlignment.dropped} |
+
 ## P2 battle and monster placeholder audit
 
 There are ${placeholderUses} source-file uses across ${placeholderRows.length}

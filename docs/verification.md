@@ -22,17 +22,25 @@ where noted. Set `TUXEMON_SRC` first (or keep a repo-local `.tuxemon-src`).
 | `verify:terrain:collision` | Imported collision matches an independent Python oracle that mirrors Tuxemon's own movement code, cell by cell and direction by direction (default: 11 maps, 56,176 directed steps; `--all` for every map). | `data/terrain.json`, Tuxemon source, PyYAML | under a second for the default set; minutes for `--all` |
 | `verify:g6:locks` | Every imported `lockInput` page releases its lock, either through `unlockInput` or a map transfer (331 pages, 336 checks). | imported project | ~15 s |
 | `verify:g6:frozen` | The freeze scan finds no permanent input lock or blocking fiber on any imported map: every map is entered and driven for 12,000 frames, flagging held input locks, blocking fibers and interpreter errors. This is an interpreter-liveness result, not a proof that a wanderer can never spatially block the player. | imported project | ~65 s |
-| `verify:gb6:mainline` | The 110,866-frame mainline tape replays at 60 Hz to the frozen terminal state, with every map checkpoint, all 107 battles (22 trainer, 85 wild) and the trainer win counts intact. | `data/gb6-mainline-journey.json` | ~72 s |
+| `verify:gb6:mainline` | The 110,244-frame mainline tape replays at 60 Hz to the frozen terminal state, with every map checkpoint, all 107 battles (22 trainer, 85 wild) and the trainer win counts intact. | `data/gb6-mainline-journey.json` | ~72 s |
 | `verify:gb6:failures` | Both committed defeat tapes (the first loss against Billie, and the later Route 3 loss) replay with their visible recovery order: faint-point teleport, heal-before-leaving block, nurse recovery. | `data/gb6-first-loss-journey.json`, `data/gb6-later-loss-journey.json` | ~40 s |
-| `verify:j1:mainline` | The Captain-return continuation, concatenated with the GB6 tape and replayed from frame zero (122,386 frames), ends at the mansion with the captain's return and all 14 battles (10 trainer, 4 wild) intact. | `data/gb6-mainline-journey.json`, `data/j1-captainreturns-journey.json` | ~67 s |
-| `verify:j2:mainline` | The hospital-cure continuation, concatenated with GB6 and J1 and replayed from frame zero (172,873 frames), ends in the Candy Town hospital with the cure granted and all 54 battles (50 trainer, 4 wild) won. | `data/gb6-mainline-journey.json`, `data/j1-captainreturns-journey.json`, `data/j2-hospitalcure-journey.json` | ~130 s |
-| `verify:j3:mainline` | The Radio Tower continuation, concatenated with GB6, J1 and J2 and replayed from frame zero (185,802 frames), ends at the broadcast with all 13 new trainer battles won and the Omnichannel story flags intact. | the four maintained mainline tapes through `data/j3-omnichannelradioannounce-journey.json` | ~140 s |
-| `verify:j4:mainline` | The Kernel continuation replays twice from the exact J3 production-save boundary, then concatenates all five segments and replays 199,189 frames from frame zero. It pins 14 wins (12 trainer plus Cataspike and Kernel), all seven correct Data Center answers and the `kernelquest=done` epilogue. | the five maintained mainline tapes through `data/j4-kernelquestdone-journey.json` | ~30 s |
+| `verify:j1:mainline` | The Captain-return continuation, concatenated with the GB6 tape and replayed from frame zero (121,764 frames), ends at the mansion with the captain's return and all 14 battles (10 trainer, 4 wild) intact. | `data/gb6-mainline-journey.json`, `data/j1-captainreturns-journey.json` | ~67 s |
+| `verify:j2:mainline` | The hospital-cure continuation, concatenated with GB6 and J1 and replayed from frame zero (172,251 frames), ends in the Candy Town hospital with the cure granted and all 54 battles (50 trainer, 4 wild) won. | `data/gb6-mainline-journey.json`, `data/j1-captainreturns-journey.json`, `data/j2-hospitalcure-journey.json` | ~130 s |
+| `verify:j3:mainline` | The Radio Tower continuation, concatenated with GB6, J1 and J2 and replayed from frame zero (185,181 frames), ends at the broadcast with all 13 new trainer battles won and the Omnichannel story flags intact. | the four maintained mainline tapes through `data/j3-omnichannelradioannounce-journey.json` | ~140 s |
+| `verify:j4:mainline` | The Kernel continuation replays twice from the exact J3 production-save boundary, then concatenates all five segments and replays 198,568 frames from frame zero. It pins 14 wins (12 trainer plus Cataspike and Kernel), all seven correct Data Center answers and the `kernelquest=done` epilogue. | the five maintained mainline tapes through `data/j4-kernelquestdone-journey.json` | ~30 s |
 | `verify:chapters` | The demo chapters re-bake byte-identical: each save envelope passes the kit's save validator (decode + map-aware restore), the 480×272 thumbnails re-render from the built game to the committed PNG hashes, and every envelope restored and resumed at its `timelineFrame` suffix-replays to the full-tape terminal state. Fails with the rebake command when the kit, the tape or the importer moves a checkpoint. | `data/chapters.json`, `docs/screenshots/chapters/`, built bundle | ~12 min |
 | `verify:save` | Five saves through the game's own save path (save-point check, slot store or save code, content identity, decode, restore): after a battle, after a map change and after a late battle in the 09:00 GB6 replay, and one minute before noon plus mid-tint-tween right after the daylight stage turns in an 11:52 replay. Each restored state equals the live state at its save frame (one frame later for the rebuilt NPC table), and each resumed replay ends at the uninterrupted terminal state hash. Only the host frame counter `SessionState.frame`, which the reducer never reads, is set back for hashing. Report in `reports/save-resume.json`. | GB6 tape, generated shards | ~4 min |
 
 Durations are wall-clock measured on a current developer machine; the CI
 machines fold the mainline tapes in about a minute each.
+
+The committed chapter pack is rebaked against the current 198,568-frame
+recording. Route 2's `autosave` coincides with an independent parallel choices
+modal, which the current tagged save format can decode and restore, so it is a
+same-tick safe snapshot. Autosaves that coincide with work the v1 format cannot
+resume (for example a pending transfer or battle, active scene or handoff) are
+instead published at the first recoverable reference tick. `verify:chapters`
+exercises the host effect path and validates every resulting envelope.
 
 ### Modes of the five big verifiers
 
@@ -163,9 +171,9 @@ bun run verify:world-cache
 bun run verify:world-cache:cold
 ```
 
-The short G6 benchmark replays 3,990 frames at 480×272 and 960×544, then
+The short G6 benchmark replays 3,982 frames at 480×272 and 960×544, then
 measures the first visit to all 263 maps. The long GB6 benchmark replays all
-110,866 frames and 107 battles at both viewports; set
+110,244 frames and 107 battles at both viewports; set
 `GB6_BENCH_VIEWPORT="960 544"` (or `"480 272"`) to select one viewport. On the
 reference workstation each viewport takes roughly two minutes; a cold
 isolated Rust host build adds about 40–60 seconds. GB6 reads its expected
@@ -174,7 +182,7 @@ so re-pinning the tape cannot leave a second stale literal in the wrapper.
 JavaScript compile/evaluation failures include the original message and stack.
 
 The J3 benchmark restores the production `hospital-cure` chapter snapshot,
-then replays the 11 remaining J2 masks plus all 12,929 J3 masks (12,940 total).
+then replays the 11 remaining J2 masks plus all 12,930 J3 masks (12,941 total).
 It exercises
 13 battles including Beaverbrook and checks the Radio Tower terminal hash at
 both 480×272 and 960×544. This also keeps chapter restore honest in the
@@ -293,14 +301,14 @@ fail on any mismatch, so a silently corrupted tape is a red build.
 
 | Tape | Frames | Route | Battles | Terminal |
 |---|---:|---|---:|---|
-| `data/g6-journey.json` | 3,990 | bedroom -> Paper Town -> first battle -> Route 1 | 1 | `spyder_route1 @14,19` |
-| `data/gb6-mainline-journey.json` | 110,866 | Route 1 -> Cotton Town -> Paper Town -> Route 2 -> City Park -> Leather Center -> Route 3 -> Wayfarer Inn -> back to Route 3 | 107 (22 trainer, 85 wild) | `spyder_route3 @4,6` |
-| `data/gb6-first-loss-journey.json` | 3,325 | the opening, deliberately losing the first Billie fight | 1 | `spyder_route1 @14,19` |
-| `data/gb6-later-loss-journey.json` | 66,498 | the mainline prefix to Wanda, a deliberate loss, then the recovery path | 1 loss + prefix | `spyder_leather_town @23,10` |
-| `data/j1-captainreturns-journey.json` | 11,520 (122,386 combined with GB6) | Wayfarer Inn -> Route 4 -> Flower City -> Route A -> Mansion -> basement -> the captain's return | 14 (10 trainer, 4 wild) | `spyder_mansion @1,13` |
-| `data/j2-hospitalcure-journey.json` | 50,487 (172,873 combined) | Mansion -> Candy Town -> Greenwash -> hospital password -> the cure | 54 (50 trainer, 4 wild) | `spyder_candy_hospital3 @5,7` |
-| `data/j3-omnichannelradioannounce-journey.json` | 12,929 (185,802 combined) | hospital cure -> Paper Town -> Cotton Town -> Omnichannel floors 1–4 -> Radio Tower broadcast | 13 trainer | `spyder_radiotower @9,5` |
-| `data/j4-kernelquestdone-journey.json` | 13,387 (199,189 combined) | Radio Tower -> Cotton Town briefing -> Surfboard -> Route E -> Route B -> Data Center -> Kernel | 14 (12 trainer, 2 wild) | `spyder_datacenter @7,4` |
+| `data/g6-journey.json` | 3,982 | bedroom -> Paper Town -> first battle -> Route 1 | 1 | `spyder_route1 @14,19` |
+| `data/gb6-mainline-journey.json` | 110,244 | Route 1 -> Cotton Town -> Paper Town -> Route 2 -> City Park -> Leather Center -> Route 3 -> Wayfarer Inn -> back to Route 3 | 107 (22 trainer, 85 wild) | `spyder_route3 @4,6` |
+| `data/gb6-first-loss-journey.json` | 3,317 | the opening, deliberately losing the first Billie fight | 1 | `spyder_route1 @14,19` |
+| `data/gb6-later-loss-journey.json` | 66,056 | the mainline prefix to Wanda, a deliberate loss, then the recovery path | 1 loss + prefix | `spyder_leather_town @23,10` |
+| `data/j1-captainreturns-journey.json` | 11,520 (121,764 combined with GB6) | Wayfarer Inn -> Route 4 -> Flower City -> Route A -> Mansion -> basement -> the captain's return | 14 (10 trainer, 4 wild) | `spyder_mansion @1,13` |
+| `data/j2-hospitalcure-journey.json` | 50,487 (172,251 combined) | Mansion -> Candy Town -> Greenwash -> hospital password -> the cure | 54 (50 trainer, 4 wild) | `spyder_candy_hospital3 @5,7` |
+| `data/j3-omnichannelradioannounce-journey.json` | 12,930 (185,181 combined) | hospital cure -> Paper Town -> Cotton Town -> Omnichannel floors 1–4 -> Radio Tower broadcast | 13 trainer | `spyder_radiotower @9,5` |
+| `data/j4-kernelquestdone-journey.json` | 13,387 (198,568 combined) | Radio Tower -> Cotton Town briefing -> Surfboard -> Route E -> Route B -> Data Center -> Kernel | 14 (12 trainer, 2 wild) | `spyder_datacenter @7,4` |
 | `data/zh-smoke-journey.json` | 3,201 | Chinese bedroom opening -> downstairs dialogue -> Paper Town -> first battle | 1 | `spyder_paper_town @26,9` |
 
 Terminal state hashes and per-checkpoint expectations live in the tapes or
