@@ -26,6 +26,8 @@ import { applyTerrain, DEFAULT_TUXEMON_SRC, writeTerrain } from "./importer/terr
 import { buildWarpIndex } from "./importer/warp.ts";
 import { buildDemoData, demoIndexSource } from "./importer/demo-data.ts";
 import { splitGameProjectMaps } from "./importer/map-shards.ts";
+import { buildPreviewCoverage, tuxemonPreviewSessionOptions } from "./importer/preview-coverage.ts";
+import monthNames from "./data/month-names.json";
 
 // Tests and determinism checks can cook into a disposable root without
 // touching the maintained project tree. Source modules still come from this
@@ -514,7 +516,8 @@ const mapZhPakEntries: PakManifestEntry[] = zhSplit.entries.map((entry) => ({
 writeFileSync(join(DIST, "project-shell.zh_CN.json"), zhSplit.shellText);
 assertShellManifestFresh(JSON.parse(readFileSync(join(DIST, "project-shell.zh_CN.json"), "utf8")));
 writeFileSync(join(DIST, "project.zh_CN.json"), jsonBytes(zhProject));
-writeFileSync(join(DIST, "import-report.zh_CN.json"), jsonBytes(zhImported.report));
+// import-report.zh_CN.json is written with the en one, once the preview
+// coverage exists (below).
 // zh_CN slug -> description table for the {x:map_desc} resolver.
 writeFileSync(join(DIST, "map-descriptions.zh_CN.json"), jsonBytes(zhImported.mapDescriptions));
 // The CJK subset baker scans this file for every character the zh build
@@ -551,7 +554,6 @@ const zhGaps = (() => {
   };
 })();
 writeFileSync(join(DIST, "zh-fallbacks.json"), jsonBytes(zhGaps));
-writeFileSync(join(ROOT, "reports/G1-coverage.zh_CN.md"), coverageMarkdown(zhImported.report));
 setImportLang("en_US");
 // Demo menu data: the 198,568-frame mainline tape (nibble-packed) and the 20
 // chapter snapshots become pak entries read on demand; only the tiny chapter
@@ -649,7 +651,20 @@ writeFileSync(join(DIST, "project-shell.json"), split.shellText);
 assertShellManifestFresh(JSON.parse(readFileSync(join(DIST, "project-shell.json"), "utf8")));
 writeFileSync(join(DIST, "variable-enums.json"), jsonBytes(imported.variables));
 writeFileSync(join(DIST, "world-index.json"), jsonBytes(imported.worldIndex));
+// Neighbour character preview coverage by sandboxed map entry, on the en
+// project with the production session wiring. Only text differs in the
+// zh_CN build, so both reports carry the same verdict.
+const previewCoverage = buildPreviewCoverage(project, tuxemonPreviewSessionOptions(
+  project,
+  battle.db,
+  imported.variables,
+  imported.mapDescriptions,
+  monthNames as string[],
+));
+imported.report.preview = previewCoverage;
+zhImported.report.preview = previewCoverage;
 writeFileSync(join(DIST, "import-report.json"), jsonBytes(imported.report));
+writeFileSync(join(DIST, "import-report.zh_CN.json"), jsonBytes(zhImported.report));
 // Slug -> localized map description for the {x:map_desc} text-token resolver.
 writeFileSync(join(DIST, "map-descriptions.json"), jsonBytes(imported.mapDescriptions));
 writeFileSync(join(DIST, "weather.json"), jsonBytes({
@@ -661,6 +676,7 @@ writeFileSync(join(DIST, "weather.json"), jsonBytes({
 // when one exists, else the first standable cell outside every event area.
 writeFileSync(join(ROOT, "data/warp.json"), jsonBytes(warpIndex));
 writeFileSync(join(ROOT, "reports/G1-coverage.md"), coverageMarkdown(imported.report));
+writeFileSync(join(ROOT, "reports/G1-coverage.zh_CN.md"), coverageMarkdown(zhImported.report));
 
 function gameAssetsSource(
   player: PlayerFrames,

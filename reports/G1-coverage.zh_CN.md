@@ -207,6 +207,211 @@ direction-only seams, 14 linked gaps,
 72 indoor world members. None is marked
 for seamless handoff.
 
+## Neighbour character preview / 邻图 NPC 预览
+
+The world renderer previews the characters on visible neighbour maps by
+entering each map in a sandbox: a private copy of the durable state goes
+through the real map entry, folds the first target tick and is read back
+(kit README, "Sandboxed-entry preview"). The game's cache key drops the step
+countdowns and keeps, of the clock and weather, the calendar day + hour + weather (every
+`time_is` property is a function of the day and hour); the volatile probe moves the
+minute by 15 inside the same hour. This table is the same
+verdict at the new-game state; `bun run verify:preview:coverage`
+repeats it at every mainline chapter.
+
+世界渲染器在沙盒里真实进入邻图（持久状态的私有副本、跑第一个目标 tick）来画邻图上的人；
+游戏钩子的缓存键去掉步数倒计时，时钟与天气只保留日期、小时与天气（`time_is` 的每个属性都由日期和小时决定）；扰动探针在同一小时内把分钟拨 15。
+下表是新游戏状态下的结果；各主线章节的结果见 `bun run verify:preview:coverage`。
+
+- All maps / 全部地图: 263 maps, 8175 events: 1158 previewable (0 from the static rules), 7012 hidden, 5 rejected; 99.6% of the events that paint are previewable; 165 maps show at least one character.
+- Mainline (`spyder_*`) / 主线: 99 maps, 5259 events: 464 previewable (0 from the static rules), 4795 hidden, 0 rejected; 100.0% of the events that paint are previewable; 89 maps show at least one character.
+
+| Reject reason / 拒绝原因 | All / 全部 | Mainline / 主线 | Meaning / 含义 |
+|---|---:|---:|---|
+| `duplicate-id` | 0 | 0 | two events share one id / 两个事件同 id |
+| `entry-transfer` | 5 | 0 | the map's entry transfers away / 进图即传送走（整图） |
+| `entry-scene` | 0 | 0 | the map's entry starts a battle or scene / 进图即开战斗或场景（整图） |
+| `entry-error` | 0 | 0 | the map's entry raised an error / 进图报错（整图） |
+| `entry-runtime-branch` | 0 | 0 | an entry program branches on facing, timer or BGM / 入口程序按朝向、计时器或 BGM 分支（整图） |
+| `facing-condition` | 0 | 0 | a page condition reads the player's facing / 页条件读玩家朝向 |
+| `runtime-condition` | 0 | 0 | a page condition reads the timer or BGM / 页条件读计时器或 BGM |
+| `player-dependent` | 0 | 0 | differs with the player elsewhere / 玩家位置、朝向不同则不同 |
+| `random-dependent` | 0 | 0 | differs with another random cursor / 换随机数则不同 |
+| `volatile-dependent` | 0 | 0 | differs with the minute inside the hour / 同一小时内的分钟不同则不同 |
+
+Maps with a previewable or rejected event / 有可预览或被拒绝事件的地图
+(every other map only holds hidden events / 其余地图只有隐藏事件):
+
+| Map | Events | Previewable | Static | Hidden | Rejected | Reasons |
+|---|---:|---:|---:|---:|---:|---|
+| `37707_town` | 28 | 2 | 0 | 26 | 0 | — |
+| `37707_town_missing` | 28 | 2 | 0 | 26 | 0 | — |
+| `citypark` | 54 | 1 | 0 | 53 | 0 | — |
+| `classic_gym_astra` | 7 | 1 | 0 | 6 | 0 | — |
+| `classic_gym_bravion` | 7 | 1 | 0 | 6 | 0 | — |
+| `classic_gym_ferrum` | 6 | 1 | 0 | 5 | 0 | — |
+| `classic_gym_granite` | 7 | 1 | 0 | 6 | 0 | — |
+| `classic_gym_marin` | 7 | 1 | 0 | 6 | 0 | — |
+| `classic_gym_mila` | 7 | 1 | 0 | 6 | 0 | — |
+| `classic_gym_orion` | 6 | 1 | 0 | 5 | 0 | — |
+| `classic_gym_pyra` | 7 | 1 | 0 | 6 | 0 | — |
+| `classic_gym_shade` | 6 | 1 | 0 | 5 | 0 | — |
+| `classic_gym_sylva` | 6 | 1 | 0 | 5 | 0 | — |
+| `classic_gym_voltessa` | 7 | 1 | 0 | 6 | 0 | — |
+| `classic_gym_vyre` | 6 | 1 | 0 | 5 | 0 | — |
+| `classic_gym_zephra` | 6 | 1 | 0 | 5 | 0 | — |
+| `cotton_cafe_basement` | 8 | 1 | 0 | 7 | 0 | — |
+| `cotton_cathedral` | 11 | 1 | 0 | 10 | 0 | — |
+| `cotton_misa_house` | 10 | 1 | 0 | 9 | 0 | — |
+| `cotton_misa_house_upstairs` | 7 | 1 | 0 | 6 | 0 | — |
+| `cotton_scoop` | 9 | 1 | 0 | 8 | 0 | — |
+| `cotton_town` | 48 | 4 | 0 | 44 | 0 | — |
+| `eclipse_crystal_bank1` | 15 | 4 | 0 | 11 | 0 | — |
+| `eclipse_crystal_bank2` | 15 | 4 | 0 | 11 | 0 | — |
+| `eclipse_crystal_bank3` | 16 | 3 | 0 | 13 | 0 | — |
+| `eclipse_crystal_center` | 26 | 1 | 0 | 25 | 0 | — |
+| `eclipse_crystal_town` | 23 | 4 | 0 | 19 | 0 | — |
+| `eclipse_crystal_town_cafe` | 16 | 5 | 0 | 11 | 0 | — |
+| `eclipse_crystal_town_house` | 8 | 1 | 0 | 7 | 0 | — |
+| `eclipse_lion_mountain_high` | 30 | 5 | 0 | 25 | 0 | — |
+| `eclipse_lion_mountain_low` | 20 | 2 | 0 | 18 | 0 | — |
+| `eclipse_lion_mountain_middle` | 32 | 6 | 0 | 26 | 0 | — |
+| `eclipse_obsidian_center` | 20 | 1 | 0 | 19 | 0 | — |
+| `eclipse_park` | 41 | 0 | 0 | 37 | 4 | entry-transfer:4 |
+| `eclipse_park_cabin` | 7 | 1 | 0 | 6 | 0 | — |
+| `eclipse_park_cave` | 12 | 0 | 0 | 11 | 1 | entry-transfer:1 |
+| `eclipse_park_entrance` | 15 | 2 | 0 | 13 | 0 | — |
+| `eclipse_route7` | 61 | 14 | 0 | 47 | 0 | — |
+| `healing_center` | 16 | 2 | 0 | 14 | 0 | — |
+| `leather_scoop` | 8 | 1 | 0 | 7 | 0 | — |
+| `manhattan_beach` | 11 | 2 | 0 | 9 | 0 | — |
+| `maple_house` | 10 | 1 | 0 | 9 | 0 | — |
+| `player_house_downstairs` | 18 | 1 | 0 | 17 | 0 | — |
+| `professor_lab` | 44 | 3 | 0 | 41 | 0 | — |
+| `route1` | 82 | 11 | 0 | 71 | 0 | — |
+| `route2` | 51 | 1 | 0 | 50 | 0 | — |
+| `sphalian_center` | 10 | 1 | 0 | 9 | 0 | — |
+| `spyder_candy_cafe` | 42 | 4 | 0 | 38 | 0 | — |
+| `spyder_candy_center` | 44 | 2 | 0 | 42 | 0 | — |
+| `spyder_candy_hospital1` | 59 | 10 | 0 | 49 | 0 | — |
+| `spyder_candy_hospital2` | 51 | 8 | 0 | 43 | 0 | — |
+| `spyder_candy_hospital3` | 34 | 2 | 0 | 32 | 0 | — |
+| `spyder_candy_house1` | 26 | 2 | 0 | 24 | 0 | — |
+| `spyder_candy_house2` | 22 | 2 | 0 | 20 | 0 | — |
+| `spyder_candy_house3` | 24 | 1 | 0 | 23 | 0 | — |
+| `spyder_candy_inn1` | 30 | 5 | 0 | 25 | 0 | — |
+| `spyder_candy_inn2` | 32 | 3 | 0 | 29 | 0 | — |
+| `spyder_candy_port` | 69 | 1 | 0 | 68 | 0 | — |
+| `spyder_candy_scoop` | 27 | 2 | 0 | 25 | 0 | — |
+| `spyder_candy_town` | 111 | 5 | 0 | 106 | 0 | — |
+| `spyder_citypark` | 144 | 13 | 0 | 131 | 0 | — |
+| `spyder_citypark_house1` | 20 | 1 | 0 | 19 | 0 | — |
+| `spyder_cotton_artshop` | 52 | 8 | 0 | 44 | 0 | — |
+| `spyder_cotton_cafe` | 39 | 7 | 0 | 32 | 0 | — |
+| `spyder_cotton_house1` | 22 | 2 | 0 | 20 | 0 | — |
+| `spyder_cotton_house2` | 24 | 3 | 0 | 21 | 0 | — |
+| `spyder_cotton_scoop` | 32 | 3 | 0 | 29 | 0 | — |
+| `spyder_cotton_town` | 76 | 9 | 0 | 67 | 0 | — |
+| `spyder_cotton_tunnel` | 48 | 6 | 0 | 42 | 0 | — |
+| `spyder_datacenter` | 77 | 13 | 0 | 64 | 0 | — |
+| `spyder_dojo1` | 51 | 7 | 0 | 44 | 0 | — |
+| `spyder_dojo2` | 33 | 6 | 0 | 27 | 0 | — |
+| `spyder_dojo3` | 33 | 6 | 0 | 27 | 0 | — |
+| `spyder_dojo4` | 30 | 1 | 0 | 29 | 0 | — |
+| `spyder_downstairs` | 24 | 1 | 0 | 23 | 0 | — |
+| `spyder_dragonscave` | 78 | 11 | 0 | 67 | 0 | — |
+| `spyder_dryadsgrove` | 292 | 8 | 0 | 284 | 0 | — |
+| `spyder_flower_center` | 34 | 1 | 0 | 33 | 0 | — |
+| `spyder_flower_city` | 114 | 13 | 0 | 101 | 0 | — |
+| `spyder_flower_house1` | 23 | 2 | 0 | 21 | 0 | — |
+| `spyder_flower_house2` | 22 | 2 | 0 | 20 | 0 | — |
+| `spyder_flower_petshop` | 32 | 2 | 0 | 30 | 0 | — |
+| `spyder_flower_scoop` | 32 | 2 | 0 | 30 | 0 | — |
+| `spyder_greenwash` | 40 | 6 | 0 | 34 | 0 | — |
+| `spyder_greenwash_greenhouse` | 55 | 7 | 0 | 48 | 0 | — |
+| `spyder_greenwash_level2` | 64 | 6 | 0 | 58 | 0 | — |
+| `spyder_healing_center` | 44 | 1 | 0 | 43 | 0 | — |
+| `spyder_leather_center` | 34 | 1 | 0 | 33 | 0 | — |
+| `spyder_leather_gym` | 38 | 7 | 0 | 31 | 0 | — |
+| `spyder_leather_house1` | 21 | 2 | 0 | 19 | 0 | — |
+| `spyder_leather_house2` | 24 | 3 | 0 | 21 | 0 | — |
+| `spyder_leather_museum` | 49 | 6 | 0 | 43 | 0 | — |
+| `spyder_leather_scoop` | 27 | 2 | 0 | 25 | 0 | — |
+| `spyder_leather_shaft1` | 24 | 5 | 0 | 19 | 0 | — |
+| `spyder_leather_shaft2` | 23 | 1 | 0 | 22 | 0 | — |
+| `spyder_leather_town` | 113 | 3 | 0 | 110 | 0 | — |
+| `spyder_mansion` | 68 | 10 | 0 | 58 | 0 | — |
+| `spyder_mansion_basement` | 48 | 11 | 0 | 37 | 0 | — |
+| `spyder_mansion_top` | 47 | 10 | 0 | 37 | 0 | — |
+| `spyder_nimrod_bottom` | 43 | 6 | 0 | 37 | 0 | — |
+| `spyder_nimrod_middle` | 50 | 7 | 0 | 43 | 0 | — |
+| `spyder_nimrod_top` | 35 | 5 | 0 | 30 | 0 | — |
+| `spyder_omnichannel1` | 41 | 5 | 0 | 36 | 0 | — |
+| `spyder_omnichannel2` | 49 | 7 | 0 | 42 | 0 | — |
+| `spyder_omnichannel3` | 34 | 4 | 0 | 30 | 0 | — |
+| `spyder_paper_daycare` | 25 | 1 | 0 | 24 | 0 | — |
+| `spyder_paper_manor` | 20 | 1 | 0 | 19 | 0 | — |
+| `spyder_paper_scoop` | 45 | 7 | 0 | 38 | 0 | — |
+| `spyder_paper_town` | 93 | 2 | 0 | 91 | 0 | — |
+| `spyder_radiotower` | 34 | 5 | 0 | 29 | 0 | — |
+| `spyder_route1` | 79 | 1 | 0 | 78 | 0 | — |
+| `spyder_route2` | 131 | 3 | 0 | 128 | 0 | — |
+| `spyder_route3` | 133 | 14 | 0 | 119 | 0 | — |
+| `spyder_route4` | 105 | 10 | 0 | 95 | 0 | — |
+| `spyder_route5` | 94 | 10 | 0 | 84 | 0 | — |
+| `spyder_route6` | 136 | 10 | 0 | 126 | 0 | — |
+| `spyder_routea` | 125 | 15 | 0 | 110 | 0 | — |
+| `spyder_routeb` | 62 | 5 | 0 | 57 | 0 | — |
+| `spyder_routec` | 206 | 15 | 0 | 191 | 0 | — |
+| `spyder_routee` | 61 | 2 | 0 | 59 | 0 | — |
+| `spyder_scoop1` | 41 | 8 | 0 | 33 | 0 | — |
+| `spyder_scoop2` | 27 | 1 | 0 | 26 | 0 | — |
+| `spyder_scoop3` | 34 | 3 | 0 | 31 | 0 | — |
+| `spyder_scoop4` | 44 | 11 | 0 | 33 | 0 | — |
+| `spyder_test_map` | 46 | 6 | 0 | 40 | 0 | — |
+| `spyder_timber_cafe` | 31 | 3 | 0 | 28 | 0 | — |
+| `spyder_timber_center` | 34 | 1 | 0 | 33 | 0 | — |
+| `spyder_timber_house` | 20 | 1 | 0 | 19 | 0 | — |
+| `spyder_timber_scoop` | 27 | 2 | 0 | 25 | 0 | — |
+| `spyder_timber_town` | 92 | 2 | 0 | 90 | 0 | — |
+| `spyder_timber_walledgarden1` | 45 | 6 | 0 | 39 | 0 | — |
+| `spyder_timber_walledgarden2` | 44 | 6 | 0 | 38 | 0 | — |
+| `spyder_tunnel` | 105 | 5 | 0 | 100 | 0 | — |
+| `spyder_tunnel_below` | 53 | 5 | 0 | 48 | 0 | — |
+| `spyder_wayfarer_inn1` | 52 | 10 | 0 | 42 | 0 | — |
+| `spyder_wayfarer_inn2` | 30 | 4 | 0 | 26 | 0 | — |
+| `taba_ba_br_1` | 19 | 2 | 0 | 17 | 0 | — |
+| `taba_ba_br_2` | 15 | 2 | 0 | 13 | 0 | — |
+| `taba_ba_br_3` | 15 | 1 | 0 | 14 | 0 | — |
+| `taba_ba_br_4` | 15 | 1 | 0 | 14 | 0 | — |
+| `taba_ba_foyer` | 9 | 1 | 0 | 8 | 0 | — |
+| `taba_ba_main` | 45 | 6 | 0 | 39 | 0 | — |
+| `taba_ba_passageway_1` | 17 | 1 | 0 | 16 | 0 | — |
+| `taba_ba_passageway_2` | 14 | 1 | 0 | 13 | 0 | — |
+| `taba_ba_passageway_3` | 17 | 1 | 0 | 16 | 0 | — |
+| `taba_ba_passageway_4` | 12 | 1 | 0 | 11 | 0 | — |
+| `taba_ba_stairwell_1` | 9 | 1 | 0 | 8 | 0 | — |
+| `taba_house1` | 12 | 2 | 0 | 10 | 0 | — |
+| `taba_house2` | 18 | 3 | 0 | 15 | 0 | — |
+| `taba_house2_upstairs` | 10 | 2 | 0 | 8 | 0 | — |
+| `taba_house3` | 15 | 4 | 0 | 11 | 0 | — |
+| `taba_house3_upstairs` | 9 | 2 | 0 | 7 | 0 | — |
+| `taba_house4` | 18 | 5 | 0 | 13 | 0 | — |
+| `taba_town` | 88 | 8 | 0 | 80 | 0 | — |
+| `test_npcs` | 504 | 500 | 0 | 4 | 0 | — |
+| `tuxe_mart_taba` | 14 | 1 | 0 | 13 | 0 | — |
+| `water_end_of_desert` | 22 | 1 | 0 | 21 | 0 | — |
+| `water_lower_village` | 45 | 12 | 0 | 33 | 0 | — |
+| `water_outskirts` | 21 | 4 | 0 | 17 | 0 | — |
+| `water_river_village` | 23 | 6 | 0 | 17 | 0 | — |
+| `water_route_grass` | 50 | 5 | 0 | 45 | 0 | — |
+| `water_route_ice` | 53 | 5 | 0 | 48 | 0 | — |
+| `water_snow_village` | 26 | 4 | 0 | 22 | 0 | — |
+| `water_underwater` | 73 | 2 | 0 | 71 | 0 | — |
+| `water_volcano_path` | 34 | 1 | 0 | 33 | 0 | — |
+| `water_volcano_village` | 25 | 3 | 0 | 22 | 0 | — |
+| `witcher_route_7` | 15 | 3 | 0 | 12 | 0 | — |
+
 ## Transfer repairs
 
 The generated project has 0 invalid transfers.

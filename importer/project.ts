@@ -1,5 +1,6 @@
 // Tuxemon event-to-rpgkit-project/v1 conversion.
 
+import type { PreviewCoverageReport } from "./preview-coverage.ts";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
@@ -4708,6 +4709,9 @@ export interface ImportReport {
     uniqueIcons: number;
   };
   seamlessHandoff: SeamlessHandoffReport;
+  /** Neighbour character preview by sandboxed map entry; the cook adds it
+   * once the project and its battle data exist (gen-assets.ts). */
+  preview?: PreviewCoverageReport;
   world: WorldImportReport;
   coverage: CoverageReport;
   /** Source-file parameter coverage for Tuxemon's translated dialog layout.

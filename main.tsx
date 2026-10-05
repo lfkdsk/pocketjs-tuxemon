@@ -55,6 +55,7 @@ import {
   withWorldDiagnostics,
 } from "./ui/world-diagnostics.ts";
 import { createWorldRenderer } from "./vendor/pocket-rpgkit/src/ui/world/index.ts";
+import { TUXEMON_PREVIEW_HOOKS } from "./battle/preview-hooks.ts";
 import { ChoiceIconBox } from "./vendor/pocket-rpgkit/src/ui/ChoiceIconBox.tsx";
 import { createDemo } from "./vendor/pocket-rpgkit/src/ui/demo/index.ts";
 import { frameProfileMark } from "./vendor/pocket-rpgkit/src/frame-profile.ts";
@@ -272,11 +273,16 @@ mount(() => (
         [TUXEMON_DAYCARE_SCENE_ID]: TuxemonDaycareScene,
       }}
       assets={assets}
-      world={createWorldRenderer()}
-      createWorldCacheDriver={(session, layout) => createGameWorldCacheDriver(session, layout, {
-        onStats: worldAssetCache.onWorldCacheStats,
-        onPrefetchActivity: (active) => { deferredAudioIdle = !active; },
-      })}
+      world={createWorldRenderer({ npcPreview: { sandbox: TUXEMON_PREVIEW_HOOKS } })}
+      createWorldCacheDriver={(session, layout) => {
+        // NPC art of the visible neighbours the session holds stays resident
+        // for the neighbour preview.
+        worldAssetCache.bindMaps((mapId) => session.maps.get(mapId) ?? session.preparingMaps.get(mapId)?.map);
+        return createGameWorldCacheDriver(session, layout, {
+          onStats: worldAssetCache.onWorldCacheStats,
+          onPrefetchActivity: (active) => { deferredAudioIdle = !active; },
+        });
+      }}
       onMapChange={(mapId, map) => {
         frameProfileMark("map-change-assets:start");
         worldAssetCache.onMapChange(mapId, map);

@@ -8,6 +8,11 @@ import {
   type ImportOptions,
   type ImportReport,
 } from "./project.ts";
+import {
+  PREVIEW_REASON_LABELS,
+  type PreviewCoverageTotals,
+} from "./preview-coverage.ts";
+import { SANDBOX_PREVIEW_REJECT_REASONS } from "../vendor/pocket-rpgkit/src/engine/world-preview-sandbox.ts";
 
 export interface ImportPaths {
   project: string;
@@ -19,6 +24,68 @@ export interface ImportPaths {
 
 export function jsonBytes(value: unknown): string {
   return JSON.stringify(value, null, 1) + "\n";
+}
+
+function previewTotalsLine(totals: PreviewCoverageTotals): string {
+  return `${totals.maps} maps, ${totals.events} events: ${totals.previewed} previewable`
+    + ` (${totals.fallback} from the static rules), ${totals.hidden} hidden, ${totals.rejected} rejected;`
+    + ` ${totals.previewablePercent}% of the events that paint are previewable;`
+    + ` ${totals.mapsWithPreview} maps show at least one character`;
+}
+
+/** The neighbour character preview section (bilingual: the same section
+ *  ships in the en_US and zh_CN report files). */
+function previewSection(report: ImportReport): string {
+  const preview = report.preview;
+  if (!preview) {
+    return `## Neighbour character preview / 邻图 NPC 预览
+
+Not computed by this import path (only the full cook, \`bun run import\`, runs
+the sandbox).
+`;
+  }
+  const reasonRows = SANDBOX_PREVIEW_REJECT_REASONS
+    .map((reason) => `| \`${reason}\` | ${preview.all.reasons[reason]} | ${preview.mainline.reasons[reason]} | ${PREVIEW_REASON_LABELS[reason]} |`)
+    .join("\n");
+  const perMapRows = preview.perMap
+    .map((row) => {
+      const reasons = SANDBOX_PREVIEW_REJECT_REASONS
+        .filter((reason) => (row.reasons[reason] ?? 0) > 0)
+        .map((reason) => `${reason}:${row.reasons[reason]}`)
+        .join(", ");
+      return `| \`${row.mapId}\` | ${row.events} | ${row.previewed} | ${row.fallback} | ${row.hidden} | ${row.rejected} | ${reasons || "—"} |`;
+    })
+    .join("\n");
+  return `## Neighbour character preview / 邻图 NPC 预览
+
+The world renderer previews the characters on visible neighbour maps by
+entering each map in a sandbox: a private copy of the durable state goes
+through the real map entry, folds the first target tick and is read back
+(kit README, "Sandboxed-entry preview"). The game's cache key drops the step
+countdowns and keeps, of the clock and weather, the ${preview.probes.key} (every
+\`time_is\` property is a function of the day and hour); the volatile probe moves the
+minute by ${preview.probes.minuteShift} inside the same hour. This table is the same
+verdict at the ${preview.evaluatedAt} state; \`bun run verify:preview:coverage\`
+repeats it at every mainline chapter.
+
+世界渲染器在沙盒里真实进入邻图（持久状态的私有副本、跑第一个目标 tick）来画邻图上的人；
+游戏钩子的缓存键去掉步数倒计时，时钟与天气只保留日期、小时与天气（\`time_is\` 的每个属性都由日期和小时决定）；扰动探针在同一小时内把分钟拨 ${preview.probes.minuteShift}。
+下表是新游戏状态下的结果；各主线章节的结果见 \`bun run verify:preview:coverage\`。
+
+- All maps / 全部地图: ${previewTotalsLine(preview.all)}.
+- Mainline (\`spyder_*\`) / 主线: ${previewTotalsLine(preview.mainline)}.
+
+| Reject reason / 拒绝原因 | All / 全部 | Mainline / 主线 | Meaning / 含义 |
+|---|---:|---:|---|
+${reasonRows}
+
+Maps with a previewable or rejected event / 有可预览或被拒绝事件的地图
+(every other map only holds hidden events / 其余地图只有隐藏事件):
+
+| Map | Events | Previewable | Static | Hidden | Rejected | Reasons |
+|---|---:|---:|---:|---:|---:|---|
+${perMapRows}
+`;
 }
 
 export function coverageMarkdown(report: ImportReport): string {
@@ -258,6 +325,7 @@ ${report.seamlessHandoff.topologyExcluded.rejectedContacts} rejected contacts, a
 ${report.seamlessHandoff.topologyExcluded.indoorMaps} indoor world members. None is marked
 for seamless handoff.
 
+${previewSection(report)}
 ## Transfer repairs
 
 The generated project has ${report.transferErrors.length} invalid transfers.

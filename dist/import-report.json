@@ -5385,5 +5385,1565 @@
     "modifiers": []
    }
   ]
+ },
+ "preview": {
+  "evaluatedAt": "new-game",
+  "probes": {
+   "key": "calendar day + hour + weather",
+   "minuteShift": 15
+  },
+  "all": {
+   "maps": 263,
+   "events": 8175,
+   "previewed": 1158,
+   "fallback": 0,
+   "hidden": 7012,
+   "rejected": 5,
+   "reasons": {
+    "duplicate-id": 0,
+    "entry-transfer": 5,
+    "entry-scene": 0,
+    "entry-error": 0,
+    "entry-runtime-branch": 0,
+    "facing-condition": 0,
+    "runtime-condition": 0,
+    "player-dependent": 0,
+    "random-dependent": 0,
+    "volatile-dependent": 0
+   },
+   "mapsWithPreview": 165,
+   "previewablePercent": "99.6"
+  },
+  "mainline": {
+   "maps": 99,
+   "events": 5259,
+   "previewed": 464,
+   "fallback": 0,
+   "hidden": 4795,
+   "rejected": 0,
+   "reasons": {
+    "duplicate-id": 0,
+    "entry-transfer": 0,
+    "entry-scene": 0,
+    "entry-error": 0,
+    "entry-runtime-branch": 0,
+    "facing-condition": 0,
+    "runtime-condition": 0,
+    "player-dependent": 0,
+    "random-dependent": 0,
+    "volatile-dependent": 0
+   },
+   "mapsWithPreview": 89,
+   "previewablePercent": "100.0"
+  },
+  "perMap": [
+   {
+    "mapId": "37707_town",
+    "events": 28,
+    "previewed": 2,
+    "fallback": 0,
+    "hidden": 26,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "37707_town_missing",
+    "events": 28,
+    "previewed": 2,
+    "fallback": 0,
+    "hidden": 26,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "citypark",
+    "events": 54,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 53,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "classic_gym_astra",
+    "events": 7,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 6,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "classic_gym_bravion",
+    "events": 7,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 6,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "classic_gym_ferrum",
+    "events": 6,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 5,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "classic_gym_granite",
+    "events": 7,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 6,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "classic_gym_marin",
+    "events": 7,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 6,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "classic_gym_mila",
+    "events": 7,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 6,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "classic_gym_orion",
+    "events": 6,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 5,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "classic_gym_pyra",
+    "events": 7,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 6,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "classic_gym_shade",
+    "events": 6,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 5,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "classic_gym_sylva",
+    "events": 6,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 5,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "classic_gym_voltessa",
+    "events": 7,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 6,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "classic_gym_vyre",
+    "events": 6,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 5,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "classic_gym_zephra",
+    "events": 6,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 5,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "cotton_cafe_basement",
+    "events": 8,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 7,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "cotton_cathedral",
+    "events": 11,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 10,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "cotton_misa_house",
+    "events": 10,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 9,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "cotton_misa_house_upstairs",
+    "events": 7,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 6,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "cotton_scoop",
+    "events": 9,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 8,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "cotton_town",
+    "events": 48,
+    "previewed": 4,
+    "fallback": 0,
+    "hidden": 44,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "eclipse_crystal_bank1",
+    "events": 15,
+    "previewed": 4,
+    "fallback": 0,
+    "hidden": 11,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "eclipse_crystal_bank2",
+    "events": 15,
+    "previewed": 4,
+    "fallback": 0,
+    "hidden": 11,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "eclipse_crystal_bank3",
+    "events": 16,
+    "previewed": 3,
+    "fallback": 0,
+    "hidden": 13,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "eclipse_crystal_center",
+    "events": 26,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 25,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "eclipse_crystal_town",
+    "events": 23,
+    "previewed": 4,
+    "fallback": 0,
+    "hidden": 19,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "eclipse_crystal_town_cafe",
+    "events": 16,
+    "previewed": 5,
+    "fallback": 0,
+    "hidden": 11,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "eclipse_crystal_town_house",
+    "events": 8,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 7,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "eclipse_lion_mountain_high",
+    "events": 30,
+    "previewed": 5,
+    "fallback": 0,
+    "hidden": 25,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "eclipse_lion_mountain_low",
+    "events": 20,
+    "previewed": 2,
+    "fallback": 0,
+    "hidden": 18,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "eclipse_lion_mountain_middle",
+    "events": 32,
+    "previewed": 6,
+    "fallback": 0,
+    "hidden": 26,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "eclipse_obsidian_center",
+    "events": 20,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 19,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "eclipse_park",
+    "events": 41,
+    "previewed": 0,
+    "fallback": 0,
+    "hidden": 37,
+    "rejected": 4,
+    "reasons": {
+     "entry-transfer": 4
+    }
+   },
+   {
+    "mapId": "eclipse_park_cabin",
+    "events": 7,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 6,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "eclipse_park_cave",
+    "events": 12,
+    "previewed": 0,
+    "fallback": 0,
+    "hidden": 11,
+    "rejected": 1,
+    "reasons": {
+     "entry-transfer": 1
+    }
+   },
+   {
+    "mapId": "eclipse_park_entrance",
+    "events": 15,
+    "previewed": 2,
+    "fallback": 0,
+    "hidden": 13,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "eclipse_route7",
+    "events": 61,
+    "previewed": 14,
+    "fallback": 0,
+    "hidden": 47,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "healing_center",
+    "events": 16,
+    "previewed": 2,
+    "fallback": 0,
+    "hidden": 14,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "leather_scoop",
+    "events": 8,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 7,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "manhattan_beach",
+    "events": 11,
+    "previewed": 2,
+    "fallback": 0,
+    "hidden": 9,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "maple_house",
+    "events": 10,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 9,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "player_house_downstairs",
+    "events": 18,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 17,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "professor_lab",
+    "events": 44,
+    "previewed": 3,
+    "fallback": 0,
+    "hidden": 41,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "route1",
+    "events": 82,
+    "previewed": 11,
+    "fallback": 0,
+    "hidden": 71,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "route2",
+    "events": 51,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 50,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "sphalian_center",
+    "events": 10,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 9,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_candy_cafe",
+    "events": 42,
+    "previewed": 4,
+    "fallback": 0,
+    "hidden": 38,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_candy_center",
+    "events": 44,
+    "previewed": 2,
+    "fallback": 0,
+    "hidden": 42,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_candy_hospital1",
+    "events": 59,
+    "previewed": 10,
+    "fallback": 0,
+    "hidden": 49,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_candy_hospital2",
+    "events": 51,
+    "previewed": 8,
+    "fallback": 0,
+    "hidden": 43,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_candy_hospital3",
+    "events": 34,
+    "previewed": 2,
+    "fallback": 0,
+    "hidden": 32,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_candy_house1",
+    "events": 26,
+    "previewed": 2,
+    "fallback": 0,
+    "hidden": 24,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_candy_house2",
+    "events": 22,
+    "previewed": 2,
+    "fallback": 0,
+    "hidden": 20,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_candy_house3",
+    "events": 24,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 23,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_candy_inn1",
+    "events": 30,
+    "previewed": 5,
+    "fallback": 0,
+    "hidden": 25,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_candy_inn2",
+    "events": 32,
+    "previewed": 3,
+    "fallback": 0,
+    "hidden": 29,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_candy_port",
+    "events": 69,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 68,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_candy_scoop",
+    "events": 27,
+    "previewed": 2,
+    "fallback": 0,
+    "hidden": 25,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_candy_town",
+    "events": 111,
+    "previewed": 5,
+    "fallback": 0,
+    "hidden": 106,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_citypark",
+    "events": 144,
+    "previewed": 13,
+    "fallback": 0,
+    "hidden": 131,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_citypark_house1",
+    "events": 20,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 19,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_cotton_artshop",
+    "events": 52,
+    "previewed": 8,
+    "fallback": 0,
+    "hidden": 44,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_cotton_cafe",
+    "events": 39,
+    "previewed": 7,
+    "fallback": 0,
+    "hidden": 32,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_cotton_house1",
+    "events": 22,
+    "previewed": 2,
+    "fallback": 0,
+    "hidden": 20,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_cotton_house2",
+    "events": 24,
+    "previewed": 3,
+    "fallback": 0,
+    "hidden": 21,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_cotton_scoop",
+    "events": 32,
+    "previewed": 3,
+    "fallback": 0,
+    "hidden": 29,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_cotton_town",
+    "events": 76,
+    "previewed": 9,
+    "fallback": 0,
+    "hidden": 67,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_cotton_tunnel",
+    "events": 48,
+    "previewed": 6,
+    "fallback": 0,
+    "hidden": 42,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_datacenter",
+    "events": 77,
+    "previewed": 13,
+    "fallback": 0,
+    "hidden": 64,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_dojo1",
+    "events": 51,
+    "previewed": 7,
+    "fallback": 0,
+    "hidden": 44,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_dojo2",
+    "events": 33,
+    "previewed": 6,
+    "fallback": 0,
+    "hidden": 27,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_dojo3",
+    "events": 33,
+    "previewed": 6,
+    "fallback": 0,
+    "hidden": 27,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_dojo4",
+    "events": 30,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 29,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_downstairs",
+    "events": 24,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 23,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_dragonscave",
+    "events": 78,
+    "previewed": 11,
+    "fallback": 0,
+    "hidden": 67,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_dryadsgrove",
+    "events": 292,
+    "previewed": 8,
+    "fallback": 0,
+    "hidden": 284,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_flower_center",
+    "events": 34,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 33,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_flower_city",
+    "events": 114,
+    "previewed": 13,
+    "fallback": 0,
+    "hidden": 101,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_flower_house1",
+    "events": 23,
+    "previewed": 2,
+    "fallback": 0,
+    "hidden": 21,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_flower_house2",
+    "events": 22,
+    "previewed": 2,
+    "fallback": 0,
+    "hidden": 20,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_flower_petshop",
+    "events": 32,
+    "previewed": 2,
+    "fallback": 0,
+    "hidden": 30,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_flower_scoop",
+    "events": 32,
+    "previewed": 2,
+    "fallback": 0,
+    "hidden": 30,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_greenwash",
+    "events": 40,
+    "previewed": 6,
+    "fallback": 0,
+    "hidden": 34,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_greenwash_greenhouse",
+    "events": 55,
+    "previewed": 7,
+    "fallback": 0,
+    "hidden": 48,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_greenwash_level2",
+    "events": 64,
+    "previewed": 6,
+    "fallback": 0,
+    "hidden": 58,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_healing_center",
+    "events": 44,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 43,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_leather_center",
+    "events": 34,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 33,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_leather_gym",
+    "events": 38,
+    "previewed": 7,
+    "fallback": 0,
+    "hidden": 31,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_leather_house1",
+    "events": 21,
+    "previewed": 2,
+    "fallback": 0,
+    "hidden": 19,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_leather_house2",
+    "events": 24,
+    "previewed": 3,
+    "fallback": 0,
+    "hidden": 21,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_leather_museum",
+    "events": 49,
+    "previewed": 6,
+    "fallback": 0,
+    "hidden": 43,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_leather_scoop",
+    "events": 27,
+    "previewed": 2,
+    "fallback": 0,
+    "hidden": 25,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_leather_shaft1",
+    "events": 24,
+    "previewed": 5,
+    "fallback": 0,
+    "hidden": 19,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_leather_shaft2",
+    "events": 23,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 22,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_leather_town",
+    "events": 113,
+    "previewed": 3,
+    "fallback": 0,
+    "hidden": 110,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_mansion",
+    "events": 68,
+    "previewed": 10,
+    "fallback": 0,
+    "hidden": 58,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_mansion_basement",
+    "events": 48,
+    "previewed": 11,
+    "fallback": 0,
+    "hidden": 37,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_mansion_top",
+    "events": 47,
+    "previewed": 10,
+    "fallback": 0,
+    "hidden": 37,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_nimrod_bottom",
+    "events": 43,
+    "previewed": 6,
+    "fallback": 0,
+    "hidden": 37,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_nimrod_middle",
+    "events": 50,
+    "previewed": 7,
+    "fallback": 0,
+    "hidden": 43,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_nimrod_top",
+    "events": 35,
+    "previewed": 5,
+    "fallback": 0,
+    "hidden": 30,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_omnichannel1",
+    "events": 41,
+    "previewed": 5,
+    "fallback": 0,
+    "hidden": 36,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_omnichannel2",
+    "events": 49,
+    "previewed": 7,
+    "fallback": 0,
+    "hidden": 42,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_omnichannel3",
+    "events": 34,
+    "previewed": 4,
+    "fallback": 0,
+    "hidden": 30,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_paper_daycare",
+    "events": 25,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 24,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_paper_manor",
+    "events": 20,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 19,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_paper_scoop",
+    "events": 45,
+    "previewed": 7,
+    "fallback": 0,
+    "hidden": 38,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_paper_town",
+    "events": 93,
+    "previewed": 2,
+    "fallback": 0,
+    "hidden": 91,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_radiotower",
+    "events": 34,
+    "previewed": 5,
+    "fallback": 0,
+    "hidden": 29,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_route1",
+    "events": 79,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 78,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_route2",
+    "events": 131,
+    "previewed": 3,
+    "fallback": 0,
+    "hidden": 128,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_route3",
+    "events": 133,
+    "previewed": 14,
+    "fallback": 0,
+    "hidden": 119,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_route4",
+    "events": 105,
+    "previewed": 10,
+    "fallback": 0,
+    "hidden": 95,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_route5",
+    "events": 94,
+    "previewed": 10,
+    "fallback": 0,
+    "hidden": 84,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_route6",
+    "events": 136,
+    "previewed": 10,
+    "fallback": 0,
+    "hidden": 126,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_routea",
+    "events": 125,
+    "previewed": 15,
+    "fallback": 0,
+    "hidden": 110,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_routeb",
+    "events": 62,
+    "previewed": 5,
+    "fallback": 0,
+    "hidden": 57,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_routec",
+    "events": 206,
+    "previewed": 15,
+    "fallback": 0,
+    "hidden": 191,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_routee",
+    "events": 61,
+    "previewed": 2,
+    "fallback": 0,
+    "hidden": 59,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_scoop1",
+    "events": 41,
+    "previewed": 8,
+    "fallback": 0,
+    "hidden": 33,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_scoop2",
+    "events": 27,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 26,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_scoop3",
+    "events": 34,
+    "previewed": 3,
+    "fallback": 0,
+    "hidden": 31,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_scoop4",
+    "events": 44,
+    "previewed": 11,
+    "fallback": 0,
+    "hidden": 33,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_test_map",
+    "events": 46,
+    "previewed": 6,
+    "fallback": 0,
+    "hidden": 40,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_timber_cafe",
+    "events": 31,
+    "previewed": 3,
+    "fallback": 0,
+    "hidden": 28,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_timber_center",
+    "events": 34,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 33,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_timber_house",
+    "events": 20,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 19,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_timber_scoop",
+    "events": 27,
+    "previewed": 2,
+    "fallback": 0,
+    "hidden": 25,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_timber_town",
+    "events": 92,
+    "previewed": 2,
+    "fallback": 0,
+    "hidden": 90,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_timber_walledgarden1",
+    "events": 45,
+    "previewed": 6,
+    "fallback": 0,
+    "hidden": 39,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_timber_walledgarden2",
+    "events": 44,
+    "previewed": 6,
+    "fallback": 0,
+    "hidden": 38,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_tunnel",
+    "events": 105,
+    "previewed": 5,
+    "fallback": 0,
+    "hidden": 100,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_tunnel_below",
+    "events": 53,
+    "previewed": 5,
+    "fallback": 0,
+    "hidden": 48,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_wayfarer_inn1",
+    "events": 52,
+    "previewed": 10,
+    "fallback": 0,
+    "hidden": 42,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "spyder_wayfarer_inn2",
+    "events": 30,
+    "previewed": 4,
+    "fallback": 0,
+    "hidden": 26,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "taba_ba_br_1",
+    "events": 19,
+    "previewed": 2,
+    "fallback": 0,
+    "hidden": 17,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "taba_ba_br_2",
+    "events": 15,
+    "previewed": 2,
+    "fallback": 0,
+    "hidden": 13,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "taba_ba_br_3",
+    "events": 15,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 14,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "taba_ba_br_4",
+    "events": 15,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 14,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "taba_ba_foyer",
+    "events": 9,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 8,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "taba_ba_main",
+    "events": 45,
+    "previewed": 6,
+    "fallback": 0,
+    "hidden": 39,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "taba_ba_passageway_1",
+    "events": 17,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 16,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "taba_ba_passageway_2",
+    "events": 14,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 13,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "taba_ba_passageway_3",
+    "events": 17,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 16,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "taba_ba_passageway_4",
+    "events": 12,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 11,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "taba_ba_stairwell_1",
+    "events": 9,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 8,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "taba_house1",
+    "events": 12,
+    "previewed": 2,
+    "fallback": 0,
+    "hidden": 10,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "taba_house2",
+    "events": 18,
+    "previewed": 3,
+    "fallback": 0,
+    "hidden": 15,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "taba_house2_upstairs",
+    "events": 10,
+    "previewed": 2,
+    "fallback": 0,
+    "hidden": 8,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "taba_house3",
+    "events": 15,
+    "previewed": 4,
+    "fallback": 0,
+    "hidden": 11,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "taba_house3_upstairs",
+    "events": 9,
+    "previewed": 2,
+    "fallback": 0,
+    "hidden": 7,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "taba_house4",
+    "events": 18,
+    "previewed": 5,
+    "fallback": 0,
+    "hidden": 13,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "taba_town",
+    "events": 88,
+    "previewed": 8,
+    "fallback": 0,
+    "hidden": 80,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "test_npcs",
+    "events": 504,
+    "previewed": 500,
+    "fallback": 0,
+    "hidden": 4,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "tuxe_mart_taba",
+    "events": 14,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 13,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "water_end_of_desert",
+    "events": 22,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 21,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "water_lower_village",
+    "events": 45,
+    "previewed": 12,
+    "fallback": 0,
+    "hidden": 33,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "water_outskirts",
+    "events": 21,
+    "previewed": 4,
+    "fallback": 0,
+    "hidden": 17,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "water_river_village",
+    "events": 23,
+    "previewed": 6,
+    "fallback": 0,
+    "hidden": 17,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "water_route_grass",
+    "events": 50,
+    "previewed": 5,
+    "fallback": 0,
+    "hidden": 45,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "water_route_ice",
+    "events": 53,
+    "previewed": 5,
+    "fallback": 0,
+    "hidden": 48,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "water_snow_village",
+    "events": 26,
+    "previewed": 4,
+    "fallback": 0,
+    "hidden": 22,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "water_underwater",
+    "events": 73,
+    "previewed": 2,
+    "fallback": 0,
+    "hidden": 71,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "water_volcano_path",
+    "events": 34,
+    "previewed": 1,
+    "fallback": 0,
+    "hidden": 33,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "water_volcano_village",
+    "events": 25,
+    "previewed": 3,
+    "fallback": 0,
+    "hidden": 22,
+    "rejected": 0,
+    "reasons": {}
+   },
+   {
+    "mapId": "witcher_route_7",
+    "events": 15,
+    "previewed": 3,
+    "fallback": 0,
+    "hidden": 12,
+    "rejected": 0,
+    "reasons": {}
+   }
+  ]
  }
 }

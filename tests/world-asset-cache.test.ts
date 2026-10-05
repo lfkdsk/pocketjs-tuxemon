@@ -126,4 +126,53 @@ describe("game world asset cache", () => {
       npcSrc: { resident: 1 },
     });
   });
+
+  test("NPC art also covers the visible neighbour maps the session holds", () => {
+    const ground = table(MAP_IDS, (id) => [`${id}-ground`]);
+    const upper = table(MAP_IDS, (id) => [`${id}-upper`]);
+    const animated = table(MAP_IDS, () => []);
+    const npcSrc = table(NPC_IDS, (id) => `${id}.png`);
+    const cache = createGameWorldAssetCache(layout, {
+      stream: { chunkPx: 256, columns: {}, ground, upper },
+      animated,
+      npcSrc,
+    });
+    const resident = new Map<string, MapDef>([
+      ["outdoor_a", map("outdoor_a", "npc.a")],
+      ["outdoor_b", map("outdoor_b", "npc.b", "npc.shared")],
+      ["outdoor_c", map("outdoor_c", "npc.shared")],
+    ]);
+    const touchAll = () => {
+      for (const id of NPC_IDS) void npcSrc[id];
+    };
+
+    touchAll();
+    cache.onMapChange("outdoor_a", resident.get("outdoor_a")!);
+    cache.onVisibleMaps(["outdoor_a", "outdoor_b"]);
+    // Not bound yet: the active map alone.
+    expect(lazyEntryStats(npcSrc).resident).toBe(1);
+
+    cache.bindMaps((id) => resident.get(id));
+    touchAll();
+    cache.onVisibleMaps(["outdoor_a", "outdoor_b"]);
+    expect(lazyEntryStats(npcSrc).resident).toBe(3);
+
+    // outdoor_b scrolls away: its art is released, outdoor_c's kept.
+    cache.onVisibleMaps(["outdoor_a", "outdoor_c"]);
+    expect(lazyEntryStats(npcSrc).resident).toBe(2);
+    touchAll();
+    // An unchanged visible set does not release again.
+    cache.onVisibleMaps(["outdoor_a", "outdoor_c"]);
+    expect(lazyEntryStats(npcSrc).resident).toBe(3);
+
+    // A neighbour the session does not hold contributes nothing.
+    resident.delete("outdoor_b");
+    cache.onVisibleMaps(["outdoor_a", "outdoor_b"]);
+    expect(lazyEntryStats(npcSrc).resident).toBe(1);
+
+    // An unplaced active map keeps only its own art.
+    touchAll();
+    cache.onMapChange("indoor", map("indoor", "npc.b"));
+    expect(lazyEntryStats(npcSrc).resident).toBe(1);
+  });
 });

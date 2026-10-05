@@ -24,7 +24,9 @@ export interface GameWorldCacheSnapshot {
   driver: WorldCacheStats;
   /** Renderer margin-expanded map ids retained by terrain/animation shards. */
   visualKeep: readonly string[];
-  /** Sprite ids reachable from every page on the active map. */
+  /** Sprite ids reachable from every page on the active map and on the
+   * visible neighbour maps the session holds (the neighbour NPC preview and
+   * the frozen map left behind paint those). */
   npcKeep: readonly string[];
   assets: GameWorldAssetStats;
 }
@@ -36,6 +38,10 @@ export interface GameWorldAssetCache {
   onVisibleMaps(mapIds: readonly string[]): void;
   /** Apply the active-map policy to NPC art and to every unplaced map. */
   onMapChange(mapId: string, map: MapDef): void;
+  /** Resolve a visible neighbour map the session holds (resident maps
+   * only; the preview never paints another). Until bound, NPC art follows
+   * the active map alone. */
+  bindMaps(lookup: (mapId: string) => Readonly<MapDef> | undefined): void;
   stats(): GameWorldAssetStats;
 }
 
@@ -54,8 +60,8 @@ export function npcArtKeepSet(map: Readonly<MapDef>): string[] {
  * Bind the game's lazy render shards to the kit's world working set.
  *
  * - terrain and authored animated tiles follow the visible-map set;
- * - NPC art follows the authoritative active map (neighbour NPC preview is
- *   deliberately outside this phase);
+ * - NPC art follows the active map plus the visible neighbour maps the
+ *   session holds, whose characters the neighbour preview paints;
  * - an unplaced map uses the legacy one-map keep-set.
  *
  * The mutable simulation remains owned by GameView/Session. This object only
@@ -80,6 +86,42 @@ export function createGameWorldAssetCache(
   let lastDriver: WorldCacheStats | undefined;
   let visualKeep: readonly string[] = [];
   let npcKeep: readonly string[] = [];
+  let activeMap: Readonly<MapDef> | undefined;
+  let lookup: ((mapId: string) => Readonly<MapDef> | undefined) | undefined;
+  const spritesOf = new WeakMap<Readonly<MapDef>, readonly string[]>();
+  const sprites = (map: Readonly<MapDef>): readonly string[] => {
+    let ids = spritesOf.get(map);
+    if (!ids) spritesOf.set(map, ids = npcArtKeepSet(map));
+    return ids;
+  };
+  // The inputs of the last NPC keep-set: the active map and the resolved
+  // neighbour maps, compared by identity so an unchanged frame neither
+  // rebuilds the keep-set nor walks the table.
+  let keptMaps: (Readonly<MapDef> | undefined)[] = [];
+
+  const neighbourKept = (id: string): boolean =>
+    id !== activeMap!.id && placed.has(id);
+  const updateNpcKeep = (): void => {
+    const withNeighbours = lookup !== undefined && activeMap !== undefined && placed.has(activeMap.id);
+    // Unchanged inputs (the common case, checked every frame): no work.
+    let same = keptMaps[0] === activeMap;
+    let count = 1;
+    if (withNeighbours) {
+      for (let index = 0; same && index < visualKeep.length; index++) {
+        const id = visualKeep[index]!;
+        if (!neighbourKept(id)) continue;
+        if (keptMaps[count++] !== lookup!(id)) same = false;
+      }
+    }
+    if (same && count === keptMaps.length) return;
+    const maps: (Readonly<MapDef> | undefined)[] = [activeMap];
+    if (withNeighbours) for (const id of visualKeep) if (neighbourKept(id)) maps.push(lookup!(id));
+    keptMaps = maps;
+    const keep = new Set<string>();
+    for (const map of maps) if (map) for (const id of sprites(map)) keep.add(id);
+    npcKeep = [...keep].sort();
+    releaseLazyEntries(providers.npcSrc, npcKeep);
+  };
 
   const report = (): void => {
     if (lastDriver) onStats?.({ driver: lastDriver, visualKeep, npcKeep, assets: stats() });
@@ -88,6 +130,9 @@ export function createGameWorldAssetCache(
   return {
     onWorldCacheStats(driver) {
       lastDriver = driver;
+      // The driver publishes after it makes neighbours resident; their art
+      // joins the keep-set then.
+      updateNpcKeep();
       report();
     },
     onVisibleMaps(mapIds) {
@@ -98,19 +143,28 @@ export function createGameWorldAssetCache(
       releaseLazyEntries(providers.stream.ground, visualKeep);
       releaseLazyEntries(providers.stream.upper, visualKeep);
       releaseLazyEntries(providers.animated, visualKeep);
+      updateNpcKeep();
       report();
     },
     onMapChange(mapId, map) {
-      npcKeep = npcArtKeepSet(map);
-      releaseLazyEntries(providers.npcSrc, npcKeep);
-      if (placed.has(mapId)) return;
+      activeMap = map;
+      if (placed.has(mapId)) {
+        updateNpcKeep();
+        return;
+      }
       // The world driver intentionally emits no outdoor stats for an
       // unplaced map. Collapse visual shards here to the legacy fast path.
       visualKeep = [mapId];
       releaseLazyEntries(providers.stream.ground, visualKeep);
       releaseLazyEntries(providers.stream.upper, visualKeep);
       releaseLazyEntries(providers.animated, visualKeep);
+      updateNpcKeep();
       report();
+    },
+    bindMaps(next) {
+      lookup = next;
+      keptMaps = [];
+      updateNpcKeep();
     },
     stats,
   };

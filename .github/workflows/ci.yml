@@ -123,6 +123,10 @@ jobs:
           # finish the tape at the uninterrupted terminal state.
           - name: Save mid-journey, load, finish the tape
             run: bun run verify:save
+          # Sandboxed neighbour preview at every chapter: no mainline event
+          # rejected, the live state never written.
+          - name: Neighbour preview coverage at every chapter
+            run: bun run verify:preview:coverage
     steps:
       - uses: actions/checkout@v7
         with:

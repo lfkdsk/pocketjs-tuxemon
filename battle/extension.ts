@@ -53,7 +53,7 @@ export const PARTY_LIMIT = 6;
 export const KENNEL_LIMIT = 30;
 export const TUXEMON_EXT_SAVE_FORMAT = "pocket-tuxemon/ext/v1";
 const TUXEMON_EXT_RUNTIME_PREFIX = "pocket-tuxemon/ext-runtime/v1:";
-const TUXEMON_EXT_RUNTIME_V2_PREFIX = "pocket-tuxemon/ext-runtime/v2:";
+export const TUXEMON_EXT_RUNTIME_V2_PREFIX = "pocket-tuxemon/ext-runtime/v2:";
 
 interface TuxemonRuntimeEnvelope {
   wire: string;
