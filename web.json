@@ -25,6 +25,12 @@
         {
           "button": "START",
           "action": "Save / load menu"
+        },
+        {
+          "keys": [
+            "R"
+          ],
+          "action": "Switch language (in game)"
         }
       ],
       "preview": "docs/screenshots/paper-town-overview.png",
@@ -170,7 +176,117 @@
           "preview": "docs/screenshots/chapters/kernel-defeated-480x272.png",
           "autoplay": true
         }
-      ]
+      ],
+      "languages": [
+        {
+          "code": "en",
+          "label": "English"
+        },
+        {
+          "code": "zh",
+          "label": "中文"
+        }
+      ],
+      "languageSwitch": {
+        "param": "lang",
+        "storage": "pocket-tuxemon/lang"
+      },
+      "i18n": {
+        "zh": {
+          "description": "游玩完整的斯派德战役：从新游戏的卧室，到全能公司电台广播与科内尔决战——263 张导入的地图，包含 NPC、对话、商店与真实对战。用章节按钮跳转到任意剧情节点，或传送到任意地图。",
+          "chapters": {
+            "bedroom": {
+              "title": "房间（新游戏）",
+              "description": "在斯派德的卧室醒来，踏入这个世界。",
+              "preview": "docs/screenshots/chapters-zh_CN/bedroom-480x272.png"
+            },
+            "paper-town": {
+              "title": "方絮镇",
+              "description": "抵达方絮镇，和当地人聊聊。"
+            },
+            "before-billie": {
+              "title": "首次对战比莉之前",
+              "description": "与比莉首次对战前的一刻。"
+            },
+            "starter": {
+              "title": "选定初始精灵",
+              "description": "劲敌对战后选定的第一只精灵。"
+            },
+            "route-1": {
+              "title": "路线1",
+              "description": "沿路线1出发。"
+            },
+            "cotton-town": {
+              "title": "暖棉镇",
+              "description": "抵达暖棉镇。"
+            },
+            "city-park": {
+              "title": "城市公园",
+              "description": "漫步穿过城市公园。"
+            },
+            "route-3-north": {
+              "title": "路线3北端",
+              "description": "路线3的北端。"
+            },
+            "flower-city": {
+              "title": "彩花城",
+              "description": "抵达彩花城。"
+            },
+            "captain-returns": {
+              "title": "船长归来",
+              "description": "船长在公馆归来。"
+            },
+            "candy-town": {
+              "title": "甜饴镇",
+              "description": "甜饴镇，在去医院的路上。"
+            },
+            "greenwash-aardant": {
+              "title": "格林沃什（获得阿尔丹特）",
+              "description": "格林沃什，已取得剧情关键的阿尔丹特。"
+            },
+            "hospital-cure": {
+              "title": "医院治疗",
+              "description": "在被隔离的甜饴镇医院取回解药。"
+            },
+            "omnichannel-open": {
+              "title": "全能公司通道开启",
+              "description": "打开一楼通道，获得斯派德通行证。"
+            },
+            "radio-broadcast": {
+              "title": "电台广播",
+              "description": "击败比弗布鲁克，完成全能公司的广播。"
+            },
+            "kernel-briefing": {
+              "title": "科内尔任务简报",
+              "description": "在暖棉镇听取网络中断的简报。"
+            },
+            "surfboard": {
+              "title": "获得冲浪板",
+              "description": "在甜饴镇拿到冲浪板，前往路线E。"
+            },
+            "route-b": {
+              "title": "路线B",
+              "description": "穿过路线B，前往好聊数据中心。"
+            },
+            "data-center": {
+              "title": "数据中心",
+              "description": "回答全部七个终端问题，与数据中心的训练师对战。"
+            },
+            "kernel-defeated": {
+              "title": "科内尔任务完成",
+              "description": "击败科内尔并完成比莉尾声后的完整主线。"
+            }
+          },
+          "controls": {
+            "Walk / choose": "移动 / 选择",
+            "Talk / confirm": "对话 / 确认",
+            "Back / cancel": "返回 / 取消",
+            "Open the demo menu (chapters, map warp, autoplay)": "打开演示菜单（章节、地图传送、自动演示）",
+            "Save / load menu": "存档 / 读档菜单",
+            "Switch language (in game)": "切换语言（游戏内）"
+          }
+        }
+      }
     }
   }
 }

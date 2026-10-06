@@ -94,6 +94,7 @@
     "web": "bun tools/web.ts",
     "web:verify": "bun vendor/pocket-rpgkit/tools/web-verify.ts --site dist/web --out dist/web-verify",
     "verify:web:audio": "bun tools/verify-web-audio.ts",
+    "verify:web:lang": "bun tools/verify-web-lang.ts",
     "test": "bun test tests/",
     "tsc": "bunx tsc --noEmit",
     "build:psp": "bun tools/psp.ts",
