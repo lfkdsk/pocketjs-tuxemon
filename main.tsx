@@ -62,7 +62,7 @@ import { createDemo } from "./vendor/pocket-rpgkit/src/ui/demo/index.ts";
 import { frameProfileMark } from "./vendor/pocket-rpgkit/src/frame-profile.ts";
 import { createGameWorldCacheDriver } from "./ui/game-world-cache-driver.ts";
 import type { WorldStreamedTerrainStats } from "./vendor/pocket-rpgkit/src/ui/WorldStreamedTerrain.tsx";
-import { createDemoOptions } from "./ui/demo-tape.ts";
+import { createDemoOptions, hasDemoChapters } from "./ui/demo-tape.ts";
 import type {
   GameViewDemoConfig,
   GameViewDemoRuntime,
@@ -213,19 +213,45 @@ const weatherOverlayEnabled = (globalThis as typeof globalThis & {
 // START opens the save/load menu. It is a GameView overlay: it reads and
 // replaces the live session through the overlay host, independent of the
 // demo menu on SELECT, and START does nothing while the demo menu is open.
-// The demo menu replays the English mainline tape; the Chinese build has no
-// recorded tape yet, so SELECT is dormant there.
+// Each language replays its own tape from its own chapter saves (the
+// Chinese ones are transcribed from the English mainline); a build without
+// chapters for the boot language leaves SELECT dormant.
 let demoMenu: GameViewDemoRuntime | null = null;
-const demoConfig = createDemo(createDemoOptions(readEntry));
-// A production-bundle visual test may opt the controller into a zh_CN boot
-// through the existing diagnostics object. It opens only the menu and never
-// loads the English snapshots/tape; ordinary Chinese launches remain inert.
-const demo: GameViewDemoConfig | undefined = lang === "en_US" || worldDiagnostics?.enableZhDemo === true ? {
-  create(host) {
-    demoMenu = demoConfig.create(host);
-    return demoMenu;
-  },
-} : undefined;
+const demo: GameViewDemoConfig | undefined = hasDemoChapters(lang) ? (() => {
+  // The pak entries the demo's lazy providers actually read. The selection
+  // published below is computed before any I/O, so it cannot prove the
+  // built game loaded the entries it declares; the read log is the I/O
+  // evidence the built-game demo verification asserts
+  // (tools/verify-zh-demo.ts).
+  const demoReads: string[] = [];
+  const demoOptions = createDemoOptions((entry) => {
+    demoReads.push(entry);
+    return readEntry(entry);
+  }, undefined, lang);
+  // Published for the built-game demo verification (tools/verify-zh-demo.ts):
+  // the pak entries and chapter titles the SELECT menu was built from, so
+  // the check can assert a Chinese boot selected the Chinese tape and saves
+  // instead of the English ones.
+  (globalThis as typeof globalThis & { __rpgkitDemoSelection?: unknown }).__rpgkitDemoSelection = {
+    tapeEntry: demoOptions.demoResources.tapeEntry,
+    snapshotsEntry: demoOptions.demoResources.snapshotsEntry,
+    chapters: demoOptions.chapters.map((chapter) => ({ id: chapter.id, title: chapter.title })),
+  };
+  (globalThis as typeof globalThis & { __rpgkitDemoReads?: () => string[] }).__rpgkitDemoReads =
+    () => [...demoReads];
+  const demoConfig = createDemo(demoOptions);
+  const config: GameViewDemoConfig = {
+    create(host) {
+      demoMenu = demoConfig.create(host);
+      return demoMenu;
+    },
+  };
+  return config;
+})() : undefined;
+// Whether the SELECT demo menu is currently open, for the built-game demo
+// verification (the kit owns the runtime; this only reads its state).
+(globalThis as typeof globalThis & { __rpgkitDemoMenuOpen?: () => boolean }).__rpgkitDemoMenuOpen = () =>
+  demoMenu?.isOpen() ?? false;
 // The save/load menu (START) and the language switcher (R) share one
 // GameView overlay slot through the composite overlay. Each config wrapper
 // also captures its runtime so the weather overlay can suspend while either

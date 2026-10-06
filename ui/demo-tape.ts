@@ -4,6 +4,11 @@
 // the tiny generated index (ui/demo-index.ts). Every chapter names the same
 // tape provider with its own window; the kit's demo runtime calls that
 // provider once and windows the decoded tape without copying it.
+//
+// The Chinese build has its own tape and chapter saves: the English tape
+// transcribed for Chinese dialog pages, and saves taken from the Chinese
+// session on the same frames (tools/transcribe-zh-tape.ts), so a chapter
+// never resumes Chinese play with English event text.
 
 import { decodeEnvelopeText, type SaveSnapshot } from "../vendor/pocket-rpgkit/src/engine/save.ts";
 import type { WorldTraversalMode } from "../vendor/pocket-rpgkit/src/engine/types.ts";
@@ -11,10 +16,14 @@ import { utf8ToString } from "../vendor/pocket-rpgkit/vendor/pocketjs/framework/
 import type { DemoChapter, DemoOptions, DemoSpawn } from "../vendor/pocket-rpgkit/src/ui/demo/types.ts";
 import {
   DEMO_CHAPTER_INDEX,
+  DEMO_CHAPTER_INDEX_ZH,
   DEMO_SNAPSHOTS_ENTRY,
+  DEMO_SNAPSHOTS_ENTRY_ZH,
   DEMO_TAPE_ENTRY,
+  DEMO_TAPE_ENTRY_ZH,
   DEMO_WARP_SPAWNS,
 } from "./demo-index.ts";
+import type { Lang } from "./language.ts";
 
 const TAPE_FMT_NIBBLE = 1;
 const TAPE_FMT_RAW = 2;
@@ -85,25 +94,51 @@ export function decodeDemoTape(bytes: Uint8Array): DecodedDemoTape {
   return { masks: out, worldTraversal };
 }
 
+/** True when the build has demo chapters for this language. */
+export function hasDemoChapters(lang: Lang): boolean {
+  return (lang === "zh_CN" ? DEMO_CHAPTER_INDEX_ZH : DEMO_CHAPTER_INDEX).length > 0;
+}
+
+/** Which pak entries a language's demo chapters read their tape and saves
+ *  from. The Chinese build has its own transcribed tape and chapter saves,
+ *  so a Chinese boot must never read the English entries. */
+export interface DemoResources {
+  tapeEntry: string;
+  snapshotsEntry: string;
+}
+
+export function demoResourcesForLang(lang: Lang): DemoResources {
+  const zh = lang === "zh_CN";
+  return {
+    tapeEntry: zh ? DEMO_TAPE_ENTRY_ZH : DEMO_TAPE_ENTRY,
+    snapshotsEntry: zh ? DEMO_SNAPSHOTS_ENTRY_ZH : DEMO_SNAPSHOTS_ENTRY,
+  };
+}
+
 /** Build the kit DemoOptions from the generated index. All chapters share
  *  one provider for the combined tape and window it by their index entry;
  *  the snapshot getter decodes the envelope on first selection. Neither
- *  touches the pak at boot. */
+ *  touches the pak at boot. The returned object also carries `demoResources`
+ *  (the entries the options were built from) so the game can publish what a
+ *  boot selected for the built-game demo verification. */
 export function createDemoOptions(
   read: (entry: string) => Uint8Array,
   expectedWorldTraversal: WorldTraversalMode = "seamless-v1",
-): DemoOptions {
+  lang: Lang = "en_US",
+): DemoOptions & { demoResources: DemoResources } {
   const expected = worldTraversal(expectedWorldTraversal, "demo index");
-  for (const entry of DEMO_CHAPTER_INDEX) {
-    const indexed = entry as typeof entry & { worldTraversal?: unknown };
-    const actual = worldTraversal(indexed.worldTraversal, `demo chapter ${entry.id}`);
+  const zh = lang === "zh_CN";
+  const index = zh ? DEMO_CHAPTER_INDEX_ZH : DEMO_CHAPTER_INDEX;
+  const { tapeEntry, snapshotsEntry } = demoResourcesForLang(lang);
+  for (const entry of index) {
+    const actual = worldTraversal(entry.worldTraversal, `demo chapter ${entry.id}`);
     if (actual !== expected) {
       throw new Error(`demo chapter ${entry.id}: worldTraversal ${actual} != expected ${expected}`);
     }
   }
 
   const tape = (): Uint16Array => {
-    const decoded = decodeDemoTape(read(DEMO_TAPE_ENTRY));
+    const decoded = decodeDemoTape(read(tapeEntry));
     if (decoded.worldTraversal !== expected) {
       throw new Error(`demo tape: worldTraversal ${decoded.worldTraversal} != expected ${expected}`);
     }
@@ -112,7 +147,7 @@ export function createDemoOptions(
   let snapshotsCache: Record<string, string> | null = null;
   const snapshots = (): Record<string, string> => {
     if (!snapshotsCache) {
-      const text = utf8ToString(read(DEMO_SNAPSHOTS_ENTRY));
+      const text = utf8ToString(read(snapshotsEntry));
       const manifest = JSON.parse(text) as {
         format?: unknown;
         worldTraversal?: unknown;
@@ -132,7 +167,7 @@ export function createDemoOptions(
     }
     return snapshotsCache;
   };
-  const chapters: DemoChapter[] = DEMO_CHAPTER_INDEX.map((entry) => ({
+  const chapters: DemoChapter[] = index.map((entry) => ({
     id: entry.id,
     title: entry.title,
     get snapshot(): SaveSnapshot {
@@ -145,5 +180,5 @@ export function createDemoOptions(
   }));
   const spawns: Record<string, DemoSpawn> = {};
   for (const spawn of DEMO_WARP_SPAWNS) spawns[spawn.id] = { x: spawn.x, y: spawn.y };
-  return { chapters, warp: { spawns } };
+  return { chapters, warp: { spawns }, demoResources: { tapeEntry, snapshotsEntry } };
 }

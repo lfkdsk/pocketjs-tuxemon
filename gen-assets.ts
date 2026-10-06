@@ -24,7 +24,7 @@ import { decodePng } from "./importer/png.ts";
 import { availableMapIds, buildProject, categorizeMissingKeys, G6_IMPORT_OPTIONS, importL10nGaps, setImportLang } from "./importer/project.ts";
 import { applyTerrain, DEFAULT_TUXEMON_SRC, writeTerrain } from "./importer/terrain.ts";
 import { buildWarpIndex } from "./importer/warp.ts";
-import { buildDemoData, demoIndexSource } from "./importer/demo-data.ts";
+import { buildDemoData, buildEnDemoData, buildZhDemoData, demoIndexSource } from "./importer/demo-data.ts";
 import { splitGameProjectMaps } from "./importer/map-shards.ts";
 import { buildPreviewCoverage, tuxemonPreviewSessionOptions } from "./importer/preview-coverage.ts";
 import monthNames from "./data/month-names.json";
@@ -533,6 +533,7 @@ const zhTextParts: string[] = [
   readFileSync(join(DIST, "battle-runtime-shell.zh_CN.json"), "utf8"),
   readFileSync(join(DIST, "map-descriptions.zh_CN.json"), "utf8"),
   readFileSync(join(ROOT, "data/battle-names.zh_CN.json"), "utf8"),
+  readFileSync(join(import.meta.dir, "l10n/zh_CN/chapter-titles.json"), "utf8"),
 ];
 for (const entry of battleZh.battleRepository.pakEntries) {
   zhTextParts.push(readFileSync(join(ROOT, entry.file), "utf8"));
@@ -564,13 +565,30 @@ const warpIndex = buildWarpIndex(project);
 const demoData = existsSync(join(ROOT, "data/chapters.json"))
   ? buildDemoData(ROOT, warpIndex)
   : null;
+// The Chinese build replays the transcribed tape from its own chapter saves
+// (tools/transcribe-zh-tape.ts); without a current transcription it ships no
+// chapters and the demo menu stays off in Chinese.
+const zhDemo = demoData ? buildZhDemoData(ROOT, demoData) : { data: null, reason: null };
+if (demoData && zhDemo.reason) console.warn(`zh_CN demo chapters disabled: ${zhDemo.reason}`);
+// The English build replays the demo tape: the canonical tape with frames
+// inserted at the two Nimrod-room windows that take two pages under the
+// production paginator (tools/transcribe-en-demo-tape.ts). Without a current
+// transcription it ships the canonical tape (the pre-existing Autoplay
+// drift) and `verify:en:demo` fails on the same mismatch.
+const enDemo = demoData ? buildEnDemoData(ROOT, demoData) : { data: null, reason: null };
+if (demoData && enDemo.reason) console.warn(`en_US demo tape disabled: ${enDemo.reason}`);
 if (demoData) {
+  const enData = enDemo.data ?? demoData;
   const demoDir = join(DIST, "demo");
   rmSync(demoDir, { recursive: true, force: true });
   mkdirSync(demoDir, { recursive: true });
-  writeFileSync(join(demoDir, "tape.bin"), demoData.tapeBytes);
-  writeFileSync(join(demoDir, "chapters.json"), demoData.snapshotsJson);
-  writeFileSync(join(ROOT, "ui/demo-index.ts"), demoIndexSource(demoData.index, demoData.spawns));
+  writeFileSync(join(demoDir, "tape.bin"), enData.tapeBytes);
+  writeFileSync(join(demoDir, "chapters.json"), enData.snapshotsJson);
+  if (zhDemo.data) {
+    writeFileSync(join(demoDir, "tape.zh_CN.bin"), zhDemo.data.tapeBytes);
+    writeFileSync(join(demoDir, "chapters.zh_CN.json"), zhDemo.data.snapshotsJson);
+  }
+  writeFileSync(join(ROOT, "ui/demo-index.ts"), demoIndexSource(enData.index, enData.spawns, zhDemo.data?.index));
 } else {
   writeFileSync(join(ROOT, "ui/demo-index.ts"), demoIndexSource([], []));
 }
@@ -623,6 +641,7 @@ const pakEntries = [
   itemIconPakEntry,
   { key: "world-index.json", file: "dist/world-index.json" },
   ...(demoData?.pakEntries ?? []),
+  ...(zhDemo.data?.pakEntries ?? []),
 ].sort((a, b) => a.key < b.key ? -1 : a.key > b.key ? 1 : 0);
 
 writeFileSync(join(ROOT, "sprites.json"), jsonBytes(cooked.spritesJson));

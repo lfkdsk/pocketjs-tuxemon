@@ -70,10 +70,10 @@ summary:
   maps cross a 128 KiB compact-decode cap, trading a small amount of storage
   for bounded first-visit latency on QuickJS. Indexed battle art plus its lazy
   database occupies 3,516,960 B in the pak. The current bilingual Web game pak
-  is 90,354,272 B, including English and Chinese content, CJK font atlases, all
+  is 90,996,368 B, including English and Chinese content, CJK font atlases, all
   content-resolvable audio, its attribution list and demo data. The desktop
   launcher removes the 24 QOA music payloads (22,481,712 B) from that target's
-  startup read: its pak is 54,917,456 B and those files retain their exact
+  startup read: its pak is 55,559,552 B and those files retain their exact
   `audio:qoa.*` keys under the companion `dist/runtime-data` tree. The three
   small WAV effects remain packed for immediate one-shot playback; QOA files
   are copied from `data.fs` one 64 KiB page per frame before playback starts.
@@ -268,10 +268,26 @@ are stored as canonical JSON in both languages.
 Saves record the language they were written with. Loading a save from the
 other language shows a bilingual "LANGUAGE MISMATCH / 语言不匹配" prompt
 (which language the save is in, how to switch) before any content check,
-instead of an "another build" error. The demo menu (SELECT) remains disabled
-in ordinary Chinese launches because its journey tape and chapter-row titles
-were authored in English. Its kit-owned menu chrome is translated and covered
-by the production visual fixture, ready for a future Chinese tape. The Chinese
+instead of an "another build" error. The demo menu (SELECT), the chapter
+buttons and Autoplay work in Chinese too. The Chinese build replays its own
+tape and restores its own chapter saves: `bun run record:zh:tape` folds the
+English mainline in an English and a Chinese session side by side, keeps the
+English masks outside dialog boxes, rewrites only the confirm presses a
+Chinese box needs (an extra page, a shorter or longer page; none are needed
+today), and saves each chapter from the Chinese session on the same frame as
+the English chapter (`data/zh-mainline-journey.json`,
+`data/chapters.zh_CN.json`, titles in `l10n/zh_CN/chapter-titles.json`).
+Both sessions must hold the same state apart from their words at every
+chapter, after every dialog and at the end, so a Chinese chapter never mixes
+in English event text. `bun run verify:zh:tape` re-derives both files and
+fails as soon as an English tape frame changes; `bun run verify:zh:demo`
+boots the built game in Chinese and checks every chapter jump, Autoplay from
+three chapters (`--autoplay=all`, `--full` for the whole tape) and the Chinese
+chapter thumbnails. Only the bedroom thumbnail shows words, so it alone has a
+Chinese copy (`docs/screenshots/chapters-zh_CN/`). If the English tape changes
+and the Chinese one is not re-recorded, the import leaves the Chinese build
+without chapters (SELECT stays dormant there) rather than ship a tape that
+falls out of step. The Chinese
 opening has its own short smoke tape (`data/zh-smoke-journey.json`),
 replayed in headless Chrome by `bun run verify:web:zh`, which renders the
 expected text from the baked font atlas and matches its glyph mask against
@@ -285,8 +301,7 @@ merged text (with reasoned, key-specific exceptions). `bun run check:cjk`
 verifies glyph subset coverage. `bun test tests/ui-text-zh-visual.test.ts`
 boots the production bundle and pins save, keyboard, demo, shop, button-hint,
 event-error and battle-status frames at 480×272 and 960×544, including Chinese
-glyph-mask checks. The English demo chapter-row titles are outside
-`UiTextTable`; these are the remaining English words in those captures.
+glyph-mask checks. The demo menu capture lists the Chinese chapter titles.
 
 Known limitations:
 - Dynamic dialog templates resolve at runtime. The importer maps Tuxemon's

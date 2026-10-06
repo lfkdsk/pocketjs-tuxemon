@@ -1,0 +1,105 @@
+{
+  "format": "pocket-tuxemon/zh-mainline-journey/v1",
+  "lang": "zh_CN",
+  "hz": 60,
+  "worldTraversal": "seamless-v1",
+  "source": {
+    "chaptersSha256": "ec5f7ad0313f0be493c2626fc85dca1bf16dffd6c5926746f0a3490abe7cd187",
+    "tape": {
+      "gb6": {
+        "file": "data/gb6-mainline-journey.json",
+        "frames": 110244,
+        "tapeSha256": "529d93c91d9c05055b0d57dc3ebfd9586a6fdb4494a965c144ad5ef781300eda",
+        "worldTraversal": "seamless-v1"
+      },
+      "j1": {
+        "file": "data/j1-captainreturns-journey.json",
+        "frames": 11520,
+        "tapeSha256": "18af446ceb72ddfc780c3d5f356efbfca07e5d525c0279432ad24b43dd601758",
+        "worldTraversal": "seamless-v1"
+      },
+      "j2": {
+        "file": "data/j2-hospitalcure-journey.json",
+        "frames": 50487,
+        "tapeSha256": "c23c8722c4a537b625fb598c41896bdaf3dd79416a5f50ba528b09eda5e70c3c",
+        "worldTraversal": "seamless-v1"
+      },
+      "j3": {
+        "file": "data/j3-omnichannelradioannounce-journey.json",
+        "frames": 12930,
+        "tapeSha256": "472c748926ce7cb232023f071ecf8caf552f6bc01a3a25ee40443e92e3345be3",
+        "worldTraversal": "seamless-v1"
+      },
+      "j4": {
+        "file": "data/j4-kernelquestdone-journey.json",
+        "frames": 13387,
+        "tapeSha256": "08c88566e1da8c7c86816175403152f2f15fbb771d60b2a0756a32c9061987b1",
+        "worldTraversal": "seamless-v1"
+      },
+      "frames": 198568,
+      "sha256": "a1dde2471f1b66df83683813de996837ec8b558fc1bd16ba0f1d47f13d4a7e3c"
+    }
+  },
+  "paginator": {
+    "viewportWidth": 480,
+    "px": 12,
+    "rim": true,
+    "fallbacks": [
+      "fonts/NotoSansCJKsc-subset.otf"
+    ],
+    "fontSha256": "0e7909eeb3a42c25115683ca55b10fca63d9f0066f33e14db1e7d05eea090db7",
+    "charsetSha256": "677a466ade918030ae332ace47dc9f097a860b95bdf94baceff5649a19827598"
+  },
+  "frames": 198568,
+  "tapeSha256": "a1dde2471f1b66df83683813de996837ec8b558fc1bd16ba0f1d47f13d4a7e3c",
+  "edits": [],
+  "dialogs": {
+    "textBoxes": 646,
+    "rewrittenBoxes": 0,
+    "pagedBoxes": 0,
+    "choiceBoxes": 57,
+    "confirmsInserted": 0,
+    "confirmsRemoved": 0,
+    "neutralChecks": 720
+  },
+  "terminal": {
+    "summary": {
+      "map": "spyder_datacenter",
+      "position": [
+        7,
+        4
+      ],
+      "facing": 3,
+      "frame": 198568,
+      "gold": 68920,
+      "items": {
+        "aardant": 1,
+        "app_map": 1,
+        "app_tuxepedia": 1,
+        "dojo_pass": 1,
+        "fishing_rod": 1,
+        "friendship_scroll": 1,
+        "nu_phone": 1,
+        "potion": 1,
+        "sledgehammer": 1,
+        "spyder_pass": 1,
+        "surfboard": 1,
+        "tm_all_in": 1,
+        "tm_blade": 1,
+        "tm_panjandrum": 1,
+        "tm_scope": 1,
+        "tm_shadow_boxing": 1
+      },
+      "party": [
+        "arthrobolt:100",
+        "aardorn:4",
+        "cataspike:4",
+        "axolightl:4",
+        "cardiling:8",
+        "pawsand:9"
+      ],
+      "storySha256": "187f2002f6fbf3efb33f1aa0146c09b259dcc6bb25365a9a14b925fe4ef29e9c"
+    },
+    "neutralSha256": "f9c38df4e613bed445ef92878abeb03a7e834acce4468fa41bf3b8ce733840f4"
+  }
+}

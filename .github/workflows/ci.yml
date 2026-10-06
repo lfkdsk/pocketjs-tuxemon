@@ -123,6 +123,21 @@ jobs:
             run: bun run verify:g6:frozen
           - name: Chapter snapshots and thumbnails
             run: bun run verify:chapters
+          # Re-transcribes the English mainline for the Chinese build and
+          # requires the committed zh_CN tape and chapter saves byte for byte;
+          # an edited English frame fails before the replay starts.
+          - name: Chinese tape matches the English mainline
+            run: bun run verify:zh:tape
+          # The built game booted in Chinese: every chapter jump and Autoplay
+          # from three chapters reach the reducer's Chinese state.
+          - name: Chinese chapters and Autoplay in the built game
+            run: bun run verify:zh:demo
+          # Re-transcribes the English mainline against the production dialog
+          # paginator and requires the committed demo tape byte for byte; an
+          # edited English frame fails before the replay starts. Also replays
+          # the demo tape from every chapter save to the next node.
+          - name: English demo tape matches the paginated mainline
+            run: bun run verify:en:demo
           # Five saves along GB6 (two runs, one crossing noon) each load and
           # finish the tape at the uninterrupted terminal state.
           - name: Save mid-journey, load, finish the tape

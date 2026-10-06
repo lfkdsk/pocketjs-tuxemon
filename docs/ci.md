@@ -2,7 +2,7 @@
 
 CI is a single workflow, `.github/workflows/ci.yml`. Five jobs run in
 parallel from the shared prepare action — `import`, `test` (four matrix
-legs), `journey` (ten matrix legs), `web` and `psp`, seventeen runners in all —
+legs), `journey` (fourteen matrix legs), `web` and `psp`, twenty-one runners in all —
 and `deploy` publishes Pages once all but `psp` pass. The slowest journey leg
 (`verify:chapters`, which re-bakes and suffix-replays every chapter) sets
 the wall-clock. It runs on pushes to `main`, on pull requests, and on
@@ -57,7 +57,8 @@ it runs twice.
 
 ### journey — the maintained tapes
 
-Ten parallel legs, one `bun run verify:*` script each:
+Fourteen parallel legs, one `bun run verify:*` script each (the table lists
+the tape legs):
 
 | Leg | Script | What it proves |
 |---|---|---|
@@ -70,6 +71,8 @@ Ten parallel legs, one `bun run verify:*` script each:
 | Every imported input lock is executed to its unlock | `verify:g6:locks` | every `lockInput` page releases its lock. |
 | No permanent input lock or blocking fiber on any imported map | `verify:g6:frozen` | a corpus-wide stuck/lock scan over all 263 maps; an interpreter-liveness result, not a proof that a wanderer can never spatially block the player. |
 | Chapter snapshots and thumbnails | `verify:chapters` | the twenty demo chapters re-bake byte-identical: save envelopes pass the kit's save validator, the 480×272 thumbnails match the committed PNGs, and every envelope restored and resumed at its timeline frame suffix-replays to the full-tape terminal state. |
+| Chinese tape matches the English mainline | `verify:zh:tape` | the committed Chinese tape and chapter saves are exactly what transcribing the current English mainline produces; an edited English frame fails before the replay. |
+| Chinese chapters and Autoplay in the built game | `verify:zh:demo` | the built game booted in Chinese restores every chapter and Autoplays three chapters to the reducer's Chinese state; the Chinese thumbnails match. |
 | Save mid-journey, load, finish the tape | `verify:save` | five saves along GB6 (one run crossing noon) each restore to the live state and finish the tape at the uninterrupted terminal state hash. |
 
 The full 60/30/20 Hz alignment, save/load and rewind checks stay in
@@ -84,7 +87,8 @@ as release gates; they are too slow for every push. See [verification.md](verifi
 the first battle to Route 1) in headless Chrome against the built site,
 comparing checkpoint states and framebuffer hashes against the committed
 goldens; `bun tools/verify-web-demo.ts` then exercises chapter selection,
-deep links and autoplay through the complete Kernel endpoint. Any console error
+deep links and autoplay through the complete Kernel endpoint, and the same
+chapter buttons and 600-frame Autoplay in Chinese (`?lang=zh`). Any console error
 fails the run. The site is uploaded as the
 `web-site` artifact (14-day retention), and the journey screenshots as
 `web-journey`. On pushes to `main` the site is also staged as the Pages

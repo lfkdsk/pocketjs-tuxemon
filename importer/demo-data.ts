@@ -12,15 +12,22 @@
 // or 479 KB JSON). A tape with more than 16 distinct masks falls back to
 // raw u16 so the format stays self-describing.
 
-import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { PakManifestEntry } from "../vendor/pocket-rpgkit/tools/lib/stream.ts";
 import type { WorldTraversalMode } from "../vendor/pocket-rpgkit/src/engine/types.ts";
+import { applyTapeEdits, type TapeEdit } from "./tape-edits.ts";
 import type { WarpIndex } from "./warp.ts";
 
 export const DEMO_TAPE_ENTRY = "demo/tape.bin";
 export const DEMO_SNAPSHOTS_ENTRY = "demo/chapters.json";
 export const DEMO_SNAPSHOTS_FORMAT = "pocket-tuxemon/demo-snapshots/v1";
+/** The Chinese build's tape and chapter saves (tools/transcribe-zh-tape.ts).
+ *  Keys carry "zh_CN" so the English-only PSP pak drops them with the rest
+ *  of the Chinese content. */
+export const DEMO_TAPE_ENTRY_ZH = "demo/tape.zh_CN.bin";
+export const DEMO_SNAPSHOTS_ENTRY_ZH = "demo/chapters.zh_CN.json";
 
 const TAPE_MAGIC = 0x54; // 'T'
 const TAPE_VERSION = 2;
@@ -76,6 +83,8 @@ export interface DemoSpawnIndexEntry {
 
 export interface DemoDataBuild {
   worldTraversal: WorldTraversalMode;
+  /** The combined English masks (the Chinese tape is derived from them). */
+  masks: number[];
   tapeBytes: Uint8Array;
   snapshotsJson: string;
   pakEntries: PakManifestEntry[];
@@ -202,6 +211,7 @@ export function buildDemoData(root: string, warp: WarpIndex): DemoDataBuild {
     .map((map) => ({ id: map.id, x: map.x, y: map.y }));
   return {
     worldTraversal,
+    masks,
     tapeBytes,
     snapshotsJson,
     pakEntries: [
@@ -213,19 +223,228 @@ export function buildDemoData(root: string, warp: WarpIndex): DemoDataBuild {
   };
 }
 
+
+interface ZhTapeFile {
+  format: string;
+  source: { chaptersSha256: string; tape: { sha256: string; frames: number } };
+  frames: number;
+  tapeSha256: string;
+  edits: TapeEdit[];
+}
+
+interface ZhChaptersFile {
+  format: string;
+  source: { tapeSha256: string };
+  chapters: ChapterRecord[];
+}
+
+export interface ZhDemoDataBuild {
+  tapeBytes: Uint8Array;
+  snapshotsJson: string;
+  pakEntries: PakManifestEntry[];
+  index: DemoChapterIndexEntry[];
+}
+
+function sha256(text: string): string {
+  return createHash("sha256").update(text).digest("hex");
+}
+
+/** The Chinese demo data, or null with a reason when the committed
+ *  transcription is missing or no longer matches the English tape (the
+ *  Chinese build then ships without chapters rather than with a tape that
+ *  would fall out of step). `verify:zh:tape` and tests/zh-tape.test.ts fail
+ *  on the same mismatch. */
+export function buildZhDemoData(
+  root: string,
+  english: DemoDataBuild,
+  englishChapters: readonly { id: string; frame: number }[] = readEnglishChapters(root),
+): { data: ZhDemoDataBuild | null; reason: string | null } {
+  const tapePath = join(root, "data/zh-mainline-journey.json");
+  const chaptersPath = join(root, "data/chapters.zh_CN.json");
+  if (!existsSync(tapePath) || !existsSync(chaptersPath)) {
+    return { data: null, reason: "no transcribed Chinese tape" };
+  }
+  const tape = JSON.parse(readFileSync(tapePath, "utf8")) as ZhTapeFile;
+  const chapters = JSON.parse(readFileSync(chaptersPath, "utf8")) as ZhChaptersFile;
+  if (tape.format !== "pocket-tuxemon/zh-mainline-journey/v1" || chapters.format !== "pocket-tuxemon/chapters-zh/v1") {
+    return { data: null, reason: "unexpected Chinese tape or chapters format" };
+  }
+  if (tape.source.tape.sha256 !== sha256(JSON.stringify(english.masks)) || tape.frames !== english.masks.length) {
+    return { data: null, reason: "the English tape changed since the Chinese tape was transcribed" };
+  }
+  // A re-baked data/chapters.json (new saves on the same frames) also makes
+  // the Chinese saves stale.
+  const chaptersSha256 = sha256(readFileSync(join(root, "data/chapters.json"), "utf8"));
+  if (tape.source.chaptersSha256 !== chaptersSha256) {
+    return { data: null, reason: "data/chapters.json changed since the Chinese tape was transcribed" };
+  }
+  // Apply the committed edits through the same loop the transcriber's tests
+  // exercise (importer/tape-edits.ts), so a non-empty edit file cannot pass
+  // the transcriber while the production pak ships the unedited tape.
+  let masks: number[];
+  try {
+    masks = applyTapeEdits(english.masks, tape.edits);
+  } catch (error) {
+    return { data: null, reason: error instanceof Error ? error.message : String(error) };
+  }
+  if (sha256(JSON.stringify(masks)) !== tape.tapeSha256 || chapters.source.tapeSha256 !== tape.tapeSha256) {
+    return { data: null, reason: "the Chinese chapters were made from another Chinese tape" };
+  }
+  const ids = chapters.chapters.map((chapter) => `${chapter.id}@${chapter.frame}`).join(",");
+  if (ids !== englishChapters.map((chapter) => `${chapter.id}@${chapter.frame}`).join(",")) {
+    return { data: null, reason: "the Chinese chapters do not match data/chapters.json" };
+  }
+  const snapshots: Record<string, string> = {};
+  const index: DemoChapterIndexEntry[] = [];
+  for (const chapter of chapters.chapters) {
+    snapshots[chapter.id] = chapter.snapshot;
+    index.push({
+      id: chapter.id,
+      title: chapter.title,
+      worldTraversal: english.worldTraversal,
+      frame: chapter.frame,
+      suffixFrames: chapter.suffixFrames,
+      timelineFrame: chapter.timelineFrame,
+    });
+  }
+  return {
+    data: {
+      tapeBytes: encodeTape(masks, english.worldTraversal),
+      snapshotsJson: JSON.stringify({
+        format: DEMO_SNAPSHOTS_FORMAT,
+        worldTraversal: english.worldTraversal,
+        frames: masks.length,
+        snapshots,
+      }) + "\n",
+      pakEntries: [
+        { key: DEMO_TAPE_ENTRY_ZH, file: "dist/demo/tape.zh_CN.bin" },
+        { key: DEMO_SNAPSHOTS_ENTRY_ZH, file: "dist/demo/chapters.zh_CN.json" },
+      ],
+      index,
+    },
+    reason: null,
+  };
+}
+
+function readEnglishChapters(root: string): { id: string; frame: number }[] {
+  return (JSON.parse(readFileSync(join(root, "data/chapters.json"), "utf8")) as ChaptersFile).chapters;
+}
+
+interface EnDemoTapeFile {
+  format: string;
+  source: { chaptersSha256: string; tape: { sha256: string; frames: number } };
+  frames: number;
+  tapeSha256: string;
+  insertions: { afterFrame: number; masks: number[] }[];
+}
+
+/** The demo-tape index for a canonical frame: canonical frame plus every
+ *  insertion that precedes it. */
+function enDemoFrameFor(canonicalFrame: number, insertions: readonly { afterFrame: number; masks: number[] }[]): number {
+  let offset = 0;
+  for (const insertion of insertions) {
+    if (insertion.afterFrame < canonicalFrame) offset += insertion.masks.length;
+  }
+  return canonicalFrame + offset;
+}
+
+/** Build the demo masks by interleaving the recorded insertions. */
+function applyEnDemoInsertions(source: readonly number[], insertions: readonly { afterFrame: number; masks: number[] }[]): number[] {
+  const byFrame = new Map<number, number[]>();
+  for (const insertion of insertions) {
+    if (byFrame.has(insertion.afterFrame)) {
+      throw new Error(`demo-data: duplicate en-demo insertion after frame ${insertion.afterFrame}`);
+    }
+    byFrame.set(insertion.afterFrame, insertion.masks);
+  }
+  const out: number[] = [];
+  for (let f = 0; f < source.length; f++) {
+    out.push(source[f]!);
+    const extra = byFrame.get(f);
+    if (extra) out.push(...extra);
+  }
+  return out;
+}
+
+/** The English demo tape: the canonical tape with frames inserted at the two
+ *  Nimrod-room windows that take two pages under the production paginator
+ *  (tools/transcribe-en-demo-tape.ts), or null with a reason when the
+ *  committed transcription is missing or no longer matches the English tape.
+ *  The English build then ships the canonical tape (the pre-existing Autoplay
+ *  drift) rather than a demo tape that would fall out of step; `verify:en:demo`
+ *  fails on the same mismatch. The chapter saves are the canonical ones: only
+ *  the tape window (frame/suffixFrames) moves, since the inserted frames shift
+ *  the tape offset but not the story state a save restores. */
+export function buildEnDemoData(
+  root: string,
+  english: DemoDataBuild,
+): { data: DemoDataBuild | null; reason: string | null } {
+  const path = join(root, "data/en-demo-journey.json");
+  if (!existsSync(path)) return { data: null, reason: "no transcribed English demo tape" };
+  const file = JSON.parse(readFileSync(path, "utf8")) as EnDemoTapeFile;
+  if (file.format !== "pocket-tuxemon/en-demo-journey/v1") {
+    return { data: null, reason: "unexpected English demo tape format" };
+  }
+  if (file.source.tape.sha256 !== sha256(JSON.stringify(english.masks)) || file.source.tape.frames !== english.masks.length) {
+    return { data: null, reason: "the English tape changed since the demo tape was transcribed" };
+  }
+  const chaptersSha256 = sha256(readFileSync(join(root, "data/chapters.json"), "utf8"));
+  if (file.source.chaptersSha256 !== chaptersSha256) {
+    return { data: null, reason: "data/chapters.json changed since the demo tape was transcribed" };
+  }
+  const masks = applyEnDemoInsertions(english.masks, file.insertions);
+  if (sha256(JSON.stringify(masks)) !== file.tapeSha256 || file.frames !== masks.length) {
+    return { data: null, reason: "the English demo tape does not match its recorded insertions" };
+  }
+  const manifest = JSON.parse(english.snapshotsJson) as {
+    format: string;
+    worldTraversal: WorldTraversalMode;
+    frames: number;
+    snapshots: Record<string, string>;
+  };
+  const index: DemoChapterIndexEntry[] = english.index.map((chapter) => {
+    const frame = enDemoFrameFor(chapter.frame, file.insertions);
+    return { ...chapter, frame, suffixFrames: masks.length - frame };
+  });
+  const snapshotsJson = JSON.stringify({
+    format: manifest.format,
+    worldTraversal: manifest.worldTraversal,
+    frames: masks.length,
+    snapshots: manifest.snapshots,
+  }) + "\n";
+  return {
+    data: {
+      worldTraversal: english.worldTraversal,
+      masks,
+      tapeBytes: encodeTape(masks, english.worldTraversal),
+      snapshotsJson,
+      pakEntries: english.pakEntries,
+      index,
+      spawns: english.spawns,
+    },
+    reason: null,
+  };
+}
+
 /** The generated ui/demo-index.ts source: the tiny inline index the bundle
  *  needs to build lazy chapter objects. Snapshots and tape stay in the pak. */
 export function demoIndexSource(
   index: readonly DemoChapterIndexEntry[],
   spawns: readonly DemoSpawnIndexEntry[],
+  zhIndex: readonly DemoChapterIndexEntry[] = [],
 ): string {
   return (
     "// AUTO-GENERATED by gen-assets.ts — do not edit.\n" +
     "// The chapter snapshots and the mainline tape live in the pak (entries\n" +
-    "// below) and are read on demand when a chapter is first selected.\n" +
+    "// below) and are read on demand when a chapter is first selected. The\n" +
+    "// zh_CN index is empty when the build has no current Chinese tape.\n" +
+    "import type { DemoChapterIndexEntry } from \"../importer/demo-data.ts\";\n\n" +
     `export const DEMO_TAPE_ENTRY = ${JSON.stringify(DEMO_TAPE_ENTRY)};\n` +
-    `export const DEMO_SNAPSHOTS_ENTRY = ${JSON.stringify(DEMO_SNAPSHOTS_ENTRY)};\n\n` +
-    `export const DEMO_CHAPTER_INDEX = ${JSON.stringify(index, null, 2)} as const;\n\n` +
+    `export const DEMO_SNAPSHOTS_ENTRY = ${JSON.stringify(DEMO_SNAPSHOTS_ENTRY)};\n` +
+    `export const DEMO_TAPE_ENTRY_ZH = ${JSON.stringify(DEMO_TAPE_ENTRY_ZH)};\n` +
+    `export const DEMO_SNAPSHOTS_ENTRY_ZH = ${JSON.stringify(DEMO_SNAPSHOTS_ENTRY_ZH)};\n\n` +
+    `export const DEMO_CHAPTER_INDEX: readonly DemoChapterIndexEntry[] = ${JSON.stringify(index, null, 2)};\n\n` +
+    `export const DEMO_CHAPTER_INDEX_ZH: readonly DemoChapterIndexEntry[] = ${JSON.stringify(zhIndex, null, 2)};\n\n` +
     `export const DEMO_WARP_SPAWNS = ${JSON.stringify(spawns, null, 2)} as const;\n`
   );
 }

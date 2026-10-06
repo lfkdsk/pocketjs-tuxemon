@@ -5636,8 +5636,16 @@
     "file": "dist/demo/chapters.json"
   },
   {
+    "key": "demo/chapters.zh_CN.json",
+    "file": "dist/demo/chapters.zh_CN.json"
+  },
+  {
     "key": "demo/tape.bin",
     "file": "dist/demo/tape.bin"
+  },
+  {
+    "key": "demo/tape.zh_CN.bin",
+    "file": "dist/demo/tape.zh_CN.bin"
   },
   {
     "key": "game:battle-db",

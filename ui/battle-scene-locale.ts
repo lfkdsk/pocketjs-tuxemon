@@ -30,6 +30,8 @@ export interface BattleSceneLabels {
   gotAway: string;
   couldntEscape: string;
   victory: string;
+  /** The message band's confirm legend while a message is presented. */
+  messageOk: string;
   partyDefeated: string;
   battleOver: string;
   battleEnded: string;
@@ -64,6 +66,7 @@ const EN: BattleSceneLabels = {
   gotAway: "Got away safely!",
   couldntEscape: "Couldn't escape!",
   victory: "Victory!",
+  messageOk: "OK",
   partyDefeated: "Your party was defeated.",
   battleOver: "The battle is over.",
   battleEnded: "The battle ended.",
@@ -109,6 +112,7 @@ const ZH: BattleSceneLabels = {
   gotAway: "成功逃跑！",
   couldntEscape: "逃跑失败！",
   victory: "胜利！",
+  messageOk: "确定",
   partyDefeated: "你的队伍被击败了。",
   battleOver: "战斗结束。",
   battleEnded: "战斗结束了。",

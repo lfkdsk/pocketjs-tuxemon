@@ -193,7 +193,7 @@ function partySize(state: SessionState): number {
   return tuxemonExtensionState(state.ext, TUXEMON_BATTLE_DB).party.length;
 }
 
-function loadTape(): {
+export function loadTape(): {
   gb6: Gb6JourneyResult;
   j1: J1JourneyResult;
   j2: J2JourneyResult;
@@ -273,6 +273,10 @@ function loadTape(): {
   return { gb6, j1, j2, j3, j4, combined, worldTraversal };
 }
 
+/** Frames a chapter's thumbnail idles after the restore (the bedroom shows
+ *  its opening question instead of a blank first frame). */
+export const THUMBNAIL_IDLE: Readonly<Record<string, number>> = { bedroom: 60 };
+
 function defineCheckpoints(gb6: Gb6JourneyResult): Checkpoint[] {
   const firstBillie = gb6.battles.find((battle) => battle.opponent === "spyder_billie");
   expect("missing the first Billie battle", firstBillie !== undefined);
@@ -282,7 +286,7 @@ function defineCheckpoints(gb6: Gb6JourneyResult): Checkpoint[] {
       id: "bedroom",
       title: "Bedroom (new game)",
       mode: "first",
-      thumbnailIdle: 60,
+      thumbnailIdle: THUMBNAIL_IDLE.bedroom,
       select: (frame, state) => frame === 0 && state.mapId === "spyder_bedroom" && safe(state),
     },
     {

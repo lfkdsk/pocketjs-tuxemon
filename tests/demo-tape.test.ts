@@ -4,13 +4,19 @@
 
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
-import { encodeTape } from "../importer/demo-data.ts";
+import { buildZhDemoData, encodeTape, type DemoDataBuild } from "../importer/demo-data.ts";
 import { createDemoOptions, decodeDemoTape } from "../ui/demo-tape.ts";
 import {
   DEMO_CHAPTER_INDEX,
+  DEMO_CHAPTER_INDEX_ZH,
   DEMO_SNAPSHOTS_ENTRY,
+  DEMO_SNAPSHOTS_ENTRY_ZH,
   DEMO_TAPE_ENTRY,
+  DEMO_TAPE_ENTRY_ZH,
 } from "../ui/demo-index.ts";
+import { loadTape, ROOT } from "../tools/bake-chapters.ts";
+import { zhMainlineMasks } from "../tools/transcribe-zh-tape.ts";
+import { sha256 } from "../tools/zh-tape.ts";
 import { chapterTape, chapterTapeFrames } from "../vendor/pocket-rpgkit/src/ui/demo/runtime.ts";
 
 /** Raw-format tape (see decodeTape): frame i holds i & 0xffff. */
@@ -108,5 +114,72 @@ describe("demo chapter tapes", () => {
       return encodeTape([0], other);
     }, authoredTraversal);
     expect(() => chapterTape(options.chapters[0]!)).toThrow(/worldTraversal .* != expected/);
+  });
+});
+
+describe("Chinese demo resource selection", () => {
+  const { combined } = loadTape();
+  const zhMasks = zhMainlineMasks(ROOT);
+  const zh = buildZhDemoData(ROOT, { masks: combined, worldTraversal: "seamless-v1" } as unknown as DemoDataBuild);
+  expect(zh.data).not.toBeNull();
+  const enChapters = JSON.parse(readFileSync("data/chapters.json", "utf8")) as {
+    chapters: { id: string; snapshot: string }[];
+  };
+  // The English demo tape is the canonical tape with the en-demo insertions,
+  // so the English index windows a tape of its own (longer) length.
+  const enTotal = Math.max(...DEMO_CHAPTER_INDEX.map((entry) => entry.frame + entry.suffixFrames));
+  const entries: Record<string, Uint8Array> = {
+    [DEMO_TAPE_ENTRY]: encodeTape(new Array<number>(enTotal).fill(0), "seamless-v1"),
+    [DEMO_TAPE_ENTRY_ZH]: zh.data!.tapeBytes,
+    [DEMO_SNAPSHOTS_ENTRY]: Buffer.from(JSON.stringify({
+      worldTraversal: "seamless-v1",
+      snapshots: Object.fromEntries(enChapters.chapters.map((c) => [c.id, c.snapshot])),
+    })),
+    [DEMO_SNAPSHOTS_ENTRY_ZH]: Buffer.from(zh.data!.snapshotsJson),
+  };
+  function fakeRead(): { read: (entry: string) => Uint8Array; reads: string[] } {
+    const reads: string[] = [];
+    return {
+      reads,
+      read: (entry: string) => {
+        reads.push(entry);
+        const bytes = entries[entry];
+        if (!bytes) throw new Error(`unexpected read ${entry}`);
+        return bytes;
+      },
+    };
+  }
+
+  test("a Chinese boot reads the Chinese tape and saves and lists Chinese titles", () => {
+    const { read, reads } = fakeRead();
+    const options = createDemoOptions(read, "seamless-v1", "zh_CN");
+    expect(options.demoResources).toEqual({
+      tapeEntry: DEMO_TAPE_ENTRY_ZH,
+      snapshotsEntry: DEMO_SNAPSHOTS_ENTRY_ZH,
+    });
+    expect(options.chapters.map((c) => c.title)).toEqual(DEMO_CHAPTER_INDEX_ZH.map((c) => c.title));
+    expect(options.chapters[0]!.title).toMatch(/[一-鿿]/);
+    // The tape provider decodes the Chinese entry to the transcribed tape.
+    const tape = chapterTape(options.chapters[0]!) as Uint16Array;
+    expect(reads).toEqual([DEMO_TAPE_ENTRY_ZH]);
+    expect(tape.length).toBe(zhMasks.length);
+    expect(sha256(JSON.stringify([...tape]))).toBe(sha256(JSON.stringify([...zhMasks])));
+    // The snapshot getter reads the Chinese snapshots entry.
+    reads.length = 0;
+    expect((options.chapters[0]!.snapshot as { map: string }).map).toBe("spyder_bedroom");
+    expect(reads).toEqual([DEMO_SNAPSHOTS_ENTRY_ZH]);
+  });
+
+  test("an English boot reads the English tape and saves", () => {
+    const { read, reads } = fakeRead();
+    const options = createDemoOptions(read, "seamless-v1", "en_US");
+    expect(options.demoResources).toEqual({
+      tapeEntry: DEMO_TAPE_ENTRY,
+      snapshotsEntry: DEMO_SNAPSHOTS_ENTRY,
+    });
+    expect(options.chapters.map((c) => c.title)).toEqual(DEMO_CHAPTER_INDEX.map((c) => c.title));
+    const tape = chapterTape(options.chapters[0]!) as Uint16Array;
+    expect(reads).toEqual([DEMO_TAPE_ENTRY]);
+    expect(tape.length).toBe(enTotal);
   });
 });

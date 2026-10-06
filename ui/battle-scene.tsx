@@ -695,7 +695,7 @@ export const TuxemonBattleScene: Component<BattleSceneViewProps> = (props) => {
         />
         <MessageBand
           lines={bandLines()}
-          legend={presenting() ? "OK" : " "}
+          legend={presenting() ? battleSceneLabels().messageOk : " "}
           width={rootVisible() || listVisible() ? R.message.width : BATTLE_BASE_WIDTH}
           theme={UI_THEME}
           style={{ insetL: 0, insetT: R.message.y }}

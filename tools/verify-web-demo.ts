@@ -7,6 +7,14 @@
 //   3. An invalid chapter id is a visible error, not a crash or a reload.
 //   4. Autoplay from a chapter for 600 source frames reaches the same state
 //      as a reducer-level suffix replay (the verify:chapters contract).
+//   5. The same in Chinese (?lang=zh): three chapter buttons restore the
+//      Chinese saves, and 600 frames of Autoplay from each of those chapters
+//      reach the Chinese reducer state, which is the English chapter's
+//      state once the words are set aside (tools/zh-demo-reference.ts).
+//   6. English Autoplay from the three chapters before Candy Town
+//      (route-3-north, flower-city, captain-returns) reaches the next
+//      chapter node past the Nimrod dialog, matching a reducer replay of
+//      the English demo tape state for state.
 //
 //   bun run web && bun tools/verify-web-demo.ts [--chrome PATH]
 //
@@ -28,6 +36,7 @@ import {
 } from "../vendor/pocket-rpgkit/src/engine/session.ts";
 import type { WorldTraversalMode } from "../vendor/pocket-rpgkit/src/engine/types.ts";
 import { chapterWorldTraversal } from "./bake-chapters.ts";
+import { chapterReference, liveStateDigests } from "./zh-demo-reference.ts";
 import { readInlineProject } from "./generated-project.ts";
 import { journeyWorldTraversal } from "./gb6-journey.ts";
 
@@ -126,6 +135,62 @@ function expectedChapterState(chapterId: string, frames: number): { mapId: strin
   let prev = chapter.held >>> 0;
   for (let f = chapter.frame; f < chapter.frame + frames; f++) {
     const mask = combined[f]!;
+    state = stepSession(session, state, input(mask, prev));
+    prev = mask;
+  }
+  return { mapId: state.mapId, frame: state.frame, hash: sha256(canonicalJson(state)) };
+}
+
+/** The English demo tape: the canonical tape with the recorded insertions
+ *  (tools/transcribe-en-demo-tape.ts) interleaved, plus the canonical->demo
+ *  frame map. */
+function loadDemoTape(): { demoMasks: number[]; demoFrame: (canonicalFrame: number) => number } {
+  const enDemo = JSON.parse(readFileSync(join(ROOT, "data/en-demo-journey.json"), "utf8")) as {
+    insertions: { afterFrame: number; masks: number[] }[];
+  };
+  const { combined } = loadChapters();
+  const byFrame = new Map<number, number[]>();
+  for (const ins of enDemo.insertions) byFrame.set(ins.afterFrame, ins.masks);
+  const demoMasks: number[] = [];
+  for (let f = 0; f < combined.length; f++) {
+    demoMasks.push(combined[f]!);
+    const extra = byFrame.get(f);
+    if (extra) demoMasks.push(...extra);
+  }
+  const demoFrame = (canonicalFrame: number): number => {
+    let offset = 0;
+    for (const ins of enDemo.insertions) if (ins.afterFrame < canonicalFrame) offset += ins.masks.length;
+    return canonicalFrame + offset;
+  };
+  return { demoMasks, demoFrame };
+}
+
+/** Restore a chapter save and fold the English demo tape through to the next
+ *  chapter node, the exact path the built game's Autoplay takes. Used to prove
+ *  the demo tape (which inserts frames at the two Nimrod paged windows)
+ *  reaches the canonical chapter state. */
+function expectedDemoChapterState(fromId: string, toId: string): { mapId: string; frame: number; hash: string } {
+  const { chapters, worldTraversal } = loadChapters();
+  const from = chapters.find((c) => c.id === fromId)!;
+  const to = chapters.find((c) => c.id === toId)!;
+  const file = JSON.parse(readFileSync(join(ROOT, "data/chapters.json"), "utf8"));
+  const record = file.chapters.find((c: any) => c.id === fromId)!;
+  const project = readInlineProject(ROOT);
+  if ((project.worldTraversal ?? "legacy-transfer") !== worldTraversal) {
+    throw new Error(`verify-web-demo: project traversal ${project.worldTraversal ?? "legacy-transfer"} != chapters ${worldTraversal}`);
+  }
+  const session: Session = createSession(
+    project,
+    60,
+    createTuxemonSessionOptions(project, worldTraversal),
+  );
+  const { demoMasks, demoFrame } = loadDemoTape();
+  const snapshot = decodeEnvelopeText(record.snapshot);
+  let state: SessionState = restoreSessionSnapshot(session, snapshot);
+  state = { ...state, frame: from.timelineFrame };
+  let prev = from.held >>> 0;
+  for (let f = demoFrame(from.frame); f < demoFrame(to.frame); f++) {
+    const mask = demoMasks[f]!;
     state = stepSession(session, state, input(mask, prev));
     prev = mask;
   }
@@ -435,6 +500,120 @@ await boot(`?autoplay=${AUTO_CHAPTER}&speed=1`);
     `browser ${browserHash.slice(0, 12)} vs reducer ${expected.hash.slice(0, 12)}`);
   await shot("autoplay-consistency");
 }
+
+// --- 4b. English Autoplay from the three chapters before Candy Town reaches
+// the next chapter node past the Nimrod dialog. The canonical tape was
+// recorded without the paginator, so the two Nimrod corner windows take two
+// pages in the built game; the demo tape (data/en-demo-journey.json) inserts
+// the page-turn confirms. The reducer reference folds the demo tape from the
+// chapter save to the next chapter, and the browser must match it state for
+// state. These three segments cover both Nimrod windows. ---
+
+const EN_DEMO_CHAPTERS: [string, string, string][] = [
+  ["route-3-north", "flower-city", "spyder_flower_city"],
+  ["flower-city", "captain-returns", "spyder_mansion"],
+  ["captain-returns", "candy-town", "spyder_candy_town"],
+];
+for (const [fromId, toId, wantMap] of EN_DEMO_CHAPTERS) {
+  const expected = expectedDemoChapterState(fromId, toId);
+  console.log(`reference: ${fromId} -> ${toId} -> ${expected.mapId}@${expected.frame} hash ${expected.hash.slice(0, 12)}`);
+  await boot(`?autoplay=${fromId}&speed=1`);
+  let stepped = 0;
+  while (stepped < 120000) {
+    await evaluate(`globalThis.__pocketPlayer.step()`);
+    stepped++;
+    const f = await evaluate(`globalThis.__rpgSessionState.frame`);
+    if (f >= expected.frame) break;
+  }
+  const s = await evaluate(stateOf());
+  const browserHash = await evaluate(`(async () => {
+    const canonical = (v) => {
+      if (Array.isArray(v)) return v.map(canonical);
+      if (v !== null && typeof v === "object") {
+        const out = {};
+        for (const k of Object.keys(v).sort()) out[k] = canonical(v[k]);
+        return out;
+      }
+      return v;
+    };
+    const bytes = new TextEncoder().encode(JSON.stringify(canonical(globalThis.__rpgSessionState)));
+    return Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", bytes)), (b) => b.toString(16).padStart(2, "0")).join("");
+  })()`);
+  check(`en autoplay ${fromId} -> ${toId} reaches ${wantMap}`, s.frame >= expected.frame && s.map === wantMap,
+    `${s.map}@${s.x},${s.y} frame ${s.frame} (want >= ${expected.frame}, ${wantMap})`);
+  check(`en autoplay ${fromId} -> ${toId} state hash matches the demo tape replay`, browserHash === expected.hash,
+    `browser ${browserHash.slice(0, 12)} vs reducer ${expected.hash.slice(0, 12)}`);
+  await shot(`en-autoplay-${fromId}`);
+}
+
+// --- 5. Chinese chapters and Autoplay ---------------------------------------
+
+const ZH_CHAPTERS: [string, string][] = [
+  ["before-billie", "spyder_paper_town"],
+  ["captain-returns", "spyder_mansion"],
+  ["kernel-briefing", "spyder_cotton_town"],
+];
+const liveState = async (): Promise<SessionState> =>
+  JSON.parse(await evaluate(`JSON.stringify(globalThis.__rpgSessionState)`)) as SessionState;
+const CJK = /[\u4e00-\u9fff]/;
+const LATIN_WORD = /[A-Za-z]{3,}/;
+
+await boot("?lang=zh");
+{
+  // The bedroom's opening question is open on boot: Chinese words only.
+  const lines: string[] = await evaluate(`(__rpgSessionState.interp.modal && __rpgSessionState.interp.modal.lines) || []`);
+  check("zh boot shows the Chinese opening question", lines.some((line) => CJK.test(line)) && !lines.some((line) => LATIN_WORD.test(line)),
+    lines.join(" / "));
+  const titles: string[] = await evaluate(`[...document.querySelectorAll('[data-demo-chapter]')].map((a) => a.getAttribute("data-demo-chapter"))`);
+  check("zh page lists the chapter buttons", ZH_CHAPTERS.every(([id]) => titles.includes(id)), `${titles.length} buttons`);
+}
+for (const [chapterId, wantMap] of ZH_CHAPTERS) {
+  const reference = chapterReference(chapterId, 0);
+  await evaluate(`document.querySelector('[data-demo-chapter="${chapterId}"]').click()`);
+  await waitFor(`zh chapter ${chapterId}`, `__rpgSessionState.mapId === ${JSON.stringify(wantMap)} &&
+    __rpgSessionState.frame === ${reference.frame}`);
+  const digests = liveStateDigests(await liveState());
+  const noReload = await evaluate(`globalThis.__demoSentinel === undefined || globalThis.__demoSentinel.player === globalThis.__pocketPlayer`);
+  check(`zh chapter button ${chapterId} restores the Chinese save`,
+    digests.stateSha256 === reference.zhStateSha256 && digests.neutralSha256 === reference.englishNeutralSha256 && noReload === true,
+    `${digests.summary.map}@${digests.summary.position} frame ${digests.summary.frame}`);
+  await shot(`zh-chapter-${chapterId}`);
+}
+
+let zhDialogShot = false;
+let zhBattleShot = false;
+for (const [chapterId] of ZH_CHAPTERS) {
+  const reference = chapterReference(chapterId, AUTO_FRAMES);
+  await boot(`?lang=zh&autoplay=${chapterId}&speed=1`);
+  let stepped = 0;
+  while (stepped < AUTO_FRAMES * 20) {
+    await evaluate(`globalThis.__pocketPlayer.step()`);
+    stepped++;
+    const probe = await evaluate(`({ frame: __rpgSessionState.frame,
+      text: !!(__rpgSessionState.interp.modal && __rpgSessionState.interp.modal.kind === "text"),
+      battle: !!(__rpgSessionState.scene && __rpgSessionState.scene.kind === "battle") })`);
+    // A dialog page shown for a while (typed out) and a battle's first
+    // seconds make the language screenshots.
+    if (!zhDialogShot && probe.text && stepped % 90 === 0) {
+      await shot("zh-autoplay-dialog");
+      zhDialogShot = true;
+    }
+    if (!zhBattleShot && probe.battle && stepped % 240 === 0) {
+      await shot("zh-autoplay-battle");
+      zhBattleShot = true;
+    }
+    if (probe.frame >= reference.frame) break;
+  }
+  const digests = liveStateDigests(await liveState());
+  check(`zh autoplay ${chapterId} +${AUTO_FRAMES} reaches the Chinese reducer state`,
+    digests.stateSha256 === reference.zhStateSha256,
+    `${digests.summary.map}@${digests.summary.position} frame ${digests.summary.frame} (want ${reference.frame})`);
+  check(`zh autoplay ${chapterId} +${AUTO_FRAMES} has the English chapter's language-neutral state`,
+    digests.neutralSha256 === reference.englishNeutralSha256,
+    `party ${digests.summary.party.join(" ")}, gold ${digests.summary.gold}`);
+}
+check("zh autoplay showed a dialog page and a battle", zhDialogShot && zhBattleShot,
+  `dialog=${zhDialogShot} battle=${zhBattleShot}`);
 
 console.log(`console errors: ${errors.length}${errors.length ? "\n  " + errors.slice(0, 5).join("\n  ") : ""}`);
 check("no console errors", errors.length === 0);

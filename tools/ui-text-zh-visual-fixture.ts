@@ -1,9 +1,8 @@
 // Production-bundle fixture for the Simplified Chinese kit UI words.
 // Every frame comes from dist/main.{js,pak}; the small amount of direct state
 // injection selects otherwise distant UI surfaces without maintaining seven
-// separate journey tapes. The demo controller is mounted only through the
-// production diagnostics switch, because the shipped zh_CN build deliberately
-// has no English-timeline attract mode.
+// separate journey tapes. The demo menu is the shipped zh_CN one, listing
+// the Chinese chapters.
 
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
@@ -67,11 +66,11 @@ function memoryStorage() {
   };
 }
 
-function globals(enableZhDemo = false): Record<string, unknown> {
+function globals(): Record<string, unknown> {
   return {
     ...FIXED_TIME_HOST_GLOBALS,
     __pocketTuxemonLang: "zh_CN",
-    __pocketTuxemonWorldDiagnostics: enableZhDemo ? { enableZhDemo: true } : undefined,
+    __pocketTuxemonWorldDiagnostics: undefined,
     __rpgkitBoot: undefined,
     localStorage: memoryStorage(),
   };
@@ -116,9 +115,8 @@ function treeHasNode(node: unknown, name: string): boolean {
 
 async function boot(
   viewport: { width: number; height: number },
-  enableZhDemo = false,
 ): Promise<SimWorld> {
-  const world = await bootWorld(BUNDLE, 60, globals(enableZhDemo), undefined, viewport);
+  const world = await bootWorld(BUNDLE, 60, globals(), undefined, viewport);
   step(world);
   return world;
 }
@@ -164,10 +162,10 @@ async function captureNameInput(viewport: { width: number; height: number }): Pr
 }
 
 async function captureDemo(viewport: { width: number; height: number }): Promise<UiTextZhFrame> {
-  const world = await boot(viewport, true);
+  const world = await boot(viewport);
   tap(world, BTN.SELECT);
   if (!treeHasNode(world.getTree(), "rpgkit-demo-menu-title")) {
-    throw new Error("uiText zh fixture: diagnostics-enabled demo menu did not open");
+    throw new Error("uiText zh fixture: demo menu did not open");
   }
   return frame(world);
 }
