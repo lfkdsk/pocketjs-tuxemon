@@ -416,6 +416,9 @@ mod g6_quickjs_bench {
         let fs_mount = fs::mount_fs(&guest, &fs_roots)?;
         let audio = audio::AudioSurface::new(audio_host.client(0));
         audio.mount(&guest)?;
+        // Same order as the host's Runtime::new: net.http and net.socket are
+        // installed before the application bundle is evaluated.
+        let network = network::Network::mount(&guest)?;
         // Journey and performance fixtures must not inherit the machine wall
         // clock. Install the same fixed civil time used by the Bun and web
         // harnesses before the application bundle is evaluated.
@@ -515,6 +518,7 @@ mod g6_quickjs_bench {
             script_mouse: false,
             click_edge: false,
             mouse_down: false,
+            network,
             wire,
         };
         Ok((
