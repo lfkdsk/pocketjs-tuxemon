@@ -1,0 +1,197 @@
+{
+  "format": "pocket-tuxemon/tuxepedia-goldens/v1",
+  "frames": [
+    {
+      "case": "populated",
+      "lang": "en_US",
+      "width": 480,
+      "height": 272,
+      "file": "tuxepedia-populated-en_US-480x272.png",
+      "rgbaFnv1a": "35aa066c",
+      "pngSha256": "f9fc358fb8434304d40fdb6d9869030192c3e4449669e66cd834627c0e722200",
+      "cursor": 3,
+      "filter": "all",
+      "counts": {
+        "seen": 4,
+        "caught": 2,
+        "total": 255
+      }
+    },
+    {
+      "case": "unknown",
+      "lang": "en_US",
+      "width": 480,
+      "height": 272,
+      "file": "tuxepedia-unknown-en_US-480x272.png",
+      "rgbaFnv1a": "4f2aae0a",
+      "pngSha256": "24b3c5924861e36ef9a9d975203bb05b1ada2a761c42346a443b3ca6e9187f00",
+      "cursor": 0,
+      "filter": "all",
+      "counts": {
+        "seen": 0,
+        "caught": 0,
+        "total": 255
+      }
+    },
+    {
+      "case": "caughtFilter",
+      "lang": "en_US",
+      "width": 480,
+      "height": 272,
+      "file": "tuxepedia-caughtFilter-en_US-480x272.png",
+      "rgbaFnv1a": "55d45d6c",
+      "pngSha256": "89ae81c5008d424eaeeecd3a417f8716185bef4d719af945b3aca93df30d9307",
+      "cursor": 1,
+      "filter": "caught",
+      "counts": {
+        "seen": 4,
+        "caught": 2,
+        "total": 255
+      }
+    },
+    {
+      "case": "populated",
+      "lang": "en_US",
+      "width": 960,
+      "height": 544,
+      "file": "tuxepedia-populated-en_US-960x544.png",
+      "rgbaFnv1a": "4f6fccd7",
+      "pngSha256": "f28d899980e0c50478056e653cd6afb3fc41edc5ace9367fa06188b24a7954ce",
+      "cursor": 3,
+      "filter": "all",
+      "counts": {
+        "seen": 4,
+        "caught": 2,
+        "total": 255
+      }
+    },
+    {
+      "case": "unknown",
+      "lang": "en_US",
+      "width": 960,
+      "height": 544,
+      "file": "tuxepedia-unknown-en_US-960x544.png",
+      "rgbaFnv1a": "9114f7ca",
+      "pngSha256": "fc797bd58a15ad9e5169df3602387eda68020e0cd48803134250448e2738d419",
+      "cursor": 0,
+      "filter": "all",
+      "counts": {
+        "seen": 0,
+        "caught": 0,
+        "total": 255
+      }
+    },
+    {
+      "case": "caughtFilter",
+      "lang": "en_US",
+      "width": 960,
+      "height": 544,
+      "file": "tuxepedia-caughtFilter-en_US-960x544.png",
+      "rgbaFnv1a": "560fc4f6",
+      "pngSha256": "a4c78385444060bbfba6a898310ce4b731de8d75635e911b16cf5cf53077b58b",
+      "cursor": 1,
+      "filter": "caught",
+      "counts": {
+        "seen": 4,
+        "caught": 2,
+        "total": 255
+      }
+    },
+    {
+      "case": "populated",
+      "lang": "zh_CN",
+      "width": 480,
+      "height": 272,
+      "file": "tuxepedia-populated-zh_CN-480x272.png",
+      "rgbaFnv1a": "5a47ecfe",
+      "pngSha256": "d5dcd2f6f57db97cb5df45c1e7ac798851010ff2d02056965f392d04bf7b823f",
+      "cursor": 3,
+      "filter": "all",
+      "counts": {
+        "seen": 4,
+        "caught": 2,
+        "total": 255
+      }
+    },
+    {
+      "case": "unknown",
+      "lang": "zh_CN",
+      "width": 480,
+      "height": 272,
+      "file": "tuxepedia-unknown-zh_CN-480x272.png",
+      "rgbaFnv1a": "6a473d70",
+      "pngSha256": "fdc1bb30dc4faff262bdfd0a2f8da0c880a1f3a83770e4222d2dd7fe7622f3a9",
+      "cursor": 0,
+      "filter": "all",
+      "counts": {
+        "seen": 0,
+        "caught": 0,
+        "total": 255
+      }
+    },
+    {
+      "case": "caughtFilter",
+      "lang": "zh_CN",
+      "width": 480,
+      "height": 272,
+      "file": "tuxepedia-caughtFilter-zh_CN-480x272.png",
+      "rgbaFnv1a": "2c04096b",
+      "pngSha256": "906382377baac0c5588b08bca85ef68285cde457660978477e9554d791f2b395",
+      "cursor": 1,
+      "filter": "caught",
+      "counts": {
+        "seen": 4,
+        "caught": 2,
+        "total": 255
+      }
+    },
+    {
+      "case": "populated",
+      "lang": "zh_CN",
+      "width": 960,
+      "height": 544,
+      "file": "tuxepedia-populated-zh_CN-960x544.png",
+      "rgbaFnv1a": "19c31a9e",
+      "pngSha256": "207e541dda1670aead4d349973ef280f1ab7e06a1d27edab40f76e0bad02fe3d",
+      "cursor": 3,
+      "filter": "all",
+      "counts": {
+        "seen": 4,
+        "caught": 2,
+        "total": 255
+      }
+    },
+    {
+      "case": "unknown",
+      "lang": "zh_CN",
+      "width": 960,
+      "height": 544,
+      "file": "tuxepedia-unknown-zh_CN-960x544.png",
+      "rgbaFnv1a": "b57b7f59",
+      "pngSha256": "e9776252b62772fa945c0057b7a345b601eb2e23077991ad2eabd47931107153",
+      "cursor": 0,
+      "filter": "all",
+      "counts": {
+        "seen": 0,
+        "caught": 0,
+        "total": 255
+      }
+    },
+    {
+      "case": "caughtFilter",
+      "lang": "zh_CN",
+      "width": 960,
+      "height": 544,
+      "file": "tuxepedia-caughtFilter-zh_CN-960x544.png",
+      "rgbaFnv1a": "d4a7737b",
+      "pngSha256": "dc7691da52363108ad9e5292c87655b5b036dbebad421a7143b8db96479ca004",
+      "cursor": 1,
+      "filter": "caught",
+      "counts": {
+        "seen": 4,
+        "caught": 2,
+        "total": 255
+      }
+    }
+  ]
+}

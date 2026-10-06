@@ -53,6 +53,7 @@ export function createSaveMenu(options: SaveMenuOptions = {}): GameViewOverlayCo
                 theme={theme}
                 title={uiText?.["save.title"] ?? menu.title}
                 uiText={uiText}
+                extraRows={options.extraRows}
               />
               <SaveToast text={menu.toast} theme={theme} />
             </>

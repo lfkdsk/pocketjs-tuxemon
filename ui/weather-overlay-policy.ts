@@ -7,6 +7,9 @@ export interface WeatherOverlayMenu {
 export function weatherOverlaySuspended(
   demoMenu: WeatherOverlayMenu | null,
   saveMenu: WeatherOverlayMenu | null,
+  ...more: (WeatherOverlayMenu | null)[]
 ): boolean {
-  return (demoMenu?.isOpen() ?? false) || (saveMenu?.isOpen() ?? false);
+  if (demoMenu?.isOpen() ?? false) return true;
+  if (saveMenu?.isOpen() ?? false) return true;
+  return more.some((menu) => menu?.isOpen() ?? false);
 }

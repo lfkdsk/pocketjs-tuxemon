@@ -16,6 +16,7 @@ import { MapNotReadyError } from "../vendor/pocket-rpgkit/src/engine/map-reposit
 import {
   menuStep,
   saveMenuRootRows,
+  type ExtraRootRow,
   type MenuAction,
   type MenuState,
 } from "../vendor/pocket-rpgkit/src/engine/save-menu.ts";
@@ -64,6 +65,11 @@ export interface SaveMenuOptions {
   /** Active content language. A save written in the other language is
    * refused with a clear message instead of silently mixing content. */
   lang?: Lang;
+  /** Game-defined rows appended after the kit's own root rows. Their labels
+   *  are already localized; CONFIRM on one calls `onExtra` with its id. */
+  extraRows?: readonly ExtraRootRow[];
+  /** Called when the player confirms an `extraRows` row. */
+  onExtra?: (id: string) => void;
 }
 
 /** Test and tooling handle: the live menu publishes itself here. */
@@ -151,7 +157,7 @@ export function createSaveMenuRuntime(
   const [typed, setTyped] = createSignal("");
   const [toast, setToast] = createSignal<string | null>(null);
   const rootIndex = (id: string): number => Math.max(0,
-    saveMenuRootRows(hasSlots, autosaveInfo() !== null).findIndex((row) => row.id === id));
+    saveMenuRootRows(hasSlots, autosaveInfo() !== null, options.extraRows).findIndex((row) => row.id === id));
   let toastFrames = 0;
   // After the menu closes, hold the world until every button is released so
   // the closing press never reaches the reducer as a fresh edge.
@@ -328,6 +334,12 @@ export function createSaveMenuRuntime(
         setMenu(next);
         osk.open();
         return false;
+      case "extra":
+        // A game-defined root row: hand off to the game. The menu stays on
+        // the root (the kit returned it unchanged); the game opens its own
+        // screen, which the composite overlay routes input to while open.
+        options.onExtra?.(command.id);
+        return false;
     }
   };
 
@@ -388,6 +400,7 @@ export function createSaveMenuRuntime(
         slotNonEmpty: slotInfo().map((slot) => slot !== null),
         codePages: Math.max(1, Math.ceil(saveCode().length / CODE_PAGE_CHARS)),
         text: uiText(),
+        extra: options.extraRows,
       });
       if (result.state.kind === "closed") {
         close();

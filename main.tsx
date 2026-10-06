@@ -46,6 +46,7 @@ import { createSaveMenu } from "./ui/save-menu.tsx";
 import { persistAutosave } from "./ui/save-game.ts";
 import { createLangMenu } from "./ui/lang-menu.tsx";
 import { createCompositeOverlay } from "./ui/game-overlay.tsx";
+import { createTuxepediaOverlay } from "./ui/tuxepedia.tsx";
 import { createBootSnapshotOverlay } from "./ui/boot-snapshot-overlay.tsx";
 import { createNpcSrcProvider } from "./ui/npc-src-repository.ts";
 import { createChoiceIconNpcSrc } from "./ui/choice-icon-provider.ts";
@@ -259,8 +260,19 @@ const demo: GameViewDemoConfig | undefined = hasDemoChapters(lang) ? (() => {
 // persist a choice (PSP: no localStorage, no data.fs — the PSP build is
 // English-only).
 const langSwitchable = canSwitchLang();
+// The Tuxepedia (START menu row): an overlay that reads the live seen/caught
+// state. Its runtime is captured here so the save menu's onExtra can open it.
+const tuxepediaConfig = createTuxepediaOverlay({ catalog, lang });
+const tuxepediaRowLabel = lang === "zh_CN" ? "图鉴" : "Tuxepedia";
 let saveMenuRuntime: GameViewDemoRuntime | null = null;
-const saveMenuConfig = createSaveMenu({ suspended: () => demoMenu?.isOpen() ?? false, lang });
+const saveMenuConfig = createSaveMenu({
+  suspended: () => demoMenu?.isOpen() ?? false,
+  lang,
+  extraRows: [{ id: "tuxepedia", label: tuxepediaRowLabel }],
+  onExtra: (id) => {
+    if (id === "tuxepedia") tuxepediaConfig.runtimeRef.current?.open();
+  },
+});
 const baseSaveMenu: GameViewOverlayConfig = {
   create(host) {
     saveMenuRuntime = saveMenuConfig.create(host);
@@ -278,7 +290,7 @@ const langMenu: GameViewOverlayConfig = {
     return langMenuRuntime;
   },
 };
-const overlay = langSwitchable ? createCompositeOverlay(saveMenu, langMenu) : saveMenu;
+const overlay = createCompositeOverlay(saveMenu, langSwitchable ? langMenu : undefined, tuxepediaConfig);
 // The boot-snapshot overlay runs first so a PSP segment build can restore a
 // chapter save before the tape replay starts. Production builds leave its
 // global unset and it is inert after the first frame.
@@ -374,7 +386,7 @@ mount(() => (
       <WeatherOverlay
         bridge={weatherBridge}
         suspended={() =>
-          weatherOverlaySuspended(demoMenu, saveMenuRuntime)
+          weatherOverlaySuspended(demoMenu, saveMenuRuntime, tuxepediaConfig.runtimeRef.current)
           || (langMenuRuntime?.isOpen() ?? false)}
       />
     )}
