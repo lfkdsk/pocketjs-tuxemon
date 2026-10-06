@@ -378,6 +378,14 @@ export interface SegMetrics {
   maps: number;
   battles: number;
   slowest: [number, number][];
+  /** Host-forced QuickJS collections in the window (null when the bench
+   *  predates the host's GC counters). */
+  gcCount: number | null;
+  gcTotalMs: number | null;
+  /** The longest single collection: the GC pause a player would feel. */
+  maxGcMs: number | null;
+  /** QuickJS live request bytes at the end of the window. */
+  qjsLiveMiB: number | null;
 }
 
 /** Recompute the per-segment metrics from the retained bench + profile. Both
@@ -396,6 +404,12 @@ export function computeMetrics(out: string): SegMetrics[] {
     const arenaBump = Math.max(0, ...app.map((w) => w.arena_bump_bytes));
     const arenaCap = Math.max(0, ...app.map((w) => w.arena_capacity_bytes));
     const qjsPeak = Math.max(0, ...slow.map((l) => (JSON.parse(l).qjs_peak_bytes as number | undefined) ?? 0));
+    const gc = slow.map((l) => JSON.parse(l) as {
+      gc_count?: number;
+      gc_us?: number;
+      max_gc_us?: number;
+      qjs_live_bytes?: number;
+    }).filter((w) => typeof w.gc_count === "number");
     const slowest = slow
       .flatMap((l) => (JSON.parse(l).slowest as [number, number, number, number, number, number, number][]))
       .sort((a, b) => b[1] - a[1])
@@ -427,6 +441,10 @@ export function computeMetrics(out: string): SegMetrics[] {
       maps,
       battles,
       slowest: slowest.map((s) => [s[0], Math.round(s[1] / 1000)]),
+      gcCount: gc.length === 0 ? null : gc.reduce((s, w) => s + w.gc_count!, 0),
+      gcTotalMs: gc.length === 0 ? null : gc.reduce((s, w) => s + (w.gc_us ?? 0), 0) / 1000,
+      maxGcMs: gc.length === 0 ? null : Math.max(...gc.map((w) => w.max_gc_us ?? 0)) / 1000,
+      qjsLiveMiB: gc.length === 0 ? null : (gc[gc.length - 1]!.qjs_live_bytes ?? 0) / 1024 / 1024,
     });
   }
   return metrics;
@@ -817,16 +835,24 @@ if (import.meta.main) {
   } else if (command === "report") {
     const metrics = computeMetrics(OUT);
     const mib = (n: number) => n.toFixed(1);
-    console.log("| Segment | Frames | Avg ms | MaxWork ms | Arena MiB | QJS peak MiB | Maps | Battles |");
-    console.log("| --- | --- | --- | --- | --- | --- | --- | --- |");
+    const opt = (n: number | null, digits: number) => n === null ? "-" : n.toFixed(digits);
+    console.log("| Segment | Frames | Avg ms | MaxWork ms | Arena MiB | QJS peak MiB | Maps | Battles | GCs | GC total ms | Max GC ms |");
+    console.log("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |");
     for (const m of metrics) {
-      console.log(`| ${m.id} | ${m.frames} | ${m.avgIntervalMs.toFixed(1)} | ${m.maxWorkMs.toFixed(0)} | ${mib(m.arenaBumpMiB)}/${mib(m.arenaCapMiB)} | ${mib(m.qjsPeakMiB)} | ${m.maps} | ${m.battles} |`);
+      console.log(`| ${m.id} | ${m.frames} | ${m.avgIntervalMs.toFixed(1)} | ${m.maxWorkMs.toFixed(0)} | ${mib(m.arenaBumpMiB)}/${mib(m.arenaCapMiB)} | ${mib(m.qjsPeakMiB)} | ${m.maps} | ${m.battles} | ${opt(m.gcCount, 0)} | ${opt(m.gcTotalMs, 1)} | ${opt(m.maxGcMs, 1)} |`);
     }
     const totalFrames = metrics.reduce((s, m) => s + m.frames, 0);
     const totalBattles = metrics.reduce((s, m) => s + m.battles, 0);
     const maxArena = Math.max(...metrics.map((m) => m.arenaBumpMiB));
     const maxQjs = Math.max(...metrics.map((m) => m.qjsPeakMiB));
     console.log(`\nTOTAL: ${totalFrames} frames, ${totalBattles} battles, arena high-water ${mib(maxArena)} MiB, QJS peak ${mib(maxQjs)} MiB`);
+    const withGc = metrics.filter((m) => m.gcCount !== null);
+    if (withGc.length > 0) {
+      const gcs = withGc.reduce((s, m) => s + m.gcCount!, 0);
+      const gcMs = withGc.reduce((s, m) => s + m.gcTotalMs!, 0);
+      const worst = withGc.reduce((a, b) => (b.maxGcMs! > a.maxGcMs! ? b : a));
+      console.log(`GC: ${gcs} collections, ${gcMs.toFixed(1)} ms total, longest ${worst.maxGcMs!.toFixed(1)} ms (${worst.id}) over ${withGc.length} segment(s)`);
+    }
     writeFileSync(join(OUT, "metrics.json"), JSON.stringify(metrics, null, 2) + "\n");
   } else if (command === "verify") {
     // Four-way consistency gate: retained artifacts (PRX + assets.pak) match

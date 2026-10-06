@@ -455,7 +455,9 @@ boot frame plus the whole suffix, so the completed segments cover the whole
 suffix (the rotating 300-frame windows lost every segment tail).
 
 The full-run evidence (per-segment terminal hashes, wall times and bench
-windows) is recorded in `findings/PSP-EMU.md`. Segment
+windows) is recorded in `findings/PSP-EMU.md`, and the latest rerun on the
+minor-GC host (per-segment GC counts, totals, longest pause and residual
+heap) in `findings/PSP-RERUN.md`. Segment
 `06-cotton-town-a` previously hung when the PSP host stopped collecting
 garbage once the arena's bump tail was spent and ran out of memory; the
 PocketJS GC fix ("keep collecting once the arena's bump tail is spent")
@@ -470,7 +472,9 @@ equals `endFrame`), the profile's newest session and its terminal match the
 receipt's build/segment/frame and desktop pin (state compared
 byte-for-byte), the bench window covers `[0, frames+1)`, and `metrics.json`
 recomputes from the benches. The current run's verdict and per-segment
-evidence are recorded in `findings/PSP-EMU.md`. `--known-incomplete=<id>`
+evidence are recorded in `findings/PSP-EMU.md`; the GC columns in
+`metrics.json` and `psp-mainline report` come from the host bench's
+`gc_count`/`gc_us`/`max_gc_us`/`qjs_live_bytes` fields. `--known-incomplete=<id>`
 (or `--known-incomplete <id>`) tolerates a segment that ran but did not
 finish (no terminal marker and/or no bench); it is fail-closed: an empty
 id, an id outside the plan, a flagged segment that actually completed, or
@@ -478,6 +482,25 @@ any other bench/retention problem still fails.
 The plan itself is guarded by independent invariants (28 segments, a fixed
 id/chapter/start/end identity table, continuous coverage `[0, 198568)`, no
 gap or overlap) enforced before plan/build/run/verify.
+
+### PSP GC pauses
+
+The PSP host's QuickJS is a personal fork (`lfkdsk/quickjs-rs`, based on
+`pocket-nexus/quickjs-rs` `ba5bdd0`) that adds a generational ("minor")
+collector; the collector branch has been proposed upstream. The host
+promotes the loaded program and data at boot, then runs minor collections
+(young list only). QuickJS's own size-based trigger never fires on this
+host (`hosts/psp/src/gc_policy.rs`), so the frame loop decides: it collects
+when the arena bump, or live bytes once the bump tail is spent, has grown
+256 KiB since the last collection, and QuickJS also collects in the middle
+of a frame once 8,000 young objects exist. A full `JS_RunGC` runs only when
+the arena tail is spent and live bytes are high.
+The latest 28-segment rerun measures the longest single GC pause at
+**38.0 ms** (21-hospital-cure) and total GC time at **6,878.8 ms** over
+867 collections, down from 152.5 ms / 45,359.5 ms / 520 collections with
+the stock full-heap collector. The residual QuickJS live heap at segment
+end is 11.5–23.4 MiB. `psp-mainline report` prints the per-segment GC
+columns; the full table is in `findings/PSP-RERUN.md`.
 
 ### Same-moment captures
 

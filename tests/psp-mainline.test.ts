@@ -615,6 +615,20 @@ describe("PSP mainline metrics drift", () => {
     expect(metricsDrift(join(out, "metrics.json"), computeMetrics(out))).toContain("<metrics.json missing>");
   });
 
+  test("GC counters are carried from the bench window", () => {
+    const out = metricsOut();
+    expect(computeMetrics(out)[0]).toMatchObject({ gcCount: null, gcTotalMs: null, maxGcMs: null, qjsLiveMiB: null });
+    const { start, n } = expectedBenchWindow(23);
+    writeFileSync(join(out, "01-test", "bench.jsonl"), [
+      JSON.stringify({ app: "pocket-tuxemon", frames: n, window_start: start, window_n: n }),
+      JSON.stringify({
+        window_start: start, slowest_columns: [], slowest: [],
+        gc_count: 3, gc_us: 41_500, max_gc_us: 30_250, qjs_live_bytes: 3 * 1024 * 1024,
+      }),
+    ].join("\n") + "\n");
+    expect(computeMetrics(out)[0]).toMatchObject({ gcCount: 3, gcTotalMs: 41.5, maxGcMs: 30.25, qjsLiveMiB: 3 });
+  });
+
   test("map and battle events are counted only for the newest session", () => {
     // A rerun appends a new session to the same profile. The metrics must
     // describe the newest run only; counting the old session's events would

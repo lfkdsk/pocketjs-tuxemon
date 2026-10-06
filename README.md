@@ -445,7 +445,11 @@ PPSSPPHeadless as 28 bounded chapter-to-chapter segments: the no-argument
 retained-evidence gate (`bun tools/psp-mainline.ts verify`) reports 28/28
 PASS with no exemptions, each segment's receipt bound to its plan entry by
 id, chapter, start frame, window length and end frame, with its terminal
-state matching the desktop replay byte-for-byte. Six same-moment
+state matching the desktop replay byte-for-byte. The PSP host's
+generational QuickJS collector (a personal fork of `pocket-nexus/quickjs-rs`,
+proposed upstream) bounds the longest single GC pause to 38.0 ms across the
+whole mainline (6,878.8 ms total over 867 collections, down from 152.5 ms /
+45,359.5 ms / 520 with the stock collector). Six same-moment
 desktop/PSP framebuffer captures (bedroom, Paper Town, the first Billie
 battle, the Route 1 seam, Cotton Town, the radio-tower segment) are
 re-taken at a clean HEAD; five are byte-identical between desktop and PSP
