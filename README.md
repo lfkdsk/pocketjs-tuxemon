@@ -26,7 +26,7 @@ summary:
   the north end of Route 3, Route 4 and Flower City to the Captain's return
   in the Mansion and on through Candy Town, the hospital cure and Omnichannel
   Radio Tower broadcast, then across Routes E and B to the Data Center and
-  Kernel's defeat — the complete 199,308-frame Spyder mainline at 60 Hz,
+  Kernel's defeat — the complete 199,316-frame Spyder mainline at 60 Hz,
   driven by
   deterministic autoplay tapes — and every imported input lock is executed
   to its unlock. On the 67 placed outdoor maps, the streamed renderer paints
@@ -362,7 +362,7 @@ not a crash. Chapter snapshots and the nibble-dictionary tape are packed into
 the pak and read on demand, so the JS bundle keeps only a tiny chapter index;
 the tape is decoded once, on the first chapter selection, and every chapter
 plays a window of it. The committed chapter pack and all twenty thumbnails are
-rebaked against the current 199,308-frame recording; every chapter envelope
+rebaked against the current 199,316-frame recording; every chapter envelope
 passes decode, map-aware restore and suffix replay to the production terminal.
 `bun tools/verify-web-demo.ts` drives all of the above in headless Chrome,
 including a 600-frame autoplay that must reach a state byte-identical to a
@@ -448,7 +448,7 @@ then compare the completed session with a fresh production replay:
 bun run verify:psp:emu          # builds nothing; runs the already-built .prx
 ```
 
-The complete GB6+J1+J2+J3+J4 mainline (199,308 frames) runs under
+The complete GB6+J1+J2+J3+J4 mainline (199,316 frames) runs under
 PPSSPPHeadless as 28 bounded chapter-to-chapter segments: the no-argument
 retained-evidence gate (`bun tools/psp-mainline.ts verify`) reports 28/28
 PASS with no exemptions, each segment's receipt bound to its plan entry by

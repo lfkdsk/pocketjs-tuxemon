@@ -8,12 +8,12 @@ import { join, resolve } from "node:path";
 
 import { tuxemonExtensionState } from "../battle/extension.ts";
 import {
-  createTuxemonSessionOptions,
   TUXEMON_BATTLE_DB,
   TUXEMON_BATTLE_RULES,
   TUXEMON_EXTENSIONS,
   TUXEMON_SCENES,
 } from "../battle/game.ts";
+import { mainlineSessionOptions } from "./mainline-session.ts";
 import { tuxemonRuntimeBattleState } from "../battle/runtime.ts";
 import { canonicalJson } from "../vendor/pocket-rpgkit/src/engine/save.ts";
 import {
@@ -84,7 +84,7 @@ function replay(tape: FrozenTape): Replay {
   expect("frame count differs from masks", tape.frames === tape.masks.length);
   const { project, repository: maps } = readShardedProject(ROOT);
   const worldTraversal = journeyWorldTraversal(tape, "GB6 failure tape");
-  const session = createSession(project, 60, createTuxemonSessionOptions(project, worldTraversal, {
+  const session = createSession(project, 60, mainlineSessionOptions(project, worldTraversal, {
     maps,
   }));
   let state = startSession(project, session);

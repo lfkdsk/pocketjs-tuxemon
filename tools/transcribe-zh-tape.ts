@@ -175,7 +175,9 @@ export function transcribeZhDemo(root: string = ROOT): { tape: string; chapters:
   }
 
   const enProject = readInlineProject(root);
-  const enSession = createSession(enProject, 60, createTuxemonSessionOptions(enProject, worldTraversal));
+  const enSession = createSession(enProject, 60, createTuxemonSessionOptions(enProject, worldTraversal, {
+    paginateText: productionPaginator(root),
+  }));
   const zh = readShardedProject(root, "zh_CN");
   const zhSession = createSession(zh.project, 60, createTuxemonSessionOptions(zh.project, worldTraversal, {
     ...TUXEMON_SESSION_OPTIONS_ZH,

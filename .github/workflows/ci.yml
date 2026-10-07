@@ -146,6 +146,11 @@ jobs:
           # rejected, the live state never written.
           - name: Neighbour preview coverage at every chapter
             run: bun run verify:preview:coverage
+          # The built bundle (what players run) replays the whole mainline
+          # and must hit every journey checkpoint the reducer records; a
+          # verifier that drifts from the production game fails here.
+          - name: Built game replays the mainline at every checkpoint
+            run: bun run verify:bootworld:replay
     steps:
       - uses: actions/checkout@v7
         with:

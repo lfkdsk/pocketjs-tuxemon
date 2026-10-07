@@ -40,9 +40,10 @@ import {
   type SessionState,
 } from "../vendor/pocket-rpgkit/src/engine/session.ts";
 import type { TextModal, TextPaginator } from "../vendor/pocket-rpgkit/src/engine/interpreter.ts";
-import { createDialogPaginator } from "../vendor/pocket-rpgkit/src/ui/dialog-pages.ts";
-import { createFontMeasure } from "../vendor/pocket-rpgkit/tools/lib/font-measure.ts";
+import { productionPaginator } from "../battle/paginator.ts";
 import { TUXEMON_UI_THEME } from "../ui/tuxemon-theme.ts";
+
+export { productionPaginator };
 
 export const ZH_TAPE_REL = "data/zh-mainline-journey.json";
 export const ZH_CHAPTERS_REL = "data/chapters.zh_CN.json";
@@ -106,23 +107,6 @@ export function productionPaginatorIdentity(root: string): PaginatorIdentity {
     ].join("\n")),
     charsetSha256: sha256(charsetFiles.map((file) => readFileSync(join(root, file), "utf8")).join("")),
   };
-}
-
-export function productionPaginator(root: string): TextPaginator {
-  const fonts = JSON.parse(readFileSync(join(root, "fonts.json"), "utf8")) as {
-    fallback?: string[];
-    characterFiles?: string[];
-  };
-  const charset = new Set<number>();
-  for (const file of fonts.characterFiles ?? []) {
-    for (const ch of readFileSync(join(root, file), "utf8")) charset.add(ch.codePointAt(0)!);
-  }
-  const measure = createFontMeasure({
-    px: 12,
-    fallbacks: (fonts.fallback ?? []).map((file) => join(root, file)),
-    charset,
-  });
-  return createDialogPaginator({ rim: !!TUXEMON_UI_THEME.rim }, measure);
 }
 
 // --- language-neutral state ----------------------------------------------

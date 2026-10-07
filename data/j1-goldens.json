@@ -1,14 +1,14 @@
 {
   "format": "pocket-tuxemon/j1-goldens/v1",
   "baseFrames": 110244,
-  "segmentTapeSha256": "18af446ceb72ddfc780c3d5f356efbfca07e5d525c0279432ad24b43dd601758",
-  "combinedTapeSha256": "5986a2e8e2de2750a65c190d6f195ca166a59d3d954e4200f3b5491d0a74a3ef",
+  "segmentTapeSha256": "8ad67ac42f86e1b8a54a938586e729791ac2a01dfe87d1813a504d7e8c893d27",
+  "combinedTapeSha256": "bd99c9fe22e1cc1a3d75435322cff5b7c3b55d334cf74e670c5b1d8d917161de",
   "frames": [
     {
       "name": "wayfarer-guestbook",
-      "frame": 519,
-      "mergedFrame": 110763,
-      "timelineFrame": 110764,
+      "frame": 523,
+      "mergedFrame": 110767,
+      "timelineFrame": 110768,
       "map": "spyder_wayfarer_inn1",
       "position": [
         9,
@@ -47,9 +47,9 @@
     },
     {
       "name": "route-4-billie",
-      "frame": 4717,
-      "mergedFrame": 114961,
-      "timelineFrame": 114962,
+      "frame": 4721,
+      "mergedFrame": 114965,
+      "timelineFrame": 114966,
       "map": "spyder_route4",
       "position": [
         2,
@@ -88,9 +88,9 @@
     },
     {
       "name": "captain-found",
-      "frame": 10355,
-      "mergedFrame": 120599,
-      "timelineFrame": 120600,
+      "frame": 10359,
+      "mergedFrame": 120603,
+      "timelineFrame": 120604,
       "map": "spyder_mansion_basement",
       "position": [
         3,
@@ -145,9 +145,9 @@
     },
     {
       "name": "wayfarer-guestbook",
-      "frame": 519,
-      "mergedFrame": 110763,
-      "timelineFrame": 110764,
+      "frame": 523,
+      "mergedFrame": 110767,
+      "timelineFrame": 110768,
       "map": "spyder_wayfarer_inn1",
       "position": [
         9,
@@ -186,9 +186,9 @@
     },
     {
       "name": "route-4-billie",
-      "frame": 4717,
-      "mergedFrame": 114961,
-      "timelineFrame": 114962,
+      "frame": 4721,
+      "mergedFrame": 114965,
+      "timelineFrame": 114966,
       "map": "spyder_route4",
       "position": [
         2,
@@ -227,9 +227,9 @@
     },
     {
       "name": "captain-found",
-      "frame": 10355,
-      "mergedFrame": 120599,
-      "timelineFrame": 120600,
+      "frame": 10359,
+      "mergedFrame": 120603,
+      "timelineFrame": 120604,
       "map": "spyder_mansion_basement",
       "position": [
         3,

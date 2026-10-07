@@ -28,9 +28,9 @@ import { join, resolve } from "node:path";
 
 import { tuxemonExtensionState } from "../battle/extension.ts";
 import {
-  createTuxemonSessionOptions,
   TUXEMON_BATTLE_DB,
 } from "../battle/game.ts";
+import { mainlineSessionOptions } from "./mainline-session.ts";
 // Thumbnails boot the built game at the same fixed 09:00 as the reducer
 // replay; without it the daylight tint follows the machine's wall clock.
 import { FIXED_TIME_HOST_GLOBALS } from "../battle/time-weather.ts";
@@ -528,7 +528,7 @@ function buildChaptersFile(
   captures: Map<string, Capture>,
   worldTraversal: WorldTraversalMode,
 ): ChaptersFile {
-  const session = createSession(project, 60, createTuxemonSessionOptions(project, worldTraversal));
+  const session = createSession(project, 60, mainlineSessionOptions(project, worldTraversal));
   const chapters: ChapterRecord[] = [];
   const ordered = [...captures.values()].sort((a, b) => a.frame - b.frame);
   for (const cap of ordered) {
@@ -652,7 +652,7 @@ export async function bakeChapters(
   last.at = j1.combinedFrames;
   last.select = (frame, state) => frame === j1.combinedFrames && state.mapId === "spyder_mansion" && safe(state);
 
-  const session = createSession(project, 60, createTuxemonSessionOptions(project, worldTraversal));
+  const session = createSession(project, 60, mainlineSessionOptions(project, worldTraversal));
   const captures = replayReducer(session, project, combined, checkpoints);
   const chapters = buildChaptersFile(project, gb6, j1, j2, j3, j4, combined, captures, worldTraversal);
   const thumbnails = options.renderThumbnails === false
@@ -704,7 +704,7 @@ export function verifyChapterSuffixes(root: string = ROOT): ChapterSuffixResult[
   expect(`chapters traversal ${worldTraversal} != journey traversal ${tape.worldTraversal}`,
     worldTraversal === tape.worldTraversal);
   const { combined } = tape;
-  const session = createSession(project, 60, createTuxemonSessionOptions(project, worldTraversal));
+  const session = createSession(project, 60, mainlineSessionOptions(project, worldTraversal));
 
   // One full replay: the terminal state every suffix must reach.
   let terminal = startSession(project, session);

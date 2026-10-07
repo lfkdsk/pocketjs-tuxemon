@@ -106,17 +106,19 @@ describe("en demo tape transcription", () => {
     expect(canonicalJson(demoNeutralSummary(reached) as never))
       .toBe(canonicalJson(demoNeutralSummary(want) as never));
 
-    // The canonical tape alone drifts: replaying it through the paginator
-    // does not reach the next chapter's story state.
-    let drifted = restoreSessionSnapshot(paged, decodeEnvelopeText(from.snapshot));
-    drifted = { ...drifted, frame: from.timelineFrame };
+    // The canonical segment is the paginated mainline tape, so it already
+    // carries the page-turn confirms and reaches the next chapter on its
+    // own (the transcription above still produces insertions because its
+    // source session is deliberately non-paginated).
+    let canonical = restoreSessionSnapshot(paged, decodeEnvelopeText(from.snapshot));
+    canonical = { ...canonical, frame: from.timelineFrame };
     prev = from.held >>> 0;
     for (const mask of segment) {
-      drifted = stepSession(paged, drifted, tapeInput(mask, prev));
+      canonical = stepSession(paged, canonical, tapeInput(mask, prev));
       prev = mask;
     }
-    expect(canonicalJson(demoNeutralSummary(drifted) as never))
-      .not.toBe(canonicalJson(demoNeutralSummary(want) as never));
+    expect(canonicalJson(demoNeutralSummary(canonical) as never))
+      .toBe(canonicalJson(demoNeutralSummary(want) as never));
   });
 
   test("the demo tape reaches the next chapter through the paginator at the two Nimrod segments", () => {
@@ -160,16 +162,17 @@ describe("en demo importer gate", () => {
     const { data, reason } = buildEnDemoData(ROOT, canonical);
     expect(reason).toBeNull();
     expect(data).not.toBeNull();
-    expect(data!.masks.length).toBe(combined.length + 8);
+    // The mainline tape is recorded with the production paginator, so the
+    // demo transcription needs no inserted frames: the demo masks are the
+    // canonical tape verbatim.
+    expect(data!.masks.length).toBe(combined.length);
     expect(sha256(JSON.stringify(data!.masks))).toBe(
       (JSON.parse(readFileSync(join(ROOT, "data/en-demo-journey.json"), "utf8")) as EnDemoTapeFile).tapeSha256,
     );
     const byId = new Map(data!.index.map((e) => [e.id, e]));
-    // route-3-north is before the first insertion: unchanged.
+    // route-3-north, flower-city and candy-town are the chapter frames.
     expect(byId.get("route-3-north")!.frame).toBe(110244);
-    // flower-city is after the first insertion: +4.
     expect(byId.get("flower-city")!.frame).toBe(115006);
-    // candy-town is after both: +8.
     expect(byId.get("candy-town")!.frame).toBe(165163);
   });
 

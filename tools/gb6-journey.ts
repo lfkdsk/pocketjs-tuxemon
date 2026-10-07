@@ -9,9 +9,9 @@ import { tuxemonExtensionState } from "../battle/extension.ts";
 import { utilitySceneAutoplayMask } from "./scene-autoplay.ts";
 import { battleDbToTuxemonBattleDb } from "../battle/from-battle-db.ts";
 import {
-  createTuxemonSessionOptions,
   TUXEMON_BATTLE_DB,
 } from "../battle/game.ts";
+import { mainlineSessionOptions } from "./mainline-session.ts";
 import { tuxemonRuntimeBattleState } from "../battle/runtime.ts";
 import type { RuntimeBattleState } from "../battle/runtime.ts";
 import type { SpawnedMonsterSnapshot } from "../battle/types.ts";
@@ -561,7 +561,7 @@ export function runGb6Journey(hz = 60): Gb6JourneyResult {
   if (![60, 30, 20].includes(hz)) throw new Error(`GB6 journey: unsupported rate ${hz}`);
   const project = readInlineProject(ROOT);
   const worldTraversal = recordingWorldTraversal(project, "GB6 journey");
-  const session = createSession(project, hz, createTuxemonSessionOptions(project, worldTraversal));
+  const session = createSession(project, hz, mainlineSessionOptions(project, worldTraversal));
   const driver = new Driver(session, hz, startSession(project, session));
   driver.replayPrefix();
 

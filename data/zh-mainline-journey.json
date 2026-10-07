@@ -4,7 +4,7 @@
   "hz": 60,
   "worldTraversal": "seamless-v1",
   "source": {
-    "chaptersSha256": "8713b6c6576b79817cbfabcdd2dbc87d6a56aeb5b57d8d779cb13581e2a5f401",
+    "chaptersSha256": "9722235f19279f661d5e6f4cb78ad65865c31f96bb30a428b4928a68c16160fa",
     "tape": {
       "gb6": {
         "file": "data/gb6-mainline-journey.json",
@@ -14,14 +14,14 @@
       },
       "j1": {
         "file": "data/j1-captainreturns-journey.json",
-        "frames": 11520,
-        "tapeSha256": "18af446ceb72ddfc780c3d5f356efbfca07e5d525c0279432ad24b43dd601758",
+        "frames": 11524,
+        "tapeSha256": "8ad67ac42f86e1b8a54a938586e729791ac2a01dfe87d1813a504d7e8c893d27",
         "worldTraversal": "seamless-v1"
       },
       "j2": {
         "file": "data/j2-hospitalcure-journey.json",
-        "frames": 51227,
-        "tapeSha256": "8105bf8f4fdaf659bca103c17fb3920b60c49bfb7dd5ef760f4849f0be75a052",
+        "frames": 51231,
+        "tapeSha256": "4d05119d70293b6aa1b3fa00223bff544f0c6c602bf8c40662a169e96e678197",
         "worldTraversal": "seamless-v1"
       },
       "j3": {
@@ -36,8 +36,8 @@
         "tapeSha256": "08c88566e1da8c7c86816175403152f2f15fbb771d60b2a0756a32c9061987b1",
         "worldTraversal": "seamless-v1"
       },
-      "frames": 199308,
-      "sha256": "fe75a89d1ff3000c8801fe6945c792cdba907cad63741b81d42de8e39dd186fb"
+      "frames": 199316,
+      "sha256": "05823130aca3aaa5c77ba74fbf7f55cc6f4ba53245581c27401267980012da4a"
     }
   },
   "paginator": {
@@ -50,16 +50,41 @@
     "fontSha256": "061287cd8736d448e537dc186ca396e9d306f2c8f3c7b32d641e6d9924bab1dc",
     "charsetSha256": "e7cb50da144d14aa5b68058a56363baa8bb0003110b98c2d8b64d166dddb3fc4"
   },
-  "frames": 199308,
-  "tapeSha256": "fe75a89d1ff3000c8801fe6945c792cdba907cad63741b81d42de8e39dd186fb",
-  "edits": [],
+  "frames": 199316,
+  "tapeSha256": "0150715c97199eaab8b249248c97e370d8023d9a0d5912b125fe69e6006af454",
+  "edits": [
+    {
+      "frame": 110418,
+      "source": 8192,
+      "target": 0,
+      "reason": "remove"
+    },
+    {
+      "frame": 110420,
+      "source": 8192,
+      "target": 0,
+      "reason": "remove"
+    },
+    {
+      "frame": 147759,
+      "source": 8192,
+      "target": 0,
+      "reason": "remove"
+    },
+    {
+      "frame": 147761,
+      "source": 8192,
+      "target": 0,
+      "reason": "remove"
+    }
+  ],
   "dialogs": {
     "textBoxes": 645,
-    "rewrittenBoxes": 0,
+    "rewrittenBoxes": 2,
     "pagedBoxes": 0,
     "choiceBoxes": 57,
     "confirmsInserted": 0,
-    "confirmsRemoved": 0,
+    "confirmsRemoved": 4,
     "neutralChecks": 719
   },
   "terminal": {
@@ -70,7 +95,7 @@
         4
       ],
       "facing": 3,
-      "frame": 199308,
+      "frame": 199316,
       "gold": 68920,
       "items": {
         "aardant": 1,
@@ -100,6 +125,6 @@
       ],
       "storySha256": "187f2002f6fbf3efb33f1aa0146c09b259dcc6bb25365a9a14b925fe4ef29e9c"
     },
-    "neutralSha256": "a308d48357a85fdec1d9cac8ba9eec119c61bbaea5726d2c9b07c423af5994f2"
+    "neutralSha256": "34112fdeb3f95ef811638f698f5e48e3aea3c12b467f55a1cc1c17ec2dbd53f8"
   }
 }

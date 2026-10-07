@@ -1,13 +1,13 @@
 {
   "format": "pocket-tuxemon/j3-goldens/v1",
-  "baseFrames": 172991,
+  "baseFrames": 172999,
   "segmentTapeSha256": "472c748926ce7cb232023f071ecf8caf552f6bc01a3a25ee40443e92e3345be3",
-  "combinedTapeSha256": "17bec86dab94255e1883cb4e5457167000b18fa63c9b3a026c8800f879dbcd5b",
+  "combinedTapeSha256": "e20046614f834afce4fe7300a307774a9b1c72af5fd8ef6db3b11655a5a579a9",
   "frames": [
     {
       "name": "omnichannel-wall",
       "frame": 7759,
-      "mergedFrame": 180750,
+      "mergedFrame": 180758,
       "map": "spyder_omnichannel1",
       "position": [
         3,
@@ -67,7 +67,7 @@
     {
       "name": "radio-tower-entry",
       "frame": 11600,
-      "mergedFrame": 184591,
+      "mergedFrame": 184599,
       "map": "spyder_radiotower",
       "position": [
         2,
@@ -127,7 +127,7 @@
     {
       "name": "radio-broadcast",
       "frame": 12929,
-      "mergedFrame": 185920,
+      "mergedFrame": 185928,
       "map": "spyder_radiotower",
       "position": [
         9,
@@ -171,7 +171,7 @@
     {
       "name": "omnichannel-wall",
       "frame": 7759,
-      "mergedFrame": 180750,
+      "mergedFrame": 180758,
       "map": "spyder_omnichannel1",
       "position": [
         3,
@@ -231,7 +231,7 @@
     {
       "name": "radio-tower-entry",
       "frame": 11600,
-      "mergedFrame": 184591,
+      "mergedFrame": 184599,
       "map": "spyder_radiotower",
       "position": [
         2,
@@ -291,7 +291,7 @@
     {
       "name": "radio-broadcast",
       "frame": 12929,
-      "mergedFrame": 185920,
+      "mergedFrame": 185928,
       "map": "spyder_radiotower",
       "position": [
         9,

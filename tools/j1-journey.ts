@@ -5,7 +5,7 @@ import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
-import { createTuxemonSessionOptions } from "../battle/game.ts";
+import { mainlineSessionOptions } from "./mainline-session.ts";
 import { BTN_BITS } from "../vendor/pocket-rpgkit/src/engine/camera.ts";
 import { restoreSessionSnapshot } from "../vendor/pocket-rpgkit/src/engine/save-restore.ts";
 import {
@@ -121,7 +121,7 @@ export function buildJ1BaseState(): J1BaseState {
     throw new Error("J1 journey: GB6 base tape metadata changed");
   }
   const worldTraversal = journeyWorldTraversal(base, "J1 journey GB6 base tape");
-  const session = createSession(project, 60, createTuxemonSessionOptions(project, worldTraversal));
+  const session = createSession(project, 60, mainlineSessionOptions(project, worldTraversal));
   let state = startSession(project, session);
   let previous = 0;
   for (const mask of base.masks) {
@@ -169,7 +169,7 @@ export function runJ1Journey(): J1JourneyResult {
       `J1 journey: GB6 base traversal ${base.checkpoint.worldTraversal} does not match project ${worldTraversal}`,
     );
   }
-  const session = createSession(project, 60, createTuxemonSessionOptions(project, worldTraversal));
+  const session = createSession(project, 60, mainlineSessionOptions(project, worldTraversal));
   const initial = restoreSessionSnapshot(session, base.snapshot);
   // SaveSnapshot intentionally omits the presentation-only top-level frame.
   // A continuation knows its parent timeline, so seed that derived counter

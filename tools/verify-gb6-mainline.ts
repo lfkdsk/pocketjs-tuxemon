@@ -9,12 +9,12 @@ import { join, resolve } from "node:path";
 
 import { tuxemonExtensionState } from "../battle/extension.ts";
 import {
-  createTuxemonSessionOptions,
   TUXEMON_BATTLE_DB,
   TUXEMON_BATTLE_RULES,
   TUXEMON_EXTENSIONS,
   TUXEMON_SCENES,
 } from "../battle/game.ts";
+import { mainlineSessionOptions } from "./mainline-session.ts";
 import { tuxemonRuntimeBattleState } from "../battle/runtime.ts";
 import type { SpawnedMonsterSnapshot } from "../battle/types.ts";
 import { AttractController } from "../vendor/pocket-rpgkit/src/engine/attract.ts";
@@ -152,7 +152,7 @@ function replayBaseline(journey: Gb6JourneyResult): ReplayResult {
   const session = createSession(
     project,
     60,
-    createTuxemonSessionOptions(project, worldTraversal, GAME_OPTIONS),
+    mainlineSessionOptions(project, worldTraversal, GAME_OPTIONS),
   );
   let state = startSession(project, session);
   let previous = 0;
@@ -230,7 +230,7 @@ function replayFromSave(journey: Gb6JourneyResult, point: SavedPoint): SessionSt
   const session = createSession(
     project,
     60,
-    createTuxemonSessionOptions(project, worldTraversal, GAME_OPTIONS),
+    mainlineSessionOptions(project, worldTraversal, GAME_OPTIONS),
   );
   const decoded = decodeEnvelopeText(point.envelope);
   let state = restoreSessionSnapshot(session, decoded);
@@ -266,7 +266,7 @@ function verifyRewind(journey: Gb6JourneyResult, expectedState: string): Record<
     hz: 60,
     attractEnabled: false,
     rewindSeconds: (from - target) / 60,
-    ...createTuxemonSessionOptions(project, worldTraversal, GAME_OPTIONS),
+    ...mainlineSessionOptions(project, worldTraversal, GAME_OPTIONS),
   });
   controller.startPlay();
   for (let frame = 0; frame < from; frame++) controller.step(journey.masks[frame]!);
@@ -291,7 +291,7 @@ function verifyRewind(journey: Gb6JourneyResult, expectedState: string): Record<
 
 function verifyAttractRate(journey: Gb6JourneyResult, hz: number): Record<string, number | string> {
   const project = readInlineProject(ROOT);
-  const options = createTuxemonSessionOptions(project, worldTraversal, GAME_OPTIONS);
+  const options = mainlineSessionOptions(project, worldTraversal, GAME_OPTIONS);
   const controller = new AttractController(project, journey.masks, { hz, ...options });
   const referenceSession = createSession(project, 60, options);
   let reference = startSession(project, referenceSession);

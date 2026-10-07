@@ -125,7 +125,9 @@ export function transcribeEnDemoTape(root: string = ROOT): { file: string; log: 
     english.tape.sha256 === sha256(JSON.stringify(combined)) && english.tape.frames === combined.length);
 
   const enProject = readInlineProject(root);
-  const enSession = createSession(enProject, 60, createTuxemonSessionOptions(enProject, worldTraversal));
+  const enSession = createSession(enProject, 60, createTuxemonSessionOptions(enProject, worldTraversal, {
+    paginateText: productionPaginator(root),
+  }));
   const pagedSession = createSession(enProject, 60, createTuxemonSessionOptions(enProject, worldTraversal, {
     paginateText: productionPaginator(root),
   }));

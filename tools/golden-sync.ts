@@ -11,7 +11,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
-import { createTuxemonSessionOptions } from "../battle/game.ts";
+import { mainlineSessionOptions } from "./mainline-session.ts";
 import {
   canSave,
   createSessionSnapshot,
@@ -271,7 +271,7 @@ export function captureGoldenCheckpoints(
   const project = readInlineProject(root);
   expect(`project traversal differs from tape (${project.worldTraversal} != ${worldTraversal})`,
     project.worldTraversal === worldTraversal);
-  const session = createSession(project, 60, createTuxemonSessionOptions(project, worldTraversal));
+  const session = createSession(project, 60, mainlineSessionOptions(project, worldTraversal));
   let state = startSession(project, session);
   let previous = 0;
   const captures: CapturedGoldenCheckpoint[] = [];

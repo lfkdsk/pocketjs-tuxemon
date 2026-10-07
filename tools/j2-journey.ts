@@ -5,7 +5,7 @@ import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
-import { createTuxemonSessionOptions } from "../battle/game.ts";
+import { mainlineSessionOptions } from "./mainline-session.ts";
 import { BTN_BITS } from "../vendor/pocket-rpgkit/src/engine/camera.ts";
 import { restoreSessionSnapshot } from "../vendor/pocket-rpgkit/src/engine/save-restore.ts";
 import {
@@ -149,7 +149,7 @@ export function buildJ2BaseState(): J2BaseState {
   if (j1.combinedFrames !== masks.length || sha256(JSON.stringify(masks)) !== j1.combinedTapeSha256) {
     throw new Error("J2 journey: J1 combined ancestry changed");
   }
-  const session = createSession(project, 60, createTuxemonSessionOptions(project, worldTraversal));
+  const session = createSession(project, 60, mainlineSessionOptions(project, worldTraversal));
   let state = startSession(project, session);
   let previous = 0;
   for (let frame = 0; frame < masks.length; frame++) {
@@ -207,7 +207,7 @@ export function runJ2Journey(): J2JourneyResult {
       `J2 journey: base traversal ${base.checkpoint.worldTraversal} does not match project ${worldTraversal}`,
     );
   }
-  const session = createSession(project, 60, createTuxemonSessionOptions(project, worldTraversal));
+  const session = createSession(project, 60, mainlineSessionOptions(project, worldTraversal));
   const initial = restoreSessionSnapshot(session, base.snapshot);
   initial.frame = base.checkpoint.timelineFrame;
   const initialStateSha256 = sha256(canonicalJson(initial));

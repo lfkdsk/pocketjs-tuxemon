@@ -80,7 +80,7 @@ export const DEMO_CHAPTER_INDEX: readonly DemoChapterIndexEntry[] = [
     "worldTraversal": "seamless-v1",
     "frame": 115006,
     "suffixFrames": 84310,
-    "timelineFrame": 115002
+    "timelineFrame": 115006
   },
   {
     "id": "captain-returns",
@@ -88,7 +88,7 @@ export const DEMO_CHAPTER_INDEX: readonly DemoChapterIndexEntry[] = [
     "worldTraversal": "seamless-v1",
     "frame": 121768,
     "suffixFrames": 77548,
-    "timelineFrame": 121764
+    "timelineFrame": 121768
   },
   {
     "id": "candy-town",
@@ -96,7 +96,7 @@ export const DEMO_CHAPTER_INDEX: readonly DemoChapterIndexEntry[] = [
     "worldTraversal": "seamless-v1",
     "frame": 165163,
     "suffixFrames": 34153,
-    "timelineFrame": 165155
+    "timelineFrame": 165163
   },
   {
     "id": "greenwash-aardant",
@@ -104,7 +104,7 @@ export const DEMO_CHAPTER_INDEX: readonly DemoChapterIndexEntry[] = [
     "worldTraversal": "seamless-v1",
     "frame": 171549,
     "suffixFrames": 27767,
-    "timelineFrame": 171541
+    "timelineFrame": 171549
   },
   {
     "id": "hospital-cure",
@@ -112,7 +112,7 @@ export const DEMO_CHAPTER_INDEX: readonly DemoChapterIndexEntry[] = [
     "worldTraversal": "seamless-v1",
     "frame": 172988,
     "suffixFrames": 26328,
-    "timelineFrame": 172980
+    "timelineFrame": 172988
   },
   {
     "id": "omnichannel-open",
@@ -120,7 +120,7 @@ export const DEMO_CHAPTER_INDEX: readonly DemoChapterIndexEntry[] = [
     "worldTraversal": "seamless-v1",
     "frame": 180746,
     "suffixFrames": 18570,
-    "timelineFrame": 180738
+    "timelineFrame": 180746
   },
   {
     "id": "radio-broadcast",
@@ -128,7 +128,7 @@ export const DEMO_CHAPTER_INDEX: readonly DemoChapterIndexEntry[] = [
     "worldTraversal": "seamless-v1",
     "frame": 185906,
     "suffixFrames": 13410,
-    "timelineFrame": 185898
+    "timelineFrame": 185906
   },
   {
     "id": "kernel-briefing",
@@ -136,7 +136,7 @@ export const DEMO_CHAPTER_INDEX: readonly DemoChapterIndexEntry[] = [
     "worldTraversal": "seamless-v1",
     "frame": 187777,
     "suffixFrames": 11539,
-    "timelineFrame": 187769
+    "timelineFrame": 187777
   },
   {
     "id": "surfboard",
@@ -144,7 +144,7 @@ export const DEMO_CHAPTER_INDEX: readonly DemoChapterIndexEntry[] = [
     "worldTraversal": "seamless-v1",
     "frame": 189158,
     "suffixFrames": 10158,
-    "timelineFrame": 189150
+    "timelineFrame": 189158
   },
   {
     "id": "route-b",
@@ -152,7 +152,7 @@ export const DEMO_CHAPTER_INDEX: readonly DemoChapterIndexEntry[] = [
     "worldTraversal": "seamless-v1",
     "frame": 191337,
     "suffixFrames": 7979,
-    "timelineFrame": 191329
+    "timelineFrame": 191337
   },
   {
     "id": "data-center",
@@ -160,7 +160,7 @@ export const DEMO_CHAPTER_INDEX: readonly DemoChapterIndexEntry[] = [
     "worldTraversal": "seamless-v1",
     "frame": 194849,
     "suffixFrames": 4467,
-    "timelineFrame": 194841
+    "timelineFrame": 194849
   },
   {
     "id": "kernel-defeated",
@@ -168,7 +168,7 @@ export const DEMO_CHAPTER_INDEX: readonly DemoChapterIndexEntry[] = [
     "worldTraversal": "seamless-v1",
     "frame": 199305,
     "suffixFrames": 11,
-    "timelineFrame": 199297
+    "timelineFrame": 199305
   }
 ];
 
@@ -178,7 +178,7 @@ export const DEMO_CHAPTER_INDEX_ZH: readonly DemoChapterIndexEntry[] = [
     "title": "房间（新游戏）",
     "worldTraversal": "seamless-v1",
     "frame": 0,
-    "suffixFrames": 199308,
+    "suffixFrames": 199316,
     "timelineFrame": 0
   },
   {
@@ -186,7 +186,7 @@ export const DEMO_CHAPTER_INDEX_ZH: readonly DemoChapterIndexEntry[] = [
     "title": "方絮镇",
     "worldTraversal": "seamless-v1",
     "frame": 1399,
-    "suffixFrames": 197909,
+    "suffixFrames": 197917,
     "timelineFrame": 1399
   },
   {
@@ -194,7 +194,7 @@ export const DEMO_CHAPTER_INDEX_ZH: readonly DemoChapterIndexEntry[] = [
     "title": "首次对战比莉之前",
     "worldTraversal": "seamless-v1",
     "frame": 1924,
-    "suffixFrames": 197384,
+    "suffixFrames": 197392,
     "timelineFrame": 1924
   },
   {
@@ -202,7 +202,7 @@ export const DEMO_CHAPTER_INDEX_ZH: readonly DemoChapterIndexEntry[] = [
     "title": "选定初始精灵",
     "worldTraversal": "seamless-v1",
     "frame": 3692,
-    "suffixFrames": 195616,
+    "suffixFrames": 195624,
     "timelineFrame": 3692
   },
   {
@@ -210,7 +210,7 @@ export const DEMO_CHAPTER_INDEX_ZH: readonly DemoChapterIndexEntry[] = [
     "title": "路线1",
     "worldTraversal": "seamless-v1",
     "frame": 3982,
-    "suffixFrames": 195326,
+    "suffixFrames": 195334,
     "timelineFrame": 3982
   },
   {
@@ -218,7 +218,7 @@ export const DEMO_CHAPTER_INDEX_ZH: readonly DemoChapterIndexEntry[] = [
     "title": "暖棉镇",
     "worldTraversal": "seamless-v1",
     "frame": 5384,
-    "suffixFrames": 193924,
+    "suffixFrames": 193932,
     "timelineFrame": 5384
   },
   {
@@ -226,7 +226,7 @@ export const DEMO_CHAPTER_INDEX_ZH: readonly DemoChapterIndexEntry[] = [
     "title": "城市公园",
     "worldTraversal": "seamless-v1",
     "frame": 44953,
-    "suffixFrames": 154355,
+    "suffixFrames": 154363,
     "timelineFrame": 44953
   },
   {
@@ -234,104 +234,104 @@ export const DEMO_CHAPTER_INDEX_ZH: readonly DemoChapterIndexEntry[] = [
     "title": "路线3北端",
     "worldTraversal": "seamless-v1",
     "frame": 110244,
-    "suffixFrames": 89064,
+    "suffixFrames": 89072,
     "timelineFrame": 110244
   },
   {
     "id": "flower-city",
     "title": "彩花城",
     "worldTraversal": "seamless-v1",
-    "frame": 115002,
-    "suffixFrames": 84306,
-    "timelineFrame": 115002
+    "frame": 115006,
+    "suffixFrames": 84310,
+    "timelineFrame": 115006
   },
   {
     "id": "captain-returns",
     "title": "船长归来",
     "worldTraversal": "seamless-v1",
-    "frame": 121764,
-    "suffixFrames": 77544,
-    "timelineFrame": 121764
+    "frame": 121768,
+    "suffixFrames": 77548,
+    "timelineFrame": 121768
   },
   {
     "id": "candy-town",
     "title": "甜饴镇",
     "worldTraversal": "seamless-v1",
-    "frame": 165155,
+    "frame": 165163,
     "suffixFrames": 34153,
-    "timelineFrame": 165155
+    "timelineFrame": 165163
   },
   {
     "id": "greenwash-aardant",
     "title": "格林沃什（获得阿尔丹特）",
     "worldTraversal": "seamless-v1",
-    "frame": 171541,
+    "frame": 171549,
     "suffixFrames": 27767,
-    "timelineFrame": 171541
+    "timelineFrame": 171549
   },
   {
     "id": "hospital-cure",
     "title": "医院治疗",
     "worldTraversal": "seamless-v1",
-    "frame": 172980,
+    "frame": 172988,
     "suffixFrames": 26328,
-    "timelineFrame": 172980
+    "timelineFrame": 172988
   },
   {
     "id": "omnichannel-open",
     "title": "全能公司通道开启",
     "worldTraversal": "seamless-v1",
-    "frame": 180738,
+    "frame": 180746,
     "suffixFrames": 18570,
-    "timelineFrame": 180738
+    "timelineFrame": 180746
   },
   {
     "id": "radio-broadcast",
     "title": "电台广播",
     "worldTraversal": "seamless-v1",
-    "frame": 185898,
+    "frame": 185906,
     "suffixFrames": 13410,
-    "timelineFrame": 185898
+    "timelineFrame": 185906
   },
   {
     "id": "kernel-briefing",
     "title": "科内尔任务简报",
     "worldTraversal": "seamless-v1",
-    "frame": 187769,
+    "frame": 187777,
     "suffixFrames": 11539,
-    "timelineFrame": 187769
+    "timelineFrame": 187777
   },
   {
     "id": "surfboard",
     "title": "获得冲浪板",
     "worldTraversal": "seamless-v1",
-    "frame": 189150,
+    "frame": 189158,
     "suffixFrames": 10158,
-    "timelineFrame": 189150
+    "timelineFrame": 189158
   },
   {
     "id": "route-b",
     "title": "路线B",
     "worldTraversal": "seamless-v1",
-    "frame": 191329,
+    "frame": 191337,
     "suffixFrames": 7979,
-    "timelineFrame": 191329
+    "timelineFrame": 191337
   },
   {
     "id": "data-center",
     "title": "数据中心",
     "worldTraversal": "seamless-v1",
-    "frame": 194841,
+    "frame": 194849,
     "suffixFrames": 4467,
-    "timelineFrame": 194841
+    "timelineFrame": 194849
   },
   {
     "id": "kernel-defeated",
     "title": "科内尔任务完成",
     "worldTraversal": "seamless-v1",
-    "frame": 199297,
+    "frame": 199305,
     "suffixFrames": 11,
-    "timelineFrame": 199297
+    "timelineFrame": 199305
   }
 ];
 

@@ -20,7 +20,8 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
-import { createTuxemonSessionOptions, TUXEMON_BATTLE_DB } from "../battle/game.ts";
+import { TUXEMON_BATTLE_DB } from "../battle/game.ts";
+import { mainlineSessionOptions } from "./mainline-session.ts";
 import { createTuxemonExtensions, tuxemonExtensionState } from "../battle/extension.ts";
 import { DAYLIGHT_STAGE_VARIABLE } from "../battle/daylight.ts";
 import { timeWeatherAt, type CivilDateTime, FIXED_INITIAL_CIVIL_TIME } from "../battle/time-weather.ts";
@@ -193,7 +194,7 @@ export function createGameSession(
   const extensions = createTuxemonExtensions(TUXEMON_BATTLE_DB, {
     initialTimeWeather: timeWeatherAt(start),
   });
-  const options = createTuxemonSessionOptions(project, worldTraversal, { maps: repository, extensions });
+  const options = mainlineSessionOptions(project, worldTraversal, { maps: repository, extensions });
   return { project, session: createSession(project, 60, options), options };
 }
 

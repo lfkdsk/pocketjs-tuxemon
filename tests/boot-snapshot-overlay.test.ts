@@ -136,7 +136,7 @@ describe("boot-snapshot overlay", () => {
     const runtime = createBootSnapshotOverlay().create(host);
     runtime.step(0, 0);
 
-    const spec = resolveSegment(ROOT, "radio-broadcast", 185921);
+    const spec = resolveSegment(ROOT, "radio-broadcast", 185929);
     let state = getState();
     let previous = radio.held >>> 0;
     for (const mask of spec.suffix) {
@@ -145,9 +145,9 @@ describe("boot-snapshot overlay", () => {
     }
     // The terminal hash carries the cathedral bill's authored interest/
     // late-fee/share metadata, and the frame shifted by the spectator
-    // battle presentation frames (185181 -> 185921).
+    // battle presentation frames (185181 -> 185929).
     expect(sha256(canonicalJson(state)))
-      .toBe("ab66600f85688b263c7f0072531ff923a6bdd5f11acf551236ea4995f4af9f93");
-    expect(state.frame).toBe(185921);
+      .toBe("3a77d10652eaf061d57447276053948adfe8e318ba3f6e76fa35dd48c4981f2d");
+    expect(state.frame).toBe(185929);
   });
 });

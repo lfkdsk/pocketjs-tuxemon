@@ -3,17 +3,17 @@
   "worldTraversal": "seamless-v1",
   "hz": 60,
   "frames": 13387,
-  "combinedFrames": 199308,
+  "combinedFrames": 199316,
   "durationSeconds": 223.117,
   "base": {
     "format": "pocket-tuxemon/j3-omnichannelradioannounce/v1",
     "worldTraversal": "seamless-v1",
-    "frames": 185921,
-    "tapeSha256": "17bec86dab94255e1883cb4e5457167000b18fa63c9b3a026c8800f879dbcd5b",
-    "terminalStateSha256": "ab66600f85688b263c7f0072531ff923a6bdd5f11acf551236ea4995f4af9f93",
-    "terminalSnapshotSha256": "fdc2e937556247bd83c8ab95c9305f4d3fdab206c0cfc2aa94abc074cec0370b",
+    "frames": 185929,
+    "tapeSha256": "e20046614f834afce4fe7300a307774a9b1c72af5fd8ef6db3b11655a5a579a9",
+    "terminalStateSha256": "3a77d10652eaf061d57447276053948adfe8e318ba3f6e76fa35dd48c4981f2d",
+    "terminalSnapshotSha256": "d55d7f8749b817ee1e2d27424c31a973d468501a44b22bb926e1b4d15820e238",
     "heldMask": 0,
-    "timelineFrame": 185921,
+    "timelineFrame": 185929,
     "map": "spyder_radiotower",
     "position": [
       9,
@@ -15322,8 +15322,8 @@
       "maxHp": 137
     }
   ],
-  "initialStateSha256": "ab66600f85688b263c7f0072531ff923a6bdd5f11acf551236ea4995f4af9f93",
-  "terminalStateSha256": "74960ae947f2337154e714c0c8c9d3c75b4f5e013755f93acc652b419fbeb027",
+  "initialStateSha256": "3a77d10652eaf061d57447276053948adfe8e318ba3f6e76fa35dd48c4981f2d",
+  "terminalStateSha256": "48ab373a6570f0720ac454c18a742c0dd3e72c21a7a1ee995163f5c478ac6dc2",
   "tapeSha256": "08c88566e1da8c7c86816175403152f2f15fbb771d60b2a0756a32c9061987b1",
-  "combinedTapeSha256": "fe75a89d1ff3000c8801fe6945c792cdba907cad63741b81d42de8e39dd186fb"
+  "combinedTapeSha256": "05823130aca3aaa5c77ba74fbf7f55cc6f4ba53245581c27401267980012da4a"
 }

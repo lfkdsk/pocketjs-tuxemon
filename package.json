@@ -61,6 +61,7 @@
     "verify:j4:rates": "J4_VERIFY_MODE=rate-60 bun tools/verify-j4-mainline.ts && J4_VERIFY_MODE=rate-30 bun tools/verify-j4-mainline.ts && J4_VERIFY_MODE=rate-20 bun tools/verify-j4-mainline.ts",
     "verify:j4:full": "J4_VERIFY_MODE=full bun tools/verify-j4-mainline.ts",
     "verify:goldens:sync": "bun tools/verify-goldens-sync.ts",
+    "verify:bootworld:replay": "bun tools/verify-bootworld-replay.ts",
     "goldens:g6": "bun tools/update-g6-goldens.ts",
     "goldens:gb5:battle": "bun tools/update-gb5-battle-goldens.ts",
     "goldens:gb6:route": "bun tools/update-gb6-route-goldens.ts",

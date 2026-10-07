@@ -1,5 +1,5 @@
 // Full-mainline PSP emulator runner: build and run the GB6+J1+J2+J3+J4
-// mainline (199,308 frames) as 28 bounded chapter segments under
+// mainline (199,316 frames) as 28 bounded chapter segments under
 // PPSSPPHeadless, verify each terminal against its desktop pin, and collect
 // the raw profile/bench plus per-segment metrics into reports/psp-mainline/.
 //
@@ -62,12 +62,12 @@ export const SPLIT_ENVELOPES = [
 ];
 
 // The pinned full-mainline extent this plan must cover: the J4 quest ends the
-// Spyder campaign at frame 199,308, split into 28 bounded segments. These are
+// Spyder campaign at frame 199,316, split into 28 bounded segments. These are
 // independent of the plan's own self-report (the plan is hand-written), so a
 // deleted or reordered segment is caught even though `verify` only walks the
 // plan as given.
 export const EXPECTED_SEGMENTS = 28;
-export const EXPECTED_END_FRAME = 199308;
+export const EXPECTED_END_FRAME = 199316;
 
 /** The fixed 28-segment identity table: every plan entry's id, chapter and
  *  [start, end) window, in order. This is independent of the plan's own
@@ -90,21 +90,21 @@ export const EXPECTED_PLAN_IDENTITIES: ReadonlyArray<{ id: string; chapter: stri
   { id: "11-route3-b", chapter: "seg-71527", start: 71539, end: 84645 },
   { id: "12-route3-c", chapter: "seg-84640", start: 84645, end: 97754 },
   { id: "13-leather-town", chapter: "seg-97753", start: 97754, end: 110244 },
-  { id: "14-route-3-north", chapter: "route-3-north", start: 110244, end: 115002 },
-  { id: "15-flower-city", chapter: "flower-city", start: 115002, end: 121764 },
-  { id: "16-captain-returns-a", chapter: "captain-returns", start: 121764, end: 137567 },
-  { id: "17-dojo", chapter: "seg-136603", start: 137567, end: 150957 },
-  { id: "18-route5", chapter: "seg-150820", start: 150957, end: 165155 },
-  { id: "19-candy-town", chapter: "candy-town", start: 165155, end: 171541 },
-  { id: "20-greenwash", chapter: "greenwash-aardant", start: 171541, end: 172980 },
-  { id: "21-hospital-cure", chapter: "hospital-cure", start: 172980, end: 180738 },
-  { id: "22-omnichannel", chapter: "omnichannel-open", start: 180738, end: 185898 },
-  { id: "23-radio-broadcast", chapter: "radio-broadcast", start: 185898, end: 187769 },
-  { id: "24-kernel-briefing", chapter: "kernel-briefing", start: 187769, end: 189150 },
-  { id: "25-surfboard", chapter: "surfboard", start: 189150, end: 191329 },
-  { id: "26-route-b", chapter: "route-b", start: 191329, end: 194841 },
-  { id: "27-data-center", chapter: "data-center", start: 194841, end: 199297 },
-  { id: "28-kernel-defeated", chapter: "kernel-defeated", start: 199297, end: 199308 },
+  { id: "14-route-3-north", chapter: "route-3-north", start: 110244, end: 115006 },
+  { id: "15-flower-city", chapter: "flower-city", start: 115006, end: 121768 },
+  { id: "16-captain-returns-a", chapter: "captain-returns", start: 121768, end: 137571 },
+  { id: "17-dojo", chapter: "seg-136603", start: 137571, end: 150965 },
+  { id: "18-route5", chapter: "seg-150820", start: 150965, end: 165163 },
+  { id: "19-candy-town", chapter: "candy-town", start: 165163, end: 171549 },
+  { id: "20-greenwash", chapter: "greenwash-aardant", start: 171549, end: 172988 },
+  { id: "21-hospital-cure", chapter: "hospital-cure", start: 172988, end: 180746 },
+  { id: "22-omnichannel", chapter: "omnichannel-open", start: 180746, end: 185906 },
+  { id: "23-radio-broadcast", chapter: "radio-broadcast", start: 185906, end: 187777 },
+  { id: "24-kernel-briefing", chapter: "kernel-briefing", start: 187777, end: 189158 },
+  { id: "25-surfboard", chapter: "surfboard", start: 189158, end: 191337 },
+  { id: "26-route-b", chapter: "route-b", start: 191337, end: 194849 },
+  { id: "27-data-center", chapter: "data-center", start: 194849, end: 199305 },
+  { id: "28-kernel-defeated", chapter: "kernel-defeated", start: 199305, end: 199316 },
 ];
 
 /** The 28-segment plan (exported so the coverage invariants are testable

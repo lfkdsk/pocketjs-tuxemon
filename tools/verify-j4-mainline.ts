@@ -7,12 +7,12 @@ import { join, resolve } from "node:path";
 
 import { tuxemonExtensionState } from "../battle/extension.ts";
 import {
-  createTuxemonSessionOptions,
   TUXEMON_BATTLE_DB,
   TUXEMON_BATTLE_RULES,
   TUXEMON_EXTENSIONS,
   TUXEMON_SCENES,
 } from "../battle/game.ts";
+import { mainlineSessionOptions } from "./mainline-session.ts";
 import { tuxemonRuntimeBattleState } from "../battle/runtime.ts";
 import type { SpawnedMonsterSnapshot } from "../battle/types.ts";
 import { AttractController } from "../vendor/pocket-rpgkit/src/engine/attract.ts";
@@ -446,7 +446,7 @@ function replaySegmentPair(journey: J4JourneyResult): [ReplayResult, ReplayResul
     const session = createSession(
       project,
       60,
-      createTuxemonSessionOptions(project, worldTraversal, GAME_OPTIONS),
+      mainlineSessionOptions(project, worldTraversal, GAME_OPTIONS),
     );
     const initial = restoreSessionSnapshot(session, base.snapshot);
     initial.frame = journey.base.timelineFrame;
@@ -474,7 +474,7 @@ function replayMerged(
   const session = createSession(
     project,
     60,
-    createTuxemonSessionOptions(project, worldTraversal, GAME_OPTIONS),
+    mainlineSessionOptions(project, worldTraversal, GAME_OPTIONS),
   );
   return replay(
     session,
@@ -493,7 +493,7 @@ function replayFromSave(combined: readonly number[], point: SavedPoint): Session
   const session = createSession(
     project,
     60,
-    createTuxemonSessionOptions(project, worldTraversal, GAME_OPTIONS),
+    mainlineSessionOptions(project, worldTraversal, GAME_OPTIONS),
   );
   const decoded = decodeEnvelopeText(point.envelope);
   let state = restoreSessionSnapshot(session, decoded);
@@ -525,7 +525,7 @@ function verifyRewind(
     hz: 60,
     attractEnabled: false,
     rewindSeconds: (from - target) / 60,
-    ...createTuxemonSessionOptions(project, worldTraversal, GAME_OPTIONS),
+    ...mainlineSessionOptions(project, worldTraversal, GAME_OPTIONS),
   });
   controller.startPlay();
   for (let frame = 0; frame < from; frame++) controller.step(combined[frame]!);
@@ -563,7 +563,7 @@ function verifyRate(
   hz: number,
 ): Record<string, number | string> {
   const project = readInlineProject(ROOT);
-  const options = createTuxemonSessionOptions(project, worldTraversal, GAME_OPTIONS);
+  const options = mainlineSessionOptions(project, worldTraversal, GAME_OPTIONS);
   const controller = new AttractController(project, combined, { hz, ...options });
   const referenceSession = createSession(project, 60, options);
   let reference = startSession(project, referenceSession);
