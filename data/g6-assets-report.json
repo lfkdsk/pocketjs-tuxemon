@@ -31,10 +31,10 @@
    "json": 3
   },
   "shellBytes": 202196,
-  "entryBytes": 5714710,
-  "canonicalJsonBytes": 10680608,
+  "entryBytes": 5743662,
+  "canonicalJsonBytes": 10715730,
   "entries": 263,
-  "manifestHash": "35377ed9706a999d8585cfd8c2b418ab2e0f049f850e41e62f707857b0651cae",
+  "manifestHash": "760870fc601e021e3ec6499dac217fad5d7be984ac2913a7e6b0d5479af40846",
   "schemaHash": "dddabaa88780fa1e117a911c88e191b5958bd390b41739e8b6bc1fd0f41ed4e0"
  },
  "terrain": {

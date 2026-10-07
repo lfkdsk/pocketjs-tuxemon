@@ -82,7 +82,11 @@ definitions below are the report's own:
 | `lock_controls` / `unlock_controls` | `lockInput` / `unlockInput`. |
 | `transition_teleport` (player, in bounds) | `transfer`; a trailing facing action folds into the transfer direction. With battles on, `tux.clear_npc_parties` runs right before every transfer (also `teleport_faint`'s), and each map has one entry page (`e000_npc_parties`) that runs it once per visit for entries that are not transfers: as upstream `change_map`, every map change drops all non-persistent NPCs' parties. |
 | `start_battle` (player vs trainer) | `battle` with a trainer setup; literal trainer parties are folded in. |
-| `random_encounter` / `wild_encounter` | `battle` with a random-table setup. |
+| `random_encounter` / `wild_encounter` | `battle` with a random-table setup. The encounter roll, daytime filtering and weighted row selection run on the saved RNG cursor (the project's deliberate determinism); repellent, level scaling and held items are unused in the corpus. |
+| `set_party_status player` | `tux.set_party_status` writes `party_lost_hp` (the sum of the party's missing HP) as a text variable. |
+| `modify_money player,,<var>` | `tux.modify_money` resolves the amount from the text variable (an int is direct, a float is a wallet ratio) and refuses an overdraft, matching upstream. |
+| `is/not money_is player,<op>,<var>` | `tux.money_is` compares the wallet against the variable's int value, with the authored operator and negation. |
+| `info <var>,<attr>` | `tux.info` reads the monster whose iid the variable holds (searched across the party, kennel, boxes and NPC parties) and writes `info_<attr>` (the corpus uses `level`). |
 | `create_npc` / `remove_npc` | a presence variable plus a `place` command for the walker. With battles on, creating an NPC that is not on the map and removing one both clear its party (`tux.clear_npc_party`): as upstream, an NPC's party lasts only as long as the NPC. |
 | `char_stop` | `moveControl` stop, cancelling the active route and page patrol. |
 | `set_facing_mode` | `moveControl` facingMode (locked / followMovement). |
@@ -113,7 +117,7 @@ definitions below are the report's own:
 
 | Tuxemon | Lowering |
 |---|---|
-| `char_face player,<dir>` | one-step `moveRoute` (the kit has no face op); a `char_face` immediately after a `char_position` folds into the placement's `dir` instead. |
+| `char_face player,<dir>` | a `moveRoute` with the kit's native `faceUp`/`faceDown`/… step; the step applies on the next boundary tick (upstream faces immediately), so the turn lands one tick after the command. A `char_face` immediately after a `char_position` folds into the placement's `dir` instead, and a spawn-event `char_face npc,<dir>` becomes the NPC page's native initial `dir`. |
 | `add_tracker` | a `switch`; step counters are not modeled. |
 | `add_step_tracker player,…` | `tux.add_step_tracker`; the kit's `playerStep` hook (shared with the daycare) moves every player tracker by one per completed tile, where upstream subtracts the signed tile delta (dx+dy) and also counts teleports. |
 | `transition_teleport` with an out-of-range landing | coordinates clamped into the target map; an isolated landing is repaired to the nearest walkable cell by deterministic four-neighbour BFS. |
@@ -187,16 +191,18 @@ completed-step edge; neither page can consume the edge before the other.
 | `add_step_tracker` and friends for a non-player character | the kit's step hook reports only the player's completed tiles (the pinned content tracks the player only). |
 | `copy_variable` between enum-coded variables | enum codes are numbered per variable, so only variables that hold text copy verbatim. |
 | `transition_teleport` targeting an NPC | only the player transfers. |
-| `modify_money` with a variable amount | only literal amounts are supported. |
+| `create_npc`, `random_monster`, `not char_exists`, … in `test_spyder_cotton_*` / `battle_menu` scenario YAML | these files have no same-slug TMX and no `scenario=` reference, and no `load_yaml` pulls them in, so no map ever materializes them in the pinned source either. |
+| `translated_dialog` with a msgid absent from every catalog | five keys (three in `spyder_test_map`, `spyder_flower_sandy_willtrade`, `water_nice_mayor12`) exist in no `.po`; the fallback shows the raw key. |
+| `set_party_status`, `update_time`, `get_pending_moves`/`remove_tech` in `is current_state Combat*/Teleporter*`-guarded events | the kit does not run map fibers inside combat/menu/teleporter states. The combat move-deletion choice is covered by the battle runtime's deterministic progression (auto-forget the first move); the time variables are write-only in the corpus. |
 | rules inside structurally discarded events | the event never starts (inert, zero-size, fixed-false guard, trigger area outside the map, or over the 64-cell area cap), or it is not materialized by any map. |
 
 Per-rule drop reasons are retained in `dist/import-report.json`.
 
 ## The coverage report
 
-`bun run import` regenerates `reports/G1-coverage.md` (the only committed
-file in `reports/`) and the machine-readable `dist/import-report.json`. The
-report contains:
+`bun run import` regenerates `reports/G1-coverage.md` and
+`reports/G1-coverage.zh_CN.md` (the committed files in `reports/`) and the
+machine-readable `dist/import-report.json`. The report contains:
 
 - a summary table per kind (actions, conditions): number of source types,
   uses, and the four disposition tallies, plus the S1 acceptance baselines;
@@ -216,8 +222,8 @@ Current coverage (G6 profile):
 
 | Kind | Types | Uses | Native | Degraded | Placeholder | Dropped | Executable |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Actions | 98 | 13,617 | 12,199 | 1,100 | 0 | 318 | 97.7% |
-| Conditions | 64 | 8,663 | 8,364 | 56 | 0 | 243 | 97.2% |
+| Actions | 98 | 13,617 | 13,040 | 287 | 0 | 290 | 97.9% |
+| Conditions | 64 | 8,663 | 8,368 | 56 | 0 | 239 | 97.2% |
 
 ## Adding or changing a mapping
 

@@ -15,9 +15,12 @@ test("every G6 lockInput page dynamically releases or transfers", () => {
   // is party_infected ...,all guard used to fold false), adding one more.
   // Surf's independently coalesced shoreline pages no longer split eight
   // existing locked source areas; every remaining lock still releases.
-  expect(report.lockCommands).toBe(336);
-  expect(report.dynamicChecks).toBe(336);
-  expect(report.pages).toBe(331);
+  // The cathedral "Heal Cannot Afford" event on the seven healing centers
+  // (its money_is(variable) guard used to fold false) adds one lockInput
+  // page per center.
+  expect(report.lockCommands).toBe(343);
+  expect(report.dynamicChecks).toBe(343);
+  expect(report.pages).toBe(338);
   expect(report.outcomes).toMatchObject({ unresolved: 0, error: 0 });
   expect(report.failures).toEqual([]);
   expect(report.exceptions).toEqual([]);

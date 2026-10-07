@@ -284,11 +284,11 @@
  "schemaErrors": [],
  "audioQoaPending": [],
  "byFate": {
-  "T1-lowered": 3135,
-  "T3-dropped": 111,
-  "T1": 35856,
-  "T4-dropped": 1742,
-  "T2-dropped": 391,
+  "T1-lowered": 2328,
+  "T3-dropped": 12,
+  "T1": 36965,
+  "T4-dropped": 1721,
+  "T2-dropped": 370,
   "structural": 792
  },
  "rows": [
@@ -409,14 +409,14 @@
   {
    "key": "act:char_face:T1",
    "fate": "T1",
-   "count": 535,
-   "note": "K2 moveRoute targets an arbitrary event"
+   "count": 880,
+   "note": "spawn facing becomes the NPC page's initial dir"
   },
   {
    "key": "act:char_face:T1-lowered",
    "fate": "T1-lowered",
-   "count": 454,
-   "note": "spawn facing becomes the NPC page route"
+   "count": 123,
+   "note": "moveRoute player face"
   },
   {
    "key": "act:char_move:T1",
@@ -497,6 +497,12 @@
    "note": "variable set 0"
   },
   {
+   "key": "act:copy_variable:T1",
+   "fate": "T1",
+   "count": 14,
+   "note": "variable copy of the stored text"
+  },
+  {
    "key": "act:create_kennel:T1",
    "fate": "T1",
    "count": 99,
@@ -535,7 +541,7 @@
   {
    "key": "act:format_variable:T1",
    "fate": "T1",
-   "count": 221,
+   "count": 242,
    "note": "tux.format_variable: Python int()/float() (optionally negated) stored as str()"
   },
   {
@@ -563,10 +569,10 @@
    "note": "KC1 extChoice over the live party (empty party -> no_options; cancel -> no_choice)"
   },
   {
-   "key": "act:info:T4-dropped",
-   "fate": "T4-dropped",
+   "key": "act:info:T1",
+   "fate": "T1",
    "count": 7,
-   "note": "presentation / meta"
+   "note": "tux.info writes info_level from the selected monster"
   },
   {
    "key": "act:load_yaml:T1-lowered",
@@ -577,26 +583,20 @@
   {
    "key": "act:lock_controls:T1",
    "fate": "T1",
-   "count": 328,
+   "count": 335,
    "note": "K1 cross-event input lock command"
   },
   {
    "key": "act:modify_bill:T1",
    "fate": "T1",
-   "count": 7,
+   "count": 21,
    "note": "tux.modify_bill adds to or subtracts from a bill (deletes it at zero)"
-  },
-  {
-   "key": "act:modify_money(var/npc):T2-dropped",
-   "fate": "T2-dropped",
-   "count": 7,
-   "note": "amount from a variable"
   },
   {
    "key": "act:modify_money:T1",
    "fate": "T1",
-   "count": 18,
-   "note": "gold add/sub"
+   "count": 25,
+   "note": "tux.modify_money adds/subtracts a variable amount (int is direct, float is a wallet ratio)"
   },
   {
    "key": "act:modify_monster_bond:T4-dropped",
@@ -649,7 +649,7 @@
   {
    "key": "act:play_sound:T1",
    "fate": "T1",
-   "count": 72,
+   "count": 79,
    "note": "playSe japanese_temple_bell_small"
   },
   {
@@ -665,10 +665,10 @@
    "note": "tux.quarantine transfers infected monsters to/from the hidden quarantine box, honouring its own capacity; a full box keeps the monster in the party and a full party+kennel release keeps it in the box (upstream renames a full box into a successor and overflows the Kennel past its capacity)"
   },
   {
-   "key": "act:random_encounter:T1-lowered",
-   "fate": "T1-lowered",
+   "key": "act:random_encounter:T1",
+   "fate": "T1",
    "count": 476,
-   "note": "deterministic encounter-table sampling with live-clock daytime; no repellent, scaling or held items (unused in corpus)"
+   "note": "battle with a seeded encounter-table roll (live-clock daytime filtering); repellent, level scaling and held items are unused in the corpus"
   },
   {
    "key": "act:random_integer:T1",
@@ -793,7 +793,7 @@
   {
    "key": "act:set_monster_health:T1",
    "fate": "T1",
-   "count": 88,
+   "count": 95,
    "note": "tux.set_monster_health updates persistent party HP"
   },
   {
@@ -805,14 +805,14 @@
   {
    "key": "act:set_monster_status:T1",
    "fate": "T1",
-   "count": 88,
+   "count": 95,
    "note": "tux.set_monster_status updates persistent party status"
   },
   {
-   "key": "act:set_party_status:T4-dropped",
-   "fate": "T4-dropped",
+   "key": "act:set_party_status:T1",
+   "fate": "T1",
    "count": 7,
-   "note": "presentation / meta"
+   "note": "tux.set_party_status writes party_lost_hp (sum of the party's missing HP)"
   },
   {
    "key": "act:set_random_variable:T1",
@@ -853,7 +853,7 @@
   {
    "key": "act:set_variable:T1",
    "fate": "T1",
-   "count": 1374,
+   "count": 1388,
    "note": "variable set enum code (text variables: the literal string)"
   },
   {
@@ -901,7 +901,7 @@
   {
    "key": "act:translated_dialog:T1",
    "fate": "T1",
-   "count": 2241,
+   "count": 2269,
    "note": "text boxes from the active .po catalog with native position and alignment"
   },
   {
@@ -931,7 +931,7 @@
   {
    "key": "act:unlock_controls:T1",
    "fate": "T1",
-   "count": 335,
+   "count": 342,
    "note": "K1 cross-event input lock command"
   },
   {
@@ -943,7 +943,7 @@
   {
    "key": "act:variable_math:T1",
    "fate": "T1",
-   "count": 9,
+   "count": 23,
    "note": "tux.variable_math: float arithmetic (floor-division to int) stored as Python str()"
   },
   {
@@ -955,7 +955,7 @@
   {
    "key": "act:wait:T1",
    "fate": "T1",
-   "count": 441,
+   "count": 448,
    "note": "wait seconds"
   },
   {
@@ -1193,10 +1193,10 @@
    "note": "static map property, folded at import"
   },
   {
-   "key": "cond:is money_is(variable):T2-dropped",
-   "fate": "T2-dropped",
+   "key": "cond:is money_is(variable):T1",
+   "fate": "T1",
    "count": 7,
-   "note": "gold comparison uses a variable operand"
+   "note": "tux.money_is compares gold against a game variable"
   },
   {
    "key": "cond:is money_is:T1",
@@ -1265,10 +1265,10 @@
    "note": "tux.battle_outcome_count extension condition"
   },
   {
-   "key": "cond:not bill_exists:T3-dropped",
-   "fate": "T3-dropped",
+   "key": "cond:not bill_exists:T1",
+   "fate": "T1",
    "count": 99,
-   "note": "monster/party/meta state unknown to P1: fixed answer"
+   "note": "tux.bill_exists checks a bill's presence on the tab (a zero bill still exists)"
   },
   {
    "key": "cond:not char_defeated:T1",
@@ -1367,10 +1367,10 @@
    "note": "static map property, folded at import"
   },
   {
-   "key": "cond:not money_is(variable):T2-dropped",
-   "fate": "T2-dropped",
+   "key": "cond:not money_is(variable):T1",
+   "fate": "T1",
    "count": 7,
-   "note": "gold comparison uses a variable operand"
+   "note": "tux.money_is compares gold against a game variable"
   },
   {
    "key": "cond:not money_is:T1",
@@ -1435,7 +1435,7 @@
   {
    "key": "trigger:guard:T1",
    "fate": "T1",
-   "count": 2399,
+   "count": 2406,
    "note": "parallel"
   },
   {
@@ -1459,7 +1459,7 @@
   {
    "key": "trigger:never-true guard:T4-dropped",
    "fate": "T4-dropped",
-   "count": 814,
+   "count": 807,
    "note": "fixed-false guard (is current_state: combat/menu/teleporter states do not run map fibers in the kit) prevents the source event from starting"
   },
   {
@@ -2899,15 +2899,15 @@
    "summary": {
     "types": 98,
     "uses": 13617,
-    "native": 12213,
-    "degraded": 1088,
+    "native": 13040,
+    "degraded": 287,
     "placeholder": 0,
-    "dropped": 316,
-    "nativePercent": 89.7,
-    "executablePercent": 97.7,
+    "dropped": 290,
+    "nativePercent": 95.8,
+    "executablePercent": 97.9,
     "tier1": {
-     "uses": 6407,
-     "percent": 47.05,
+     "uses": 6418,
+     "percent": 47.13,
      "requiredUses": 6246,
      "requiredPercent": 45.9,
      "meetsBaseline": true
@@ -3080,15 +3080,17 @@
     {
      "type": "char_face",
      "total": 2027,
-     "native": 1562,
-     "degraded": 444,
+     "native": 1889,
+     "degraded": 119,
      "placeholder": 0,
-     "dropped": 21,
+     "dropped": 19,
      "reasons": {
-      "degraded": [
-       "spawn facing becomes the NPC page route",
-       "moveRoute player face",
-       "moveRoute this face"
+      "native": [
+       "spawn facing becomes the NPC page's initial dir",
+       "folded into transfer direction",
+       "K2 moveRoute targets an arbitrary event",
+       "K2 arbitrary-target turn-toward route",
+       "folded into placement dir"
       ],
       "dropped": [
        "runs on the old map during the fade",
@@ -3096,14 +3098,11 @@
        "fixed-false guard (is char_facing: source direction 'top' is not up/down/left/right and can never equal Tuxemon's Direction) prevents the source event from starting",
        "Tuxemon never starts an event without source conditions or behavior",
        "spawn target or direction is unavailable",
-       "Tuxemon's integer tile boundary never contains a point for a zero-size TMX event",
-       "fixed-false guard prevents the source event from starting"
+       "Tuxemon's integer tile boundary never contains a point for a zero-size TMX event"
       ],
-      "native": [
-       "folded into transfer direction",
-       "K2 moveRoute targets an arbitrary event",
-       "K2 arbitrary-target turn-toward route",
-       "folded into placement dir"
+      "degraded": [
+       "moveRoute player face",
+       "moveRoute this face"
       ]
      }
     },
@@ -3261,13 +3260,13 @@
     {
      "type": "copy_variable",
      "total": 2,
-     "native": 0,
+     "native": 2,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 2,
+     "dropped": 0,
      "reasons": {
-      "dropped": [
-       "fixed-false guard prevents the source event from starting"
+      "native": [
+       "variable copy of the stored text"
       ]
      }
     },
@@ -3355,16 +3354,13 @@
     {
      "type": "format_variable",
      "total": 10,
-     "native": 7,
+     "native": 10,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 3,
+     "dropped": 0,
      "reasons": {
       "native": [
        "tux.format_variable: Python int()/float() (optionally negated) stored as str()"
-      ],
-      "dropped": [
-       "fixed-false guard prevents the source event from starting"
       ]
      }
     },
@@ -3414,13 +3410,13 @@
     {
      "type": "info",
      "total": 1,
-     "native": 0,
+     "native": 1,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 1,
+     "dropped": 0,
      "reasons": {
-      "dropped": [
-       "presentation / meta"
+      "native": [
+       "tux.info writes info_level from the selected monster"
       ]
      }
     },
@@ -3440,48 +3436,40 @@
     {
      "type": "lock_controls",
      "total": 323,
-     "native": 322,
+     "native": 323,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 1,
+     "dropped": 0,
      "reasons": {
       "native": [
        "K1 cross-event input lock command"
-      ],
-      "dropped": [
-       "fixed-false guard prevents the source event from starting"
       ]
      }
     },
     {
      "type": "modify_bill",
      "total": 3,
-     "native": 1,
+     "native": 3,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 2,
+     "dropped": 0,
      "reasons": {
       "native": [
        "tux.modify_bill adds to or subtracts from a bill (deletes it at zero)"
-      ],
-      "dropped": [
-       "fixed-false guard prevents the source event from starting"
       ]
      }
     },
     {
      "type": "modify_money",
      "total": 19,
-     "native": 18,
+     "native": 19,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 1,
+     "dropped": 0,
      "reasons": {
       "native": [
-       "gold add/sub"
-      ],
-      "dropped": [
-       "amount from a variable"
+       "gold add/sub",
+       "tux.modify_money adds/subtracts a variable amount (int is direct, float is a wallet ratio)"
       ]
      }
     },
@@ -3634,18 +3622,15 @@
     {
      "type": "play_sound",
      "total": 67,
-     "native": 66,
+     "native": 67,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 1,
+     "dropped": 0,
      "reasons": {
       "native": [
        "playSe sound_confirm",
        "playSe coinecho",
        "playSe japanese_temple_bell_small"
-      ],
-      "dropped": [
-       "fixed-false guard prevents the source event from starting"
       ]
      }
     },
@@ -3691,13 +3676,13 @@
     {
      "type": "random_encounter",
      "total": 476,
-     "native": 0,
-     "degraded": 476,
+     "native": 476,
+     "degraded": 0,
      "placeholder": 0,
      "dropped": 0,
      "reasons": {
-      "degraded": [
-       "deterministic encounter-table sampling with live-clock daytime; no repellent, scaling or held items (unused in corpus)"
+      "native": [
+       "battle with a seeded encounter-table roll (live-clock daytime filtering); repellent, level scaling and held items are unused in the corpus"
       ]
      }
     },
@@ -3973,16 +3958,13 @@
     {
      "type": "set_monster_health",
      "total": 83,
-     "native": 82,
+     "native": 83,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 1,
+     "dropped": 0,
      "reasons": {
       "native": [
        "tux.set_monster_health updates persistent party HP"
-      ],
-      "dropped": [
-       "fixed-false guard prevents the source event from starting"
       ]
      }
     },
@@ -4002,30 +3984,29 @@
     {
      "type": "set_monster_status",
      "total": 83,
-     "native": 82,
+     "native": 83,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 1,
+     "dropped": 0,
      "reasons": {
       "native": [
        "tux.set_monster_status updates persistent party status"
-      ],
-      "dropped": [
-       "fixed-false guard prevents the source event from starting"
       ]
      }
     },
     {
      "type": "set_party_status",
      "total": 2,
-     "native": 0,
+     "native": 1,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 2,
+     "dropped": 1,
      "reasons": {
       "dropped": [
-       "fixed-false guard (is current_state: combat/menu/teleporter states do not run map fibers in the kit) prevents the source event from starting",
-       "presentation / meta"
+       "fixed-false guard (is current_state: combat/menu/teleporter states do not run map fibers in the kit) prevents the source event from starting"
+      ],
+      "native": [
+       "tux.set_party_status writes party_lost_hp (sum of the party's missing HP)"
       ]
      }
     },
@@ -4102,10 +4083,10 @@
     {
      "type": "set_variable",
      "total": 715,
-     "native": 707,
+     "native": 709,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 8,
+     "dropped": 6,
      "reasons": {
       "native": [
        "variable set enum code (text variables: the literal string)",
@@ -4113,8 +4094,7 @@
       ],
       "dropped": [
        "fixed-false guard (is button_pressed: source button 'K_RETURN' is not a supported Tuxemon intention) prevents the source event from starting",
-       "source event is not materialized by any map",
-       "fixed-false guard prevents the source event from starting"
+       "source event is not materialized by any map"
       ]
      }
     },
@@ -4206,10 +4186,10 @@
     {
      "type": "translated_dialog",
      "total": 2068,
-     "native": 2058,
+     "native": 2062,
      "degraded": 1,
      "placeholder": 0,
-     "dropped": 9,
+     "dropped": 5,
      "reasons": {
       "native": [
        "text boxes from the active .po catalog with native position and alignment",
@@ -4218,7 +4198,6 @@
       "dropped": [
        "fixed-false guard (is char_gender: no imported runtime state or predicate) prevents the source event from starting",
        "fixed-false guard (is button_pressed: source button 'K_RETURN' is not a supported Tuxemon intention) prevents the source event from starting",
-       "fixed-false guard prevents the source event from starting",
        "fixed-false guard (is current_state: combat/menu/teleporter states do not run map fibers in the kit) prevents the source event from starting"
       ],
       "degraded": [
@@ -4262,16 +4241,13 @@
     {
      "type": "unlock_controls",
      "total": 330,
-     "native": 329,
+     "native": 330,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 1,
+     "dropped": 0,
      "reasons": {
       "native": [
        "K1 cross-event input lock command"
-      ],
-      "dropped": [
-       "fixed-false guard prevents the source event from starting"
       ]
      }
     },
@@ -4305,14 +4281,11 @@
     {
      "type": "variable_math",
      "total": 5,
-     "native": 3,
+     "native": 5,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 2,
+     "dropped": 0,
      "reasons": {
-      "dropped": [
-       "fixed-false guard prevents the source event from starting"
-      ],
       "native": [
        "tux.variable_math: float arithmetic (floor-division to int) stored as Python str()"
       ]
@@ -4321,18 +4294,17 @@
     {
      "type": "wait",
      "total": 441,
-     "native": 435,
+     "native": 436,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 6,
+     "dropped": 5,
      "reasons": {
       "native": [
        "wait seconds"
       ],
       "dropped": [
        "Tuxemon never starts an event without source conditions or behavior",
-       "runs on the old map during the fade",
-       "fixed-false guard prevents the source event from starting"
+       "runs on the old map during the fade"
       ]
      }
     },
@@ -4358,15 +4330,15 @@
    "summary": {
     "types": 64,
     "uses": 8663,
-    "native": 8364,
+    "native": 8368,
     "degraded": 56,
     "placeholder": 0,
-    "dropped": 243,
-    "nativePercent": 96.5,
+    "dropped": 239,
+    "nativePercent": 96.6,
     "executablePercent": 97.2,
     "tier1": {
-     "uses": 4758,
-     "percent": 54.92,
+     "uses": 4761,
+     "percent": 54.96,
      "requiredUses": 4591,
      "requiredPercent": 53,
      "meetsBaseline": true
@@ -4796,16 +4768,14 @@
     {
      "type": "is money_is",
      "total": 15,
-     "native": 14,
+     "native": 15,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 1,
+     "dropped": 0,
      "reasons": {
       "native": [
-       "gold >= n"
-      ],
-      "dropped": [
-       "gold comparison uses a variable operand"
+       "gold >= n",
+       "tux.money_is compares gold against a game variable"
       ]
      }
     },
@@ -4907,18 +4877,17 @@
     {
      "type": "is variable_set",
      "total": 730,
-     "native": 724,
+     "native": 725,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 6,
+     "dropped": 5,
      "reasons": {
       "native": [
        "page/if variable compare on the enum code",
        "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
       ],
       "dropped": [
-       "source event is not materialized by any map",
-       "fixed-false guard prevents the source event from starting"
+       "source event is not materialized by any map"
       ]
      }
     },
@@ -4951,13 +4920,13 @@
     {
      "type": "not bill_exists",
      "total": 1,
-     "native": 0,
+     "native": 1,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 1,
+     "dropped": 0,
      "reasons": {
-      "dropped": [
-       "monster/party/meta state unknown to P1: fixed answer"
+      "native": [
+       "tux.bill_exists checks a bill's presence on the tab (a zero bill still exists)"
       ]
      }
     },
@@ -5182,16 +5151,14 @@
     {
      "type": "not money_is",
      "total": 9,
-     "native": 8,
+     "native": 9,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 1,
+     "dropped": 0,
      "reasons": {
       "native": [
-       "gold >= n"
-      ],
-      "dropped": [
-       "fixed-false guard prevents the source event from starting"
+       "gold >= n",
+       "tux.money_is compares gold against a game variable"
       ]
      }
     },
@@ -5386,10 +5353,10 @@
   },
   "all": {
    "maps": 263,
-   "events": 8175,
+   "events": 8182,
    "previewed": 1158,
    "fallback": 0,
-   "hidden": 7012,
+   "hidden": 7019,
    "rejected": 5,
    "reasons": {
     "duplicate-id": 0,
@@ -5408,10 +5375,10 @@
   },
   "mainline": {
    "maps": 99,
-   "events": 5259,
+   "events": 5264,
    "previewed": 464,
    "fallback": 0,
-   "hidden": 4795,
+   "hidden": 4800,
    "rejected": 0,
    "reasons": {
     "duplicate-id": 0,
@@ -5656,10 +5623,10 @@
    },
    {
     "mapId": "eclipse_crystal_center",
-    "events": 26,
+    "events": 27,
     "previewed": 1,
     "fallback": 0,
-    "hidden": 25,
+    "hidden": 26,
     "rejected": 0,
     "reasons": {}
    },
@@ -5719,10 +5686,10 @@
    },
    {
     "mapId": "eclipse_obsidian_center",
-    "events": 20,
+    "events": 21,
     "previewed": 1,
     "fallback": 0,
-    "hidden": 19,
+    "hidden": 20,
     "rejected": 0,
     "reasons": {}
    },
@@ -5867,10 +5834,10 @@
    },
    {
     "mapId": "spyder_candy_center",
-    "events": 44,
+    "events": 45,
     "previewed": 2,
     "fallback": 0,
-    "hidden": 42,
+    "hidden": 43,
     "rejected": 0,
     "reasons": {}
    },
@@ -6128,10 +6095,10 @@
    },
    {
     "mapId": "spyder_flower_center",
-    "events": 34,
+    "events": 35,
     "previewed": 1,
     "fallback": 0,
-    "hidden": 33,
+    "hidden": 34,
     "rejected": 0,
     "reasons": {}
    },
@@ -6209,19 +6176,19 @@
    },
    {
     "mapId": "spyder_healing_center",
-    "events": 44,
+    "events": 45,
     "previewed": 1,
     "fallback": 0,
-    "hidden": 43,
+    "hidden": 44,
     "rejected": 0,
     "reasons": {}
    },
    {
     "mapId": "spyder_leather_center",
-    "events": 34,
+    "events": 35,
     "previewed": 1,
     "fallback": 0,
-    "hidden": 33,
+    "hidden": 34,
     "rejected": 0,
     "reasons": {}
    },
@@ -6569,10 +6536,10 @@
    },
    {
     "mapId": "spyder_timber_center",
-    "events": 34,
+    "events": 35,
     "previewed": 1,
     "fallback": 0,
-    "hidden": 33,
+    "hidden": 34,
     "rejected": 0,
     "reasons": {}
    },

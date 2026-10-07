@@ -1481,8 +1481,12 @@ function clauses(
     }
     case "money_is": {
       if (!/^\d+$/.test(a[2]!)) {
-        noteCondition(c, `${c.op} money_is(variable)`, "T2-dropped", "gold comparison uses a variable operand");
-        return K(true);
+        if (a[0] !== "player" || !options.battle) {
+          noteCondition(c, `${c.op} money_is(variable)`, "T2-dropped", "gold comparison uses a variable operand");
+          return K(true);
+        }
+        noteCondition(c, `${c.op} money_is(variable)`, "T1", "tux.money_is compares gold against a game variable");
+        return [{ k: "ext", call: "tux.money_is", args: { character: "player", operator: a[1], variable: varId(a[2]!), negate: not } }];
       }
       const n = Number(a[2]);
       const op = a[1];
@@ -1618,6 +1622,15 @@ function clauses(
         noteCondition(c, `${c.op} bill_is`, "T1", "tux.bill_is compares a bill amount (missing/zero bill is false)");
         return [{ k: "ext", call: "tux.bill_is", args: {
           character: a[0]!, bill: a[1]!, operator: a[2]!, amount: Number(a[3]), negate: not,
+        } }];
+      }
+      noteCondition(c, `${c.op} ${c.type}`, "T3-dropped", "monster/party/meta state unknown to P1: fixed answer");
+      return K(false);
+    case "bill_exists":
+      if (options.battle) {
+        noteCondition(c, `${c.op} bill_exists`, "T1", "tux.bill_exists checks a bill's presence on the tab (a zero bill still exists)");
+        return [{ k: "ext", call: "tux.bill_exists", args: {
+          character: a[0]!, bill: a[1]!, negate: not,
         } }];
       }
       noteCondition(c, `${c.op} ${c.type}`, "T3-dropped", "monster/party/meta state unknown to P1: fixed answer");
@@ -2677,9 +2690,18 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         break;
       }
       case "modify_money":
-        if (g[0] !== "player" || !g[1]) { noteAction(a, "modify_money(var/npc)", "T2-dropped", "amount from a variable"); break; }
-        noteAction(a, a.type, "T1", "gold add/sub");
-        out.push({ op: "gold", set: Number(g[1]) >= 0 ? "add" : "sub", amount: Math.abs(Number(g[1])) });
+        if (g[0] !== "player") { noteAction(a, "modify_money(npc)", "T2-dropped", "only the player's wallet is imported"); break; }
+        if (g[1]) {
+          noteAction(a, a.type, "T1", "gold add/sub");
+          out.push({ op: "gold", set: Number(g[1]) >= 0 ? "add" : "sub", amount: Math.abs(Number(g[1])) });
+        } else if (g[2] && ctx.options.battle) {
+          noteAction(a, a.type, "T1", "tux.modify_money adds/subtracts a variable amount (int is direct, float is a wallet ratio)");
+          out.push({ op: "ext", call: "tux.modify_money", args: { character: "player", variable: varId(g[2]) } });
+        } else if (g[2]) {
+          noteAction(a, "modify_money(var)", "T3-dropped", "variable amounts need the battle runtime");
+        } else {
+          noteAction(a, "modify_money(zero)", "T4-dropped", "no amount is a no-op");
+        }
         break;
       case "add_tracker":
         noteAction(a, a.type, "T1-lowered", "switch tracker.<map>");
@@ -3042,8 +3064,8 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         break;
       case "random_encounter":
         if (ctx.options.battle) {
-          noteAction(a, a.type, "T1-lowered",
-            "deterministic encounter-table sampling with live-clock daytime; no repellent, scaling or held items (unused in corpus)");
+          noteAction(a, a.type, "T1",
+            "battle with a seeded encounter-table roll (live-clock daytime filtering); repellent, level scaling and held items are unused in the corpus");
           out.push({ op: "battle", setup: {
             kind: "random",
             table: g[0]!,
@@ -3488,6 +3510,28 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         out.push({ op: "ext", call: "tux.modify_bill", args });
         break;
       }
+      case "set_party_status": {
+        if (!ctx.options.battle) {
+          noteAction(a, a.type, "T3-dropped", "monster/combat subsystem (P2)");
+          break;
+        }
+        const character = g[0] || "player";
+        if (character !== "player") { noteAction(a, "set_party_status(npc)", "T2-dropped", "only the player's party is imported"); break; }
+        noteAction(a, a.type, "T1", "tux.set_party_status writes party_lost_hp (sum of the party's missing HP)");
+        out.push({ op: "ext", call: "tux.set_party_status", args: { character, variable: varId("party_lost_hp") } });
+        break;
+      }
+      case "info": {
+        if (!ctx.options.battle) {
+          noteAction(a, a.type, "T3-dropped", "monster/combat subsystem (P2)");
+          break;
+        }
+        const [variable, attribute] = g;
+        if (!variable || !attribute) { noteAction(a, "info(malformed)", "T4-dropped", "missing variable or attribute"); break; }
+        noteAction(a, a.type, "T1", `tux.info writes info_${attribute} from the selected monster`);
+        out.push({ op: "ext", call: "tux.info", args: { variable: varId(variable), attribute, result: varId(`info_${attribute}`) } });
+        break;
+      }
       case "variable_math": {
         const [left, operator, right, result] = g;
         const operand = (text: string | undefined): JsonValue | null => {
@@ -3896,7 +3940,8 @@ function convertMap(
           if (a.type === "char_face") {
             if (npcs.has(a.args[0]!) && DIRS.has(a.args[1]!)) {
               npcOf(a.args[0]!).face = a.args[1];
-              noteAction(a, a.type, "T1-lowered", "spawn facing becomes the NPC page route");
+              noteAction(a, a.type, options.place ? "T1" : "T1-lowered",
+                options.place ? "spawn facing becomes the NPC page's initial dir" : "spawn facing becomes the NPC page route");
             } else {
               noteAction(a, "char_face(spawn unsupported)", "T2-dropped", "spawn target or direction is unavailable");
             }

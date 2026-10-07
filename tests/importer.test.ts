@@ -683,10 +683,9 @@ test("dialog templates map to kit text tokens and the project declares them", ()
   expect(all).toContain("{x:monster_0_level}");
   expect(all).toContain("{v:v.chad_points}");
   expect(all).toContain("{v:v.brad_points}");
-  // The cathedral_fee variable is written by the spyder scenario; its token
-  // resolves at runtime. scoop_price/party_lost_hp/cathedral_share_full/
-  // cathedral_interest_full have no imported writer and render the kit's
-  // unset-variable default ("0").
+  // These cathedral variables are written by imported scenario actions and
+  // resolve at runtime. This assertion only checks that their source tokens
+  // survive import; the billing/text-variable tests cover the live values.
 });
 
 test("the importer emits a slug->description table for {x:map_desc}", () => {

@@ -201,7 +201,8 @@ describe("map_desc token (${{map_desc}})", () => {
 
 describe("var tokens (${{var:X}} -> {v:v.X})", () => {
   test("a written variable expands to its live value; an unwritten one to 0", () => {
-    // scoop_price has no imported writer and renders the kit's unset default.
+    // This isolated resolver call supplies no scoop_price value, so the kit's
+    // unset default is rendered even though imported scenarios can write it.
     expect(expandTextTokens("{v:v.scoop_price}", "Spyder", {}, null, null, false)).toBe("0");
   });
 });

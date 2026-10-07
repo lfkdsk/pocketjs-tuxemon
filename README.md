@@ -316,9 +316,10 @@ Known limitations:
   allowlist. The only `???` left are upstream's own 2 literal
   anonymous-speaker lines (`???: ...` in cotton_town), which the Chinese
   build renders with full-width punctuation; `tests/placeholder-parity.test.ts`
-  pins both. Variables with no imported writer (`scoop_price`,
-  `party_lost_hp`, `cathedral_share_full`, `cathedral_interest_full`) render
-  the kit's unset-variable default (`0`).
+  pins both. Imported cathedral flows write `scoop_price`, `party_lost_hp`,
+  `cathedral_share_full`, and `cathedral_interest_full` before displaying
+  them; if any variable is read before its scenario action runs, the kit's
+  unset-variable default is `0`.
 - The battle menu is localized: root commands (Fight/Item/Forfeit/…), the
   technique/item/party submenus, monster names, and the battle narration all
   render in Chinese from the generated `data/battle-names.zh_CN.json` table.

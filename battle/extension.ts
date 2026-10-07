@@ -14,6 +14,7 @@ import {
 import { advanceDaycareStep } from "./daycare.ts";
 import {
   formatVariableCommand,
+  pyValueFromText,
   setVariableTextCommand,
   variableMathCommand,
   variableTextCondition,
@@ -2390,6 +2391,149 @@ function adjustBillPenaltyCommand() {
   };
 }
 
+/** set_party_status: upstream records `party_lost_hp`, the sum of every
+ *  party monster's missing HP, as a game variable (only when it changes).
+ *  The cathedral billing flow reads it through money_is/modify_money and
+ *  format_variable, so it is stored as the variable's Python str. Upstream
+ *  stops without writing when the character has no monsters
+ *  (set_party_status.py:36-40). */
+function setPartyStatusCommand() {
+  return (context: ExtensionCommandContext, value: JsonValue) => {
+    const args = argsRecord(value, "tux.set_party_status");
+    const character = args.character === undefined ? "player" : args.character;
+    if (!nonEmptyString(character) || !nonEmptyString(args.variable)) return;
+    if (character !== "player") return;
+    const state = currentExtensionState(context.ext);
+    if (state.party.length === 0) return;
+    let lost = 0;
+    for (const monster of state.party) {
+      const max = monster.base.hp;
+      const current = monster.currentHp ?? max;
+      lost += Math.max(0, max - current);
+    }
+    const text = String(lost);
+    if (context.variables[args.variable] === text) return;
+    return { writes: { [args.variable]: text } };
+  };
+}
+
+/** Resolve a money amount from a literal or a game variable. Upstream
+ *  game variables are typed: an int variable is a direct amount, a float
+ *  variable is a ratio of the current wallet (int(wallet * ratio)). The
+ *  port stores Python str() of the value, so the type is read back from
+ *  the text. A missing variable is upstream's `get(var, 0)` default: a
+ *  zero-amount no-op (modify_money.py:51); a present value that is not
+ *  numeric is upstream's ValueError. */
+function resolveMoneyAmount(context: ExtensionCommandContext, ref: unknown, literal: unknown): number {
+  if (literal !== undefined && literal !== null && literal !== "") {
+    const amount = Number(literal);
+    if (!Number.isFinite(amount)) throw new Error("tux.money: amount must be numeric");
+    return Math.trunc(amount);
+  }
+  if (!nonEmptyString(ref)) return 0;
+  if (!Object.prototype.hasOwnProperty.call(context.variables, ref)) return 0;
+  const stored = context.variables[ref];
+  if (typeof stored === "number") {
+    return Number.isInteger(stored) ? stored : Math.trunc(context.gold * stored);
+  }
+  if (typeof stored !== "string" || stored === "") {
+    throw new Error(`tux.money: variable '${ref}' is not numeric`);
+  }
+  const typed = pyValueFromText(stored);
+  if (typed === null) throw new Error(`tux.money: variable '${ref}' is not numeric`);
+  if (typed.kind === "int") return typed.value;
+  return Math.trunc(context.gold * typed.value);
+}
+
+/** modify_money: add to or subtract from the player's wallet. Upstream
+ *  raises when a withdrawal would overdraw the account; the authored
+ *  events guard that branch with money_is, so the error surfaces a real
+ *  content bug instead of silently going negative. */
+function modifyMoneyCommand() {
+  return (context: ExtensionCommandContext, value: JsonValue) => {
+    const args = argsRecord(value, "tux.modify_money");
+    const character = args.character === undefined ? "player" : args.character;
+    if (!nonEmptyString(character)) return;
+    if (character !== "player") return;
+    const amount = resolveMoneyAmount(context, args.variable, args.amount);
+    if (amount === 0) return;
+    if (amount < 0 && context.gold + amount < 0) {
+      throw new Error(`tux.modify_money: cannot remove ${-amount}, only ${context.gold} available`);
+    }
+    return { gold: context.gold + amount };
+  };
+}
+
+/** money_is: compare the player's wallet against a literal or a game
+ *  variable. Upstream reads int(variable) (truncating a float value); the
+ *  port stores the text and truncates the same way. A missing variable is
+ *  0 upstream. */
+function moneyIsCondition() {
+  return (context: ExtensionReadContext, value: JsonValue) => {
+    const args = argsRecord(value, "tux.money_is");
+    const character = args.character === undefined ? "player" : args.character;
+    if (!nonEmptyString(character)) return negate(false, args);
+    if (character !== "player") return negate(false, args);
+    let amount: number;
+    if (args.variable !== undefined && args.variable !== null && args.variable !== "") {
+      const stored = context.variables[String(args.variable)];
+      if (typeof stored !== "string" || stored === "") {
+        amount = 0;
+      } else {
+        const typed = pyValueFromText(stored);
+        if (typed === null) throw new Error(`tux.money_is: variable '${String(args.variable)}' is not numeric`);
+        amount = typed.kind === "int" ? typed.value : Math.trunc(typed.value);
+      }
+    } else {
+      amount = Number(args.amount ?? 0);
+      if (!Number.isFinite(amount)) return negate(false, args);
+      amount = Math.trunc(amount);
+    }
+    return negate(compare(args.operator, context.gold, amount), args);
+  };
+}
+
+/** info: record a monster attribute in `info_<attribute>`. The corpus only
+ *  asks for `level`, but the snapshot's stable fields are all readable. The
+ *  monster is the iid the named variable holds (written by get_player_monster
+ *  or get_party_monsters), searched across the party, kennel, boxes and NPC
+ *  parties like remove_monster. A missing iid or attribute is upstream's
+ *  logged stop, so the command writes nothing. */
+function infoCommand() {
+  return (context: ExtensionCommandContext, value: JsonValue) => {
+    const args = argsRecord(value, "tux.info");
+    if (!nonEmptyString(args.variable) || !nonEmptyString(args.attribute) || !nonEmptyString(args.result)) return;
+    const iid = context.variables[args.variable];
+    if (typeof iid !== "string" || iid.length === 0) return;
+    const state = currentExtensionState(context.ext);
+    const monster = state.party.find((m) => m.iid === iid)
+      ?? state.kennel.find((m) => m.iid === iid)
+      ?? Object.values(state.boxes ?? {}).flatMap((box) => box.monsters).find((m) => m.iid === iid)
+      ?? Object.values(state.npcParties).flat().find((m) => m.iid === iid);
+    if (!monster) return;
+    const attribute = infoAttribute(monster, args.attribute);
+    if (attribute === null) return;
+    const text = String(attribute);
+    if (context.variables[args.result] === text) return;
+    return { writes: { [args.result]: text } };
+  };
+}
+
+function infoAttribute(monster: SpawnedMonsterSnapshot | PendingMonster, attribute: string): string | number | null {
+  switch (attribute) {
+    case "level": return monster.level;
+    case "slug": return monster.slug;
+    case "name": return monster.nickname ?? monster.slug;
+    case "gender": return monster.gender ?? null;
+    case "stage": return "stage" in monster ? monster.stage : null;
+    case "height": return "height" in monster && monster.height !== undefined ? Math.trunc(monster.height) : null;
+    case "weight": return "weight" in monster && monster.weight !== undefined ? Math.trunc(monster.weight) : null;
+    case "current_hp": return "base" in monster ? (monster.currentHp ?? monster.base.hp) : null;
+    case "max_hp": return "base" in monster ? monster.base.hp : null;
+    default: return null;
+  }
+}
+
 /** Upstream MoneyManager.apply_all_battle_shares: each of the winner's
  *  bills with a shareRate diverts trunc(earnings * rate) of the battle
  *  winnings to pay itself down (a bill reaching zero is deleted), and
@@ -2515,6 +2659,17 @@ function billIsCondition() {
     const amount = typeof args.amount === "number" ? args.amount : Number(args.amount ?? 0);
     if (!Number.isFinite(amount)) return negate(false, args);
     return negate(compare(args.operator, bill.amount, amount), args);
+  };
+}
+
+/** bill_exists: upstream money_manager.get_bill returns the entry for any
+ *  bill on the tab, including a zero-amount one (bill_exists.py:46-48). */
+function billExistsCondition() {
+  return (context: ExtensionReadContext, value: JsonValue) => {
+    const args = argsRecord(value, "tux.bill_exists");
+    if (!nonEmptyString(args.character) || !nonEmptyString(args.bill)) return negate(false, args);
+    const state = currentExtensionState(context.ext);
+    return negate(state.bills[args.character]?.[args.bill] !== undefined, args);
   };
 }
 /** Pure game registration used by createSession, GameView and attract replay. */
@@ -2644,6 +2799,9 @@ export function createTuxemonExtensions(
       "tux.set_bill": setBillCommand(),
       "tux.modify_bill": modifyBillCommand(),
       "tux.adjust_bill_penalty": adjustBillPenaltyCommand(),
+      "tux.set_party_status": setPartyStatusCommand(),
+      "tux.modify_money": modifyMoneyCommand(),
+      "tux.info": infoCommand(),
       "tux.create_kennel": createKennelCommand(),
       "tux.set_kennel_visible": setKennelVisibleCommand(),
       "tux.player_step": playerStepCommand(source),
@@ -2842,6 +3000,8 @@ export function createTuxemonExtensions(
       "tux.check_max_tech": checkMaxTechCondition(source),
       "tux.party_infected": partyInfectedCondition(),
       "tux.bill_is": billIsCondition(),
+      "tux.bill_exists": billExistsCondition(),
+      "tux.money_is": moneyIsCondition(),
       "tux.step_tracker": stepTrackerCondition,
       "tux.variable_text": variableTextCondition,
       // `kennel <character>,<box>,visible|hidden|exist`. A missing character

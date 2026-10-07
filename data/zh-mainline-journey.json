@@ -4,7 +4,7 @@
   "hz": 60,
   "worldTraversal": "seamless-v1",
   "source": {
-    "chaptersSha256": "9722235f19279f661d5e6f4cb78ad65865c31f96bb30a428b4928a68c16160fa",
+    "chaptersSha256": "2ec3853b805ed5b057ed212030b3ea5cf6f9b1af022e82fcc89634e08a678dce",
     "tape": {
       "gb6": {
         "file": "data/gb6-mainline-journey.json",
@@ -47,8 +47,8 @@
     "fallbacks": [
       "fonts/NotoSansCJKsc-subset.otf"
     ],
-    "fontSha256": "061287cd8736d448e537dc186ca396e9d306f2c8f3c7b32d641e6d9924bab1dc",
-    "charsetSha256": "e7cb50da144d14aa5b68058a56363baa8bb0003110b98c2d8b64d166dddb3fc4"
+    "fontSha256": "8234a03e2a650587f4dc5c336aedba1fe15b6ab4b1e869c9c19d372642c3a79c",
+    "charsetSha256": "56cb1e5cd00fcddcb41e5cf5b97234fe4b05869287205b0088faa9a5e4ff0eeb"
   },
   "frames": 199316,
   "tapeSha256": "0150715c97199eaab8b249248c97e370d8023d9a0d5912b125fe69e6006af454",
@@ -96,7 +96,7 @@
       ],
       "facing": 3,
       "frame": 199316,
-      "gold": 68920,
+      "gold": 68298,
       "items": {
         "aardant": 1,
         "app_map": 1,
@@ -123,8 +123,8 @@
         "cardiling:8",
         "pawsand:9"
       ],
-      "storySha256": "187f2002f6fbf3efb33f1aa0146c09b259dcc6bb25365a9a14b925fe4ef29e9c"
+      "storySha256": "f0ea898f960ab45f40eb869f405ddfb513912b071bb2db7cc0a9be31cd6dae5e"
     },
-    "neutralSha256": "34112fdeb3f95ef811638f698f5e48e3aea3c12b467f55a1cc1c17ec2dbd53f8"
+    "neutralSha256": "c167224c26b054e2978f091cf2b20ebe5025fa7baa5deaf858c2d99ac0026f50"
   }
 }

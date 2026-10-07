@@ -11,20 +11,20 @@ When conversion discards a whole event, every source rule in it is Dropped.
 
 | Kind | Kinds | Uses | Native | Degraded | Placeholder | Dropped | S1 T1 baseline |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Actions | 98 | 13617 | 12213 | 1088 | 0 | 316 | 6407 / 6246 (47.05% / 45.9%) |
-| Conditions | 64 | 8663 | 8364 | 56 | 0 | 243 | 4758 / 4591 (54.92% / 53.0%) |
+| Actions | 98 | 13617 | 13040 | 287 | 0 | 290 | 6418 / 6246 (47.13% / 45.9%) |
+| Conditions | 64 | 8663 | 8368 | 56 | 0 | 239 | 4761 / 4591 (54.96% / 53.0%) |
 
 The S1 acceptance baselines are 6,246 action uses (45.9%) and 4,591
 condition uses (53.0%). Only T1 source types whose disposition is Native or
-Degraded count toward them. This import records 6407
-(47.05%) and 4758
-(54.92%), respectively: 161 above
-for actions and 167 above for conditions. The old
+Degraded count toward them. This import records 6418
+(47.13%) and 4761
+(54.96%), respectively: 172 above
+for actions and 170 above for conditions. The old
 type-table Native figure was 5,448 / 13,617 (40.0%); conversion-path accounting
-supersedes it with 12213 / 13617
-(89.7%). “Executable”
+supersedes it with 13040 / 13617
+(95.8%). “Executable”
 (native + degraded + deliberate P1 placeholder) is
-97.7% for actions and
+97.9% for actions and
 97.2% for conditions.
 
 Definitions:
@@ -226,8 +226,8 @@ repeats it at every mainline chapter.
 游戏钩子的缓存键去掉步数倒计时，时钟与天气只保留日期、小时与天气（`time_is` 的每个属性都由日期和小时决定）；扰动探针在同一小时内把分钟拨 15。
 下表是新游戏状态下的结果；各主线章节的结果见 `bun run verify:preview:coverage`。
 
-- All maps / 全部地图: 263 maps, 8175 events: 1158 previewable (0 from the static rules), 7012 hidden, 5 rejected; 99.6% of the events that paint are previewable; 165 maps show at least one character.
-- Mainline (`spyder_*`) / 主线: 99 maps, 5259 events: 464 previewable (0 from the static rules), 4795 hidden, 0 rejected; 100.0% of the events that paint are previewable; 89 maps show at least one character.
+- All maps / 全部地图: 263 maps, 8182 events: 1158 previewable (0 from the static rules), 7019 hidden, 5 rejected; 99.6% of the events that paint are previewable; 165 maps show at least one character.
+- Mainline (`spyder_*`) / 主线: 99 maps, 5264 events: 464 previewable (0 from the static rules), 4800 hidden, 0 rejected; 100.0% of the events that paint are previewable; 89 maps show at least one character.
 
 | Reject reason / 拒绝原因 | All / 全部 | Mainline / 主线 | Meaning / 含义 |
 |---|---:|---:|---|
@@ -272,14 +272,14 @@ Maps with a previewable or rejected event / 有可预览或被拒绝事件的地
 | `eclipse_crystal_bank1` | 15 | 4 | 0 | 11 | 0 | — |
 | `eclipse_crystal_bank2` | 15 | 4 | 0 | 11 | 0 | — |
 | `eclipse_crystal_bank3` | 16 | 3 | 0 | 13 | 0 | — |
-| `eclipse_crystal_center` | 26 | 1 | 0 | 25 | 0 | — |
+| `eclipse_crystal_center` | 27 | 1 | 0 | 26 | 0 | — |
 | `eclipse_crystal_town` | 23 | 4 | 0 | 19 | 0 | — |
 | `eclipse_crystal_town_cafe` | 16 | 5 | 0 | 11 | 0 | — |
 | `eclipse_crystal_town_house` | 8 | 1 | 0 | 7 | 0 | — |
 | `eclipse_lion_mountain_high` | 30 | 5 | 0 | 25 | 0 | — |
 | `eclipse_lion_mountain_low` | 20 | 2 | 0 | 18 | 0 | — |
 | `eclipse_lion_mountain_middle` | 32 | 6 | 0 | 26 | 0 | — |
-| `eclipse_obsidian_center` | 20 | 1 | 0 | 19 | 0 | — |
+| `eclipse_obsidian_center` | 21 | 1 | 0 | 20 | 0 | — |
 | `eclipse_park` | 41 | 0 | 0 | 37 | 4 | entry-transfer:4 |
 | `eclipse_park_cabin` | 7 | 1 | 0 | 6 | 0 | — |
 | `eclipse_park_cave` | 12 | 0 | 0 | 11 | 1 | entry-transfer:1 |
@@ -295,7 +295,7 @@ Maps with a previewable or rejected event / 有可预览或被拒绝事件的地
 | `route2` | 51 | 1 | 0 | 50 | 0 | — |
 | `sphalian_center` | 10 | 1 | 0 | 9 | 0 | — |
 | `spyder_candy_cafe` | 42 | 4 | 0 | 38 | 0 | — |
-| `spyder_candy_center` | 44 | 2 | 0 | 42 | 0 | — |
+| `spyder_candy_center` | 45 | 2 | 0 | 43 | 0 | — |
 | `spyder_candy_hospital1` | 59 | 10 | 0 | 49 | 0 | — |
 | `spyder_candy_hospital2` | 51 | 8 | 0 | 43 | 0 | — |
 | `spyder_candy_hospital3` | 34 | 2 | 0 | 32 | 0 | — |
@@ -324,7 +324,7 @@ Maps with a previewable or rejected event / 有可预览或被拒绝事件的地
 | `spyder_downstairs` | 24 | 1 | 0 | 23 | 0 | — |
 | `spyder_dragonscave` | 78 | 11 | 0 | 67 | 0 | — |
 | `spyder_dryadsgrove` | 292 | 8 | 0 | 284 | 0 | — |
-| `spyder_flower_center` | 34 | 1 | 0 | 33 | 0 | — |
+| `spyder_flower_center` | 35 | 1 | 0 | 34 | 0 | — |
 | `spyder_flower_city` | 114 | 13 | 0 | 101 | 0 | — |
 | `spyder_flower_house1` | 23 | 2 | 0 | 21 | 0 | — |
 | `spyder_flower_house2` | 22 | 2 | 0 | 20 | 0 | — |
@@ -333,8 +333,8 @@ Maps with a previewable or rejected event / 有可预览或被拒绝事件的地
 | `spyder_greenwash` | 40 | 6 | 0 | 34 | 0 | — |
 | `spyder_greenwash_greenhouse` | 55 | 7 | 0 | 48 | 0 | — |
 | `spyder_greenwash_level2` | 64 | 6 | 0 | 58 | 0 | — |
-| `spyder_healing_center` | 44 | 1 | 0 | 43 | 0 | — |
-| `spyder_leather_center` | 34 | 1 | 0 | 33 | 0 | — |
+| `spyder_healing_center` | 45 | 1 | 0 | 44 | 0 | — |
+| `spyder_leather_center` | 35 | 1 | 0 | 34 | 0 | — |
 | `spyder_leather_gym` | 38 | 7 | 0 | 31 | 0 | — |
 | `spyder_leather_house1` | 21 | 2 | 0 | 19 | 0 | — |
 | `spyder_leather_house2` | 24 | 3 | 0 | 21 | 0 | — |
@@ -373,7 +373,7 @@ Maps with a previewable or rejected event / 有可预览或被拒绝事件的地
 | `spyder_scoop4` | 44 | 11 | 0 | 33 | 0 | — |
 | `spyder_test_map` | 46 | 6 | 0 | 40 | 0 | — |
 | `spyder_timber_cafe` | 31 | 3 | 0 | 28 | 0 | — |
-| `spyder_timber_center` | 34 | 1 | 0 | 33 | 0 | — |
+| `spyder_timber_center` | 35 | 1 | 0 | 34 | 0 | — |
 | `spyder_timber_house` | 20 | 1 | 0 | 19 | 0 | — |
 | `spyder_timber_scoop` | 27 | 2 | 0 | 25 | 0 | — |
 | `spyder_timber_town` | 92 | 2 | 0 | 90 | 0 | — |
@@ -442,7 +442,7 @@ four-neighbour BFS with fixed tie-breaking selects the nearest walkable cell:
 | Action | `change_bg_char` | 4 | 0 | 0 | 0 | 4 |
 | Action | `change_bg_monster` | 7 | 0 | 0 | 0 | 7 |
 | Action | `change_taste` | 0 | 0 | 0 | 2 | 2 |
-| Action | `char_face` | 1562 | 444 | 0 | 21 | 2027 |
+| Action | `char_face` | 1889 | 119 | 0 | 19 | 2027 |
 | Action | `char_move` | 64 | 13 | 0 | 0 | 77 |
 | Action | `char_plague` | 13 | 0 | 0 | 0 | 13 |
 | Action | `char_position` | 0 | 1 | 0 | 0 | 1 |
@@ -454,22 +454,22 @@ four-neighbour BFS with fixed tie-breaking selects the nearest walkable cell:
 | Action | `choice_monster` | 2 | 0 | 0 | 0 | 2 |
 | Action | `choice_npc` | 1 | 0 | 0 | 0 | 1 |
 | Action | `clear_variable` | 36 | 0 | 0 | 0 | 36 |
-| Action | `copy_variable` | 0 | 0 | 0 | 2 | 2 |
+| Action | `copy_variable` | 2 | 0 | 0 | 0 | 2 |
 | Action | `create_kennel` | 1 | 0 | 0 | 0 | 1 |
 | Action | `create_npc` | 1328 | 0 | 0 | 175 | 1503 |
 | Action | `daycare` | 2 | 0 | 0 | 0 | 2 |
 | Action | `dojo_method` | 0 | 0 | 0 | 3 | 3 |
 | Action | `evolution` | 2 | 0 | 0 | 0 | 2 |
 | Action | `fadeout_music` | 1 | 0 | 0 | 0 | 1 |
-| Action | `format_variable` | 7 | 0 | 0 | 3 | 10 |
+| Action | `format_variable` | 10 | 0 | 0 | 0 | 10 |
 | Action | `get_party_monster` | 9 | 0 | 0 | 0 | 9 |
 | Action | `get_pending_moves` | 0 | 0 | 0 | 2 | 2 |
 | Action | `get_player_monster` | 15 | 2 | 0 | 0 | 17 |
-| Action | `info` | 0 | 0 | 0 | 1 | 1 |
+| Action | `info` | 1 | 0 | 0 | 0 | 1 |
 | Action | `load_yaml` | 0 | 7 | 0 | 0 | 7 |
-| Action | `lock_controls` | 322 | 0 | 0 | 1 | 323 |
-| Action | `modify_bill` | 1 | 0 | 0 | 2 | 3 |
-| Action | `modify_money` | 18 | 0 | 0 | 1 | 19 |
+| Action | `lock_controls` | 323 | 0 | 0 | 0 | 323 |
+| Action | `modify_bill` | 3 | 0 | 0 | 0 | 3 |
+| Action | `modify_money` | 19 | 0 | 0 | 0 | 19 |
 | Action | `modify_monster_bond` | 0 | 0 | 0 | 1 | 1 |
 | Action | `not` | 0 | 0 | 0 | 1 | 1 |
 | Action | `open_journal` | 0 | 14 | 0 | 0 | 14 |
@@ -479,11 +479,11 @@ four-neighbour BFS with fixed tie-breaking selects the nearest walkable cell:
 | Action | `pathfind_to_char` | 201 | 0 | 0 | 0 | 201 |
 | Action | `play_map_animation` | 276 | 0 | 0 | 0 | 276 |
 | Action | `play_music` | 199 | 0 | 0 | 1 | 200 |
-| Action | `play_sound` | 66 | 0 | 0 | 1 | 67 |
+| Action | `play_sound` | 67 | 0 | 0 | 0 | 67 |
 | Action | `play_tile_animation` | 1 | 0 | 0 | 0 | 1 |
 | Action | `quarantine` | 0 | 8 | 0 | 0 | 8 |
 | Action | `quit_world` | 0 | 0 | 0 | 3 | 3 |
-| Action | `random_encounter` | 0 | 476 | 0 | 0 | 476 |
+| Action | `random_encounter` | 476 | 0 | 0 | 0 | 476 |
 | Action | `random_integer` | 1 | 0 | 0 | 0 | 1 |
 | Action | `random_monster` | 9 | 0 | 0 | 30 | 39 |
 | Action | `remove_collision` | 5 | 0 | 0 | 0 | 5 |
@@ -504,29 +504,29 @@ four-neighbour BFS with fixed tie-breaking selects the nearest walkable cell:
 | Action | `set_layer` | 79 | 0 | 0 | 0 | 79 |
 | Action | `set_mission` | 6 | 0 | 0 | 0 | 6 |
 | Action | `set_monster_attribute` | 33 | 0 | 0 | 0 | 33 |
-| Action | `set_monster_health` | 82 | 0 | 0 | 1 | 83 |
+| Action | `set_monster_health` | 83 | 0 | 0 | 0 | 83 |
 | Action | `set_monster_level` | 0 | 0 | 0 | 3 | 3 |
-| Action | `set_monster_status` | 82 | 0 | 0 | 1 | 83 |
-| Action | `set_party_status` | 0 | 0 | 0 | 2 | 2 |
+| Action | `set_monster_status` | 83 | 0 | 0 | 0 | 83 |
+| Action | `set_party_status` | 1 | 0 | 0 | 1 | 2 |
 | Action | `set_random_variable` | 1 | 0 | 0 | 0 | 1 |
 | Action | `set_step_tracker_milestone_shown` | 3 | 0 | 0 | 0 | 3 |
 | Action | `set_teleport_faint` | 29 | 0 | 0 | 0 | 29 |
 | Action | `set_template` | 16 | 8 | 0 | 0 | 24 |
 | Action | `set_tuxepedia` | 0 | 6 | 0 | 0 | 6 |
-| Action | `set_variable` | 707 | 0 | 0 | 8 | 715 |
+| Action | `set_variable` | 709 | 0 | 0 | 6 | 715 |
 | Action | `start_battle` | 330 | 0 | 0 | 1 | 331 |
 | Action | `start_double_battle` | 8 | 0 | 0 | 0 | 8 |
 | Action | `teleport_faint` | 11 | 0 | 0 | 0 | 11 |
 | Action | `trading` | 8 | 0 | 0 | 0 | 8 |
 | Action | `transition_teleport` | 1037 | 3 | 0 | 9 | 1049 |
-| Action | `translated_dialog` | 2058 | 1 | 0 | 9 | 2068 |
+| Action | `translated_dialog` | 2062 | 1 | 0 | 5 | 2068 |
 | Action | `translated_dialog_choice` | 138 | 10 | 0 | 1 | 149 |
 | Action | `tune_radio` | 0 | 0 | 0 | 2 | 2 |
-| Action | `unlock_controls` | 329 | 0 | 0 | 1 | 330 |
+| Action | `unlock_controls` | 330 | 0 | 0 | 0 | 330 |
 | Action | `update_tile_properties` | 2 | 0 | 0 | 0 | 2 |
 | Action | `update_time` | 0 | 0 | 0 | 3 | 3 |
-| Action | `variable_math` | 3 | 0 | 0 | 2 | 5 |
-| Action | `wait` | 435 | 0 | 0 | 6 | 441 |
+| Action | `variable_math` | 5 | 0 | 0 | 0 | 5 |
+| Action | `wait` | 436 | 0 | 0 | 5 | 441 |
 | Action | `wild_encounter` | 19 | 0 | 0 | 1 | 20 |
 
 ## Conditions
@@ -565,7 +565,7 @@ census.
 | Condition | `is kennel` | 2 | 0 | 0 | 0 | 2 |
 | Condition | `is location_inside` | 1 | 0 | 0 | 0 | 1 |
 | Condition | `is location_type` | 1 | 0 | 0 | 0 | 1 |
-| Condition | `is money_is` | 14 | 0 | 0 | 1 | 15 |
+| Condition | `is money_is` | 15 | 0 | 0 | 0 | 15 |
 | Condition | `is music_playing` | 1 | 0 | 0 | 0 | 1 |
 | Condition | `is party_infected` | 3 | 0 | 0 | 0 | 3 |
 | Condition | `is party_size` | 47 | 0 | 0 | 3 | 50 |
@@ -573,10 +573,10 @@ census.
 | Condition | `is step_tracker` | 7 | 0 | 0 | 0 | 7 |
 | Condition | `is tile_property_updated` | 4 | 0 | 0 | 0 | 4 |
 | Condition | `is time_is` | 67 | 0 | 0 | 0 | 67 |
-| Condition | `is variable_set` | 724 | 0 | 0 | 6 | 730 |
+| Condition | `is variable_set` | 725 | 0 | 0 | 5 | 730 |
 | Condition | `not battle_outcome` | 363 | 0 | 0 | 0 | 363 |
 | Condition | `not battle_outcome_count` | 9 | 0 | 0 | 0 | 9 |
-| Condition | `not bill_exists` | 0 | 0 | 0 | 1 | 1 |
+| Condition | `not bill_exists` | 1 | 0 | 0 | 0 | 1 |
 | Condition | `not char_defeated` | 179 | 0 | 0 | 2 | 181 |
 | Condition | `not char_exists` | 1225 | 0 | 0 | 175 | 1400 |
 | Condition | `not char_gender` | 0 | 0 | 0 | 1 | 1 |
@@ -593,7 +593,7 @@ census.
 | Condition | `not kennel` | 1 | 0 | 0 | 0 | 1 |
 | Condition | `not location_inside` | 2 | 0 | 0 | 0 | 2 |
 | Condition | `not location_type` | 1 | 0 | 0 | 0 | 1 |
-| Condition | `not money_is` | 8 | 0 | 0 | 1 | 9 |
+| Condition | `not money_is` | 9 | 0 | 0 | 0 | 9 |
 | Condition | `not music_playing` | 196 | 0 | 0 | 0 | 196 |
 | Condition | `not party_size` | 5 | 0 | 0 | 0 | 5 |
 | Condition | `not tile_property_updated` | 0 | 2 | 0 | 0 | 2 |

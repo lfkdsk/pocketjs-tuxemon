@@ -22,6 +22,6 @@ describe("J4 QuickJS continuation tape", () => {
     });
     // Terminal carries the cathedral bill's authored metadata now.
     expect(tape.terminalStateSha256)
-      .toBe("48ab373a6570f0720ac454c18a742c0dd3e72c21a7a1ee995163f5c478ac6dc2");
+      .toBe("4c6014137a346b2be6e37469f054e4509336ea867f1fdd3724565ba494204826");
   });
 });

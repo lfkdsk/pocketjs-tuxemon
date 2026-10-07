@@ -98,6 +98,8 @@ describe("real variable transforms import", () => {
     expect(calls("tux.variable_math")).toEqual([
       { left: { variable: "v.brad_points" }, operator: "+", right: { value: 1 }, result: "v.brad_points" },
       { left: { variable: "v.chad_points" }, operator: "+", right: { value: 1 }, result: "v.chad_points" },
+      { left: { variable: "v.cathedral_share_full" }, operator: "*", right: { value: 100 }, result: "v.cathedral_share_full" },
+      { left: { variable: "v.cathedral_interest_full" }, operator: "*", right: { value: 100 }, result: "v.cathedral_interest_full" },
       { left: { variable: "v.info_level" }, operator: "*", right: { variable: "v.scoop_coeff" }, result: "v.scoop_price" },
     ]);
     expect(calls("tux.format_variable")).toContainEqual({ variable: "v.cathedral_share", format: "float" });
@@ -123,10 +125,10 @@ describe("real variable transforms import", () => {
     const full = buildProject(availableMapIds(), G6_IMPORT_OPTIONS).report.coverage.actions.rows;
     const row = (type: string) => full.find((r) => r.type === type);
     expect(row("set_mission")).toMatchObject({ total: 6, native: 6, dropped: 0 });
-    // The remaining uses sit in the cathedral heal events, whose
-    // money_is(variable) guard is still unconverted.
-    expect(row("variable_math")).toMatchObject({ total: 5, native: 3, dropped: 2 });
-    expect(row("format_variable")).toMatchObject({ total: 10, native: 7, dropped: 3 });
+    // The cathedral heal events' money_is(variable) guard is converted, so
+    // their variable_math and format_variable uses are all native.
+    expect(row("variable_math")).toMatchObject({ total: 5, native: 5, dropped: 0 });
+    expect(row("format_variable")).toMatchObject({ total: 10, native: 10, dropped: 0 });
   });
 });
 
