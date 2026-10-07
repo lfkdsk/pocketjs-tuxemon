@@ -342,6 +342,7 @@ function replay(
         startFrame: localFrame,
         before: battlePartyRows(battle),
         enemy: battle.battle.parties[1].map((monster) => ({ slug: monster.slug, level: monster.level })),
+        ...(battle.spectator ? { spectator: true } : {}),
       };
     }
     if (localFrame >= 0 && before?.kind === "battle" && state.scene?.kind !== "battle") {
@@ -382,12 +383,15 @@ function counts(rows: readonly Gb6BattleCheckpoint[]): Record<string, number> {
 
 function validateBattles(label: string, battles: readonly Gb6BattleCheckpoint[], journey: J2JourneyResult): void {
   expect(`${label} battle checkpoints changed`, canonicalJson(battles) === canonicalJson(journey.battles));
-  const trainers = battles.filter((battle) => battle.kind === "trainer");
-  const wilds = battles.filter((battle) => battle.kind === "wild");
-  expect(`${label} battle kind changed`, trainers.length + wilds.length === battles.length);
+  const spectatorBattles = battles.filter((battle) => battle.spectator === true);
+  const playerBattles = battles.filter((battle) => battle.spectator !== true);
+  const trainers = playerBattles.filter((battle) => battle.kind === "trainer");
+  const wilds = playerBattles.filter((battle) => battle.kind === "wild");
+  expect(`${label} battle kind changed`, trainers.length + wilds.length === playerBattles.length);
   expect(`${label} trainer count changed`, trainers.length === 50);
   expect(`${label} wild count changed`, wilds.length === 4);
-  expect(`${label} battle did not win`, battles.every((battle) => battle.outcome === "won"));
+  expect(`${label} spectator count changed`, spectatorBattles.length === 1);
+  expect(`${label} battle did not win`, playerBattles.every((battle) => battle.outcome === "won"));
   expect(`${label} trainer roster changed`, canonicalJson(counts(trainers)) === canonicalJson(REQUIRED_TRAINERS));
   expect(`${label} wild roster changed`, canonicalJson(counts(wilds)) === canonicalJson(REQUIRED_WILDS));
 }

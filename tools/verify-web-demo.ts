@@ -39,6 +39,7 @@ import { chapterWorldTraversal } from "./bake-chapters.ts";
 import { chapterReference, liveStateDigests } from "./zh-demo-reference.ts";
 import { readInlineProject } from "./generated-project.ts";
 import { journeyWorldTraversal } from "./gb6-journey.ts";
+import { productionPaginator } from "./zh-tape.ts";
 
 const ROOT = resolve(import.meta.dir, "..");
 const SITE = resolve(ROOT, "dist/web");
@@ -114,7 +115,11 @@ function loadChapters(): {
 }
 
 /** Restore a chapter and fold `frames` suffix masks through the pure reducer,
- *  the same contract verify:chapters proves end to end. */
+ *  the same contract verify:chapters proves end to end. The session uses the
+ *  production dialog paginator because the built game's GameView creates its
+ *  session with one too: a message that pages differently under the
+ *  production font would otherwise let a page-turn confirm land on the wrong
+ *  owner in the headless fold. */
 function expectedChapterState(chapterId: string, frames: number): { mapId: string; frame: number; hash: string } {
   const { chapters, combined, worldTraversal } = loadChapters();
   const chapter = chapters.find((c) => c.id === chapterId)!;
@@ -127,7 +132,7 @@ function expectedChapterState(chapterId: string, frames: number): { mapId: strin
   const session: Session = createSession(
     project,
     60,
-    createTuxemonSessionOptions(project, worldTraversal),
+    createTuxemonSessionOptions(project, worldTraversal, { paginateText: productionPaginator(ROOT) }),
   );
   const snapshot = decodeEnvelopeText(record.snapshot);
   let state: SessionState = restoreSessionSnapshot(session, snapshot);
@@ -168,7 +173,9 @@ function loadDemoTape(): { demoMasks: number[]; demoFrame: (canonicalFrame: numb
 /** Restore a chapter save and fold the English demo tape through to the next
  *  chapter node, the exact path the built game's Autoplay takes. Used to prove
  *  the demo tape (which inserts frames at the two Nimrod paged windows)
- *  reaches the canonical chapter state. */
+ *  reaches the canonical chapter state. The session carries the production
+ *  dialog paginator, matching GameView, so the inserted page-turn confirms
+ *  are spent on the dialog in the headless fold exactly as in the browser. */
 function expectedDemoChapterState(fromId: string, toId: string): { mapId: string; frame: number; hash: string } {
   const { chapters, worldTraversal } = loadChapters();
   const from = chapters.find((c) => c.id === fromId)!;
@@ -182,7 +189,7 @@ function expectedDemoChapterState(fromId: string, toId: string): { mapId: string
   const session: Session = createSession(
     project,
     60,
-    createTuxemonSessionOptions(project, worldTraversal),
+    createTuxemonSessionOptions(project, worldTraversal, { paginateText: productionPaginator(ROOT) }),
   );
   const { demoMasks, demoFrame } = loadDemoTape();
   const snapshot = decodeEnvelopeText(record.snapshot);

@@ -1569,12 +1569,19 @@ export function writeBattleArtifacts(options: BattleImportOptions): BattleBuild 
   writeFileSync(join(outputRoot, `data/battle-runtime-db${suffix}.json`), runtimeDbData);
   writeFileSync(join(outputRoot, `data/battle-assets-report${suffix}.json`), jsonBytes(report));
   // Localized display names for the battle scene's menus and narration,
-  // keyed by slug. Monster names come from the validated db; technique and
-  // item names resolve through the same catalog the dialogs use.
+  // keyed by slug. Monster names come from the validated db; technique,
+  // item and NPC names resolve through the same catalog the dialogs use.
+  // The NPC table feeds the spectator battle banner (fighter/foe names);
+  // slugs the catalog does not carry fall back to a title-cased slug.
+  const npcTitle = (slug: string): string => slug
+    .split("_")
+    .map((part) => part ? part[0]!.toUpperCase() + part.slice(1) : part)
+    .join(" ");
   const battleNames = {
     monsters: Object.fromEntries(Object.keys(db.monsters).sort().map((slug) => [slug, db.monsters[slug]!.name])),
     techniques: Object.fromEntries(Object.keys(db.techniques).sort().map((slug) => [slug, po.get(slug) ?? slug])),
     items: Object.fromEntries(Object.keys(db.items).sort().map((slug) => [slug, po.get(slug) ?? slug])),
+    npcs: Object.fromEntries([...selection.npcs].sort().map((slug) => [slug, po.get(slug) ?? npcTitle(slug)])),
   };
   writeFileSync(join(outputRoot, `data/battle-names${suffix}.json`), jsonBytes(battleNames));
   // Upstream's today_string is T.translate(month_key) + " " + day for every

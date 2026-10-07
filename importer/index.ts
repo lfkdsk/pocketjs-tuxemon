@@ -194,10 +194,12 @@ defeat behavior are Native. The remaining non-native behavior is explicit:
 |---|---|---:|---|
 ${placeholderAudit}
 
-The five \`start_battle\` NPC-versus-NPC scenes auto-resolve through the
-game's battle rules with the saved deterministic RNG (both sides on the
-seeded AI policy); the player sees a name card and a decisive fight is
-recorded per upstream. A true draw is Degraded: upstream raises before
+The five \`start_battle\` NPC-versus-NPC scenes play out in the real battle
+scene as spectator fights: both parties, their techniques, damage and results
+are visible, the player cannot open menus, and confirm toggles fast-forward
+(1x/2x/4x) while cancel skips to the result. The outcome matches the headless
+resolver exactly — one RNG draw from the saved cursor, post-spawn seed, seeded
+AI policy on both sides — and a decisive fight is recorded per upstream. A true draw is Degraded: upstream raises before
 either result variable is written, so this port writes the draw code and
 the fighter (challenger) trainer code as a deterministic fallback. The
 other rows are global or legacy content. \`get_player_monster\` has

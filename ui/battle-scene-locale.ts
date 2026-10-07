@@ -45,6 +45,13 @@ export interface BattleSceneLabels {
   menuTitle: (mode: "root" | "technique" | "item" | "capture" | "swap") => string;
   /** Root command menu labels, keyed by the entry slug (fight/item/…). */
   rootCommand: (slug: string) => string;
+  /** Spectator (NPC-versus-NPC) battle chrome. */
+  spectatorWatching: string;
+  spectatorFastForward: string;
+  spectatorSkip: string;
+  spectatorSpeed: (speed: number) => string;
+  /** The banner's fighter/foe separator ("vs" / "对战"). */
+  spectatorVs: string;
 }
 
 const EN: BattleSceneLabels = {
@@ -91,6 +98,11 @@ const EN: BattleSceneLabels = {
       default: return titleCase(slug);
     }
   },
+  spectatorWatching: "Watching the battle…",
+  spectatorFastForward: "A: Fast-forward",
+  spectatorSkip: "B: Skip",
+  spectatorSpeed: (speed) => `×${speed}`,
+  spectatorVs: "vs",
 };
 
 const ZH: BattleSceneLabels = {
@@ -137,6 +149,11 @@ const ZH: BattleSceneLabels = {
       default: return titleCase(slug);
     }
   },
+  spectatorWatching: "观战中…",
+  spectatorFastForward: "A：快进",
+  spectatorSkip: "B：跳过",
+  spectatorSpeed: (speed) => `×${speed}`,
+  spectatorVs: "对战",
 };
 
 let active: BattleSceneLabels = EN;

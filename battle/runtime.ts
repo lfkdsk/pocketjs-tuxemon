@@ -92,7 +92,47 @@ export interface RandomBattleSetup {
   hour?: number;
 }
 
-export type TuxemonBattleSetup = TrainerBattleSetup | WildBattleSetup | RandomBattleSetup;
+/** NPC-versus-NPC battle the player watches. Both parties come from the
+ *  staged NPC parties (add_monster with a character argument); the player's
+ *  own party is untouched. The battle runs on the seeded AI policy for both
+ *  sides and auto-advances through the real battle scene. The result codes
+ *  are the importer-computed enum indices written to battle_last_* on
+ *  completion, matching the headless tux.npc_battle resolver exactly. */
+export interface SpectatorBattleSetup {
+  kind: "spectate";
+  fighter: string;
+  foe: string;
+  fighterWinnerCode: number;
+  foeWinnerCode: number;
+  fighterLoserCode: number;
+  foeLoserCode: number;
+  fighterTrainerCode: number;
+  foeTrainerCode: number;
+  drawCode: number;
+  environment?: string;
+  inside?: boolean;
+  hour?: number;
+}
+
+export type TuxemonBattleSetup = TrainerBattleSetup | WildBattleSetup | RandomBattleSetup | SpectatorBattleSetup;
+
+/** Per-battle spectator state carried in the serialised RuntimeBattleState.
+ *  speed is the presentation multiplier (1/2/4) toggled by confirm; cancel
+ *  skips the remaining decisions and plays only the end beat. */
+export interface SpectatorInfo {
+  fighter: string;
+  foe: string;
+  speed: 1 | 2 | 4;
+  codes: {
+    fighterWinnerCode: number;
+    foeWinnerCode: number;
+    fighterLoserCode: number;
+    foeLoserCode: number;
+    fighterTrainerCode: number;
+    foeTrainerCode: number;
+    drawCode: number;
+  };
+}
 
 export interface RuntimeBattleState {
   format: typeof TUXEMON_BATTLE_STATE_FORMAT;
@@ -137,6 +177,12 @@ export interface RuntimeBattleState {
   eventCursor: number;
   eventTicks: number;
   menuIndex: number;
+  /** Present only for NPC-versus-NPC spectator battles. When set, the step
+   *  function auto-advances both sides on the seeded AI policy (no player
+   *  menu), confirm toggles the presentation speed, and cancel skips to the
+   *  end. The completion writes the battle_last_* result variables using
+   *  the setup's codes rather than the player/trainer path. */
+  spectator?: SpectatorInfo;
 }
 
 export type BattleMenuMode = "root" | "technique" | "item" | "capture" | "swap";
@@ -271,6 +317,29 @@ function parseSetup(value: JsonValue, db: BattleDb, activeEnvironment: string | 
         table: requiredString(raw.table, "table"),
         probability: optionalFinite(raw.probability ?? raw.p, 1, "probability"),
         ...(variables === undefined ? {} : { variables: resolved }),
+        ...common,
+      };
+    }
+    case "spectate": {
+      const fighter = requiredString(raw.fighter, "fighter");
+      const foe = requiredString(raw.foe, "foe");
+      const code = (value: unknown, label: string): number => {
+        if (!safeInteger(value) || value < 1) {
+          throw new Error(`Tuxemon spectator battle ${label} must be a positive integer`);
+        }
+        return value;
+      };
+      return {
+        kind: "spectate",
+        fighter,
+        foe,
+        fighterWinnerCode: code(raw.fighterWinnerCode, "fighterWinnerCode"),
+        foeWinnerCode: code(raw.foeWinnerCode, "foeWinnerCode"),
+        fighterLoserCode: code(raw.fighterLoserCode, "fighterLoserCode"),
+        foeLoserCode: code(raw.foeLoserCode, "foeLoserCode"),
+        fighterTrainerCode: code(raw.fighterTrainerCode, "fighterTrainerCode"),
+        foeTrainerCode: code(raw.foeTrainerCode, "foeTrainerCode"),
+        drawCode: code(raw.drawCode, "drawCode"),
         ...common,
       };
     }
@@ -692,6 +761,155 @@ function completionFor(state: RuntimeBattleState, enums: VariableEnums): BattleC
   return { ...built, writes, switches };
 }
 
+/** Snapshot the per-monster progression values a decision may change, so
+ *  the presentation can interpolate XP/level gains on the faint beat. */
+function progressionSnapshot(state: TuxemonBattleState): Map<number, { level: number; totalExperience: number; maxHp: number }> {
+  return new Map(state.parties.flat().map((monster) => [monster.uid, {
+    level: monster.level,
+    totalExperience: monster.totalExperience,
+    maxHp: monster.base.hp,
+  }]));
+}
+
+/** Record the rewards a decision produced into presentationRewards, matching
+ *  the player technique path so the UI interpolates XP/level gains. Shared by
+ *  the player menu and the spectator auto-advance. */
+function recordDecisionRewards(
+  state: RuntimeBattleState,
+  rewardCount: number,
+  beforeProgression: Map<number, { level: number; totalExperience: number; maxHp: number }>,
+): void {
+  if (state.battle.rewards.length > rewardCount) state.presentationRewards = [...state.presentationRewards];
+  for (const reward of state.battle.rewards.slice(rewardCount)) {
+    const eventIndex = state.battle.events.findIndex((event, eventIndex) =>
+      eventIndex >= state.eventCursor && event.type === "faint" && event.monster === reward.loser
+    );
+    state.presentationRewards.push({
+      eventIndex,
+      loser: reward.loser,
+      winners: reward.winners.map((winner) => {
+        const before = beforeProgression.get(winner.uid);
+        const after = state.battle.parties.flat().find((monster) => monster.uid === winner.uid);
+        if (!before || !after) throw new Error(`Tuxemon battle reward references unknown winner ${winner.uid}`);
+        return {
+          uid: winner.uid,
+          effectiveExperience: winner.effectiveExperience,
+          levelsGained: winner.levelsGained,
+          before,
+          after: {
+            level: after.level,
+            totalExperience: after.totalExperience,
+            maxHp: after.base.hp,
+          },
+        };
+      }),
+    });
+  }
+}
+
+/** Run a spectator battle from its current state to the ended phase, driving
+ *  both sides through the seeded AI policy (choice 0 is ignored when the
+ *  battle policy is "ai"). This is the skip path: the presentation then jumps
+ *  straight to the end beat. */
+function runSpectatorToCompletion(rulesDb: TuxemonBattleDb, battle: TuxemonBattleState): TuxemonBattleState {
+  let current = battle;
+  for (let guard = 0; current.phase !== "ended" && guard < 10_000; guard++) {
+    if (!current.awaiting) throw new Error(`battle: stalled in ${current.phase}`);
+    current = reduceBattle(rulesDb, current, { type: "technique", choice: 0 });
+  }
+  if (current.phase !== "ended") throw new Error("battle: decision limit exceeded");
+  return current;
+}
+
+/** Completion for a spectator (NPC-versus-NPC) battle. Writes the same
+ *  battle_last_* variables as the headless tux.npc_battle resolver, using the
+ *  importer-computed enum codes, and pushes the fighter/foe history pair. The
+ *  player's party and wallet are untouched. */
+function spectatorCompletion(state: RuntimeBattleState): BattleCompletion {
+  const result = state.battle.result;
+  if (!result) throw new Error("Tuxemon battle ended without a result");
+  const info = state.spectator!;
+  const outcome = result.battleLastResult as "won" | "lost" | "draw";
+  const history = [...state.ext.history];
+  if (outcome === "won") {
+    history.push({ fighter: info.fighter, opponent: info.foe, outcome: "won" });
+    history.push({ fighter: info.foe, opponent: info.fighter, outcome: "lost" });
+  } else if (outcome === "lost") {
+    history.push({ fighter: info.foe, opponent: info.fighter, outcome: "won" });
+    history.push({ fighter: info.fighter, opponent: info.foe, outcome: "lost" });
+  } else {
+    history.push({ fighter: info.fighter, opponent: info.foe, outcome: "draw" });
+    history.push({ fighter: info.foe, opponent: info.fighter, outcome: "draw" });
+  }
+  const writes: Record<string, number> = {};
+  if (outcome !== "draw") {
+    const fighterWon = outcome === "won";
+    writes["v.battle_last_winner"] = fighterWon ? info.codes.fighterWinnerCode : info.codes.foeWinnerCode;
+    writes["v.battle_last_loser"] = fighterWon ? info.codes.foeLoserCode : info.codes.fighterLoserCode;
+    // Upstream's loser handling overwrites the winner's trainer write, so the
+    // stable trainer value is the loser's code.
+    writes["v.battle_last_trainer"] = fighterWon ? info.codes.foeTrainerCode : info.codes.fighterTrainerCode;
+  } else {
+    writes["v.battle_last_result"] = info.codes.drawCode;
+    writes["v.battle_last_trainer"] = info.codes.fighterTrainerCode;
+  }
+  return {
+    ext: packTuxemonExtensionState({ ...state.ext, history }),
+    result: outcome === "won" ? "win" : outcome === "lost" ? "lose" : "draw",
+    writes,
+  };
+}
+
+/** One host-frame fold for a spectator battle. The presentation advances at
+ *  the current speed multiplier; when it finishes and the battle is awaiting
+ *  a decision, the next AI move is made immediately (both sides run on the
+ *  "ai" policy, so choice 0 is ignored by the reducer). confirmEdge cycles
+ *  the speed 1→2→4→1; cancelEdge skips the remaining decisions and plays
+ *  only the end beat. The player cannot open menus or influence the fight. */
+function stepSpectatorBattle(
+  previous: RuntimeBattleState,
+  input: Readonly<BattleInput>,
+  ticks: number,
+  resources: () => { db: BattleDb; rulesDb: TuxemonBattleDb },
+): JsonValue {
+  const state = { ...previous };
+  const info = state.spectator!;
+
+  // Skip: run the remaining decisions headlessly and jump the presentation
+  // to the end so the next done() call completes the battle.
+  if (input.cancelEdge === true && state.battle.phase !== "ended") {
+    state.battle = runSpectatorToCompletion(resources().rulesDb, state.battle);
+    state.eventCursor = state.battle.events.length;
+    state.eventTicks = 0;
+    return asJson(state);
+  }
+
+  // Fast-forward: cycle the presentation speed multiplier.
+  if (input.confirmEdge === true) {
+    const nextSpeed = info.speed === 1 ? 2 : info.speed === 2 ? 4 : 1;
+    state.spectator = { ...info, speed: nextSpeed };
+  }
+
+  // Advance the presentation at the current speed.
+  if (!presentationDone(state)) {
+    advancePresentation(state, ticks * state.spectator!.speed, false);
+  }
+
+  // Auto-decide: when the presentation has caught up and the battle is
+  // awaiting a decision, make the next AI move so the fight progresses
+  // without player input.
+  if (presentationDone(state) && state.battle.phase !== "ended" && state.battle.awaiting) {
+    const { rulesDb } = resources();
+    const rewardCount = state.battle.rewards.length;
+    const beforeProgression = progressionSnapshot(state.battle);
+    state.battle = reduceBattle(rulesDb, state.battle, { type: "technique", choice: 0 });
+    recordDecisionRewards(state, rewardCount, beforeProgression);
+    state.eventTicks = 0;
+  }
+
+  return asJson(state);
+}
+
 /**
  * Game-owned adapter between Pocket RPG Kit's Battle Processing lifecycle and
  * the deterministic Tuxemon reducer. Every mutable byte is carried in the
@@ -729,7 +947,9 @@ export function createTuxemonBattleRules(source: BattleDbSource, enums: Variable
       try {
         const ext = tuxemonExtensionState(extValue, db);
         let setup = parseSetup(setupValue, db, ext.environment);
-        if (setup === null || !legalParty(ext.party)) {
+        // Spectator battles pit two NPC parties against each other; the
+        // player's own party is irrelevant and may be empty.
+        if (setup === null || (setup.kind !== "spectate" && !legalParty(ext.party))) {
           release();
           return null;
         }
@@ -739,6 +959,8 @@ export function createTuxemonBattleRules(source: BattleDbSource, enums: Variable
         let enemy: SpawnedMonsterSnapshot[];
         let kind: "trainer" | "wild";
         let startedExt = clone(ext);
+        let playerParty: SpawnedMonsterSnapshot[] = ext.party;
+        let spectatorInfo: SpectatorInfo | null = null;
 
         if (setup.kind === "trainer") {
           opponent = setup.opponent;
@@ -791,7 +1013,7 @@ export function createTuxemonBattleRules(source: BattleDbSource, enums: Variable
             experienceModifier: setup.experienceModifier,
             moneyModifier: setup.moneyModifier,
           })];
-        } else {
+        } else if (setup.kind === "random") {
           if (nextRandom(rng) * 100 > (setup.probability ?? 1)) {
             release();
             return null;
@@ -818,6 +1040,42 @@ export function createTuxemonBattleRules(source: BattleDbSource, enums: Variable
             moneyModifier: 0,
           })];
           setup = { ...setup, hour: setup.hour ?? clockHour };
+        } else {
+          // Spectator (NPC-versus-NPC) battle. Spawn both staged parties on
+          // the local cursor starting from the saved seed, then create the
+          // battle with the post-spawn cursor — the same RNG economy as the
+          // headless tux.npc_battle resolver, so the outcome is identical.
+          const spectate = setup;
+          const fighterParty = ext.npcParties[spectate.fighter] ?? [];
+          const foeParty = ext.npcParties[spectate.foe] ?? [];
+          if (fighterParty.length === 0 || foeParty.length === 0) {
+            release();
+            return null;
+          }
+          const fighterSnapshots = fighterParty.map((member) => enemySnapshot(db, rulesDb, rng, member));
+          const foeSnapshots = foeParty.map((member) => enemySnapshot(db, rulesDb, rng, member));
+          if (!legalParty(fighterSnapshots) || !legalParty(foeSnapshots)) {
+            release();
+            return null;
+          }
+          opponent = spectate.foe;
+          kind = "trainer";
+          enemy = foeSnapshots;
+          playerParty = fighterSnapshots;
+          spectatorInfo = {
+            fighter: spectate.fighter,
+            foe: spectate.foe,
+            speed: 1,
+            codes: {
+              fighterWinnerCode: spectate.fighterWinnerCode,
+              foeWinnerCode: spectate.foeWinnerCode,
+              fighterLoserCode: spectate.fighterLoserCode,
+              foeLoserCode: spectate.foeLoserCode,
+              fighterTrainerCode: spectate.fighterTrainerCode,
+              foeTrainerCode: spectate.foeTrainerCode,
+              drawCode: spectate.drawCode,
+            },
+          };
         }
         if (!legalParty(enemy)) {
           release();
@@ -828,7 +1086,7 @@ export function createTuxemonBattleRules(source: BattleDbSource, enums: Variable
           seed: rng.rng,
           kind,
           opponent,
-          player: ext.party,
+          player: playerParty,
           enemy,
           inside: setup.inside,
           hour: setup.hour,
@@ -837,6 +1095,10 @@ export function createTuxemonBattleRules(source: BattleDbSource, enums: Variable
           moneyMethod: "conserved",
           inventory: context.items,
           runAttempts: ext.runAttempts,
+          // Spectator battles run both sides on the seeded AI policy. The
+          // cast mirrors tux.npc_battle: PlayerPolicy is "first"|"cycle" but
+          // the reducer's selectAction accepts "ai" at runtime.
+          ...(spectatorInfo ? { policy: "ai" as unknown as "first" } : {}),
         });
         const environment = setup.environment ?? ext.environment!;
         const battleEnvironment = db.environments[environment] ?? db.environments.grass;
@@ -883,10 +1145,15 @@ export function createTuxemonBattleRules(source: BattleDbSource, enums: Variable
           visuals: {
             environment: battleEnvironment,
             ui: { hpBar: db.ui.hpBar, expBar: db.ui.expBar },
-            trainers: {
-              player: db.ui.trainerSheets.adventurer ?? null,
-              opponent: db.npcs?.[opponent]?.art ?? null,
-            },
+            trainers: spectatorInfo
+              ? {
+                  player: db.npcs?.[spectatorInfo.fighter]?.art ?? null,
+                  opponent: db.npcs?.[spectatorInfo.foe]?.art ?? null,
+                }
+              : {
+                  player: db.ui.trainerSheets.adventurer ?? null,
+                  opponent: db.npcs?.[opponent]?.art ?? null,
+                },
             monsters,
             techniques,
             items,
@@ -898,6 +1165,7 @@ export function createTuxemonBattleRules(source: BattleDbSource, enums: Variable
           eventCursor: 0,
           eventTicks: 0,
           menuIndex: 0,
+          ...(spectatorInfo ? { spectator: spectatorInfo } : {}),
         };
         state.menu = battleMenuEntries(state, rulesDb, "root");
         return { state: asJson(state), ext: packTuxemonExtensionState(startedExt) };
@@ -910,6 +1178,9 @@ export function createTuxemonBattleRules(source: BattleDbSource, enums: Variable
     step(value, input: Readonly<BattleInput>, ticks) {
       if (!safeInteger(ticks) || ticks < 0) throw new Error("Tuxemon battle ticks must be non-negative integer");
       const previous = runtimeState(value);
+      if (previous.spectator) {
+        return stepSpectatorBattle(previous, input, ticks, resources);
+      }
       if (!presentationDone(previous)) {
         const state = { ...previous };
         advancePresentation(state, ticks, input.confirmEdge === true);
@@ -940,11 +1211,7 @@ export function createTuxemonBattleRules(source: BattleDbSource, enums: Variable
           return asJson(state);
         }
         const rewardCount = state.battle.rewards.length;
-        const beforeProgression = new Map(state.battle.parties.flat().map((monster) => [monster.uid, {
-          level: monster.level,
-          totalExperience: monster.totalExperience,
-          maxHp: monster.base.hp,
-        }]));
+        const beforeProgression = progressionSnapshot(state.battle);
         if (selected.kind === "technique") {
           state.battle = reduceBattle(rulesDb, state.battle, { type: "technique", choice: index });
         } else if (selected.kind === "item" || selected.kind === "capture") {
@@ -958,32 +1225,7 @@ export function createTuxemonBattleRules(source: BattleDbSource, enums: Variable
         } else if (selected.kind === "run") {
           state.battle = reduceBattle(rulesDb, state.battle, { type: "run" });
         }
-        if (state.battle.rewards.length > rewardCount) state.presentationRewards = [...state.presentationRewards];
-        for (const reward of state.battle.rewards.slice(rewardCount)) {
-          const eventIndex = state.battle.events.findIndex((event, eventIndex) =>
-            eventIndex >= state.eventCursor && event.type === "faint" && event.monster === reward.loser
-          );
-          state.presentationRewards.push({
-            eventIndex,
-            loser: reward.loser,
-            winners: reward.winners.map((winner) => {
-              const before = beforeProgression.get(winner.uid);
-              const after = state.battle.parties.flat().find((monster) => monster.uid === winner.uid);
-              if (!before || !after) throw new Error(`Tuxemon battle reward references unknown winner ${winner.uid}`);
-              return {
-                uid: winner.uid,
-                effectiveExperience: winner.effectiveExperience,
-                levelsGained: winner.levelsGained,
-                before,
-                after: {
-                  level: after.level,
-                  totalExperience: after.totalExperience,
-                  maxHp: after.base.hp,
-                },
-              };
-            }),
-          });
-        }
+        recordDecisionRewards(state, rewardCount, beforeProgression);
         state.eventTicks = 0;
         setMenu(state, rulesDb, "root");
       }
@@ -994,7 +1236,7 @@ export function createTuxemonBattleRules(source: BattleDbSource, enums: Variable
       const state = runtimeState(value);
       if (state.battle.phase !== "ended" || !presentationDone(state)) return null;
       try {
-        return completionFor(state, enums);
+        return state.spectator ? spectatorCompletion(state) : completionFor(state, enums);
       } finally {
         release();
       }

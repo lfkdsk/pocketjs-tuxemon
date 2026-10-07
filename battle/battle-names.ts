@@ -15,6 +15,11 @@ export interface BattleNames {
   monsters: Record<string, string>;
   techniques: Record<string, string>;
   items: Record<string, string>;
+  /** NPC display names for the spectator battle banner, keyed by slug. The
+   *  importer resolves them through the same .po catalog the dialogs use
+   *  (English and zh_CN); slugs the catalog does not carry fall back to a
+   *  title-cased slug in the resolver. */
+  npcs: Record<string, string>;
 }
 
 const enNames = enNamesJson as unknown as BattleNames;
@@ -23,12 +28,13 @@ const titleCase = (slug: string): string => slug
   .map((part) => part ? part[0]!.toUpperCase() + part.slice(1) : part)
   .join(" ");
 
-export type BattleNameKind = "monster" | "technique" | "item";
+export type BattleNameKind = "monster" | "technique" | "item" | "npc";
 
 const TABLE_KEY: Record<BattleNameKind, keyof BattleNames> = {
   monster: "monsters",
   technique: "techniques",
   item: "items",
+  npc: "npcs",
 };
 
 function tableFor(

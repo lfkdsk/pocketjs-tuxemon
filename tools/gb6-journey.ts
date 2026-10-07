@@ -60,6 +60,10 @@ export interface Gb6BattleCheckpoint {
   enemy: Array<{ slug: string; level: number }>;
   before: Gb6PartyRow[];
   after: Gb6PartyRow[];
+  /** True for NPC-versus-NPC spectator battles: the player watches, both
+   *  sides run on the seeded AI policy, and the battle is excluded from the
+   *  player trainer/wild roster checks. */
+  spectator?: boolean;
 }
 
 export interface Gb6MapCheckpoint {
@@ -187,6 +191,7 @@ export class Driver {
         startFrame: this.masks.length - 1,
         before: battlePartyRows(battle),
         enemy: battle.battle.parties[1].map((monster) => ({ slug: monster.slug, level: monster.level })),
+        ...(battle.spectator ? { spectator: true } : {}),
       };
     }
     if (sceneBefore?.kind === "battle" && this.state.scene?.kind !== "battle") {
@@ -262,6 +267,18 @@ export class Driver {
           continue;
         }
         const battle = tuxemonRuntimeBattleState(this.state.scene.state);
+        // Spectator (NPC-versus-NPC) battles auto-advance on the seeded AI
+        // policy. The Driver must not press confirm: battleAutoplayInput
+        // returns confirmEdge to skip presentation beats, but in a spectator
+        // battle confirm toggles the fast-forward speed, and the built game's
+        // GameView does not derive confirmEdge from the folded mask (only UI
+        // action handlers fire it). Pressing confirm would make the reducer
+        // replay diverge from the built-game replay.
+        if (battle.spectator) {
+          this.tick();
+          idle = 0;
+          continue;
+        }
         const input = battleAutoplayInput(RULE_DB, battle, {
           capture: this.captureWild ? "uncaught" : "never",
         });

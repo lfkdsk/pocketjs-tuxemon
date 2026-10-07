@@ -11,7 +11,7 @@ When conversion discards a whole event, every source rule in it is Dropped.
 
 | Kind | Kinds | Uses | Native | Degraded | Placeholder | Dropped | S1 T1 baseline |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Actions | 98 | 13617 | 12208 | 1093 | 0 | 316 | 6407 / 6246 (47.05% / 45.9%) |
+| Actions | 98 | 13617 | 12213 | 1088 | 0 | 316 | 6407 / 6246 (47.05% / 45.9%) |
 | Conditions | 64 | 8663 | 8364 | 56 | 0 | 243 | 4758 / 4591 (54.92% / 53.0%) |
 
 The S1 acceptance baselines are 6,246 action uses (45.9%) and 4,591
@@ -21,7 +21,7 @@ Degraded count toward them. This import records 6407
 (54.92%), respectively: 161 above
 for actions and 167 above for conditions. The old
 type-table Native figure was 5,448 / 13,617 (40.0%); conversion-path accounting
-supersedes it with 12208 / 13617
+supersedes it with 12213 / 13617
 (89.7%). “Executable”
 (native + degraded + deliberate P1 placeholder) is
 97.7% for actions and
@@ -65,10 +65,12 @@ defeat behavior are Native. The remaining non-native behavior is explicit:
 |---|---|---:|---|
 
 
-The five `start_battle` NPC-versus-NPC scenes auto-resolve through the
-game's battle rules with the saved deterministic RNG (both sides on the
-seeded AI policy); the player sees a name card and a decisive fight is
-recorded per upstream. A true draw is Degraded: upstream raises before
+The five `start_battle` NPC-versus-NPC scenes play out in the real battle
+scene as spectator fights: both parties, their techniques, damage and results
+are visible, the player cannot open menus, and confirm toggles fast-forward
+(1x/2x/4x) while cancel skips to the result. The outcome matches the headless
+resolver exactly — one RNG draw from the saved cursor, post-spawn seed, seeded
+AI policy on both sides — and a decisive fight is recorded per upstream. A true draw is Degraded: upstream raises before
 either result variable is written, so this port writes the draw code and
 the fighter (challenger) trainer code as a deterministic fallback. The
 other rows are global or legacy content. `get_player_monster` has
@@ -511,7 +513,7 @@ four-neighbour BFS with fixed tie-breaking selects the nearest walkable cell:
 | Action | `set_template` | 16 | 8 | 0 | 0 | 24 |
 | Action | `set_tuxepedia` | 0 | 6 | 0 | 0 | 6 |
 | Action | `set_variable` | 707 | 0 | 0 | 8 | 715 |
-| Action | `start_battle` | 325 | 5 | 0 | 1 | 331 |
+| Action | `start_battle` | 330 | 0 | 0 | 1 | 331 |
 | Action | `start_double_battle` | 8 | 0 | 0 | 0 | 8 |
 | Action | `teleport_faint` | 11 | 0 | 0 | 0 | 11 |
 | Action | `trading` | 8 | 0 | 0 | 0 | 8 |

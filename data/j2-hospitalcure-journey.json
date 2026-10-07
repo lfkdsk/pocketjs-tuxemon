@@ -2,9 +2,9 @@
   "format": "pocket-tuxemon/j2-hospitalcure/v1",
   "worldTraversal": "seamless-v1",
   "hz": 60,
-  "frames": 50487,
-  "combinedFrames": 172251,
-  "durationSeconds": 841.45,
+  "frames": 51227,
+  "combinedFrames": 172991,
+  "durationSeconds": 853.783,
   "base": {
     "format": "pocket-tuxemon/j1-captainreturns/v1",
     "worldTraversal": "seamless-v1",
@@ -26031,9 +26031,749 @@
     0,
     8192,
     0,
-    8192,
     0,
-    8192,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
     0,
     8192,
     0,
@@ -50688,7 +51428,7 @@
     },
     {
       "name": "nimrod_bottom",
-      "frame": 26716,
+      "frame": 27456,
       "map": "spyder_nimrod_bottom",
       "position": [
         2,
@@ -50697,7 +51437,7 @@
     },
     {
       "name": "flower_city",
-      "frame": 27931,
+      "frame": 28671,
       "map": "spyder_flower_city",
       "position": [
         11,
@@ -50706,7 +51446,7 @@
     },
     {
       "name": "route5",
-      "frame": 28087,
+      "frame": 28827,
       "map": "spyder_route5",
       "position": [
         39,
@@ -50715,7 +51455,7 @@
     },
     {
       "name": "timber_town",
-      "frame": 29643,
+      "frame": 30383,
       "map": "spyder_timber_town",
       "position": [
         4,
@@ -50724,7 +51464,7 @@
     },
     {
       "name": "timber_center",
-      "frame": 29771,
+      "frame": 30511,
       "map": "spyder_timber_center",
       "position": [
         6,
@@ -50733,7 +51473,7 @@
     },
     {
       "name": "timber_town",
-      "frame": 29973,
+      "frame": 30713,
       "map": "spyder_timber_town",
       "position": [
         8,
@@ -50742,7 +51482,7 @@
     },
     {
       "name": "scoop1",
-      "frame": 30504,
+      "frame": 31244,
       "map": "spyder_scoop1",
       "position": [
         0,
@@ -50751,7 +51491,7 @@
     },
     {
       "name": "scoop2",
-      "frame": 31776,
+      "frame": 32516,
       "map": "spyder_scoop2",
       "position": [
         0,
@@ -50760,7 +51500,7 @@
     },
     {
       "name": "scoop3",
-      "frame": 31869,
+      "frame": 32609,
       "map": "spyder_scoop3",
       "position": [
         1,
@@ -50769,7 +51509,7 @@
     },
     {
       "name": "scoop4",
-      "frame": 33704,
+      "frame": 34444,
       "map": "spyder_scoop4",
       "position": [
         9,
@@ -50778,7 +51518,7 @@
     },
     {
       "name": "timber_town",
-      "frame": 35984,
+      "frame": 36724,
       "map": "spyder_timber_town",
       "position": [
         17,
@@ -50787,7 +51527,7 @@
     },
     {
       "name": "tunnel",
-      "frame": 36396,
+      "frame": 37136,
       "map": "spyder_tunnel",
       "position": [
         14,
@@ -50796,7 +51536,7 @@
     },
     {
       "name": "tunnel_below",
-      "frame": 36464,
+      "frame": 37204,
       "map": "spyder_tunnel_below",
       "position": [
         7,
@@ -50805,7 +51545,7 @@
     },
     {
       "name": "tunnel",
-      "frame": 37111,
+      "frame": 37851,
       "map": "spyder_tunnel",
       "position": [
         5,
@@ -50814,7 +51554,7 @@
     },
     {
       "name": "route6",
-      "frame": 38501,
+      "frame": 39241,
       "map": "spyder_route6",
       "position": [
         0,
@@ -50823,7 +51563,7 @@
     },
     {
       "name": "candy_town",
-      "frame": 42650,
+      "frame": 43390,
       "map": "spyder_candy_town",
       "position": [
         30,
@@ -50832,7 +51572,7 @@
     },
     {
       "name": "candy_center",
-      "frame": 43574,
+      "frame": 44314,
       "map": "spyder_candy_center",
       "position": [
         6,
@@ -50841,7 +51581,7 @@
     },
     {
       "name": "candy_town",
-      "frame": 43776,
+      "frame": 44516,
       "map": "spyder_candy_town",
       "position": [
         14,
@@ -50850,7 +51590,7 @@
     },
     {
       "name": "greenwash_greenhouse",
-      "frame": 44221,
+      "frame": 44961,
       "map": "spyder_greenwash_greenhouse",
       "position": [
         25,
@@ -50859,7 +51599,7 @@
     },
     {
       "name": "greenwash",
-      "frame": 45559,
+      "frame": 46299,
       "map": "spyder_greenwash",
       "position": [
         14,
@@ -50868,7 +51608,7 @@
     },
     {
       "name": "greenwash_level2",
-      "frame": 46464,
+      "frame": 47204,
       "map": "spyder_greenwash_level2",
       "position": [
         2,
@@ -50877,7 +51617,7 @@
     },
     {
       "name": "greenwash",
-      "frame": 47934,
+      "frame": 48674,
       "map": "spyder_greenwash",
       "position": [
         2,
@@ -50886,7 +51626,7 @@
     },
     {
       "name": "aardant-acquired",
-      "frame": 49049,
+      "frame": 49789,
       "map": "spyder_greenwash",
       "position": [
         7,
@@ -50895,7 +51635,7 @@
     },
     {
       "name": "candy_town",
-      "frame": 49122,
+      "frame": 49862,
       "map": "spyder_candy_town",
       "position": [
         25,
@@ -50904,7 +51644,7 @@
     },
     {
       "name": "candy_center",
-      "frame": 49335,
+      "frame": 50075,
       "map": "spyder_candy_center",
       "position": [
         6,
@@ -50913,7 +51653,7 @@
     },
     {
       "name": "candy_hospital2",
-      "frame": 49608,
+      "frame": 50348,
       "map": "spyder_candy_hospital2",
       "position": [
         11,
@@ -50922,7 +51662,7 @@
     },
     {
       "name": "hospital-password",
-      "frame": 49688,
+      "frame": 50428,
       "map": "spyder_candy_hospital2",
       "position": [
         11,
@@ -50931,7 +51671,7 @@
     },
     {
       "name": "candy_hospital3",
-      "frame": 50097,
+      "frame": 50837,
       "map": "spyder_candy_hospital3",
       "position": [
         5,
@@ -50940,7 +51680,7 @@
     },
     {
       "name": "hospital-cure",
-      "frame": 50486,
+      "frame": 51226,
       "map": "spyder_candy_hospital3",
       "position": [
         5,
@@ -53216,9 +53956,70 @@
       ]
     },
     {
+      "opponent": "spyder_nimrod_argon",
+      "kind": "trainer",
+      "startFrame": 26003,
+      "before": [
+        {
+          "slug": "dark_robo",
+          "level": 30,
+          "hp": 158,
+          "maxHp": 158
+        }
+      ],
+      "enemy": [
+        {
+          "slug": "chrome_robo",
+          "level": 30
+        }
+      ],
+      "spectator": true,
+      "endFrame": 26748,
+      "turns": 4,
+      "outcome": "lost",
+      "after": [
+        {
+          "slug": "arthrobolt",
+          "level": 69,
+          "hp": 332,
+          "maxHp": 332
+        },
+        {
+          "slug": "aardorn",
+          "level": 4,
+          "hp": 79,
+          "maxHp": 79
+        },
+        {
+          "slug": "cataspike",
+          "level": 4,
+          "hp": 91,
+          "maxHp": 91
+        },
+        {
+          "slug": "axolightl",
+          "level": 4,
+          "hp": 57,
+          "maxHp": 57
+        },
+        {
+          "slug": "cardiling",
+          "level": 8,
+          "hp": 68,
+          "maxHp": 68
+        },
+        {
+          "slug": "pawsand",
+          "level": 9,
+          "hp": 137,
+          "maxHp": 137
+        }
+      ]
+    },
+    {
       "opponent": "spyder_nimrod_xeon",
       "kind": "trainer",
-      "startFrame": 26096,
+      "startFrame": 26836,
       "before": [
         {
           "slug": "arthrobolt",
@@ -53263,7 +54064,7 @@
           "level": 25
         }
       ],
-      "endFrame": 26348,
+      "endFrame": 27088,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -53308,7 +54109,7 @@
     {
       "opponent": "spyder_nimrod_chromerobo",
       "kind": "trainer",
-      "startFrame": 26407,
+      "startFrame": 27147,
       "before": [
         {
           "slug": "arthrobolt",
@@ -53353,7 +54154,7 @@
           "level": 25
         }
       ],
-      "endFrame": 26659,
+      "endFrame": 27399,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -53398,7 +54199,7 @@
     {
       "opponent": "spyder_nimrod_tru",
       "kind": "trainer",
-      "startFrame": 26823,
+      "startFrame": 27563,
       "before": [
         {
           "slug": "arthrobolt",
@@ -53459,7 +54260,7 @@
           "level": 30
         }
       ],
-      "endFrame": 27755,
+      "endFrame": 28495,
       "turns": 5,
       "outcome": "won",
       "after": [
@@ -53504,7 +54305,7 @@
     {
       "opponent": "spyder_route5_goliath",
       "kind": "trainer",
-      "startFrame": 28149,
+      "startFrame": 28889,
       "before": [
         {
           "slug": "arthrobolt",
@@ -53549,7 +54350,7 @@
           "level": 40
         }
       ],
-      "endFrame": 28401,
+      "endFrame": 29141,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -53594,7 +54395,7 @@
     {
       "opponent": "wild:vamporm",
       "kind": "wild",
-      "startFrame": 28569,
+      "startFrame": 29309,
       "before": [
         {
           "slug": "arthrobolt",
@@ -53639,7 +54440,7 @@
           "level": 20
         }
       ],
-      "endFrame": 28822,
+      "endFrame": 29562,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -53684,7 +54485,7 @@
     {
       "opponent": "wild:foofle",
       "kind": "wild",
-      "startFrame": 28868,
+      "startFrame": 29608,
       "before": [
         {
           "slug": "arthrobolt",
@@ -53729,7 +54530,7 @@
           "level": 20
         }
       ],
-      "endFrame": 29121,
+      "endFrame": 29861,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -53774,7 +54575,7 @@
     {
       "opponent": "wild:vamporm",
       "kind": "wild",
-      "startFrame": 29275,
+      "startFrame": 30015,
       "before": [
         {
           "slug": "arthrobolt",
@@ -53819,7 +54620,7 @@
           "level": 19
         }
       ],
-      "endFrame": 29528,
+      "endFrame": 30268,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -53864,7 +54665,7 @@
     {
       "opponent": "spyder_scoop_paine",
       "kind": "trainer",
-      "startFrame": 30599,
+      "startFrame": 31339,
       "before": [
         {
           "slug": "arthrobolt",
@@ -53913,7 +54714,7 @@
           "level": 35
         }
       ],
-      "endFrame": 31013,
+      "endFrame": 31753,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -53958,7 +54759,7 @@
     {
       "opponent": "spyder_scoop_rubid",
       "kind": "trainer",
-      "startFrame": 31217,
+      "startFrame": 31957,
       "before": [
         {
           "slug": "arthrobolt",
@@ -54007,7 +54808,7 @@
           "level": 35
         }
       ],
-      "endFrame": 31631,
+      "endFrame": 32371,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -54052,7 +54853,7 @@
     {
       "opponent": "spyder_scoop_alyssa",
       "kind": "trainer",
-      "startFrame": 31925,
+      "startFrame": 32665,
       "before": [
         {
           "slug": "arthrobolt",
@@ -54097,7 +54898,7 @@
           "level": 45
         }
       ],
-      "endFrame": 32177,
+      "endFrame": 32917,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -54142,7 +54943,7 @@
     {
       "opponent": "spyder_scoop_taggart",
       "kind": "trainer",
-      "startFrame": 32213,
+      "startFrame": 32953,
       "before": [
         {
           "slug": "arthrobolt",
@@ -54195,7 +54996,7 @@
           "level": 35
         }
       ],
-      "endFrame": 32819,
+      "endFrame": 33559,
       "turns": 3,
       "outcome": "won",
       "after": [
@@ -54240,7 +55041,7 @@
     {
       "opponent": "spyder_scoop_donald",
       "kind": "trainer",
-      "startFrame": 32887,
+      "startFrame": 33627,
       "before": [
         {
           "slug": "arthrobolt",
@@ -54293,7 +55094,7 @@
           "level": 40
         }
       ],
-      "endFrame": 33575,
+      "endFrame": 34315,
       "turns": 4,
       "outcome": "won",
       "after": [
@@ -54338,7 +55139,7 @@
     {
       "opponent": "spyder_scoop_weaver",
       "kind": "trainer",
-      "startFrame": 34080,
+      "startFrame": 34820,
       "before": [
         {
           "slug": "arthrobolt",
@@ -54387,7 +55188,7 @@
           "level": 35
         }
       ],
-      "endFrame": 34526,
+      "endFrame": 35266,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -54432,7 +55233,7 @@
     {
       "opponent": "spyder_scoop_arachne",
       "kind": "trainer",
-      "startFrame": 34585,
+      "startFrame": 35325,
       "before": [
         {
           "slug": "arthrobolt",
@@ -54485,7 +55286,7 @@
           "level": 40
         }
       ],
-      "endFrame": 35337,
+      "endFrame": 36077,
       "turns": 4,
       "outcome": "won",
       "after": [
@@ -54530,7 +55331,7 @@
     {
       "opponent": "wild:sludgehog",
       "kind": "wild",
-      "startFrame": 35452,
+      "startFrame": 36192,
       "before": [
         {
           "slug": "arthrobolt",
@@ -54575,7 +55376,7 @@
           "level": 40
         }
       ],
-      "endFrame": 35730,
+      "endFrame": 36470,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -54620,7 +55421,7 @@
     {
       "opponent": "spyder_tunnelb_meitner",
       "kind": "trainer",
-      "startFrame": 36696,
+      "startFrame": 37436,
       "before": [
         {
           "slug": "arthrobolt",
@@ -54665,7 +55466,7 @@
           "level": 27
         }
       ],
-      "endFrame": 36974,
+      "endFrame": 37714,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -54710,7 +55511,7 @@
     {
       "opponent": "spyder_tunnelb_greta",
       "kind": "trainer",
-      "startFrame": 37271,
+      "startFrame": 38011,
       "before": [
         {
           "slug": "arthrobolt",
@@ -54775,7 +55576,7 @@
           "level": 21
         }
       ],
-      "endFrame": 38421,
+      "endFrame": 39161,
       "turns": 6,
       "outcome": "won",
       "after": [
@@ -54820,7 +55621,7 @@
     {
       "opponent": "spyder_billie",
       "kind": "trainer",
-      "startFrame": 38595,
+      "startFrame": 39335,
       "before": [
         {
           "slug": "arthrobolt",
@@ -54877,7 +55678,7 @@
           "level": 40
         }
       ],
-      "endFrame": 39413,
+      "endFrame": 40153,
       "turns": 4,
       "outcome": "won",
       "after": [
@@ -54922,7 +55723,7 @@
     {
       "opponent": "spyder_route6_maxwell",
       "kind": "trainer",
-      "startFrame": 39730,
+      "startFrame": 40470,
       "before": [
         {
           "slug": "arthrobolt",
@@ -54971,7 +55772,7 @@
           "level": 35
         }
       ],
-      "endFrame": 40176,
+      "endFrame": 40916,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -55016,7 +55817,7 @@
     {
       "opponent": "spyder_route6_orion",
       "kind": "trainer",
-      "startFrame": 40339,
+      "startFrame": 41079,
       "before": [
         {
           "slug": "arthrobolt",
@@ -55065,7 +55866,7 @@
           "level": 35
         }
       ],
-      "endFrame": 40753,
+      "endFrame": 41493,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -55110,7 +55911,7 @@
     {
       "opponent": "spyder_route6_gunner",
       "kind": "trainer",
-      "startFrame": 40942,
+      "startFrame": 41682,
       "before": [
         {
           "slug": "arthrobolt",
@@ -55159,7 +55960,7 @@
           "level": 25
         }
       ],
-      "endFrame": 41356,
+      "endFrame": 42096,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -55204,7 +56005,7 @@
     {
       "opponent": "spyder_route6_richard",
       "kind": "trainer",
-      "startFrame": 41489,
+      "startFrame": 42229,
       "before": [
         {
           "slug": "arthrobolt",
@@ -55253,7 +56054,7 @@
           "level": 35
         }
       ],
-      "endFrame": 41903,
+      "endFrame": 42643,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -55298,7 +56099,7 @@
     {
       "opponent": "spyder_route6_blair",
       "kind": "trainer",
-      "startFrame": 42038,
+      "startFrame": 42778,
       "before": [
         {
           "slug": "arthrobolt",
@@ -55347,7 +56148,7 @@
           "level": 35
         }
       ],
-      "endFrame": 42502,
+      "endFrame": 43242,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -55392,7 +56193,7 @@
     {
       "opponent": "spyder_greenwash_hunt",
       "kind": "trainer",
-      "startFrame": 44300,
+      "startFrame": 45040,
       "before": [
         {
           "slug": "arthrobolt",
@@ -55441,7 +56242,7 @@
           "level": 25
         }
       ],
-      "endFrame": 44764,
+      "endFrame": 45504,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -55486,7 +56287,7 @@
     {
       "opponent": "spyder_greenwash_louis",
       "kind": "trainer",
-      "startFrame": 45116,
+      "startFrame": 45856,
       "before": [
         {
           "slug": "arthrobolt",
@@ -55531,7 +56332,7 @@
           "level": 24
         }
       ],
-      "endFrame": 45394,
+      "endFrame": 46134,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -55576,7 +56377,7 @@
     {
       "opponent": "spyder_greenwash_lewie",
       "kind": "trainer",
-      "startFrame": 45674,
+      "startFrame": 46414,
       "before": [
         {
           "slug": "arthrobolt",
@@ -55621,7 +56422,7 @@
           "level": 31
         }
       ],
-      "endFrame": 45926,
+      "endFrame": 46666,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -55666,7 +56467,7 @@
     {
       "opponent": "spyder_greenwash_broer",
       "kind": "trainer",
-      "startFrame": 46077,
+      "startFrame": 46817,
       "before": [
         {
           "slug": "arthrobolt",
@@ -55711,7 +56512,7 @@
           "level": 31
         }
       ],
-      "endFrame": 46355,
+      "endFrame": 47095,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -55756,7 +56557,7 @@
     {
       "opponent": "spyder_greenwash_dippel",
       "kind": "trainer",
-      "startFrame": 46559,
+      "startFrame": 47299,
       "before": [
         {
           "slug": "arthrobolt",
@@ -55805,7 +56606,7 @@
           "level": 27
         }
       ],
-      "endFrame": 46973,
+      "endFrame": 47713,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -55850,7 +56651,7 @@
     {
       "opponent": "spyder_greenwash_dempsey",
       "kind": "trainer",
-      "startFrame": 47208,
+      "startFrame": 47948,
       "before": [
         {
           "slug": "arthrobolt",
@@ -55895,7 +56696,7 @@
           "level": 30
         }
       ],
-      "endFrame": 47486,
+      "endFrame": 48226,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -55940,7 +56741,7 @@
     {
       "opponent": "spyder_greenwash_heidenstam",
       "kind": "trainer",
-      "startFrame": 47609,
+      "startFrame": 48349,
       "before": [
         {
           "slug": "arthrobolt",
@@ -55985,7 +56786,7 @@
           "level": 15
         }
       ],
-      "endFrame": 47861,
+      "endFrame": 48601,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -56030,7 +56831,7 @@
     {
       "opponent": "spyder_greenwash_looten",
       "kind": "trainer",
-      "startFrame": 48073,
+      "startFrame": 48813,
       "before": [
         {
           "slug": "arthrobolt",
@@ -56087,7 +56888,7 @@
           "level": 35
         }
       ],
-      "endFrame": 49009,
+      "endFrame": 49749,
       "turns": 5,
       "outcome": "won",
       "after": [
@@ -56186,7 +56987,7 @@
     }
   ],
   "initialStateSha256": "4e462ad536a85c808d45de5250652c4b45cebd71f476edb6e02114828739386e",
-  "terminalStateSha256": "90a651cb8590b183dd1fc793cd4c6cef84f287b7ac05ee2fefba16ede70e8492",
-  "tapeSha256": "c23c8722c4a537b625fb598c41896bdaf3dd79416a5f50ba528b09eda5e70c3c",
-  "combinedTapeSha256": "d86c1d243e12d0daac269e372d0ee8d126c588da0c1fb608a3436210d7b6a362"
+  "terminalStateSha256": "db7c6411a70d85699e62859065254cd5c8fab7c91e4951d1b33c80b1ff803386",
+  "tapeSha256": "8105bf8f4fdaf659bca103c17fb3920b60c49bfb7dd5ef760f4849f0be75a052",
+  "combinedTapeSha256": "6a64459f6a8e5a86fc6292ab3b923462ed16c4cbed0abac944697c99bc8ae5f2"
 }

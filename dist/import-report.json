@@ -284,9 +284,9 @@
  "schemaErrors": [],
  "audioQoaPending": [],
  "byFate": {
-  "T1-lowered": 3140,
+  "T1-lowered": 3135,
   "T3-dropped": 111,
-  "T1": 35851,
+  "T1": 35856,
   "T4-dropped": 1742,
   "T2-dropped": 391,
   "structural": 792
@@ -859,14 +859,8 @@
   {
    "key": "act:start_battle:T1",
    "fate": "T1",
-   "count": 325,
+   "count": 330,
    "note": "Battle Processing with extension-staged trainer party"
-  },
-  {
-   "key": "act:start_battle:T1-lowered",
-   "fate": "T1-lowered",
-   "count": 5,
-   "note": "NPC-versus-NPC battle auto-resolved with the battle rules and saved RNG; outcome recorded"
   },
   {
    "key": "act:start_double_battle:T1",
@@ -2905,8 +2899,8 @@
    "summary": {
     "types": 98,
     "uses": 13617,
-    "native": 12208,
-    "degraded": 1093,
+    "native": 12213,
+    "degraded": 1088,
     "placeholder": 0,
     "dropped": 316,
     "nativePercent": 89.7,
@@ -4127,8 +4121,8 @@
     {
      "type": "start_battle",
      "total": 331,
-     "native": 325,
-     "degraded": 5,
+     "native": 330,
+     "degraded": 0,
      "placeholder": 0,
      "dropped": 1,
      "reasons": {
@@ -4139,10 +4133,8 @@
        "Battle Processing with 4 folded trainer monsters",
        "Battle Processing with 5 folded trainer monsters",
        "Battle Processing with 6 folded trainer monsters",
-       "Battle Processing with 3 folded trainer monsters"
-      ],
-      "degraded": [
-       "NPC-versus-NPC battle auto-resolved with the battle rules and saved RNG; outcome recorded"
+       "Battle Processing with 3 folded trainer monsters",
+       "NPC-versus-NPC battle played in the battle scene (spectator, AI vs AI, same RNG as headless)"
       ],
       "dropped": [
        "source event is not materialized by any map"

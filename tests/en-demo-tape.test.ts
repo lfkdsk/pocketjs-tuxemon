@@ -150,7 +150,7 @@ describe("en demo frame remap", () => {
   test("frames after an insertion shift by its size", () => {
     expect(demoFrameFor(110419, insertions)).toBe(110423);
     expect(demoFrameFor(147755, insertions)).toBe(147759);
-    expect(demoFrameFor(164415, insertions)).toBe(164423);
+    expect(demoFrameFor(165155, insertions)).toBe(165163);
   });
 });
 
@@ -170,7 +170,7 @@ describe("en demo importer gate", () => {
     // flower-city is after the first insertion: +4.
     expect(byId.get("flower-city")!.frame).toBe(115006);
     // candy-town is after both: +8.
-    expect(byId.get("candy-town")!.frame).toBe(164423);
+    expect(byId.get("candy-town")!.frame).toBe(165163);
   });
 
   test("a changed English tape disables the demo tape", () => {

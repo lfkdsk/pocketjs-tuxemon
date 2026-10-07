@@ -11,7 +11,7 @@ When conversion discards a whole event, every source rule in it is Dropped.
 
 | Kind | Kinds | Uses | Native | Degraded | Placeholder | Dropped | S1 T1 baseline |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Actions | 98 | 13617 | 12208 | 1093 | 0 | 316 | 6407 / 6246 (47.05% / 45.9%) |
+| Actions | 98 | 13617 | 12213 | 1088 | 0 | 316 | 6407 / 6246 (47.05% / 45.9%) |
 | Conditions | 64 | 8663 | 8364 | 56 | 0 | 243 | 4758 / 4591 (54.92% / 53.0%) |
 
 The S1 acceptance baselines are 6,246 action uses (45.9%) and 4,591
@@ -21,7 +21,7 @@ Degraded count toward them. This import records 6407
 (54.92%), respectively: 161 above
 for actions and 167 above for conditions. The old
 type-table Native figure was 5,448 / 13,617 (40.0%); conversion-path accounting
-supersedes it with 12208 / 13617
+supersedes it with 12213 / 13617
 (89.7%). “Executable”
 (native + degraded + deliberate P1 placeholder) is
 97.7% for actions and
@@ -65,10 +65,12 @@ defeat behavior are Native. The remaining non-native behavior is explicit:
 |---|---|---:|---|
 
 
-The five `start_battle` NPC-versus-NPC scenes auto-resolve through the
-game's battle rules with the saved deterministic RNG (both sides on the
-seeded AI policy); the player sees a name card and a decisive fight is
-recorded per upstream. A true draw is Degraded: upstream raises before
+The five `start_battle` NPC-versus-NPC scenes play out in the real battle
+scene as spectator fights: both parties, their techniques, damage and results
+are visible, the player cannot open menus, and confirm toggles fast-forward
+(1x/2x/4x) while cancel skips to the result. The outcome matches the headless
+resolver exactly — one RNG draw from the saved cursor, post-spawn seed, seeded
+AI policy on both sides — and a decisive fight is recorded per upstream. A true draw is Degraded: upstream raises before
 either result variable is written, so this port writes the draw code and
 the fighter (challenger) trainer code as a deterministic fallback. The
 other rows are global or legacy content. `get_player_monster` has
@@ -511,7 +513,7 @@ four-neighbour BFS with fixed tie-breaking selects the nearest walkable cell:
 | Action | `set_template` | 16 | 8 | 0 | 0 | 24 |
 | Action | `set_tuxepedia` | 0 | 6 | 0 | 0 | 6 |
 | Action | `set_variable` | 707 | 0 | 0 | 8 | 715 |
-| Action | `start_battle` | 325 | 5 | 0 | 1 | 331 |
+| Action | `start_battle` | 330 | 0 | 0 | 1 | 331 |
 | Action | `start_double_battle` | 8 | 0 | 0 | 0 | 8 |
 | Action | `teleport_faint` | 11 | 0 | 0 | 0 | 11 |
 | Action | `trading` | 8 | 0 | 0 | 0 | 8 |
@@ -606,10 +608,10 @@ translations is normalized to Chinese convention next to CJK text; template
 tokens are untouched.
 
 - **0 keys fell back to en_US** (untranslated): _None._
-- **177 keys are absent from every catalog** (the importer
+- **175 keys are absent from every catalog** (the importer
   shows the raw key as fallback text). These keys do not exist in en_US
   either, so the English build shows the raw key for the same lines; they
   are upstream content gaps, not translation gaps:
   - real dialog (translated_dialog/char_talk) (5): `aardornforyou`, `addlevel`, `resetcleo`, `spyder_flower_sandy_willtrade`, `water_nice_mayor12`
   - choice option values / passwords (8): `..---`, `02`, `05`, `10`, `2!`, `2F`, `B`, `II`
-  - map / NPC / monster / item name lookups (164): `37707_tower`, `37707_town`, `37707_town_missing`, `aerolume_city`, `azure_town_hall`, `bedroom`, `buddha_mountain`, `cam`, `candy_cafe`, `candy_center`, `candy_house1`, `candy_house3`, `candy_inn1`, `candy_inn2`, `candy_scoop`, `city1_mart_junkyard`, `citypark_house1`, `classic_gym_astra`, `classic_gym_bravion`, `classic_gym_ferrum`, `classic_gym_granite`, `classic_gym_marin`, `classic_gym_mila`, `classic_gym_orion`, `classic_gym_pyra`, `classic_gym_shade`, `classic_gym_sylva`, `classic_gym_voltessa`, `classic_gym_vyre`, `classic_gym_zephra`, `classic_route_1`, `classic_route_2`, `classic_route_3`, `classic_route_4`, `classic_route_5`, `classic_route_6`, `classic_route_7`, `classic_route_8`, `cotton_artshop`, `cotton_cafe`, `cotton_cafe_basement`, `cotton_cathedral`, `cotton_daycare`, `cotton_house1`, `cotton_house2`, `cotton_misa_house`, `cotton_scoop`, `cotton_tunnel`, `cotton_underground`, `crystal_bank1`, `crystal_bank2`, `crystal_bank3`, `crystal_center`, `crystal_town_cafe`, `crystal_town_house`, `datacenter`, `daycare`, `dojo1`, `dojo2`, `dojo3`, `dojo4`, `downstairs`, `elianeoutput`, `flower_center`, `flower_house1`, `flower_house2`, `flower_petshop`, `flower_scoop`, `greenwash`, `greenwash_greenhouse`, `greenwash_level2`, `greenwash_level3`, `healing_center`, `hearthrock_city`, `hospital1`, `hospital2`, `hospital3`, `house6`, `leather_center`, `leather_gym`, `leather_house1`, `leather_house2`, `leather_museum`, `leather_scoop`, `leather_shaft1`, `leather_shaft2`, `manhattan_beach`, `manor`, `mansion_basement`, `mansion_top`, `maple_bedroom`, `maple_house`, `nimrod_bottom`, `nimrod_middle`, `nimrod_room`, `nimrod_top`, `obsidian_center`, `obsidian_town`, `obsidian_town_house`, `omnichannel0`, `omnichannel1`, `omnichannel2`, `omnichannel3`, `omnichannel4`, `paper_scoop`, `park,route7`, `park_cabin`, `park_cave`, `park_entrance`, `professor_lab`, `radiotower`, `rival_bedroom`, `rival_downstairs`, `rival_office`, `routef`, `routeg`, `routeh`, `routei`, `scoop1`, `scoop2`, `scoop3`, `scoop4`, `sphalian_center`, `sphalian_house`, `sphalian_town`, `start_tuxemon`, `steamshore_city`, `stormpeak_city`, `taba_ba_br_4`, `taba_ba_br_master_foyer`, `taba_ba_passageway_3`, `taba_ba_passageway_4`, `taba_ba_stairwell_1`, `taba_house1`, `taba_house2`, `taba_house2_upstairs`, `taba_house3`, `taba_house3_upstairs`, `taba_house4`, `tabathas`, `test_npcs`, `thornwood_city`, `timber_cafe`, `timber_center`, `timber_house`, `timber_scoop`, `tuxe_mart_taba`, `umbrastar_city`, `valorhold_city`, `walled_garden1`, `walled_garden2`, `water_end_of_desert`, `water_lower_village`, `water_outskirts`, `water_river_village`, `water_route_grass`, `water_route_ice`, `water_snow_village`, `water_underwater`, `water_volcano_path`, `water_volcano_village`, `wayfarer_inn1`, `wayfarer_inn2`, `zeke`
+  - map / NPC / monster / item name lookups (162): `37707_tower`, `37707_town`, `37707_town_missing`, `aerolume_city`, `azure_town_hall`, `bedroom`, `buddha_mountain`, `candy_cafe`, `candy_center`, `candy_house1`, `candy_house3`, `candy_inn1`, `candy_inn2`, `candy_scoop`, `city1_mart_junkyard`, `citypark_house1`, `classic_gym_astra`, `classic_gym_bravion`, `classic_gym_ferrum`, `classic_gym_granite`, `classic_gym_marin`, `classic_gym_mila`, `classic_gym_orion`, `classic_gym_pyra`, `classic_gym_shade`, `classic_gym_sylva`, `classic_gym_voltessa`, `classic_gym_vyre`, `classic_gym_zephra`, `classic_route_1`, `classic_route_2`, `classic_route_3`, `classic_route_4`, `classic_route_5`, `classic_route_6`, `classic_route_7`, `classic_route_8`, `cotton_artshop`, `cotton_cafe`, `cotton_cafe_basement`, `cotton_cathedral`, `cotton_daycare`, `cotton_house1`, `cotton_house2`, `cotton_misa_house`, `cotton_scoop`, `cotton_tunnel`, `cotton_underground`, `crystal_bank1`, `crystal_bank2`, `crystal_bank3`, `crystal_center`, `crystal_town_cafe`, `crystal_town_house`, `datacenter`, `daycare`, `dojo1`, `dojo2`, `dojo3`, `dojo4`, `downstairs`, `elianeoutput`, `flower_center`, `flower_house1`, `flower_house2`, `flower_petshop`, `flower_scoop`, `greenwash`, `greenwash_greenhouse`, `greenwash_level2`, `greenwash_level3`, `healing_center`, `hearthrock_city`, `hospital1`, `hospital2`, `hospital3`, `house6`, `leather_center`, `leather_gym`, `leather_house1`, `leather_house2`, `leather_museum`, `leather_scoop`, `leather_shaft1`, `leather_shaft2`, `manhattan_beach`, `manor`, `mansion_basement`, `mansion_top`, `maple_bedroom`, `maple_house`, `nimrod_bottom`, `nimrod_middle`, `nimrod_room`, `nimrod_top`, `obsidian_center`, `obsidian_town`, `obsidian_town_house`, `omnichannel0`, `omnichannel1`, `omnichannel2`, `omnichannel3`, `omnichannel4`, `paper_scoop`, `park,route7`, `park_cabin`, `park_cave`, `park_entrance`, `professor_lab`, `radiotower`, `rival_bedroom`, `rival_downstairs`, `rival_office`, `routef`, `routeg`, `routeh`, `routei`, `scoop1`, `scoop2`, `scoop3`, `scoop4`, `sphalian_center`, `sphalian_house`, `sphalian_town`, `start_tuxemon`, `steamshore_city`, `stormpeak_city`, `taba_ba_br_4`, `taba_ba_br_master_foyer`, `taba_ba_passageway_3`, `taba_ba_passageway_4`, `taba_ba_stairwell_1`, `taba_house1`, `taba_house2`, `taba_house2_upstairs`, `taba_house3`, `taba_house3_upstairs`, `taba_house4`, `tabathas`, `test_npcs`, `thornwood_city`, `timber_cafe`, `timber_center`, `timber_house`, `timber_scoop`, `tuxe_mart_taba`, `umbrastar_city`, `valorhold_city`, `walled_garden1`, `walled_garden2`, `water_end_of_desert`, `water_lower_village`, `water_outskirts`, `water_river_village`, `water_route_grass`, `water_route_ice`, `water_snow_village`, `water_underwater`, `water_volcano_path`, `water_volcano_village`, `wayfarer_inn1`, `wayfarer_inn2`

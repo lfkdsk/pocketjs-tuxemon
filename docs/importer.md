@@ -131,7 +131,7 @@ The remaining non-native battle behavior is explicit and reported by source type
 
 | Tuxemon | Stand-in |
 |---|---|
-| `start_battle` (NPC vs NPC, 5 uses) | a name card, then a headless AI-vs-AI auto-resolution through the battle rules with the saved RNG (the battle seed continues from the post-spawn cursor); a decisive fight records `battle_last_winner`/`battle_last_loser`/`battle_last_trainer` per upstream, while a true draw writes the draw code and the fighter (challenger) trainer code as a deterministic fallback (upstream raises before either result variable is written). |
+| `start_battle` (NPC vs NPC, 5 uses) | a watchable spectator fight in the real battle scene: both parties, their techniques, damage and results play out with no player menus (confirm toggles 1x/2x/4x fast-forward, cancel skips to the result); the outcome matches the headless resolver exactly — one RNG draw from the saved cursor, post-spawn seed, seeded AI policy on both sides — and a decisive fight records `battle_last_winner`/`battle_last_loser`/`battle_last_trainer` per upstream, while a true draw writes the draw code and the fighter (challenger) trainer code as a deterministic fallback (upstream raises before either result variable is written). |
 
 `is party_infected` is a live extension condition over the per-monster plague
 state (all/some/none), not a constant: `char_plague` infects or inoculates a

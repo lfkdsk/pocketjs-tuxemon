@@ -18,6 +18,8 @@ export const BATTLE_XP_WIDTH = 140;
 // battle scene passes the asymmetric HUD widths above explicitly.
 export const BATTLE_HP_WIDTH = 116;
 
+export interface BattleRect { x: number; y: number; width: number; height: number }
+
 export const BATTLE_RECTS = Object.freeze({
   background: { x: -16, y: 0, width: 512, height: 256 },
   playerIsland: { x: 48, y: 136, width: 192, height: 114 },
@@ -36,6 +38,63 @@ export const BATTLE_RECTS = Object.freeze({
   message: { x: 0, y: 216, width: 244, height: 56 },
   menu: { x: 244, y: 216, width: 236, height: 56 },
 });
+
+/** Party-ball icon geometry. The battle db's party icons are 8x8, drawn at
+ *  2x, so each ball occupies a 16 px cell. The first 16 px of a tray row is
+ *  the tray's own leading art; balls start after it. Both the scene draw and
+ *  the layout tests derive ball rects from partyBallRect() so they can never
+ *  disagree. */
+export const BATTLE_BALL_SIZE = 16;
+export const BATTLE_BALL_X_OFFSET = 16;
+
+export function partyBallRect(side: 0 | 1, slot: number): BattleRect {
+  const tray = side === 0 ? BATTLE_RECTS.playerTray : BATTLE_RECTS.enemyTray;
+  return {
+    x: tray.x + BATTLE_BALL_X_OFFSET + slot * BATTLE_BALL_SIZE,
+    y: tray.y,
+    width: BATTLE_BALL_SIZE,
+    height: BATTLE_BALL_SIZE,
+  };
+}
+
+/** Spectator (NPC-versus-NPC) chrome lives in the menu band, which is hidden
+ *  during spectator battles (the command/list menus are not shown), so the
+ *  banner and hints never cover a HUD box, a party ball, an island/monster
+ *  clip or the message band:
+ *  - banner: the top of the menu band (x 244..480, y 216..242), right of the
+ *    narrowed message band;
+ *  - hints: just below the banner (x 244..480, y 244..262).
+ *  The message band is narrowed to its 244 px design width in spectator mode
+ *  so the chrome band stays clear of it.
+ *  `tests/battle-spectator-layout.test.ts` asserts these rects are disjoint
+ *  from every HUD/ball/island/monster/message rect at both target
+ *  resolutions, all computed by this same module. */
+export const SPECTATOR_BANNER_RECT = Object.freeze({ x: 244, y: 216, width: 236, height: 26 });
+export const SPECTATOR_HINT_RECT = Object.freeze({ x: 244, y: 244, width: 236, height: 18 });
+
+/** Every rect the spectator chrome must not cover, computed by the same
+ *  layout the scene draws with. The menu band is excluded: it is hidden
+ *  during spectator battles and is where the hint lives. */
+export function spectatorProtectedRects(): BattleRect[] {
+  return [
+    BATTLE_RECTS.enemyHud,
+    BATTLE_RECTS.playerHud,
+    BATTLE_RECTS.enemyTray,
+    BATTLE_RECTS.playerTray,
+    partyBallRect(1, 0), partyBallRect(1, 1), partyBallRect(1, 2),
+    partyBallRect(1, 3), partyBallRect(1, 4), partyBallRect(1, 5),
+    partyBallRect(0, 0), partyBallRect(0, 1), partyBallRect(0, 2),
+    partyBallRect(0, 3), partyBallRect(0, 4), partyBallRect(0, 5),
+    BATTLE_RECTS.enemyIsland,
+    BATTLE_RECTS.playerIsland,
+    BATTLE_RECTS.enemyMonster,
+    BATTLE_RECTS.playerMonster,
+    BATTLE_RECTS.playerXp,
+    BATTLE_RECTS.enemyStatus,
+    BATTLE_RECTS.playerStatus,
+    BATTLE_RECTS.message,
+  ];
+}
 
 export interface BattleSceneLayout {
   scale: number;

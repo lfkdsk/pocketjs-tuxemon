@@ -200,11 +200,6 @@ let activeLang: ImportLang = "en_US";
 // Player-visible lines for the headless NPC-versus-NPC auto battle. Kept
 // local to the importer instead of IMPORT_UI so the zh_CN catalog merge in
 // importer/l10n.ts stays the single owner of translated content.
-const NPC_BATTLE_TEXT: Record<ImportLang, { label: (fighter: string, foe: string) => string; resolved: string }> = {
-  en_US: { label: (fighter, foe) => `[BATTLE] ${fighter} vs ${foe}`, resolved: "(auto-resolved)" },
-  zh_CN: { label: (fighter, foe) => `【对战】${fighter} 对 ${foe}`, resolved: "（自动结算）" },
-};
-
 // Lookup-context recording for the zh_CN fallback report. The catalog only
 // records which keys missed; these sets record where each key was looked up
 // so the report can say whether a missing key is real dialog, a choice
@@ -2868,33 +2863,34 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
             } as unknown as JsonValue,
           });
         } else if (ctx.options.battle) {
-          // NPC-versus-NPC: run a headless AI-vs-AI battle with the saved
-          // RNG. A decisive outcome is recorded the way upstream's
-          // CombatState does: battle_last_winner = winner, battle_last_loser
-          // = loser, and battle_last_trainer = the loser (upstream's loser
-          // handling overwrites the winner's trainer write). On a true draw
-          // upstream raises before writing either variable; this port writes
-          // the draw result and the challenger's trainer code instead, a
-          // deliberate deterministic fallback (Degraded in the coverage).
+          // NPC-versus-NPC: play the battle in the real battle scene. Both
+          // parties run on the seeded AI policy; the player watches without
+          // controlling, can fast-forward (confirm) or skip (cancel). The
+          // result variables match the headless resolver exactly (same RNG
+          // cursor and enum codes). A true draw is still Degraded: upstream
+          // raises before either result variable is written, so this port
+          // writes the draw code and the challenger's trainer code as a
+          // deterministic fallback.
           const fighter = g[0]!;
           const foe = g[1]!;
-          noteAction(a, a.type, "T1-lowered", "NPC-versus-NPC battle auto-resolved with the battle rules and saved RNG; outcome recorded");
-          const npcBattleText = NPC_BATTLE_TEXT[activeLang];
+          noteAction(a, a.type, "T1", "NPC-versus-NPC battle played in the battle scene (spectator, AI vs AI, same RNG as headless)");
           out.push({
-            op: "text",
-            lines: [npcBattleText.label(npcName(fighter), npcName(foe)).slice(0, 52), npcBattleText.resolved.slice(0, 52)],
+            op: "battle",
+            setup: {
+              kind: "spectate",
+              fighter,
+              foe,
+              fighterWinnerCode: code("battle_last_winner", fighter),
+              foeWinnerCode: code("battle_last_winner", foe),
+              fighterLoserCode: code("battle_last_loser", fighter),
+              foeLoserCode: code("battle_last_loser", foe),
+              fighterTrainerCode: code("battle_last_trainer", fighter),
+              foeTrainerCode: code("battle_last_trainer", foe),
+              drawCode: code("battle_last_result", "draw"),
+              inside: ctx.m.props.inside === "true",
+              hour: 12,
+            } as unknown as JsonValue,
           });
-          out.push({ op: "ext", call: "tux.npc_battle", args: {
-            fighter,
-            foe,
-            fighterWinnerCode: code("battle_last_winner", fighter),
-            foeWinnerCode: code("battle_last_winner", foe),
-            fighterLoserCode: code("battle_last_loser", fighter),
-            foeLoserCode: code("battle_last_loser", foe),
-            fighterTrainerCode: code("battle_last_trainer", fighter),
-            foeTrainerCode: code("battle_last_trainer", foe),
-            drawCode: code("battle_last_result", "draw"),
-          } });
         } else {
           noteAction(a, a.type, "T3-placeholder", "inline placeholder: text + outcome writes");
           out.push(...battlePlaceholder(opp));

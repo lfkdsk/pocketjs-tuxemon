@@ -18,6 +18,7 @@ import type { BattleEvent, BattleMonster } from "../battle/types.ts";
 import type { BattleImageRef } from "../importer/battle-schema.ts";
 import type { BattleSceneViewProps } from "../vendor/pocket-rpgkit/src/ui/GameView.tsx";
 import { formatUiText } from "../vendor/pocket-rpgkit/src/engine/ui-text.ts";
+import { slotMeasure } from "../vendor/pocket-rpgkit/src/ui/text-measure.ts";
 import { STAT_BAR_UI_TEXT } from "../vendor/pocket-rpgkit/src/ui/battle/text.ts";
 import {
   CommandGrid,
@@ -33,8 +34,12 @@ import {
 import {
   BATTLE_BASE_HEIGHT,
   BATTLE_BASE_WIDTH,
+  BATTLE_BALL_SIZE,
   BATTLE_RECTS as R,
+  SPECTATOR_BANNER_RECT,
+  SPECTATOR_HINT_RECT,
   battleViewportLayout,
+  partyBallRect,
 } from "./battle-layout.ts";
 
 type Runtime = ReturnType<typeof tuxemonRuntimeBattleState>;
@@ -317,6 +322,7 @@ export const TuxemonBattleScene: Component<BattleSceneViewProps> = (props) => {
   const playerArt = createMemo(() => runtime().visuals.monsters[player().slug]!);
   const enemyArt = createMemo(() => runtime().visuals.monsters[enemy().slug]!);
   const allMonsters = createMemo(() => [...runtime().battle.parties[0], ...runtime().battle.parties[1]]);
+  const spectator = createMemo(() => runtime().spectator !== undefined);
   const presenting = createMemo(() => currentPresentationEvent(runtime()) !== null);
   const event = createMemo(() => currentPresentationEvent(runtime()));
   const messageTick = createMemo(() => {
@@ -338,13 +344,14 @@ export const TuxemonBattleScene: Component<BattleSceneViewProps> = (props) => {
     if (result) return result.outcome === "won" ? L.victory
       : result.outcome === "lost" ? L.partyDefeated
         : L.battleEnded;
+    if (spectator()) return L.spectatorWatching;
     return runtime().menuMode === "root" ? L.whatWill(monsterName(player()))
       : runtime().menuMode === "technique" ? L.chooseTechnique
         : runtime().menuMode === "swap" ? L.chooseTuxemon
           : runtime().menuMode === "capture" ? L.chooseCapture
             : L.chooseItem;
   });
-  const menuReady = createMemo(() => !presenting() && runtime().battle.awaiting !== null);
+  const menuReady = createMemo(() => !spectator() && !presenting() && runtime().battle.awaiting !== null);
   const rootVisible = createMemo(() => menuReady() && runtime().menuMode === "root");
   const listVisible = createMemo(() => menuReady() && runtime().menuMode !== "root");
   // Opacity-hidden menus retain their last content. Publishing a battle turn
@@ -378,6 +385,29 @@ export const TuxemonBattleScene: Component<BattleSceneViewProps> = (props) => {
   });
 
   const bandLines = createMemo(() => wrapMessage(message(), rootVisible() || listVisible() ? 27 : 58));
+  // Spectator chrome text. The banner names the two NPC parties (localized
+  // through the battle names table) and wraps to a second line at "vs" when
+  // the single-line run would not fit the free banner band — never clipped
+  // or ellipsized. The hints line carries the fast-forward/skip legend and
+  // the current speed multiplier.
+  const measure = slotMeasure();
+  const spectatorBanner = createMemo<{ lines: string[] }>(() => {
+    const info = runtime().spectator;
+    if (!info) return { lines: [] };
+    const fighter = battleDisplayName("npc", info.fighter);
+    const foe = battleDisplayName("npc", info.foe);
+    const vs = battleSceneLabels().spectatorVs;
+    const full = `${fighter}  ${vs}  ${foe}`;
+    const budget = SPECTATOR_BANNER_RECT.width - 16;
+    if (measure(full) <= budget) return { lines: [full] };
+    return { lines: [fighter, `${vs} ${foe}`] };
+  });
+  const spectatorHint = createMemo(() => {
+    const info = runtime().spectator;
+    if (!info) return "";
+    const L = battleSceneLabels();
+    return `${L.spectatorFastForward}${info.speed > 1 ? ` ${L.spectatorSpeed(info.speed)}` : ""}   ${L.spectatorSkip}`;
+  });
   const playerLevel = () => paint.playerLevel;
   const playerXp = createMemo(() => experienceProgress(
     paint.playerExperience,
@@ -581,6 +611,7 @@ export const TuxemonBattleScene: Component<BattleSceneViewProps> = (props) => {
         <For each={PARTY_SLOTS}>
           {(slot) => {
             const icon = createMemo(() => (side === 0 ? paint.playerIcons : paint.enemyIcons)[slot]!);
+            const ball = partyBallRect(side, slot);
             return (
               <LazyImage
                 src={activeImageSource(icon())}
@@ -589,10 +620,10 @@ export const TuxemonBattleScene: Component<BattleSceneViewProps> = (props) => {
                 class="absolute"
                 style={{
                   posType: 1,
-                  insetL: rect.x + 16 + slot * 16,
-                  insetT: rect.y,
-                  width: icon().width * 2,
-                  height: icon().height * 2,
+                  insetL: ball.x,
+                  insetT: ball.y,
+                  width: BATTLE_BALL_SIZE,
+                  height: BATTLE_BALL_SIZE,
                 }}
                 debugName={`${side === 0 ? "player" : "enemy"}-party-${slot}`}
               />
@@ -693,10 +724,61 @@ export const TuxemonBattleScene: Component<BattleSceneViewProps> = (props) => {
           track="#263b43"
           debugName="player-xp"
         />
+        {spectator() && (
+          <View
+            class="absolute"
+            style={{ posType: 1, insetL: SPECTATOR_BANNER_RECT.x, insetT: SPECTATOR_BANNER_RECT.y, width: SPECTATOR_BANNER_RECT.width, height: SPECTATOR_BANNER_RECT.height, bgColor: "#06141dcc" }}
+            debugName="spectator-banner"
+          >
+            <For each={spectatorBanner().lines}>
+              {(line, index) => (
+                <Text
+                  class="text-xs"
+                  style={{
+                    posType: 1,
+                    insetL: 0,
+                    insetT: index() === 0 && spectatorBanner().lines.length === 1 ? 6 : index() * 13,
+                    width: SPECTATOR_BANNER_RECT.width,
+                    height: 13,
+                    lineHeight: 13,
+                    textAlign: 1,
+                    textColor: "#f5f1d7",
+                  }}
+                  debugName="spectator-title"
+                >
+                  {line}
+                </Text>
+              )}
+            </For>
+          </View>
+        )}
+        {spectator() && (
+          <View
+            class="absolute"
+            style={{ posType: 1, insetL: SPECTATOR_HINT_RECT.x, insetT: SPECTATOR_HINT_RECT.y, width: SPECTATOR_HINT_RECT.width, height: SPECTATOR_HINT_RECT.height, bgColor: "#06141dcc" }}
+            debugName="spectator-hints"
+          >
+            <Text
+              class="text-xs"
+              style={{
+                posType: 1,
+                insetL: 6,
+                insetT: 2,
+                width: SPECTATOR_HINT_RECT.width - 12,
+                height: 14,
+                lineHeight: 13,
+                textColor: "#79d8c5",
+              }}
+              debugName="spectator-hint-text"
+            >
+              {spectatorHint()}
+            </Text>
+          </View>
+        )}
         <MessageBand
           lines={bandLines()}
-          legend={presenting() ? battleSceneLabels().messageOk : " "}
-          width={rootVisible() || listVisible() ? R.message.width : BATTLE_BASE_WIDTH}
+          legend={spectator() ? " " : presenting() ? battleSceneLabels().messageOk : " "}
+          width={spectator() || rootVisible() || listVisible() ? R.message.width : BATTLE_BASE_WIDTH}
           theme={UI_THEME}
           style={{ insetL: 0, insetT: R.message.y }}
           debugName="battle-message"

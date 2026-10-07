@@ -4,7 +4,7 @@
   "hz": 60,
   "worldTraversal": "seamless-v1",
   "source": {
-    "chaptersSha256": "9ec7ff9893c665ed41c0a53a4ce06923b6282c6b42b349cefe87af964c7ead08",
+    "chaptersSha256": "8713b6c6576b79817cbfabcdd2dbc87d6a56aeb5b57d8d779cb13581e2a5f401",
     "tape": {
       "gb6": {
         "file": "data/gb6-mainline-journey.json",
@@ -20,8 +20,8 @@
       },
       "j2": {
         "file": "data/j2-hospitalcure-journey.json",
-        "frames": 50487,
-        "tapeSha256": "c23c8722c4a537b625fb598c41896bdaf3dd79416a5f50ba528b09eda5e70c3c",
+        "frames": 51227,
+        "tapeSha256": "8105bf8f4fdaf659bca103c17fb3920b60c49bfb7dd5ef760f4849f0be75a052",
         "worldTraversal": "seamless-v1"
       },
       "j3": {
@@ -36,8 +36,8 @@
         "tapeSha256": "08c88566e1da8c7c86816175403152f2f15fbb771d60b2a0756a32c9061987b1",
         "worldTraversal": "seamless-v1"
       },
-      "frames": 198568,
-      "sha256": "a1dde2471f1b66df83683813de996837ec8b558fc1bd16ba0f1d47f13d4a7e3c"
+      "frames": 199308,
+      "sha256": "fe75a89d1ff3000c8801fe6945c792cdba907cad63741b81d42de8e39dd186fb"
     }
   },
   "paginator": {
@@ -47,20 +47,20 @@
     "fallbacks": [
       "fonts/NotoSansCJKsc-subset.otf"
     ],
-    "fontSha256": "c50a85809a976b2e956de6c4263ce811f053ed940873c695531d07aaabbe2061",
-    "charsetSha256": "e06ce645db08285f247ff08c9b860a2668281f2815d0f668f4398487ef422b55"
+    "fontSha256": "061287cd8736d448e537dc186ca396e9d306f2c8f3c7b32d641e6d9924bab1dc",
+    "charsetSha256": "e7cb50da144d14aa5b68058a56363baa8bb0003110b98c2d8b64d166dddb3fc4"
   },
-  "frames": 198568,
-  "tapeSha256": "a1dde2471f1b66df83683813de996837ec8b558fc1bd16ba0f1d47f13d4a7e3c",
+  "frames": 199308,
+  "tapeSha256": "fe75a89d1ff3000c8801fe6945c792cdba907cad63741b81d42de8e39dd186fb",
   "edits": [],
   "dialogs": {
-    "textBoxes": 646,
+    "textBoxes": 645,
     "rewrittenBoxes": 0,
     "pagedBoxes": 0,
     "choiceBoxes": 57,
     "confirmsInserted": 0,
     "confirmsRemoved": 0,
-    "neutralChecks": 720
+    "neutralChecks": 719
   },
   "terminal": {
     "summary": {
@@ -70,7 +70,7 @@
         4
       ],
       "facing": 3,
-      "frame": 198568,
+      "frame": 199308,
       "gold": 68920,
       "items": {
         "aardant": 1,
@@ -100,6 +100,6 @@
       ],
       "storySha256": "187f2002f6fbf3efb33f1aa0146c09b259dcc6bb25365a9a14b925fe4ef29e9c"
     },
-    "neutralSha256": "695c7a01ac6c8b0975ebf94af1dc739beda6d7deb3c5fc92fd7aa88f6ae71746"
+    "neutralSha256": "a308d48357a85fdec1d9cac8ba9eec119c61bbaea5726d2c9b07c423af5994f2"
   }
 }
