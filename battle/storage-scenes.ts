@@ -12,6 +12,8 @@ import type { JsonValue } from "../vendor/pocket-rpgkit/src/engine/types.ts";
 import {
   KENNEL_BOX,
   KENNEL_LIMIT,
+  LOCKER_ITEM_CAP,
+  LOCKER_LIMIT,
   PARTY_LIMIT,
   nextMonsterIid,
   packTuxemonExtensionState,
@@ -28,9 +30,15 @@ import { MONSTER_SHOP_LABELS_ZH, PC_LABELS_ZH, TRADE_MESSAGE_ZH } from "./scene-
 import { spawnMonsterWithRandom } from "./spawn.ts";
 import type { SpawnedMonsterSnapshot } from "./types.ts";
 
+/** Re-exported for the scene's title templates ({max} placeholders). */
+export { LOCKER_LIMIT, PARTY_LIMIT };
+
 export const TUXEMON_PC_SCENE_ID = "tux.pc";
 export const TUXEMON_TRADE_SCENE_ID = "tux.trade";
 export const TUXEMON_MONSTER_SHOP_SCENE_ID = "tux.monsterShop";
+
+/** Upstream item-box id created on the first PC visit (sizes.LOCKER). */
+export const LOCKER_BOX = "Locker";
 
 /** Upstream TradingTransition runs for eight seconds at the 60 Hz reference. */
 export const TRADE_ANIMATION_TICKS = 480;
@@ -54,7 +62,8 @@ function wrap(index: number, length: number): number {
   return length > 0 ? (index + length) % length : 0;
 }
 
-function format(template: string, values: Readonly<Record<string, string>>): string {
+/** Substitute {name}-style placeholders; unknown keys are left literal. */
+export function format(template: string, values: Readonly<Record<string, string>>): string {
   return template.replace(/\{(\w+)\}/g, (match, key: string) => values[key] ?? match);
 }
 
@@ -114,6 +123,36 @@ export interface PcLabels {
   releaseConfirm: string;
   released: string;
   lastMonster: string;
+  itemPickUp: string;
+  itemDropOff: string;
+  itemTake: string;
+  itemDisband: string;
+  itemEmpty: string;
+  itemLockerFull: string;
+  bagFull: string;
+  itemTaken: string;
+  itemDisbanded: string;
+  itemStored: string;
+  itemBagEmpty: string;
+  lockerBox: string;
+  // Footer hints and detail-panel titles. The scene composes these instead
+  // of hardcoding English, so zh_CN builds read in Chinese with the game's
+  // key-name wording (行动键/取消键/…). {kinds}/{items}/{party}/{max} are
+  // substituted at render time. No upstream msgids; the per-language
+  // defaults own them.
+  hintMenu: string;
+  hintBoxesPickUp: string;
+  hintBoxesDropOff: string;
+  hintParty: string;
+  hintOptions: string;
+  hintItemBoxes: string;
+  hintItemBag: string;
+  hintSelect: string;
+  hintQuantity: string;
+  quantityHint: string;
+  bagTitle: string;
+  lockerTitle: string;
+  partyTitle: string;
 }
 
 const PC_LABELS: PcLabels = {
@@ -135,10 +174,36 @@ const PC_LABELS: PcLabels = {
   releaseConfirm: "Are you sure you would like to release {name}?",
   released: "{name} has been released.",
   lastMonster: "{name} is your last Tuxemon able to fight.",
+  itemPickUp: "Pick Up Item",
+  itemDropOff: "Drop Off Item",
+  itemTake: "Take",
+  itemDisband: "Disband",
+  itemEmpty: "This locker is empty, there are no items to take.",
+  itemLockerFull: "This locker is full.",
+  bagFull: "Your bag is full, you cannot take any more from storage.",
+  itemTaken: "You added {nr} {name} into your bag!",
+  itemDisbanded: "{nr} {name} have been disbanded.",
+  itemStored: "{nr} {name} were stored in the locker.",
+  itemBagEmpty: "You have no items that can be stored.",
+  lockerBox: "Locker",
+  hintMenu: "Up/Down: choose  A: select",
+  hintBoxesPickUp: "Choose a box to open.  B: back",
+  hintBoxesDropOff: "Choose a box to store it in.  B: back",
+  hintParty: "Choose a Tuxemon to drop off.  B: back",
+  hintOptions: "A: options  B: back  Left/Right: page",
+  hintItemBoxes: "A: open the locker  B: back",
+  hintItemBag: "A: store  B: back  Left/Right: page",
+  hintSelect: "A: select  B: back",
+  hintQuantity: "Left/Right: +/-1  Up/Down: +/-10  A: ok  B: back",
+  quantityHint: "< > 1   ^ v 10   A ok   B back",
+  bagTitle: "BAG {kinds} KINDS",
+  lockerTitle: "LOCKER {kinds}/{max} {items} ITEMS",
+  partyTitle: "PARTY {party}/{max}",
 };
 
-export type PcMenuItem = "pickUp" | "dropOff" | "logOff";
+export type PcMenuItem = "pickUp" | "dropOff" | "itemPickUp" | "itemDropOff" | "logOff";
 export type PcOption = "pick" | "move" | "release" | "cancel";
+export type PcItemOption = "take" | "disband" | "cancel";
 export type PcPhase =
   | "menu"
   | "boxes"
@@ -147,6 +212,11 @@ export type PcPhase =
   | "moveTarget"
   | "confirmRelease"
   | "party"
+  | "itemBoxes"
+  | "itemLocker"
+  | "itemBag"
+  | "itemOptions"
+  | "itemQuantity"
   | "done";
 
 export interface PcSceneState {
@@ -167,6 +237,25 @@ export interface PcSceneState {
   partyCursor: number;
   confirmCursor: number;
   message: string | null;
+  // --- Item locker draft (committed atomically on Log Off) ---
+  /** Locker stacks, keyed by item slug. Upstream "Locker" item box. */
+  locker: Record<string, number>;
+  /** Backpack draft, seeded from the session bag and committed on Log Off. */
+  bag: Record<string, number>;
+  /** Item display names from the project catalog (slug -> name). */
+  itemNames: Record<string, string>;
+  /** Item slugs upstream hides from menus (behaviors.visible == false). */
+  notStorable: string[];
+  /** "itemPickUp" browses the locker; "itemDropOff" fills it from the bag. */
+  itemMode: "pickUp" | "dropOff";
+  itemBoxCursor: number;
+  itemCursor: number;
+  itemOptionCursor: number;
+  quantity: number;
+  quantityMax: number;
+  quantityMode: "take" | "disband" | "deposit";
+  /** Set once the backpack draft diverges from the session bag. */
+  bagDirty: boolean;
 }
 
 function stateOf<T>(value: JsonValue): T {
@@ -181,8 +270,61 @@ export function pcMenuItems(state: Readonly<PcSceneState>): PcMenuItem[] {
   const items: PcMenuItem[] = [];
   if (pcVisibleBoxes(state).some((box) => box.monsters.length > 0)) items.push("pickUp");
   if (state.party.length > 1) items.push("dropOff");
+  // Upstream PCMenuBuilder: item storage shows when a visible item box holds
+  // items; item drop-off shows when the bag carries more than one item type.
+  if (pcLockerItemCount(state) > 0) items.push("itemPickUp");
+  if (pcBagKindCount(state) > 1) items.push("itemDropOff");
   items.push("logOff");
   return items;
+}
+
+/** Locker item display rows: upstream sorts the grid by slug. */
+export function pcLockerRows(state: Readonly<PcSceneState>): string[] {
+  return Object.keys(state.locker).sort();
+}
+
+/** Bag rows eligible for drop-off: upstream ItemFilter.set_filter_all_visible. */
+export function pcBagRows(state: Readonly<PcSceneState>): string[] {
+  const hidden = new Set(state.notStorable);
+  return Object.keys(state.bag).filter((slug) => !hidden.has(slug) && state.bag[slug]! > 0).sort();
+}
+
+export function pcLockerItemCount(state: Readonly<PcSceneState>): number {
+  return Object.values(state.locker).reduce((sum, quantity) => sum + quantity, 0);
+}
+
+export function pcLockerKindCount(state: Readonly<PcSceneState>): number {
+  return Object.keys(state.locker).length;
+}
+
+export function pcBagKindCount(state: Readonly<PcSceneState>): number {
+  return Object.values(state.bag).filter((quantity) => quantity > 0).length;
+}
+
+export function pcItemName(state: Readonly<PcSceneState>, slug: string): string {
+  return state.itemNames[slug] ?? slug;
+}
+
+/** Upstream item option list: take and disband (change needs >= 2 boxes). */
+export function pcItemOptions(state: Readonly<PcSceneState>): PcItemOption[] {
+  return ["take", "disband", "cancel"];
+}
+
+/** Max that can be taken from the locker into the bag without the kit's
+ *  backpack normalization discarding the excess. */
+export function pcTakeMax(state: Readonly<PcSceneState>, slug: string): number {
+  const held = state.bag[slug] ?? 0;
+  if (held > 0) return Math.min(state.locker[slug] ?? 0, LOCKER_ITEM_CAP - held);
+  // A new kind needs a free backpack slot (kit maxKinds).
+  return pcBagKindCount(state) >= LOCKER_ITEM_CAP ? 0 : (state.locker[slug] ?? 0);
+}
+
+/** Max that can be deposited from the bag into the locker. */
+export function pcDepositMax(state: Readonly<PcSceneState>, slug: string): number {
+  const held = state.locker[slug] ?? 0;
+  if (held > 0) return Math.min(state.bag[slug] ?? 0, LOCKER_ITEM_CAP - held);
+  // A new locker kind needs a free locker slot (MAX_LOCKER).
+  return pcLockerKindCount(state) >= LOCKER_LIMIT ? 0 : (state.bag[slug] ?? 0);
 }
 
 /** Box contents in display order: upstream sorts the grid by slug. */
@@ -288,6 +430,14 @@ function pcStep(state: PcSceneState, input: Readonly<SceneInput>): void {
           state.mode = "pickUp";
           state.phase = "boxes";
           state.boxCursor = 0;
+        } else if (item === "itemPickUp") {
+          state.itemMode = "pickUp";
+          state.phase = "itemBoxes";
+          state.itemBoxCursor = 0;
+        } else if (item === "itemDropOff") {
+          state.itemMode = "dropOff";
+          state.phase = "itemBoxes";
+          state.itemBoxCursor = 0;
         } else {
           state.mode = "dropOff";
           state.phase = "party";
@@ -412,6 +562,127 @@ function pcStep(state: PcSceneState, input: Readonly<SceneInput>): void {
       }
       return;
     }
+    case "itemBoxes": {
+      // One item box (the Locker) exists today; the list still mirrors
+      // upstream's ItemBoxState so future boxes need no new navigation.
+      if (input.cancelEdge) {
+        state.phase = "menu";
+        state.menuCursor = 0;
+      } else if (input.confirmEdge) {
+        if (state.itemMode === "pickUp") {
+          if (pcLockerKindCount(state) === 0) state.message = labels.itemEmpty;
+          else {
+            state.phase = "itemLocker";
+            state.itemCursor = 0;
+          }
+        } else {
+          const rows = pcBagRows(state);
+          if (rows.length === 0) state.message = labels.itemBagEmpty;
+          else {
+            state.phase = "itemBag";
+            state.itemCursor = 0;
+          }
+        }
+      }
+      return;
+    }
+    case "itemLocker": {
+      const rows = pcLockerRows(state);
+      if (up) state.itemCursor = wrap(state.itemCursor - 1, rows.length);
+      else if (down) state.itemCursor = wrap(state.itemCursor + 1, rows.length);
+      else if (input.leftEdge) state.itemCursor = Math.max(0, state.itemCursor - 8);
+      else if (input.rightEdge) state.itemCursor = Math.min(rows.length - 1, state.itemCursor + 8);
+      else if (input.cancelEdge) state.phase = "itemBoxes";
+      else if (input.confirmEdge) {
+        state.phase = "itemOptions";
+        state.itemOptionCursor = 0;
+      }
+      return;
+    }
+    case "itemBag": {
+      const rows = pcBagRows(state);
+      if (up) state.itemCursor = wrap(state.itemCursor - 1, rows.length);
+      else if (down) state.itemCursor = wrap(state.itemCursor + 1, rows.length);
+      else if (input.leftEdge) state.itemCursor = Math.max(0, state.itemCursor - 8);
+      else if (input.rightEdge) state.itemCursor = Math.min(rows.length - 1, state.itemCursor + 8);
+      else if (input.cancelEdge) state.phase = "itemBoxes";
+      else if (input.confirmEdge) {
+        const slug = rows[state.itemCursor]!;
+        const max = pcDepositMax(state, slug);
+        if (max <= 0) {
+          state.message = labels.itemLockerFull;
+        } else {
+          state.quantityMode = "deposit";
+          state.quantity = 1;
+          state.quantityMax = max;
+          state.phase = "itemQuantity";
+        }
+      }
+      return;
+    }
+    case "itemOptions": {
+      const options = pcItemOptions(state);
+      if (up) state.itemOptionCursor = wrap(state.itemOptionCursor - 1, options.length);
+      else if (down) state.itemOptionCursor = wrap(state.itemOptionCursor + 1, options.length);
+      else if (input.cancelEdge) state.phase = "itemLocker";
+      else if (input.confirmEdge) {
+        const option = options[state.itemOptionCursor]!;
+        const slug = pcLockerRows(state)[state.itemCursor]!;
+        if (option === "cancel") state.phase = "itemLocker";
+        else if (option === "take") {
+          const max = pcTakeMax(state, slug);
+          if (max <= 0) {
+            state.message = labels.bagFull;
+            state.phase = "itemLocker";
+          } else {
+            state.quantityMode = "take";
+            state.quantity = 1;
+            state.quantityMax = max;
+            state.phase = "itemQuantity";
+          }
+        } else {
+          state.quantityMode = "disband";
+          state.quantity = 1;
+          state.quantityMax = state.locker[slug]!;
+          state.phase = "itemQuantity";
+        }
+      }
+      return;
+    }
+    case "itemQuantity": {
+      const step = input.leftEdge ? -1 : input.rightEdge ? 1 : input.upEdge ? 10 : input.downEdge ? -10 : 0;
+      if (step !== 0) {
+        state.quantity = Math.max(1, Math.min(state.quantityMax, state.quantity + step));
+      } else if (input.cancelEdge) {
+        state.phase = state.quantityMode === "deposit" ? "itemBag" : "itemOptions";
+      } else if (input.confirmEdge) {
+        const slug = (state.quantityMode === "deposit" ? pcBagRows(state) : pcLockerRows(state))[state.itemCursor]!;
+        const name = pcItemName(state, slug);
+        const qty = state.quantity;
+        if (state.quantityMode === "deposit") {
+          state.bag[slug] = state.bag[slug]! - qty;
+          if (state.bag[slug]! <= 0) delete state.bag[slug];
+          state.locker[slug] = (state.locker[slug] ?? 0) + qty;
+          state.bagDirty = true;
+          state.message = format(labels.itemStored, { name, nr: String(qty) });
+          state.phase = "itemBoxes";
+        } else {
+          state.locker[slug] = state.locker[slug]! - qty;
+          if (state.locker[slug]! <= 0) delete state.locker[slug];
+          if (state.quantityMode === "take") {
+            state.bag[slug] = (state.bag[slug] ?? 0) + qty;
+            state.bagDirty = true;
+            state.message = format(labels.itemTaken, { name, nr: String(qty) });
+          } else {
+            state.message = format(labels.itemDisbanded, { name, nr: String(qty) });
+          }
+          // Upstream returns to the box list once the locker is empty.
+          state.phase = pcLockerKindCount(state) === 0 ? "itemBoxes" : "itemLocker";
+          state.itemCursor = Math.min(state.itemCursor, Math.max(0, pcLockerRows(state).length - 1));
+        }
+      }
+      return;
+    }
     case "done":
       return;
   }
@@ -438,13 +709,16 @@ function pcCommit(state: Readonly<PcSceneState>): JsonValue {
     kennel,
     // `base` already carries kennelBox: start() created the Kennel.
     ...(base.boxes === undefined ? {} : { boxes }),
+    // Always override the base locker: an emptied box is invisible upstream
+    // and stays sparse (undefined is dropped by the save codec).
+    itemLocker: Object.keys(state.locker).length > 0 ? { ...state.locker } : undefined,
   };
   return packTuxemonExtensionState(next);
 }
 
 function pcRules(names: Names, lang: GameLang = "en_US"): SceneRules {
   return {
-    start(ext, rawArgs) {
+    start(ext, rawArgs, _seed, context: ExtensionReadContext) {
       const args = record(rawArgs);
       const labels = pcLabels(args.labels, lang);
       const boxNames = record(args.boxNames);
@@ -473,6 +747,16 @@ function pcRules(names: Names, lang: GameLang = "en_US"): SceneRules {
           monsters: register(box.monsters),
         });
       }
+      // Upstream PCState also creates the "Locker" item box on open. The
+      // locker is sparse here (an empty box is invisible in menus), so it
+      // only persists once the player stores something.
+      const locker: Record<string, number> = { ...(current.itemLocker ?? {}) };
+      const bag: Record<string, number> = { ...context.items };
+      const itemNames: Record<string, string> = {};
+      for (const item of context.itemCatalog ?? []) itemNames[item.id] = item.name;
+      const notStorable = Array.isArray(args.notStorable)
+        ? args.notStorable.filter((slug): slug is string => typeof slug === "string")
+        : [];
       const state: PcSceneState = {
         kind: "pc",
         base: opened,
@@ -490,6 +774,18 @@ function pcRules(names: Names, lang: GameLang = "en_US"): SceneRules {
         partyCursor: 0,
         confirmCursor: 0,
         message: null,
+        locker,
+        bag,
+        itemNames,
+        notStorable,
+        itemMode: "pickUp",
+        itemBoxCursor: 0,
+        itemCursor: 0,
+        itemOptionCursor: 0,
+        quantity: 1,
+        quantityMax: 1,
+        quantityMode: "take",
+        bagDirty: false,
       };
       return { ext: opened, state: state as unknown as JsonValue };
     },
@@ -499,7 +795,12 @@ function pcRules(names: Names, lang: GameLang = "en_US"): SceneRules {
     },
     done(rawState): SceneCompletion | null {
       const state = stateOf<PcSceneState>(rawState);
-      return state.phase === "done" ? { ext: pcCommit(state) } : null;
+      if (state.phase !== "done") return null;
+      const completion: SceneCompletion = { ext: pcCommit(state) };
+      // The kit normalizes the backpack replacement (maxKinds/maxPerItem);
+      // the take flow already clamped quantities so nothing is discarded.
+      if (state.bagDirty) completion.items = { ...state.bag };
+      return completion;
     },
   };
 }

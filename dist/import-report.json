@@ -296,7 +296,7 @@
    "key": "act:access_pc:T1-lowered",
    "fate": "T1-lowered",
    "count": 16,
-   "note": "tux.pc monster storage (pick up, drop off, move, release); no item locker, email or multiplayer entries"
+   "note": "tux.pc storage: monster pick up/drop off/move/release plus the item locker (deposit, withdraw with a quantity picker, disband); email and multiplayer entries are absent (no email-tagged PC in the campaign; multiplayer is unimplemented upstream)"
   },
   {
    "key": "act:add_item(npc):T3-dropped",
@@ -1819,7 +1819,7 @@
   "limitations": {
    "lockerOverflow": {
     "disposition": "degraded",
-    "reason": "A purchase that would introduce item kind 100 is refused; Tuxemon routes it to the locker, which is not implemented."
+    "reason": "A purchase that would introduce item kind 100 is refused (the shop row shows at-cap); the PC item locker is implemented, but shop overflow does not route to it yet."
    },
    "itemDescription": {
     "disposition": "degraded",
@@ -2923,7 +2923,7 @@
      "dropped": 0,
      "reasons": {
       "degraded": [
-       "tux.pc monster storage (pick up, drop off, move, release); no item locker, email or multiplayer entries"
+       "tux.pc storage: monster pick up/drop off/move/release plus the item locker (deposit, withdraw with a quantity picker, disband); email and multiplayer entries are absent (no email-tagged PC in the campaign; multiplayer is unimplemented upstream)"
       ]
      }
     },

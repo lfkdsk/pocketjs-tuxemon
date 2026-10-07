@@ -108,6 +108,15 @@ describe("GI-2b production storage, trade and shop visuals", () => {
       expect(treeHasText(capture.cases.tradeDone.tree, "You traded Cateye and received Zunna!")).toBeTrue();
       expect(treeHasText(capture.cases.shop.tree, "Money: $1250")).toBeTrue();
       expect(treeHasText(capture.cases.shop.tree, "Lv.10   Earth / Shadow")).toBeTrue();
+      // Item locker: sorted rows, quantities and the box summary.
+      expect(treeHasText(capture.cases.pcItemLocker.tree, "LOCKER 5/30 19 ITEMS")).toBeTrue();
+      expect(treeHasText(capture.cases.pcItemLocker.tree, "Antidote")).toBeTrue();
+      expect(treeHasText(capture.cases.pcItemLocker.tree, "Tuxeball")).toBeTrue();
+      expect(treeHasText(capture.cases.pcItemQuantity.tree, "x1 / 25")).toBeTrue();
+      // The bag list hides the invisible nu_phone (upstream visible:false).
+      expect(treeHasText(capture.cases.pcItemBag.tree, "BAG 4 KINDS")).toBeTrue();
+      expect(treeHasText(capture.cases.pcItemBag.tree, "Potion")).toBeTrue();
+      expect(treeHasText(capture.cases.pcItemBag.tree, "Nu Phone")).toBeFalse();
     }
   }, 60_000);
 
@@ -150,5 +159,30 @@ describe("GI-2b production storage, trade and shop visuals", () => {
     expect(count(shop, 480, { x: 15, y: 64, width: 196, height: 20 }, same(accent))).toBeGreaterThan(2_500);
     expect(count(shop, 480, { x: 15, y: 42, width: 196, height: 20 }, same(accent))).toBe(0);
     assertFrontSprite(shop, small.art.shop, 284, 34);
+  }, 60_000);
+
+  simTest("item locker rows, quantity picker and bag list render with a cursor", async () => {
+    const { small, large } = await captured();
+    const accent = rgb(TUXEMON_UI_THEME.accent);
+    // Locker list: Antidote (row 0) is selected; Potion (row 1) is not.
+    const locker = small.cases.pcItemLocker.rgba;
+    const itemRow = (index: number) => ({ x: 199, y: 62 + index * 22, width: 264, height: 20 });
+    expect(count(locker, 480, itemRow(0), same(accent))).toBeGreaterThan(3_000);
+    expect(count(locker, 480, itemRow(1), same(accent))).toBe(0);
+    // The nav panel's Locker box row is highlighted.
+    expect(count(locker, 480, { x: 13, y: 40, width: 166, height: 20 }, same(accent))).toBeGreaterThan(2_000);
+    // Quantity picker: the popup frame is painted over the detail list and
+    // the "x1 / 25" value renders in accent.
+    const quantity = small.cases.pcItemQuantity.rgba;
+    const popupBorder = rgb(TUXEMON_UI_THEME.border);
+    expect(count(quantity, 480, { x: 292, y: 60, width: 174, height: 2 }, same(popupBorder))).toBeGreaterThan(200);
+    expect(count(quantity, 480, { x: 302, y: 90, width: 100, height: 24 }, same(accent))).toBeGreaterThan(30);
+    // Bag list: Potion (row 0) is selected; the hidden nu_phone leaves 3 rows.
+    const bag = small.cases.pcItemBag.rgba;
+    expect(count(bag, 480, itemRow(0), same(accent))).toBeGreaterThan(3_000);
+    expect(count(bag, 480, itemRow(3), same(accent))).toBe(0);
+    // 960x544 is the same composition at 2x (accent rows land at 2x coords).
+    const locker2x = large.cases.pcItemLocker.rgba;
+    expect(count(locker2x, 960, { x: 398, y: 124, width: 528, height: 40 }, same(accent))).toBeGreaterThan(12_000);
   }, 60_000);
 });

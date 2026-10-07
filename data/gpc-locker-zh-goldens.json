@@ -1,0 +1,149 @@
+{
+  "format": "pocket-tuxemon/gpc-locker-zh-goldens/v1",
+  "frames": [
+    {
+      "case": "pcMenu",
+      "width": 480,
+      "height": 272,
+      "file": "gpc-zh-pc-menu.480x272.png",
+      "rgbaFnv1a": "4e4262b9",
+      "pngSha256": "fbc6e8b022ae21812627969142e07e5030c8746cadb5613d08f1e885eddf16c6"
+    },
+    {
+      "case": "pcBox",
+      "width": 480,
+      "height": 272,
+      "file": "gpc-zh-pc-box.480x272.png",
+      "rgbaFnv1a": "6ba04213",
+      "pngSha256": "b9508a071e120fcb2b112a22ff9e5ec3212c55a42ff2d032ae53bbeaf8e76879"
+    },
+    {
+      "case": "pcParty",
+      "width": 480,
+      "height": 272,
+      "file": "gpc-zh-pc-party.480x272.png",
+      "rgbaFnv1a": "845f6456",
+      "pngSha256": "62a2bf4e90907e0abc94e7464bff88b16bd66e74b52e14535c638592cb2080ea"
+    },
+    {
+      "case": "pcItemLocker",
+      "width": 480,
+      "height": 272,
+      "file": "gpc-zh-pc-item-locker.480x272.png",
+      "rgbaFnv1a": "463bd3c3",
+      "pngSha256": "21eadc86c84fe3db39d3ee977d1249b35dcfc8d3ee2fb835d60fff19437db2d3"
+    },
+    {
+      "case": "pcItemQuantity",
+      "width": 480,
+      "height": 272,
+      "file": "gpc-zh-pc-item-quantity.480x272.png",
+      "rgbaFnv1a": "277da150",
+      "pngSha256": "ce60c331615d183d0cb0f103e68f53015265cafe1dca5d7ee1e5c975a8ac8b4d"
+    },
+    {
+      "case": "pcItemBag",
+      "width": 480,
+      "height": 272,
+      "file": "gpc-zh-pc-item-bag.480x272.png",
+      "rgbaFnv1a": "8e4deb8f",
+      "pngSha256": "29ac44d61675f1d58002652472af718a1abea2afc8096db58a1caa3530d0fe1d"
+    },
+    {
+      "case": "pcItemEmpty",
+      "width": 480,
+      "height": 272,
+      "file": "gpc-zh-pc-item-empty.480x272.png",
+      "rgbaFnv1a": "eb46d329",
+      "pngSha256": "c8ea75dae98f02ffe7ff4d1bef2622db9cbe859f545da01ef3c8821d85f93ca8"
+    },
+    {
+      "case": "pcItemFull",
+      "width": 480,
+      "height": 272,
+      "file": "gpc-zh-pc-item-full.480x272.png",
+      "rgbaFnv1a": "e20c8e6f",
+      "pngSha256": "838612a639ec7616b26e6cfc11397c26c720b1ea33e5095784dbd828c111cf12"
+    },
+    {
+      "case": "pcItemDisband",
+      "width": 480,
+      "height": 272,
+      "file": "gpc-zh-pc-item-disband.480x272.png",
+      "rgbaFnv1a": "b9060755",
+      "pngSha256": "6ae3f9d3af381bada8b58dec53076b0f1ff1e986bdca4ca2f495f58dae1898e0"
+    },
+    {
+      "case": "pcMenu",
+      "width": 960,
+      "height": 544,
+      "file": "gpc-zh-pc-menu.960x544.png",
+      "rgbaFnv1a": "1c6986aa",
+      "pngSha256": "87a77e78badbb1ca67e7fa08fa34f5f28462539798e13dde72e5c72886981196"
+    },
+    {
+      "case": "pcBox",
+      "width": 960,
+      "height": 544,
+      "file": "gpc-zh-pc-box.960x544.png",
+      "rgbaFnv1a": "48c94197",
+      "pngSha256": "4b982d98caeae4c6174a3366f3f260bc6049b995d79e0def051e543070f7ed51"
+    },
+    {
+      "case": "pcParty",
+      "width": 960,
+      "height": 544,
+      "file": "gpc-zh-pc-party.960x544.png",
+      "rgbaFnv1a": "965701b4",
+      "pngSha256": "618c3049770a4a3cf6c09c00c29eb1cc57e785f35fde1ec9bbcaadc588ebb64d"
+    },
+    {
+      "case": "pcItemLocker",
+      "width": 960,
+      "height": 544,
+      "file": "gpc-zh-pc-item-locker.960x544.png",
+      "rgbaFnv1a": "ba1f30b7",
+      "pngSha256": "05f7636d7f584968ac457121a8beaddfed8ae99335e66419050ffa2853e71c0e"
+    },
+    {
+      "case": "pcItemQuantity",
+      "width": 960,
+      "height": 544,
+      "file": "gpc-zh-pc-item-quantity.960x544.png",
+      "rgbaFnv1a": "1a22aaaa",
+      "pngSha256": "2e6471b0a93fabdb898238be5dfc79bc6a6dc59d4a446a27b6e1cdcbe50c97be"
+    },
+    {
+      "case": "pcItemBag",
+      "width": 960,
+      "height": 544,
+      "file": "gpc-zh-pc-item-bag.960x544.png",
+      "rgbaFnv1a": "1bb495d9",
+      "pngSha256": "f82b198e5fda26d46d181d17e38c196d2173e08bf9322b0ce006e743a5a981db"
+    },
+    {
+      "case": "pcItemEmpty",
+      "width": 960,
+      "height": 544,
+      "file": "gpc-zh-pc-item-empty.960x544.png",
+      "rgbaFnv1a": "c74346ef",
+      "pngSha256": "4555efcf310b19321077fef624a330244fec2469b53b160229b90cbba9bafcbd"
+    },
+    {
+      "case": "pcItemFull",
+      "width": 960,
+      "height": 544,
+      "file": "gpc-zh-pc-item-full.960x544.png",
+      "rgbaFnv1a": "60a8d91e",
+      "pngSha256": "7c032f596ff3d9c36904da424f08bdbe8b6808154919e0f8c3ce66bdb42ed9f5"
+    },
+    {
+      "case": "pcItemDisband",
+      "width": 960,
+      "height": 544,
+      "file": "gpc-zh-pc-item-disband.960x544.png",
+      "rgbaFnv1a": "c241c291",
+      "pngSha256": "f8005a54447a00c33b834bcf9fbed3dea736404bab14305d9a4cefcd49b200aa"
+    }
+  ]
+}

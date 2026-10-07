@@ -20,6 +20,7 @@ import {
 } from "../battle/storage-scenes.ts";
 import { FIXED_TIME_HOST_GLOBALS } from "../battle/time-weather.ts";
 import type { BattleDb } from "../importer/battle-schema.ts";
+import type { ExtensionReadContext } from "../vendor/pocket-rpgkit/src/engine/extensions.ts";
 import type { SceneInput } from "../vendor/pocket-rpgkit/src/engine/scene.ts";
 import type { JsonValue } from "../vendor/pocket-rpgkit/src/engine/types.ts";
 import { bootWorld, type SimWorld } from "../vendor/pocket-rpgkit/vendor/pocketjs/hosts/sim/sim.ts";
@@ -30,7 +31,7 @@ export const GI2B_VIEWPORTS = [
   { width: 960, height: 544 },
 ] as const;
 
-export const GI2B_VISUAL_CASES = ["pcBox", "pcOptions", "tradeFlash", "tradeDone", "shop"] as const;
+export const GI2B_VISUAL_CASES = ["pcBox", "pcOptions", "pcItemLocker", "pcItemQuantity", "pcItemBag", "tradeFlash", "tradeDone", "shop"] as const;
 export type Gi2bVisualCase = typeof GI2B_VISUAL_CASES[number];
 
 export function gi2bGoldenFile(visualCase: Gi2bVisualCase, viewport: { width: number; height: number }): string {
@@ -71,7 +72,7 @@ function monster(slug: string, iid: string, level: number, hpFraction = 1) {
   return { ...spawned, currentHp: Math.floor(spawned.base.hp * hpFraction) };
 }
 
-function fixtureExt(): JsonValue {
+function fixtureExt(locker?: Record<string, number>): JsonValue {
   const state = initialTuxemonExtensionState();
   state.party = [
     monster("rockitten", "p-rock", 14),
@@ -86,21 +87,51 @@ function fixtureExt(): JsonValue {
   ];
   state.kennelBox = true;
   state.boxes = { quarantine: { hidden: false, capacity: 30, monsters: [monster("tikoal", "q-tik", 10)] } };
+  if (locker) state.itemLocker = locker;
   return packTuxemonExtensionState(state);
 }
 
-function readContext(ext: JsonValue, variables: Record<string, string> = {}, gold = 0) {
-  return { ext, switches: {}, variables, items: {}, gold, playerName: "A" };
+const ITEM_CATALOG = [
+  { id: "potion", name: "Potion" },
+  { id: "tuxeball", name: "Tuxeball" },
+  { id: "super_potion", name: "Super Potion" },
+  { id: "revive", name: "Revive" },
+  { id: "antidote", name: "Antidote" },
+  { id: "nu_phone", name: "Nu Phone" },
+] as const;
+
+function readContext(
+  ext: JsonValue,
+  variables: Record<string, string> = {},
+  gold = 0,
+  items: Record<string, number> = {},
+) {
+  return {
+    ext,
+    switches: {},
+    variables,
+    items,
+    gold,
+    playerName: "A",
+    itemCatalog: ITEM_CATALOG as unknown as ExtensionReadContext["itemCatalog"],
+  };
 }
 
 function drive(id: string, args: JsonValue, inputs: Partial<SceneInput>[], options: {
   variables?: Record<string, string>;
   gold?: number;
   ticks?: number;
+  items?: Record<string, number>;
+  locker?: Record<string, number>;
 } = {}): JsonValue {
   const rules = TUXEMON_SCENES[id]!;
-  const ext = fixtureExt();
-  const started = rules.start(ext, args, 0x5eed, readContext(ext, options.variables, options.gold));
+  const ext = fixtureExt(options.locker);
+  const started = rules.start(
+    ext,
+    args,
+    0x5eed,
+    readContext(ext, options.variables, options.gold, options.items),
+  );
   if (!started) throw new Error(`GI2b fixture: ${id} did not open`);
   let state = started.state;
   for (const input of inputs) {
@@ -110,6 +141,7 @@ function drive(id: string, args: JsonValue, inputs: Partial<SceneInput>[], optio
 }
 
 const BOX_NAMES = { boxNames: { Kennel: "Shelter", quarantine: "Quarantine" } };
+const BOX_NAMES_LOCKER = { ...BOX_NAMES, notStorable: ["nu_phone"] };
 
 export function gi2bSceneStates(): Record<Gi2bVisualCase, { id: string; state: JsonValue }> {
   return {
@@ -118,6 +150,36 @@ export function gi2bSceneStates(): Record<Gi2bVisualCase, { id: string; state: J
     pcOptions: {
       id: TUXEMON_PC_SCENE_ID,
       state: drive(TUXEMON_PC_SCENE_ID, BOX_NAMES, [{ confirmEdge: true }, { confirmEdge: true }, { downEdge: true }, { confirmEdge: true }]),
+    },
+    // Pick Up Item -> Locker -> item list (sorted by slug).
+    pcItemLocker: {
+      id: TUXEMON_PC_SCENE_ID,
+      state: drive(
+        TUXEMON_PC_SCENE_ID,
+        BOX_NAMES_LOCKER,
+        [{ downEdge: true }, { downEdge: true }, { confirmEdge: true }, { confirmEdge: true }],
+        { locker: { potion: 3, tuxeball: 12, super_potion: 1, antidote: 2, revive: 1 } },
+      ),
+    },
+    // Pick Up Item -> Locker -> Take -> quantity picker.
+    pcItemQuantity: {
+      id: TUXEMON_PC_SCENE_ID,
+      state: drive(
+        TUXEMON_PC_SCENE_ID,
+        BOX_NAMES_LOCKER,
+        [{ downEdge: true }, { downEdge: true }, { confirmEdge: true }, { confirmEdge: true }, { confirmEdge: true }, { confirmEdge: true }],
+        { locker: { potion: 25, tuxeball: 12 }, items: { tuxeball: 1 } },
+      ),
+    },
+    // Drop Off Item -> Locker -> bag list (nu_phone is hidden upstream).
+    pcItemBag: {
+      id: TUXEMON_PC_SCENE_ID,
+      state: drive(
+        TUXEMON_PC_SCENE_ID,
+        BOX_NAMES_LOCKER,
+        [{ downEdge: true }, { downEdge: true }, { confirmEdge: true }, { confirmEdge: true }],
+        { items: { potion: 5, tuxeball: 2, nu_phone: 1, super_potion: 1 } },
+      ),
     },
     // 3.5 s into the eight-second transition: both sprites alternate.
     tradeFlash: {

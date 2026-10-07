@@ -92,8 +92,9 @@ battle-time monsters stay in it until then. All
 so `iid_slot_*` always has a party to read. Scripted `trading` runs the `tux.trade` scene,
 which replaces the sent monster in its party slot with a freshly spawned
 monster at the same level and records it as caught. `access_pc` opens the
-`tux.pc` storage scene (Degraded: monster boxes only, without the item
-locker); `create_kennel`, `set_kennel_visible`, `kennel` and
+`tux.pc` storage scene (monster boxes plus the item locker: deposit,
+withdraw with a quantity picker, and disband); `create_kennel`,
+`set_kennel_visible`, `kennel` and
 `has_kennel` read and write the same saved boxes. `quarantine` is Degraded
 (it moves infected monsters between the party and the hidden `boxes.quarantine`
 box, honouring the box's own capacity; unlike upstream it keeps an
@@ -131,7 +132,7 @@ icon files are baked into one TILESET entry; 1
 item without upstream art
 share the placeholder cell 143: `elianeoutput`.
 
-- **Degraded — full bag:** A purchase that would introduce item kind 100 is refused; Tuxemon routes it to the locker, which is not implemented.
+- **Degraded — full bag:** A purchase that would introduce item kind 100 is refused (the shop row shows at-cap); the PC item locker is implemented, but shop overflow does not route to it yet.
 - **Degraded — item descriptions:** Descriptions are retained in this import report because rpgkit-project/v1 Item has no description field.
 
 ## Outdoor world index

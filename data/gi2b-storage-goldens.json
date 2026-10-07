@@ -18,6 +18,30 @@
       "pngSha256": "f71cbecc3697c3d007de8c4f043e10e3509500c637ea2ac72519e026d19105b3"
     },
     {
+      "case": "pcItemLocker",
+      "width": 480,
+      "height": 272,
+      "file": "gi2b-pc-item-locker.480x272.png",
+      "rgbaFnv1a": "036daaad",
+      "pngSha256": "73680ff9c67e2ce7f4b8144828f20e2b054e5311feb3d6e777736736ad56dc43"
+    },
+    {
+      "case": "pcItemQuantity",
+      "width": 480,
+      "height": 272,
+      "file": "gi2b-pc-item-quantity.480x272.png",
+      "rgbaFnv1a": "f37ab940",
+      "pngSha256": "3553c67c4c5210930f8cfd354038f50fcc119042be3536b097aead76e9fbac76"
+    },
+    {
+      "case": "pcItemBag",
+      "width": 480,
+      "height": 272,
+      "file": "gi2b-pc-item-bag.480x272.png",
+      "rgbaFnv1a": "0f84e641",
+      "pngSha256": "8a17c8210ce79defdf20ac567e1a99c3d2c9b499d599be05b6fd6a3395c568ca"
+    },
+    {
       "case": "tradeFlash",
       "width": 480,
       "height": 272,
@@ -56,6 +80,30 @@
       "file": "gi2b-pc-options.960x544.png",
       "rgbaFnv1a": "295dd3cc",
       "pngSha256": "1818cfd5c533588095358e07b2cc4a877c6b84984b4b5c38806bc7b10c7979b1"
+    },
+    {
+      "case": "pcItemLocker",
+      "width": 960,
+      "height": 544,
+      "file": "gi2b-pc-item-locker.960x544.png",
+      "rgbaFnv1a": "f5c4b6c0",
+      "pngSha256": "2db21f3d9b54fb0c65d78e81091f9936c434b2b06121be6766b98927dc277c03"
+    },
+    {
+      "case": "pcItemQuantity",
+      "width": 960,
+      "height": 544,
+      "file": "gi2b-pc-item-quantity.960x544.png",
+      "rgbaFnv1a": "95df1c86",
+      "pngSha256": "847dc0c42117f557fb5f4b791f7c29656fa97f4a5afc76ecc0da478f3cca453f"
+    },
+    {
+      "case": "pcItemBag",
+      "width": 960,
+      "height": 544,
+      "file": "gi2b-pc-item-bag.960x544.png",
+      "rgbaFnv1a": "2dc3847a",
+      "pngSha256": "48cc4d7d6c728caa333b45efc66abf6e4f9698de5951fbbc165559e003544476"
     },
     {
       "case": "tradeFlash",

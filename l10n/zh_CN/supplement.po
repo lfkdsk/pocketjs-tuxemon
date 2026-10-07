@@ -3059,10 +3059,10 @@ msgid "menu_storage_empty_locker"
 msgstr "这个柜子是空的，没有道具可拿。"
 
 msgid "item_menu_disband"
-msgstr "放生"
+msgstr "销毁"
 
 msgid "item_disbanded"
-msgstr "{nr} 只 {name} 已被放生。"
+msgstr "{nr} 个 {name} 已被销毁。"
 
 msgid "Locker"
 msgstr "储物柜"

@@ -96,7 +96,7 @@ definitions below are the report's own:
 | `choice_monster` | an authored `choices` box whose rows show the monster's static menu-face icon beside its translated name; each row writes its positive enum code into the result variable. |
 | `open_shop` (item economy) | the kit `shop` command with imported goods, prices and stock. |
 | `open_shop …,buy_monster` | the `tux.monsterShop` scene with the economy's monster rows (price, level, stock); purchases are saved per stock label. |
-| `access_pc player` | the `tux.pc` monster-storage scene (Degraded: no item locker). |
+| `access_pc player` | the `tux.pc` storage scene: monster boxes plus the item locker (deposit, withdraw with a quantity picker, disband). |
 | `trading <variable>,<species>` | the `tux.trade` scene, which replaces the monster whose iid the variable holds. |
 | `create_kennel` / `set_kennel_visible`, `is kennel` / `is has_kennel` | `tux.create_kennel` / `tux.set_kennel_visible` commands and `tux.kennel` / `tux.has_kennel` conditions over the saved player boxes. |
 | `play_music` | `playBgm`; each of the 21 valid content slugs resolves through the `Project.audio` table to a committed QOA pak entry. Six authored arguments (eight actions) are raw filenames, misspellings or absent DB slugs and stay silent, matching Tuxemon's exact DB lookup. |

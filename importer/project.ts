@@ -703,10 +703,13 @@ interface ItemRow {
   usable_in?: string[];
   conditions?: { type?: string; parameters?: unknown[]; operator?: string }[];
   effects?: { type?: string; parameters?: unknown[] }[];
-  behaviors?: { resellable?: boolean };
+  behaviors?: { resellable?: boolean; visible?: boolean };
   use_success?: string;
 }
 const itemDb = new Map<string, ItemRow>();
+/** Item slugs upstream hides from menus (behaviors.visible == false); the PC
+ *  locker drop-off list filters them out via set_filter_all_visible. */
+const notStorableItems: string[] = [];
 let itemSourceRows = 0;
 for (const f of readdirSync(join(TUXEMON_SRC, "mods/tuxemon/db/item")).sort()) {
   if (!f.endsWith(".yaml")) continue;
@@ -716,9 +719,13 @@ for (const f of readdirSync(join(TUXEMON_SRC, "mods/tuxemon/db/item")).sort()) {
     // A handful of upstream files accidentally repeat the cream_puffs slug.
     // Tuxemon addresses items by slug, so retain the first deterministic
     // definition instead of emitting duplicate project ids.
-    if (!itemDb.has(row.slug)) itemDb.set(row.slug, row);
+    if (!itemDb.has(row.slug)) {
+      itemDb.set(row.slug, row);
+      if (row.behaviors?.visible === false) notStorableItems.push(row.slug);
+    }
   }
 }
+notStorableItems.sort();
 
 interface WorldDestroyItem {
   item: string;
@@ -2081,8 +2088,19 @@ function pcScene(): Command {
         added: poText("menu_storage_take_monster"),
         releaseConfirm: poText("release_confirmation"),
         released: poText("tuxemon_released"),
+        // Item locker labels. Missing keys fall through to the reducer's
+        // per-language defaults (PC_LABELS / PC_LABELS_ZH); "take" and
+        // "disband" have no upstream msgid, so the defaults own them.
+        itemPickUp: poText("menu_item_storage"),
+        itemDropOff: poText("menu_item_dropoff"),
+        itemEmpty: poText("menu_storage_empty_locker"),
+        bagFull: poText("menu_storage_items_full"),
+        itemTaken: poText("menu_storage_take_item"),
+        itemDisbanded: poText("item_disbanded"),
+        lockerBox: poText("Locker"),
       }),
       boxNames,
+      ...(notStorableItems.length ? { notStorable: notStorableItems } : {}),
     },
   } as Command;
 }
@@ -3580,7 +3598,7 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         break;
       case "access_pc":
         if (ctx.options.battle && g[0] === "player") {
-          noteAction(a, a.type, "T1-lowered", "tux.pc monster storage (pick up, drop off, move, release); no item locker, email or multiplayer entries");
+          noteAction(a, a.type, "T1-lowered", "tux.pc storage: monster pick up/drop off/move/release plus the item locker (deposit, withdraw with a quantity picker, disband); email and multiplayer entries are absent (no email-tagged PC in the campaign; multiplayer is unimplemented upstream)");
           out.push(pcScene());
         } else noteAction(a, a.type, "T3-dropped", ctx.options.battle ? "PC storage is modelled for the player only" : "monster/combat subsystem (P2)");
         break;
@@ -5239,7 +5257,7 @@ export function buildProject(
         limitations: {
           lockerOverflow: {
             disposition: "degraded",
-            reason: "A purchase that would introduce item kind 100 is refused; Tuxemon routes it to the locker, which is not implemented.",
+            reason: "A purchase that would introduce item kind 100 is refused (the shop row shows at-cap); the PC item locker is implemented, but shop overflow does not route to it yet.",
           },
           itemDescription: {
             disposition: "degraded",

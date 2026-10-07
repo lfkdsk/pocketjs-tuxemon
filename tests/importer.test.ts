@@ -640,9 +640,11 @@ test("default import output remains byte-pinned", () => {
   // ${{today}}/${{map_desc}}/${{monster_0_*}}/${{money_formatted}} to {x:}
   // tokens), the system.textVariables/textTokens declarations and the
   // slug->description table for the {x:map_desc} resolver are all in this
-  // combined pin.
+  // combined pin. The economy limitations summary also lives here, so the
+  // G-PC-LOCKER fix-2 lockerOverflow wording (the locker is implemented)
+  // moves this hash.
   expect(createHash("sha256").update(bytes).digest("hex")).toBe(
-    "910c6bf0f17c70ad80dd8050960dc98564dcb06aa7d9a692363ce5754ca6f138",
+    "a175c3145c22d722ade345a06c08b01ada47272aeafa3390c6ba0e9994fa855c",
   );
 });
 

@@ -3,7 +3,17 @@ import { Text, View } from "@pocketjs/framework/components";
 
 import type { TuxemonSceneCatalog } from "../battle/scenes.ts";
 import {
+  format,
+  LOCKER_LIMIT,
+  PARTY_LIMIT,
+  pcBagKindCount,
+  pcBagRows,
   pcBoxView,
+  pcItemName,
+  pcItemOptions,
+  pcLockerItemCount,
+  pcLockerKindCount,
+  pcLockerRows,
   pcMenuItems,
   pcMoveTargets,
   pcOptions,
@@ -142,6 +152,38 @@ function MonsterRows(props: {
   );
 }
 
+function ItemRows(props: {
+  state: PcSceneState;
+  slugs: readonly string[];
+  cursor: number;
+  highlight: boolean;
+  prefix: string;
+}) {
+  const start = () => windowStart(props.cursor, props.slugs.length);
+  return (
+    <>
+      {props.slugs.slice(start(), start() + VISIBLE_ROWS).map((slug, offset) => {
+        const index = start() + offset;
+        const selected = props.highlight && index === props.cursor;
+        const quantity = props.state.phase === "itemBag" || props.state.phase === "itemQuantity" && props.state.quantityMode === "deposit"
+          ? props.state.bag[slug] ?? 0
+          : props.state.locker[slug] ?? 0;
+        return (
+          <Row
+            index={index}
+            top={30 + offset * ROW_HEIGHT}
+            width={264}
+            selected={selected}
+            label={pcItemName(props.state, slug)}
+            detail={`x${quantity}`}
+            debugName={`${props.prefix}-row-${index}`}
+          />
+        );
+      })}
+    </>
+  );
+}
+
 function ChoicePopup(props: { labels: readonly string[]; cursor: number; top: number; debugName: string }) {
   return (
     <Panel
@@ -178,7 +220,13 @@ function MessageBar(props: { text: string | null; hint: string }) {
 }
 
 function menuLabel(state: PcSceneState, item: PcMenuItem): string {
-  return item === "pickUp" ? state.labels.pickUp : item === "dropOff" ? state.labels.dropOff : state.labels.logOff;
+  switch (item) {
+    case "pickUp": return state.labels.pickUp;
+    case "dropOff": return state.labels.dropOff;
+    case "itemPickUp": return state.labels.itemPickUp;
+    case "itemDropOff": return state.labels.itemDropOff;
+    case "logOff": return state.labels.logOff;
+  }
 }
 
 function optionLabel(state: PcSceneState, option: PcOption, target: string): string {
@@ -191,12 +239,18 @@ function optionLabel(state: PcSceneState, option: PcOption, target: string): str
 }
 
 function pcHint(state: PcSceneState): string {
+  const labels = state.labels;
   switch (state.phase) {
-    case "menu": return "Up/Down: choose  A: select";
-    case "boxes": return state.mode === "pickUp" ? "Choose a box to open.  B: back" : "Choose a box to store it in.  B: back";
-    case "party": return "Choose a Tuxemon to drop off.  B: back";
-    case "box": return "A: options  B: back  Left/Right: page";
-    default: return "A: select  B: back";
+    case "menu": return labels.hintMenu;
+    case "boxes": return state.mode === "pickUp" ? labels.hintBoxesPickUp : labels.hintBoxesDropOff;
+    case "party": return labels.hintParty;
+    case "box": return labels.hintOptions;
+    case "itemBoxes": return labels.hintItemBoxes;
+    case "itemLocker": return labels.hintOptions;
+    case "itemBag": return labels.hintItemBag;
+    case "itemOptions": return labels.hintSelect;
+    case "itemQuantity": return labels.hintQuantity;
+    default: return labels.hintSelect;
   }
 }
 
@@ -204,10 +258,16 @@ export const TuxemonPcScene: Component<BattleSceneViewProps> = (props) => {
   const state = (): PcSceneState => props.state as unknown as PcSceneState;
   const menuItems = () => pcMenuItems(state());
   const visibleBoxes = () => pcVisibleBoxes(state());
+  const itemPhase = () => {
+    const phase = state().phase;
+    return phase === "itemBoxes" || phase === "itemLocker" || phase === "itemBag"
+      || phase === "itemOptions" || phase === "itemQuantity";
+  };
   const navigation = () => {
     const current = state();
     if (current.phase === "party") return "party";
     if (current.phase === "menu") return "menu";
+    if (itemPhase()) return "itemBoxes";
     return "boxes";
   };
   const detailIids = (): string[] => {
@@ -216,22 +276,44 @@ export const TuxemonPcScene: Component<BattleSceneViewProps> = (props) => {
     const box = current.phase === "menu" ? undefined : pcSelectedBox(current);
     return box ? pcBoxView(current, box) : current.party;
   };
+  const detailSlugs = (): string[] => {
+    const current = state();
+    if (current.phase === "itemLocker" || current.phase === "itemOptions" || current.phase === "itemQuantity") {
+      return current.quantityMode === "deposit" ? pcBagRows(current) : pcLockerRows(current);
+    }
+    if (current.phase === "itemBag") return pcBagRows(current);
+    // itemBoxes: preview the locker (pickUp) or bag (dropOff).
+    return current.itemMode === "pickUp" ? pcLockerRows(current) : pcBagRows(current);
+  };
   const detailTitle = () => {
     const current = state();
+    if (itemPhase()) {
+      if (current.phase === "itemBag" || (current.phase === "itemBoxes" && current.itemMode === "dropOff")
+        || (current.phase === "itemQuantity" && current.quantityMode === "deposit")) {
+        return format(current.labels.bagTitle, { kinds: String(pcBagKindCount(current)) });
+      }
+      return format(current.labels.lockerTitle, {
+        kinds: String(pcLockerKindCount(current)),
+        max: String(LOCKER_LIMIT),
+        items: String(pcLockerItemCount(current)),
+      });
+    }
     if (current.phase === "party" || current.phase === "menu"
       || (current.phase === "boxes" && current.mode === "dropOff")) {
-      return `PARTY ${current.party.length}/6`;
+      return format(current.labels.partyTitle, { party: String(current.party.length), max: String(PARTY_LIMIT) });
     }
     const box = pcSelectedBox(current);
     return box ? `${box.label.toUpperCase()} ${box.monsters.length}/${box.capacity}` : "";
   };
   const detailCursor = () => {
     const current = state();
+    if (itemPhase()) return current.itemCursor;
     if (current.phase === "party" || (current.phase === "boxes" && current.mode === "dropOff")) return current.partyCursor;
     return current.monsterCursor;
   };
   const detailHighlight = () => {
     const phase = state().phase;
+    if (phase === "itemLocker" || phase === "itemBag" || phase === "itemOptions" || phase === "itemQuantity") return true;
     return phase === "party" || phase === "box" || phase === "options" || phase === "moveTarget"
       || phase === "confirmRelease" || (phase === "boxes" && state().mode === "dropOff");
   };
@@ -243,6 +325,13 @@ export const TuxemonPcScene: Component<BattleSceneViewProps> = (props) => {
     const box = pcSelectedBox(current);
     const iid = box ? pcBoxView(current, box)[current.monsterCursor] : undefined;
     return iid ? current.labels.releaseConfirm.replace("{name}", current.monsters[iid]!.label) : null;
+  };
+  const itemOptionLabels = () => pcItemOptions(state()).map((option) =>
+    option === "take" ? state().labels.itemTake : option === "disband" ? state().labels.itemDisband : state().labels.cancel);
+  const quantitySlug = () => {
+    const current = state();
+    const rows = current.quantityMode === "deposit" ? pcBagRows(current) : pcLockerRows(current);
+    return rows[current.itemCursor];
   };
 
   return (
@@ -281,6 +370,17 @@ export const TuxemonPcScene: Component<BattleSceneViewProps> = (props) => {
             />
           ))}
         </Show>
+        <Show when={navigation() === "itemBoxes"}>
+          <Row
+            index={0}
+            top={8}
+            width={166}
+            selected={true}
+            label={state().labels.lockerBox}
+            detail={`${pcLockerKindCount(state())}/30`}
+            debugName="pc-item-box-locker"
+          />
+        </Show>
         <Show when={navigation() === "party"}>
           <Text
             class="text-sm"
@@ -299,14 +399,24 @@ export const TuxemonPcScene: Component<BattleSceneViewProps> = (props) => {
         >
           {detailTitle()}
         </Text>
-        <MonsterRows
-          state={state()}
-          iids={detailIids()}
-          cursor={detailCursor()}
-          highlight={detailHighlight()}
-          locked={(iid) => pcPartyEntryLocked(state(), iid)}
-          prefix="pc-monster"
-        />
+        <Show when={!itemPhase()} fallback={
+          <ItemRows
+            state={state()}
+            slugs={detailSlugs()}
+            cursor={detailCursor()}
+            highlight={detailHighlight()}
+            prefix="pc-item"
+          />
+        }>
+          <MonsterRows
+            state={state()}
+            iids={detailIids()}
+            cursor={detailCursor()}
+            highlight={detailHighlight()}
+            locked={(iid) => pcPartyEntryLocked(state(), iid)}
+            prefix="pc-monster"
+          />
+        </Show>
       </Panel>
 
       <Show when={state().phase === "options"}>
@@ -332,6 +442,39 @@ export const TuxemonPcScene: Component<BattleSceneViewProps> = (props) => {
           top={120}
           debugName="pc-release-confirm"
         />
+      </Show>
+      <Show when={state().phase === "itemOptions"}>
+        <ChoicePopup
+          labels={itemOptionLabels()}
+          cursor={state().itemOptionCursor}
+          top={60}
+          debugName="pc-item-options"
+        />
+      </Show>
+      <Show when={state().phase === "itemQuantity"}>
+        <Panel theme={THEME} style={{ posType: 1, insetL: 292, insetT: 60, width: 174, height: 96 }} debugName="pc-item-quantity">
+          <Text
+            class="text-sm"
+            style={{ posType: 1, insetL: 10, insetT: 8, width: 154, height: 18, lineHeight: 16, textColor: THEME.ink }}
+            debugName="pc-item-quantity-name"
+          >
+            {quantitySlug() ? pcItemName(state(), quantitySlug()!) : ""}
+          </Text>
+          <Text
+            class="text-lg"
+            style={{ posType: 1, insetL: 10, insetT: 30, width: 154, height: 24, lineHeight: 22, textColor: THEME.accent }}
+            debugName="pc-item-quantity-value"
+          >
+            {`x${state().quantity} / ${state().quantityMax}`}
+          </Text>
+          <Text
+            class="text-xs"
+            style={{ posType: 1, insetL: 10, insetT: 60, width: 154, height: 28, lineHeight: 13, textColor: THEME.dim }}
+            debugName="pc-item-quantity-hint"
+          >
+            {state().labels.quantityHint}
+          </Text>
+        </Panel>
       </Show>
 
       <MessageBar

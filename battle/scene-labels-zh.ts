@@ -26,6 +26,34 @@ export const PC_LABELS_ZH: PcLabels = {
   releaseConfirm: "你确定要放生 {name} 吗？",
   released: "{name} 已被放生。",
   lastMonster: "{name} 是你最后一只还能战斗的精灵。",
+  itemPickUp: "取出道具",
+  itemDropOff: "存入道具",
+  itemTake: "取出",
+  itemDisband: "销毁",
+  itemEmpty: "这个保管箱是空的，没有道具可以取出。",
+  itemLockerFull: "这个保管箱已满。",
+  bagFull: "你的背包已满，无法再从保管箱取出道具。",
+  itemTaken: "你把 {nr} 个 {name} 放进了背包！",
+  itemDisbanded: "{nr} 个 {name} 已被销毁。",
+  itemStored: "{nr} 个 {name} 已存入保管箱。",
+  itemBagEmpty: "你没有可以存放的道具。",
+  lockerBox: "保管箱",
+  // Footer hints and detail titles. Key names mirror the daycare scene's
+  // wording (上键/下键/行动键/取消键); the locker title says 储物柜 to match
+  // the production lockerBox label.
+  hintMenu: "上键/下键: 选择  行动键: 确定",
+  hintBoxesPickUp: "选择要打开的寄存处。  取消键: 返回",
+  hintBoxesDropOff: "选择要存入的寄存处。  取消键: 返回",
+  hintParty: "选择要存放的精灵。  取消键: 返回",
+  hintOptions: "行动键: 选项  取消键: 返回  左键/右键: 翻页",
+  hintItemBoxes: "行动键: 打开储物柜  取消键: 返回",
+  hintItemBag: "行动键: 存入  取消键: 返回  左键/右键: 翻页",
+  hintSelect: "行动键: 确定  取消键: 返回",
+  hintQuantity: "左键/右键: ±1  上键/下键: ±10  行动键: 确定  取消键: 返回",
+  quantityHint: "左键/右键 ±1   上键/下键 ±10\n行动键 确定   取消键 返回",
+  bagTitle: "背包 {kinds} 种",
+  lockerTitle: "储物柜 {kinds}/{max} {items} 件",
+  partyTitle: "队伍 {party}/{max}",
 };
 
 export const MONSTER_SHOP_LABELS_ZH: MonsterShopLabels = {

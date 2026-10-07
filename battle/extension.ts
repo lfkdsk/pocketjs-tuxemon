@@ -51,6 +51,11 @@ import { STAT_NAMES } from "./types.ts";
 
 export const PARTY_LIMIT = 6;
 export const KENNEL_LIMIT = 30;
+/** Upstream MAX_LOCKER: at most 30 distinct item types per PC item box. */
+export const LOCKER_LIMIT = 30;
+/** Upstream item quantities are plain ints; the kit backpack caps a single
+ *  item id at SHOP_ITEM_CAP (99), so the locker uses the same bound. */
+export const LOCKER_ITEM_CAP = 99;
 export const TUXEMON_EXT_SAVE_FORMAT = "pocket-tuxemon/ext/v1";
 const TUXEMON_EXT_RUNTIME_PREFIX = "pocket-tuxemon/ext-runtime/v1:";
 export const TUXEMON_EXT_RUNTIME_V2_PREFIX = "pocket-tuxemon/ext-runtime/v2:";
@@ -153,6 +158,11 @@ export interface TuxemonExtensionState {
   boxes?: Record<string, MonsterBox>;
   /** Sparse monster-shop sales per `<economy>:<slug>` stock label. */
   shopSold?: Record<string, number>;
+  /** Sparse PC item locker: saved item stacks keyed by item slug, matching
+   *  the session backpack's `Record<slug, quantity>` shape. Upstream creates
+   *  the "Locker" item box on the first PC visit; it holds at most
+   *  LOCKER_LIMIT distinct item types. */
+  itemLocker?: Record<string, number>;
   /** Sparse two-slot daycare, created on first deposit. */
   daycare?: DaycareExtensionState;
   /** Sparse per-character step trackers (character -> tracker id). */
@@ -615,6 +625,17 @@ function tuxemonStateProblem(
     if (!sold || !Object.entries(sold).every(([key, count]) =>
       nonEmptyString(key) && safeInteger(count) && count > 0)) {
       return "shopSold must map stock labels to positive integers";
+    }
+  }
+  if (state.itemLocker !== undefined) {
+    const locker = record(state.itemLocker);
+    if (!locker) return "itemLocker must be an object";
+    const kinds = Object.keys(locker);
+    if (kinds.length > LOCKER_LIMIT) return `itemLocker must contain at most ${LOCKER_LIMIT} item types`;
+    for (const [slug, quantity] of Object.entries(locker)) {
+      if (!nonEmptyString(slug) || !safeInteger(quantity) || quantity < 1 || quantity > LOCKER_ITEM_CAP) {
+        return `itemLocker.${slug} must be an integer between 1 and ${LOCKER_ITEM_CAP}`;
+      }
     }
   }
   if (state.daycare !== undefined) {

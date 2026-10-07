@@ -221,8 +221,9 @@ ${(partyMonster?.native ?? 0) + (partyMonster?.degraded ?? 0)} executable
 so \`iid_slot_*\` always has a party to read. Scripted \`trading\` runs the \`tux.trade\` scene,
 which replaces the sent monster in its party slot with a freshly spawned
 monster at the same level and records it as caught. \`access_pc\` opens the
-\`tux.pc\` storage scene (Degraded: monster boxes only, without the item
-locker); \`create_kennel\`, \`set_kennel_visible\`, \`kennel\` and
+\`tux.pc\` storage scene (monster boxes plus the item locker: deposit,
+withdraw with a quantity picker, and disband); \`create_kennel\`,
+\`set_kennel_visible\`, \`kennel\` and
 \`has_kennel\` read and write the same saved boxes. \`quarantine\` is Degraded
 (it moves infected monsters between the party and the hidden \`boxes.quarantine\`
 box, honouring the box's own capacity; unlike upstream it keeps an
