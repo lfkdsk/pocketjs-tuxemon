@@ -108,7 +108,8 @@ export function langSwitchMechanism(): "reload" | "restart" {
 
 /** Whether the in-game language switcher should be shown: the target must be
  *  able to persist the choice (web localStorage, or desktop data.fs). The PSP
- *  build has neither, so it is English-only and hides the switcher. */
+ *  build has neither, so its language is a build-time choice and the switcher
+ *  is hidden there. */
 export function canSwitchLang(): boolean {
   return reachableStorage() !== null || fsHost() !== null;
 }

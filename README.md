@@ -324,14 +324,15 @@ Known limitations:
   render in Chinese from the generated `data/battle-names.zh_CN.json` table.
   Map names on the welcome sign fall back to their slug when the catalog has
   no entry.
-- **PSP is English-only.** The PSP package does not include the CJK font
-  subset (the six baked font blobs would add ~4.4 MB of residency on top of
-  the Latin set, and the PSP allocator's power-of-two size classes push the
-  real cost to ~10.9 MB), the zh_CN shards or the five raw Chinese startup
-  documents. Its build-time locale-loader stub always selects English, and the
-  language switcher is hidden (PSP has no localStorage or data.fs to persist a
-  choice). A Chinese PSP build is deferred until the font residency is measured
-  on device.
+- **PSP ships in English and Chinese.** `bun run build:psp:zh` (see the
+  [PSP](#psp) section below) builds the Chinese package: it keeps the zh_CN
+  shards and the five Chinese startup documents and emits `font-archive.bin`,
+  a 2bpp CJK glyph archive (~1.1 MiB, 2,446 chars × 6 strikes) the PSP reads
+  on demand from the memory stick, capped at 256 resident glyphs per slot
+  across six slots (~67 KiB). Without the archive installed on the memory
+  stick every CJK glyph renders as tofu (the PSP section gives the path).
+  Language is a build-time choice on PSP — no localStorage or data.fs to
+  persist a switch — so the in-game language switcher stays hidden there.
 
 ## Web demo controls
 
@@ -429,6 +430,13 @@ Copy `dist/psp/EBOOT.PBP`, `dist/psp/assets.pak` and the readable
 development. Linux builds use Clang against the pinned PSP sysroot; macOS uses
 the pinned PSP GCC wrapper by default. Set `POCKETJS_PSP_C_COMPILER` to
 `clang` or `gcc` to choose explicitly.
+
+For the Chinese build, run `bun run build:psp:zh` instead. It additionally
+emits `dist/psp/font-archive.bin`, a 2bpp CJK glyph archive the PSP reads on
+demand from the memory stick. Copy it to `PSP/COMMON/pocketjs/font-archive.bin`
+on the memory stick (the same `ms0:` tree the external `assets.pak` rides);
+without it the Chinese build renders tofu for every CJK glyph. The English
+build does not need the archive.
 
 For a deterministic device or emulator check, build with
 `bun run build:psp --journey` and run the bare `dist/psp/pocket-tuxemon.prx`

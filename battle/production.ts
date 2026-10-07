@@ -19,7 +19,7 @@ import { createTuxemonScenes, runtimeJournalIndex } from "./scenes.ts";
 // keeps species/technique data out of the bundle and off the startup path;
 // each battle then parses only the slugs it actually touches.
 // The zh_CN shell is loaded synchronously from pak/data.fs only on a Chinese
-// boot. The PSP build swaps ui/zh-data.ts for an English-only stub.
+// boot. The English PSP build swaps ui/zh-data.ts for an English-only stub.
 export function battleRuntimeShell(lang: GameLang = "en_US"): BattleRuntimeShell {
   if (lang !== "zh_CN") return shellJson as unknown as BattleRuntimeShell;
   const localized = zhData.current();

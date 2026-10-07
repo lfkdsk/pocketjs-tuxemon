@@ -1,7 +1,8 @@
 // English-only replacement for ui/zh-data.ts (tools/psp.ts temporarily
-// copies this file over ui/zh-data.ts). The PSP package ships English only —
-// no CJK font, no zh shards, and the language switcher is hidden there — so
-// the zh_CN JSON blobs are excluded from the PSP JS bundle entirely.
+// copies this file over ui/zh-data.ts). The English PSP package ships
+// English only — no CJK font, no zh shards, and the language switcher is
+// hidden there — so the zh_CN JSON blobs are excluded from its JS bundle
+// entirely.
 // This file is self-contained because tsc also checks it in its real tools/
 // location; it cannot use relative imports that resolve only after the swap
 // into ui/. main.tsx sees available=false and never asks the stub to read a

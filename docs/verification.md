@@ -328,6 +328,15 @@ fail on any mismatch, so a silently corrupted tape is a red build.
 | `data/j4-kernelquestdone-journey.json` | 13,387 (198,568 combined) | Radio Tower -> Cotton Town briefing -> Surfboard -> Route E -> Route B -> Data Center -> Kernel | 14 (12 trainer, 2 wild) | `spyder_datacenter @7,4` |
 | `data/zh-smoke-journey.json` | 3,201 | Chinese bedroom opening -> downstairs dialogue -> Paper Town -> first battle | 1 | `spyder_paper_town @26,9` |
 
+The bill-terms change (char_run and bills) re-pinned both failure-path
+terminals. Decoding the old and new terminal states of both tapes shows one
+difference: the cathedral bill now carries `interestRate`, `lateFee` and
+`shareRate`; its amount stays 0 and every other field is equal. On the
+later-loss tape the Wanda battle's recorded end moved from frame 65,766 to
+65,765 and the dialogs after it moved back by one or two frames; the tape's
+total length and endpoint are unchanged. The cause of that one-frame shift
+has not been traced.
+
 Terminal state hashes and per-checkpoint expectations live in the tapes or
 their verifiers (`tools/verify-gb6-mainline.ts`, `tools/verify-j1-mainline.ts`,
 `tools/verify-j2-mainline.ts`, `tools/verify-j3-mainline.ts`,

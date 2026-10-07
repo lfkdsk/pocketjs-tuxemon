@@ -27,13 +27,19 @@ const sha256 = (bytes: Uint8Array | string): string =>
   createHash("sha256").update(bytes).digest("hex");
 
 const args = new Set(process.argv.slice(2));
-const allowed = new Set(["--skip-assets", "--bench", "--journey", "--capture", "--help"]);
+const allowed = new Set(["--skip-assets", "--bench", "--journey", "--capture", "--help", "--zh"]);
 for (const arg of args) {
   if (!allowed.has(arg) && !arg.startsWith("--journey-segment=")
       && !arg.startsWith("--journey-segment-end=")) {
     throw new Error(`Unknown PSP option: ${arg}`);
   }
 }
+// --zh builds the Chinese package: CJK fallback fonts stay baked, the real
+// ui/zh-data.ts and the zh_CN shards ship, and the bundle boots in Chinese
+// (the PSP host has no localStorage and mounts no fs module, so the language
+// is a build-time choice injected here rather than a runtime switch). The
+// English package (the default) is unchanged.
+const zh = args.has("--zh");
 if (args.has("--help")) {
   console.log(
     "bun run build:psp [--skip-assets] [--bench] [--journey] [--journey-segment=<chapter>] [--journey-segment-end=<frame>] [--capture]\n" +
@@ -120,22 +126,25 @@ async function run(command: string[], env: Record<string, string> = {}): Promise
 
 if (!args.has("--skip-assets")) await run([join(root, "gen-assets.ts")]);
 
-// The PSP package is English-only: bake fonts without the CJK fallback (the
-// subset's ~4.4 MiB of glyphs would not fit the PSP's residency budget) and
-// drop the zh_CN shards from the external pak. Swap fonts.json AND the
-// zh_CN data module around the compile so the desktop/web builds keep their
-// CJK coverage and their zh_CN content.
+// Both PSP packages bake fonts without the CJK fallback: the boot pak's
+// atlases are ASCII-only so the embedded PRX stays small and the arena keeps
+// its full capacity. The --zh package streams CJK glyphs on demand from a
+// 2bpp font archive on the memory stick (ui/zh-font-stream.ts) instead of
+// baking the full subset into the boot pak, which would not fit the arena.
+// The zh_CN data module is stubbed only for the English package.
 const fontsJsonPath = join(root, "fonts.json");
 const savedFontsJson = readFileSync(fontsJsonPath, "utf8");
-const englishOnlyFonts = JSON.stringify({ fallback: [], characterFiles: [] }, null, 2) + "\n";
-writeFileSync(fontsJsonPath, englishOnlyFonts);
-// Normal web/desktop builds read the five zh_CN startup documents through
-// ui/zh-data.ts. Swapping in the English-only stub makes Chinese unavailable
-// during PSP compilation; the matching pak entries are filtered below.
 const zhDataPath = join(root, "ui", "zh-data.ts");
 const savedZhData = readFileSync(zhDataPath, "utf8");
-const stubZhData = readFileSync(join(root, "tools", "psp-stubs", "zh-data.ts"), "utf8");
-writeFileSync(zhDataPath, stubZhData);
+const englishOnlyFonts = JSON.stringify({ fallback: [], characterFiles: [] }, null, 2) + "\n";
+writeFileSync(fontsJsonPath, englishOnlyFonts);
+if (!zh) {
+  // Normal web/desktop builds read the five zh_CN startup documents through
+  // ui/zh-data.ts. Swapping in the English-only stub makes Chinese unavailable
+  // during PSP compilation; the matching pak entries are filtered below.
+  const stubZhData = readFileSync(join(root, "tools", "psp-stubs", "zh-data.ts"), "utf8");
+  writeFileSync(zhDataPath, stubZhData);
+}
 try {
   await run([
     join(framework, "tools/pocket.ts"),
@@ -147,16 +156,21 @@ try {
   ]);
 } finally {
   writeFileSync(fontsJsonPath, savedFontsJson);
-  writeFileSync(zhDataPath, savedZhData);
+  if (!zh) {
+    writeFileSync(zhDataPath, savedZhData);
+  }
 }
 
 const pakPath = join(out, "pocket-tuxemon.pak");
 const fullPak = readFileSync(pakPath);
 // The external assets.pak carries everything the embedded boot pak does not;
-// strip the zh_CN shards so the PSP download stays English-only.
+// the English build strips the zh_CN shards so its download stays
+// English-only. The --zh build keeps them (they cost download bytes, not
+// PSP RAM — the external pak is read on demand from the memory stick).
 const externalEntries = unpack(fullPak).filter((entry) =>
-  !entry.key.includes("zh_CN") && !entry.key.startsWith("battle-zh/") && !entry.key.startsWith("maps-zh/")
-  && !entry.key.startsWith("license:NotoSansCJK")
+  zh || (!entry.key.includes("zh_CN") && !entry.key.startsWith("battle-zh/")
+    && !entry.key.startsWith("maps-zh/")
+    && !entry.key.startsWith("license:NotoSansCJK"))
 );
 // The sidecar and its embedded index MUST be built from the SAME filtered
 // entry list: the PSP host (pak_external.rs) rejects a sidecar whose length
@@ -169,6 +183,8 @@ if (dataOffset <= 24 || dataOffset > externalPak.length) {
 }
 const bootEntries = unpack(fullPak).filter((entry) =>
   entry.key === "ui:styles" || entry.key.startsWith("ui:font.") || entry.key.startsWith("ui:sprite.")
+  // The CJK font license ships inside the pak with the glyphs it covers.
+  || (zh && entry.key.startsWith("license:NotoSansCJK"))
 );
 if (bootEntries.length === 0) throw new Error("PSP external pak contains no boot resources");
 bootEntries.push({
@@ -187,18 +203,72 @@ console.log(
 // through the host's binary-search + read_at path.
 checkExternalPak(out);
 
+// The --zh package streams CJK glyphs from a 2bpp font archive on the
+// memory stick (the boot pak's atlases are ASCII-only). Bake the archive
+// from the subset font, one strike per boot-pak slot, and ship it beside
+// assets.pak; the PSP offload provider reads it from
+// ms0:/PSP/COMMON/pocketjs/font-archive.bin (see ui/zh-font-stream.ts).
+if (zh) {
+  const { bakeFontArchive } = await import(
+    join(framework, "framework/compiler/font-archive.ts")
+  );
+  const { fontSlotFor } = await import(
+    join(framework, "framework/compiler/tailwind.ts")
+  );
+  const charset = [...new Set([...readFileSync(join(root, "fonts/cjk-charset.txt"), "utf8")])]
+    .filter((ch) => {
+      const cp = ch.codePointAt(0)!;
+      // Every scalar the subset font covers (CJK ideographs, fullwidth
+      // punctuation, symbols); the cjk-font tool already excluded Inter's.
+      return cp >= 32 && cp !== 127 && !(cp >= 0xd800 && cp <= 0xdfff);
+    })
+    .map((ch) => ch.codePointAt(0)!);
+  // The boot pak bakes slots 0(12r),1(14r),2(16r),3(18r),7(12b),19(10r);
+  // the archive needs a matching strike per slot so the stream can extend
+  // each atlas.
+  const slots = [
+    fontSlotFor(12, false),
+    fontSlotFor(14, false),
+    fontSlotFor(16, false),
+    fontSlotFor(18, false),
+    fontSlotFor(12, true),
+    fontSlotFor(10, false),
+  ];
+  const archive = await bakeFontArchive({
+    font: join(root, "fonts/NotoSansCJKsc-subset.otf"),
+    slots,
+    codepoints: charset,
+  });
+  writeFileSync(join(out, "font-archive.bin"), archive);
+  console.log(`PSP zh: font-archive.bin ${archive.length} bytes (${(archive.length / 1048576).toFixed(2)} MiB), ${charset.length} CJK chars × ${slots.length} strikes`);
+}
+
+// The PSP host has no localStorage and mounts no fs module, so the language
+// is a build-time choice: --zh injects the boot-language override the kit
+// reads before any URL/storage/fs lookup (ui/language.ts detectLang).
+const langPrefix = zh
+  ? `globalThis.__pocketTuxemonLang="zh_CN";\n`
+  : "";
+if (zh && !args.has("--journey") && segmentChapter === undefined) {
+  const bundlePath = join(out, "pocket-tuxemon.js");
+  writeFileSync(bundlePath, langPrefix + readFileSync(bundlePath, "utf8"));
+}
+
 let journeyBuildId: string | undefined;
 if (args.has("--journey")) {
   const bundlePath = join(out, "pocket-tuxemon.js");
   const original = readFileSync(bundlePath, "utf8");
-  const tape = JSON.parse(readFileSync(join(root, "data/g6-journey.json"), "utf8")).masks as number[];
+  // The Chinese package replays the zh_CN opening smoke tape; the English
+  // package replays the maintained English opening (g6-journey).
+  const tapeFile = zh ? "data/zh-smoke-journey.json" : "data/g6-journey.json";
+  const tape = JSON.parse(readFileSync(join(root, tapeFile), "utf8")).masks as number[];
   journeyBuildId = createHash("sha256")
     .update(original)
     .update(JSON.stringify(tape))
     .update(JSON.stringify(FIXED_INITIAL_CIVIL_TIME))
     .digest("hex");
   const prefix =
-    `globalThis.__pocketTuxemonInitialCivilTime=${JSON.stringify(FIXED_INITIAL_CIVIL_TIME)};\n`;
+    `${langPrefix}globalThis.__pocketTuxemonInitialCivilTime=${JSON.stringify(FIXED_INITIAL_CIVIL_TIME)};\n`;
   const suffix =
     `\n;(function(){var id=${JSON.stringify(journeyBuildId)};` +
     `__pspLog(JSON.stringify({kind:"session",buildId:id}));` +
@@ -366,6 +436,7 @@ writeFileSync(join(out, "build-receipt.json"), JSON.stringify({
   benchmark,
   capture: args.has("--capture"),
   journey: args.has("--journey") || segmentChapter !== undefined,
+  zh,
   ...(segmentReceipt === undefined ? {} : { journeySegment: segmentReceipt }),
   ...(journeyBuildId === undefined ? {} : { journeyBuildId }),
   ...(!segmentPerf ? {} : {
@@ -388,6 +459,9 @@ writeFileSync(join(out, "build-receipt.json"), JSON.stringify({
     "pocket-tuxemon.js",
     "pocket-tuxemon.pak",
     "AUDIO-ATTRIBUTIONS.md",
+    // The CJK glyph archive ships only in the Chinese package; bind it to the
+    // build the same way as the PRX and pak so the verifier can audit it.
+    ...(zh ? ["font-archive.bin"] : []),
   ].map((name) => {
     const bytes = readFileSync(join(out, name));
     return [name, { bytes: bytes.length, sha256: sha256(bytes) }];

@@ -8,6 +8,7 @@ import {
   NAME_INPUT_SCENE_ID,
   NameInputScene,
 } from "./ui/gp1-kit-stage.ts";
+import { onMount } from "solid-js";
 import { createGameEntryReaders, createGameMapRepository } from "./ui/entry-readers.ts";
 import type { ProjectShell } from "./vendor/pocket-rpgkit/src/engine/types.ts";
 import {
@@ -37,6 +38,7 @@ import {
   TuxemonDaycareScene,
 } from "./ui/gp1-data-stage.ts";
 import { canSwitchLang, detectLang } from "./ui/language.ts";
+import { initZhFontStream } from "./ui/zh-font-stream.ts";
 import { setBattleSceneLang } from "./ui/battle-scene-locale.ts";
 import { createTuxemonTextTokens } from "./battle/text-tokens.ts";
 import enMapDescriptions from "./dist/map-descriptions.json";
@@ -100,6 +102,10 @@ const localizedData = bootReaders
 const lang = localizedData ? requestedLang : "en_US";
 gp1Mark("language-data");
 setBattleSceneLang(lang);
+// PSP zh: stream CJK glyphs from the memory-stick archive (no-op elsewhere).
+// Deferred to onMount: openFontArchive needs the host installed by render(),
+// which runs after this module evaluates but before the root mounts.
+onMount(() => initZhFontStream(lang));
 const project = (localizedData?.project ?? rawProject) as unknown as ProjectShell;
 // The {x:} text-token resolver for the boot language. GameView forwards it
 // to both the live session and the attract/demo controller, so a demo, a
@@ -257,8 +263,8 @@ const demo: GameViewDemoConfig | undefined = hasDemoChapters(lang) ? (() => {
 // GameView overlay slot through the composite overlay. Each config wrapper
 // also captures its runtime so the weather overlay can suspend while either
 // menu is open. The language switcher is hidden on targets that cannot
-// persist a choice (PSP: no localStorage, no data.fs — the PSP build is
-// English-only).
+// persist a choice (PSP: no localStorage, no data.fs — the language is a
+// build-time choice there).
 const langSwitchable = canSwitchLang();
 // The Tuxepedia (START menu row): an overlay that reads the live seen/caught
 // state. Its runtime is captured here so the save menu's onExtra can open it.
