@@ -136,7 +136,7 @@ describe("PSP segment terminal pin", () => {
     const spec = resolveSegment(ROOT, "radio-broadcast", 185181);
     const pin = replaySuffixTerminal(ROOT, spec);
     expect(pin.terminalSha256)
-      .toBe("0ef285e93cda4445a619c03c473104a03a5ee9195a2d8d5386ae07c1250ca6f1");
+      .toBe("8bacba7b23277ac93069bf5c803627728da69de89f4e522b63c4e9a19cadc34b");
     expect(pin.endMap).toBe("spyder_radiotower");
     expect(pin.endPosition).toEqual([9, 5]);
     expect(pin.endFrame).toBe(185181);
@@ -159,7 +159,7 @@ describe("PSP segment terminal pin", () => {
     };
     const pin = replaySuffixTerminal(ROOT, spec);
     expect(pin.terminalSha256)
-      .toBe("c0d7903915bd91777b8a4a6acd5bdd767be666b28d1ab140ca8e6904c428c7b0");
+      .toBe("b171943501a64d7b284c8f286f20c133f1473d8434034043c6eee732416bd916");
     expect(pin.endMap).toBe("spyder_datacenter");
     expect(pin.endPosition).toEqual([7, 4]);
     expect(pin.endFrame).toBe(198568);

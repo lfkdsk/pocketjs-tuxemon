@@ -20,7 +20,8 @@ describe("J3 QuickJS continuation tape", () => {
       opponent: "spyder_omnichannel_beaverbrook",
       outcome: "won",
     });
+    // Terminal carries the cathedral bill's authored metadata now.
     expect(tape.terminalStateSha256)
-      .toBe("0ef285e93cda4445a619c03c473104a03a5ee9195a2d8d5386ae07c1250ca6f1");
+      .toBe("8bacba7b23277ac93069bf5c803627728da69de89f4e522b63c4e9a19cadc34b");
   });
 });

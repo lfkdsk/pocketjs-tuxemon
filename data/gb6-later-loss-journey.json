@@ -66089,7 +66089,7 @@
   },
   "texts": [
     {
-      "frame": 65766,
+      "frame": 65765,
       "map": "spyder_route3",
       "lines": [
         "The fishing's good in Flower City - but who wants to",
@@ -66097,34 +66097,34 @@
       ]
     },
     {
-      "frame": 65770,
+      "frame": 65768,
       "map": "spyder_route3",
       "lines": [
         "Here, you can have my Fishing Rod."
       ]
     },
     {
-      "frame": 65774,
+      "frame": 65772,
       "map": "spyder_route3",
       "lines": [
         "Fishing Rod"
       ]
     },
     {
-      "frame": 65798,
+      "frame": 65797,
       "map": "spyder_leather_center",
       "lines": [
         "You should heal your monsters before heading off."
       ]
     },
     {
-      "frame": 65838,
+      "frame": 65837,
       "map": "spyder_leather_center",
       "lines": [
         "You should heal your monsters before heading off."
       ]
     }
   ],
-  "terminalStateSha256": "c395b5b911151c16749e2ac32dfc2498ae9e7749964d0d607ba20feedb5f7f98",
+  "terminalStateSha256": "0321e5dfb5be05e93203368da7f84f50aa78318d79acd1207e9104cca28c73f5",
   "tapeSha256": "80b0164e2c57149cbe7bcd56da6b8a2d17d39f8898489b55a97eb3ee775cf01c"
 }

@@ -1664,7 +1664,10 @@ function makeRules(db: TuxemonBattleDb): BattleCoreRules<BattleMonster, TuxemonB
         outcome,
         playerDefeated: outcome === "lost" || outcome === "draw",
         battleLastResult: outcome === "ran" ? "run" : outcome,
-        gold: state.techniqueGold + (outcome === "won" && state.kind === "trainer" ? state.prize : 0),
+        // Move gold and the trainer prize stay separate: only the prize is
+        // shared with bills at completion, and only on a trainer win.
+        gold: state.techniqueGold,
+        prize: outcome === "won" && state.kind === "trainer" ? state.prize : 0,
       };
     },
   };

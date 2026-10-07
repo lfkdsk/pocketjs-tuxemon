@@ -11,7 +11,7 @@ When conversion discards a whole event, every source rule in it is Dropped.
 
 | Kind | Kinds | Uses | Native | Degraded | Placeholder | Dropped | S1 T1 baseline |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Actions | 98 | 13617 | 12206 | 1093 | 0 | 318 | 6407 / 6246 (47.05% / 45.9%) |
+| Actions | 98 | 13617 | 12208 | 1093 | 0 | 316 | 6407 / 6246 (47.05% / 45.9%) |
 | Conditions | 64 | 8663 | 8364 | 56 | 0 | 243 | 4758 / 4591 (54.92% / 53.0%) |
 
 The S1 acceptance baselines are 6,246 action uses (45.9%) and 4,591
@@ -21,8 +21,8 @@ Degraded count toward them. This import records 6407
 (54.92%), respectively: 161 above
 for actions and 167 above for conditions. The old
 type-table Native figure was 5,448 / 13,617 (40.0%); conversion-path accounting
-supersedes it with 12206 / 13617
-(89.6%). “Executable”
+supersedes it with 12208 / 13617
+(89.7%). “Executable”
 (native + degraded + deliberate P1 placeholder) is
 97.7% for actions and
 97.2% for conditions.
@@ -443,7 +443,7 @@ four-neighbour BFS with fixed tie-breaking selects the nearest walkable cell:
 | Action | `char_move` | 64 | 13 | 0 | 0 | 77 |
 | Action | `char_plague` | 13 | 0 | 0 | 0 | 13 |
 | Action | `char_position` | 0 | 1 | 0 | 0 | 1 |
-| Action | `char_run` | 0 | 0 | 0 | 2 | 2 |
+| Action | `char_run` | 0 | 2 | 0 | 0 | 2 |
 | Action | `char_speed` | 0 | 19 | 0 | 0 | 19 |
 | Action | `char_stop` | 88 | 0 | 0 | 0 | 88 |
 | Action | `char_talk` | 772 | 0 | 0 | 0 | 772 |
@@ -491,7 +491,7 @@ four-neighbour BFS with fixed tie-breaking selects the nearest walkable cell:
 | Action | `rename_monster` | 2 | 0 | 0 | 0 | 2 |
 | Action | `rename_player` | 0 | 5 | 0 | 0 | 5 |
 | Action | `screen_transition` | 25 | 0 | 0 | 0 | 25 |
-| Action | `set_bill` | 0 | 2 | 0 | 0 | 2 |
+| Action | `set_bill` | 2 | 0 | 0 | 0 | 2 |
 | Action | `set_bubble` | 16 | 0 | 0 | 0 | 16 |
 | Action | `set_char_attribute` | 0 | 0 | 0 | 3 | 3 |
 | Action | `set_economy` | 16 | 0 | 0 | 0 | 16 |

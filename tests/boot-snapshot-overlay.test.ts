@@ -143,8 +143,10 @@ describe("boot-snapshot overlay", () => {
       state = stepSession(session, state, mainlineInput(mask, previous));
       previous = mask;
     }
+    // The cathedral bill now carries its authored interest/late-fee/share
+    // metadata, so the terminal state hash changed (frame 185181 is unchanged).
     expect(sha256(canonicalJson(state)))
-      .toBe("0ef285e93cda4445a619c03c473104a03a5ee9195a2d8d5386ae07c1250ca6f1");
+      .toBe("8bacba7b23277ac93069bf5c803627728da69de89f4e522b63c4e9a19cadc34b");
     expect(state.frame).toBe(185181);
   });
 });

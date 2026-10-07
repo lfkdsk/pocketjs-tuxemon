@@ -297,13 +297,89 @@ describe("COV-B bills", () => {
     expect(settled.bills.player!.bill_cathedral).toBeUndefined();
   });
 
-  test("the two authored set_bill uses are reported Degraded because metadata is omitted", () => {
+  test("set_bill retains the authored interest rate, late fee and battle share", () => {
+    const state = stateOf(run([
+      { op: "ext", call: "tux.set_bill", args: { character: "player", bill: "bill_cathedral", amount: 0, interestRate: 0.1, lateFee: 100, shareRate: 0.5 } },
+    ]));
+    expect(state.bills.player!.bill_cathedral!).toEqual({ amount: 0, interestRate: 0.1, lateFee: 100, shareRate: 0.5 });
+    // Replacing a bill overwrites its metadata (upstream upsert semantics).
+    const replaced = stateOf(run([
+      { op: "ext", call: "tux.set_bill", args: { character: "player", bill: "bill_cathedral", amount: 0, interestRate: 0.1, lateFee: 100, shareRate: 0.5 } },
+      { op: "ext", call: "tux.set_bill", args: { character: "player", bill: "bill_cathedral", amount: 50 } },
+    ]));
+    expect(replaced.bills.player!.bill_cathedral!).toEqual({ amount: 50 });
+  });
+
+  test("adjust_bill_penalty applies stored interest (truncating, compounding) and the flat late fee", () => {
+    const setup: Command[] = [
+      { op: "ext", call: "tux.set_bill", args: { character: "player", bill: "bill_cathedral", amount: 105, interestRate: 0.1, lateFee: 100, shareRate: 0.5 } },
+    ];
+    const first = stateOf(run([
+      ...setup,
+      { op: "ext", call: "tux.adjust_bill_penalty", args: { character: "player", bill: "bill_cathedral", penalty: "interest" } } as Command,
+    ]));
+    // trunc(105 * 0.1) = 10
+    expect(first.bills.player!.bill_cathedral!.amount).toBe(115);
+    // Interest compounds on the current amount: 115 + trunc(115 * 0.1) = 126.
+    const second = stateOf(run([
+      ...setup,
+      { op: "ext", call: "tux.adjust_bill_penalty", args: { character: "player", bill: "bill_cathedral", penalty: "interest" } } as Command,
+      { op: "ext", call: "tux.adjust_bill_penalty", args: { character: "player", bill: "bill_cathedral", penalty: "interest" } } as Command,
+    ]));
+    expect(second.bills.player!.bill_cathedral!.amount).toBe(126);
+    const fee = stateOf(run([
+      ...setup,
+      { op: "ext", call: "tux.adjust_bill_penalty", args: { character: "player", bill: "bill_cathedral", penalty: "fee" } } as Command,
+    ]));
+    expect(fee.bills.player!.bill_cathedral!.amount).toBe(205);
+    // Metadata survives the penalty applications.
+    expect(second.bills.player!.bill_cathedral!).toMatchObject({ interestRate: 0.1, lateFee: 100, shareRate: 0.5 });
+    // An unknown method and a missing bill are no-ops (upstream logs and stops).
+    const none = stateOf(run([
+      ...setup,
+      { op: "ext", call: "tux.adjust_bill_penalty", args: { character: "player", bill: "bill_cathedral", penalty: "bogus" } } as Command,
+      { op: "ext", call: "tux.adjust_bill_penalty", args: { character: "player", bill: "missing", penalty: "interest" } } as Command,
+    ]));
+    expect(none.bills.player!.bill_cathedral!.amount).toBe(105);
+  });
+
+  test("modify_bill with a float variable applies the ratio to the bill's current amount", () => {
+    const setup: Command[] = [
+      { op: "ext", call: "tux.set_bill", args: { character: "player", bill: "bill_cathedral", amount: 500 } },
+    ];
+    // Upstream ratio mode: a float variable multiplies the bill amount
+    // (truncating) — spyder.yaml's manual compound interest.
+    const grown = stateOf(run([
+      ...setup,
+      { op: "ext", call: "tux.modify_bill", args: { character: "player", bill: "bill_cathedral", variable: "ratio" } } as Command,
+    ], undefined, { ratio: 0.1 }));
+    expect(grown.bills.player!.bill_cathedral!.amount).toBe(550);
+    // A negative float ratio pays the bill down.
+    const paid = stateOf(run([
+      ...setup,
+      { op: "ext", call: "tux.modify_bill", args: { character: "player", bill: "bill_cathedral", variable: "ratio" } } as Command,
+    ], undefined, { ratio: -0.5 }));
+    expect(paid.bills.player!.bill_cathedral!.amount).toBe(250);
+    // A ratio that brings the bill to zero or below deletes it.
+    const settled = stateOf(run([
+      ...setup,
+      { op: "ext", call: "tux.modify_bill", args: { character: "player", bill: "bill_cathedral", variable: "ratio" } } as Command,
+    ], undefined, { ratio: -1.5 }));
+    expect(settled.bills.player!.bill_cathedral).toBeUndefined();
+    // Whole-valued variables stay direct deltas (upstream int mode).
+    const direct = stateOf(run([
+      ...setup,
+      { op: "ext", call: "tux.modify_bill", args: { character: "player", bill: "bill_cathedral", variable: "ratio" } } as Command,
+    ], undefined, { ratio: 50 }));
+    expect(direct.bills.player!.bill_cathedral!.amount).toBe(550);
+  });
+
+  test("the two authored set_bill uses are reported Native with their metadata", () => {
     // spyder.yaml passes amount=0, interest_rate=0.1, late_fee=100 and
-    // share_rate=0.5. The port keeps the amount path but does not retain or
-    // apply the latter three fields, so claiming Native would overstate it.
+    // share_rate=0.5; the port now retains all four fields.
     const result = buildProject(["spyder_bedroom"], { extChoice: true, battle: true } as never);
     expect(result.report.coverage.actions.rows.find((row) => row.type === "set_bill"))
-      .toMatchObject({ total: 2, native: 0, degraded: 2, placeholder: 0, dropped: 0 });
+      .toMatchObject({ total: 2, native: 2, degraded: 0, placeholder: 0, dropped: 0 });
   });
 });
 

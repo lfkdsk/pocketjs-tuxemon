@@ -111,6 +111,14 @@ export interface FaintPoint {
 
 export interface BillEntry {
   amount: number;
+  /** Upstream set_bill interest_rate (e.g. 0.1 = 10%): applied per
+   *  adjust_bill_penalty interest trigger, truncating, compounding. */
+  interestRate?: number;
+  /** Upstream set_bill late_fee: a flat amount added per fee trigger. */
+  lateFee?: number;
+  /** Upstream set_bill share_rate (e.g. 0.5 = 50%): the fraction of
+   *  trainer-battle winnings diverted to pay this bill down. */
+  shareRate?: number;
 }
 
 export interface TuxemonExtensionState {
@@ -715,6 +723,15 @@ function tuxemonStateProblem(
       const bill = record(entry);
       if (!bill || !safeInteger(bill.amount) || bill.amount < 0) {
         return `bills.${character}.${slug} must have a non-negative integer amount`;
+      }
+      if (bill.interestRate !== undefined && (typeof bill.interestRate !== "number" || !Number.isFinite(bill.interestRate) || bill.interestRate < 0)) {
+        return `bills.${character}.${slug}.interestRate must be a non-negative finite number`;
+      }
+      if (bill.lateFee !== undefined && (!safeInteger(bill.lateFee) || bill.lateFee < 0)) {
+        return `bills.${character}.${slug}.lateFee must be a non-negative integer`;
+      }
+      if (bill.shareRate !== undefined && (typeof bill.shareRate !== "number" || !Number.isFinite(bill.shareRate) || bill.shareRate < 0 || bill.shareRate > 1)) {
+        return `bills.${character}.${slug}.shareRate must be a finite number between 0 and 1`;
       }
     }
   }
@@ -2234,7 +2251,10 @@ function randomMonsterPool(db: BattleDb, level: number): string[] {
   return pool;
 }
 
-/** set_bill: create or replace a character's bill. */
+/** set_bill: create or replace a character's bill, keeping the authored
+ *  interest rate, late fee and battle-earnings share (upstream stores all
+ *  four; interest and fees are applied by adjust_bill_penalty, the share
+ *  by trainer-battle winnings). */
 function setBillCommand() {
   return (context: ExtensionCommandContext, value: JsonValue) => {
     const args = argsRecord(value, "tux.set_bill");
@@ -2246,15 +2266,43 @@ function setBillCommand() {
     if (!safeInteger(amount) || amount < 0) {
       throw new Error("tux.set_bill: amount must be a non-negative integer");
     }
+    const rate = (name: string): number | undefined => {
+      const raw = args[name];
+      if (raw === undefined || raw === null || raw === "") return undefined;
+      const parsed = Number(raw);
+      if (!Number.isFinite(parsed) || parsed < 0) {
+        throw new Error(`tux.set_bill: ${name} must be a non-negative number`);
+      }
+      return parsed;
+    };
+    const interestRate = rate("interestRate");
+    const shareRate = rate("shareRate");
+    if (shareRate !== undefined && shareRate > 1) {
+      throw new Error("tux.set_bill: shareRate must be at most 1");
+    }
+    const lateFeeRaw = args.lateFee;
+    let lateFee: number | undefined;
+    if (lateFeeRaw !== undefined && lateFeeRaw !== null && lateFeeRaw !== "") {
+      lateFee = Number(lateFeeRaw);
+      if (!safeInteger(lateFee) || lateFee < 0) {
+        throw new Error("tux.set_bill: lateFee must be a non-negative integer");
+      }
+    }
+    const entry: BillEntry = { amount };
+    if (interestRate !== undefined) entry.interestRate = interestRate;
+    if (lateFee !== undefined) entry.lateFee = lateFee;
+    if (shareRate !== undefined) entry.shareRate = shareRate;
     const current = currentExtensionState(context.ext);
     const tabs = { ...(current.bills[character] ?? {}) };
-    tabs[args.bill] = { amount };
+    tabs[args.bill] = entry;
     return { ext: json({ ...current, bills: { ...current.bills, [character]: tabs } }) };
   };
 }
 
 /** modify_bill: add to (or subtract from) a bill. A negative amount that
- *  brings the bill to zero or below deletes it. */
+ *  brings the bill to zero or below deletes it. A float variable is
+ *  upstream's ratio mode: the delta is the bill's current amount times the
+ *  variable, truncated (whole-valued variables are direct deltas). */
 function modifyBillCommand() {
   return (context: ExtensionCommandContext, value: JsonValue) => {
     const args = argsRecord(value, "tux.modify_bill");
@@ -2269,24 +2317,84 @@ function modifyBillCommand() {
     if (args.amount !== undefined && args.amount !== null && args.amount !== "") {
       delta = Number(args.amount);
       if (!Number.isFinite(delta)) throw new Error("tux.modify_bill: amount must be numeric");
+      delta = Math.trunc(delta);
     } else if (nonEmptyString(args.variable)) {
       const resolved = context.variables[args.variable];
-      if (typeof resolved === "number") delta = resolved;
+      let value: number | undefined;
+      if (typeof resolved === "number") value = resolved;
       else if (typeof resolved === "string" && resolved.trim() !== "") {
         const parsed = Number(resolved);
-        if (Number.isFinite(parsed)) delta = parsed;
-        else return;
-      } else return;
+        if (Number.isFinite(parsed)) value = parsed;
+      }
+      if (value === undefined) return;
+      delta = Number.isInteger(value)
+        ? value
+        : Math.trunc(existing.amount * value);
     } else {
       delta = 0;
     }
-    delta = Math.trunc(delta);
     const amount = existing.amount + delta;
     const tabs = { ...(current.bills[character] ?? {}) };
     if (amount <= 0) delete tabs[args.bill];
-    else tabs[args.bill] = { amount };
+    else tabs[args.bill] = { ...existing, amount };
     return { ext: json({ ...current, bills: { ...current.bills, [character]: tabs } }) };
   };
+}
+
+/** adjust_bill_penalty: apply a bill's stored interest (truncating,
+ *  compounding on the current amount) or its flat late fee once. Upstream
+ *  logs and skips a missing bill, character or unknown method; the kit
+ *  treats those as a no-op like its other bill commands. */
+function adjustBillPenaltyCommand() {
+  return (context: ExtensionCommandContext, value: JsonValue) => {
+    const args = argsRecord(value, "tux.adjust_bill_penalty");
+    const character = args.character === undefined ? "player" : args.character;
+    if (!nonEmptyString(character) || !nonEmptyString(args.bill)) return;
+    const method = String(args.penalty ?? "");
+    if (method !== "interest" && method !== "fee") return;
+    const current = currentExtensionState(context.ext);
+    const existing = current.bills[character]?.[args.bill];
+    if (!existing || existing.amount <= 0) return;
+    let amount = existing.amount;
+    if (method === "interest") {
+      if (!existing.interestRate || existing.interestRate <= 0) return;
+      amount += Math.trunc(existing.amount * existing.interestRate);
+    } else {
+      if (!existing.lateFee || existing.lateFee <= 0) return;
+      amount += existing.lateFee;
+    }
+    const tabs = { ...(current.bills[character] ?? {}) };
+    tabs[args.bill] = { ...existing, amount };
+    return { ext: json({ ...current, bills: { ...current.bills, [character]: tabs } }) };
+  };
+}
+
+/** Upstream MoneyManager.apply_all_battle_shares: each of the winner's
+ *  bills with a shareRate diverts trunc(earnings * rate) of the battle
+ *  winnings to pay itself down (a bill reaching zero is deleted), and
+ *  bills cascade on the remainder. The caller gates on trainer battles
+ *  won by the player; wild battles and losses never share. */
+export function applyBattleSharesToBills(
+  bills: TuxemonExtensionState["bills"],
+  earnings: number,
+): { bills: TuxemonExtensionState["bills"]; earnings: number } {
+  const playerTabs = bills.player;
+  if (!playerTabs || earnings <= 0) return { bills, earnings };
+  let remaining = earnings;
+  let changed = false;
+  const tabs = { ...playerTabs };
+  for (const [slug, entry] of Object.entries(playerTabs)) {
+    if (entry.amount <= 0 || !entry.shareRate || entry.shareRate <= 0) continue;
+    const deduction = Math.trunc(remaining * entry.shareRate);
+    if (deduction <= 0) continue;
+    changed = true;
+    remaining -= deduction;
+    const amount = entry.amount - deduction;
+    if (amount <= 0) delete tabs[slug];
+    else tabs[slug] = { ...entry, amount };
+  }
+  if (!changed) return { bills, earnings };
+  return { bills: { ...bills, player: tabs }, earnings: remaining };
 }
 
 /** check_party_parameter: count party members whose attribute equals the
@@ -2514,6 +2622,7 @@ export function createTuxemonExtensions(
       "tux.random_monster": randomMonsterCommand(source),
       "tux.set_bill": setBillCommand(),
       "tux.modify_bill": modifyBillCommand(),
+      "tux.adjust_bill_penalty": adjustBillPenaltyCommand(),
       "tux.create_kennel": createKennelCommand(),
       "tux.set_kennel_visible": setKennelVisibleCommand(),
       "tux.player_step": playerStepCommand(source),

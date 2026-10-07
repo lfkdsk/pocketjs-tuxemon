@@ -54,7 +54,10 @@ const journey = JSON.parse(readFileSync(join(ROOT, "data/g6-journey.json"), "utf
 };
 const worldTraversal = journeyWorldTraversal(journey, "G7 maintained journey");
 const GAME_OPTIONS = { extensions: TUXEMON_EXTENSIONS, battle: TUXEMON_BATTLE_RULES, scenes: TUXEMON_SCENES } as const;
-const LEGACY_TERMINAL_STATE_SHA256 = "1ddcc7e23ce64953e5d1d8bbad2a8259638a82b6100463198fee2d4ac8cdc14b";
+// Terminal state after the legacy timeline: the cathedral bill now carries
+// its authored interest/late-fee/share metadata, so the state hash changed
+// (the story terminal — spyder_route1@14,19 — is unchanged).
+const LEGACY_TERMINAL_STATE_SHA256 = "5173f27c8f63e360cfce26f1fd865fb29ca2ae919857e864df934ee883478781";
 const BEFORE_HANDOFF_FRAME = 3_964;
 const MID_HANDOFF_FRAME = 3_978;
 const AFTER_HANDOFF_FRAME = 3_982;

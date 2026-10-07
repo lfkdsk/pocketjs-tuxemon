@@ -7,6 +7,7 @@ import type { ExtensionReadContext } from "../vendor/pocket-rpgkit/src/engine/ex
 import type { JsonValue } from "../vendor/pocket-rpgkit/src/engine/types.ts";
 import type { BattleAnimationRef, BattleDb, BattleImageRef } from "../importer/battle-schema.ts";
 import {
+  applyBattleSharesToBills,
   initialTuxemonExtensionState,
   KENNEL_LIMIT,
   nextMonsterIid,
@@ -640,18 +641,29 @@ function completionFor(state: RuntimeBattleState, enums: VariableEnums): BattleC
   const kitResult = result.outcome === "won" ? "win"
     : result.outcome === "lost" ? "lose"
       : result.outcome === "draw" ? "draw" : "escape";
-  const reward = Math.max(0, boundedInteger(result.gold, "reward"));
-  const gold = state.startingGold + reward;
+  const moveGold = Math.max(0, boundedInteger(result.gold, "gold"));
+  const prize = Math.max(0, boundedInteger(result.prize, "prize"));
+  // Upstream (_handle_win) diverts a share of the prize to pay down the
+  // winner's bills before the remainder reaches the wallet, and only for a
+  // trainer-battle win. Move gold lands in the wallet directly (upstream's
+  // modify_money) and is never shared; wild battles, losses and draws carry
+  // no prize, so their bills are untouched.
+  const trainerWin = state.battle.kind === "trainer" && result.outcome === "won";
+  const shared = trainerWin
+    ? applyBattleSharesToBills(ext.bills, prize)
+    : { bills: ext.bills, earnings: prize };
+  const gold = state.startingGold + moveGold + shared.earnings;
   if (!Number.isFinite(gold)) throw new Error("Tuxemon battle gold is not finite");
-  const shared = {
-    ext: packTuxemonExtensionState(ext),
+  const sharedExt = packTuxemonExtensionState({ ...ext, bills: shared.bills });
+  const built = {
+    ext: sharedExt,
     result: kitResult,
     items: { ...state.battle.inventory },
     gold,
   } as const;
   if (state.battle.kind !== "trainer") {
     return {
-      ...shared,
+      ...built,
       writes: {
         "v.battle_last_result": enumCode(enums, "battle_last_result", result.battleLastResult),
       },
@@ -677,7 +689,7 @@ function completionFor(state: RuntimeBattleState, enums: VariableEnums): BattleC
   const switches: Record<string, boolean> = { [`bo.${opponent}.${outcome}`]: true };
   if (outcome === "won") switches[`defeated.${opponent}`] = true;
   else if (outcome === "lost") switches["defeated.player"] = true;
-  return { ...shared, writes, switches };
+  return { ...built, writes, switches };
 }
 
 /**

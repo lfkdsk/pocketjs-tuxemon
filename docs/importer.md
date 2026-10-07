@@ -119,6 +119,7 @@ definitions below are the report's own:
 | `transition_teleport` with an out-of-range landing | coordinates clamped into the target map; an isolated landing is repaired to the nearest walkable cell by deterministic four-neighbour BFS. |
 | `char_wander` | `moveControl` random wander with a deterministic seed, a seconds-to-MV frequency grade and optional bounds. |
 | `char_speed` | `moveControl` speed; tiles/s maps to the nearest MV exponential grade. |
+| `char_run` | `moveControl` routeSpeed at the run rate (grade 5); the boost scopes to the character's next forced route and is gone when the route ends, so a wandering NPC with no forced route is unaffected (matching upstream's idle no-op) and a page already moving at grade 5 sees no change. |
 | `char_position` | a clamped `place` (out-of-map coordinates are clamped; upstream raises). |
 | `choice_npc` | static `extChoice` list; the shared label is extended with each option's translated name so the lines stay distinguishable (upstream tells options apart by per-option NPC portraits, which need kit option-image support). |
 | `get_party_monster` (dojo, gym) | `tux.get_party_monsters` dumps the party iids into `iid_slot_*`; NPC trainer parties are staged live (not folded) when an event inspects them, so the dojo and gym calls find a party. |
@@ -181,7 +182,6 @@ completed-step edge; neither page can consume the edge before the other.
 
 | Tuxemon | Reason |
 |---|---|
-| `char_run` | upstream applies the absolute run rate only while the character is already moving and reverts on idle; the kit's run control is a persistent relative grade with no movement-scoped lifetime, so the action emits nothing. |
 | unsupported live-cell terrain predicates outside the Spyder Surf cluster | project conditions still do not expose a general current/facing terrain-label query; the two remaining unrelated surface-facing uses emit nothing. Completed-step movement guards and the known Surf cluster use the specialized lowerings described above. |
 | `char_facing player,top/bottom`, `button_pressed K_RETURN` | these legacy source arguments are invalid in the pinned Tuxemon runtime: directions are `up/down/left/right`, and `K_RETURN` is not an intention constant. The guards are fixed false instead of being reported as native triggers. |
 | `add_step_tracker` and friends for a non-player character | the kit's step hook reports only the player's completed tiles (the pinned content tracks the player only). |

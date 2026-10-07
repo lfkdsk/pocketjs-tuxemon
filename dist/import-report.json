@@ -284,11 +284,11 @@
  "schemaErrors": [],
  "audioQoaPending": [],
  "byFate": {
-  "T1-lowered": 3336,
+  "T1-lowered": 3140,
   "T3-dropped": 111,
-  "T1": 35653,
+  "T1": 35851,
   "T4-dropped": 1742,
-  "T2-dropped": 393,
+  "T2-dropped": 391,
   "structural": 792
  },
  "rows": [
@@ -443,10 +443,10 @@
    "note": "place command (out-of-map coordinates are clamped; upstream raises)"
   },
   {
-   "key": "act:char_run:T2-dropped",
-   "fate": "T2-dropped",
+   "key": "act:char_run:T1-lowered",
+   "fate": "T1-lowered",
    "count": 2,
-   "note": "upstream run rate applies only while moving and reverts on idle; the kit has no movement-scoped speed"
+   "note": "tux.char_run scopes the run rate to the next forced route; autonomous wander is unaffected"
   },
   {
    "key": "act:char_speed:T1-lowered",
@@ -731,10 +731,10 @@
    "note": "KS1 blocking fade out followed by fade in"
   },
   {
-   "key": "act:set_bill:T1-lowered",
-   "fate": "T1-lowered",
+   "key": "act:set_bill:T1",
+   "fate": "T1",
    "count": 198,
-   "note": "tux.set_bill creates or replaces the amount; interest rate, late fee and battle-earnings share are not retained or applied"
+   "note": "tux.set_bill creates or replaces the bill with its interest rate, late fee and battle-earnings share"
   },
   {
    "key": "act:set_bubble:T1",
@@ -2905,11 +2905,11 @@
    "summary": {
     "types": 98,
     "uses": 13617,
-    "native": 12206,
+    "native": 12208,
     "degraded": 1093,
     "placeholder": 0,
-    "dropped": 318,
-    "nativePercent": 89.6,
+    "dropped": 316,
+    "nativePercent": 89.7,
     "executablePercent": 97.7,
     "tier1": {
      "uses": 6407,
@@ -3161,12 +3161,12 @@
      "type": "char_run",
      "total": 2,
      "native": 0,
-     "degraded": 0,
+     "degraded": 2,
      "placeholder": 0,
-     "dropped": 2,
+     "dropped": 0,
      "reasons": {
-      "dropped": [
-       "upstream run rate applies only while moving and reverts on idle; the kit has no movement-scoped speed"
+      "degraded": [
+       "tux.char_run scopes the run rate to the next forced route; autonomous wander is unaffected"
       ]
      }
     },
@@ -3844,13 +3844,13 @@
     {
      "type": "set_bill",
      "total": 2,
-     "native": 0,
-     "degraded": 2,
+     "native": 2,
+     "degraded": 0,
      "placeholder": 0,
      "dropped": 0,
      "reasons": {
-      "degraded": [
-       "tux.set_bill creates or replaces the amount; interest rate, late fee and battle-earnings share are not retained or applied"
+      "native": [
+       "tux.set_bill creates or replaces the bill with its interest rate, late fee and battle-earnings share"
       ]
      }
     },

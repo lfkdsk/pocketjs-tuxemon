@@ -889,10 +889,14 @@ test("ImportOptions.moveControl emits KM1 stop, run, speed and facing controls",
     node.op === "moveControl" && node.target === "player" &&
     (node.control as { kind?: string })?.kind === "stop"
   )).toBeTrue();
-  // char_run christie emits nothing: upstream only applies the absolute run
-  // rate while the character is already moving and reverts on idle, so the
-  // call is a no-op for the idle christie; the kit's run control is a
-  // persistent relative grade and cannot express that lifetime.
+  // char_run christie -> a routeSpeed control: the run rate (7.35 tiles/s)
+  // is grade 5, scoped to her next forced route (the following pathfind),
+  // and gone when that route ends.
+  expect(nodes.some((node) =>
+    node.op === "moveControl" && (node.control as { kind?: string; value?: number })?.kind === "routeSpeed" &&
+    (node.control as { value?: number })?.value === 5
+  )).toBeTrue();
+  // no persistent run control is emitted (it would speed every later route)
   expect(nodes.some((node) =>
     node.op === "moveControl" && (node.control as { kind?: string })?.kind === "run"
   )).toBeFalse();

@@ -348,7 +348,12 @@ export interface BattleResult {
   /** Draw is deliberately player-defeating while retaining a distinct result. */
   playerDefeated: boolean;
   battleLastResult: "won" | "lost" | "draw" | "run" | "captured";
+  /** Move/effect gold, awarded mid-battle: goes straight to the wallet,
+   *  like upstream's modify_money path, and is never shared with bills. */
   gold: number;
+  /** Trainer-battle prize on a player win; zero everywhere else. Only this
+   *  stream is shared with the winner's bills (upstream _handle_win). */
+  prize: number;
 }
 
 export interface TuxemonBattleState extends BattleCoreState<BattleMonster> {

@@ -19,7 +19,7 @@ import {
 } from "../battle/runtime.ts";
 import { spawnMonster } from "../battle/spawn.ts";
 import { createBattle, getSide, reduceBattle } from "../battle/tuxemon.ts";
-import type { SpawnedMonsterSnapshot } from "../battle/types.ts";
+import type { SpawnedMonsterSnapshot, Stats } from "../battle/types.ts";
 import { validateBattleDb } from "../importer/battle-schema.ts";
 import type { BattleCompletion, BattleRules } from "../vendor/pocket-rpgkit/src/engine/battle.ts";
 import type { JsonValue } from "../vendor/pocket-rpgkit/src/engine/types.ts";
@@ -45,6 +45,32 @@ function monster(
     iid,
     ...options,
   });
+}
+
+// A spawned snapshot with its combat stats, HP and moveset overridden —
+// monsterFromSnapshot reads those fields verbatim, so this pins a matchup
+// (who outspeeds, who KOs whom) without touching the database.
+function crafted(
+  slug: string,
+  level: number,
+  iid: string,
+  seed: number,
+  overrides: {
+    base?: Partial<Stats>;
+    currentHp?: number;
+    moves?: string[];
+    moneyModifier?: number;
+  } = {},
+): SpawnedMonsterSnapshot {
+  const snapshot = monster(slug, level, iid, seed);
+  const base = { ...snapshot.base, ...overrides.base };
+  return {
+    ...snapshot,
+    base,
+    currentHp: overrides.currentHp ?? base.hp,
+    ...(overrides.moves ? { moves: overrides.moves } : {}),
+    ...(overrides.moneyModifier !== undefined ? { moneyModifier: overrides.moneyModifier } : {}),
+  };
 }
 
 function extensionWith(player: SpawnedMonsterSnapshot): TuxemonExtensionState {
@@ -103,6 +129,39 @@ function finish(
     state = tuxemonRuntimeBattleState(value);
     const completion = rules.done(value);
     if (completion) return { state, completion };
+  }
+  throw new Error("runtime battle did not finish");
+}
+
+// Drives a runtime battle to completion, choosing a technique from the
+// technique submenu each turn (finish() only ever confirms the default).
+// `pick` selects the technique slug for the current turn.
+function finishWithTechnique(
+  rules: BattleRules,
+  started: NonNullable<ReturnType<BattleRules["start"]>>,
+  pick: (state: RuntimeBattleState) => string,
+  ticks = 15,
+): { state: RuntimeBattleState; completion: BattleCompletion } {
+  let value = started.state;
+  for (let guard = 0; guard < 10_000; guard++) {
+    const state = tuxemonRuntimeBattleState(value);
+    if (state.eventCursor < state.battle.events.length) {
+      value = rules.step(value, { buttons: 0 }, ticks);
+    } else if (state.battle.awaiting) {
+      if (state.menuMode === "technique") {
+        const slug = pick(state);
+        const index = state.menu.findIndex((entry) => entry.slug === slug && entry.available);
+        if (index < 0) throw new Error(`battle test: technique '${slug}' is not on the menu`);
+        state.menuIndex = index;
+      }
+      value = rules.step(value, { buttons: 0, confirmEdge: true }, ticks);
+    } else {
+      const completion = rules.done(value);
+      if (completion) return { state, completion };
+      value = rules.step(value, { buttons: 0 }, ticks);
+    }
+    const completion = rules.done(value);
+    if (completion) return { state: tuxemonRuntimeBattleState(value), completion };
   }
   throw new Error("runtime battle did not finish");
 }
@@ -297,6 +356,221 @@ describe("Tuxemon BattleRules adapter", () => {
       [`bo.${OPPONENT}.won`]: true,
       [`defeated.${OPPONENT}`]: true,
     });
+  });
+
+  test("trainer-battle winnings pay down shareRate bills before reaching the wallet", () => {
+    const ext = extensionWith(monster("nut", 50, "txmn-player", 91));
+    ext.npcParties[OPPONENT] = [{
+      iid: "txmn-enemy",
+      slug: "budaye",
+      level: 2,
+      experienceModifier: 5,
+      moneyModifier: 10,
+    }];
+    ext.bills.player = {
+      bill_a: { amount: 500, shareRate: 0.5 },
+      bill_b: { amount: 500, shareRate: 0.5 },
+    };
+    const rules = createTuxemonBattleRules(DB, ENUMS);
+    const started = startBattle(rules, ext, json({
+      kind: "trainer",
+      opponent: OPPONENT,
+      environment: "grass",
+    }), 101, {}, 100);
+    const { completion } = finish(rules, started!);
+    // Prize = trunc(level 2 * moneyModifier 10) = 20. Bill A takes
+    // trunc(20 * 0.5) = 10 (490 left); bill B cascades on the remainder:
+    // trunc(10 * 0.5) = 5 (495 left). The wallet gets the remainder.
+    const persisted = tuxemonExtensionState(completion.ext, DB);
+    expect(persisted.bills.player!.bill_a!.amount).toBe(490);
+    expect(persisted.bills.player!.bill_b!.amount).toBe(495);
+    expect(completion.gold).toBe(105);
+  });
+
+  test("a battle share that exceeds the bill deletes it without refunding the excess", () => {
+    const ext = extensionWith(monster("nut", 50, "txmn-player", 91));
+    ext.npcParties[OPPONENT] = [{
+      iid: "txmn-enemy",
+      slug: "budaye",
+      level: 2,
+      experienceModifier: 5,
+      moneyModifier: 10,
+    }];
+    ext.bills.player = { small: { amount: 5, shareRate: 0.5 } };
+    const rules = createTuxemonBattleRules(DB, ENUMS);
+    const started = startBattle(rules, ext, json({
+      kind: "trainer",
+      opponent: OPPONENT,
+      environment: "grass",
+    }), 101, {}, 100);
+    const { completion } = finish(rules, started!);
+    // deduction = trunc(20 * 0.5) = 10 > 5: the bill is deleted and the
+    // extra 5 is not refunded (upstream MoneyManager.apply_all_battle_shares).
+    const persisted = tuxemonExtensionState(completion.ext, DB);
+    expect(persisted.bills.player!.small).toBeUndefined();
+    expect(completion.gold).toBe(110);
+  });
+
+  // The five money-shape cases below pin the two upstream revenue streams
+  // against each other. Upstream keeps them apart: the money technique calls
+  // modify_money directly (core/effects/money.py:68-72), so its gold lands in
+  // the wallet mid-battle for every outcome; _handle_win applies bill shares
+  // to the prize alone and only for a player trainer win
+  // (tuxemon/combat/utils.py:222-224). completionFor mirrors that split:
+  // moveGold goes straight to the wallet, the prize is shared first, and
+  // wild battles, losses and draws carry no prize so their bills are untouched.
+  test("a wild battle's move gold reaches the wallet without touching bills", () => {
+    const ext = extensionWith(crafted("nut", 50, "txmn-player", 2, {
+      moves: ["gold_digger", "bubble_trap"],
+    }));
+    ext.bills.player = { bill_x: { amount: 500, shareRate: 0.5 } };
+    const rules = createTuxemonBattleRules(DB, ENUMS);
+    const started = startBattle(rules, ext, json({
+      kind: "wild",
+      species: "budaye",
+      level: 2,
+      environment: "grass",
+    }), 2, {}, 100);
+    // gold_digger (money effect) deals no damage; one hit banks its
+    // calculated damage as move gold, then bubble_trap wins the battle.
+    const { state, completion } = finishWithTechnique(rules, started!, (s) =>
+      s.battle.turn <= 1 ? "gold_digger" : "bubble_trap");
+    expect(state.battle.result?.outcome).toBe("won");
+    expect(state.battle.techniqueGold).toBe(211);
+    expect(state.battle.result?.prize).toBe(0);
+    // wallet = startingGold + moveGold; a wild battle has no prize to share.
+    expect(completion.gold).toBe(311);
+    const persisted = tuxemonExtensionState(completion.ext, DB);
+    expect(persisted.bills.player!.bill_x!.amount).toBe(500);
+  });
+
+  test("a trainer loss banks move gold without a prize or a bill share", () => {
+    // The player outspeeds and lands one gold_digger (5 move gold), then the
+    // enemy's stick KOs the 1-HP player. A loss pays no prize and shares
+    // nothing, so the wallet keeps the move gold and the bill is untouched.
+    const ext = extensionWith(crafted("nut", 50, "txmn-player", 1, {
+      base: { hp: 1, speed: 999, melee: 6, armour: 10 },
+      currentHp: 1,
+      moves: ["gold_digger"],
+    }));
+    ext.npcParties[OPPONENT] = [{
+      iid: "txmn-enemy",
+      slug: "budaye",
+      level: 2,
+      experienceModifier: 1,
+      moneyModifier: 10,
+    }];
+    ext.bills.player = { bill_x: { amount: 500, shareRate: 0.5 } };
+    const rules = createTuxemonBattleRules(DB, ENUMS);
+    const started = startBattle(rules, ext, json({
+      kind: "trainer",
+      opponent: OPPONENT,
+      environment: "grass",
+    }), 1, {}, 100);
+    const { state, completion } = finishWithTechnique(rules, started!, () => "gold_digger");
+    expect(state.battle.result?.outcome).toBe("lost");
+    expect(state.battle.techniqueGold).toBe(5);
+    expect(state.battle.result?.prize).toBe(0);
+    expect(completion.gold).toBe(105);
+    const persisted = tuxemonExtensionState(completion.ext, DB);
+    expect(persisted.bills.player!.bill_x!.amount).toBe(500);
+  });
+
+  test("a trainer draw banks move gold without a prize or a bill share", () => {
+    // The player lands one gold_digger (5 move gold), then on turn 2 uses
+    // undertaker (sacrifice): it KOs the enemy and the user at once, so both
+    // sides faint in the same action and the core calls it a draw. A draw is
+    // player-defeating, pays no prize and shares nothing.
+    const ext = extensionWith(crafted("nut", 50, "txmn-player", 1, {
+      base: { hp: 100, speed: 999, melee: 6, armour: 999, dodge: 999 },
+      moves: ["gold_digger", "undertaker"],
+    }));
+    ext.npcParties[OPPONENT] = [{
+      iid: "txmn-enemy",
+      slug: "budaye",
+      level: 2,
+      experienceModifier: 1,
+      moneyModifier: 10,
+    }];
+    ext.bills.player = { bill_x: { amount: 500, shareRate: 0.5 } };
+    const rules = createTuxemonBattleRules(DB, ENUMS);
+    const started = startBattle(rules, ext, json({
+      kind: "trainer",
+      opponent: OPPONENT,
+      environment: "grass",
+    }), 1, {}, 100);
+    const { state, completion } = finishWithTechnique(rules, started!, (s) =>
+      s.battle.turn <= 1 ? "gold_digger" : "undertaker");
+    expect(state.battle.result?.outcome).toBe("draw");
+    expect(state.battle.techniqueGold).toBe(5);
+    expect(state.battle.result?.prize).toBe(0);
+    expect(completion.gold).toBe(105);
+    const persisted = tuxemonExtensionState(completion.ext, DB);
+    expect(persisted.bills.player!.bill_x!.amount).toBe(500);
+  });
+
+  test("a trainer win with a zero prize banks the move gold in full", () => {
+    // moneyModifier 0 makes the prize 0, so the only revenue is the move
+    // gold. With no prize there is nothing to share; the wallet gets all of it.
+    const ext = extensionWith(crafted("nut", 50, "txmn-player", 2, {
+      moves: ["gold_digger", "bubble_trap"],
+    }));
+    ext.npcParties[OPPONENT] = [{
+      iid: "txmn-enemy",
+      slug: "budaye",
+      level: 2,
+      experienceModifier: 1,
+      moneyModifier: 0,
+    }];
+    const rules = createTuxemonBattleRules(DB, ENUMS);
+    const started = startBattle(rules, ext, json({
+      kind: "trainer",
+      opponent: OPPONENT,
+      environment: "grass",
+    }), 2, {}, 100);
+    const { state, completion } = finishWithTechnique(rules, started!, (s) =>
+      s.battle.turn <= 1 ? "gold_digger" : "bubble_trap");
+    expect(state.battle.result?.outcome).toBe("won");
+    expect(state.battle.techniqueGold).toBe(211);
+    expect(state.battle.result?.prize).toBe(0);
+    expect(completion.gold).toBe(311);
+  });
+
+  test("a trainer win shares only the prize with bills, never the move gold", () => {
+    // The player lands one gold_digger (211 move gold) and wins a 20 prize
+    // (trunc(level 2 * moneyModifier 10)). Upstream shares the prize alone:
+    // bill_a takes trunc(20 * 0.5) = 10 (490 left), bill_b cascades on the
+    // remainder for trunc(10 * 0.5) = 5 (495 left). The wallet gets the move
+    // gold plus the 5 the bills did not take: 100 + 211 + 5 = 316.
+    const ext = extensionWith(crafted("nut", 50, "txmn-player", 2, {
+      moves: ["gold_digger", "bubble_trap"],
+    }));
+    ext.npcParties[OPPONENT] = [{
+      iid: "txmn-enemy",
+      slug: "budaye",
+      level: 2,
+      experienceModifier: 1,
+      moneyModifier: 10,
+    }];
+    ext.bills.player = {
+      bill_a: { amount: 500, shareRate: 0.5 },
+      bill_b: { amount: 500, shareRate: 0.5 },
+    };
+    const rules = createTuxemonBattleRules(DB, ENUMS);
+    const started = startBattle(rules, ext, json({
+      kind: "trainer",
+      opponent: OPPONENT,
+      environment: "grass",
+    }), 2, {}, 100);
+    const { state, completion } = finishWithTechnique(rules, started!, (s) =>
+      s.battle.turn <= 1 ? "gold_digger" : "bubble_trap");
+    expect(state.battle.result?.outcome).toBe("won");
+    expect(state.battle.techniqueGold).toBe(211);
+    expect(state.battle.result?.prize).toBe(20);
+    const persisted = tuxemonExtensionState(completion.ext, DB);
+    expect(persisted.bills.player!.bill_a!.amount).toBe(490);
+    expect(persisted.bills.player!.bill_b!.amount).toBe(495);
+    expect(completion.gold).toBe(316);
   });
 
   test("the Nimrod Zircon Back flow: a folded trainer party persists so get_party_monster writes its iid and remove_monster deletes it", () => {

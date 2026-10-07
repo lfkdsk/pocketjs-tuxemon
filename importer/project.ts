@@ -3144,15 +3144,21 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         break;
       }
       case "char_run":
-        // Upstream char_run sets the absolute run rate (7.35 tiles/s) only
-        // while the character is already moving, and the boost reverts to
-        // walk speed when movement stops. The kit's run control is a
-        // persistent relative +1 speed grade with no movement-scoped
-        // lifetime: emitting it would speed every later route (route1's
-        // idle christie would run her whole pathfind, where upstream is a
-        // no-op). Drop the action; the one wander use may lose a transient
-        // single-step boost.
-        noteAction(a, a.type, "T2-dropped", "upstream run rate applies only while moving and reverts on idle; the kit has no movement-scoped speed");
+        if (!ctx.options.moveControl) {
+          noteAction(a, a.type, "T2-dropped", "runtime pathfinding / other-event routes / NPC motion props");
+          break;
+        }
+        // Upstream char_run swaps to the absolute run rate (7.35 tiles/s)
+        // only while the character is already moving, reverting on idle.
+        // The kit's routeSpeed control scopes a grade to one forced route:
+        // the boost latches onto the next (or current) route and is gone
+        // when it ends, so route1's "char_run then pathfind" keeps the fast
+        // path without speeding later routes. A wandering NPC with no
+        // forced route (spyder_route1's beachcomber) is unaffected, matching
+        // upstream's idle no-op; on a page already moving at grade 5 the
+        // run rate is a no-op too (grade 5 is already ~7.5 tiles/s).
+        noteAction(a, a.type, "T1-lowered", "tux.char_run scopes the run rate to the next forced route; autonomous wander is unaffected");
+        out.push(command({ op: "moveControl", target: charTarget(g[0]!, isSelf(g[0])), control: { kind: "routeSpeed", value: speedGrade(7.35) } }));
         break;
       case "set_facing_mode": {
         const FACING: Record<string, FacingMode> = {
@@ -3432,15 +3438,25 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         const character = g[0] || "player";
         const bill = g[1]!;
         if (!bill) { noteAction(a, a.type, "T4-dropped", "missing bill slug"); break; }
-        noteAction(
-          a,
-          a.type,
-          "T1-lowered",
-          "tux.set_bill creates or replaces the amount; interest rate, late fee and battle-earnings share are not retained or applied",
-        );
-        out.push({ op: "ext", call: "tux.set_bill", args: {
-          character, bill, amount: numeric(g[2], 0),
-        } });
+        const args: Record<string, JsonValue> = { character, bill, amount: numeric(g[2], 0) };
+        if (g[3] !== undefined && g[3] !== "") args.interestRate = numeric(g[3], 0);
+        if (g[4] !== undefined && g[4] !== "") args.lateFee = numeric(g[4], 0);
+        if (g[5] !== undefined && g[5] !== "") args.shareRate = numeric(g[5], 0);
+        noteAction(a, a.type, "T1", "tux.set_bill creates or replaces the bill with its interest rate, late fee and battle-earnings share");
+        out.push({ op: "ext", call: "tux.set_bill", args });
+        break;
+      }
+      case "adjust_bill_penalty": {
+        if (!ctx.options.battle) {
+          noteAction(a, a.type, "T3-dropped", "monster/combat subsystem (P2)");
+          break;
+        }
+        const character = g[0] || "player";
+        const bill = g[1]!;
+        if (!bill) { noteAction(a, a.type, "T4-dropped", "missing bill slug"); break; }
+        const penalty = g[2] === "fee" ? "fee" : "interest";
+        noteAction(a, a.type, "T1", "tux.adjust_bill_penalty applies the bill's interest or late fee once");
+        out.push({ op: "ext", call: "tux.adjust_bill_penalty", args: { character, bill, penalty } });
         break;
       }
       case "modify_bill": {
