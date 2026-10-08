@@ -34,7 +34,7 @@ describe("G6 generated game assets", () => {
       // events materialize. Independently coalesced Surf rectangles keep
       // Dryad's Grove within this playable bound; test_npcs remains the
       // excluded global maximum.
-      runtimeMaxActors: 292,
+      runtimeMaxActors: 290,
       excludedActorStressMaps: [{ id: "test_npcs", slots: 504 }],
       options: {
         areas: true,
@@ -67,9 +67,9 @@ describe("G6 generated game assets", () => {
       playerSheet: `sprites/${appearances[0]!.template.sprite_name}.png`,
     });
     expect(GAME_ASSETS.order).toHaveLength(263);
-    // 292 actors come from the Kernel-quest event growth (main); the 191
+    // 290 actors come from the Kernel-quest event growth (main); the 191
     // sprite sources are main's 183 plus the 8 monster menu-face icons.
-    expect(GAME_ASSETS.maxActors).toBe(292);
+    expect(GAME_ASSETS.maxActors).toBe(290);
     expect(NPC_SRC_INDEX).toHaveLength(191);
     for (const { id, entry } of NPC_SRC_INDEX) {
       const art = JSON.parse(readFileSync(resolve(ROOT, "dist", entry), "utf8")) as NpcArt;

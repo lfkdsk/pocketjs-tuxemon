@@ -144,19 +144,36 @@ describe("runtime WorldLayout projection", () => {
     expect(project.worldTraversal).toBe("seamless-v1");
     expect(imported.report.seamlessHandoff).toMatchObject({
       topologySafeOpenings: 258,
-      enabledTransfers: 253,
+      runtimeEligibleOpenings: 283,
+      enabledTransfers: 283,
+      partialSeamlessCells: 25,
+      partialLegacyCells: 50,
     });
-    expect(imported.report.seamlessHandoff.notEnabledSafePortalIds).toEqual([
-      "route3:tmx:route3.tmx:153:a0",
-      "route3:tmx:route3.tmx:154:a0",
-      "route3:tmx:route3.tmx:155:a0",
-      "route3:tmx:route3.tmx:156:a0",
-      "route3:tmx:route3.tmx:157:a0",
+    expect(imported.report.seamlessHandoff.notEnabledSafePortalIds).toEqual([]);
+    expect(imported.report.seamlessHandoff.fullyLegacyPortalOnlyPortalIds).toEqual([
+      "classic_route_2:tmx:classic_route_2.tmx:285:a0",
+      "classic_route_3:tmx:classic_route_3.tmx:285:a0",
+      "classic_route_4:tmx:classic_route_4.tmx:285:a0",
+      "classic_route_4:tmx:classic_route_4.tmx:286:a0",
+      "classic_stormpeak_city:tmx:classic_stormpeak_city.tmx:290:a0",
+      "route1_sanglorian:tmx:route1_sanglorian.tmx:129:a0",
+      "route1_sanglorian:tmx:route1_sanglorian.tmx:130:a0",
+      "route1_sanglorian:tmx:route1_sanglorian.tmx:160:a0",
+      "routea:tmx:routea.tmx:45:a0",
+      "spyder_candy_town:tmx:spyder_candy_town.tmx:100:a0",
+      "spyder_paper_town:tmx:spyder_paper_town.tmx:217:a0",
+      "spyder_routec:tmx:spyder_routec.tmx:155:a0",
+      "spyder_routec:tmx:spyder_routec.tmx:156:a0",
+      "spyder_routec:tmx:spyder_routec.tmx:275:a0",
     ]);
-    expect(imported.report.seamlessHandoff.notEnabled).toContainEqual({
-      reason: "unreachable-source-facing",
-      count: 5,
-    });
+    expect(imported.report.seamlessHandoff.notEnabled).not.toContainEqual(
+      expect.objectContaining({ reason: "unreachable-source-facing" }),
+    );
+    expect(imported.report.seamlessHandoff.partialPromotions).toHaveLength(25);
+    const route3Ids = [153, 154, 155, 156, 157]
+      .map((id) => `route3:tmx:route3.tmx:${id}:a0`);
+    expect(route3Ids.every((portalId) => imported.report.seamlessHandoff.enabledPortalIds.includes(portalId)))
+      .toBeTrue();
 
     const safeIds = new Set(project.worldLayout!.components.flatMap((component) =>
       component.openings.filter((opening) => opening.compatibility === "coordinate-preserving")
@@ -173,6 +190,8 @@ describe("runtime WorldLayout projection", () => {
     const sheets = new Map(project.sheets.map((sheet) => [sheet.id, sheet] as const));
     const passage = new Map(project.maps.map((map) => [map.id, buildPassage(map, sheets)] as const));
     const resolver = createWorldHandoffResolver(project.worldLayout!);
+    const partialById = new Map(imported.report.seamlessHandoff.partialPromotions
+      .map((promotion) => [promotion.portalId, promotion] as const));
     const markedIds = new Set<string>();
     const compiledDirectIds = new Set<string>();
     const sideDirection = { south: 0, west: 1, north: 2, east: 3 } as const;
@@ -195,12 +214,15 @@ describe("runtime WorldLayout projection", () => {
             const opening = openingById.get(portalId)!;
             const target = mapById.get(transfer.map)!;
             const facing = sideDirection[opening.source.side] as Dir4;
+            const partial = partialById.get(portalId);
+            const sourceX = partial?.source.x ?? event.x;
+            const sourceY = partial?.source.y ?? event.y;
             const resolved = resolver.resolve({
               portalId,
               sourceMapId: map.id,
               targetMapId: transfer.map,
-              sourceX: event.x,
-              sourceY: event.y,
+              sourceX,
+              sourceY,
               targetX: transfer.x,
               targetY: transfer.y,
               sourceWidth: map.width,
@@ -211,8 +233,31 @@ describe("runtime WorldLayout projection", () => {
               transferDirection,
             });
             expect(resolved, portalId).toEqual({ direction: facing });
-            expect(cellBlocksExit(passage.get(map.id)!, event.x, event.y, facing), portalId).toBeFalse();
+            expect(cellBlocksExit(passage.get(map.id)!, sourceX, sourceY, facing), portalId).toBeFalse();
             expect(canEnter(passage.get(target.id)!, transfer.x, transfer.y, opposite[facing]), portalId).toBeTrue();
+            if (partial) {
+              const otherTangent = opening.source.span.start === (opening.axis === "x" ? sourceX : sourceY)
+                ? opening.source.span.end
+                : opening.source.span.start - 1;
+              const other = opening.axis === "x"
+                ? { x: otherTangent, y: sourceY }
+                : { x: sourceX, y: otherTangent };
+              expect(resolver.resolve({
+                portalId,
+                sourceMapId: map.id,
+                targetMapId: transfer.map,
+                sourceX: other.x,
+                sourceY: other.y,
+                targetX: transfer.x,
+                targetY: transfer.y,
+                sourceWidth: map.width,
+                sourceHeight: map.height,
+                targetWidth: target.width,
+                targetHeight: target.height,
+                facing,
+                transferDirection,
+              }), `${portalId} non-aligned lane`).toBeNull();
+            }
           }
           for (const instruction of compile(page.commands)) {
             if (instruction.op === "transfer" && instruction.handoff) {
@@ -225,7 +270,7 @@ describe("runtime WorldLayout projection", () => {
 
     expect([...markedIds].sort()).toEqual(imported.report.seamlessHandoff.enabledPortalIds);
     expect([...compiledDirectIds].sort()).toEqual(imported.report.seamlessHandoff.enabledPortalIds);
-    expect(markedIds.size).toBe(253);
+    expect(markedIds.size).toBe(283);
     expect([...safeIds].filter((id) => !markedIds.has(id)).sort())
       .toEqual(imported.report.seamlessHandoff.notEnabledSafePortalIds);
   });

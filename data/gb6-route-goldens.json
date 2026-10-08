@@ -1,12 +1,12 @@
 {
   "format": "pocket-tuxemon/gb6-route-goldens/v1",
   "worldTraversal": "seamless-v1",
-  "tapeSha256": "529d93c91d9c05055b0d57dc3ebfd9586a6fdb4494a965c144ad5ef781300eda",
+  "tapeSha256": "4500c0f05c2f6169f9d57d9dddc2430e2c9dd5849544c6297fff22c8d32cea2e",
   "frames": [
     {
       "name": "cotton-town",
-      "frame": 5406,
-      "timelineFrame": 5407,
+      "frame": 5601,
+      "timelineFrame": 5602,
       "map": "spyder_cotton_town",
       "position": [
         21,
@@ -36,8 +36,8 @@
     },
     {
       "name": "route-2",
-      "frame": 10550,
-      "timelineFrame": 10551,
+      "frame": 9591,
+      "timelineFrame": 9592,
       "map": "spyder_route2",
       "position": [
         0,
@@ -67,8 +67,8 @@
     },
     {
       "name": "city-park",
-      "frame": 44975,
-      "timelineFrame": 44976,
+      "frame": 47265,
+      "timelineFrame": 47266,
       "map": "spyder_citypark",
       "position": [
         10,
@@ -98,8 +98,8 @@
     },
     {
       "name": "route-3-end",
-      "frame": 110243,
-      "timelineFrame": 110244,
+      "frame": 115827,
+      "timelineFrame": 115828,
       "map": "spyder_route3",
       "position": [
         4,
@@ -129,8 +129,8 @@
     },
     {
       "name": "cotton-town",
-      "frame": 5406,
-      "timelineFrame": 5407,
+      "frame": 5601,
+      "timelineFrame": 5602,
       "map": "spyder_cotton_town",
       "position": [
         21,
@@ -139,8 +139,8 @@
       "width": 960,
       "height": 544,
       "file": "gb6-mainline-cotton-town.960x544.png",
-      "rgbaFnv1a": "43fe194a",
-      "pngSha256": "f687b7b4ef6b13bc9bdd20d1fc06be7a74f0c86dfd753d0fae5d98bd63099eeb",
+      "rgbaFnv1a": "362eb0be",
+      "pngSha256": "e8f0aa6af70d931eaae148473fc52a316c490ac9bc11c39ff99e088a35cf3fa2",
       "camera": [
         1464,
         2280
@@ -160,8 +160,8 @@
     },
     {
       "name": "route-2",
-      "frame": 10550,
-      "timelineFrame": 10551,
+      "frame": 9591,
+      "timelineFrame": 9592,
       "map": "spyder_route2",
       "position": [
         0,
@@ -191,8 +191,8 @@
     },
     {
       "name": "city-park",
-      "frame": 44975,
-      "timelineFrame": 44976,
+      "frame": 47265,
+      "timelineFrame": 47266,
       "map": "spyder_citypark",
       "position": [
         10,
@@ -222,8 +222,8 @@
     },
     {
       "name": "route-3-end",
-      "frame": 110243,
-      "timelineFrame": 110244,
+      "frame": 115827,
+      "timelineFrame": 115828,
       "map": "spyder_route3",
       "position": [
         4,

@@ -102,8 +102,10 @@ describe("warp spawn index", () => {
     // tracker), so a bare majority of spawns keep a transfer landing while
     // the rest fall back to the nearest event-free cell. A jump here means
     // the importer's event geometry or landing set changed, not just the data.
-    expect(counts.transfer).toBe(135);
-    expect(counts.fallback).toBe(110);
+    // Route 3's repaired south-edge event now occupies its former transfer
+    // landing, so the demo index chooses the adjacent clear fallback cell.
+    expect(counts.transfer).toBe(134);
+    expect(counts.fallback).toBe(111);
     expect(counts.blocked).toBe(BLOCKED_MAPS.length);
   });
 

@@ -1,13 +1,13 @@
 {
   "format": "pocket-tuxemon/daylight-goldens/v1",
   "worldTraversal": "seamless-v1",
-  "journeySha256": "52c62c53fbe6edb6aa50d37e5cef0931e93a6ad295b464fc7d87f43419efa388",
+  "journeySha256": "ca3afd89e29d1cc78f57cc97294efdab7c40ddf00d9f806ee310f0f21db722f1",
   "width": 480,
   "height": 272,
   "checkpoint": {
     "name": "paper-town",
-    "frame": 1406,
-    "timelineFrame": 1407,
+    "frame": 1392,
+    "timelineFrame": 1393,
     "map": "spyder_paper_town",
     "position": [
       10,
@@ -41,10 +41,10 @@
         "minute": 0
       },
       "file": "daylight-day.png",
-      "rgbaFnv1a": "5adc8b47",
-      "pngSha256": "2ce0bde1fa82a17d32ece15eddf3a67eacf5d1cf4e61a5c05e3fea109f69fffc",
-      "luminance": 134.643,
-      "blueBias": 0.794
+      "rgbaFnv1a": "d9ebc3ff",
+      "pngSha256": "7522745d663d6fce38d052fba224ecc58e4b638f7001c04a5c1c4fafb169c50c",
+      "luminance": 134.652,
+      "blueBias": 0.807
     },
     {
       "name": "night",
@@ -56,15 +56,15 @@
         "minute": 0
       },
       "file": "daylight-night.png",
-      "rgbaFnv1a": "22e68699",
-      "pngSha256": "9e0dbdc5c37063b192c89fbaa84a711e1414ff63be46ed35e2ffa3d7906c22c6",
-      "luminance": 49.617,
-      "blueBias": 64.058
+      "rgbaFnv1a": "15f3810d",
+      "pngSha256": "b0d5fd531ad2403dfa90144ac5a9477d1c5905316cc5f37c0b67a473d598f9ec",
+      "luminance": 49.62,
+      "blueBias": 64.061
     }
   ],
   "comparison": {
     "darkerPixels": 130262,
-    "bluerPixels": 110356,
+    "bluerPixels": 110354,
     "pixels": 130560
   }
 }

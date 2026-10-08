@@ -20,13 +20,11 @@ export function triggerClass(ev: TuxEvent): string {
     if (has("is", "char_facing", player)) return "touch:facing";
     return "touch:on";
   }
-  // `check_char_parameter player,moving,1` is upstream's per-step encounter
-  // guard (true while the player has velocity). The kit has no map-wide
-  // moving predicate, so lower it to a step trigger on the event's own cells:
-  // the encounter fires once when the player steps onto the tile, which is
-  // multi-Hz safe and keeps the saved-RNG economy identical to char_moved.
+  // `check_char_parameter player,moving,1` is a map-wide live guard, not a
+  // spatial trigger. Keep it on an automatic page so the engine's native
+  // playerMoving condition observes every committed interpolation tick.
   if (has("is", "check_char_parameter", (a) => a[0] === "player" && a[1] === "moving")) {
-    return "touch:step";
+    return "guard";
   }
   if (has("is", "char_at")) return "npcAt";
   if (has("not", "char_exists") && ev.acts.some((a) => a.type === "create_npc")) return "spawn";

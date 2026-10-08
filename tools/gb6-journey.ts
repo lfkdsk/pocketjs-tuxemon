@@ -791,7 +791,7 @@ export function runGb6Journey(hz = 60): Gb6JourneyResult {
   for (const [map, id] of [
     ["spyder_cotton_town", "e042_battle_confused"],
     ["spyder_route2", "e036_billie_encounter_r036"],
-    ["spyder_citypark", "e047_talk_bobette_r056"],
+    ["spyder_citypark", "e047_talk_bobette_r053"],
     ["spyder_route3", "e045_rookie_talk_r009"],
   ] as const) assertEvent(map, id, session);
 

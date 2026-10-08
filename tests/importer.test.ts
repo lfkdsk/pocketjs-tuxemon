@@ -13,6 +13,7 @@ import {
   K1_IMPORT_OPTIONS,
   dialogLayout,
   lowerCurrentStateCondition,
+  validateCharPosition,
 } from "../importer/project.ts";
 import { jsonBytes } from "../importer/index.ts";
 import { loadAllFileEvents, TUXEMON_SRC } from "../importer/source.ts";
@@ -116,17 +117,20 @@ test("all maps pass schema and reference valid transfer destinations", () => {
   expect(result.report.coverage.actions.summary).toMatchObject({
     // Merged counts: G-COV-C step/numeric work, translated_dialog layout
     // args lowered natively to the kit's text-window layout, and the starter
-    // portrait backdrops (change_bg_monster) now native.
+    // portrait backdrops (change_bg_monster) now native. The five pinned
+    // Route 3 `bottom` exits are repaired to their physical down direction,
+    // making each transfer native and its trailing face degraded instead of
+    // dropping both unreachable actions.
     types: 98,
     uses: 13_617,
-    native: 6_864,
-    degraded: 2_819,
+    native: 6_869,
+    degraded: 2_824,
     placeholder: 708,
-    dropped: 3_226,
+    dropped: 3_216,
     nativePercent: 50.4,
     tier1: {
-      uses: 6_318,
-      percent: 46.4,
+      uses: 6_323,
+      percent: 46.43,
       requiredUses: 6_246,
       meetsBaseline: true,
     },
@@ -134,14 +138,14 @@ test("all maps pass schema and reference valid transfer destinations", () => {
   expect(result.report.coverage.conditions.summary).toMatchObject({
     types: 64,
     uses: 8_663,
-    native: 4_371,
+    native: 4_376,
     degraded: 1_245,
     placeholder: 859,
-    dropped: 2_188,
+    dropped: 2_183,
     nativePercent: 50.5,
     tier1: {
-      uses: 4_308,
-      percent: 49.73,
+      uses: 4_313,
+      percent: 49.79,
       requiredUses: 4_591,
       meetsBaseline: false,
     },
@@ -154,8 +158,8 @@ test("all maps pass schema and reference valid transfer destinations", () => {
   ];
   expect(coverageRows.find((row) => row.type === "char_face")).toMatchObject({
     native: 868,
-    degraded: 442,
-    dropped: 717,
+    degraded: 447,
+    dropped: 712,
   });
   expect(coverageRows.find((row) => row.type === "char_move")).toMatchObject({
     degraded: 13,
@@ -629,11 +633,12 @@ test("default import output remains byte-pinned", () => {
   // monster backdrops and choice_monster menu-face icons (lazy on-demand IMG
   // entries), the GI-2b storage/trade/shop dispositions, imported item icon
   // atlas metadata, the COV-B live NPC party staging and NPC-versus-NPC
-  // resolver, the moving-guard step triggers, the live-clock daytime filter,
+  // resolver, the map-wide live moving guards, the live-clock daytime filter,
   // the map-entry layer reset, the runtime player-name condition, the
   // per-domain NPC battle result codes, COV-C step trackers, text-valued
   // numeric transforms and set_mission no-op, the Spyder-only collision-folded
-  // Surf boundary pages, native text-window layout for dialogs that carry
+  // Surf boundary pages, the map-wide live player-movement guards, native
+  // text-window layout for dialogs that carry
   // upstream position/alignment args, the starter portrait backdrops, and
   // the dialog
   // template mapping (${{var:X}} to {v:v.X}, the
@@ -644,7 +649,7 @@ test("default import output remains byte-pinned", () => {
   // G-PC-LOCKER fix-2 lockerOverflow wording (the locker is implemented)
   // moves this hash.
   expect(createHash("sha256").update(bytes).digest("hex")).toBe(
-    "a175c3145c22d722ade345a06c08b01ada47272aeafa3390c6ba0e9994fa855c",
+    "f803ae54c7eddc5570346d7419446205f6a021b57b79b708d48ee4868f42e4f4",
   );
 });
 
@@ -901,9 +906,10 @@ test("ImportOptions.moveControl emits KM1 stop, run, speed and facing controls",
   expect(nodes.some((node) =>
     node.op === "moveControl" && (node.control as { kind?: string })?.kind === "run"
   )).toBeFalse();
-  // char_speed kay_wren,7 -> the nearest MV grade to 7 tiles/s is 5
+  // char_speed kay_wren,7 -> the nearest MV grade to 7 tiles/s is 5,
+  // scoped to the next forced route like the upstream idle reset.
   expect(nodes.some((node) =>
-    node.op === "moveControl" && (node.control as { kind?: string; value?: number })?.kind === "speed" &&
+    node.op === "moveControl" && (node.control as { kind?: string; value?: number })?.kind === "routeSpeed" &&
     (node.control as { value?: number })?.value === 5
   )).toBeTrue();
   // set_facing_mode callie_wren,locked -> facingMode locked
@@ -918,11 +924,21 @@ test("ImportOptions.moveControl emits KM1 stop, run, speed and facing controls",
   )).toBeTrue();
 });
 
-test("char_position becomes a clamped place command under moveControl", () => {
+test("char_position becomes a validated place command under moveControl", () => {
   const nodes = objectNodes(buildProject(["spyder_paper_rival_downstairs"], { moveControl: true }).project);
   expect(nodes.some((node) =>
     node.op === "place" && node.target === "player" && node.x === 6 && node.y === 8
   )).toBeTrue();
+  expect(validateCharPosition(11, 12, "6", "8")).toEqual({ x: 6, y: 8 });
+  expect(() => validateCharPosition(11, 12, "-1", "8")).toThrow(
+    "char_position (-1,8) is outside the 11x12 map",
+  );
+  expect(() => validateCharPosition(11, 12, "11", "8")).toThrow(
+    "char_position (11,8) is outside the 11x12 map",
+  );
+  expect(() => validateCharPosition(11, 12, "6.5", "8")).toThrow(
+    "char_position (6.5,8) is outside the 11x12 map",
+  );
 });
 
 test("char_position followed by char_face folds the facing into the placement", () => {
@@ -952,15 +968,16 @@ test("char_position followed by char_face folds the facing into the placement", 
   expect(state.move.facing).toBe(1);
 });
 
-test("spawn char_wander becomes a KM1 wander control and a page frequency grade", () => {
+test("spawn char_wander keeps the exact source interval and a page fallback grade", () => {
   const result = buildProject(["spyder_leather_museum"], { moveControl: true });
   const nodes = objectNodes(result.project);
-  // historian wanders at 0.8s -> the nearest MV grade is 3 (1s cadence)
+  // The real historian's 0.8-second interval is exactly 48 reference ticks.
   expect(nodes.some((node) =>
-    node.op === "moveControl" && (node.control as { kind?: string; frequency?: number })?.kind === "wander" &&
-    (node.control as { frequency?: number })?.frequency === 3
+    node.op === "moveControl" && (node.control as { kind?: string; intervalTicks?: number })?.kind === "wander" &&
+    (node.control as { intervalTicks?: number })?.intervalTicks === 48
   )).toBeTrue();
-  // the NPC page keeps random movement as the fallback, at the same grade
+  // The NPC page keeps random movement as a compatibility fallback; the
+  // runtime control above owns the exact cadence.
   expect(nodes.some((node) => node.moveType === "random" && node.moveFrequency === 3)).toBeTrue();
   // a char_wander naming an NPC the spawn never creates is dropped, not emitted
   const miner = nodes.filter((node) =>
@@ -1505,7 +1522,7 @@ test("Spyder surf boundaries require the Surfboard, enter water, and dismount", 
   // Generated Surf boundaries are intentionally outside the source-authored
   // area partition. Otherwise their cells split and renumber frozen rNNN ids
   // even before the player owns a Surfboard.
-  expect(route1.events?.some((event) => event.id === "e003_teleport_to_route1_r046")).toBeTrue();
+  expect(route1.events?.some((event) => event.id === "e003_teleport_to_route1_r042")).toBeTrue();
   expect(route1.events?.filter((event) => event.id.startsWith("tux_surf_"))
     .every((event) => event.name === "Choice Surf" || event.name === "Not surfable")).toBeTrue();
   const entry = timber.events?.find((event) =>
@@ -1569,28 +1586,29 @@ test("Spyder surf boundaries require the Surfboard, enter water, and dismount", 
   expect(state.sw.playerAppearance?.sprite).toBeUndefined();
   expect(state.interp.tileProperties).toBeUndefined();
 
-  // Route D has an authored moving-guard encounter on (8,0) and a generated
-  // Surf dismount rectangle covering that same playerTouch cell. The importer
-  // folds dismount into the source guard-latch/body chain and removes (8,0)
-  // from the standalone Surf event, so one completed-step edge runs both.
+  // Route D has an authored map-wide moving-guard encounter whose TMX marker
+  // happens to be (8,0), plus a generated Surf dismount rectangle covering
+  // that cell. They stay independent: the encounter observes live movement
+  // on every map tile, while dismount remains a completed-step interaction.
   const routed = result.project.maps.find((map) => map.id === "spyder_routed")!;
   const encounter = routed.events?.find((event) =>
-    event.id.startsWith("e011_swim_encounters_day") &&
-    event.x === 8 && event.y === 0
+    event.id === "e011_swim_encounters_day"
   );
-  const competingDismount = routed.events?.find((event) =>
-    event.id.startsWith("tux_surf_dismount") &&
+  const arrival = routed.events?.find((event) =>
     event.x <= 8 && 8 < event.x + (event.w ?? 1) &&
-    event.y <= 0 && 0 < event.y + (event.h ?? 1)
+    event.y <= 0 && 0 < event.y + (event.h ?? 1) &&
+    objectNodes(event).some((node) => node.op === "appearance" && node.sprite === null)
   );
-  expect(encounter?.pages[0]?.trigger).toBe("playerTouch");
-  expect(competingDismount).toBeUndefined();
-  expect(objectNodes(encounter)).toContainEqual({
+  expect(encounter?.pages[0]?.trigger).toBe("parallel");
+  expect(objectNodes(encounter).some((node) => node.kind === "playerMoving")).toBeTrue();
+  expect(arrival?.pages[0]?.trigger).toBe("playerTouch");
+  expect(arrival?.name).toBe("Track routed + Not surfable");
+  expect(objectNodes(arrival)).toContainEqual({
     op: "appearance",
     target: "player",
     sprite: null,
   });
-  expect(objectNodes(encounter)).toContainEqual({
+  expect(objectNodes(arrival)).toContainEqual({
     op: "variable",
     id: "v.swimming",
     set: { op: "set", value: 1 },

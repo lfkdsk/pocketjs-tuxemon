@@ -2,7 +2,7 @@
  "format": "pocket-tuxemon/zh-smoke-journey/v1",
  "worldTraversal": "seamless-v1",
  "hz": 60,
- "frames": 3201,
+ "frames": 3187,
  "map": "spyder_paper_town",
  "position": [
   26,
@@ -251,13 +251,6 @@
   0,
   0,
   0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
   8192,
   0,
   8192,
@@ -307,13 +300,6 @@
   8192,
   0,
   8192,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
   0,
   0,
   0,
@@ -3223,7 +3209,7 @@
   },
   {
    "name": "bedroom",
-   "frame": 1121,
+   "frame": 1107,
    "map": "spyder_bedroom",
    "position": [
     3,
@@ -3232,7 +3218,7 @@
   },
   {
    "name": "downstairs-mom",
-   "frame": 1323,
+   "frame": 1309,
    "map": "spyder_downstairs",
    "position": [
     7,
@@ -3241,7 +3227,7 @@
   },
   {
    "name": "paper-town",
-   "frame": 1374,
+   "frame": 1360,
    "map": "spyder_paper_town",
    "position": [
     10,
@@ -3250,7 +3236,7 @@
   },
   {
    "name": "first-battle",
-   "frame": 3200,
+   "frame": 3186,
    "map": "spyder_paper_town",
    "position": [
     26,
@@ -3270,7 +3256,7 @@
   },
   {
    "name": "bedroom",
-   "frame": 1121,
+   "frame": 1107,
    "map": "spyder_bedroom",
    "position": [
     3,
@@ -3279,7 +3265,7 @@
   },
   {
    "name": "downstairs-mom",
-   "frame": 1323,
+   "frame": 1309,
    "map": "spyder_downstairs",
    "position": [
     7,
@@ -3288,7 +3274,7 @@
   },
   {
    "name": "paper-town",
-   "frame": 1374,
+   "frame": 1360,
    "map": "spyder_paper_town",
    "position": [
     10,
@@ -3297,7 +3283,7 @@
   },
   {
    "name": "first-battle",
-   "frame": 3200,
+   "frame": 3186,
    "map": "spyder_paper_town",
    "position": [
     26,
@@ -3309,8 +3295,8 @@
   {
    "opponent": "spyder_billie",
    "kind": "trainer",
-   "startFrame": 2115,
-   "endFrame": 2920,
+   "startFrame": 2101,
+   "endFrame": 2906,
    "outcome": "won"
   }
  ],
@@ -3320,6 +3306,6 @@
   "dantebin": 1,
   "firstfightend": 1
  },
- "terminalStateSha256": "244d09173a83435f67cb1f100f1e7a4ad61b07da6287207d7eff372513ad786a",
- "tapeSha256": "f3f0f329913c12836cf77e433edcd5e0cf4750d76ea2e34db9b20401b18db059"
+ "terminalStateSha256": "23c80f8cf0d52c8652ea2ddae1fd8e2e96326379f90947ede8fc96cf90d0b1c4",
+ "tapeSha256": "42458b081b9e3f3dec61aa68e0239f330cb171ee532c98f1fe1b36b02cf3ba90"
 }

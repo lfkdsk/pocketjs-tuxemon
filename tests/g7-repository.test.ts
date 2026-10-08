@@ -57,10 +57,10 @@ const GAME_OPTIONS = { extensions: TUXEMON_EXTENSIONS, battle: TUXEMON_BATTLE_RU
 // Terminal state after the legacy timeline: the cathedral bill now carries
 // its authored interest/late-fee/share metadata, so the state hash changed
 // (the story terminal — spyder_route1@14,19 — is unchanged).
-const LEGACY_TERMINAL_STATE_SHA256 = "5173f27c8f63e360cfce26f1fd865fb29ca2ae919857e864df934ee883478781";
-const BEFORE_HANDOFF_FRAME = 3_964;
-const MID_HANDOFF_FRAME = 3_978;
-const AFTER_HANDOFF_FRAME = 3_982;
+const LEGACY_TERMINAL_STATE_SHA256 = "9a35b622040cead72b2c10b6bbe2668a61a0e323b27fc6c134b28088529e2697";
+const BEFORE_HANDOFF_FRAME = 3_480;
+const MID_HANDOFF_FRAME = 3_494;
+const AFTER_HANDOFF_FRAME = 3_498;
 const BTN_LTRIGGER = 0x0100;
 const VIEWPORT = { w: 480, h: 272 } as const;
 

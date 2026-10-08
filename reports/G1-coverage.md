@@ -11,21 +11,21 @@ When conversion discards a whole event, every source rule in it is Dropped.
 
 | Kind | Kinds | Uses | Native | Degraded | Placeholder | Dropped | S1 T1 baseline |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Actions | 98 | 13617 | 13040 | 287 | 0 | 290 | 6418 / 6246 (47.13% / 45.9%) |
-| Conditions | 64 | 8663 | 8368 | 56 | 0 | 239 | 4761 / 4591 (54.96% / 53.0%) |
+| Actions | 98 | 13617 | 13078 | 259 | 0 | 280 | 6423 / 6246 (47.17% / 45.9%) |
+| Conditions | 64 | 8663 | 8411 | 23 | 0 | 229 | 4766 / 4591 (55.02% / 53.0%) |
 
 The S1 acceptance baselines are 6,246 action uses (45.9%) and 4,591
 condition uses (53.0%). Only T1 source types whose disposition is Native or
-Degraded count toward them. This import records 6418
-(47.13%) and 4761
-(54.96%), respectively: 172 above
-for actions and 170 above for conditions. The old
+Degraded count toward them. This import records 6423
+(47.17%) and 4766
+(55.02%), respectively: 177 above
+for actions and 175 above for conditions. The old
 type-table Native figure was 5,448 / 13,617 (40.0%); conversion-path accounting
-supersedes it with 13040 / 13617
-(95.8%). “Executable”
+supersedes it with 13078 / 13617
+(96.0%). “Executable”
 (native + degraded + deliberate P1 placeholder) is
 97.9% for actions and
-97.2% for conditions.
+97.4% for conditions.
 
 Definitions:
 
@@ -175,9 +175,13 @@ accepted seams; generated 71
 
 The generated project opts into `seamless-v1`. Of
 258 coordinate-preserving topology openings,
-253 runtime-direct `playerTouch` transfers
-carry a stable `handoff.portalId`; every other transfer
-keeps the legacy timeline. The source maps selected for this build contain
+all are runtime-direct. A further 25 fixed-destination
+rectangles each expose their one already-coordinate-continuous lane without changing
+the authored fixed landing: 25 such cells are
+seamless and 50 funneling cells in the same
+rectangles keep the legacy fade. In total 283 of
+283 eligible portal IDs carry a stable
+`handoff.portalId`. The source maps selected for this build contain
 1161 transfer-like actions
 (`transition_teleport` plus faint recovery). Exclusions are classified without
 per-map overrides:
@@ -190,25 +194,68 @@ per-map overrides:
 | `non-tmx-overlay` | 163 |
 | `outdoor-nonseam-or-story` | 118 |
 | `outside-world-layout` | 310 |
-| `portal-only-opening` | 39 |
+| `portal-only-opening` | 14 |
 | `rejected-contact` | 4 |
-| `unreachable-source-facing` | 5 |
 
 Safe topology openings not emitted as runtime-direct transfers:
 
-- `route3:tmx:route3.tmx:153:a0`
-- `route3:tmx:route3.tmx:154:a0`
-- `route3:tmx:route3.tmx:155:a0`
-- `route3:tmx:route3.tmx:156:a0`
-- `route3:tmx:route3.tmx:157:a0`
+- None
+
+Partially promoted fixed-destination openings:
+
+| Portal | Seamless source cell | Authored target | Legacy cells retained |
+|---|---|---|---:|
+| `classic_aerolume_city:tmx:classic_aerolume_city.tmx:285:a0` | `classic_aerolume_city@39,2` | `classic_route_6@0,2` | 2 |
+| `classic_aerolume_city:tmx:classic_aerolume_city.tmx:286:a0` | `classic_aerolume_city@0,17` | `classic_route_5@39,17` | 2 |
+| `classic_hearthrock_city:tmx:classic_hearthrock_city.tmx:300:a0` | `classic_hearthrock_city@33,0` | `classic_route_1@33,19` | 2 |
+| `classic_hearthrock_city:tmx:classic_hearthrock_city.tmx:301:a0` | `classic_hearthrock_city@39,16` | `classic_route_8@0,16` | 2 |
+| `classic_route_1:tmx:classic_route_1.tmx:293:a0` | `classic_route_1@33,19` | `classic_hearthrock_city@33,0` | 2 |
+| `classic_route_1:tmx:classic_route_1.tmx:294:a0` | `classic_route_1@6,0` | `classic_steamshore_city@6,19` | 2 |
+| `classic_route_2:tmx:classic_route_2.tmx:286:a0` | `classic_route_2@39,17` | `classic_thornwood_city@0,17` | 2 |
+| `classic_route_3:tmx:classic_route_3.tmx:286:a0` | `classic_route_3@17,19` | `classic_thornwood_city@17,0` | 2 |
+| `classic_route_5:tmx:classic_route_5.tmx:285:a0` | `classic_route_5@0,2` | `classic_thornwood_city@39,2` | 2 |
+| `classic_route_5:tmx:classic_route_5.tmx:286:a0` | `classic_route_5@39,17` | `classic_aerolume_city@0,17` | 2 |
+| `classic_route_6:tmx:classic_route_6.tmx:285:a0` | `classic_route_6@39,17` | `classic_umbrastar_city@0,17` | 2 |
+| `classic_route_6:tmx:classic_route_6.tmx:286:a0` | `classic_route_6@0,2` | `classic_aerolume_city@39,2` | 2 |
+| `classic_route_7:tmx:classic_route_7.tmx:285:a0` | `classic_route_7@3,19` | `classic_valorhold_city@3,0` | 2 |
+| `classic_route_7:tmx:classic_route_7.tmx:286:a0` | `classic_route_7@36,0` | `classic_thornwood_city@36,19` | 2 |
+| `classic_route_8:tmx:classic_route_8.tmx:285:a0` | `classic_route_8@0,16` | `classic_hearthrock_city@39,16` | 2 |
+| `classic_route_8:tmx:classic_route_8.tmx:286:a0` | `classic_route_8@39,17` | `classic_valorhold_city@0,17` | 2 |
+| `classic_steamshore_city:tmx:classic_steamshore_city.tmx:286:a0` | `classic_steamshore_city@6,19` | `classic_route_1@6,0` | 2 |
+| `classic_steamshore_city:tmx:classic_steamshore_city.tmx:287:a0` | `classic_steamshore_city@39,3` | `classic_route_2@0,3` | 2 |
+| `classic_thornwood_city:tmx:classic_thornwood_city.tmx:285:a0` | `classic_thornwood_city@0,17` | `classic_route_2@39,17` | 2 |
+| `classic_thornwood_city:tmx:classic_thornwood_city.tmx:286:a0` | `classic_thornwood_city@39,2` | `classic_route_5@0,2` | 2 |
+| `classic_thornwood_city:tmx:classic_thornwood_city.tmx:287:a0` | `classic_thornwood_city@36,19` | `classic_route_7@36,0` | 2 |
+| `classic_thornwood_city:tmx:classic_thornwood_city.tmx:288:a0` | `classic_thornwood_city@17,0` | `classic_route_3@17,19` | 2 |
+| `classic_umbrastar_city:tmx:classic_umbrastar_city.tmx:285:a0` | `classic_umbrastar_city@0,17` | `classic_route_6@39,17` | 2 |
+| `classic_valorhold_city:tmx:classic_valorhold_city.tmx:285:a0` | `classic_valorhold_city@0,17` | `classic_route_8@39,17` | 2 |
+| `classic_valorhold_city:tmx:classic_valorhold_city.tmx:286:a0` | `classic_valorhold_city@3,0` | `classic_route_7@3,19` | 2 |
+
+Portal-only openings that remain wholly legacy:
+
+- `classic_route_2:tmx:classic_route_2.tmx:285:a0`
+- `classic_route_3:tmx:classic_route_3.tmx:285:a0`
+- `classic_route_4:tmx:classic_route_4.tmx:285:a0`
+- `classic_route_4:tmx:classic_route_4.tmx:286:a0`
+- `classic_stormpeak_city:tmx:classic_stormpeak_city.tmx:290:a0`
+- `route1_sanglorian:tmx:route1_sanglorian.tmx:129:a0`
+- `route1_sanglorian:tmx:route1_sanglorian.tmx:130:a0`
+- `route1_sanglorian:tmx:route1_sanglorian.tmx:160:a0`
+- `routea:tmx:routea.tmx:45:a0`
+- `spyder_candy_town:tmx:spyder_candy_town.tmx:100:a0`
+- `spyder_paper_town:tmx:spyder_paper_town.tmx:217:a0`
+- `spyder_routec:tmx:spyder_routec.tmx:155:a0`
+- `spyder_routec:tmx:spyder_routec.tmx:156:a0`
+- `spyder_routec:tmx:spyder_routec.tmx:275:a0`
 
 Topology-only exclusions use their natural units: 39
 portal-only openings (including 1
 unsafe opening on a mixed seam), 10
 direction-only seams, 14 linked gaps,
 20 rejected contacts, and
-72 indoor world members. None is marked
-for seamless handoff.
+72 indoor world members. The partial
+rows above are the only portal-only openings with a marked lane; all other excluded
+topology and transfer classes keep their legacy behavior.
 
 ## Neighbour character preview / 邻图 NPC 预览
 
@@ -226,8 +273,8 @@ repeats it at every mainline chapter.
 游戏钩子的缓存键去掉步数倒计时，时钟与天气只保留日期、小时与天气（`time_is` 的每个属性都由日期和小时决定）；扰动探针在同一小时内把分钟拨 15。
 下表是新游戏状态下的结果；各主线章节的结果见 `bun run verify:preview:coverage`。
 
-- All maps / 全部地图: 263 maps, 8182 events: 1158 previewable (0 from the static rules), 7019 hidden, 5 rejected; 99.6% of the events that paint are previewable; 165 maps show at least one character.
-- Mainline (`spyder_*`) / 主线: 99 maps, 5264 events: 464 previewable (0 from the static rules), 4800 hidden, 0 rejected; 100.0% of the events that paint are previewable; 89 maps show at least one character.
+- All maps / 全部地图: 263 maps, 8175 events: 1158 previewable (0 from the static rules), 7012 hidden, 5 rejected; 99.6% of the events that paint are previewable; 165 maps show at least one character.
+- Mainline (`spyder_*`) / 主线: 99 maps, 5252 events: 464 previewable (0 from the static rules), 4788 hidden, 0 rejected; 100.0% of the events that paint are previewable; 89 maps show at least one character.
 
 | Reject reason / 拒绝原因 | All / 全部 | Mainline / 主线 | Meaning / 含义 |
 |---|---:|---:|---|
@@ -304,10 +351,10 @@ Maps with a previewable or rejected event / 有可预览或被拒绝事件的地
 | `spyder_candy_house3` | 24 | 1 | 0 | 23 | 0 | — |
 | `spyder_candy_inn1` | 30 | 5 | 0 | 25 | 0 | — |
 | `spyder_candy_inn2` | 32 | 3 | 0 | 29 | 0 | — |
-| `spyder_candy_port` | 69 | 1 | 0 | 68 | 0 | — |
+| `spyder_candy_port` | 70 | 1 | 0 | 69 | 0 | — |
 | `spyder_candy_scoop` | 27 | 2 | 0 | 25 | 0 | — |
 | `spyder_candy_town` | 111 | 5 | 0 | 106 | 0 | — |
-| `spyder_citypark` | 144 | 13 | 0 | 131 | 0 | — |
+| `spyder_citypark` | 143 | 13 | 0 | 130 | 0 | — |
 | `spyder_citypark_house1` | 20 | 1 | 0 | 19 | 0 | — |
 | `spyder_cotton_artshop` | 52 | 8 | 0 | 44 | 0 | — |
 | `spyder_cotton_cafe` | 39 | 7 | 0 | 32 | 0 | — |
@@ -322,8 +369,8 @@ Maps with a previewable or rejected event / 有可预览或被拒绝事件的地
 | `spyder_dojo3` | 33 | 6 | 0 | 27 | 0 | — |
 | `spyder_dojo4` | 30 | 1 | 0 | 29 | 0 | — |
 | `spyder_downstairs` | 24 | 1 | 0 | 23 | 0 | — |
-| `spyder_dragonscave` | 78 | 11 | 0 | 67 | 0 | — |
-| `spyder_dryadsgrove` | 292 | 8 | 0 | 284 | 0 | — |
+| `spyder_dragonscave` | 75 | 11 | 0 | 64 | 0 | — |
+| `spyder_dryadsgrove` | 290 | 8 | 0 | 282 | 0 | — |
 | `spyder_flower_center` | 35 | 1 | 0 | 34 | 0 | — |
 | `spyder_flower_city` | 114 | 13 | 0 | 101 | 0 | — |
 | `spyder_flower_house1` | 23 | 2 | 0 | 21 | 0 | — |
@@ -357,16 +404,16 @@ Maps with a previewable or rejected event / 有可预览或被拒绝事件的地
 | `spyder_paper_scoop` | 45 | 7 | 0 | 38 | 0 | — |
 | `spyder_paper_town` | 93 | 2 | 0 | 91 | 0 | — |
 | `spyder_radiotower` | 34 | 5 | 0 | 29 | 0 | — |
-| `spyder_route1` | 79 | 1 | 0 | 78 | 0 | — |
+| `spyder_route1` | 77 | 1 | 0 | 76 | 0 | — |
 | `spyder_route2` | 131 | 3 | 0 | 128 | 0 | — |
 | `spyder_route3` | 133 | 14 | 0 | 119 | 0 | — |
 | `spyder_route4` | 105 | 10 | 0 | 95 | 0 | — |
 | `spyder_route5` | 94 | 10 | 0 | 84 | 0 | — |
-| `spyder_route6` | 136 | 10 | 0 | 126 | 0 | — |
+| `spyder_route6` | 134 | 10 | 0 | 124 | 0 | — |
 | `spyder_routea` | 125 | 15 | 0 | 110 | 0 | — |
-| `spyder_routeb` | 62 | 5 | 0 | 57 | 0 | — |
+| `spyder_routeb` | 61 | 5 | 0 | 56 | 0 | — |
 | `spyder_routec` | 206 | 15 | 0 | 191 | 0 | — |
-| `spyder_routee` | 61 | 2 | 0 | 59 | 0 | — |
+| `spyder_routee` | 60 | 2 | 0 | 58 | 0 | — |
 | `spyder_scoop1` | 41 | 8 | 0 | 33 | 0 | — |
 | `spyder_scoop2` | 27 | 1 | 0 | 26 | 0 | — |
 | `spyder_scoop3` | 34 | 3 | 0 | 31 | 0 | — |
@@ -380,7 +427,7 @@ Maps with a previewable or rejected event / 有可预览或被拒绝事件的地
 | `spyder_timber_walledgarden1` | 45 | 6 | 0 | 39 | 0 | — |
 | `spyder_timber_walledgarden2` | 44 | 6 | 0 | 38 | 0 | — |
 | `spyder_tunnel` | 105 | 5 | 0 | 100 | 0 | — |
-| `spyder_tunnel_below` | 53 | 5 | 0 | 48 | 0 | — |
+| `spyder_tunnel_below` | 51 | 5 | 0 | 46 | 0 | — |
 | `spyder_wayfarer_inn1` | 52 | 10 | 0 | 42 | 0 | — |
 | `spyder_wayfarer_inn2` | 30 | 4 | 0 | 26 | 0 | — |
 | `taba_ba_br_1` | 19 | 2 | 0 | 17 | 0 | — |
@@ -442,15 +489,15 @@ four-neighbour BFS with fixed tie-breaking selects the nearest walkable cell:
 | Action | `change_bg_char` | 4 | 0 | 0 | 0 | 4 |
 | Action | `change_bg_monster` | 7 | 0 | 0 | 0 | 7 |
 | Action | `change_taste` | 0 | 0 | 0 | 2 | 2 |
-| Action | `char_face` | 1889 | 119 | 0 | 19 | 2027 |
+| Action | `char_face` | 1889 | 124 | 0 | 14 | 2027 |
 | Action | `char_move` | 64 | 13 | 0 | 0 | 77 |
 | Action | `char_plague` | 13 | 0 | 0 | 0 | 13 |
-| Action | `char_position` | 0 | 1 | 0 | 0 | 1 |
+| Action | `char_position` | 1 | 0 | 0 | 0 | 1 |
 | Action | `char_run` | 0 | 2 | 0 | 0 | 2 |
 | Action | `char_speed` | 0 | 19 | 0 | 0 | 19 |
 | Action | `char_stop` | 88 | 0 | 0 | 0 | 88 |
 | Action | `char_talk` | 772 | 0 | 0 | 0 | 772 |
-| Action | `char_wander` | 0 | 32 | 0 | 1 | 33 |
+| Action | `char_wander` | 32 | 0 | 0 | 1 | 33 |
 | Action | `choice_monster` | 2 | 0 | 0 | 0 | 2 |
 | Action | `choice_npc` | 1 | 0 | 0 | 0 | 1 |
 | Action | `clear_variable` | 36 | 0 | 0 | 0 | 36 |
@@ -518,7 +565,7 @@ four-neighbour BFS with fixed tie-breaking selects the nearest walkable cell:
 | Action | `start_double_battle` | 8 | 0 | 0 | 0 | 8 |
 | Action | `teleport_faint` | 11 | 0 | 0 | 0 | 11 |
 | Action | `trading` | 8 | 0 | 0 | 0 | 8 |
-| Action | `transition_teleport` | 1037 | 3 | 0 | 9 | 1049 |
+| Action | `transition_teleport` | 1042 | 3 | 0 | 4 | 1049 |
 | Action | `translated_dialog` | 2062 | 1 | 0 | 5 | 2068 |
 | Action | `translated_dialog_choice` | 138 | 10 | 0 | 1 | 149 |
 | Action | `tune_radio` | 0 | 0 | 0 | 2 | 2 |
@@ -540,17 +587,17 @@ census.
 | Condition | `is battle_outcome_count` | 2 | 0 | 0 | 0 | 2 |
 | Condition | `is bill_is` | 2 | 0 | 0 | 0 | 2 |
 | Condition | `is button_pressed` | 416 | 0 | 0 | 3 | 419 |
-| Condition | `is char_at` | 1802 | 0 | 0 | 9 | 1811 |
+| Condition | `is char_at` | 1807 | 0 | 0 | 4 | 1811 |
 | Condition | `is char_defeated` | 10 | 0 | 0 | 0 | 10 |
 | Condition | `is char_exists` | 3 | 0 | 0 | 6 | 9 |
-| Condition | `is char_facing` | 995 | 4 | 0 | 9 | 1008 |
+| Condition | `is char_facing` | 995 | 9 | 0 | 4 | 1008 |
 | Condition | `is char_facing_tile` | 337 | 5 | 0 | 2 | 344 |
 | Condition | `is char_gender` | 0 | 0 | 0 | 1 | 1 |
 | Condition | `is char_healed` | 1 | 0 | 0 | 0 | 1 |
 | Condition | `is char_in` | 0 | 1 | 0 | 0 | 1 |
 | Condition | `is char_moved` | 454 | 0 | 0 | 0 | 454 |
 | Condition | `is char_sprite` | 37 | 0 | 0 | 0 | 37 |
-| Condition | `is check_char_parameter` | 2 | 38 | 0 | 0 | 40 |
+| Condition | `is check_char_parameter` | 40 | 0 | 0 | 0 | 40 |
 | Condition | `is check_evolution` | 2 | 0 | 0 | 0 | 2 |
 | Condition | `is check_max_tech` | 1 | 0 | 0 | 1 | 2 |
 | Condition | `is check_party_parameter` | 8 | 0 | 0 | 0 | 8 |

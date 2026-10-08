@@ -15,160 +15,160 @@ export const DEMO_CHAPTER_INDEX: readonly DemoChapterIndexEntry[] = [
     "title": "Bedroom (new game)",
     "worldTraversal": "seamless-v1",
     "frame": 0,
-    "suffixFrames": 199316,
+    "suffixFrames": 206816,
     "timelineFrame": 0
   },
   {
     "id": "paper-town",
     "title": "Paper Town",
     "worldTraversal": "seamless-v1",
-    "frame": 1399,
-    "suffixFrames": 197917,
-    "timelineFrame": 1399
+    "frame": 1385,
+    "suffixFrames": 205431,
+    "timelineFrame": 1385
   },
   {
     "id": "before-billie",
     "title": "Before the first Billie battle",
     "worldTraversal": "seamless-v1",
-    "frame": 1924,
-    "suffixFrames": 197392,
-    "timelineFrame": 1924
+    "frame": 1910,
+    "suffixFrames": 204906,
+    "timelineFrame": 1910
   },
   {
     "id": "starter",
     "title": "Starter chosen",
     "worldTraversal": "seamless-v1",
-    "frame": 3692,
-    "suffixFrames": 195624,
-    "timelineFrame": 3692
+    "frame": 3208,
+    "suffixFrames": 203608,
+    "timelineFrame": 3208
   },
   {
     "id": "route-1",
     "title": "Route 1",
     "worldTraversal": "seamless-v1",
-    "frame": 3982,
-    "suffixFrames": 195334,
-    "timelineFrame": 3982
+    "frame": 3498,
+    "suffixFrames": 203318,
+    "timelineFrame": 3498
   },
   {
     "id": "cotton-town",
     "title": "Cotton Town",
     "worldTraversal": "seamless-v1",
-    "frame": 5384,
-    "suffixFrames": 193932,
-    "timelineFrame": 5384
+    "frame": 5579,
+    "suffixFrames": 201237,
+    "timelineFrame": 5579
   },
   {
     "id": "city-park",
     "title": "City Park",
     "worldTraversal": "seamless-v1",
-    "frame": 44953,
-    "suffixFrames": 154363,
-    "timelineFrame": 44953
+    "frame": 47243,
+    "suffixFrames": 159573,
+    "timelineFrame": 47243
   },
   {
     "id": "route-3-north",
     "title": "Route 3 north end",
     "worldTraversal": "seamless-v1",
-    "frame": 110244,
-    "suffixFrames": 89072,
-    "timelineFrame": 110244
+    "frame": 115828,
+    "suffixFrames": 90988,
+    "timelineFrame": 115828
   },
   {
     "id": "flower-city",
     "title": "Flower City",
     "worldTraversal": "seamless-v1",
-    "frame": 115006,
-    "suffixFrames": 84310,
-    "timelineFrame": 115006
+    "frame": 121020,
+    "suffixFrames": 85796,
+    "timelineFrame": 121020
   },
   {
     "id": "captain-returns",
     "title": "Captain's return",
     "worldTraversal": "seamless-v1",
-    "frame": 121768,
-    "suffixFrames": 77548,
-    "timelineFrame": 121768
+    "frame": 128704,
+    "suffixFrames": 78112,
+    "timelineFrame": 128704
   },
   {
     "id": "candy-town",
     "title": "Candy Town",
     "worldTraversal": "seamless-v1",
-    "frame": 165163,
-    "suffixFrames": 34153,
-    "timelineFrame": 165163
+    "frame": 172064,
+    "suffixFrames": 34752,
+    "timelineFrame": 172064
   },
   {
     "id": "greenwash-aardant",
     "title": "Greenwash (Aardant acquired)",
     "worldTraversal": "seamless-v1",
-    "frame": 171549,
-    "suffixFrames": 27767,
-    "timelineFrame": 171549
+    "frame": 178665,
+    "suffixFrames": 28151,
+    "timelineFrame": 178665
   },
   {
     "id": "hospital-cure",
     "title": "Hospital cure",
     "worldTraversal": "seamless-v1",
-    "frame": 172988,
-    "suffixFrames": 26328,
-    "timelineFrame": 172988
+    "frame": 180104,
+    "suffixFrames": 26712,
+    "timelineFrame": 180104
   },
   {
     "id": "omnichannel-open",
     "title": "Omnichannel passage opened",
     "worldTraversal": "seamless-v1",
-    "frame": 180746,
-    "suffixFrames": 18570,
-    "timelineFrame": 180746
+    "frame": 187582,
+    "suffixFrames": 19234,
+    "timelineFrame": 187582
   },
   {
     "id": "radio-broadcast",
     "title": "Radio Tower broadcast",
     "worldTraversal": "seamless-v1",
-    "frame": 185906,
-    "suffixFrames": 13410,
-    "timelineFrame": 185906
+    "frame": 193194,
+    "suffixFrames": 13622,
+    "timelineFrame": 193194
   },
   {
     "id": "kernel-briefing",
     "title": "Kernel quest briefing",
     "worldTraversal": "seamless-v1",
-    "frame": 187777,
-    "suffixFrames": 11539,
-    "timelineFrame": 187777
+    "frame": 195065,
+    "suffixFrames": 11751,
+    "timelineFrame": 195065
   },
   {
     "id": "surfboard",
     "title": "Surfboard acquired",
     "worldTraversal": "seamless-v1",
-    "frame": 189158,
-    "suffixFrames": 10158,
-    "timelineFrame": 189158
+    "frame": 196183,
+    "suffixFrames": 10633,
+    "timelineFrame": 196183
   },
   {
     "id": "route-b",
     "title": "Route B",
     "worldTraversal": "seamless-v1",
-    "frame": 191337,
-    "suffixFrames": 7979,
-    "timelineFrame": 191337
+    "frame": 198330,
+    "suffixFrames": 8486,
+    "timelineFrame": 198330
   },
   {
     "id": "data-center",
     "title": "Data Center",
     "worldTraversal": "seamless-v1",
-    "frame": 194849,
-    "suffixFrames": 4467,
-    "timelineFrame": 194849
+    "frame": 201822,
+    "suffixFrames": 4994,
+    "timelineFrame": 201822
   },
   {
     "id": "kernel-defeated",
     "title": "Kernel quest complete",
     "worldTraversal": "seamless-v1",
-    "frame": 199305,
+    "frame": 206805,
     "suffixFrames": 11,
-    "timelineFrame": 199305
+    "timelineFrame": 206805
   }
 ];
 
@@ -178,160 +178,160 @@ export const DEMO_CHAPTER_INDEX_ZH: readonly DemoChapterIndexEntry[] = [
     "title": "房间（新游戏）",
     "worldTraversal": "seamless-v1",
     "frame": 0,
-    "suffixFrames": 199316,
+    "suffixFrames": 206816,
     "timelineFrame": 0
   },
   {
     "id": "paper-town",
     "title": "方絮镇",
     "worldTraversal": "seamless-v1",
-    "frame": 1399,
-    "suffixFrames": 197917,
-    "timelineFrame": 1399
+    "frame": 1385,
+    "suffixFrames": 205431,
+    "timelineFrame": 1385
   },
   {
     "id": "before-billie",
     "title": "首次对战比莉之前",
     "worldTraversal": "seamless-v1",
-    "frame": 1924,
-    "suffixFrames": 197392,
-    "timelineFrame": 1924
+    "frame": 1910,
+    "suffixFrames": 204906,
+    "timelineFrame": 1910
   },
   {
     "id": "starter",
     "title": "选定初始精灵",
     "worldTraversal": "seamless-v1",
-    "frame": 3692,
-    "suffixFrames": 195624,
-    "timelineFrame": 3692
+    "frame": 3208,
+    "suffixFrames": 203608,
+    "timelineFrame": 3208
   },
   {
     "id": "route-1",
     "title": "路线1",
     "worldTraversal": "seamless-v1",
-    "frame": 3982,
-    "suffixFrames": 195334,
-    "timelineFrame": 3982
+    "frame": 3498,
+    "suffixFrames": 203318,
+    "timelineFrame": 3498
   },
   {
     "id": "cotton-town",
     "title": "暖棉镇",
     "worldTraversal": "seamless-v1",
-    "frame": 5384,
-    "suffixFrames": 193932,
-    "timelineFrame": 5384
+    "frame": 5579,
+    "suffixFrames": 201237,
+    "timelineFrame": 5579
   },
   {
     "id": "city-park",
     "title": "城市公园",
     "worldTraversal": "seamless-v1",
-    "frame": 44953,
-    "suffixFrames": 154363,
-    "timelineFrame": 44953
+    "frame": 47243,
+    "suffixFrames": 159573,
+    "timelineFrame": 47243
   },
   {
     "id": "route-3-north",
     "title": "路线3北端",
     "worldTraversal": "seamless-v1",
-    "frame": 110244,
-    "suffixFrames": 89072,
-    "timelineFrame": 110244
+    "frame": 115828,
+    "suffixFrames": 90988,
+    "timelineFrame": 115828
   },
   {
     "id": "flower-city",
     "title": "彩花城",
     "worldTraversal": "seamless-v1",
-    "frame": 115006,
-    "suffixFrames": 84310,
-    "timelineFrame": 115006
+    "frame": 121020,
+    "suffixFrames": 85796,
+    "timelineFrame": 121020
   },
   {
     "id": "captain-returns",
     "title": "船长归来",
     "worldTraversal": "seamless-v1",
-    "frame": 121768,
-    "suffixFrames": 77548,
-    "timelineFrame": 121768
+    "frame": 128704,
+    "suffixFrames": 78112,
+    "timelineFrame": 128704
   },
   {
     "id": "candy-town",
     "title": "甜饴镇",
     "worldTraversal": "seamless-v1",
-    "frame": 165163,
-    "suffixFrames": 34153,
-    "timelineFrame": 165163
+    "frame": 172064,
+    "suffixFrames": 34752,
+    "timelineFrame": 172064
   },
   {
     "id": "greenwash-aardant",
     "title": "格林沃什（获得阿尔丹特）",
     "worldTraversal": "seamless-v1",
-    "frame": 171549,
-    "suffixFrames": 27767,
-    "timelineFrame": 171549
+    "frame": 178665,
+    "suffixFrames": 28151,
+    "timelineFrame": 178665
   },
   {
     "id": "hospital-cure",
     "title": "医院治疗",
     "worldTraversal": "seamless-v1",
-    "frame": 172988,
-    "suffixFrames": 26328,
-    "timelineFrame": 172988
+    "frame": 180104,
+    "suffixFrames": 26712,
+    "timelineFrame": 180104
   },
   {
     "id": "omnichannel-open",
     "title": "全能公司通道开启",
     "worldTraversal": "seamless-v1",
-    "frame": 180746,
-    "suffixFrames": 18570,
-    "timelineFrame": 180746
+    "frame": 187582,
+    "suffixFrames": 19234,
+    "timelineFrame": 187582
   },
   {
     "id": "radio-broadcast",
     "title": "电台广播",
     "worldTraversal": "seamless-v1",
-    "frame": 185906,
-    "suffixFrames": 13410,
-    "timelineFrame": 185906
+    "frame": 193194,
+    "suffixFrames": 13622,
+    "timelineFrame": 193194
   },
   {
     "id": "kernel-briefing",
     "title": "科内尔任务简报",
     "worldTraversal": "seamless-v1",
-    "frame": 187777,
-    "suffixFrames": 11539,
-    "timelineFrame": 187777
+    "frame": 195065,
+    "suffixFrames": 11751,
+    "timelineFrame": 195065
   },
   {
     "id": "surfboard",
     "title": "获得冲浪板",
     "worldTraversal": "seamless-v1",
-    "frame": 189158,
-    "suffixFrames": 10158,
-    "timelineFrame": 189158
+    "frame": 196183,
+    "suffixFrames": 10633,
+    "timelineFrame": 196183
   },
   {
     "id": "route-b",
     "title": "路线B",
     "worldTraversal": "seamless-v1",
-    "frame": 191337,
-    "suffixFrames": 7979,
-    "timelineFrame": 191337
+    "frame": 198330,
+    "suffixFrames": 8486,
+    "timelineFrame": 198330
   },
   {
     "id": "data-center",
     "title": "数据中心",
     "worldTraversal": "seamless-v1",
-    "frame": 194849,
-    "suffixFrames": 4467,
-    "timelineFrame": 194849
+    "frame": 201822,
+    "suffixFrames": 4994,
+    "timelineFrame": 201822
   },
   {
     "id": "kernel-defeated",
     "title": "科内尔任务完成",
     "worldTraversal": "seamless-v1",
-    "frame": 199305,
+    "frame": 206805,
     "suffixFrames": 11,
-    "timelineFrame": 199305
+    "timelineFrame": 206805
   }
 ];
 
@@ -844,7 +844,7 @@ export const DEMO_WARP_SPAWNS = [
   {
     "id": "route3",
     "x": 30,
-    "y": 39
+    "y": 38
   },
   {
     "id": "route4",

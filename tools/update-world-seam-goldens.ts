@@ -79,6 +79,9 @@ if (journey.hz !== 60) throw new Error(`world seam goldens: expected a 60 Hz war
 // hook to place the same progressed state beside each capture seam.
 const warmup = journey.checkpoints.find((checkpoint) => checkpoint.name === "route-1");
 if (!warmup) throw new Error("world seam goldens: missing route-1 warm-up checkpoint");
+/** Let entry autoruns create their NPCs and release controls before the real
+ * directional approach. Stream readiness alone can arrive first. */
+const ENTRY_SETTLE_FRAMES = 120;
 
 function binding(mapId: string): { component: WorldComponent; placement: WorldPlacement } {
   for (const component of project.worldLayout!.components) {
@@ -94,17 +97,15 @@ function assertCaptureOpening(plan: WorldSeamCrossingPlan): void {
   if (source.component.componentId !== target.component.componentId) {
     throw new Error(`world seam goldens: ${plan.orientation} maps are in different components`);
   }
-  const opening = source.component.openings.find((candidate) =>
-    candidate.compatibility === "coordinate-preserving" &&
-    candidate.source.mapId === plan.sourceMap &&
-    candidate.target.mapId === plan.targetMap &&
-    candidate.source.side === plan.sourceSide
-  );
+  const opening = source.component.openings.find((candidate) => {
+    const tangent = candidate.axis === "x" ? plan.start[0] : plan.start[1];
+    return candidate.compatibility === "coordinate-preserving" &&
+      candidate.source.mapId === plan.sourceMap &&
+      candidate.target.mapId === plan.targetMap &&
+      candidate.source.side === plan.sourceSide &&
+      tangent >= candidate.source.span.start && tangent < candidate.source.span.end;
+  });
   if (!opening) throw new Error(`world seam goldens: ${plan.orientation} capture has no seamless opening`);
-  const tangent = opening.axis === "x" ? plan.start[0] : plan.start[1];
-  if (tangent < opening.source.span.start || tangent >= opening.source.span.end) {
-    throw new Error(`world seam goldens: ${plan.orientation} start misses ${opening.portalId}`);
-  }
 }
 for (const plan of WORLD_SEAM_CROSSINGS) assertCaptureOpening(plan);
 
@@ -316,6 +317,14 @@ for (const viewport of WORLD_SEAM_VIEWPORTS) {
       }
     }
     if (!ready) throw new Error(`world seam goldens: ${plan.orientation} streams did not settle`);
+    for (let frame = 0; frame < ENTRY_SETTLE_FRAMES; frame++) {
+      step(world);
+      world.render();
+      const state = stateAndCamera(`${plan.orientation} entry settle`).state;
+      if (state.fade || state.scene || state.handoff || state.mapId !== plan.sourceMap) {
+        throw new Error(`world seam goldens: ${plan.orientation} source did not remain idle during entry settle`);
+      }
+    }
 
     let started = false;
     for (let guard = 0; guard < 240; guard++) {
@@ -332,7 +341,21 @@ for (const viewport of WORLD_SEAM_VIEWPORTS) {
         throw new Error(`world seam goldens: ${plan.orientation} used a legacy transfer instead of a handoff`);
       }
     }
-    if (!started) throw new Error(`world seam goldens: ${plan.orientation} handoff did not start`);
+    if (!started) {
+      const state = stateAndCamera(`${plan.orientation} stuck`).state;
+      const dx = plan.facing === 1 ? -1 : plan.facing === 3 ? 1 : 0;
+      const dy = plan.facing === 2 ? -1 : plan.facing === 0 ? 1 : 0;
+      const blockers = Object.entries(state.chars.chars)
+        .filter(([, actor]) => actor.tx === state.move.tx + dx && actor.ty === state.move.ty + dy)
+        .map(([eventId, actor]) => `${eventId}[visible=${actor.visible},blocks=${actor.blocks},page=${actor.pageIndex}]`)
+        .join(",");
+      throw new Error(
+        `world seam goldens: ${plan.orientation} handoff did not start ` +
+        `(player ${state.move.tx},${state.move.ty}, moving=${state.move.moving}, ` +
+        `inputLocked=${state.interp.inputLocked}, main=${state.interp.main !== null}, ` +
+        `actorsAhead=${blockers || "none"})`,
+      );
+    }
 
     const row: PendingImage[] = [];
     for (const capturePhase of WORLD_SEAM_PHASES) {

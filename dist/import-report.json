@@ -284,11 +284,11 @@
  "schemaErrors": [],
  "audioQoaPending": [],
  "byFate": {
-  "T1-lowered": 2328,
+  "T1-lowered": 2249,
   "T3-dropped": 12,
-  "T1": 36965,
-  "T4-dropped": 1721,
-  "T2-dropped": 370,
+  "T1": 37046,
+  "T4-dropped": 1716,
+  "T2-dropped": 365,
   "structural": 792
  },
  "rows": [
@@ -389,6 +389,12 @@
    "note": "folded into transfer direction"
   },
   {
+   "key": "act:char_face(after teleport):T1-lowered",
+   "fate": "T1-lowered",
+   "count": 5,
+   "note": "pinned Route 3 source typo bottom repaired to down and folded into transfer direction"
+  },
+  {
    "key": "act:char_face(after teleport):T4-dropped",
    "fate": "T4-dropped",
    "count": 4,
@@ -437,10 +443,10 @@
    "note": "tux.char_plague marks a character's party inoculated"
   },
   {
-   "key": "act:char_position:T1-lowered",
-   "fate": "T1-lowered",
+   "key": "act:char_position:T1",
+   "fate": "T1",
    "count": 1,
-   "note": "place command (out-of-map coordinates are clamped; upstream raises)"
+   "note": "validated in-bounds direct place command"
   },
   {
    "key": "act:char_run:T1-lowered",
@@ -452,7 +458,7 @@
    "key": "act:char_speed:T1-lowered",
    "fate": "T1-lowered",
    "count": 19,
-   "note": "KM1 moveControl speed (tiles/sec -> nearest MV exponential grade)"
+   "note": "route-scoped speed lifetime; tiles/sec -> nearest MV exponential grade"
   },
   {
    "key": "act:char_stop:T1",
@@ -473,10 +479,10 @@
    "note": "spawn target is unavailable"
   },
   {
-   "key": "act:char_wander:T1-lowered",
-   "fate": "T1-lowered",
+   "key": "act:char_wander:T1",
+   "fate": "T1",
    "count": 32,
-   "note": "KM1 moveControl wander (seeded RNG, dialog-pausing; seconds -> nearest MV frequency grade)"
+   "note": "exact 60 Hz wander interval, bounds, observation/modal holds, and seeded RNG"
   },
   {
    "key": "act:choice_monster:T1",
@@ -889,7 +895,7 @@
   {
    "key": "act:transition_teleport:T1",
    "fate": "T1",
-   "count": 1040,
+   "count": 1045,
    "note": "transfer (terminal; dir from trailing char_face)"
   },
   {
@@ -1039,13 +1045,13 @@
   {
    "key": "cond:is char_facing:T1-lowered",
    "fate": "T1-lowered",
-   "count": 64,
-   "note": "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
+   "count": 69,
+   "note": "pinned Route 3 source typo bottom repaired to down"
   },
   {
    "key": "cond:is char_facing:T2-dropped",
    "fate": "T2-dropped",
-   "count": 8,
+   "count": 3,
    "note": "source direction 'bottom' is not up/down/left/right and can never equal Tuxemon's Direction"
   },
   {
@@ -1097,10 +1103,10 @@
    "note": "live playerName exact comparison"
   },
   {
-   "key": "cond:is check_char_parameter:T1-lowered",
-   "fate": "T1-lowered",
+   "key": "cond:is check_char_parameter:T1",
+   "fate": "T1",
    "count": 38,
-   "note": "moving guard lowered to a step trigger (map-wide in upstream)"
+   "note": "native live playerMoving condition (map-wide at reference-tick start)"
   },
   {
    "key": "cond:is check_evolution:T1",
@@ -1435,7 +1441,7 @@
   {
    "key": "trigger:guard:T1",
    "fate": "T1",
-   "count": 2406,
+   "count": 2444,
    "note": "parallel"
   },
   {
@@ -1459,7 +1465,7 @@
   {
    "key": "trigger:never-true guard:T4-dropped",
    "fate": "T4-dropped",
-   "count": 807,
+   "count": 802,
    "note": "fixed-false guard (is current_state: combat/menu/teleporter states do not run map fibers in the kit) prevents the source event from starting"
   },
   {
@@ -1483,7 +1489,7 @@
   {
    "key": "trigger:stacked event areas:T1-lowered",
    "fate": "T1-lowered",
-   "count": 489,
+   "count": 471,
    "note": "partitioned: match flags then bodies"
   },
   {
@@ -1513,7 +1519,7 @@
   {
    "key": "trigger:touch:facing(area):T1",
    "fate": "T1",
-   "count": 928,
+   "count": 933,
    "note": "K1 rectangular event area (overlaps partitioned after guard sampling)"
   },
   {
@@ -1525,7 +1531,7 @@
   {
    "key": "trigger:touch:step(area):T1",
    "fate": "T1",
-   "count": 492,
+   "count": 454,
    "note": "K1 rectangular event area (overlaps partitioned after guard sampling)"
   }
  ],
@@ -2418,7 +2424,8 @@
   "mode": "seamless-v1",
   "sourceTransferActions": 1161,
   "topologySafeOpenings": 258,
-  "enabledTransfers": 253,
+  "runtimeEligibleOpenings": 283,
+  "enabledTransfers": 283,
   "enabledPortalIds": [
    "candy_town:tmx:candy_town.tmx:197:a0",
    "candy_town:tmx:candy_town.tmx:198:a0",
@@ -2435,6 +2442,31 @@
    "citypark:tmx:citypark.tmx:88:a0",
    "citypark:tmx:citypark.tmx:89:a0",
    "citypark:tmx:citypark.tmx:90:a0",
+   "classic_aerolume_city:tmx:classic_aerolume_city.tmx:285:a0",
+   "classic_aerolume_city:tmx:classic_aerolume_city.tmx:286:a0",
+   "classic_hearthrock_city:tmx:classic_hearthrock_city.tmx:300:a0",
+   "classic_hearthrock_city:tmx:classic_hearthrock_city.tmx:301:a0",
+   "classic_route_1:tmx:classic_route_1.tmx:293:a0",
+   "classic_route_1:tmx:classic_route_1.tmx:294:a0",
+   "classic_route_2:tmx:classic_route_2.tmx:286:a0",
+   "classic_route_3:tmx:classic_route_3.tmx:286:a0",
+   "classic_route_5:tmx:classic_route_5.tmx:285:a0",
+   "classic_route_5:tmx:classic_route_5.tmx:286:a0",
+   "classic_route_6:tmx:classic_route_6.tmx:285:a0",
+   "classic_route_6:tmx:classic_route_6.tmx:286:a0",
+   "classic_route_7:tmx:classic_route_7.tmx:285:a0",
+   "classic_route_7:tmx:classic_route_7.tmx:286:a0",
+   "classic_route_8:tmx:classic_route_8.tmx:285:a0",
+   "classic_route_8:tmx:classic_route_8.tmx:286:a0",
+   "classic_steamshore_city:tmx:classic_steamshore_city.tmx:286:a0",
+   "classic_steamshore_city:tmx:classic_steamshore_city.tmx:287:a0",
+   "classic_thornwood_city:tmx:classic_thornwood_city.tmx:285:a0",
+   "classic_thornwood_city:tmx:classic_thornwood_city.tmx:286:a0",
+   "classic_thornwood_city:tmx:classic_thornwood_city.tmx:287:a0",
+   "classic_thornwood_city:tmx:classic_thornwood_city.tmx:288:a0",
+   "classic_umbrastar_city:tmx:classic_umbrastar_city.tmx:285:a0",
+   "classic_valorhold_city:tmx:classic_valorhold_city.tmx:285:a0",
+   "classic_valorhold_city:tmx:classic_valorhold_city.tmx:286:a0",
    "cotton_town:tmx:cotton_town.tmx:144:a0",
    "cotton_town:tmx:cotton_town.tmx:145:a0",
    "cotton_town:tmx:cotton_town.tmx:149:a0",
@@ -2477,6 +2509,11 @@
    "route2:tmx:route2.tmx:31:a0",
    "route2:tmx:route2.tmx:61:a0",
    "route2:tmx:route2.tmx:62:a0",
+   "route3:tmx:route3.tmx:153:a0",
+   "route3:tmx:route3.tmx:154:a0",
+   "route3:tmx:route3.tmx:155:a0",
+   "route3:tmx:route3.tmx:156:a0",
+   "route3:tmx:route3.tmx:157:a0",
    "route3:tmx:route3.tmx:169:a0",
    "route3:tmx:route3.tmx:170:a0",
    "route4:tmx:route4.tmx:31:a0",
@@ -2674,12 +2711,426 @@
    "tunnel:tmx:tunnel.tmx:98:a0",
    "tunnel:tmx:tunnel.tmx:99:a0"
   ],
-  "notEnabledSafePortalIds": [
-   "route3:tmx:route3.tmx:153:a0",
-   "route3:tmx:route3.tmx:154:a0",
-   "route3:tmx:route3.tmx:155:a0",
-   "route3:tmx:route3.tmx:156:a0",
-   "route3:tmx:route3.tmx:157:a0"
+  "notEnabledSafePortalIds": [],
+  "partialPromotions": [
+   {
+    "portalId": "classic_aerolume_city:tmx:classic_aerolume_city.tmx:285:a0",
+    "sourceMap": "classic_aerolume_city",
+    "source": {
+     "x": 39,
+     "y": 2
+    },
+    "targetMap": "classic_route_6",
+    "target": {
+     "x": 0,
+     "y": 2
+    },
+    "reason": "fixed-destination-aligned-lane",
+    "sourceCells": 3,
+    "legacyCells": 2
+   },
+   {
+    "portalId": "classic_aerolume_city:tmx:classic_aerolume_city.tmx:286:a0",
+    "sourceMap": "classic_aerolume_city",
+    "source": {
+     "x": 0,
+     "y": 17
+    },
+    "targetMap": "classic_route_5",
+    "target": {
+     "x": 39,
+     "y": 17
+    },
+    "reason": "fixed-destination-aligned-lane",
+    "sourceCells": 3,
+    "legacyCells": 2
+   },
+   {
+    "portalId": "classic_hearthrock_city:tmx:classic_hearthrock_city.tmx:300:a0",
+    "sourceMap": "classic_hearthrock_city",
+    "source": {
+     "x": 33,
+     "y": 0
+    },
+    "targetMap": "classic_route_1",
+    "target": {
+     "x": 33,
+     "y": 19
+    },
+    "reason": "fixed-destination-aligned-lane",
+    "sourceCells": 3,
+    "legacyCells": 2
+   },
+   {
+    "portalId": "classic_hearthrock_city:tmx:classic_hearthrock_city.tmx:301:a0",
+    "sourceMap": "classic_hearthrock_city",
+    "source": {
+     "x": 39,
+     "y": 16
+    },
+    "targetMap": "classic_route_8",
+    "target": {
+     "x": 0,
+     "y": 16
+    },
+    "reason": "fixed-destination-aligned-lane",
+    "sourceCells": 3,
+    "legacyCells": 2
+   },
+   {
+    "portalId": "classic_route_1:tmx:classic_route_1.tmx:293:a0",
+    "sourceMap": "classic_route_1",
+    "source": {
+     "x": 33,
+     "y": 19
+    },
+    "targetMap": "classic_hearthrock_city",
+    "target": {
+     "x": 33,
+     "y": 0
+    },
+    "reason": "fixed-destination-aligned-lane",
+    "sourceCells": 3,
+    "legacyCells": 2
+   },
+   {
+    "portalId": "classic_route_1:tmx:classic_route_1.tmx:294:a0",
+    "sourceMap": "classic_route_1",
+    "source": {
+     "x": 6,
+     "y": 0
+    },
+    "targetMap": "classic_steamshore_city",
+    "target": {
+     "x": 6,
+     "y": 19
+    },
+    "reason": "fixed-destination-aligned-lane",
+    "sourceCells": 3,
+    "legacyCells": 2
+   },
+   {
+    "portalId": "classic_route_2:tmx:classic_route_2.tmx:286:a0",
+    "sourceMap": "classic_route_2",
+    "source": {
+     "x": 39,
+     "y": 17
+    },
+    "targetMap": "classic_thornwood_city",
+    "target": {
+     "x": 0,
+     "y": 17
+    },
+    "reason": "fixed-destination-aligned-lane",
+    "sourceCells": 3,
+    "legacyCells": 2
+   },
+   {
+    "portalId": "classic_route_3:tmx:classic_route_3.tmx:286:a0",
+    "sourceMap": "classic_route_3",
+    "source": {
+     "x": 17,
+     "y": 19
+    },
+    "targetMap": "classic_thornwood_city",
+    "target": {
+     "x": 17,
+     "y": 0
+    },
+    "reason": "fixed-destination-aligned-lane",
+    "sourceCells": 3,
+    "legacyCells": 2
+   },
+   {
+    "portalId": "classic_route_5:tmx:classic_route_5.tmx:285:a0",
+    "sourceMap": "classic_route_5",
+    "source": {
+     "x": 0,
+     "y": 2
+    },
+    "targetMap": "classic_thornwood_city",
+    "target": {
+     "x": 39,
+     "y": 2
+    },
+    "reason": "fixed-destination-aligned-lane",
+    "sourceCells": 3,
+    "legacyCells": 2
+   },
+   {
+    "portalId": "classic_route_5:tmx:classic_route_5.tmx:286:a0",
+    "sourceMap": "classic_route_5",
+    "source": {
+     "x": 39,
+     "y": 17
+    },
+    "targetMap": "classic_aerolume_city",
+    "target": {
+     "x": 0,
+     "y": 17
+    },
+    "reason": "fixed-destination-aligned-lane",
+    "sourceCells": 3,
+    "legacyCells": 2
+   },
+   {
+    "portalId": "classic_route_6:tmx:classic_route_6.tmx:285:a0",
+    "sourceMap": "classic_route_6",
+    "source": {
+     "x": 39,
+     "y": 17
+    },
+    "targetMap": "classic_umbrastar_city",
+    "target": {
+     "x": 0,
+     "y": 17
+    },
+    "reason": "fixed-destination-aligned-lane",
+    "sourceCells": 3,
+    "legacyCells": 2
+   },
+   {
+    "portalId": "classic_route_6:tmx:classic_route_6.tmx:286:a0",
+    "sourceMap": "classic_route_6",
+    "source": {
+     "x": 0,
+     "y": 2
+    },
+    "targetMap": "classic_aerolume_city",
+    "target": {
+     "x": 39,
+     "y": 2
+    },
+    "reason": "fixed-destination-aligned-lane",
+    "sourceCells": 3,
+    "legacyCells": 2
+   },
+   {
+    "portalId": "classic_route_7:tmx:classic_route_7.tmx:285:a0",
+    "sourceMap": "classic_route_7",
+    "source": {
+     "x": 3,
+     "y": 19
+    },
+    "targetMap": "classic_valorhold_city",
+    "target": {
+     "x": 3,
+     "y": 0
+    },
+    "reason": "fixed-destination-aligned-lane",
+    "sourceCells": 3,
+    "legacyCells": 2
+   },
+   {
+    "portalId": "classic_route_7:tmx:classic_route_7.tmx:286:a0",
+    "sourceMap": "classic_route_7",
+    "source": {
+     "x": 36,
+     "y": 0
+    },
+    "targetMap": "classic_thornwood_city",
+    "target": {
+     "x": 36,
+     "y": 19
+    },
+    "reason": "fixed-destination-aligned-lane",
+    "sourceCells": 3,
+    "legacyCells": 2
+   },
+   {
+    "portalId": "classic_route_8:tmx:classic_route_8.tmx:285:a0",
+    "sourceMap": "classic_route_8",
+    "source": {
+     "x": 0,
+     "y": 16
+    },
+    "targetMap": "classic_hearthrock_city",
+    "target": {
+     "x": 39,
+     "y": 16
+    },
+    "reason": "fixed-destination-aligned-lane",
+    "sourceCells": 3,
+    "legacyCells": 2
+   },
+   {
+    "portalId": "classic_route_8:tmx:classic_route_8.tmx:286:a0",
+    "sourceMap": "classic_route_8",
+    "source": {
+     "x": 39,
+     "y": 17
+    },
+    "targetMap": "classic_valorhold_city",
+    "target": {
+     "x": 0,
+     "y": 17
+    },
+    "reason": "fixed-destination-aligned-lane",
+    "sourceCells": 3,
+    "legacyCells": 2
+   },
+   {
+    "portalId": "classic_steamshore_city:tmx:classic_steamshore_city.tmx:286:a0",
+    "sourceMap": "classic_steamshore_city",
+    "source": {
+     "x": 6,
+     "y": 19
+    },
+    "targetMap": "classic_route_1",
+    "target": {
+     "x": 6,
+     "y": 0
+    },
+    "reason": "fixed-destination-aligned-lane",
+    "sourceCells": 3,
+    "legacyCells": 2
+   },
+   {
+    "portalId": "classic_steamshore_city:tmx:classic_steamshore_city.tmx:287:a0",
+    "sourceMap": "classic_steamshore_city",
+    "source": {
+     "x": 39,
+     "y": 3
+    },
+    "targetMap": "classic_route_2",
+    "target": {
+     "x": 0,
+     "y": 3
+    },
+    "reason": "fixed-destination-aligned-lane",
+    "sourceCells": 3,
+    "legacyCells": 2
+   },
+   {
+    "portalId": "classic_thornwood_city:tmx:classic_thornwood_city.tmx:285:a0",
+    "sourceMap": "classic_thornwood_city",
+    "source": {
+     "x": 0,
+     "y": 17
+    },
+    "targetMap": "classic_route_2",
+    "target": {
+     "x": 39,
+     "y": 17
+    },
+    "reason": "fixed-destination-aligned-lane",
+    "sourceCells": 3,
+    "legacyCells": 2
+   },
+   {
+    "portalId": "classic_thornwood_city:tmx:classic_thornwood_city.tmx:286:a0",
+    "sourceMap": "classic_thornwood_city",
+    "source": {
+     "x": 39,
+     "y": 2
+    },
+    "targetMap": "classic_route_5",
+    "target": {
+     "x": 0,
+     "y": 2
+    },
+    "reason": "fixed-destination-aligned-lane",
+    "sourceCells": 3,
+    "legacyCells": 2
+   },
+   {
+    "portalId": "classic_thornwood_city:tmx:classic_thornwood_city.tmx:287:a0",
+    "sourceMap": "classic_thornwood_city",
+    "source": {
+     "x": 36,
+     "y": 19
+    },
+    "targetMap": "classic_route_7",
+    "target": {
+     "x": 36,
+     "y": 0
+    },
+    "reason": "fixed-destination-aligned-lane",
+    "sourceCells": 3,
+    "legacyCells": 2
+   },
+   {
+    "portalId": "classic_thornwood_city:tmx:classic_thornwood_city.tmx:288:a0",
+    "sourceMap": "classic_thornwood_city",
+    "source": {
+     "x": 17,
+     "y": 0
+    },
+    "targetMap": "classic_route_3",
+    "target": {
+     "x": 17,
+     "y": 19
+    },
+    "reason": "fixed-destination-aligned-lane",
+    "sourceCells": 3,
+    "legacyCells": 2
+   },
+   {
+    "portalId": "classic_umbrastar_city:tmx:classic_umbrastar_city.tmx:285:a0",
+    "sourceMap": "classic_umbrastar_city",
+    "source": {
+     "x": 0,
+     "y": 17
+    },
+    "targetMap": "classic_route_6",
+    "target": {
+     "x": 39,
+     "y": 17
+    },
+    "reason": "fixed-destination-aligned-lane",
+    "sourceCells": 3,
+    "legacyCells": 2
+   },
+   {
+    "portalId": "classic_valorhold_city:tmx:classic_valorhold_city.tmx:285:a0",
+    "sourceMap": "classic_valorhold_city",
+    "source": {
+     "x": 0,
+     "y": 17
+    },
+    "targetMap": "classic_route_8",
+    "target": {
+     "x": 39,
+     "y": 17
+    },
+    "reason": "fixed-destination-aligned-lane",
+    "sourceCells": 3,
+    "legacyCells": 2
+   },
+   {
+    "portalId": "classic_valorhold_city:tmx:classic_valorhold_city.tmx:286:a0",
+    "sourceMap": "classic_valorhold_city",
+    "source": {
+     "x": 3,
+     "y": 0
+    },
+    "targetMap": "classic_route_7",
+    "target": {
+     "x": 3,
+     "y": 19
+    },
+    "reason": "fixed-destination-aligned-lane",
+    "sourceCells": 3,
+    "legacyCells": 2
+   }
+  ],
+  "partialSeamlessCells": 25,
+  "partialLegacyCells": 50,
+  "fullyLegacyPortalOnlyPortalIds": [
+   "classic_route_2:tmx:classic_route_2.tmx:285:a0",
+   "classic_route_3:tmx:classic_route_3.tmx:285:a0",
+   "classic_route_4:tmx:classic_route_4.tmx:285:a0",
+   "classic_route_4:tmx:classic_route_4.tmx:286:a0",
+   "classic_stormpeak_city:tmx:classic_stormpeak_city.tmx:290:a0",
+   "route1_sanglorian:tmx:route1_sanglorian.tmx:129:a0",
+   "route1_sanglorian:tmx:route1_sanglorian.tmx:130:a0",
+   "route1_sanglorian:tmx:route1_sanglorian.tmx:160:a0",
+   "routea:tmx:routea.tmx:45:a0",
+   "spyder_candy_town:tmx:spyder_candy_town.tmx:100:a0",
+   "spyder_paper_town:tmx:spyder_paper_town.tmx:217:a0",
+   "spyder_routec:tmx:spyder_routec.tmx:155:a0",
+   "spyder_routec:tmx:spyder_routec.tmx:156:a0",
+   "spyder_routec:tmx:spyder_routec.tmx:275:a0"
   ],
   "notEnabled": [
    {
@@ -2708,15 +3159,11 @@
    },
    {
     "reason": "portal-only-opening",
-    "count": 39
+    "count": 14
    },
    {
     "reason": "rejected-contact",
     "count": 4
-   },
-   {
-    "reason": "unreachable-source-facing",
-    "count": 5
    }
   ],
   "topologyExcluded": {
@@ -2899,15 +3346,15 @@
    "summary": {
     "types": 98,
     "uses": 13617,
-    "native": 13040,
-    "degraded": 287,
+    "native": 13078,
+    "degraded": 259,
     "placeholder": 0,
-    "dropped": 290,
-    "nativePercent": 95.8,
+    "dropped": 280,
+    "nativePercent": 96,
     "executablePercent": 97.9,
     "tier1": {
-     "uses": 6418,
-     "percent": 47.13,
+     "uses": 6423,
+     "percent": 47.17,
      "requiredUses": 6246,
      "requiredPercent": 45.9,
      "meetsBaseline": true
@@ -3081,9 +3528,9 @@
      "type": "char_face",
      "total": 2027,
      "native": 1889,
-     "degraded": 119,
+     "degraded": 124,
      "placeholder": 0,
-     "dropped": 19,
+     "dropped": 14,
      "reasons": {
       "native": [
        "spawn facing becomes the NPC page's initial dir",
@@ -3102,7 +3549,8 @@
       ],
       "degraded": [
        "moveRoute player face",
-       "moveRoute this face"
+       "moveRoute this face",
+       "pinned Route 3 source typo bottom repaired to down and folded into transfer direction"
       ]
      }
     },
@@ -3140,13 +3588,13 @@
     {
      "type": "char_position",
      "total": 1,
-     "native": 0,
-     "degraded": 1,
+     "native": 1,
+     "degraded": 0,
      "placeholder": 0,
      "dropped": 0,
      "reasons": {
-      "degraded": [
-       "place command (out-of-map coordinates are clamped; upstream raises)"
+      "native": [
+       "validated in-bounds direct place command"
       ]
      }
     },
@@ -3172,7 +3620,7 @@
      "dropped": 0,
      "reasons": {
       "degraded": [
-       "KM1 moveControl speed (tiles/sec -> nearest MV exponential grade)"
+       "route-scoped speed lifetime; tiles/sec -> nearest MV exponential grade"
       ]
      }
     },
@@ -3205,13 +3653,13 @@
     {
      "type": "char_wander",
      "total": 33,
-     "native": 0,
-     "degraded": 32,
+     "native": 32,
+     "degraded": 0,
      "placeholder": 0,
      "dropped": 1,
      "reasons": {
-      "degraded": [
-       "KM1 moveControl wander (seeded RNG, dialog-pausing; seconds -> nearest MV frequency grade)"
+      "native": [
+       "exact 60 Hz wander interval, bounds, observation/modal holds, and seeded RNG"
       ],
       "dropped": [
        "spawn target is unavailable"
@@ -4164,10 +4612,10 @@
     {
      "type": "transition_teleport",
      "total": 1049,
-     "native": 1037,
+     "native": 1042,
      "degraded": 3,
      "placeholder": 0,
-     "dropped": 9,
+     "dropped": 4,
      "reasons": {
       "native": [
        "transfer (terminal; dir from trailing char_face)"
@@ -4330,15 +4778,15 @@
    "summary": {
     "types": 64,
     "uses": 8663,
-    "native": 8368,
-    "degraded": 56,
+    "native": 8411,
+    "degraded": 23,
     "placeholder": 0,
-    "dropped": 239,
-    "nativePercent": 96.6,
-    "executablePercent": 97.2,
+    "dropped": 229,
+    "nativePercent": 97.1,
+    "executablePercent": 97.4,
     "tier1": {
-     "uses": 4761,
-     "percent": 54.96,
+     "uses": 4766,
+     "percent": 55.02,
      "requiredUses": 4591,
      "requiredPercent": 53,
      "meetsBaseline": true
@@ -4408,10 +4856,10 @@
     {
      "type": "is char_at",
      "total": 1811,
-     "native": 1802,
+     "native": 1807,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 9,
+     "dropped": 4,
      "reasons": {
       "native": [
        "consumed by trigger selection"
@@ -4456,9 +4904,9 @@
      "type": "is char_facing",
      "total": 1008,
      "native": 995,
-     "degraded": 4,
+     "degraded": 9,
      "placeholder": 0,
-     "dropped": 9,
+     "dropped": 4,
      "reasons": {
       "native": [
        "K1 facing page condition"
@@ -4469,6 +4917,7 @@
        "Tuxemon's integer tile boundary never contains a point for a zero-size TMX event"
       ],
       "degraded": [
+       "pinned Route 3 source typo bottom repaired to down",
        "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
       ]
      }
@@ -4561,15 +5010,13 @@
     {
      "type": "is check_char_parameter",
      "total": 40,
-     "native": 2,
-     "degraded": 38,
+     "native": 40,
+     "degraded": 0,
      "placeholder": 0,
      "dropped": 0,
      "reasons": {
-      "degraded": [
-       "moving guard lowered to a step trigger (map-wide in upstream)"
-      ],
       "native": [
+       "native live playerMoving condition (map-wide at reference-tick start)",
        "live playerName exact comparison"
       ]
      }
@@ -5353,10 +5800,10 @@
   },
   "all": {
    "maps": 263,
-   "events": 8182,
+   "events": 8175,
    "previewed": 1158,
    "fallback": 0,
-   "hidden": 7019,
+   "hidden": 7012,
    "rejected": 5,
    "reasons": {
     "duplicate-id": 0,
@@ -5375,10 +5822,10 @@
   },
   "mainline": {
    "maps": 99,
-   "events": 5264,
+   "events": 5252,
    "previewed": 464,
    "fallback": 0,
-   "hidden": 4800,
+   "hidden": 4788,
    "rejected": 0,
    "reasons": {
     "duplicate-id": 0,
@@ -5915,10 +6362,10 @@
    },
    {
     "mapId": "spyder_candy_port",
-    "events": 69,
+    "events": 70,
     "previewed": 1,
     "fallback": 0,
-    "hidden": 68,
+    "hidden": 69,
     "rejected": 0,
     "reasons": {}
    },
@@ -5942,10 +6389,10 @@
    },
    {
     "mapId": "spyder_citypark",
-    "events": 144,
+    "events": 143,
     "previewed": 13,
     "fallback": 0,
-    "hidden": 131,
+    "hidden": 130,
     "rejected": 0,
     "reasons": {}
    },
@@ -6077,19 +6524,19 @@
    },
    {
     "mapId": "spyder_dragonscave",
-    "events": 78,
+    "events": 75,
     "previewed": 11,
     "fallback": 0,
-    "hidden": 67,
+    "hidden": 64,
     "rejected": 0,
     "reasons": {}
    },
    {
     "mapId": "spyder_dryadsgrove",
-    "events": 292,
+    "events": 290,
     "previewed": 8,
     "fallback": 0,
-    "hidden": 284,
+    "hidden": 282,
     "rejected": 0,
     "reasons": {}
    },
@@ -6392,10 +6839,10 @@
    },
    {
     "mapId": "spyder_route1",
-    "events": 79,
+    "events": 77,
     "previewed": 1,
     "fallback": 0,
-    "hidden": 78,
+    "hidden": 76,
     "rejected": 0,
     "reasons": {}
    },
@@ -6437,10 +6884,10 @@
    },
    {
     "mapId": "spyder_route6",
-    "events": 136,
+    "events": 134,
     "previewed": 10,
     "fallback": 0,
-    "hidden": 126,
+    "hidden": 124,
     "rejected": 0,
     "reasons": {}
    },
@@ -6455,10 +6902,10 @@
    },
    {
     "mapId": "spyder_routeb",
-    "events": 62,
+    "events": 61,
     "previewed": 5,
     "fallback": 0,
-    "hidden": 57,
+    "hidden": 56,
     "rejected": 0,
     "reasons": {}
    },
@@ -6473,10 +6920,10 @@
    },
    {
     "mapId": "spyder_routee",
-    "events": 61,
+    "events": 60,
     "previewed": 2,
     "fallback": 0,
-    "hidden": 59,
+    "hidden": 58,
     "rejected": 0,
     "reasons": {}
    },
@@ -6599,10 +7046,10 @@
    },
    {
     "mapId": "spyder_tunnel_below",
-    "events": 53,
+    "events": 51,
     "previewed": 5,
     "fallback": 0,
-    "hidden": 48,
+    "hidden": 46,
     "rejected": 0,
     "reasons": {}
    },

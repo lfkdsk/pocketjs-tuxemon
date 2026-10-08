@@ -8,13 +8,13 @@ describe("J3 QuickJS continuation tape", () => {
     const tape = buildJ3QuickjsTape();
     expect(tape.format).toBe("pocket-tuxemon/j3-quickjs/v1");
     expect(tape.worldTraversal).toBe("seamless-v1");
-    expect(tape.frames).toBe(12_941);
+    expect(tape.frames).toBe(13_113);
     expect(tape.frames).toBe(tape.masks.length);
     expect(tape.tapeSha256)
       .toBe(createHash("sha256").update(JSON.stringify(tape.masks)).digest("hex"));
     expect(tape.maps[0]).toEqual({ frame: 0, map: "spyder_candy_hospital3" });
     expect(tape.maps.at(-1)).toMatchObject({ map: "spyder_radiotower" });
-    expect(tape.battles).toHaveLength(13);
+    expect(tape.battles).toHaveLength(14);
     expect(tape.battles[0]).toMatchObject({ opponent: "spyder_billie", startFrame: 97 });
     expect(tape.battles.at(-1)).toMatchObject({
       opponent: "spyder_omnichannel_beaverbrook",
@@ -22,6 +22,6 @@ describe("J3 QuickJS continuation tape", () => {
     });
     // Terminal carries the cathedral bill's authored metadata now.
     expect(tape.terminalStateSha256)
-      .toBe("9229662b9782b9d12f12d9b93b51392bf395aa3bd2389e71679fe425a12c4cf7");
+      .toBe("a388673c6afd4160128f8d4c41c77e6d04212abc173f60fdf2f8d4bcdf9f1239");
   });
 });

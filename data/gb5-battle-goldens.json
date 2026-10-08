@@ -6,156 +6,156 @@
       "width": 480,
       "height": 272,
       "file": "gb5-battle-main-menu.480x272.png",
-      "hostFrame": 2243,
+      "hostFrame": 2229,
       "event": null,
       "eventCursor": 4,
       "eventTicks": 0,
       "menuMode": "root",
-      "rgbaFnv1a": "b3e592c1",
-      "pngSha256": "e4643f2ef6842514dff7dbeb8e9eb8dc4ad954353272007e351f68abc9bf332d"
+      "rgbaFnv1a": "469b0f7d",
+      "pngSha256": "6df343afe31da98e71f7c329d6abc9a51c5ec2f105393987221a1cbdb8384caf"
     },
     {
       "name": "technique-menu",
       "width": 480,
       "height": 272,
       "file": "gb5-battle-technique-menu.480x272.png",
-      "hostFrame": 2245,
+      "hostFrame": 2231,
       "event": null,
       "eventCursor": 4,
       "eventTicks": 0,
       "menuMode": "technique",
-      "rgbaFnv1a": "65e93fb2",
-      "pngSha256": "166e0ab3d07df32e876f51a3b3f92698d3a0bca17f00bf73ef08ddf4382a1188"
+      "rgbaFnv1a": "e17fb996",
+      "pngSha256": "f8339547a570eabea753b8ed04a8978024fdefd9b84c982074029290fa6db440"
     },
     {
       "name": "hit",
       "width": 480,
       "height": 272,
       "file": "gb5-battle-hit.480x272.png",
-      "hostFrame": 2330,
+      "hostFrame": 2312,
       "event": "technique",
       "eventCursor": 6,
       "eventTicks": 24,
       "menuMode": "root",
-      "rgbaFnv1a": "1aa3ac1e",
-      "pngSha256": "fdfaa01415d4d383f4f1c3cc53ccb13541753682f74249f75ae19e56753a6d51"
+      "rgbaFnv1a": "2ca13e09",
+      "pngSha256": "85573737c114b79a6494715277e3f8da9c2657f3acc35a235bf2dd3c4aee20cf"
     },
     {
       "name": "faint",
       "width": 480,
       "height": 272,
       "file": "gb5-battle-faint.480x272.png",
-      "hostFrame": 3454,
+      "hostFrame": 2928,
       "event": "faint",
-      "eventCursor": 55,
+      "eventCursor": 32,
       "eventTicks": 24,
       "menuMode": "root",
-      "rgbaFnv1a": "52ded518",
-      "pngSha256": "548e22ddb3bf1bba59701b2a8a25b9ac2298967a99a4991ad0ce2578351da23f"
+      "rgbaFnv1a": "655483d3",
+      "pngSha256": "401221ca8cd34d41dad03ff694200c7be40f544af270ae71662de0ad1837b37c"
     },
     {
       "name": "capture-shake",
       "width": 480,
       "height": 272,
       "file": "gb5-battle-capture-shake.480x272.png",
-      "hostFrame": 3485,
+      "hostFrame": 2959,
       "event": "capture",
       "eventCursor": 2,
       "eventTicks": 21,
       "menuMode": "root",
-      "rgbaFnv1a": "9cb80957",
-      "pngSha256": "ae331e492a5991022ec48103fa2a4764c4f1fc0e36ed5748800e9a780de601ed"
+      "rgbaFnv1a": "9abdf083",
+      "pngSha256": "aad57c9c56cb738142b67332feb68fbb39ece588c8dd83c4f61631914cd47730"
     },
     {
       "name": "level-up",
       "width": 480,
       "height": 272,
       "file": "gb5-battle-level-up.480x272.png",
-      "hostFrame": 3484,
+      "hostFrame": 2958,
       "event": "faint",
-      "eventCursor": 55,
+      "eventCursor": 32,
       "eventTicks": 54,
       "menuMode": "root",
-      "rgbaFnv1a": "123c785b",
-      "pngSha256": "69dc8cc2f14f74efe7cef8ff03b16201625c40851d11bd8805e1abf85406bea4"
+      "rgbaFnv1a": "e556a826",
+      "pngSha256": "d7b5598498fea85641ea30fdd8b71337532484d61e933650e07c7a83d3996048"
     },
     {
       "name": "main-menu",
       "width": 960,
       "height": 544,
       "file": "gb5-battle-main-menu.960x544.png",
-      "hostFrame": 2243,
+      "hostFrame": 2229,
       "event": null,
       "eventCursor": 4,
       "eventTicks": 0,
       "menuMode": "root",
-      "rgbaFnv1a": "44cb81a5",
-      "pngSha256": "e51fff83a6526608ab30f0ee1e03ff34c8870b1b1b6614b5c37006c14c9b8606"
+      "rgbaFnv1a": "528c7985",
+      "pngSha256": "f21283b96e8bf9869f087d598501aca50facf93f03a8ec9c7aa6c1bc5ed2bee0"
     },
     {
       "name": "technique-menu",
       "width": 960,
       "height": 544,
       "file": "gb5-battle-technique-menu.960x544.png",
-      "hostFrame": 2245,
+      "hostFrame": 2231,
       "event": null,
       "eventCursor": 4,
       "eventTicks": 0,
       "menuMode": "technique",
-      "rgbaFnv1a": "f0d89ccd",
-      "pngSha256": "0c4fb8adaa839e052853af9b723d8668e19f7d789659e2f454e66473fe527833"
+      "rgbaFnv1a": "777a48ed",
+      "pngSha256": "8b18fdc1ac338311a1c2bf3d19a5c75a4e6ade5f02f211dc9805997b473212e9"
     },
     {
       "name": "hit",
       "width": 960,
       "height": 544,
       "file": "gb5-battle-hit.960x544.png",
-      "hostFrame": 2330,
+      "hostFrame": 2312,
       "event": "technique",
       "eventCursor": 6,
       "eventTicks": 24,
       "menuMode": "root",
-      "rgbaFnv1a": "04dd08b8",
-      "pngSha256": "6ff265cc11bd20b44f487ab2d0a2826242af6208a0b7402c92f9a5365caf9b3b"
+      "rgbaFnv1a": "ad7b0381",
+      "pngSha256": "e7ca17b0bdbb92882f7a0ed0e65174abefa32f6242ea8418a2063cb0e5993e77"
     },
     {
       "name": "faint",
       "width": 960,
       "height": 544,
       "file": "gb5-battle-faint.960x544.png",
-      "hostFrame": 3454,
+      "hostFrame": 2928,
       "event": "faint",
-      "eventCursor": 55,
+      "eventCursor": 32,
       "eventTicks": 24,
       "menuMode": "root",
-      "rgbaFnv1a": "bc5bbc6c",
-      "pngSha256": "5c2985d9baf8443123126a4f58e664952803554750de11b97091cf475b21d363"
+      "rgbaFnv1a": "35431f8f",
+      "pngSha256": "e21fd90adbc653656c3820c99f8813b079a14e1dde0ccd8628ce56bb1726a0d6"
     },
     {
       "name": "capture-shake",
       "width": 960,
       "height": 544,
       "file": "gb5-battle-capture-shake.960x544.png",
-      "hostFrame": 3485,
+      "hostFrame": 2959,
       "event": "capture",
       "eventCursor": 2,
       "eventTicks": 21,
       "menuMode": "root",
-      "rgbaFnv1a": "13e0c028",
-      "pngSha256": "6958ace3b30ccaa66469a0544ba946a9e4687022c8b9f2088ffe82e636a8e0e9"
+      "rgbaFnv1a": "2556d968",
+      "pngSha256": "09ca8f064711872ff917d226b25c76a5a19de1be1027e7a09127366a7172e2ce"
     },
     {
       "name": "level-up",
       "width": 960,
       "height": 544,
       "file": "gb5-battle-level-up.960x544.png",
-      "hostFrame": 3484,
+      "hostFrame": 2958,
       "event": "faint",
-      "eventCursor": 55,
+      "eventCursor": 32,
       "eventTicks": 54,
       "menuMode": "root",
-      "rgbaFnv1a": "4f6b0b71",
-      "pngSha256": "c958372d017c54558305d79d8f368ce62a7dd1da99d2c06ecf8faeee033a7d9f"
+      "rgbaFnv1a": "98a638f8",
+      "pngSha256": "21a88cced821a817038db65251812f6fe1c3d688fbe71ffa6d4a9dbc28a92757"
     }
   ]
 }

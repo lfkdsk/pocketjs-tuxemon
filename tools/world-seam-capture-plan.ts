@@ -32,23 +32,27 @@ export interface WorldSeamCrossingPlan {
 export const WORLD_SEAM_CROSSINGS: readonly WorldSeamCrossingPlan[] = [
   {
     orientation: "horizontal",
-    sourceMap: "spyder_route2",
-    targetMap: "spyder_cotton_town",
+    // A portal-only fixed-destination rectangle whose aligned y=17 lane is
+    // now direct; the other two source cells still take the legacy fade.
+    sourceMap: "classic_aerolume_city",
+    targetMap: "classic_route_5",
     sourceSide: "west",
-    start: [1, 8],
+    start: [1, 17],
     button: 0x0080,
     facing: 1,
     worldDelta: [-2, 0],
   },
   {
     orientation: "vertical",
-    sourceMap: "spyder_paper_town",
-    targetMap: "spyder_route1",
-    sourceSide: "north",
-    start: [14, 1],
-    button: 0x0010,
-    facing: 2,
-    worldDelta: [0, -2],
+    // One of Route 3's five pinned `bottom` source typos, repaired to the
+    // authored south-edge/downward physical crossing.
+    sourceMap: "route3",
+    targetMap: "leather_town",
+    sourceSide: "south",
+    start: [32, 38],
+    button: 0x0040,
+    facing: 0,
+    worldDelta: [0, 2],
   },
 ] as const;
 
@@ -166,7 +170,10 @@ export function assertWorldSeamManifest(manifest: WorldSeamManifest): void {
         if (frame.activeMap !== expectedMap) fail(`${frame.file} active map is ${frame.activeMap}, expected ${expectedMap}`);
         if (frame.fade !== null || frame.scene !== null) fail(`${frame.file} is obscured by a fade or scene`);
         if (frame.player.facing !== crossing.facing) fail(`${frame.file} player faces away from the handoff`);
-        if (frame.nonBlackPixels <= 0) fail(`${frame.file} is black`);
+        const pixels = frame.viewport.width * frame.viewport.height;
+        if (frame.nonBlackPixels * 2 < pixels) {
+          fail(`${frame.file} is majority black (${frame.nonBlackPixels}/${pixels} non-black pixels)`);
+        }
         for (const [name, band] of [["ground", frame.ground], ["upper", frame.upper]] as const) {
           if (!band.visibleMaps.includes(crossing.sourceMap) || !band.visibleMaps.includes(crossing.targetMap)) {
             fail(`${frame.file} ${name} does not expose both crossing maps`);

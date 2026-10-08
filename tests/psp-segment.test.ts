@@ -109,18 +109,18 @@ describe("PSP segment suffix slicing", () => {
 describe("PSP segment resolution", () => {
   test("a committed chapter resolves to the next chapter's frame", () => {
     // radio-broadcast now resolves to the next committed chapter,
-    // kernel-briefing (the J3 terminal at 185929 is mid-tape once J4 loads).
+    // kernel-briefing (the J3 terminal at 193217 is mid-tape once J4 loads).
     const spec = resolveSegment(ROOT, "radio-broadcast");
     expect(spec.generated).toBe(false);
-    expect(spec.startFrame).toBe(185906);
-    expect(spec.endFrame).toBe(187777);
+    expect(spec.startFrame).toBe(193194);
+    expect(spec.endFrame).toBe(195065);
     expect(spec.suffix.length).toBe(1871);
     expect(spec.envelope.map).toBe("spyder_radiotower");
   });
 
   test("an explicit end frame overrides the next-chapter default", () => {
-    const spec = resolveSegment(ROOT, "radio-broadcast", 185929);
-    expect(spec.endFrame).toBe(185929);
+    const spec = resolveSegment(ROOT, "radio-broadcast", 193217);
+    expect(spec.endFrame).toBe(193217);
     expect(spec.suffix.length).toBe(23);
   });
 
@@ -131,21 +131,21 @@ describe("PSP segment resolution", () => {
 
 describe("PSP segment terminal pin", () => {
   test("the radio-broadcast suffix replay reaches the J3 terminal pin", () => {
-    // Pin the J3 terminal at 185929 with an explicit end (the default end is
+    // Pin the J3 terminal at 193217 with an explicit end (the default end is
     // now the J4 chapter kernel-briefing).
-    const spec = resolveSegment(ROOT, "radio-broadcast", 185929);
+    const spec = resolveSegment(ROOT, "radio-broadcast", 193217);
     const pin = replaySuffixTerminal(ROOT, spec);
     expect(pin.terminalSha256)
-      .toBe("9229662b9782b9d12f12d9b93b51392bf395aa3bd2389e71679fe425a12c4cf7");
+      .toBe("a388673c6afd4160128f8d4c41c77e6d04212abc173f60fdf2f8d4bcdf9f1239");
     expect(pin.endMap).toBe("spyder_radiotower");
     expect(pin.endPosition).toEqual([9, 5]);
-    expect(pin.endFrame).toBe(185929);
+    expect(pin.endFrame).toBe(193217);
   });
 
   test("a generated envelope at a safe point also reaches the full-mainline terminal", () => {
     // A safe point mid-City-Park (frame 60000 is on spyder_route3); replay
     // from it to the tape end must reach the same full-mainline terminal
-    // (the J4 Kernel-quest terminal at 199316).
+    // (the J4 Kernel-quest terminal at 206816).
     const env = generateEnvelope(ROOT, 60000, { id: "test-f60000", write: false });
     expect(env.frame).toBeGreaterThanOrEqual(60000);
     expect(env.map).toBe("spyder_route3");
@@ -159,17 +159,17 @@ describe("PSP segment terminal pin", () => {
     };
     const pin = replaySuffixTerminal(ROOT, spec);
     expect(pin.terminalSha256)
-      .toBe("a8f5e3df82fb8232716953e5609254c12bd26054661e92fab2cc14031336f23c");
+      .toBe("26032277d9391a611298f2367d752374d7bf6a7a8dfb9966fbc7399ef017d4e2");
     expect(pin.endMap).toBe("spyder_datacenter");
     expect(pin.endPosition).toEqual([7, 4]);
-    expect(pin.endFrame).toBe(199316);
+    expect(pin.endFrame).toBe(206816);
   }, 60_000);
 });
 
 describe("PSP segment receipt/profile verification", () => {
   test("a matching PSP terminal passes and reports the terminal", () => {
-    const { receipt, buildId } = receiptFor("radio-broadcast", 185929);
-    const spec = resolveSegment(ROOT, "radio-broadcast", 185929);
+    const { receipt, buildId } = receiptFor("radio-broadcast", 193217);
+    const spec = resolveSegment(ROOT, "radio-broadcast", 193217);
     const terminal = replaySuffixState(ROOT, spec);
     const result = verifySegmentProfile(
       ROOT,
@@ -183,8 +183,8 @@ describe("PSP segment receipt/profile verification", () => {
   });
 
   test("a diverged PSP terminal is rejected", () => {
-    const { receipt, buildId } = receiptFor("radio-broadcast", 185929);
-    const spec = resolveSegment(ROOT, "radio-broadcast", 185929);
+    const { receipt, buildId } = receiptFor("radio-broadcast", 193217);
+    const spec = resolveSegment(ROOT, "radio-broadcast", 193217);
     const terminal = replaySuffixState(ROOT, spec);
     const wrong = { ...terminal, mapId: "spyder_paper_town" } as SessionState;
     expect(() =>
@@ -193,8 +193,8 @@ describe("PSP segment receipt/profile verification", () => {
   });
 
   test("a wrong segment length is rejected", () => {
-    const { receipt, buildId } = receiptFor("radio-broadcast", 185929);
-    const spec = resolveSegment(ROOT, "radio-broadcast", 185929);
+    const { receipt, buildId } = receiptFor("radio-broadcast", 193217);
+    const spec = resolveSegment(ROOT, "radio-broadcast", 193217);
     const terminal = replaySuffixState(ROOT, spec);
     expect(() =>
       verifySegmentProfile(ROOT, receipt, buildId, profileFor(buildId, "radio-broadcast", terminal, 22)),
@@ -202,8 +202,8 @@ describe("PSP segment receipt/profile verification", () => {
   });
 
   test("a stale receipt pin is rejected", () => {
-    const { receipt, buildId } = receiptFor("radio-broadcast", 185929);
-    const spec = resolveSegment(ROOT, "radio-broadcast", 185929);
+    const { receipt, buildId } = receiptFor("radio-broadcast", 193217);
+    const spec = resolveSegment(ROOT, "radio-broadcast", 193217);
     const terminal = replaySuffixState(ROOT, spec);
     const stale = { ...receipt, terminalSha256: "0".repeat(64) };
     expect(() =>
@@ -212,8 +212,8 @@ describe("PSP segment receipt/profile verification", () => {
   });
 
   test("a profile from a different segment is rejected", () => {
-    const { receipt, buildId } = receiptFor("radio-broadcast", 185929);
-    const spec = resolveSegment(ROOT, "radio-broadcast", 185929);
+    const { receipt, buildId } = receiptFor("radio-broadcast", 193217);
+    const spec = resolveSegment(ROOT, "radio-broadcast", 193217);
     const terminal = replaySuffixState(ROOT, spec);
     expect(() =>
       verifySegmentProfile(ROOT, receipt, buildId, profileFor(buildId, "paper-town", terminal, 23)),
@@ -221,8 +221,8 @@ describe("PSP segment receipt/profile verification", () => {
   });
 
   test("a profile with the wrong build id is rejected", () => {
-    const { receipt, buildId } = receiptFor("radio-broadcast", 185929);
-    const spec = resolveSegment(ROOT, "radio-broadcast", 185929);
+    const { receipt, buildId } = receiptFor("radio-broadcast", 193217);
+    const spec = resolveSegment(ROOT, "radio-broadcast", 193217);
     const terminal = replaySuffixState(ROOT, spec);
     expect(() =>
       verifySegmentProfile(ROOT, receipt, "deadbeef", profileFor(buildId, "radio-broadcast", terminal, 23)),
@@ -230,7 +230,7 @@ describe("PSP segment receipt/profile verification", () => {
   });
 
   test("a profile without a terminal is rejected", () => {
-    const { receipt, buildId } = receiptFor("radio-broadcast", 185929);
+    const { receipt, buildId } = receiptFor("radio-broadcast", 193217);
     expect(() =>
       verifySegmentProfile(ROOT, receipt, buildId, [
         { kind: "session", buildId, segment: "radio-broadcast" },
@@ -240,8 +240,8 @@ describe("PSP segment receipt/profile verification", () => {
   });
 
   test("a receipt whose tape hash does not match the committed tape is rejected", () => {
-    const { receipt, buildId } = receiptFor("radio-broadcast", 185929);
-    const spec = resolveSegment(ROOT, "radio-broadcast", 185929);
+    const { receipt, buildId } = receiptFor("radio-broadcast", 193217);
+    const spec = resolveSegment(ROOT, "radio-broadcast", 193217);
     const terminal = replaySuffixState(ROOT, spec);
     const stale = { ...receipt, tapeSha256: "0".repeat(64) };
     expect(() =>
@@ -255,8 +255,8 @@ describe("PSP segment receipt invariants", () => {
   // checked, or a tampered receipt sails through. These pin each invariant.
 
   test("receipt frames must equal endFrame - startFrame", () => {
-    const { receipt, buildId } = receiptFor("radio-broadcast", 185929);
-    const spec = resolveSegment(ROOT, "radio-broadcast", 185929);
+    const { receipt, buildId } = receiptFor("radio-broadcast", 193217);
+    const spec = resolveSegment(ROOT, "radio-broadcast", 193217);
     const terminal = replaySuffixState(ROOT, spec);
     const tampered = { ...receipt, frames: 22 };
     expect(() =>
@@ -265,8 +265,8 @@ describe("PSP segment receipt invariants", () => {
   });
 
   test("receipt terminalFrame must equal envelope timelineFrame + frames", () => {
-    const { receipt, buildId } = receiptFor("radio-broadcast", 185929);
-    const spec = resolveSegment(ROOT, "radio-broadcast", 185929);
+    const { receipt, buildId } = receiptFor("radio-broadcast", 193217);
+    const spec = resolveSegment(ROOT, "radio-broadcast", 193217);
     const terminal = replaySuffixState(ROOT, spec);
     const tampered = { ...receipt, terminalFrame: receipt.terminalFrame - 1 };
     expect(() =>
@@ -275,8 +275,8 @@ describe("PSP segment receipt invariants", () => {
   });
 
   test("a receipt with invalid segment bounds is rejected", () => {
-    const { receipt, buildId } = receiptFor("radio-broadcast", 185929);
-    const spec = resolveSegment(ROOT, "radio-broadcast", 185929);
+    const { receipt, buildId } = receiptFor("radio-broadcast", 193217);
+    const spec = resolveSegment(ROOT, "radio-broadcast", 193217);
     const terminal = replaySuffixState(ROOT, spec);
     const tampered = {
       ...receipt,
@@ -290,8 +290,8 @@ describe("PSP segment receipt invariants", () => {
   });
 
   test("receipt endMap must match the fresh replay", () => {
-    const { receipt, buildId } = receiptFor("radio-broadcast", 185929);
-    const spec = resolveSegment(ROOT, "radio-broadcast", 185929);
+    const { receipt, buildId } = receiptFor("radio-broadcast", 193217);
+    const spec = resolveSegment(ROOT, "radio-broadcast", 193217);
     const terminal = replaySuffixState(ROOT, spec);
     const tampered = { ...receipt, endMap: "spyder_paper_town" };
     expect(() =>
@@ -302,8 +302,8 @@ describe("PSP segment receipt invariants", () => {
   test("receipt endPosition x must match the fresh replay", () => {
     // A tampered x with the real y must be rejected. Deleting the x
     // comparison in verifySegmentProfile must turn this test red.
-    const { receipt, buildId } = receiptFor("radio-broadcast", 185929);
-    const spec = resolveSegment(ROOT, "radio-broadcast", 185929);
+    const { receipt, buildId } = receiptFor("radio-broadcast", 193217);
+    const spec = resolveSegment(ROOT, "radio-broadcast", 193217);
     const terminal = replaySuffixState(ROOT, spec);
     const tampered = { ...receipt, endPosition: [0, receipt.endPosition[1]] as [number, number] };
     expect(() =>
@@ -315,8 +315,8 @@ describe("PSP segment receipt invariants", () => {
     // A tampered y with the real x must be rejected. The round-3 review's
     // surviving mutation deleted the y comparison and stayed green; this
     // fixture pins the y component on its own.
-    const { receipt, buildId } = receiptFor("radio-broadcast", 185929);
-    const spec = resolveSegment(ROOT, "radio-broadcast", 185929);
+    const { receipt, buildId } = receiptFor("radio-broadcast", 193217);
+    const spec = resolveSegment(ROOT, "radio-broadcast", 193217);
     const terminal = replaySuffixState(ROOT, spec);
     const tampered = { ...receipt, endPosition: [receipt.endPosition[0], 0] as [number, number] };
     expect(() =>
@@ -325,8 +325,8 @@ describe("PSP segment receipt invariants", () => {
   });
 
   test("receipt envelope frame must match startFrame", () => {
-    const { receipt, buildId } = receiptFor("radio-broadcast", 185929);
-    const spec = resolveSegment(ROOT, "radio-broadcast", 185929);
+    const { receipt, buildId } = receiptFor("radio-broadcast", 193217);
+    const spec = resolveSegment(ROOT, "radio-broadcast", 193217);
     const terminal = replaySuffixState(ROOT, spec);
     const tampered = {
       ...receipt,
@@ -342,8 +342,8 @@ describe("PSP segment receipt invariants", () => {
     // comparison disabled, a terminal whose map/position/frame still match
     // was accepted. This fixture differs only in a story variable, so the
     // SHA comparison is the ONLY check that can catch it.
-    const { receipt, buildId } = receiptFor("radio-broadcast", 185929);
-    const spec = resolveSegment(ROOT, "radio-broadcast", 185929);
+    const { receipt, buildId } = receiptFor("radio-broadcast", 193217);
+    const spec = resolveSegment(ROOT, "radio-broadcast", 193217);
     const terminal = replaySuffixState(ROOT, spec);
     const diverged = {
       ...terminal,
@@ -401,7 +401,7 @@ describe("PSP segment wrapper baking (no SDK)", () => {
     const spec = resolveSegment(ROOT, "radio-broadcast");
     const { bundle } = bakeSegmentBundle("B", spec, FIXED_INITIAL_CIVIL_TIME);
     expect(bundle).toContain(`__pocketTuxemonBootFrame=${spec.envelope.timelineFrame}`);
-    expect(spec.envelope.timelineFrame).toBe(185906);
+    expect(spec.envelope.timelineFrame).toBe(193194);
   });
 
   test("the terminal is logged at the tape end and __pspExit fires one frame later", () => {

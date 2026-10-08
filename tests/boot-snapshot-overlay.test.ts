@@ -7,7 +7,6 @@
 
 import { afterEach, describe, expect, test } from "bun:test";
 
-import { createTuxemonSessionOptions } from "../battle/game.ts";
 import { canonicalJson } from "../vendor/pocket-rpgkit/src/engine/save.ts";
 import {
   createSession,
@@ -19,6 +18,7 @@ import {
 import type { GameViewSessionHost } from "../vendor/pocket-rpgkit/src/ui/demo-contract.ts";
 import { createBootSnapshotOverlay } from "../ui/boot-snapshot-overlay.tsx";
 import { readInlineProject } from "../tools/generated-project.ts";
+import { mainlineSessionOptions } from "../tools/mainline-session.ts";
 import {
   loadChapters,
   loadMainlineTape,
@@ -36,7 +36,7 @@ function makeHost(): { host: GameViewSessionHost; session: Session; getState: ()
   const session = createSession(
     project,
     60,
-    createTuxemonSessionOptions(project, worldTraversal),
+    mainlineSessionOptions(project, worldTraversal),
   );
   let state = startSession(project, session);
   const host: GameViewSessionHost = {
@@ -136,7 +136,7 @@ describe("boot-snapshot overlay", () => {
     const runtime = createBootSnapshotOverlay().create(host);
     runtime.step(0, 0);
 
-    const spec = resolveSegment(ROOT, "radio-broadcast", 185929);
+    const spec = resolveSegment(ROOT, "radio-broadcast", 193217);
     let state = getState();
     let previous = radio.held >>> 0;
     for (const mask of spec.suffix) {
@@ -144,10 +144,9 @@ describe("boot-snapshot overlay", () => {
       previous = mask;
     }
     // The terminal hash carries the cathedral bill's authored interest/
-    // late-fee/share metadata, and the frame shifted by the spectator
-    // battle presentation frames (185181 -> 185929).
+    // late-fee/share metadata and the additional live-movement encounters.
     expect(sha256(canonicalJson(state)))
-      .toBe("9229662b9782b9d12f12d9b93b51392bf395aa3bd2389e71679fe425a12c4cf7");
-    expect(state.frame).toBe(185929);
+      .toBe("a388673c6afd4160128f8d4c41c77e6d04212abc173f60fdf2f8d4bcdf9f1239");
+    expect(state.frame).toBe(193217);
   });
 });

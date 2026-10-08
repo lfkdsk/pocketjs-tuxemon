@@ -31,20 +31,8 @@ import {
   type SessionState,
 } from "../vendor/pocket-rpgkit/src/engine/session.ts";
 import type { WorldTraversalMode } from "../vendor/pocket-rpgkit/src/engine/types.ts";
-import { createDialogPaginator } from "../vendor/pocket-rpgkit/src/ui/dialog-pages.ts";
-import { createFontMeasure } from "../vendor/pocket-rpgkit/tools/lib/font-measure.ts";
 import { readInlineProject } from "./generated-project.ts";
-
-// The PSP build paginates long dialogues through the kit's dialog paginator
-// (GameView passes createDialogPaginator with the baked-font measurer). The
-// desktop pin must paginate identically, or a multi-page dialogue takes a
-// different number of confirms and the replay diverges (random encounters
-// fire at different steps). This builds the same paginator with a build-time
-// measurer that matches the baked atlas (Inter, 12 px, the kit's text-xs slot).
-const desktopPaginator = createDialogPaginator(
-  { viewportWidth: 480, rim: true },
-  createFontMeasure({ px: 12 }),
-);
+import { mainlineSessionOptions } from "./mainline-session.ts";
 
 export const ROOT = resolve(import.meta.dir, "..");
 export const CHAPTERS_PATH = join(ROOT, "data/chapters.json");
@@ -78,9 +66,9 @@ export interface SegmentSpec {
   endFrame: number;
   envelope: SegmentEnvelope;
   suffix: number[];
-  /** Replay with the dialog paginator (the PSP/GameView path). The default is
-   *  false: the desktop mainline replays without one, and a generated envelope
-   *  must reach the same terminal as that continuous replay. */
+  /** Replay with the production dialog paginator (the PSP/GameView and
+   *  canonical mainline path). Defaults to true; false is retained only for
+   *  callers that deliberately exercise the legacy unpaginated path. */
   paginate?: boolean;
 }
 
@@ -302,9 +290,9 @@ export function replaySuffixState(root: string, spec: SegmentSpec): SessionState
   const session = createSession(
     project,
     60,
-    spec.paginate
-      ? { ...createTuxemonSessionOptions(project, worldTraversal), paginateText: desktopPaginator }
-      : createTuxemonSessionOptions(project, worldTraversal),
+    spec.paginate === false
+      ? createTuxemonSessionOptions(project, worldTraversal)
+      : mainlineSessionOptions(project, worldTraversal),
   );
   const decoded = decodeEnvelopeText(spec.envelope.snapshot);
   let state = restoreSessionSnapshot(session, decoded);
@@ -510,7 +498,7 @@ export function generateEnvelope(
   const session = createSession(
     project,
     60,
-    createTuxemonSessionOptions(project, worldTraversal),
+    mainlineSessionOptions(project, worldTraversal),
   );
   let state = startSession(project, session);
   let previous = 0;
@@ -581,7 +569,7 @@ export function generateEnvelopes(
   const session = createSession(
     project,
     60,
-    createTuxemonSessionOptions(project, worldTraversal),
+    mainlineSessionOptions(project, worldTraversal),
   );
   const maxScan = options.maxScan ?? 3600;
   const sorted = [...targets].sort((a, b) => a.frame - b.frame);

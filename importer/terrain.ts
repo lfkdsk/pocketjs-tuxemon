@@ -874,6 +874,115 @@ export type TerrainSurfaceLabels = Readonly<
   Record<string, Readonly<Record<string, readonly number[]>>>
 >;
 
+/** The final MapDef terrain opinions needed to prove a direct edge crossing.
+ * Codes use the same packed dirBlock/entry/exit bits as `passageSheet`; solid
+ * cells are the authoritative `map.passage` blocks after labelled dynamic
+ * bodies have been left to events. */
+export interface TerrainPassageProof {
+  width: number;
+  height: number;
+  codes: readonly number[];
+  solid: ReadonlySet<number>;
+}
+
+function proofIndex(
+  proof: Readonly<TerrainPassageProof>,
+  x: number,
+  y: number,
+): number | null {
+  return x < 0 || y < 0 || x >= proof.width || y >= proof.height
+    ? null
+    : y * proof.width + x;
+}
+
+/** Mirrors engine `cellBlocksExit` for a terrain-only MapDef. */
+export function terrainCellBlocksExit(
+  proof: Readonly<TerrainPassageProof>,
+  x: number,
+  y: number,
+  exit: Dir,
+): boolean {
+  const index = proofIndex(proof, x, y);
+  if (index === null) return false;
+  const code = proof.codes[index] ?? 0;
+  return ((code & 0xf) | ((code >> 8) & 0xf)) & DIR_BIT[exit] ? true : false;
+}
+
+/** Mirrors engine `canEnter` with an explicit entry edge. */
+export function terrainCellCanEnter(
+  proof: Readonly<TerrainPassageProof>,
+  x: number,
+  y: number,
+  entry: Dir,
+): boolean {
+  const index = proofIndex(proof, x, y);
+  if (index === null || proof.solid.has(index)) return false;
+  const code = proof.codes[index] ?? 0;
+  return ((((code & 0xf) | ((code >> 4) & 0xf)) & DIR_BIT[entry]) === 0);
+}
+
+/** Mirrors engine `canStepFrom` for one adjacent terrain step. */
+export function terrainCanStep(
+  proof: Readonly<TerrainPassageProof>,
+  x: number,
+  y: number,
+  direction: Dir,
+): boolean {
+  return !terrainCellBlocksExit(proof, x, y, direction) && terrainCellCanEnter(
+    proof,
+    x + DX[direction],
+    y + DY[direction],
+    OPPOSITE[direction],
+  );
+}
+
+/** Parse just enough TMX/TSX collision data to reproduce the final terrain
+ * MapDef's passage table. Unlike the PNG cooker this performs no image,
+ * chunk, compression or filesystem output work. */
+export function importTerrainPassageProofs(
+  mapIds: readonly string[],
+  sourceRoot = process.env.TUXEMON_SRC ?? DEFAULT_TUXEMON_SRC,
+): Readonly<Record<string, TerrainPassageProof>> {
+  const mapsDir = join(normalize(sourceRoot), "mods/tuxemon/maps");
+  const templates = new Map<string, TileTemplate>();
+  const result: Record<string, TerrainPassageProof> = {};
+  for (const id of [...new Set(mapIds)].sort()) {
+    const path = join(mapsDir, `${id}.tmx`);
+    if (!existsSync(path)) throw new Error(`missing TMX map: ${id}`);
+    const root = readXml(path);
+    if (root.name !== "map") throw new Error(`${path}: expected <map>`);
+    const width = integerAttr(root, "width");
+    const height = integerAttr(root, "height");
+    const tilesets = parseMapTilesets(root, mapsDir, templates);
+    const layers = mapLayers(root, width, height);
+    const collision = tileCollision(
+      root,
+      join(mapsDir, `${id}.yaml`),
+      layers,
+      tilesets,
+      width,
+      height,
+    );
+    const dynamicBodyCells = new Set(Object.values(collision.labels).flat());
+    const compiled = compilePassage(
+      collision.cells,
+      collision.lineMasks,
+      width,
+      height,
+      dynamicBodyCells,
+    );
+    result[id] = {
+      width,
+      height,
+      codes: compiled.ground.map((tile) =>
+        tile === null ? 0 : Number(tile.slice(tile.lastIndexOf(".") + 1))
+      ),
+      solid: new Set(compiled.passage.map(([index]) => index)),
+    };
+  }
+  return result;
+}
+
 /** Read only Tuxemon's per-cell surface-key membership. This shares the
  * exact visible-layer/tileset rules with the terrain cooker but skips every
  * PNG, chunk, and pak operation, so standalone importer tests can lower

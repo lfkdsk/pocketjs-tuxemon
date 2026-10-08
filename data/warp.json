@@ -719,8 +719,8 @@
    "id": "route3",
    "name": "Route 3",
    "x": 30,
-   "y": 39,
-   "from": "transfer"
+   "y": 38,
+   "from": "fallback"
   },
   {
    "id": "route4",

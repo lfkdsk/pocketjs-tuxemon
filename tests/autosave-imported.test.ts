@@ -27,12 +27,12 @@ const HELD = 0x2000;
 const DONE = "test.autosave.continued";
 
 const CASES = [
-  { map: "spyder_omnichannel1", event: "e008_battle_enforcer_r004", afterVariable: "v.save3" },
-  { map: "spyder_paper_town", event: "e012_stop_r005", afterVariable: "v.save1" },
+  { map: "spyder_omnichannel1", event: "e008_battle_enforcer_r003", afterVariable: "v.save3" },
+  { map: "spyder_paper_town", event: "e012_stop_r003", afterVariable: "v.save1" },
   { map: "spyder_route2", event: "e037_billie_encounter_win" },
   { map: "spyder_route3", event: "npc_spyder_route3_zoolander" },
-  { map: "spyder_route6", event: "e036_talk_richard_r041" },
-  { map: "spyder_routec", event: "e034_autosave_dragon_r037", afterVariable: "v.save2" },
+  { map: "spyder_route6", event: "e036_talk_richard_r037" },
+  { map: "spyder_routec", event: "e034_autosave_dragon_r035", afterVariable: "v.save2" },
 ] as const;
 
 interface LocatedAutosave {

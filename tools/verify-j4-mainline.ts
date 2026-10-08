@@ -80,7 +80,8 @@ const REQUIRED_STEPS = [
   "kernel-defeated",
 ] as const;
 const REQUIRED_OPPONENTS: Readonly<Record<string, number>> = {
-  "wild:cataspike": 1,
+  "wild:pythwire": 1,
+  "wild:sockeserp": 1,
   spyder_routee_calliope: 1,
   spyder_routee_aiolos: 1,
   spyder_routeb_electra: 1,
@@ -391,11 +392,11 @@ function counts(rows: readonly Gb6BattleCheckpoint[]): Record<string, number> {
 function validateBattles(label: string, replayed: ReplayResult, journey: J4JourneyResult): void {
   expect(label + " battle trace changed",
     canonicalJson(replayed.battles) === canonicalJson(journey.battles));
-  expect(label + " battle count changed", replayed.battles.length === 14);
+  expect(label + " battle count changed", replayed.battles.length === 15);
   expect(label + " trainer count changed",
     replayed.battles.filter((battle) => battle.kind === "trainer").length === 12);
   expect(label + " wild count changed",
-    replayed.battles.filter((battle) => battle.kind === "wild").length === 2);
+    replayed.battles.filter((battle) => battle.kind === "wild").length === 3);
   expect(label + " battle outcome changed",
     replayed.battles.every((battle) => battle.outcome === "won"));
   expect(label + " opponent list changed",

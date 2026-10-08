@@ -72,6 +72,7 @@
     "goldens:j2": "bun tools/update-j2-goldens.ts",
     "goldens:j3": "bun tools/update-j3-goldens.ts",
     "goldens:j4": "bun tools/update-j4-goldens.ts",
+    "goldens:npc-movement": "bun tools/update-npc-movement-goldens.ts",
     "goldens:preview-seam": "bun tools/update-preview-seam-goldens.ts",
     "goldens:world": "bun tools/update-world-seam-goldens.ts",
     "goldens:daylight": "bun tools/update-daylight-goldens.ts",

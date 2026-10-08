@@ -27,7 +27,10 @@ import {
   outdoorWorldPortalId,
   type WorldImportReport,
 } from "./world.ts";
-import type { OutdoorWorldIndex } from "./world-schema.ts";
+import type {
+  OutdoorWorldIndex,
+  WorldSeamOpening,
+} from "./world-schema.ts";
 import { projectOutdoorWorldLayout } from "./world-layout.ts";
 import {
   DAYLIGHT_STAGE_VARIABLE,
@@ -37,7 +40,11 @@ import {
   DAYLIGHT_TWEEN_SECONDS,
 } from "../battle/daylight.ts";
 import {
+  importTerrainPassageProofs,
   importTerrainSurfaceLabels,
+  terrainCanStep,
+  terrainCellBlocksExit,
+  terrainCellCanEnter,
   type TerrainSurfaceLabels,
 } from "./terrain.ts";
 import {
@@ -77,6 +84,10 @@ import type {
   TextBoxLayout,
   TextBoxPosition,
   WanderBounds,
+  WorldLayout,
+  WorldOpening,
+  WorldPlacement,
+  WorldSide,
 } from "../vendor/pocket-rpgkit/src/engine/types.ts";
 
 export const DEFAULT_MAPS = ["spyder_bedroom", "spyder_paper_scoop", "spyder_downstairs", "spyder_paper_town"];
@@ -1231,18 +1242,26 @@ function clauses(
     ...(reason ? { reason } : {}),
   }];
   if (TRIGGER_CONDS.has(c.type)) {
+    const repairedFacing = c.type === "char_facing" ? sourceDirection(m.slug, c.args[1]) : undefined;
     if (c.type === "char_facing" && options.facing && c.op === "is" &&
-        c.args[0] === "player" && DIRS.has(c.args[1]!)) {
-      noteCondition(c, `${c.op} ${c.type}`, "T1", "K1 facing page condition");
-      return [{ k: "facing", dir: c.args[1] as Dir }];
+        c.args[0] === "player" && repairedFacing) {
+      noteCondition(
+        c,
+        `${c.op} ${c.type}`,
+        c.args[1] === repairedFacing ? "T1" : "T1-lowered",
+        c.args[1] === repairedFacing
+          ? "K1 facing page condition"
+          : "pinned Route 3 source typo bottom repaired to down",
+      );
+      return [{ k: "facing", dir: repairedFacing }];
     }
     if (c.type === "char_facing" && c.op === "is" && c.args[0] === "player" &&
-        DIRS.has(c.args[1]!)) {
+        repairedFacing) {
       noteCondition(c, `${c.op} ${c.type}`, "T2-dropped", "trigger predicate unavailable in v1");
       return null;
     }
     if (c.type === "char_facing") {
-      const reason = c.args[0] === "player" && !DIRS.has(c.args[1]!)
+      const reason = c.args[0] === "player" && !repairedFacing
         ? `source direction '${c.args[1] ?? ""}' is not up/down/left/right and can never equal Tuxemon's Direction`
         : "live facing for this character/operator is unavailable in v1";
       noteCondition(c, `${c.op} ${c.type}`, "T2-dropped", reason);
@@ -1319,12 +1338,13 @@ function clauses(
     case "check_char_parameter": {
       const [character, parameter, value] = a;
       if (character === "player" && parameter === "moving") {
-        // Upstream's map-wide random-encounter guard is true while the player
-        // has velocity. triggerClass lowers it to one deterministic step
-        // trigger on the authored event cells.
-        noteCondition(c, `${c.op} ${c.type}`, "T1-lowered",
-          "moving guard lowered to a step trigger (map-wide in upstream)");
-        return null;
+        noteCondition(c, `${c.op} ${c.type}`, "T1",
+          "native live playerMoving condition (map-wide at reference-tick start)");
+        return [{
+          k: "native",
+          condition: { kind: "playerMoving" },
+          negate: not,
+        }];
       }
       if (options.battle && character === "player" && parameter === "name" && value !== undefined) {
         noteCondition(c, `${c.op} check_char_parameter(name)`, "T1", "live playerName exact comparison");
@@ -1334,9 +1354,7 @@ function clauses(
           args: { name: value, negate: not },
         }];
       }
-      const reason = character === "player" && parameter === "moving"
-        ? "the extension condition context has no live player movement state"
-        : `character parameter '${parameter ?? ""}' is unavailable to map conditions`;
+      const reason = `character parameter '${parameter ?? ""}' is unavailable to map conditions`;
       noteCondition(c, `${c.op} check_char_parameter`, "T2-dropped", reason);
       return K(false, `${c.op} check_char_parameter: ${reason}`);
     }
@@ -1887,6 +1905,32 @@ function frequencyGrade(seconds: number): MoveFrequency {
   return Math.max(1, Math.min(5, grade)) as MoveFrequency;
 }
 
+/** Tuxemon's WanderBehavior stores seconds directly. The action treats an
+ * omitted or numeric zero as its 1-second default; unlike its stale docstring,
+ * the implementation does not clamp other positive values. */
+function wanderIntervalTicks(raw: string | undefined): number {
+  const parsed = numeric(raw, 1);
+  const seconds = parsed === 0 ? 1 : parsed;
+  return Math.max(1, Math.round(seconds * 60));
+}
+
+/** Validate direct placement at import time. Upstream raises instead of
+ * silently clamping an invalid tile, so bad source content must fail the
+ * reproducible import too. */
+export function validateCharPosition(
+  width: number,
+  height: number,
+  rawX: string | undefined,
+  rawY: string | undefined,
+): { x: number; y: number } {
+  const x = Number(rawX);
+  const y = Number(rawY);
+  if (!Number.isInteger(x) || !Number.isInteger(y) || x < 0 || y < 0 || x >= width || y >= height) {
+    throw new Error(`char_position (${rawX ?? ""},${rawY ?? ""}) is outside the ${width}x${height} map`);
+  }
+  return { x, y };
+}
+
 /** Numeric monster fields get_player_monster filters with an operator. */
 const MONSTER_NUMERIC_FIELDS = new Set([
   "level", "weight", "height", "max_hp", "current_hp",
@@ -1914,6 +1958,14 @@ function partyFilter(g: readonly string[]): { field: string; value: string | num
 // actions -> commands
 
 const DIRS = new Set(["up", "down", "left", "right"]);
+/** The pinned source has five adjacent Route 3 edge events whose only typo is
+ * `bottom`; Tuxemon documents/implements `down`, so those events are otherwise
+ * unreachable upstream. Keep the repair scoped to that source map instead of
+ * silently accepting `bottom` as a new direction in unrelated/future data. */
+const sourceDirection = (mapId: string, value: string | undefined): Dir | undefined =>
+  value === "bottom" && mapId === "route3"
+    ? "down"
+    : DIRS.has(value ?? "") ? value as Dir : undefined;
 const RACE_APPEARANCE_SPRITES = new Set([
   "adventurer",
   "adventurerblack",
@@ -2761,7 +2813,8 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         const target = who === "player"
           ? "player" as const
           : isSelf(who) ? "this" as const : { event: `npc_${slug(who)}` };
-        if (!DIRS.has(dir)) {
+        const repairedDirection = sourceDirection(ctx.m.slug, dir);
+        if (!repairedDirection) {
           if (ctx.options.routes) {
             noteAction(a, "char_face(toward char)", "T1", "K2 arbitrary-target turn-toward route");
             const step: FutureMoveStep = dir === "player"
@@ -2774,11 +2827,18 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
           break;
         }
         if (who === "player" || isSelf(who)) {
-          noteAction(a, a.type, "T1-lowered", `moveRoute ${who === "player" ? "player" : "this"} face`);
-          out.push({ op: "moveRoute", target: who === "player" ? "player" : "this", wait: false, route: { steps: [FACE[dir]!], repeat: false, skippable: true } });
+          noteAction(
+            a,
+            a.type,
+            "T1-lowered",
+            dir === repairedDirection
+              ? `moveRoute ${who === "player" ? "player" : "this"} face`
+              : "pinned Route 3 source typo bottom repaired to down and folded into facing",
+          );
+          out.push({ op: "moveRoute", target: who === "player" ? "player" : "this", wait: false, route: { steps: [FACE[repairedDirection]!], repeat: false, skippable: true } });
         } else if (ctx.options.routes) {
           noteAction(a, a.type, "T1", "K2 moveRoute targets an arbitrary event");
-          out.push(command({ op: "moveRoute", target, wait: false, route: { steps: [FACE[dir]!], repeat: false, skippable: true } }));
+          out.push(command({ op: "moveRoute", target, wait: false, route: { steps: [FACE[repairedDirection]!], repeat: false, skippable: true } }));
         } else noteAction(a, "char_face(other npc)", "T2-dropped", "moveRoute target must be an event id");
         break;
       }
@@ -2810,9 +2870,19 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         let dir: Dir | "keep" = "keep";
         const hoisted: Rule[] = [];
         for (const b of acts.slice(i + 1)) {
-          if (b.type === "char_face" && b.args[0] === "player" && DIRS.has(b.args[1]!)) {
-            dir = b.args[1] as Dir;
-            noteAction(b, "char_face(after teleport)", "T1", "folded into transfer direction");
+          const trailingDirection = b.type === "char_face"
+            ? sourceDirection(ctx.m.slug, b.args[1])
+            : undefined;
+          if (b.type === "char_face" && b.args[0] === "player" && trailingDirection) {
+            dir = trailingDirection;
+            noteAction(
+              b,
+              "char_face(after teleport)",
+              b.args[1] === trailingDirection ? "T1" : "T1-lowered",
+              b.args[1] === trailingDirection
+                ? "folded into transfer direction"
+                : "pinned Route 3 source typo bottom repaired to down and folded into transfer direction",
+            );
           }
           else if (INSTANT.has(b.type)) hoisted.push(b);
           else noteAction(b, `${b.type}(after teleport)`, "T4-dropped", "runs on the old map during the fade");
@@ -3152,16 +3222,13 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
           break;
         }
         const who = g[0]!;
-        // Upstream: `self.frequency or DEFAULT_FREQUENCY` (None or 0 -> 1.0),
-        // clipped to [0.5, 5] by the action contract.
-        const freq = Math.max(0.5, Math.min(5, numeric(g[1], 1)));
-        const control: MoveControl = { kind: "wander", frequency: frequencyGrade(freq) };
+        const control: MoveControl = { kind: "wander", intervalTicks: wanderIntervalTicks(g[1]) };
         const [tx, ty, bx, by] = [g[2], g[3], g[4], g[5]].map((v) => (v === undefined || v === "" ? NaN : Number(v)));
         if ([tx, ty, bx, by].every(Number.isFinite) && bx >= tx && by >= ty) {
           const bounds: WanderBounds = { x: tx, y: ty, width: bx - tx + 1, height: by - ty + 1 };
           control.bounds = bounds;
         }
-        noteAction(a, a.type, "T1-lowered", "KM1 moveControl wander (seeded RNG; seconds -> nearest MV frequency grade)");
+        noteAction(a, a.type, "T1", "exact 60 Hz wander interval, bounds, observation/modal holds, and seeded RNG");
         out.push(command({ op: "moveControl", target: charTarget(who, isSelf(who)), control }));
         break;
       }
@@ -3175,8 +3242,8 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
           noteAction(a, "char_speed(invalid)", "T2-dropped", `moverate ${g[1]} is outside the upstream (0, 20) range`);
           break;
         }
-        noteAction(a, a.type, "T1-lowered", "KM1 moveControl speed (tiles/sec -> nearest MV exponential grade)");
-        out.push(command({ op: "moveControl", target: charTarget(g[0]!, isSelf(g[0])), control: { kind: "speed", value: speedGrade(rate) } }));
+        noteAction(a, a.type, "T1-lowered", "route-scoped speed lifetime; tiles/sec -> nearest MV exponential grade");
+        out.push(command({ op: "moveControl", target: charTarget(g[0]!, isSelf(g[0])), control: { kind: "routeSpeed", value: speedGrade(rate) } }));
         break;
       }
       case "char_run":
@@ -3216,8 +3283,7 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
           noteAction(a, a.type, "T2-dropped", "runtime pathfinding / other-event routes / NPC motion props");
           break;
         }
-        const x = Math.max(0, Math.min(ctx.m.width - 1, Number(g[1])));
-        const y = Math.max(0, Math.min(ctx.m.height - 1, Number(g[2])));
+        const { x, y } = validateCharPosition(ctx.m.width, ctx.m.height, g[1], g[2]);
         // Fold an immediately-following `char_face <same target>,<dir>` into
         // the placement's dir. The kit installs pending routes before it
         // applies placements, and a player placement stops the player route,
@@ -3230,7 +3296,7 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
           noteAction(next, "char_face(after position)", "T1", "folded into placement dir");
           i++;
         }
-        noteAction(a, a.type, "T1-lowered", "place command (out-of-map coordinates are clamped; upstream raises)");
+        noteAction(a, a.type, "T1", "validated in-bounds direct place command");
         out.push(command({ op: "place", target: charTarget(g[0]!, isSelf(g[0])), x, y, ...(dir ? { dir } : {}) }));
         break;
       }
@@ -3786,6 +3852,8 @@ interface NpcAgg {
   wander: boolean;
   /** KM1 wander cadence grade, when a spawn-event char_wander named it. */
   wanderFrequency?: MoveFrequency;
+  /** Source-exact 60 Hz attempt interval for the runtime wander control. */
+  wanderIntervalTicks?: number;
   /** KM1 wander bounds, when a spawn-event char_wander supplied them. */
   wanderBounds?: WanderBounds;
   face?: string;
@@ -3843,10 +3911,11 @@ function convertMap(
    *  them separate preserves every pre-existing region id and keeps their
    *  false pages out of legacy saves made before the Surfboard is acquired. */
   const surfSpatialPages: SpatialPage[] = [];
-  /** Authored cells whose `player,moving,1` guard becomes playerTouch. A Surf
-   *  dismount on the same cell must join that source page's latch/body chain:
-   *  two independent playerTouch events would compete for one step edge. */
-  const movingTouchCells = new Set<string>();
+  /** A map-wide moving guard still has an authored marker cell. If Surf
+   *  dismount and another playerTouch page share that cell, fold dismount
+   *  into the source partition so both bodies observe the same arrival edge.
+   *  The moving guard itself remains an independent parallel page. */
+  const movingGuardMarkerCells = new Set<string>();
   const collisionRegions = readCollisionRegions(join(MAPS_DIR, `${m.slug}.tmx`));
   const economies = new Map<string, string>();
   for (const event of m.events) {
@@ -3951,19 +4020,18 @@ function convertMap(
               const agg = npcOf(a.args[0]!);
               agg.wander = true;
               if (options.moveControl) {
-                // Upstream: `self.frequency or DEFAULT_FREQUENCY` (None or
-                // 0 -> 1.0s), clipped to [0.5, 5]s.
-                const freq = Math.max(0.5, Math.min(5, numeric(a.args[1], 1)));
+                const freq = numeric(a.args[1], 1) || 1;
                 agg.wanderFrequency = frequencyGrade(freq);
+                agg.wanderIntervalTicks = wanderIntervalTicks(a.args[1]);
                 const [tx, ty, bx, by] = [a.args[2], a.args[3], a.args[4], a.args[5]]
                   .map((v) => (v === undefined || v === "" ? NaN : Number(v)));
                 if ([tx, ty, bx, by].every(Number.isFinite) && bx >= tx && by >= ty) {
                   agg.wanderBounds = { x: tx, y: ty, width: bx - tx + 1, height: by - ty + 1 };
                 }
-                const control: MoveControl = { kind: "wander", frequency: agg.wanderFrequency };
+                const control: MoveControl = { kind: "wander", intervalTicks: agg.wanderIntervalTicks };
                 if (agg.wanderBounds) control.bounds = agg.wanderBounds;
                 wanderControls.push({ slug: agg.slug, control });
-                noteAction(a, a.type, "T1-lowered", "KM1 moveControl wander (seeded RNG, dialog-pausing; seconds -> nearest MV frequency grade)");
+                noteAction(a, a.type, "T1", "exact 60 Hz wander interval, bounds, observation/modal holds, and seeded RNG");
               } else {
                 noteAction(a, a.type, "T1-lowered", "NPC page uses random movement; frequency/bounds are omitted");
               }
@@ -4031,6 +4099,12 @@ function convertMap(
           if (x >= 0 && y >= 0 && x < m.width && y < m.height) cells.push([x, y]);
         }
       }
+      if (options.areas && e.conds.some((condition) => condition.op === "is" &&
+        condition.type === "check_char_parameter" &&
+        condition.args[0] === "player" && condition.args[1] === "moving" &&
+        condition.args[2] !== "")) {
+        for (const [x, y] of cells) movingGuardMarkerCells.add(`${x},${y}`);
+      }
 
       if (k.startsWith("touch") || k.startsWith("action")) {
         const trigger = k.startsWith("touch") ? "playerTouch" : "action";
@@ -4041,12 +4115,6 @@ function convertMap(
           continue;
         }
         if (options.areas) {
-          if (e.conds.some((condition) => condition.op === "is" &&
-            condition.type === "check_char_parameter" &&
-            condition.args[0] === "player" && condition.args[1] === "moving" &&
-            condition.args[2] === "1")) {
-            for (const [x, y] of cells) movingTouchCells.add(`${x},${y}`);
-          }
           spatialPages.push({
             id: nextId(e.name),
             name: e.name,
@@ -4077,14 +4145,9 @@ function convertMap(
           continue;
         }
         const base = nextId(e.name);
-        const movingTouch = e.conds.some((condition) => condition.op === "is" &&
-          condition.type === "check_char_parameter" &&
-          condition.args[0] === "player" && condition.args[1] === "moving" &&
-          condition.args[2] === "1");
         cells.forEach(([x, y], i) => {
           const key = `${trigger}|${x},${y}`;
           const list = cellPages.get(key) ?? cellPages.set(key, []).get(key)!;
-          if (movingTouch) movingTouchCells.add(`${x},${y}`);
           list.push({ id: cells.length > 1 ? `${base}_${i}` : base, name: e.name, x, y, trigger, cls: live, cmds });
         });
         note("trigger", k, cells.length > 1 ? "T1-lowered" : "T1", cells.length > 1 ? "area expanded to one event per cell" : trigger);
@@ -4243,15 +4306,11 @@ function convertMap(
     };
     if (options.areas) {
       const contended = landBoundary.filter((index) =>
-        movingTouchCells.has(`${index % m.width},${Math.floor(index / m.width)}`)
+        movingGuardMarkerCells.has(`${index % m.width},${Math.floor(index / m.width)}`)
       );
       const standalone = landBoundary.filter((index) =>
-        !movingTouchCells.has(`${index % m.width},${Math.floor(index / m.width)}`)
+        !movingGuardMarkerCells.has(`${index % m.width},${Math.floor(index / m.width)}`)
       );
-      // Tuxemon samples all matching guards before running their bodies. Fold
-      // a colliding completed-step encounter and Surf dismount into the same
-      // source partition so both run in order from one playerTouch edge. The
-      // remaining Surf cells stay separate to preserve source region IDs.
       if (contended.length) {
         spatialPages.push({
           ...dismount,
@@ -4274,12 +4333,7 @@ function convertMap(
       for (const index of landBoundary) {
         const x = index % m.width;
         const y = Math.floor(index / m.width);
-        const sourcePages = cellPages.get(`playerTouch|${x},${y}`);
-        if (movingTouchCells.has(`${x},${y}`) && sourcePages?.length) {
-          sourcePages.push({ ...dismount, x, y });
-        } else {
-          addCellPage(dismount, x, y);
-        }
+        addCellPage(dismount, x, y);
       }
     }
     note(
@@ -4816,10 +4870,17 @@ export type SeamlessHandoffExclusionReason =
 export interface SeamlessHandoffReport {
   mode: "seamless-v1";
   sourceTransferActions: number;
+  /** Authored openings already coordinate-preserving before repair. */
   topologySafeOpenings: number;
+  /** Fully-safe openings plus one proven aligned lane per partial promotion. */
+  runtimeEligibleOpenings: number;
   enabledTransfers: number;
   enabledPortalIds: string[];
   notEnabledSafePortalIds: string[];
+  partialPromotions: PartialSeamPromotion[];
+  partialSeamlessCells: number;
+  partialLegacyCells: number;
+  fullyLegacyPortalOnlyPortalIds: string[];
   notEnabled: { reason: SeamlessHandoffExclusionReason; count: number }[];
   topologyExcluded: {
     portalOnlyOpenings: number;
@@ -4846,6 +4907,172 @@ export interface TransferError {
   x: number;
   y: number;
   reason: "missing-map" | "out-of-bounds";
+}
+
+export interface PartialSeamPromotion {
+  portalId: string;
+  sourceMap: string;
+  source: { x: number; y: number };
+  targetMap: string;
+  target: { x: number; y: number };
+  /** The one lane already preserved by the authored fixed destination. */
+  reason: "fixed-destination-aligned-lane";
+  sourceCells: number;
+  legacyCells: number;
+}
+
+const SIDE_DIR: Readonly<Record<WorldSide, Dir>> = {
+  south: "down",
+  west: "left",
+  north: "up",
+  east: "right",
+};
+const DIR_STEP: Readonly<Record<Dir, { x: number; y: number }>> = {
+  down: { x: 0, y: 1 },
+  left: { x: -1, y: 0 },
+  up: { x: 0, y: -1 },
+  right: { x: 1, y: 0 },
+};
+const OPPOSITE_DIR: Readonly<Record<Dir, Dir>> = {
+  down: "up",
+  left: "right",
+  up: "down",
+  right: "left",
+};
+
+function edgeCell(
+  placement: Readonly<WorldPlacement>,
+  side: WorldSide,
+  tangent: number,
+): { x: number; y: number } {
+  switch (side) {
+    case "north": return { x: tangent, y: 0 };
+    case "east": return { x: placement.width - 1, y: tangent };
+    case "south": return { x: tangent, y: placement.height - 1 };
+    case "west": return { x: 0, y: tangent };
+  }
+}
+
+function worldBindings(layout: Readonly<WorldLayout>): {
+  openings: Map<string, Readonly<WorldOpening>>;
+  placements: Map<string, Readonly<WorldPlacement>>;
+} {
+  const openings = new Map<string, Readonly<WorldOpening>>();
+  const placements = new Map<string, Readonly<WorldPlacement>>();
+  for (const component of layout.components) {
+    for (const placement of component.placements) placements.set(placement.mapId, placement);
+    for (const opening of component.openings) openings.set(opening.portalId, opening);
+  }
+  return { openings, placements };
+}
+
+function sourcePortalEvents(): Map<string, { map: TuxMap; event: TuxEvent; action: Rule }> {
+  const sources = new Map<string, { map: TuxMap; event: TuxEvent; action: Rule }>();
+  for (const map of allMaps.values()) {
+    for (const [eventIndex, event] of map.events.entries()) {
+      if (event.origin !== "tmx") continue;
+      for (const [actionIndex, action] of event.acts.entries()) {
+        if (action.type !== "transition_teleport") continue;
+        sources.set(outdoorWorldPortalId(map.slug, event, eventIndex, actionIndex), { map, event, action });
+      }
+    }
+  }
+  return sources;
+}
+
+/** A fixed-destination rectangle has exactly one lane whose authored landing
+ * is already the coordinate-continuous neighbour cell. Promote only that lane:
+ * all funneling lanes keep their exact legacy fade and landing. This is a
+ * generated geometric proof, not a map-id allowlist. */
+function planPartialSeamPromotions(
+  index: Readonly<OutdoorWorldIndex>,
+  layout: Readonly<WorldLayout>,
+): PartialSeamPromotion[] {
+  const indexed = new Map<string, Readonly<WorldSeamOpening>>();
+  for (const world of index.worlds) for (const seam of world.seams) {
+    for (const opening of seam.handoff.openings) indexed.set(opening.portalId, opening);
+  }
+  const sourceByPortal = sourcePortalEvents();
+  const { openings, placements } = worldBindings(layout);
+  const passageProofs = importTerrainPassageProofs([...placements.keys()]);
+  const promotions: PartialSeamPromotion[] = [];
+  for (const [portalId, opening] of [...openings].sort(([a], [b]) => a.localeCompare(b))) {
+    const diagnostic = indexed.get(portalId);
+    if (!diagnostic || diagnostic.compatibility !== "portal-only" ||
+        diagnostic.issues.length !== 1 || diagnostic.issues[0] !== "fixed-destination") continue;
+    const source = sourceByPortal.get(portalId);
+    const sourcePlacement = placements.get(opening.source.mapId);
+    const targetPlacement = placements.get(opening.target.mapId);
+    if (!source || !sourcePlacement || !targetPlacement) continue;
+
+    const expectedDirection = SIDE_DIR[opening.source.side];
+    const simpleConditions = source.event.conds.length === 2 && source.event.conds.every((condition) =>
+      condition.op === "is" && condition.args[0] === "player" &&
+      (condition.type === "char_at" ||
+        (condition.type === "char_facing" && sourceDirection(source.map.slug, condition.args[1]) === expectedDirection))
+    );
+    const simpleActions = source.event.acts.length === 2 && source.event.acts[0] === source.action &&
+      source.action.args[0] === "player" &&
+      source.action.args[1]?.replace(/\.tmx$/, "") === opening.target.mapId &&
+      source.event.acts[1]?.type === "char_face" && source.event.acts[1]?.args[0] === "player" &&
+      sourceDirection(source.map.slug, source.event.acts[1]?.args[1]) === expectedDirection;
+    if (!simpleConditions || !simpleActions || source.event.behavs.length !== 0) continue;
+
+    const targetTangent = diagnostic.actualTarget.tangent;
+    const sourceTangent = targetTangent - opening.offset;
+    if (sourceTangent < opening.source.span.start || sourceTangent >= opening.source.span.end ||
+        targetTangent < opening.target.span.start || targetTangent >= opening.target.span.end) continue;
+    const sourceCell = edgeCell(sourcePlacement, opening.source.side, sourceTangent);
+    const targetCell = edgeCell(targetPlacement, opening.target.side, targetTangent);
+    if (!transferCellIsWalkable(source.map, sourceCell.x, sourceCell.y)) continue;
+    const targetMap = allMaps.get(opening.target.mapId);
+    if (!targetMap || !transferCellIsWalkable(targetMap, targetCell.x, targetCell.y)) continue;
+    if (Number(source.action.args[2]) !== targetCell.x || Number(source.action.args[3]) !== targetCell.y) continue;
+    const sourceProof = passageProofs[opening.source.mapId];
+    const targetProof = passageProofs[opening.target.mapId];
+    if (!sourceProof || !targetProof) continue;
+    const step = DIR_STEP[expectedDirection];
+    const inner = { x: sourceCell.x - step.x, y: sourceCell.y - step.y };
+    if (!terrainCanStep(sourceProof, inner.x, inner.y, expectedDirection) ||
+        terrainCellBlocksExit(sourceProof, sourceCell.x, sourceCell.y, expectedDirection) ||
+        !terrainCellCanEnter(
+          targetProof,
+          targetCell.x,
+          targetCell.y,
+          OPPOSITE_DIR[expectedDirection],
+        )) continue;
+
+    const sourceCells = opening.source.span.end - opening.source.span.start;
+    promotions.push({
+      portalId,
+      sourceMap: opening.source.mapId,
+      source: sourceCell,
+      targetMap: opening.target.mapId,
+      target: targetCell,
+      reason: "fixed-destination-aligned-lane",
+      sourceCells,
+      legacyCells: sourceCells - 1,
+    });
+  }
+  return promotions;
+}
+
+function applyPartialSeamPromotions(
+  layout: Readonly<WorldLayout>,
+  promotions: readonly PartialSeamPromotion[],
+): WorldLayout {
+  const promoted = new Map(promotions.map((promotion) => [promotion.portalId, promotion]));
+  const next = structuredClone(layout) as WorldLayout;
+  for (const component of next.components) for (const opening of component.openings) {
+    const promotion = promoted.get(opening.portalId);
+    if (!promotion) continue;
+    const sourceTangent = opening.axis === "x" ? promotion.source.x : promotion.source.y;
+    const targetTangent = opening.axis === "x" ? promotion.target.x : promotion.target.y;
+    opening.source.span = { start: sourceTangent, end: sourceTangent + 1 };
+    opening.target.span = { start: targetTangent, end: targetTangent + 1 };
+    opening.compatibility = "coordinate-preserving";
+  }
+  return next;
 }
 
 export interface ImportBuild {
@@ -4914,12 +5141,15 @@ function transferErrors(project: Project): TransferError[] {
  * page program, so they preserve the runtime's one-frame fiber stack. Choice,
  * battle, and scene continuations run as child programs and must fall back to
  * the legacy transfer timeline. */
-function retainDirectHandoffMarkers(mapDefs: readonly MapDef[]): Set<string> {
+function retainDirectHandoffMarkers(
+  mapDefs: readonly MapDef[],
+  approvedPortalIds: ReadonlySet<string>,
+): Set<string> {
   const enabled = new Set<string>();
   const visit = (commands: readonly Command[], direct: boolean): void => {
     for (const command of commands) {
       if (command.op === "transfer" && command.handoff) {
-        if (direct) enabled.add(command.handoff.portalId);
+        if (direct && approvedPortalIds.has(command.handoff.portalId)) enabled.add(command.handoff.portalId);
         else delete command.handoff;
       }
       if (command.op === "if") {
@@ -4951,8 +5181,9 @@ function retainDirectHandoffMarkers(mapDefs: readonly MapDef[]): Set<string> {
 function seamlessHandoffReport(
   index: OutdoorWorldIndex,
   selectedMaps: ReadonlySet<string>,
-  projectSafePortalIds: ReadonlySet<string>,
+  runtimeSeamlessPortalIds: ReadonlySet<string>,
   enabledPortalIds: ReadonlySet<string>,
+  partialPromotions: readonly PartialSeamPromotion[],
 ): SeamlessHandoffReport {
   const globalSafePortalIds = new Set(index.worlds.flatMap((world) => world.seams.flatMap((seam) =>
     seam.handoff.openings.filter((opening) => opening.compatibility === "coordinate-preserving")
@@ -4961,6 +5192,12 @@ function seamlessHandoffReport(
   const portalOnlyIds = new Set(index.worlds.flatMap((world) => world.seams.flatMap((seam) =>
     seam.handoff.openings.filter((opening) => opening.compatibility === "portal-only")
       .map((opening) => opening.portalId)
+  )));
+  const selectedSafePortalIds = new Set(index.worlds.flatMap((world) => world.seams.flatMap((seam) =>
+    seam.handoff.openings.filter((opening) =>
+      opening.compatibility === "coordinate-preserving" &&
+      selectedMaps.has(opening.sourceMap) && selectedMaps.has(opening.targetMap)
+    ).map((opening) => opening.portalId)
   )));
   const gapIds = new Set(index.worlds.flatMap((world) => world.diagnostics.rejectedContacts
     .filter((contact) => contact.geometry === "gap")
@@ -4997,12 +5234,12 @@ function seamlessHandoffReport(
           continue;
         }
         const portalId = outdoorWorldPortalId(mapId, event, eventIndex, actionIndex);
-        if (projectSafePortalIds.has(portalId)) {
+        if (runtimeSeamlessPortalIds.has(portalId)) {
           if (!enabledPortalIds.has(portalId)) {
-            notEnabledSafePortalIds.push(portalId);
+            if (selectedSafePortalIds.has(portalId)) notEnabledSafePortalIds.push(portalId);
             const unreachableFacing = event.conds.some((condition) =>
               condition.type === "char_facing" && condition.op === "is" &&
-              condition.args[0] === "player" && !DIRS.has(condition.args[1]!)
+              condition.args[0] === "player" && !sourceDirection(mapId, condition.args[1])
             );
             exclude(unreachableFacing ? "unreachable-source-facing" : "safe-opening-not-direct");
           }
@@ -5031,10 +5268,17 @@ function seamlessHandoffReport(
   return {
     mode: "seamless-v1",
     sourceTransferActions,
-    topologySafeOpenings: projectSafePortalIds.size,
+    topologySafeOpenings: selectedSafePortalIds.size,
+    runtimeEligibleOpenings: runtimeSeamlessPortalIds.size,
     enabledTransfers: enabledPortalIds.size,
     enabledPortalIds: [...enabledPortalIds].sort(),
     notEnabledSafePortalIds: notEnabledSafePortalIds.sort(),
+    partialPromotions: [...partialPromotions],
+    partialSeamlessCells: partialPromotions.length,
+    partialLegacyCells: partialPromotions.reduce((sum, promotion) => sum + promotion.legacyCells, 0),
+    fullyLegacyPortalOnlyPortalIds: [...portalOnlyIds]
+      .filter((portalId) => !runtimeSeamlessPortalIds.has(portalId))
+      .sort(),
     notEnabled: [...reasons.entries()]
       .map(([reason, count]) => ({ reason, count }))
       .sort((a, b) => a.reason.localeCompare(b.reason)),
@@ -5074,11 +5318,13 @@ export function buildProject(
   conversionCoverage.reset();
   const world = buildOutdoorWorldIndex([...allMaps.values()]);
   const selectedMaps = new Set(want);
-  const worldLayout = projectOutdoorWorldLayout(world.index, selectedMaps);
-  const seamlessPortalIds = new Set(worldLayout?.components.flatMap((component) =>
-    component.openings
-      .filter((opening) => opening.compatibility === "coordinate-preserving")
-      .map((opening) => opening.portalId)
+  const sourceWorldLayout = projectOutdoorWorldLayout(world.index, selectedMaps);
+  // Attach provenance to every accepted physical opening during conversion.
+  // Unsafe markers are stripped below; fixed-destination rectangles need the
+  // marker temporarily so the resolver can accept their narrowed continuous
+  // lane and fail closed to the authored fade on every funneling lane.
+  const candidateHandoffPortalIds = new Set(sourceWorldLayout?.components.flatMap((component) =>
+    component.openings.map((opening) => opening.portalId)
   ) ?? []);
   const surfaceLabels = providedSurfaceLabels ?? importTerrainSurfaceLabels(want);
 
@@ -5109,7 +5355,7 @@ export function buildProject(
   for (const s of want) {
     const m = allMaps.get(s);
     if (!m) throw new Error(`no map ${s}`);
-    const r = convertMap(m, options, surfaceLabels[s] ?? {}, seamlessPortalIds);
+    const r = convertMap(m, options, surfaceLabels[s] ?? {}, candidateHandoffPortalIds);
     mapDefs.push(r.map);
     Object.assign(sprites, r.sprites);
     const tuxemonSlug = m.props.slug ?? m.slug;
@@ -5119,6 +5365,18 @@ export function buildProject(
   Object.assign(sprites, Object.fromEntries([...appearanceSpriteDefs.entries()].sort(([a], [b]) =>
     a < b ? -1 : a > b ? 1 : 0
   )));
+
+  const partialSeamPromotions = sourceWorldLayout
+    ? planPartialSeamPromotions(world.index, sourceWorldLayout)
+    : [];
+  const worldLayout = sourceWorldLayout
+    ? applyPartialSeamPromotions(sourceWorldLayout, partialSeamPromotions)
+    : undefined;
+  const seamlessPortalIds = new Set(worldLayout?.components.flatMap((component) =>
+    component.openings
+      .filter((opening) => opening.compatibility === "coordinate-preserving")
+      .map((opening) => opening.portalId)
+  ) ?? []);
 
   // Assign every item its atlas cell once the full catalog is known (event
   // conversion can introduce items absent from the DB, e.g. elianeoutput).
@@ -5168,7 +5426,7 @@ export function buildProject(
     });
   }
 
-  const enabledHandoffPortalIds = retainDirectHandoffMarkers(mapDefs);
+  const enabledHandoffPortalIds = retainDirectHandoffMarkers(mapDefs, seamlessPortalIds);
   const built: Project = {
     format: "rpgkit-project/v1",
     title: "Pocket Tuxemon",
@@ -5322,6 +5580,7 @@ export function buildProject(
         selectedMaps,
         seamlessPortalIds,
         enabledHandoffPortalIds,
+        partialSeamPromotions,
       ),
       world: world.report,
       coverage: conversionCoverage.report(),

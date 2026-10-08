@@ -1,14 +1,14 @@
 {
   "format": "pocket-tuxemon/j4-goldens/v1",
-  "baseFrames": 185929,
-  "segmentTapeSha256": "08c88566e1da8c7c86816175403152f2f15fbb771d60b2a0756a32c9061987b1",
-  "combinedTapeSha256": "05823130aca3aaa5c77ba74fbf7f55cc6f4ba53245581c27401267980012da4a",
+  "baseFrames": 193217,
+  "segmentTapeSha256": "78de1c0c67a260bb4b5e97999900bbff629ce8a64de39d362f66889f0b046a61",
+  "combinedTapeSha256": "dfdcdc2fc49697973e96f69d966c6606f4d2de739df47aee5288de63bf42c110",
   "frames": [
     {
       "name": "surfboard-collected",
-      "frame": 3239,
-      "mergedFrame": 189168,
-      "timelineFrame": 189169,
+      "frame": 2976,
+      "mergedFrame": 196193,
+      "timelineFrame": 196194,
       "map": "spyder_candy_town",
       "position": [
         28,
@@ -60,9 +60,9 @@
     },
     {
       "name": "datacenter-upper-screens",
-      "frame": 12464,
-      "mergedFrame": 198393,
-      "timelineFrame": 198394,
+      "frame": 12676,
+      "mergedFrame": 205893,
+      "timelineFrame": 205894,
       "map": "spyder_datacenter",
       "position": [
         14,
@@ -114,9 +114,9 @@
     },
     {
       "name": "kernel-defeated",
-      "frame": 13386,
-      "mergedFrame": 199315,
-      "timelineFrame": 199316,
+      "frame": 13598,
+      "mergedFrame": 206815,
+      "timelineFrame": 206816,
       "map": "spyder_datacenter",
       "position": [
         7,
@@ -168,9 +168,9 @@
     },
     {
       "name": "surfboard-collected",
-      "frame": 3239,
-      "mergedFrame": 189168,
-      "timelineFrame": 189169,
+      "frame": 2976,
+      "mergedFrame": 196193,
+      "timelineFrame": 196194,
       "map": "spyder_candy_town",
       "position": [
         28,
@@ -222,9 +222,9 @@
     },
     {
       "name": "datacenter-upper-screens",
-      "frame": 12464,
-      "mergedFrame": 198393,
-      "timelineFrame": 198394,
+      "frame": 12676,
+      "mergedFrame": 205893,
+      "timelineFrame": 205894,
       "map": "spyder_datacenter",
       "position": [
         14,
@@ -276,9 +276,9 @@
     },
     {
       "name": "kernel-defeated",
-      "frame": 13386,
-      "mergedFrame": 199315,
-      "timelineFrame": 199316,
+      "frame": 13598,
+      "mergedFrame": 206815,
+      "timelineFrame": 206816,
       "map": "spyder_datacenter",
       "position": [
         7,

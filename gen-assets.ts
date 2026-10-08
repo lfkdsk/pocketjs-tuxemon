@@ -556,7 +556,7 @@ const zhGaps = (() => {
 })();
 writeFileSync(join(DIST, "zh-fallbacks.json"), jsonBytes(zhGaps));
 setImportLang("en_US");
-// Demo menu data: the 199,316-frame mainline tape (nibble-packed) and the 20
+// Demo menu data: the 206,816-frame mainline tape (nibble-packed) and the 20
 // chapter snapshots become pak entries read on demand; only the tiny chapter
 // index is inline in the bundle (ui/demo-index.ts). The baked chapter data
 // only exists in the maintained tree, so an isolated cook (determinism

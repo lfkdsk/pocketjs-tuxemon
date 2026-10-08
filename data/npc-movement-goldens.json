@@ -1,0 +1,75 @@
+{
+  "format": "pocket-tuxemon/npc-movement-goldens/v1",
+  "frames": [
+    {
+      "name": "taba-facing-lock",
+      "map": "taba_town",
+      "width": 480,
+      "height": 272,
+      "file": "npc-movement-facing-lock.480x272.png",
+      "rgbaFnv1a": "1a97e4fe",
+      "pngSha256": "b1184d1e5ba7df76acce7cb9a2d409f554eb91407a9f0aee5086e44e951a2861",
+      "camera": [
+        1272,
+        624
+      ],
+      "actor": {
+        "id": "npc_callie_wren",
+        "tile": [
+          38,
+          46
+        ],
+        "pixel": [
+          608,
+          742
+        ],
+        "facing": 1,
+        "phase": 3,
+        "moving": true,
+        "stepDir": 0,
+        "sprite": "npc.girl1",
+        "image": "assets/characters/npc-npc-girl1-walk-l-1.png",
+        "height": 32
+      },
+      "control": {
+        "facingMode": "locked",
+        "routeStopped": false
+      }
+    },
+    {
+      "name": "taba-facing-lock",
+      "map": "taba_town",
+      "width": 960,
+      "height": 544,
+      "file": "npc-movement-facing-lock.960x544.png",
+      "rgbaFnv1a": "e6238fe4",
+      "pngSha256": "d6cf73ad4847f80f5506af9f4f10d723196bdc4f0d9615e922fafb614e80b5cc",
+      "camera": [
+        992,
+        416
+      ],
+      "actor": {
+        "id": "npc_callie_wren",
+        "tile": [
+          38,
+          46
+        ],
+        "pixel": [
+          608,
+          742
+        ],
+        "facing": 1,
+        "phase": 3,
+        "moving": true,
+        "stepDir": 0,
+        "sprite": "npc.girl1",
+        "image": "assets/characters/npc-npc-girl1-walk-l-1.png",
+        "height": 32
+      },
+      "control": {
+        "facingMode": "locked",
+        "routeStopped": false
+      }
+    }
+  ]
+}

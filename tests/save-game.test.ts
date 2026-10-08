@@ -182,7 +182,7 @@ describe("save and resume on the GB6 mainline prefix", () => {
       afterBattle("after-billie", billie.endFrame),
       afterMapChange("route-1", route1.frame),
       afterBattle("after-wild", wild.endFrame),
-    ]);
+    ], undefined, tape.worldTraversal);
     expect(report.points.map((p) => p.id)).toEqual(["after-billie", "route-1", "after-wild"]);
     expect(report.points.map((p) => p.channel)).toEqual(["slot", "code", "slot"]);
     for (const resume of report.resumes) {

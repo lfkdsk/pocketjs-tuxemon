@@ -18,7 +18,13 @@ component-bounded terrain renderer: neighbouring ground, upper layers and
 animated tiles can be visible across a seam, while its working-set driver
 bounds parsed and compiled maps and the game evicts terrain and NPC-art
 provider entries outside the corresponding visible/active sets. The transfer
-interpreter still does not perform seamless handoff.
+interpreter uses stable portal IDs to perform an eight-tick atomic handoff for
+proved direct `playerTouch` crossings. A wide fixed-destination portal may
+mark only its already-coordinate-continuous lane; every other lane keeps the
+same event, fade and fixed landing. Final cooked-terrain exit/entry proofs
+make this lowering fail closed. The deterministic inventory in
+`reports/outdoor-seam-audit.json` records every promoted and retained outdoor
+portal.
 
 ## Source checkout
 
@@ -89,8 +95,11 @@ definitions below are the report's own:
 | `info <var>,<attr>` | `tux.info` reads the monster whose iid the variable holds (searched across the party, kennel, boxes and NPC parties) and writes `info_<attr>` (the corpus uses `level`). |
 | `create_npc` / `remove_npc` | a presence variable plus a `place` command for the walker. With battles on, creating an NPC that is not on the map and removing one both clear its party (`tux.clear_npc_party`): as upstream, an NPC's party lasts only as long as the NPC. |
 | `char_stop` | `moveControl` stop, cancelling the active route and page patrol. |
+| `char_wander` | `moveControl` random wander with the source's exact 60 Hz attempt interval and inclusive bounds. The attempt clock resets before modal, movement, observation and bounds checks; cardinally adjacent NPCs pause while the player faces them, and skipped attempts consume no seeded-RNG draw. |
 | `set_facing_mode` | `moveControl` facingMode (locked / followMovement). |
+| `char_position` | an exact `place` after import validates that both coordinates are integers inside the map; invalid source coordinates fail the import, as upstream raises instead of clamping. An immediately following `char_face` folds into the placement direction. |
 | `is battle_outcome` | `tux.battle_outcome` extension condition reading live battle history. |
+| `is check_char_parameter player,moving,1` | the live `playerMoving` condition on an automatic page. It is map-wide and observes whether the player had a committed interpolating step at the start of the reference tick, matching upstream's event-before-world-update ordering. |
 | `is/not check_char_parameter player,name,<value>` | `tux.player_name_is` compares the live saved player name exactly and case-sensitively. |
 | `is/not has_tuxepedia player,<species>,seen/caught` | `tux.has_tuxepedia` reads the exact saved player Tuxepedia status; caught does not also count as seen. |
 | `is/not char_healed player` | `tux.char_healed` requires a non-empty party whose members are all at full HP; status ailments do not change the answer. |
@@ -121,10 +130,8 @@ definitions below are the report's own:
 | `add_tracker` | a `switch`; step counters are not modeled. |
 | `add_step_tracker player,…` | `tux.add_step_tracker`; the kit's `playerStep` hook (shared with the daycare) moves every player tracker by one per completed tile, where upstream subtracts the signed tile delta (dx+dy) and also counts teleports. |
 | `transition_teleport` with an out-of-range landing | coordinates clamped into the target map; an isolated landing is repaired to the nearest walkable cell by deterministic four-neighbour BFS. |
-| `char_wander` | `moveControl` random wander with a deterministic seed, a seconds-to-MV frequency grade and optional bounds. |
-| `char_speed` | `moveControl` speed; tiles/s maps to the nearest MV exponential grade. |
+| `char_speed` | `moveControl` routeSpeed scoped to the active or next forced route, then cleared when that route ends as upstream clears custom speed on idle; tiles/s still maps to the nearest MV exponential grade. |
 | `char_run` | `moveControl` routeSpeed at the run rate (grade 5); the boost scopes to the character's next forced route and is gone when the route ends, so a wandering NPC with no forced route is unaffected (matching upstream's idle no-op) and a page already moving at grade 5 sees no change. |
-| `char_position` | a clamped `place` (out-of-map coordinates are clamped; upstream raises). |
 | `choice_npc` | static `extChoice` list; the shared label is extended with each option's translated name so the lines stay distinguishable (upstream tells options apart by per-option NPC portraits, which need kit option-image support). |
 | `get_party_monster` (dojo, gym) | `tux.get_party_monsters` dumps the party iids into `iid_slot_*`; NPC trainer parties are staged live (not folded) when an event inspects them, so the dojo and gym calls find a party. |
 | `load_yaml` | a gating variable; the referenced events are merged at import time and unlock when the action runs. |
@@ -168,26 +175,24 @@ This preserves the seven cooperating `char_in` uses and five surface-facing
 uses without pretending the project schema has a general live-player-cell
 predicate. Two unrelated surface-facing uses remain dropped.
 
-The 38 `is check_char_parameter player,moving,1` encounter guards use one
-separate, consistent lowering. Trigger classification turns each source event
-into a completed-step `playerTouch` page on its authored cells, and condition
-conversion consumes the moving guard instead of emitting another condition or
-page. This is deterministic across tick rates and cannot double-fire, but it
-is narrower than Tuxemon's map-wide velocity test, so coverage reports it as
-Degraded. The Spyder Surf events above are intercepted as a complete cluster
-before this generic path and therefore cannot also emit source-derived pages.
-At the one Route D cell where a generated land boundary overlaps a moving-
-encounter page, the importer folds the dismount guard and body into that
-source page's existing guard-latch chain and removes the cell from the
-standalone boundary. Both matching source behaviors run once from the same
-completed-step edge; neither page can consume the edge before the other.
+The 38 `is check_char_parameter player,moving,1` encounter guards use the
+native map-wide `playerMoving` condition on automatic pages. The sampled value
+is false on the tick that first commits a step, true on every interpolation
+tick including landing, and independent of the source TMX marker. This follows
+Tuxemon's event-before-world-update order, stays identical at 60/30/20 Hz and
+survives save/restore and rewind. The Spyder Surf events above are intercepted
+as a complete cluster before this generic path and therefore cannot also emit
+source-derived pages. On Route D, the moving encounter remains its independent
+parallel guard while the generated land dismount folds into the existing
+arrival-trigger partition at the shared marker; the two behaviors no longer
+compete for one arrival edge.
 
 ### Dropped examples
 
 | Tuxemon | Reason |
 |---|---|
-| unsupported live-cell terrain predicates outside the Spyder Surf cluster | project conditions still do not expose a general current/facing terrain-label query; the two remaining unrelated surface-facing uses emit nothing. Completed-step movement guards and the known Surf cluster use the specialized lowerings described above. |
-| `char_facing player,top/bottom`, `button_pressed K_RETURN` | these legacy source arguments are invalid in the pinned Tuxemon runtime: directions are `up/down/left/right`, and `K_RETURN` is not an intention constant. The guards are fixed false instead of being reported as native triggers. |
+| unsupported live-cell terrain predicates outside the Spyder Surf cluster | project conditions still do not expose a general current/facing terrain-label query; the two remaining unrelated surface-facing uses emit nothing. Live movement guards are native; completed-step movement guards and the known Surf cluster use the specialized lowerings described above. |
+| `char_facing player,top/bottom`, `button_pressed K_RETURN` | these legacy source arguments are invalid in the pinned Tuxemon runtime: directions are `up/down/left/right`, and `K_RETURN` is not an intention constant. They remain fixed false instead of being reported as native triggers, except that the five geometrically proved Route 3 south exits repair their pinned `bottom` typo to `down` in the guard, trailing face and transfer direction. |
 | `add_step_tracker` and friends for a non-player character | the kit's step hook reports only the player's completed tiles (the pinned content tracks the player only). |
 | `copy_variable` between enum-coded variables | enum codes are numbered per variable, so only variables that hold text copy verbatim. |
 | `transition_teleport` targeting an NPC | only the player transfers. |

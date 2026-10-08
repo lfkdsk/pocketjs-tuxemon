@@ -83,6 +83,9 @@ const REQUIRED_TRAINERS: Readonly<Record<string, number>> = {
   spyder_omnichannel_byrne: 1,
   spyder_omnichannel_beaverbrook: 1,
 };
+const REQUIRED_WILDS: Readonly<Record<string, number>> = {
+  "wild:xeon_2": 1,
+};
 
 interface SavedPoint {
   nextFrame: number;
@@ -390,10 +393,12 @@ function validateBattles(
   const trainers = battles.filter((battle) => battle.kind === "trainer");
   const wilds = battles.filter((battle) => battle.kind === "wild");
   expect(label + " trainer count changed", trainers.length === 13);
-  expect(label + " unexpected wild battle", wilds.length === 0);
+  expect(label + " wild count changed", wilds.length === 1);
   expect(label + " battle did not win", battles.every((battle) => battle.outcome === "won"));
   expect(label + " trainer roster changed",
     canonicalJson(counts(trainers)) === canonicalJson(REQUIRED_TRAINERS));
+  expect(label + " wild roster changed",
+    canonicalJson(counts(wilds)) === canonicalJson(REQUIRED_WILDS));
 }
 
 function replayStandalone(journey: J3JourneyResult): ReplayResult {

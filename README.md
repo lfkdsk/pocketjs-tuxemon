@@ -26,30 +26,33 @@ summary:
   the north end of Route 3, Route 4 and Flower City to the Captain's return
   in the Mansion and on through Candy Town, the hospital cure and Omnichannel
   Radio Tower broadcast, then across Routes E and B to the Data Center and
-  Kernel's defeat — the complete 199,316-frame Spyder mainline at 60 Hz,
+  Kernel's defeat — the complete 206,816-frame Spyder mainline at 60 Hz,
   driven by
   deterministic autoplay tapes — and every imported input lock is executed
   to its unlock. On the 67 placed outdoor maps, the streamed renderer paints
   neighbouring ground, upper layers and animated tiles across authored seams,
   with map, texture-shard and NPC-art caches bounded to the current world
-  working set. The project now opts into `seamless-v1`: 253 of the 258
-  coordinate-preserving outdoor openings cross atomically in eight ticks with
-  no fade. Portal-only, gap, rejected, indoor, faint and story transfers keep
-  their legacy transition. Neighbouring maps preview statically decidable
+  working set. The project now opts into `seamless-v1`: all 258
+  coordinate-preserving outdoor openings plus the coordinate-continuous lane
+  of 25 fixed-destination openings cross atomically in eight ticks with no
+  fade (283 portal IDs total). The other 50 lanes in those wide openings keep
+  their authored funnel landing and fade; 65 wholly legacy outdoor portals,
+  plus indoor, faint and story transfers, also keep their legacy transition.
+  Neighbouring maps preview statically decidable
   NPCs, and a completed handoff saves a frozen snapshot of the map just left
   so actors behind the player do not jump back to their entry poses.
 - **Battles (P2, complete):** the battle database and 590 battle
   textures are imported from Tuxemon's YAML, and `battle/` is a pure
   reducer whose results match Tuxemon's own Python engine on 8,560 recorded
   battles; monsters spawn draw-for-draw like Tuxemon's. The mainline is
-  played for real end to end: the autoplay tapes fight 202 real battles
-  (107 on the Route 3 mainline — 22 trainer + 85 wild — 14 on the
-  Captain-return continuation — 10 trainer + 4 wild — and 54 on the way to
-  the hospital cure — 50 trainer + 4 wild — and 13 more trainers through
-  Omnichannel and the Radio Tower, and 14 on the Kernel quest — 12 trainer +
-  2 wild), and every trainer
+  played for real end to end: the autoplay tapes fight 212 player battles
+  (111 on the Route 3 mainline — 22 trainer + 89 wild — 16 on the
+  Captain-return continuation — 10 trainer + 6 wild — and 56 on the way to
+  the hospital cure — 50 trainer + 6 wild — and 14 through Omnichannel and
+  the Radio Tower — 13 trainer + 1 wild — and 15 on the Kernel quest —
+  12 trainer + 3 wild), and every trainer
   battle enters Battle Processing and ends `won` with its `battle_outcome`
-  written back. The frozen 31-minute 60 Hz tape (110,244 frames / 30 min 37 s)
+  written back. The frozen 32-minute 60 Hz tape (115,828 frames / 32 min 10 s)
   replays byte-identical at 60, 30 and 20 Hz, and both failure paths are
   verified — the first loss against Billie, and a later loss on Route 3
   with the faint-point teleport, the heal-before-leaving block and the
@@ -227,7 +230,7 @@ Screens: [menu](docs/screenshots/save/save-menu.480x272.png),
 (960×544 versions alongside; `bun run screens:save` re-renders them from the
 built game).
 
-CI also plays the 3,982-frame opening journey — bedroom, Paper Town, the
+CI also plays the 3,498-frame opening journey — bedroom, Paper Town, the
 first battle, Route 1 — in headless Chrome against the built site
 (`bun tools/verify-web-journey.ts`) and checks every checkpoint's state and
 pixels against the goldens.
@@ -374,7 +377,7 @@ not a crash. Chapter snapshots and the nibble-dictionary tape are packed into
 the pak and read on demand, so the JS bundle keeps only a tiny chapter index;
 the tape is decoded once, on the first chapter selection, and every chapter
 plays a window of it. The committed chapter pack and all twenty thumbnails are
-rebaked against the current 199,316-frame recording; every chapter envelope
+rebaked against the current 206,816-frame recording; every chapter envelope
 passes decode, map-aware restore and suffix replay to the production terminal.
 `bun tools/verify-web-demo.ts` drives all of the above in headless Chrome,
 including a 600-frame autoplay that must reach a state byte-identical to a
@@ -479,7 +482,7 @@ then compare the completed session with a fresh production replay:
 bun run verify:psp:emu          # builds nothing; runs the already-built .prx
 ```
 
-The complete GB6+J1+J2+J3+J4 mainline (199,316 frames) runs under
+The complete GB6+J1+J2+J3+J4 mainline (206,816 frames) runs under
 PPSSPPHeadless as 28 bounded chapter-to-chapter segments: the no-argument
 retained-evidence gate (`bun tools/psp-mainline.ts verify`) reports 28/28
 PASS with no exemptions, each segment's receipt bound to its plan entry by
