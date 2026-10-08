@@ -15,13 +15,18 @@ import type { CreateOskOptions, OskController } from "@pocketjs/framework/osk";
 import { MapNotReadyError } from "../vendor/pocket-rpgkit/src/engine/map-repository.ts";
 import {
   menuStep,
+  SAVE_MENU_UI_TEXT,
   saveMenuRootRows,
   type ExtraRootRow,
   type MenuAction,
   type MenuState,
 } from "../vendor/pocket-rpgkit/src/engine/save-menu.ts";
 import type { SaveSnapshot } from "../vendor/pocket-rpgkit/src/engine/save.ts";
-import type { UiTextOverrides } from "../vendor/pocket-rpgkit/src/engine/ui-text.ts";
+import {
+  formatUiText,
+  withUiText,
+  type UiTextOverrides,
+} from "../vendor/pocket-rpgkit/src/engine/ui-text.ts";
 import type {
   GameViewDemoRuntime,
   GameViewDemoStepResult,
@@ -92,6 +97,36 @@ function message(title: string, body: string, back: MenuState): MenuState {
   return { kind: "message", title, body, back };
 }
 
+type LoadTarget =
+  | { kind: "slot"; slot: number }
+  | { kind: "code" }
+  | { kind: "autosave" };
+
+function loadFailureTitle(
+  target: LoadTarget,
+  text: ReturnType<typeof saveMenuText>,
+): string {
+  if (target.kind === "slot") {
+    return formatUiText(text["save.loadSlotFailedTitle"], { slot: target.slot });
+  }
+  return target.kind === "code"
+    ? text["save.loadCodeFailedTitle"]
+    : text["save.loadAutosaveFailedTitle"];
+}
+
+function loadedToast(target: LoadTarget, text: ReturnType<typeof saveMenuText>): string {
+  if (target.kind === "slot") {
+    return formatUiText(text["save.loadedSlotToast"], { slot: target.slot });
+  }
+  return target.kind === "code"
+    ? text["save.loadedCodeToast"]
+    : text["save.loadedAutosaveToast"];
+}
+
+function saveMenuText(overrides?: UiTextOverrides) {
+  return withUiText(SAVE_MENU_UI_TEXT, overrides);
+}
+
 /** The prompt shown when a save was written in the other language build.
  *  Says which language the save is in and how to switch to it. */
 function languageMismatchMessage(saveLang: Lang, back: MenuState): MenuState {
@@ -113,7 +148,9 @@ function languageMismatchMessage(saveLang: Lang, back: MenuState): MenuState {
 
 export function channelTitle(slots: SlotStore | null): string {
   if (!slots) return "SAVE — save code";
-  return slots.channel === "desktop" ? "SAVE — desktop slots" : "SAVE — browser slots";
+  if (slots.channel === "desktop") return "SAVE — desktop slots";
+  if (slots.channel === "psp") return "SAVE — memory stick";
+  return "SAVE — browser slots";
 }
 
 /** Everything the presentation reads, plus the GameView step contract. */
@@ -163,7 +200,7 @@ export function createSaveMenuRuntime(
   // the closing press never reaches the reducer as a fresh edge.
   let waitRelease = false;
   // A load whose map is not resident yet (sharded web/console builds).
-  let pending: { snapshot: SaveSnapshot; label: string; ready: boolean; error?: unknown } | null = null;
+  let pending: { snapshot: SaveSnapshot; target: LoadTarget; ready: boolean; error?: unknown } | null = null;
   // The keyboard closes on its own START/x press, which may run before this
   // runtime's step in the same frame; that press must not also close the menu.
   let keyboardClosed = false;
@@ -182,7 +219,8 @@ export function createSaveMenuRuntime(
   };
 
   /** Restore and present a decoded save; false while its map is loading. */
-  const load = (snapshot: SaveSnapshot, label: string, back: MenuState): boolean => {
+  const load = (snapshot: SaveSnapshot, target: LoadTarget, back: MenuState): boolean => {
+    const text = saveMenuText(uiText());
     const saveLang = snapshotLang(snapshot);
     if (options.lang && saveLang !== options.lang) {
       setMenu(languageMismatchMessage(saveLang, back));
@@ -193,14 +231,18 @@ export function createSaveMenuRuntime(
       host.replaceState(restored, snapshot.held);
       pending = null;
       close();
-      showToast(`Loaded ${label}`);
+      showToast(loadedToast(target, text));
       return true;
     } catch (error) {
       const repository = host.session.repository;
       if (error instanceof MapNotReadyError && repository?.prepare) {
-        const wait = { snapshot, label, ready: false as boolean, error: undefined as unknown };
+        const wait = { snapshot, target, ready: false as boolean, error: undefined as unknown };
         pending = wait;
-        setMenu(message("LOADING", `Preparing ${error.mapId}...`, back));
+        setMenu(message(
+          text["save.loadingTitle"],
+          formatUiText(text["save.loadingBody"], { map: error.mapId }),
+          back,
+        ));
         void repository.prepare(error.mapId).then(
           () => { wait.ready = true; },
           (reason) => { wait.error = reason ?? new Error("map failed to load"); },
@@ -208,17 +250,18 @@ export function createSaveMenuRuntime(
         return false;
       }
       pending = null;
-      setMenu(message(`CAN'T LOAD ${label.toUpperCase()}`, describeLoadError(error), back));
+      setMenu(message(loadFailureTitle(target, text), describeLoadError(error, uiText()), back));
       return false;
     }
   };
 
   const snapshotNow = (back: MenuState): SaveSnapshot | null => {
+    const text = saveMenuText(uiText());
     try {
-      return takeSaveSnapshot(host.session, host.getState(), host.heldButtons());
+      return takeSaveSnapshot(host.session, host.getState(), host.heldButtons(), uiText());
     } catch (error) {
-      const body = error instanceof SaveRefused ? error.message : "The game state could not be saved.";
-      setMenu(message("CAN'T SAVE NOW", body, back));
+      const body = error instanceof SaveRefused ? error.message : text["save.snapshotFailed"];
+      setMenu(message(text["save.refusedTitle"], body, back));
       return null;
     }
   };
@@ -239,15 +282,17 @@ export function createSaveMenuRuntime(
           return;
         }
       } catch (error) {
-        setMenu(message("CAN'T LOAD THAT CODE", describeLoadError(error), back));
+        const text = saveMenuText(uiText());
+        setMenu(message(loadFailureTitle({ kind: "code" }, text), describeLoadError(error, uiText()), back));
         return;
       }
       try {
         const snapshot = importSaveCode(host.session, text);
         // replaceState outside a step: GameView presents it next frame.
-        load(snapshot, "save code", back);
+        load(snapshot, { kind: "code" }, back);
       } catch (error) {
-        setMenu(message("CAN'T LOAD THAT CODE", describeLoadError(error), back));
+        const text = saveMenuText(uiText());
+        setMenu(message(loadFailureTitle({ kind: "code" }, text), describeLoadError(error, uiText()), back));
       }
     },
     onClose() {
@@ -265,11 +310,20 @@ export function createSaveMenuRuntime(
         try {
           saveSlot(slots!, command.slot, snapshot, content);
         } catch (error) {
-          setMenu(message("SAVE FAILED", error instanceof Error ? error.message.slice(0, 48) : "write failed", back));
+          globalThis.console?.debug?.("pocket-tuxemon: slot save write failed", error);
+          const text = saveMenuText(uiText());
+          setMenu(message(text["save.failedTitle"], text["save.failedBody"], back));
           return false;
         }
         refreshSlots();
-        setMenu(message(`SAVED TO SLOT ${command.slot}`, `${snapshot.map}  (${snapshot.player.tx},${snapshot.player.ty})`, {
+        const text = saveMenuText(uiText());
+        setMenu(message(
+          formatUiText(text["save.savedTitle"], { slot: command.slot }),
+          formatUiText(text["save.savedBody"], {
+            map: snapshot.map,
+            x: snapshot.player.tx,
+            y: snapshot.player.ty,
+          }), {
           kind: "root",
           index: 0,
         }));
@@ -287,17 +341,27 @@ export function createSaveMenuRuntime(
             return false;
           }
         } catch (error) {
-          setMenu(message(`CAN'T LOAD SLOT ${command.slot}`, describeLoadError(error), back));
+          const text = saveMenuText(uiText());
+          setMenu(message(
+            loadFailureTitle({ kind: "slot", slot: command.slot }, text),
+            describeLoadError(error, uiText()),
+            back,
+          ));
           return false;
         }
         let snapshot: SaveSnapshot;
         try {
           snapshot = loadSlot(slots!, command.slot, content);
         } catch (error) {
-          setMenu(message(`CAN'T LOAD SLOT ${command.slot}`, describeLoadError(error), back));
+          const text = saveMenuText(uiText());
+          setMenu(message(
+            loadFailureTitle({ kind: "slot", slot: command.slot }, text),
+            describeLoadError(error, uiText()),
+            back,
+          ));
           return false;
         }
-        return load(snapshot, `slot ${command.slot}`, back);
+        return load(snapshot, { kind: "slot", slot: command.slot }, back);
       }
       case "load-autosave": {
         const back: MenuState = { kind: "slots-load", index: 0 };
@@ -309,15 +373,25 @@ export function createSaveMenuRuntime(
             return false;
           }
         } catch (error) {
-          setMenu(message("CAN'T LOAD AUTOSAVE", describeLoadError(error), back));
+          const text = saveMenuText(uiText());
+          setMenu(message(
+            loadFailureTitle({ kind: "autosave" }, text),
+            describeLoadError(error, uiText()),
+            back,
+          ));
           return false;
         }
         try {
           const snapshot = loadAutosaveSlot(content);
           if (!snapshot) throw new Error("automatic save is empty");
-          return load(snapshot, "autosave", back);
+          return load(snapshot, { kind: "autosave" }, back);
         } catch (error) {
-          setMenu(message("CAN'T LOAD AUTOSAVE", describeLoadError(error), back));
+          const text = saveMenuText(uiText());
+          setMenu(message(
+            loadFailureTitle({ kind: "autosave" }, text),
+            describeLoadError(error, uiText()),
+            back,
+          ));
           return false;
         }
       }
@@ -363,12 +437,17 @@ export function createSaveMenuRuntime(
         if (pending.error !== undefined) {
           const failed = pending;
           pending = null;
-          setMenu(message(`CAN'T LOAD ${failed.label.toUpperCase()}`, describeLoadError(failed.error), { kind: "root", index: 0 }));
+          const text = saveMenuText(uiText());
+          setMenu(message(
+            loadFailureTitle(failed.target, text),
+            describeLoadError(failed.error, uiText()),
+            { kind: "root", index: 0 },
+          ));
           return { consumed: true };
         }
         if (!pending.ready) return { consumed: true };
         const ready = pending;
-        return { consumed: true, stateChanged: load(ready.snapshot, ready.label, { kind: "root", index: 0 }) };
+        return { consumed: true, stateChanged: load(ready.snapshot, ready.target, { kind: "root", index: 0 }) };
       }
       const current = menu();
       if (current.kind === "closed") {

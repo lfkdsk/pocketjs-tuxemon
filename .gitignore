@@ -33,3 +33,4 @@ tools/.verify-web-zh-mutant.ts
 .psp-emu-memstick/
 .psp-emu-memstick-zh/
 .psp-test-tmp/
+.psp-save-e2e/

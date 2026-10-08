@@ -19,7 +19,11 @@ export function SaveToast(props: { text: () => string | null; theme?: Partial<Ui
     <Show when={props.text() !== null}>
       <View class="absolute left-0 right-0 flex-row justify-center" style={{ posType: 1, insetT: 10 }} debugName="tux-save-toast">
         <Panel theme={theme()} style={{ posType: 1, width: 300, height: 34 }} paperClass="flex-row justify-center items-center">
-          <Text class="text-xs" style={{ textColor: theme().accent, lineHeight: 15, height: 15 }}>
+          <Text
+            class="text-xs"
+            style={{ textColor: theme().accent, lineHeight: 15, height: 15 }}
+            debugName="tux-save-toast-text"
+          >
             {props.text() ?? ""}
           </Text>
         </Panel>

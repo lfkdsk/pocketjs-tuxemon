@@ -32,15 +32,19 @@ const FONT_CMAP_ENTRY_SIZE = 8;
  *  too close to the background to match reliably. */
 const INK_ALPHA = 100;
 
-let cached: FontMask | null = null;
+const cached = new Map<string, FontMask>();
 
-/** Parse the text-xs font atlas from the built desktop pak. */
-export function loadFontMask(pakPath?: string): FontMask {
-  if (cached) return cached;
+/** Parse one font atlas from the built desktop pak. Slot 0 is text-xs; slot 1
+ * is text-sm, which the save message page uses for its title and body. */
+export function loadFontMask(pakPath?: string, slot = 0): FontMask {
   const file = pakPath ?? join(ROOT, "dist/main.pak");
+  const cacheKey = `${file}\0${slot}`;
+  const hit = cached.get(cacheKey);
+  if (hit) return hit;
   const entries = unpack(readFileSync(file));
-  const blob = entries.find((e) => e.key === "ui:font.0");
-  if (!blob) throw new Error("ui:font.0 not found in pak");
+  const key = `ui:font.${slot}`;
+  const blob = entries.find((e) => e.key === key);
+  if (!blob) throw new Error(`${key} not found in pak`);
   const d = blob.data;
   const dv = new DataView(d.buffer, d.byteOffset, d.byteLength);
   const glyphCount = dv.getUint16(6, true);
@@ -61,8 +65,9 @@ export function loadFontMask(pakPath?: string): FontMask {
     if (gid === 0) fallback = info;
   }
   if (!fallback) throw new Error("font atlas has no gid 0 fallback");
-  cached = { cellW, cellH, glyphs, fallback };
-  return cached;
+  const result = { cellW, cellH, glyphs, fallback };
+  cached.set(cacheKey, result);
+  return result;
 }
 
 export interface TextMask {

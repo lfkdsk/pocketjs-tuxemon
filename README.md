@@ -177,8 +177,12 @@ properties from the decoded pixels as well as pinning the PNG bytes.
   <http://localhost:8000/pocket-tuxemon/>.
 - **Locally:** `bun run web`, then serve `dist/web` the same way; or
   `bun run desktop` for the desktop host.
-- **Keys:** arrows walk, `A`/`Z`/`Enter` talks and confirms, `B`/`Esc` goes back,
-  `Space` (START) opens the save menu, `L`/`Q` rewinds three seconds.
+- **Browser keys:** arrows walk, `A`/`Z`/`Enter` talks and confirms, `B`/`Esc`
+  goes back, `Space` (START) opens the save menu, and `L`/`Q` rewinds three
+  seconds.
+- **Desktop-host keys:** arrows walk, `X`/`Backspace` talks and confirms,
+  `Z`/`Enter` goes back, `A` is SQUARE, `S` is TRIANGLE, `Space` is START,
+  and `L`/`Q` rewinds. A host regression test pins this legacy desktop map.
 
 ### Saving and loading
 
@@ -189,17 +193,20 @@ world is paused while the menu is open.
   `save/slot-1.json` … `save/slot-3.json` in the app's data folder. The browser
   build keeps them in the page's local storage.
 - **Automatic Save:** a read-only slot separate from the three manual slots.
-  The six imported story commands write `save/autosave.json` on desktop and an
-  app-scoped local-storage key in the browser; loading resumes immediately
-  after the autosave command. A recoverable command tick, including one with a
-  text, choices or shop modal, is published immediately; an unrecoverable tick
-  such as an active transfer, battle or scene is deferred to the first safe
-  reference tick. PSP currently has no writable save bridge, so those commands
-  are quiet no-ops there. Focused reducer/host tests cover all six authored
-  boundaries and the maintained production tape crosses four of them once.
+  The six imported story commands write `save/autosave.json` on desktop, an
+  app-scoped local-storage key in the browser, and `save/autosave.json` on
+  the PSP memory stick; loading resumes immediately after the autosave
+  command. A recoverable command tick, including one with a text, choices
+  or shop modal, is published immediately; an unrecoverable tick such as an
+  active transfer, battle or scene is deferred to the first safe reference
+  tick. Focused reducer/host tests cover all six authored boundaries, the
+  maintained production tape crosses four of them once, and `verify:psp:save`
+  crosses the Paper Town point under PPSSPPHeadless and restarts into it.
+  A missing automatic save is omitted; a storage read error stays visible as
+  a damaged Automatic Save row and reports a load failure when selected.
 - **Save code (export) / Load code (import):** the same save as URL-safe text,
-  paged on screen. Hosts with no file system or browser storage (PSP) have only
-  these two rows. Codes are compressed, but still a few thousand characters
+  paged on screen. Every target keeps these two rows as a fallback. Codes are
+  compressed, but still a few thousand characters
   (3,209–5,297 at the `verify:save` points; 3,657 in the documented screenshot),
   so they suit copying between tools more than typing on the on-screen
   keyboard. Additive project-schema upgrades change the encoded text, but the
@@ -257,8 +264,9 @@ are stored as canonical JSON in both languages.
 - **Desktop:** `bun run desktop -- --lang zh` (or `--lang en`). The in-game
   **R** switcher writes the choice to the app's data folder and asks for a
   restart.
-- **Default:** English. The Chinese project supplies all 57 kit-owned
-  interface strings: button hints, shop chrome, save pages, name input and
+- **Default:** English. The Chinese project supplies all 84 kit-owned
+  interface strings: button hints, shop chrome, save pages and their
+  success/failure/loading results, name input and
   its on-screen keyboard actions, demo chrome and errors, the event-error
   screen, and battle HP values. Missing future kit keys fail the importer
   instead of silently falling back to English. Game content — dialogue,
@@ -299,9 +307,12 @@ regression it targets.
 placeholder and escaped newline, and enforces the glossary against the final
 merged text (with reasoned, key-specific exceptions). `bun run check:cjk`
 verifies glyph subset coverage. `bun test tests/ui-text-zh-visual.test.ts`
-boots the production bundle and pins save, keyboard, demo, shop, button-hint,
-event-error and battle-status frames at 480×272 and 960×544, including Chinese
-glyph-mask checks. The demo menu capture lists the Chinese chapter titles.
+boots the production bundle and pins the save menu, Chinese save-success and
+save-failure pages, keyboard, demo, shop, button-hint, event-error and
+battle-status frames at 480×272 and 960×544, including Chinese glyph-mask
+checks. The generator also writes uncommitted nearest-neighbour 3× review
+copies under `dist/ui-text-zh-review/`. The demo menu capture lists the Chinese
+chapter titles.
 
 Known limitations:
 - Dynamic dialog templates resolve at runtime. The importer maps Tuxemon's
@@ -438,6 +449,25 @@ demand from the memory stick. Copy it to `PSP/COMMON/pocketjs/font-archive.bin`
 on the memory stick (the same `ms0:` tree the external `assets.pak` rides);
 without it the Chinese build renders tofu for every CJK glyph. The English
 build does not need the archive.
+
+### Saving on PSP
+
+START opens the save menu on PSP, with three manual slots and the read-only
+Automatic Save row, just like desktop and web. Saves land on the memory stick
+at `PSP/COMMON/pocketjs/save/` (`ms0:/PSP/COMMON/pocketjs/save/`):
+`slot-1.json` … `slot-3.json` and `autosave.json`. Each new write is wrapped
+in a length-and-checksum record, written to `.tmp`, closed, synced and read
+back before rename. A valid live generation moves to `.bak`; when `.bak` is
+the only valid old generation it stays untouched until the validated temp is
+live. Reads validate live and fall back to a valid backup, so failure or power
+loss at any write step leaves the old or new complete save readable. Deleting
+a slot checks removal of both live and backup copies. A failed operation
+(memory stick full or read-only) is reported in the menu instead of being
+swallowed. A save is bounded to 1 MiB. The same files work in PPSSPP:
+`--memstick=<dir>` maps `ms0:` to `<dir>`, so saves persist across emulator
+restarts. `bun run verify:psp:save` drives the menu through a save, a
+restart and a load under PPSSPPHeadless and checks the states match
+field-by-field, plus the autosave point and the read-only failure path.
 
 For a deterministic device or emulator check, build with
 `bun run build:psp --journey` and run the bare `dist/psp/pocket-tuxemon.prx`

@@ -42,7 +42,9 @@ import type { CharsState } from "../vendor/pocket-rpgkit/src/engine/chars.ts";
 import type { JsonValue } from "../vendor/pocket-rpgkit/src/engine/types.ts";
 import { isBusy } from "../vendor/pocket-rpgkit/src/engine/interpreter.ts";
 import type { MapContentIdentity } from "../vendor/pocket-rpgkit/src/engine/map-repository.ts";
+import { SAVE_MENU_UI_TEXT } from "../vendor/pocket-rpgkit/src/engine/save-menu.ts";
 import type { Session, SessionState } from "../vendor/pocket-rpgkit/src/engine/session.ts";
+import { withUiText, type UiTextOverrides } from "../vendor/pocket-rpgkit/src/engine/ui-text.ts";
 import {
   hasFsSave,
   inspectAutosaveFs,
@@ -58,6 +60,7 @@ import {
   writeAutosaveHost,
   type AutosaveSlotStatus,
 } from "../vendor/pocket-rpgkit/src/host/autosave.ts";
+import { pspSaveHost, pspSaveStore } from "./save-psp.ts";
 
 export const SAVE_SLOTS = 3;
 export const BROWSER_SAVE_KEY_PREFIX = "pocket-tuxemon/save/slot-";
@@ -65,14 +68,14 @@ export const BROWSER_SAVE_KEY_PREFIX = "pocket-tuxemon/save/slot-";
 export type SlotListing = (FsSlotInfo | { slot: number; error: string } | null)[];
 
 /** Where slot saves live on this target. */
-export type SaveChannel = "desktop" | "browser";
+export type SaveChannel = "desktop" | "browser" | "psp";
 
 export interface SlotStore {
   readonly channel: SaveChannel;
   readonly store: SaveStore;
 }
 
-export type AutosaveChannel = "desktop" | "browser";
+export type AutosaveChannel = "desktop" | "browser" | "psp";
 export type AutosaveListing = AutosaveSlotStatus | FsSlotInfo | { slot: 0; error: string };
 
 /** The subset of the Web Storage API the browser channel needs. */
@@ -97,18 +100,22 @@ export class SaveRefused extends Error {
  * chapter snapshots, so a save never lands inside a scripted scene or a
  * screen transition. Reasons are short enough for one menu line.
  */
-export function saveBlockReason(state: Readonly<SessionState>): string | null {
+export function saveBlockReason(
+  state: Readonly<SessionState>,
+  uiText?: UiTextOverrides,
+): string | null {
+  const text = withUiText(SAVE_MENU_UI_TEXT, uiText);
   const interp = state.interp;
-  if (interp.error !== undefined) return "The game stopped with an error.";
-  if (state.scene !== null || interp.pendingBattles.length > 0) return "You can't save during a battle.";
-  if (interp.modal !== null) return "Finish the conversation first.";
-  if (interp.pendingTransfer !== null || state.fade !== null) return "Wait until the map has changed.";
+  if (interp.error !== undefined) return text["save.refusedEventError"];
+  if (state.scene !== null || interp.pendingBattles.length > 0) return text["save.refusedBattle"];
+  if (interp.modal !== null) return text["save.refusedConversation"];
+  if (interp.pendingTransfer !== null || state.fade !== null) return text["save.refusedMapChange"];
   if (interp.inputLocked || isBusy(interp) && interp.main?.mode !== "screenWait") {
-    return "Wait until the scene is over.";
+    return text["save.refusedScene"];
   }
-  if (state.move.moving || state.move.phase !== 0) return "Stop walking first.";
+  if (state.move.moving || state.move.phase !== 0) return text["save.refusedWalking"];
   // Queued move routes or placements: an event is still arranging actors.
-  if (!canSave(state.move, interp, state.scene)) return "Wait until the scene is over.";
+  if (!canSave(state.move, interp, state.scene)) return text["save.refusedScene"];
   return null;
 }
 
@@ -132,8 +139,13 @@ export function isLegacySaveExt(value: unknown): value is LegacySavedExt {
 /** Snapshot the session for saving, or throw SaveRefused off a save point.
  * `held` is the button mask folded on the save frame; a load uses it as the
  * previous mask so press edges continue exactly as they would have. */
-export function takeSaveSnapshot(session: Session, state: SessionState, held: number): SaveSnapshot {
-  const reason = saveBlockReason(state);
+export function takeSaveSnapshot(
+  session: Session,
+  state: SessionState,
+  held: number,
+  uiText?: UiTextOverrides,
+): SaveSnapshot {
+  const reason = saveBlockReason(state, uiText);
   if (reason !== null) throw new SaveRefused(reason);
   return createSessionSnapshot(session, state, held >>> 0);
 }
@@ -198,20 +210,24 @@ function reachableStorage(): StorageLike | null {
   }
 }
 
-/** Slot storage for this target: data.fs first, then browser storage, else
- * null (the save code is then the only channel, e.g. on PSP). */
+/** Slot storage for this target: data.fs first, then the PSP memory stick,
+ * then browser storage, else null (the save code is then the only channel). */
 export function detectSlotStore(): SlotStore | null {
   const fs = fsSaveStore();
   if (fs) return { channel: "desktop", store: fs };
+  const psp = pspSaveStore();
+  if (psp) return { channel: "psp", store: psp };
   const storage = reachableStorage();
   return storage ? { channel: "browser", store: browserSaveStore(storage) } : null;
 }
 
-/** Dedicated automatic-save channel. Desktop uses data.fs; the generated web
- * player installs the app-scoped browser bridge. PSP currently exposes
- * neither and deliberately treats the command as a quiet no-op. */
+/** Dedicated automatic-save channel. Desktop uses data.fs, the PSP uses its
+ * memory-stick bridge, and the generated web player installs the app-scoped
+ * browser bridge. A target with none of the three treats the command as a
+ * quiet no-op. */
 export function detectAutosaveChannel(): AutosaveChannel | null {
   if (hasFsSave()) return "desktop";
+  if (pspSaveHost()) return "psp";
   return autosaveBridge() ? "browser" : null;
 }
 
@@ -327,20 +343,22 @@ export function snapshotLang(snapshot: SaveSnapshot): "en_US" | "zh_CN" {
 }
 
 /** One-line, player-facing explanation of a failed load. */
-export function describeLoadError(error: unknown): string {  if (error instanceof SaveError) {
+export function describeLoadError(error: unknown, uiText?: UiTextOverrides): string {
+  const text = withUiText(SAVE_MENU_UI_TEXT, uiText);
+  if (error instanceof SaveError) {
     switch (error.code) {
       case "content":
-        return "That save is from another build of the game.";
+        return text["save.loadErrorContent"];
       case "checksum":
-        return "That save is damaged (checksum mismatch).";
+        return text["save.loadErrorChecksum"];
       case "version":
-        return "That save is from a newer version.";
+        return text["save.loadErrorVersion"];
       case "bad-json":
       case "format":
-        return "That is not a Pocket Tuxemon save.";
+        return text["save.loadErrorInvalid"];
       case "shape":
-        return "That save does not fit this game.";
+        return text["save.loadErrorShape"];
     }
   }
-  return "The save could not be read.";
+  return text["save.loadErrorRead"];
 }

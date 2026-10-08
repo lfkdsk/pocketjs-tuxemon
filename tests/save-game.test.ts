@@ -13,6 +13,7 @@ import {
 } from "../vendor/pocket-rpgkit/src/engine/save.ts";
 import { restoreSessionSnapshot } from "../vendor/pocket-rpgkit/src/engine/save-restore.ts";
 import { startSession, stepSession, type Session, type SessionState } from "../vendor/pocket-rpgkit/src/engine/session.ts";
+import type { UiTextOverrides } from "../vendor/pocket-rpgkit/src/engine/ui-text.ts";
 import { createOsk } from "../vendor/pocket-rpgkit/vendor/pocketjs/framework/src/osk-controller.ts";
 import { createSimFsHost } from "../vendor/pocket-rpgkit/vendor/pocketjs/hosts/sim/fs.ts";
 import { createSimAutosaveBridge } from "../vendor/pocket-rpgkit/src/host/autosave.ts";
@@ -110,6 +111,28 @@ describe("save points", () => {
     for (const unsafe of [states.modal, states.battle, states.walking, states.locked]) {
       expect(() => takeSaveSnapshot(session, unsafe, 0)).toThrow(SaveRefused);
     }
+  });
+
+  test("every save refusal reason uses the active UI-text table", () => {
+    const { states } = sampled;
+    const text: UiTextOverrides = {
+      "save.refusedEventError": "事件错误",
+      "save.refusedBattle": "战斗中",
+      "save.refusedConversation": "对话中",
+      "save.refusedMapChange": "切换地图中",
+      "save.refusedScene": "剧情中",
+      "save.refusedWalking": "行走中",
+    };
+    const eventError = structuredClone(states.safe);
+    eventError.interp.error = { kind: "content", message: "fixture" };
+    const mapChange = structuredClone(states.safe);
+    mapChange.fade = { phase: "out", left: 1, half: 1 };
+    expect(saveBlockReason(eventError, text)).toBe("事件错误");
+    expect(saveBlockReason(states.battle, text)).toBe("战斗中");
+    expect(saveBlockReason(states.modal, text)).toBe("对话中");
+    expect(saveBlockReason(mapChange, text)).toBe("切换地图中");
+    expect(saveBlockReason(states.locked, text)).toBe("剧情中");
+    expect(saveBlockReason(states.walking, text)).toBe("行走中");
   });
 
   test("a save carries the map's characters in the kit's map runtime", () => {
@@ -247,6 +270,28 @@ describe("bad, foreign and empty saves", () => {
       expect(describeLoadError(caught)).toBe("That is not a Pocket Tuxemon save.");
     }
   });
+
+  test("every typed and generic load failure uses the active UI-text table", () => {
+    const translated: UiTextOverrides = {
+      "save.loadErrorContent": "内容",
+      "save.loadErrorChecksum": "校验",
+      "save.loadErrorVersion": "版本",
+      "save.loadErrorInvalid": "格式",
+      "save.loadErrorShape": "结构",
+      "save.loadErrorRead": "读取",
+    };
+    for (const [code, expected] of [
+      ["content", "内容"],
+      ["checksum", "校验"],
+      ["version", "版本"],
+      ["bad-json", "格式"],
+      ["format", "格式"],
+      ["shape", "结构"],
+    ] as const) {
+      expect(describeLoadError(new SaveError(code, "fixture"), translated)).toBe(expected);
+    }
+    expect(describeLoadError(new Error("host read failed"), translated)).toBe("读取");
+  });
 });
 
 describe("storage channels", () => {
@@ -323,7 +368,10 @@ interface LiveView {
 }
 
 describe("START menu runtime", () => {
-  const mount = (withSlots = true): { live: LiveView; menu: SaveMenuRuntime; dispose: () => void; storage: ReturnType<typeof memoryStorage> } => {
+  const mount = (
+    withSlots = true,
+    uiText?: UiTextOverrides,
+  ): { live: LiveView; menu: SaveMenuRuntime; dispose: () => void; storage: ReturnType<typeof memoryStorage> } => {
     const { project, session } = createGameSession(FIXED_INITIAL_CIVIL_TIME);
     const live: LiveView = {
       session,
@@ -351,6 +399,7 @@ describe("START menu runtime", () => {
           },
         },
         createOsk,
+        () => uiText,
       );
     });
     return { live, menu, dispose, storage };
@@ -436,6 +485,56 @@ describe("START menu runtime", () => {
     expect(menu.toast()).toBe("Loaded slot 1");
     expect(digest({ ...live.state, frame: 0 })).toBe(digest({ ...sampledAt(saveFrame), frame: 0 }));
     dispose();
+  }, 60_000);
+
+  test("save success, write failure, load toast and code failure are localized", () => {
+    const text: UiTextOverrides = {
+      "save.failedTitle": "保存失败标题",
+      "save.failedBody": "保存失败正文",
+      "save.savedTitle": "已存入 {slot}",
+      "save.savedBody": "地图 {map}，坐标 {x}/{y}",
+      "save.loadCodeFailedTitle": "存档码失败",
+      "save.loadErrorInvalid": "存档码无效",
+      "save.loadedSlotToast": "已读取 {slot}",
+    };
+    const { live, menu, dispose, storage } = mount(true, text);
+    try {
+      foldToSavePoint(live);
+      press(menu, BTN_START);
+      press(menu, BTN_CIRCLE);
+      press(menu, BTN_CIRCLE);
+      expect(menu.menu()).toMatchObject({
+        kind: "message",
+        title: "已存入 1",
+        body: `地图 ${live.state.mapId}，坐标 ${live.state.move.tx}/${live.state.move.ty}`,
+      });
+
+      press(menu, BTN_CROSS); // success -> root
+      storage.setItem = () => { throw new Error("raw host failure must stay hidden"); };
+      press(menu, BTN_CIRCLE);
+      press(menu, BTN_CIRCLE);
+      expect(menu.menu()).toMatchObject({
+        kind: "message",
+        title: "保存失败标题",
+        body: "保存失败正文",
+      });
+
+      press(menu, BTN_CROSS); // failure -> save slots
+      press(menu, BTN_CROSS); // save slots -> root
+      press(menu, BTN_DOWN);
+      press(menu, BTN_CIRCLE);
+      press(menu, BTN_CIRCLE);
+      expect(menu.toast()).toBe("已读取 1");
+
+      globalThis.__pocketTuxemonSave!.importCode("not-a-save-code");
+      expect(menu.menu()).toMatchObject({
+        kind: "message",
+        title: "存档码失败",
+        body: "存档码无效",
+      });
+    } finally {
+      dispose();
+    }
   }, 60_000);
 
   test("empty and damaged slots and a bad code show messages and keep the world", () => {

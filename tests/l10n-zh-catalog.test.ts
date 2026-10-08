@@ -114,7 +114,7 @@ describe("zh_CN component uiText", () => {
 
   test("covers every pinned UiTextTable key and only those keys", () => {
     expect(Object.keys(zh).sort()).toEqual(Object.keys(EN_UI_TEXT).sort());
-    expect(Object.keys(zh)).toHaveLength(58);
+    expect(Object.keys(zh)).toHaveLength(84);
   });
 
   test("preserves every named template parameter", () => {

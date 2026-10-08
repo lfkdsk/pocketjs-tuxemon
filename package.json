@@ -103,6 +103,7 @@
     "build:psp:zh": "bun tools/psp.ts --zh",
     "verify:psp:journey": "bun tools/verify-psp-journey.ts",
     "verify:psp:emu": "bun tools/verify-psp-emu.ts",
+    "verify:psp:save": "bun tools/verify-psp-save.ts",
     "check:l10n": "bun tools/check-l10n.ts",
     "update:l10n-overrides": "bun tools/build-zh-overrides.ts",
     "verify:web:zh": "bun tools/verify-web-zh.ts",

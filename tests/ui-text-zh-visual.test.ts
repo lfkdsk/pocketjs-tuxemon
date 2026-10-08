@@ -58,6 +58,7 @@ interface GlyphCheck {
   text: string;
   region: Region;
   ink: "light" | "dark";
+  fontSlot?: number;
   scale?: number;
 }
 
@@ -150,7 +151,7 @@ function assertSurfaceText(tree: unknown): void {
 }
 
 describe("Simplified Chinese kit interface visuals", () => {
-  simTest("matches all seven production surfaces at both committed viewports", async () => {
+  simTest("matches every production surface at both committed viewports", async () => {
     expect(manifest.format).toBe("pocket-tuxemon/ui-text-zh-goldens/v1");
     expect(manifest.frames).toHaveLength(UI_TEXT_ZH_VIEWPORTS.length * UI_TEXT_ZH_CASES.length);
     const { small, large } = await captures();
@@ -181,6 +182,16 @@ describe("Simplified Chinese kit interface visuals", () => {
     const all = await captures();
     for (const capture of [all.small, all.large]) {
       assertSurfaceText(capture.cases["save-menu"].tree);
+
+      const saveSuccess = capture.cases["save-success"].tree;
+      expect(nodeText(requireNode(saveSuccess, "rpgkit-message-title"))).toBe("已保存到存档位 1");
+      expect(nodeText(requireNode(saveSuccess, "rpgkit-message-body"))).toMatch(/^.+  （\d+，\d+）$/);
+      expect(textLeaves(requireNode(saveSuccess, "rpgkit-save-panel"))).not.toContain("SAVED TO SLOT 1");
+
+      const saveFailure = capture.cases["save-failure"].tree;
+      expect(nodeText(requireNode(saveFailure, "rpgkit-message-title"))).toBe("保存失败");
+      expect(nodeText(requireNode(saveFailure, "rpgkit-message-body"))).toBe("无法写入存档。");
+      expect(textLeaves(requireNode(saveFailure, "rpgkit-save-panel"))).not.toContain("SAVE FAILED");
 
       const name = requireNode(capture.cases["name-input"].tree, "rpgkit-name-input-scene");
       const nameWords = textLeaves(name);
@@ -220,6 +231,8 @@ describe("Simplified Chinese kit interface visuals", () => {
 
       const visibleSurfaces = [
         requireNode(capture.cases["save-menu"].tree, "rpgkit-save-overlay"),
+        requireNode(saveSuccess, "rpgkit-save-panel"),
+        requireNode(saveFailure, "rpgkit-save-panel"),
         name,
         requireNode(demoTree, "rpgkit-demo-menu-overlay"),
         requireNode(shopTree, "rpgkit-shop-box"),
@@ -232,17 +245,20 @@ describe("Simplified Chinese kit interface visuals", () => {
     }
   }, 60_000);
 
-  simTest("matches Chinese glyph shapes on four surfaces at both viewports", async () => {
+  simTest("matches Chinese glyph shapes on production surfaces at both viewports", async () => {
     const all = await captures();
-    const font = loadFontMask();
     const checks: Record<"small" | "large", GlyphCheck[]> = {
       small: [
+        { case: "save-success", text: "已保存", region: { x0: 40, y0: 45, x1: 440, y1: 175 }, ink: "light", fontSlot: 1 },
+        { case: "save-failure", text: "失败", region: { x0: 40, y0: 45, x1: 440, y1: 175 }, ink: "light", fontSlot: 1 },
         { case: "shop", text: "购买", region: { x0: 220, y0: 70, x1: 300, y1: 105 }, ink: "light" },
         { case: "name-input", text: "删除", region: { x0: 300, y0: 185, x1: 380, y1: 225 }, ink: "light" },
         { case: "button-hints", text: "○ 确定 · × 返回", region: { x0: 350, y0: 140, x1: 470, y1: 175 }, ink: "light" },
         { case: "battle-status", text: "105／105", region: { x0: 390, y0: 110, x1: 475, y1: 150 }, ink: "dark" },
       ],
       large: [
+        { case: "save-success", text: "已保存", region: { x0: 280, y0: 180, x1: 680, y1: 320 }, ink: "light", fontSlot: 1 },
+        { case: "save-failure", text: "失败", region: { x0: 280, y0: 180, x1: 680, y1: 320 }, ink: "light", fontSlot: 1 },
         { case: "shop", text: "购买", region: { x0: 700, y0: 340, x1: 780, y1: 385 }, ink: "light" },
         { case: "name-input", text: "删除", region: { x0: 630, y0: 390, x1: 730, y1: 450 }, ink: "light" },
         { case: "button-hints", text: "○ 确定 · × 返回", region: { x0: 820, y0: 400, x1: 950, y1: 455 }, ink: "light" },
@@ -252,6 +268,7 @@ describe("Simplified Chinese kit interface visuals", () => {
     for (const size of ["small", "large"] as const) {
       const capture = all[size];
       for (const check of checks[size]) {
+        const font = loadFontMask(undefined, check.fontSlot ?? 0);
         const mask = scaleMask(renderTextMask(font, check.text), check.scale ?? 1);
         const match = bestGlyphMatch(
           capture.cases[check.case].rgba,

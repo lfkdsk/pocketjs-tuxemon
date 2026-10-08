@@ -10,6 +10,22 @@
       "pngSha256": "0fbc48c577c9dee1a767186edb9b71cd90bcafd2701f90fd1e27972f0eb59b78"
     },
     {
+      "case": "save-success",
+      "width": 480,
+      "height": 272,
+      "file": "ui-text-zh-save-success.480x272.png",
+      "rgbaFnv1a": "62b584a7",
+      "pngSha256": "427f1ca67171a42e0d9aea4bc8532fd1ae3fb210a776c9f24d0f81722b00a78d"
+    },
+    {
+      "case": "save-failure",
+      "width": 480,
+      "height": 272,
+      "file": "ui-text-zh-save-failure.480x272.png",
+      "rgbaFnv1a": "6e52f3a6",
+      "pngSha256": "6d4fc3883585106d8c830c280e00b96551878589f4cfc69163bd191eaef0cd9c"
+    },
+    {
       "case": "name-input",
       "width": 480,
       "height": 272,
@@ -64,6 +80,22 @@
       "file": "ui-text-zh-save-menu.960x544.png",
       "rgbaFnv1a": "3c088584",
       "pngSha256": "63e1ca29ce999dde04e9e16c2075f254156dd643fcc995983dc820070f23363b"
+    },
+    {
+      "case": "save-success",
+      "width": 960,
+      "height": 544,
+      "file": "ui-text-zh-save-success.960x544.png",
+      "rgbaFnv1a": "33fbc4a7",
+      "pngSha256": "569abca532f6caefbed2dbc19c770b2d758a43b60e3c45c499334ab87f77ef54"
+    },
+    {
+      "case": "save-failure",
+      "width": 960,
+      "height": 544,
+      "file": "ui-text-zh-save-failure.960x544.png",
+      "rgbaFnv1a": "b3b7d066",
+      "pngSha256": "133d05ca4f56080d80bc37cfd6e9916d9ffefcfcccd7059710df074102fdcb1f"
     },
     {
       "case": "name-input",

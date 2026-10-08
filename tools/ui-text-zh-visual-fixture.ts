@@ -28,6 +28,8 @@ export const UI_TEXT_ZH_VIEWPORTS = [
 
 export const UI_TEXT_ZH_CASES = [
   "save-menu",
+  "save-success",
+  "save-failure",
   "name-input",
   "demo-menu",
   "shop",
@@ -129,6 +131,49 @@ async function captureSave(viewport: { width: number; height: number }): Promise
   hook.open();
   step(world);
   if (hook.menu().kind !== "root") throw new Error("uiText zh fixture: save root did not open");
+  return frame(world);
+}
+
+function forceSavePoint(live: SessionState): void {
+  live.scene = null;
+  live.fade = null;
+  live.move.moving = false;
+  live.move.phase = 0;
+  live.interp.error = undefined;
+  live.interp.modal = null;
+  live.interp.main = null;
+  live.interp.inputLocked = false;
+  live.interp.pendingTransfer = null;
+  live.interp.pendingMoveRoutes.length = 0;
+  live.interp.pendingPlacements.length = 0;
+  live.interp.abortedRoutes.length = 0;
+  live.interp.pendingBattles.length = 0;
+  if (live.interp.pendingScenes) live.interp.pendingScenes.length = 0;
+}
+
+async function captureSaveOutcome(
+  viewport: { width: number; height: number },
+  failWrite: boolean,
+): Promise<UiTextZhFrame> {
+  const world = await boot(viewport);
+  forceSavePoint(state());
+  if (failWrite) {
+    const storage = (globalThis as unknown as { localStorage: { setItem(key: string, value: string): void } })
+      .localStorage;
+    storage.setItem = () => { throw new Error("uiText zh fixture: injected write failure"); };
+  }
+  const hook = globalThis.__pocketTuxemonSave;
+  if (!hook) throw new Error("uiText zh fixture: save-menu hook is unavailable");
+  hook.open();
+  step(world);
+  tap(world, BTN.CIRCLE); // Save to slot
+  tap(world, BTN.CIRCLE); // slot 1
+  const outcome = hook.menu();
+  if (outcome.kind !== "message") throw new Error("uiText zh fixture: save outcome did not open");
+  const expected = failWrite ? "保存失败" : "已保存到存档位 1";
+  if (outcome.title !== expected) {
+    throw new Error(`uiText zh fixture: expected ${expected}, got ${outcome.title}`);
+  }
   return frame(world);
 }
 
@@ -264,6 +309,8 @@ export async function captureUiTextZh(
   }
   const cases: Record<UiTextZhVisualCase, UiTextZhFrame> = {
     "save-menu": await captureSave(viewport),
+    "save-success": await captureSaveOutcome(viewport, false),
+    "save-failure": await captureSaveOutcome(viewport, true),
     "name-input": await captureNameInput(viewport),
     "demo-menu": await captureDemo(viewport),
     shop: await captureShop(viewport),

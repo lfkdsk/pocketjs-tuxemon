@@ -30,7 +30,8 @@ const args = new Set(process.argv.slice(2));
 const allowed = new Set(["--skip-assets", "--bench", "--journey", "--capture", "--help", "--zh"]);
 for (const arg of args) {
   if (!allowed.has(arg) && !arg.startsWith("--journey-segment=")
-      && !arg.startsWith("--journey-segment-end=")) {
+      && !arg.startsWith("--journey-segment-end=")
+      && !arg.startsWith("--journey-tape=")) {
     throw new Error(`Unknown PSP option: ${arg}`);
   }
 }
@@ -54,10 +55,15 @@ if (args.has("--help")) {
 }
 const segmentArg = [...args].find((a) => a.startsWith("--journey-segment="));
 const segmentChapter = segmentArg?.slice("--journey-segment=".length);
+const journeyTapeArg = [...args].find((a) => a.startsWith("--journey-tape="));
 if (segmentChapter !== undefined && args.has("--journey")) {
   throw new Error("--journey and --journey-segment are mutually exclusive");
 }
-const benchmark = args.has("--bench") || args.has("--journey") || segmentChapter !== undefined;
+if (journeyTapeArg !== undefined && (args.has("--journey") || segmentChapter !== undefined)) {
+  throw new Error("--journey-tape is mutually exclusive with --journey and --journey-segment");
+}
+const benchmark = args.has("--bench") || args.has("--journey") || segmentChapter !== undefined
+  || journeyTapeArg !== undefined;
 const root = resolve(import.meta.dir, "..");
 const framework = join(root, "vendor/pocket-rpgkit/vendor/pocketjs");
 const out = join(root, "dist/psp");
@@ -285,6 +291,45 @@ if (args.has("--journey")) {
   writeFileSync(bundlePath, prefix + original + suffix);
 }
 
+// Custom-tape journey: like --journey, but the tape and the state-log point
+// come from a JSON file ({masks:number[], logAt?:number}). The save/load
+// e2e (tools/verify-psp-save.ts) uses it to drive the START menu under
+// PPSSPP and log the live state right after a save or a load, so the two
+// runs can be compared field-by-field. Implies --bench (the wrapper calls
+// __pspLog/__pspExit, which the bench feature registers).
+if (journeyTapeArg !== undefined) {
+  const tapeFile = journeyTapeArg.slice("--journey-tape=".length);
+  const tapeSpec = JSON.parse(readFileSync(tapeFile, "utf8")) as {
+    masks: number[];
+    logAt?: number;
+    label?: string;
+  };
+  if (!Array.isArray(tapeSpec.masks) || tapeSpec.masks.length === 0) {
+    throw new Error(`--journey-tape: ${tapeFile} has no masks`);
+  }
+  const bundlePath = join(out, "pocket-tuxemon.js");
+  const original = readFileSync(bundlePath, "utf8");
+  journeyBuildId = createHash("sha256")
+    .update(original)
+    .update(JSON.stringify(tapeSpec.masks))
+    .update(JSON.stringify(FIXED_INITIAL_CIVIL_TIME))
+    .digest("hex");
+  const prefix =
+    `${langPrefix}globalThis.__pocketTuxemonInitialCivilTime=${JSON.stringify(FIXED_INITIAL_CIVIL_TIME)};\n`;
+  const logAt = tapeSpec.logAt ?? -1;
+  const suffix =
+    `\n;(function(){var id=${JSON.stringify(journeyBuildId)};` +
+    `__pspLog(JSON.stringify({kind:"session",buildId:id}));` +
+    `var f=globalThis.frame,n=0,tape=${JSON.stringify(tapeSpec.masks)},logAt=${logAt};` +
+    `globalThis.frame=function(buttons,analog){f(n<tape.length?tape[n]:buttons,analog);n++;` +
+    `var s=globalThis.__rpgSessionState;` +
+    `if(n===logAt){var m=null;try{var h=globalThis.__pocketTuxemonSave;m=h?h.menu():null;}catch(e){}` +
+    `__pspLog(JSON.stringify({kind:"marked",frame:n,state:s,menu:m,buildId:id}));}` +
+    `if(n===tape.length)__pspLog(JSON.stringify({kind:"terminal",frame:n,state:s,buildId:id}));` +
+    `if(n===tape.length&&typeof __pspExit==="function")__pspExit();};})();\n`;
+  writeFileSync(bundlePath, prefix + original + suffix);
+}
+
 // Segment build: replay a mainline chapter suffix from a chapter save, so the
 // full GB6+J1+J2+J3+J4 mainline can run under the emulator in bounded pieces.
 // The boot-snapshot overlay (ui/boot-snapshot-overlay.tsx) restores the
@@ -342,7 +387,7 @@ if (segmentChapter !== undefined) {
 // instead of exiting silently after the window. A plain capture (no tape)
 // keeps --capture alone.
 const captureWithJourney = args.has("--capture") &&
-  (args.has("--journey") || segmentChapter !== undefined);
+  (args.has("--journey") || segmentChapter !== undefined || journeyTapeArg !== undefined);
 const captureEnv: Record<string, string> = {};
 if (args.has("--capture")) {
   const capStart = Number(process.env.PSP_CAP_START ?? "16");
@@ -435,7 +480,7 @@ writeFileSync(join(out, "build-receipt.json"), JSON.stringify({
   cCompiler,
   benchmark,
   capture: args.has("--capture"),
-  journey: args.has("--journey") || segmentChapter !== undefined,
+  journey: args.has("--journey") || segmentChapter !== undefined || journeyTapeArg !== undefined,
   zh,
   ...(segmentReceipt === undefined ? {} : { journeySegment: segmentReceipt }),
   ...(journeyBuildId === undefined ? {} : { journeyBuildId }),

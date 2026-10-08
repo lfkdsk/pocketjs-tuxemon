@@ -534,6 +534,13 @@ decoded-RGBA hash, per-opaque-pixel sprite matches at the reducer-derived
 positions, and semantic colour-region counts per map. There is no tolerance:
 a single differing pixel fails.
 
+The Simplified-Chinese UI fixture also captures the localized save-success
+and save-failure pages at both sizes. `bun run goldens:ui-text:zh` commits the
+native-size PNGs and manifest hashes, and writes nearest-neighbour 3× review
+copies to `dist/ui-text-zh-review/` for visual inspection; the 3× copies are
+build artifacts and are not committed. Its test asserts the exact translated
+title/body nodes and Chinese glyph masks in addition to the pixel hashes.
+
 The GB6 route, J1, J4 and daylight tools share the checkpoint authority in
 `tools/golden-sync.ts`. It verifies every segment's format, frame count, tape
 hash, ancestry and traversal mode before replaying the pure reducer. At each

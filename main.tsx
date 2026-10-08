@@ -46,6 +46,7 @@ import enMonthNames from "./data/month-names.json";
 import { createAnimatedProvider } from "./ui/animated-repository.ts";
 import { createSaveMenu } from "./ui/save-menu.tsx";
 import { persistAutosave } from "./ui/save-game.ts";
+import { pspAutosaveBridge } from "./ui/save-psp.ts";
 import { createLangMenu } from "./ui/lang-menu.tsx";
 import { createCompositeOverlay } from "./ui/game-overlay.tsx";
 import { createTuxepediaOverlay } from "./ui/tuxepedia.tsx";
@@ -106,6 +107,12 @@ setBattleSceneLang(lang);
 // Deferred to onMount: openFontArchive needs the host installed by render(),
 // which runs after this module evaluates but before the root mounts.
 onMount(() => initZhFontStream(lang));
+// PSP: install the memory-stick autosave bridge so the kit's autosave
+// command and the menu's Automatic Save row have a channel there (no-op on
+// every other target). Runs before GameView mounts, so the first autosave
+// callback already sees it.
+const pspAutosave = pspAutosaveBridge();
+if (pspAutosave) globalThis.__rpgkitAutosave = pspAutosave;
 const project = (localizedData?.project ?? rawProject) as unknown as ProjectShell;
 // The {x:} text-token resolver for the boot language. GameView forwards it
 // to both the live session and the attract/demo controller, so a demo, a
