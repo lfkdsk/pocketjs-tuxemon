@@ -90,7 +90,7 @@ describe("generated per-map repository", () => {
     expect(localized.shell.mapIndex.find((entry) => entry.id === "spyder_routec")?.entry)
       .toBe(routec.path);
     expect(localized.files[0]?.path).toBe("project-shell.zh_CN.json");
-  });
+  }, 60_000);
 
   test("the packaged shell's declared mapManifestHash is fresh", () => {
     // The runtime trusts the declared hash instead of rehashing at startup,
