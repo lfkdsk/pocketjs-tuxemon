@@ -35,7 +35,7 @@ rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
 const journey = JSON.parse(readFileSync(join(ROOT, "data/g6-journey.json"), "utf8"));
 const goldens = JSON.parse(readFileSync(join(ROOT, "data/g6-goldens.json"), "utf8"));
-const DENSITY_DIALOG_FRAME = 1624;
+const DENSITY_DIALOG_FRAME = 1610;
 const densityDialog = decodePng(new Uint8Array(readFileSync(
   join(ROOT, "tests/goldens/web-density-paper-dialog.2x.png"),
 )));
