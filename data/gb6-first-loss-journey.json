@@ -2,7 +2,7 @@
   "format": "pocket-tuxemon/gb6-first-loss/v1",
   "worldTraversal": "seamless-v1",
   "hz": 60,
-  "frames": 3263,
+  "frames": 3265,
   "map": "spyder_route1",
   "position": [
     14,
@@ -11,7 +11,7 @@
   "checkpoints": [
     {
       "name": "bedroom",
-      "frame": 1107,
+      "frame": 1109,
       "map": "spyder_bedroom",
       "position": [
         3,
@@ -20,7 +20,7 @@
     },
     {
       "name": "downstairs-mom",
-      "frame": 1357,
+      "frame": 1359,
       "map": "spyder_downstairs",
       "position": [
         3,
@@ -29,7 +29,7 @@
     },
     {
       "name": "paper-town",
-      "frame": 1392,
+      "frame": 1394,
       "map": "spyder_paper_town",
       "position": [
         10,
@@ -38,7 +38,7 @@
     },
     {
       "name": "route-1",
-      "frame": 3262,
+      "frame": 3264,
       "map": "spyder_route1",
       "position": [
         14,
@@ -319,6 +319,8 @@
     8192,
     0,
     8192,
+    0,
+    128,
     0,
     8192,
     0,
@@ -3312,8 +3314,8 @@
     0
   ],
   "rewind": {
-    "target": 2459,
-    "from": 2718,
+    "target": 2461,
+    "from": 2720,
     "restored": true
   },
   "story": {
@@ -3327,7 +3329,7 @@
     "billie_won": false,
     "billie_lost": true
   },
-  "tapeSha256": "c24ddbe25602a15bcabf3789eb66208af1cb9ffee99db436406b45b0144112fb",
-  "terminalStateSha256": "9b29345d3c581d662c598754cfbb8d24db1c347ed8a43889def69c0672fc9f00",
-  "sha256": "abc063bf88a271aa3662fcb4ad964a7ca77746ac40b35d9de5d8349ae72d3df6"
+  "tapeSha256": "3799888cd222207225a73c317c66650b57f8a1e926fc37b7a5ef7e9a6c6f65eb",
+  "terminalStateSha256": "056fe41f0544eb2d4a6725cbbff6de3de45ae0ac6ee1163b55d45248b66e44cc",
+  "sha256": "96ca5aa499b3bb841cce01672186f1b09f12b8b0faef1dfbad98ec8104d4920d"
 }

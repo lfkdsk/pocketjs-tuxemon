@@ -5,13 +5,13 @@
   "frames": [
     {
       "name": "bedroom",
-      "frame": 1107,
+      "frame": 1109,
       "map": "spyder_bedroom",
       "position": [
         3,
         4
       ],
-      "file": "g6-bedroom.1107.png",
+      "file": "g6-bedroom.1109.png",
       "rgbaFnv1a": "00af3e6f",
       "pngSha256": "3e63b2f4c0e4ac5215d04834dfb41e8ba113400c1af001b1c87cad95ece12c67",
       "camera": [
@@ -35,13 +35,13 @@
     },
     {
       "name": "downstairs-mom",
-      "frame": 1357,
+      "frame": 1359,
       "map": "spyder_downstairs",
       "position": [
         3,
         6
       ],
-      "file": "g6-downstairs-mom.1357.png",
+      "file": "g6-downstairs-mom.1359.png",
       "rgbaFnv1a": "fc6f434d",
       "pngSha256": "2e97ca5ba45793d4d5c3c0d3a4bd0f45fa1477dba02bfcabf881eddf4c5697ad",
       "camera": [
@@ -81,13 +81,13 @@
     },
     {
       "name": "paper-town",
-      "frame": 1392,
+      "frame": 1394,
       "map": "spyder_paper_town",
       "position": [
         10,
         8
       ],
-      "file": "g6-paper-town.1392.png",
+      "file": "g6-paper-town.1394.png",
       "rgbaFnv1a": "d9ebc3ff",
       "pngSha256": "7522745d663d6fce38d052fba224ecc58e4b638f7001c04a5c1c4fafb169c50c",
       "camera": [
@@ -111,13 +111,13 @@
     },
     {
       "name": "route-1",
-      "frame": 3497,
+      "frame": 3499,
       "map": "spyder_route1",
       "position": [
         14,
         19
       ],
-      "file": "g6-route-1.3497.png",
+      "file": "g6-route-1.3499.png",
       "rgbaFnv1a": "2c96801c",
       "pngSha256": "2bc6ef2c0833bd41f4af19799c184585165e4cb2ff22f056bb007e0004671c64",
       "camera": [

@@ -2,7 +2,7 @@
   "format": "pocket-tuxemon/gb6-mainline/v1",
   "worldTraversal": "seamless-v1",
   "hz": 60,
-  "frames": 115828,
+  "frames": 115830,
   "terminalMapFrame": 31,
   "map": "spyder_route3",
   "position": [
@@ -282,6 +282,8 @@
     8192,
     0,
     8192,
+    0,
+    128,
     0,
     8192,
     0,
@@ -115860,7 +115862,7 @@
     },
     {
       "name": "bedroom",
-      "frame": 1098,
+      "frame": 1100,
       "map": "spyder_bedroom",
       "position": [
         3,
@@ -115869,7 +115871,7 @@
     },
     {
       "name": "downstairs",
-      "frame": 1180,
+      "frame": 1182,
       "map": "spyder_downstairs",
       "position": [
         0,
@@ -115878,7 +115880,7 @@
     },
     {
       "name": "paper_town",
-      "frame": 1375,
+      "frame": 1377,
       "map": "spyder_paper_town",
       "position": [
         10,
@@ -115887,7 +115889,7 @@
     },
     {
       "name": "route1",
-      "frame": 3497,
+      "frame": 3499,
       "map": "spyder_route1",
       "position": [
         14,
@@ -115896,7 +115898,7 @@
     },
     {
       "name": "cotton_town",
-      "frame": 5578,
+      "frame": 5580,
       "map": "spyder_cotton_town",
       "position": [
         21,
@@ -115905,7 +115907,7 @@
     },
     {
       "name": "cotton_scoop",
-      "frame": 6791,
+      "frame": 6793,
       "map": "spyder_cotton_scoop",
       "position": [
         5,
@@ -115914,7 +115916,7 @@
     },
     {
       "name": "cotton_town",
-      "frame": 6894,
+      "frame": 6896,
       "map": "spyder_cotton_town",
       "position": [
         30,
@@ -115923,7 +115925,7 @@
     },
     {
       "name": "route1",
-      "frame": 7018,
+      "frame": 7020,
       "map": "spyder_route1",
       "position": [
         22,
@@ -115932,7 +115934,7 @@
     },
     {
       "name": "paper_town",
-      "frame": 7305,
+      "frame": 7307,
       "map": "spyder_paper_town",
       "position": [
         14,
@@ -115941,7 +115943,7 @@
     },
     {
       "name": "downstairs",
-      "frame": 7421,
+      "frame": 7423,
       "map": "spyder_downstairs",
       "position": [
         4,
@@ -115950,7 +115952,7 @@
     },
     {
       "name": "paper_town",
-      "frame": 7546,
+      "frame": 7548,
       "map": "spyder_paper_town",
       "position": [
         10,
@@ -115959,7 +115961,7 @@
     },
     {
       "name": "route1",
-      "frame": 7662,
+      "frame": 7664,
       "map": "spyder_route1",
       "position": [
         14,
@@ -115968,7 +115970,7 @@
     },
     {
       "name": "cotton_town",
-      "frame": 8111,
+      "frame": 8113,
       "map": "spyder_cotton_town",
       "position": [
         21,
@@ -115977,7 +115979,7 @@
     },
     {
       "name": "cotton_cafe",
-      "frame": 8597,
+      "frame": 8599,
       "map": "spyder_cotton_cafe",
       "position": [
         8,
@@ -115986,7 +115988,7 @@
     },
     {
       "name": "cotton_town",
-      "frame": 9256,
+      "frame": 9258,
       "map": "spyder_cotton_town",
       "position": [
         31,
@@ -115995,7 +115997,7 @@
     },
     {
       "name": "route2",
-      "frame": 9580,
+      "frame": 9582,
       "map": "spyder_route2",
       "position": [
         0,
@@ -116004,7 +116006,7 @@
     },
     {
       "name": "cotton_town",
-      "frame": 11239,
+      "frame": 11241,
       "map": "spyder_cotton_town",
       "position": [
         39,
@@ -116013,7 +116015,7 @@
     },
     {
       "name": "cotton_cafe",
-      "frame": 11571,
+      "frame": 11573,
       "map": "spyder_cotton_cafe",
       "position": [
         8,
@@ -116022,7 +116024,7 @@
     },
     {
       "name": "cotton_town",
-      "frame": 11891,
+      "frame": 11893,
       "map": "spyder_cotton_town",
       "position": [
         31,
@@ -116031,7 +116033,7 @@
     },
     {
       "name": "route2",
-      "frame": 12215,
+      "frame": 12217,
       "map": "spyder_route2",
       "position": [
         0,
@@ -116040,7 +116042,7 @@
     },
     {
       "name": "cotton_town",
-      "frame": 13768,
+      "frame": 13770,
       "map": "spyder_cotton_town",
       "position": [
         39,
@@ -116049,7 +116051,7 @@
     },
     {
       "name": "cotton_cafe",
-      "frame": 14100,
+      "frame": 14102,
       "map": "spyder_cotton_cafe",
       "position": [
         8,
@@ -116058,7 +116060,7 @@
     },
     {
       "name": "cotton_town",
-      "frame": 14420,
+      "frame": 14422,
       "map": "spyder_cotton_town",
       "position": [
         31,
@@ -116067,7 +116069,7 @@
     },
     {
       "name": "route2",
-      "frame": 14744,
+      "frame": 14746,
       "map": "spyder_route2",
       "position": [
         0,
@@ -116076,7 +116078,7 @@
     },
     {
       "name": "cotton_town",
-      "frame": 16573,
+      "frame": 16575,
       "map": "spyder_cotton_town",
       "position": [
         39,
@@ -116085,7 +116087,7 @@
     },
     {
       "name": "cotton_cafe",
-      "frame": 16905,
+      "frame": 16907,
       "map": "spyder_cotton_cafe",
       "position": [
         8,
@@ -116094,7 +116096,7 @@
     },
     {
       "name": "cotton_town",
-      "frame": 17225,
+      "frame": 17227,
       "map": "spyder_cotton_town",
       "position": [
         31,
@@ -116103,7 +116105,7 @@
     },
     {
       "name": "route2",
-      "frame": 17549,
+      "frame": 17551,
       "map": "spyder_route2",
       "position": [
         0,
@@ -116112,7 +116114,7 @@
     },
     {
       "name": "cotton_town",
-      "frame": 18510,
+      "frame": 18512,
       "map": "spyder_cotton_town",
       "position": [
         39,
@@ -116121,7 +116123,7 @@
     },
     {
       "name": "cotton_cafe",
-      "frame": 18842,
+      "frame": 18844,
       "map": "spyder_cotton_cafe",
       "position": [
         8,
@@ -116130,7 +116132,7 @@
     },
     {
       "name": "cotton_town",
-      "frame": 19162,
+      "frame": 19164,
       "map": "spyder_cotton_town",
       "position": [
         31,
@@ -116139,7 +116141,7 @@
     },
     {
       "name": "route2",
-      "frame": 19486,
+      "frame": 19488,
       "map": "spyder_route2",
       "position": [
         0,
@@ -116148,7 +116150,7 @@
     },
     {
       "name": "cotton_town",
-      "frame": 20550,
+      "frame": 20552,
       "map": "spyder_cotton_town",
       "position": [
         39,
@@ -116157,7 +116159,7 @@
     },
     {
       "name": "cotton_cafe",
-      "frame": 20882,
+      "frame": 20884,
       "map": "spyder_cotton_cafe",
       "position": [
         8,
@@ -116166,7 +116168,7 @@
     },
     {
       "name": "cotton_town",
-      "frame": 21202,
+      "frame": 21204,
       "map": "spyder_cotton_town",
       "position": [
         31,
@@ -116175,7 +116177,7 @@
     },
     {
       "name": "route2",
-      "frame": 21526,
+      "frame": 21528,
       "map": "spyder_route2",
       "position": [
         0,
@@ -116184,7 +116186,7 @@
     },
     {
       "name": "cotton_town",
-      "frame": 22114,
+      "frame": 22116,
       "map": "spyder_cotton_town",
       "position": [
         39,
@@ -116193,7 +116195,7 @@
     },
     {
       "name": "cotton_cafe",
-      "frame": 22446,
+      "frame": 22448,
       "map": "spyder_cotton_cafe",
       "position": [
         8,
@@ -116202,7 +116204,7 @@
     },
     {
       "name": "cotton_town",
-      "frame": 22766,
+      "frame": 22768,
       "map": "spyder_cotton_town",
       "position": [
         31,
@@ -116211,7 +116213,7 @@
     },
     {
       "name": "route2",
-      "frame": 23090,
+      "frame": 23092,
       "map": "spyder_route2",
       "position": [
         0,
@@ -116220,7 +116222,7 @@
     },
     {
       "name": "cotton_town",
-      "frame": 24580,
+      "frame": 24582,
       "map": "spyder_cotton_town",
       "position": [
         39,
@@ -116229,7 +116231,7 @@
     },
     {
       "name": "cotton_cafe",
-      "frame": 24912,
+      "frame": 24914,
       "map": "spyder_cotton_cafe",
       "position": [
         8,
@@ -116238,7 +116240,7 @@
     },
     {
       "name": "cotton_town",
-      "frame": 25232,
+      "frame": 25234,
       "map": "spyder_cotton_town",
       "position": [
         31,
@@ -116247,7 +116249,7 @@
     },
     {
       "name": "route2",
-      "frame": 25556,
+      "frame": 25558,
       "map": "spyder_route2",
       "position": [
         0,
@@ -116256,7 +116258,7 @@
     },
     {
       "name": "cotton_town",
-      "frame": 27504,
+      "frame": 27506,
       "map": "spyder_cotton_town",
       "position": [
         39,
@@ -116265,7 +116267,7 @@
     },
     {
       "name": "cotton_cafe",
-      "frame": 27836,
+      "frame": 27838,
       "map": "spyder_cotton_cafe",
       "position": [
         8,
@@ -116274,7 +116276,7 @@
     },
     {
       "name": "cotton_town",
-      "frame": 28156,
+      "frame": 28158,
       "map": "spyder_cotton_town",
       "position": [
         31,
@@ -116283,7 +116285,7 @@
     },
     {
       "name": "route2",
-      "frame": 28480,
+      "frame": 28482,
       "map": "spyder_route2",
       "position": [
         0,
@@ -116292,7 +116294,7 @@
     },
     {
       "name": "cotton_town",
-      "frame": 30360,
+      "frame": 30362,
       "map": "spyder_cotton_town",
       "position": [
         39,
@@ -116301,7 +116303,7 @@
     },
     {
       "name": "cotton_cafe",
-      "frame": 30692,
+      "frame": 30694,
       "map": "spyder_cotton_cafe",
       "position": [
         8,
@@ -116310,7 +116312,7 @@
     },
     {
       "name": "cotton_town",
-      "frame": 31012,
+      "frame": 31014,
       "map": "spyder_cotton_town",
       "position": [
         31,
@@ -116319,7 +116321,7 @@
     },
     {
       "name": "route2",
-      "frame": 31336,
+      "frame": 31338,
       "map": "spyder_route2",
       "position": [
         0,
@@ -116328,7 +116330,7 @@
     },
     {
       "name": "cotton_town",
-      "frame": 32903,
+      "frame": 32905,
       "map": "spyder_cotton_town",
       "position": [
         39,
@@ -116337,7 +116339,7 @@
     },
     {
       "name": "cotton_cafe",
-      "frame": 33235,
+      "frame": 33237,
       "map": "spyder_cotton_cafe",
       "position": [
         8,
@@ -116346,7 +116348,7 @@
     },
     {
       "name": "cotton_town",
-      "frame": 33555,
+      "frame": 33557,
       "map": "spyder_cotton_town",
       "position": [
         31,
@@ -116355,7 +116357,7 @@
     },
     {
       "name": "route2",
-      "frame": 33879,
+      "frame": 33881,
       "map": "spyder_route2",
       "position": [
         0,
@@ -116364,7 +116366,7 @@
     },
     {
       "name": "cotton_town",
-      "frame": 34603,
+      "frame": 34605,
       "map": "spyder_cotton_town",
       "position": [
         39,
@@ -116373,7 +116375,7 @@
     },
     {
       "name": "cotton_cafe",
-      "frame": 34935,
+      "frame": 34937,
       "map": "spyder_cotton_cafe",
       "position": [
         8,
@@ -116382,7 +116384,7 @@
     },
     {
       "name": "cotton_town",
-      "frame": 35255,
+      "frame": 35257,
       "map": "spyder_cotton_town",
       "position": [
         31,
@@ -116391,7 +116393,7 @@
     },
     {
       "name": "route2",
-      "frame": 35579,
+      "frame": 35581,
       "map": "spyder_route2",
       "position": [
         0,
@@ -116400,7 +116402,7 @@
     },
     {
       "name": "cotton_town",
-      "frame": 36728,
+      "frame": 36730,
       "map": "spyder_cotton_town",
       "position": [
         39,
@@ -116409,7 +116411,7 @@
     },
     {
       "name": "cotton_cafe",
-      "frame": 37060,
+      "frame": 37062,
       "map": "spyder_cotton_cafe",
       "position": [
         8,
@@ -116418,7 +116420,7 @@
     },
     {
       "name": "cotton_town",
-      "frame": 37380,
+      "frame": 37382,
       "map": "spyder_cotton_town",
       "position": [
         31,
@@ -116427,7 +116429,7 @@
     },
     {
       "name": "route2",
-      "frame": 37704,
+      "frame": 37706,
       "map": "spyder_route2",
       "position": [
         0,
@@ -116436,7 +116438,7 @@
     },
     {
       "name": "cotton_town",
-      "frame": 39223,
+      "frame": 39225,
       "map": "spyder_cotton_town",
       "position": [
         39,
@@ -116445,7 +116447,7 @@
     },
     {
       "name": "cotton_cafe",
-      "frame": 39555,
+      "frame": 39557,
       "map": "spyder_cotton_cafe",
       "position": [
         8,
@@ -116454,7 +116456,7 @@
     },
     {
       "name": "cotton_town",
-      "frame": 39875,
+      "frame": 39877,
       "map": "spyder_cotton_town",
       "position": [
         31,
@@ -116463,7 +116465,7 @@
     },
     {
       "name": "route2",
-      "frame": 40199,
+      "frame": 40201,
       "map": "spyder_route2",
       "position": [
         0,
@@ -116472,7 +116474,7 @@
     },
     {
       "name": "cotton_town",
-      "frame": 42331,
+      "frame": 42333,
       "map": "spyder_cotton_town",
       "position": [
         39,
@@ -116481,7 +116483,7 @@
     },
     {
       "name": "cotton_cafe",
-      "frame": 42663,
+      "frame": 42665,
       "map": "spyder_cotton_cafe",
       "position": [
         8,
@@ -116490,7 +116492,7 @@
     },
     {
       "name": "cotton_town",
-      "frame": 42983,
+      "frame": 42985,
       "map": "spyder_cotton_town",
       "position": [
         31,
@@ -116499,7 +116501,7 @@
     },
     {
       "name": "route2",
-      "frame": 43307,
+      "frame": 43309,
       "map": "spyder_route2",
       "position": [
         0,
@@ -116508,7 +116510,7 @@
     },
     {
       "name": "citypark",
-      "frame": 47242,
+      "frame": 47244,
       "map": "spyder_citypark",
       "position": [
         10,
@@ -116517,7 +116519,7 @@
     },
     {
       "name": "leather_town",
-      "frame": 57611,
+      "frame": 57613,
       "map": "spyder_leather_town",
       "position": [
         39,
@@ -116526,7 +116528,7 @@
     },
     {
       "name": "leather_center",
-      "frame": 57951,
+      "frame": 57953,
       "map": "spyder_leather_center",
       "position": [
         6,
@@ -116535,7 +116537,7 @@
     },
     {
       "name": "leather_town",
-      "frame": 58153,
+      "frame": 58155,
       "map": "spyder_leather_town",
       "position": [
         23,
@@ -116544,7 +116546,7 @@
     },
     {
       "name": "route3",
-      "frame": 58389,
+      "frame": 58391,
       "map": "spyder_route3",
       "position": [
         7,
@@ -116553,7 +116555,7 @@
     },
     {
       "name": "leather_town",
-      "frame": 59004,
+      "frame": 59006,
       "map": "spyder_leather_town",
       "position": [
         7,
@@ -116562,7 +116564,7 @@
     },
     {
       "name": "leather_center",
-      "frame": 59240,
+      "frame": 59242,
       "map": "spyder_leather_center",
       "position": [
         6,
@@ -116571,7 +116573,7 @@
     },
     {
       "name": "leather_town",
-      "frame": 59442,
+      "frame": 59444,
       "map": "spyder_leather_town",
       "position": [
         23,
@@ -116580,7 +116582,7 @@
     },
     {
       "name": "route3",
-      "frame": 59678,
+      "frame": 59680,
       "map": "spyder_route3",
       "position": [
         7,
@@ -116589,7 +116591,7 @@
     },
     {
       "name": "leather_town",
-      "frame": 61852,
+      "frame": 61854,
       "map": "spyder_leather_town",
       "position": [
         7,
@@ -116598,7 +116600,7 @@
     },
     {
       "name": "leather_center",
-      "frame": 62088,
+      "frame": 62090,
       "map": "spyder_leather_center",
       "position": [
         6,
@@ -116607,7 +116609,7 @@
     },
     {
       "name": "leather_town",
-      "frame": 62290,
+      "frame": 62292,
       "map": "spyder_leather_town",
       "position": [
         23,
@@ -116616,7 +116618,7 @@
     },
     {
       "name": "route3",
-      "frame": 62526,
+      "frame": 62528,
       "map": "spyder_route3",
       "position": [
         7,
@@ -116625,7 +116627,7 @@
     },
     {
       "name": "leather_town",
-      "frame": 67504,
+      "frame": 67506,
       "map": "spyder_leather_town",
       "position": [
         7,
@@ -116634,7 +116636,7 @@
     },
     {
       "name": "leather_center",
-      "frame": 67740,
+      "frame": 67742,
       "map": "spyder_leather_center",
       "position": [
         6,
@@ -116643,7 +116645,7 @@
     },
     {
       "name": "leather_town",
-      "frame": 67942,
+      "frame": 67944,
       "map": "spyder_leather_town",
       "position": [
         23,
@@ -116652,7 +116654,7 @@
     },
     {
       "name": "route3",
-      "frame": 68178,
+      "frame": 68180,
       "map": "spyder_route3",
       "position": [
         7,
@@ -116661,7 +116663,7 @@
     },
     {
       "name": "leather_town",
-      "frame": 76581,
+      "frame": 76583,
       "map": "spyder_leather_town",
       "position": [
         7,
@@ -116670,7 +116672,7 @@
     },
     {
       "name": "leather_center",
-      "frame": 76817,
+      "frame": 76819,
       "map": "spyder_leather_center",
       "position": [
         6,
@@ -116679,7 +116681,7 @@
     },
     {
       "name": "leather_town",
-      "frame": 77019,
+      "frame": 77021,
       "map": "spyder_leather_town",
       "position": [
         23,
@@ -116688,7 +116690,7 @@
     },
     {
       "name": "route3",
-      "frame": 77255,
+      "frame": 77257,
       "map": "spyder_route3",
       "position": [
         7,
@@ -116697,7 +116699,7 @@
     },
     {
       "name": "leather_town",
-      "frame": 85147,
+      "frame": 85149,
       "map": "spyder_leather_town",
       "position": [
         7,
@@ -116706,7 +116708,7 @@
     },
     {
       "name": "leather_center",
-      "frame": 85383,
+      "frame": 85385,
       "map": "spyder_leather_center",
       "position": [
         6,
@@ -116715,7 +116717,7 @@
     },
     {
       "name": "leather_town",
-      "frame": 85585,
+      "frame": 85587,
       "map": "spyder_leather_town",
       "position": [
         23,
@@ -116724,7 +116726,7 @@
     },
     {
       "name": "route3",
-      "frame": 85821,
+      "frame": 85823,
       "map": "spyder_route3",
       "position": [
         7,
@@ -116733,7 +116735,7 @@
     },
     {
       "name": "leather_town",
-      "frame": 93176,
+      "frame": 93178,
       "map": "spyder_leather_town",
       "position": [
         7,
@@ -116742,7 +116744,7 @@
     },
     {
       "name": "leather_center",
-      "frame": 93412,
+      "frame": 93414,
       "map": "spyder_leather_center",
       "position": [
         6,
@@ -116751,7 +116753,7 @@
     },
     {
       "name": "leather_town",
-      "frame": 93614,
+      "frame": 93616,
       "map": "spyder_leather_town",
       "position": [
         23,
@@ -116760,7 +116762,7 @@
     },
     {
       "name": "route3",
-      "frame": 93850,
+      "frame": 93852,
       "map": "spyder_route3",
       "position": [
         7,
@@ -116769,7 +116771,7 @@
     },
     {
       "name": "leather_town",
-      "frame": 102403,
+      "frame": 102405,
       "map": "spyder_leather_town",
       "position": [
         7,
@@ -116778,7 +116780,7 @@
     },
     {
       "name": "leather_center",
-      "frame": 102639,
+      "frame": 102641,
       "map": "spyder_leather_center",
       "position": [
         6,
@@ -116787,7 +116789,7 @@
     },
     {
       "name": "leather_town",
-      "frame": 102841,
+      "frame": 102843,
       "map": "spyder_leather_town",
       "position": [
         23,
@@ -116796,7 +116798,7 @@
     },
     {
       "name": "route3",
-      "frame": 103077,
+      "frame": 103079,
       "map": "spyder_route3",
       "position": [
         7,
@@ -116805,7 +116807,7 @@
     },
     {
       "name": "leather_town",
-      "frame": 109658,
+      "frame": 109660,
       "map": "spyder_leather_town",
       "position": [
         7,
@@ -116814,7 +116816,7 @@
     },
     {
       "name": "leather_center",
-      "frame": 109894,
+      "frame": 109896,
       "map": "spyder_leather_center",
       "position": [
         6,
@@ -116823,7 +116825,7 @@
     },
     {
       "name": "leather_town",
-      "frame": 110096,
+      "frame": 110098,
       "map": "spyder_leather_town",
       "position": [
         23,
@@ -116832,7 +116834,7 @@
     },
     {
       "name": "route3",
-      "frame": 110332,
+      "frame": 110334,
       "map": "spyder_route3",
       "position": [
         7,
@@ -116841,7 +116843,7 @@
     },
     {
       "name": "wayfarer_inn1",
-      "frame": 113083,
+      "frame": 113085,
       "map": "spyder_wayfarer_inn1",
       "position": [
         11,
@@ -116850,7 +116852,7 @@
     },
     {
       "name": "wayfarer_inn2",
-      "frame": 113728,
+      "frame": 113730,
       "map": "spyder_wayfarer_inn2",
       "position": [
         5,
@@ -116859,7 +116861,7 @@
     },
     {
       "name": "wayfarer_inn1",
-      "frame": 114411,
+      "frame": 114413,
       "map": "spyder_wayfarer_inn1",
       "position": [
         11,
@@ -116868,7 +116870,7 @@
     },
     {
       "name": "route3",
-      "frame": 114979,
+      "frame": 114981,
       "map": "spyder_route3",
       "position": [
         2,
@@ -116877,7 +116879,7 @@
     },
     {
       "name": "wayfarer_inn1",
-      "frame": 115307,
+      "frame": 115309,
       "map": "spyder_wayfarer_inn1",
       "position": [
         11,
@@ -116886,7 +116888,7 @@
     },
     {
       "name": "wayfarer_inn2",
-      "frame": 115352,
+      "frame": 115354,
       "map": "spyder_wayfarer_inn2",
       "position": [
         9,
@@ -116895,7 +116897,7 @@
     },
     {
       "name": "wayfarer_inn1",
-      "frame": 115605,
+      "frame": 115607,
       "map": "spyder_wayfarer_inn1",
       "position": [
         3,
@@ -116904,7 +116906,7 @@
     },
     {
       "name": "route3",
-      "frame": 115787,
+      "frame": 115789,
       "map": "spyder_route3",
       "position": [
         4,
@@ -116913,7 +116915,7 @@
     },
     {
       "name": "route-3-end",
-      "frame": 115827,
+      "frame": 115829,
       "map": "spyder_route3",
       "position": [
         4,
@@ -116925,7 +116927,7 @@
     {
       "opponent": "spyder_billie",
       "kind": "trainer",
-      "startFrame": 2132,
+      "startFrame": 2134,
       "before": [
         {
           "slug": "nut",
@@ -116940,7 +116942,7 @@
           "level": 5
         }
       ],
-      "endFrame": 2938,
+      "endFrame": 2940,
       "turns": 5,
       "outcome": "won",
       "after": [
@@ -116955,7 +116957,7 @@
     {
       "opponent": "wild:cataspike",
       "kind": "wild",
-      "startFrame": 3721,
+      "startFrame": 3723,
       "before": [
         {
           "slug": "nut",
@@ -116970,7 +116972,7 @@
           "level": 4
         }
       ],
-      "endFrame": 4390,
+      "endFrame": 4392,
       "turns": 4,
       "outcome": "won",
       "after": [
@@ -116985,7 +116987,7 @@
     {
       "opponent": "wild:pairagrin",
       "kind": "wild",
-      "startFrame": 4409,
+      "startFrame": 4411,
       "before": [
         {
           "slug": "nut",
@@ -117000,7 +117002,7 @@
           "level": 3
         }
       ],
-      "endFrame": 4898,
+      "endFrame": 4900,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -117015,7 +117017,7 @@
     {
       "opponent": "wild:pairagrin",
       "kind": "wild",
-      "startFrame": 5012,
+      "startFrame": 5014,
       "before": [
         {
           "slug": "nut",
@@ -117030,7 +117032,7 @@
           "level": 4
         }
       ],
-      "endFrame": 5467,
+      "endFrame": 5469,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -117045,7 +117047,7 @@
     {
       "opponent": "spyder_confusedperson",
       "kind": "trainer",
-      "startFrame": 5851,
+      "startFrame": 5853,
       "before": [
         {
           "slug": "nut",
@@ -117064,7 +117066,7 @@
           "level": 2
         }
       ],
-      "endFrame": 6542,
+      "endFrame": 6544,
       "turns": 3,
       "outcome": "won",
       "after": [
@@ -117079,7 +117081,7 @@
     {
       "opponent": "spyder_billie",
       "kind": "trainer",
-      "startFrame": 9659,
+      "startFrame": 9661,
       "before": [
         {
           "slug": "nut",
@@ -117102,7 +117104,7 @@
           "level": 3
         }
       ],
-      "endFrame": 11129,
+      "endFrame": 11131,
       "turns": 9,
       "outcome": "won",
       "after": [
@@ -117117,7 +117119,7 @@
     {
       "opponent": "wild:cataspike",
       "kind": "wild",
-      "startFrame": 12468,
+      "startFrame": 12470,
       "before": [
         {
           "slug": "bolt",
@@ -117132,7 +117134,7 @@
           "level": 4
         }
       ],
-      "endFrame": 13023,
+      "endFrame": 13025,
       "turns": 3,
       "outcome": "won",
       "after": [
@@ -117147,7 +117149,7 @@
     {
       "opponent": "wild:aardorn",
       "kind": "wild",
-      "startFrame": 13144,
+      "startFrame": 13146,
       "before": [
         {
           "slug": "bolt",
@@ -117162,7 +117164,7 @@
           "level": 6
         }
       ],
-      "endFrame": 13690,
+      "endFrame": 13692,
       "turns": 3,
       "outcome": "captured",
       "after": [
@@ -117183,7 +117185,7 @@
     {
       "opponent": "wild:aardorn",
       "kind": "wild",
-      "startFrame": 15161,
+      "startFrame": 15163,
       "before": [
         {
           "slug": "bolt",
@@ -117204,7 +117206,7 @@
           "level": 5
         }
       ],
-      "endFrame": 15780,
+      "endFrame": 15782,
       "turns": 3,
       "outcome": "won",
       "after": [
@@ -117225,7 +117227,7 @@
     {
       "opponent": "wild:aardorn",
       "kind": "wild",
-      "startFrame": 15922,
+      "startFrame": 15924,
       "before": [
         {
           "slug": "bolt",
@@ -117246,7 +117248,7 @@
           "level": 6
         }
       ],
-      "endFrame": 16517,
+      "endFrame": 16519,
       "turns": 3,
       "outcome": "won",
       "after": [
@@ -117267,7 +117269,7 @@
     {
       "opponent": "wild:aardorn",
       "kind": "wild",
-      "startFrame": 17863,
+      "startFrame": 17865,
       "before": [
         {
           "slug": "bolt",
@@ -117288,7 +117290,7 @@
           "level": 6
         }
       ],
-      "endFrame": 18302,
+      "endFrame": 18304,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -117309,7 +117311,7 @@
     {
       "opponent": "wild:eyenemy",
       "kind": "wild",
-      "startFrame": 19780,
+      "startFrame": 19782,
       "before": [
         {
           "slug": "bolt",
@@ -117330,7 +117332,7 @@
           "level": 4
         }
       ],
-      "endFrame": 20087,
+      "endFrame": 20089,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -117351,7 +117353,7 @@
     {
       "opponent": "wild:eyenemy",
       "kind": "wild",
-      "startFrame": 20187,
+      "startFrame": 20189,
       "before": [
         {
           "slug": "bolt",
@@ -117372,7 +117374,7 @@
           "level": 6
         }
       ],
-      "endFrame": 20494,
+      "endFrame": 20496,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -117393,7 +117395,7 @@
     {
       "opponent": "wild:aardorn",
       "kind": "wild",
-      "startFrame": 21566,
+      "startFrame": 21568,
       "before": [
         {
           "slug": "bolt",
@@ -117414,7 +117416,7 @@
           "level": 3
         }
       ],
-      "endFrame": 21879,
+      "endFrame": 21881,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -117435,7 +117437,7 @@
     {
       "opponent": "wild:cataspike",
       "kind": "wild",
-      "startFrame": 23548,
+      "startFrame": 23550,
       "before": [
         {
           "slug": "bolt",
@@ -117456,7 +117458,7 @@
           "level": 4
         }
       ],
-      "endFrame": 23968,
+      "endFrame": 23970,
       "turns": 2,
       "outcome": "captured",
       "after": [
@@ -117483,7 +117485,7 @@
     {
       "opponent": "wild:aardorn",
       "kind": "wild",
-      "startFrame": 24069,
+      "startFrame": 24071,
       "before": [
         {
           "slug": "bolt",
@@ -117510,7 +117512,7 @@
           "level": 5
         }
       ],
-      "endFrame": 24524,
+      "endFrame": 24526,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -117537,7 +117539,7 @@
     {
       "opponent": "wild:aardorn",
       "kind": "wild",
-      "startFrame": 25829,
+      "startFrame": 25831,
       "before": [
         {
           "slug": "bolt",
@@ -117564,7 +117566,7 @@
           "level": 6
         }
       ],
-      "endFrame": 26586,
+      "endFrame": 26588,
       "turns": 4,
       "outcome": "won",
       "after": [
@@ -117591,7 +117593,7 @@
     {
       "opponent": "wild:aardorn",
       "kind": "wild",
-      "startFrame": 26605,
+      "startFrame": 26607,
       "before": [
         {
           "slug": "bolt",
@@ -117618,7 +117620,7 @@
           "level": 3
         }
       ],
-      "endFrame": 27346,
+      "endFrame": 27348,
       "turns": 4,
       "outcome": "won",
       "after": [
@@ -117645,7 +117647,7 @@
     {
       "opponent": "wild:axolightl",
       "kind": "wild",
-      "startFrame": 29368,
+      "startFrame": 29370,
       "before": [
         {
           "slug": "bolt",
@@ -117672,7 +117674,7 @@
           "level": 4
         }
       ],
-      "endFrame": 29760,
+      "endFrame": 29762,
       "turns": 2,
       "outcome": "captured",
       "after": [
@@ -117705,7 +117707,7 @@
     {
       "opponent": "wild:cardiling",
       "kind": "wild",
-      "startFrame": 29890,
+      "startFrame": 29892,
       "before": [
         {
           "slug": "bolt",
@@ -117738,7 +117740,7 @@
           "level": 4
         }
       ],
-      "endFrame": 30282,
+      "endFrame": 30284,
       "turns": 2,
       "outcome": "captured",
       "after": [
@@ -117777,7 +117779,7 @@
     {
       "opponent": "wild:eyenemy",
       "kind": "wild",
-      "startFrame": 31814,
+      "startFrame": 31816,
       "before": [
         {
           "slug": "bolt",
@@ -117816,7 +117818,7 @@
           "level": 4
         }
       ],
-      "endFrame": 32283,
+      "endFrame": 32285,
       "turns": 3,
       "outcome": "won",
       "after": [
@@ -117855,7 +117857,7 @@
     {
       "opponent": "wild:cataspike",
       "kind": "wild",
-      "startFrame": 32302,
+      "startFrame": 32304,
       "before": [
         {
           "slug": "bolt",
@@ -117894,7 +117896,7 @@
           "level": 3
         }
       ],
-      "endFrame": 32703,
+      "endFrame": 32705,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -117933,7 +117935,7 @@
     {
       "opponent": "wild:cardiling",
       "kind": "wild",
-      "startFrame": 33940,
+      "startFrame": 33942,
       "before": [
         {
           "slug": "bolt",
@@ -117972,7 +117974,7 @@
           "level": 5
         }
       ],
-      "endFrame": 34389,
+      "endFrame": 34391,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -118011,7 +118013,7 @@
     {
       "opponent": "wild:eyenemy",
       "kind": "wild",
-      "startFrame": 35852,
+      "startFrame": 35854,
       "before": [
         {
           "slug": "bolt",
@@ -118050,7 +118052,7 @@
           "level": 5
         }
       ],
-      "endFrame": 36159,
+      "endFrame": 36161,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -118089,7 +118091,7 @@
     {
       "opponent": "wild:cataspike",
       "kind": "wild",
-      "startFrame": 36292,
+      "startFrame": 36294,
       "before": [
         {
           "slug": "arthrobolt",
@@ -118128,7 +118130,7 @@
           "level": 3
         }
       ],
-      "endFrame": 36693,
+      "endFrame": 36695,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -118167,7 +118169,7 @@
     {
       "opponent": "spyder_route2_roddick",
       "kind": "trainer",
-      "startFrame": 37830,
+      "startFrame": 37832,
       "before": [
         {
           "slug": "arthrobolt",
@@ -118206,7 +118208,7 @@
           "level": 8
         }
       ],
-      "endFrame": 38422,
+      "endFrame": 38424,
       "turns": 3,
       "outcome": "won",
       "after": [
@@ -118245,7 +118247,7 @@
     {
       "opponent": "wild:eyenemy",
       "kind": "wild",
-      "startFrame": 38498,
+      "startFrame": 38500,
       "before": [
         {
           "slug": "arthrobolt",
@@ -118284,7 +118286,7 @@
           "level": 3
         }
       ],
-      "endFrame": 38747,
+      "endFrame": 38749,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -118323,7 +118325,7 @@
     {
       "opponent": "wild:cataspike",
       "kind": "wild",
-      "startFrame": 38766,
+      "startFrame": 38768,
       "before": [
         {
           "slug": "arthrobolt",
@@ -118362,7 +118364,7 @@
           "level": 3
         }
       ],
-      "endFrame": 39167,
+      "endFrame": 39169,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -118401,7 +118403,7 @@
     {
       "opponent": "wild:cardiling",
       "kind": "wild",
-      "startFrame": 40239,
+      "startFrame": 40241,
       "before": [
         {
           "slug": "arthrobolt",
@@ -118440,7 +118442,7 @@
           "level": 4
         }
       ],
-      "endFrame": 40640,
+      "endFrame": 40642,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -118479,7 +118481,7 @@
     {
       "opponent": "spyder_route2_marion",
       "kind": "trainer",
-      "startFrame": 41028,
+      "startFrame": 41030,
       "before": [
         {
           "slug": "arthrobolt",
@@ -118522,7 +118524,7 @@
           "level": 7
         }
       ],
-      "endFrame": 41582,
+      "endFrame": 41584,
       "turns": 3,
       "outcome": "won",
       "after": [
@@ -118561,7 +118563,7 @@
     {
       "opponent": "wild:axolightl",
       "kind": "wild",
-      "startFrame": 41850,
+      "startFrame": 41852,
       "before": [
         {
           "slug": "arthrobolt",
@@ -118600,7 +118602,7 @@
           "level": 6
         }
       ],
-      "endFrame": 42103,
+      "endFrame": 42105,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -118639,7 +118641,7 @@
     {
       "opponent": "wild:cataspike",
       "kind": "wild",
-      "startFrame": 43326,
+      "startFrame": 43328,
       "before": [
         {
           "slug": "arthrobolt",
@@ -118678,7 +118680,7 @@
           "level": 6
         }
       ],
-      "endFrame": 43579,
+      "endFrame": 43581,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -118717,7 +118719,7 @@
     {
       "opponent": "wild:axolightl",
       "kind": "wild",
-      "startFrame": 43770,
+      "startFrame": 43772,
       "before": [
         {
           "slug": "arthrobolt",
@@ -118756,7 +118758,7 @@
           "level": 7
         }
       ],
-      "endFrame": 44023,
+      "endFrame": 44025,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -118795,7 +118797,7 @@
     {
       "opponent": "wild:cardiling",
       "kind": "wild",
-      "startFrame": 44042,
+      "startFrame": 44044,
       "before": [
         {
           "slug": "arthrobolt",
@@ -118834,7 +118836,7 @@
           "level": 3
         }
       ],
-      "endFrame": 44421,
+      "endFrame": 44423,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -118873,7 +118875,7 @@
     {
       "opponent": "wild:aardorn",
       "kind": "wild",
-      "startFrame": 44913,
+      "startFrame": 44915,
       "before": [
         {
           "slug": "arthrobolt",
@@ -118912,7 +118914,7 @@
           "level": 4
         }
       ],
-      "endFrame": 45564,
+      "endFrame": 45566,
       "turns": 4,
       "outcome": "won",
       "after": [
@@ -118951,7 +118953,7 @@
     {
       "opponent": "spyder_route2_graf",
       "kind": "trainer",
-      "startFrame": 45752,
+      "startFrame": 45754,
       "before": [
         {
           "slug": "arthrobolt",
@@ -118998,7 +119000,7 @@
           "level": 5
         }
       ],
-      "endFrame": 46942,
+      "endFrame": 46944,
       "turns": 7,
       "outcome": "won",
       "after": [
@@ -119037,7 +119039,7 @@
     {
       "opponent": "wild:cardiling",
       "kind": "wild",
-      "startFrame": 47808,
+      "startFrame": 47810,
       "before": [
         {
           "slug": "arthrobolt",
@@ -119076,7 +119078,7 @@
           "level": 8
         }
       ],
-      "endFrame": 48333,
+      "endFrame": 48335,
       "turns": 3,
       "outcome": "won",
       "after": [
@@ -119115,7 +119117,7 @@
     {
       "opponent": "wild:cataspike",
       "kind": "wild",
-      "startFrame": 48352,
+      "startFrame": 48354,
       "before": [
         {
           "slug": "arthrobolt",
@@ -119154,7 +119156,7 @@
           "level": 6
         }
       ],
-      "endFrame": 48605,
+      "endFrame": 48607,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -119193,7 +119195,7 @@
     {
       "opponent": "wild:eyenemy",
       "kind": "wild",
-      "startFrame": 48708,
+      "startFrame": 48710,
       "before": [
         {
           "slug": "arthrobolt",
@@ -119232,7 +119234,7 @@
           "level": 7
         }
       ],
-      "endFrame": 48955,
+      "endFrame": 48957,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -119271,7 +119273,7 @@
     {
       "opponent": "spyder_citypark_frances",
       "kind": "trainer",
-      "startFrame": 49085,
+      "startFrame": 49087,
       "before": [
         {
           "slug": "arthrobolt",
@@ -119314,7 +119316,7 @@
           "level": 8
         }
       ],
-      "endFrame": 49779,
+      "endFrame": 49781,
       "turns": 4,
       "outcome": "won",
       "after": [
@@ -119353,7 +119355,7 @@
     {
       "opponent": "wild:cataspike",
       "kind": "wild",
-      "startFrame": 49928,
+      "startFrame": 49930,
       "before": [
         {
           "slug": "arthrobolt",
@@ -119392,7 +119394,7 @@
           "level": 9
         }
       ],
-      "endFrame": 50179,
+      "endFrame": 50181,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -119431,7 +119433,7 @@
     {
       "opponent": "wild:cataspike",
       "kind": "wild",
-      "startFrame": 50303,
+      "startFrame": 50305,
       "before": [
         {
           "slug": "arthrobolt",
@@ -119470,7 +119472,7 @@
           "level": 7
         }
       ],
-      "endFrame": 50554,
+      "endFrame": 50556,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -119509,7 +119511,7 @@
     {
       "opponent": "spyder_citypark_bobette",
       "kind": "trainer",
-      "startFrame": 51230,
+      "startFrame": 51232,
       "before": [
         {
           "slug": "arthrobolt",
@@ -119548,7 +119550,7 @@
           "level": 10
         }
       ],
-      "endFrame": 51482,
+      "endFrame": 51484,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -119587,7 +119589,7 @@
     {
       "opponent": "wild:eyenemy",
       "kind": "wild",
-      "startFrame": 52273,
+      "startFrame": 52275,
       "before": [
         {
           "slug": "arthrobolt",
@@ -119626,7 +119628,7 @@
           "level": 6
         }
       ],
-      "endFrame": 52524,
+      "endFrame": 52526,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -119665,7 +119667,7 @@
     {
       "opponent": "spyder_citypark_edith",
       "kind": "trainer",
-      "startFrame": 52983,
+      "startFrame": 52985,
       "before": [
         {
           "slug": "arthrobolt",
@@ -119708,7 +119710,7 @@
           "level": 8
         }
       ],
-      "endFrame": 53417,
+      "endFrame": 53419,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -119747,7 +119749,7 @@
     {
       "opponent": "wild:cardiling",
       "kind": "wild",
-      "startFrame": 53583,
+      "startFrame": 53585,
       "before": [
         {
           "slug": "arthrobolt",
@@ -119786,7 +119788,7 @@
           "level": 6
         }
       ],
-      "endFrame": 53834,
+      "endFrame": 53836,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -119825,7 +119827,7 @@
     {
       "opponent": "wild:cataspike",
       "kind": "wild",
-      "startFrame": 53874,
+      "startFrame": 53876,
       "before": [
         {
           "slug": "arthrobolt",
@@ -119864,7 +119866,7 @@
           "level": 8
         }
       ],
-      "endFrame": 54421,
+      "endFrame": 54423,
       "turns": 3,
       "outcome": "won",
       "after": [
@@ -119903,7 +119905,7 @@
     {
       "opponent": "wild:eyenemy",
       "kind": "wild",
-      "startFrame": 54575,
+      "startFrame": 54577,
       "before": [
         {
           "slug": "arthrobolt",
@@ -119942,7 +119944,7 @@
           "level": 8
         }
       ],
-      "endFrame": 54826,
+      "endFrame": 54828,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -119981,7 +119983,7 @@
     {
       "opponent": "wild:cataspike",
       "kind": "wild",
-      "startFrame": 55013,
+      "startFrame": 55015,
       "before": [
         {
           "slug": "arthrobolt",
@@ -120020,7 +120022,7 @@
           "level": 6
         }
       ],
-      "endFrame": 55266,
+      "endFrame": 55268,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -120059,7 +120061,7 @@
     {
       "opponent": "wild:eyenemy",
       "kind": "wild",
-      "startFrame": 56103,
+      "startFrame": 56105,
       "before": [
         {
           "slug": "arthrobolt",
@@ -120098,7 +120100,7 @@
           "level": 6
         }
       ],
-      "endFrame": 56488,
+      "endFrame": 56490,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -120137,7 +120139,7 @@
     {
       "opponent": "wild:eyenemy",
       "kind": "wild",
-      "startFrame": 57084,
+      "startFrame": 57086,
       "before": [
         {
           "slug": "arthrobolt",
@@ -120176,7 +120178,7 @@
           "level": 6
         }
       ],
-      "endFrame": 57333,
+      "endFrame": 57335,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -120215,7 +120217,7 @@
     {
       "opponent": "spyder_route3_novak",
       "kind": "trainer",
-      "startFrame": 58594,
+      "startFrame": 58596,
       "before": [
         {
           "slug": "arthrobolt",
@@ -120254,7 +120256,7 @@
           "level": 13
         }
       ],
-      "endFrame": 58842,
+      "endFrame": 58844,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -120293,7 +120295,7 @@
     {
       "opponent": "wild:tumblequill",
       "kind": "wild",
-      "startFrame": 59947,
+      "startFrame": 59949,
       "before": [
         {
           "slug": "arthrobolt",
@@ -120332,7 +120334,7 @@
           "level": 10
         }
       ],
-      "endFrame": 60198,
+      "endFrame": 60200,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -120371,7 +120373,7 @@
     {
       "opponent": "spyder_route3_curie",
       "kind": "trainer",
-      "startFrame": 60551,
+      "startFrame": 60553,
       "before": [
         {
           "slug": "arthrobolt",
@@ -120410,7 +120412,7 @@
           "level": 13
         }
       ],
-      "endFrame": 60801,
+      "endFrame": 60803,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -120449,7 +120451,7 @@
     {
       "opponent": "wild:tumblequill",
       "kind": "wild",
-      "startFrame": 60867,
+      "startFrame": 60869,
       "before": [
         {
           "slug": "arthrobolt",
@@ -120488,7 +120490,7 @@
           "level": 11
         }
       ],
-      "endFrame": 61118,
+      "endFrame": 61120,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -120527,7 +120529,7 @@
     {
       "opponent": "wild:elofly",
       "kind": "wild",
-      "startFrame": 61434,
+      "startFrame": 61436,
       "before": [
         {
           "slug": "arthrobolt",
@@ -120566,7 +120568,7 @@
           "level": 7
         }
       ],
-      "endFrame": 61683,
+      "endFrame": 61685,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -120605,7 +120607,7 @@
     {
       "opponent": "wild:tumblequill",
       "kind": "wild",
-      "startFrame": 62867,
+      "startFrame": 62869,
       "before": [
         {
           "slug": "arthrobolt",
@@ -120644,7 +120646,7 @@
           "level": 8
         }
       ],
-      "endFrame": 63118,
+      "endFrame": 63120,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -120683,7 +120685,7 @@
     {
       "opponent": "wild:seirein",
       "kind": "wild",
-      "startFrame": 63746,
+      "startFrame": 63748,
       "before": [
         {
           "slug": "arthrobolt",
@@ -120722,7 +120724,7 @@
           "level": 8
         }
       ],
-      "endFrame": 63997,
+      "endFrame": 63999,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -120761,7 +120763,7 @@
     {
       "opponent": "spyder_route3_wanda",
       "kind": "trainer",
-      "startFrame": 64020,
+      "startFrame": 64022,
       "before": [
         {
           "slug": "arthrobolt",
@@ -120820,7 +120822,7 @@
           "level": 8
         }
       ],
-      "endFrame": 65358,
+      "endFrame": 65360,
       "turns": 8,
       "outcome": "won",
       "after": [
@@ -120859,7 +120861,7 @@
     {
       "opponent": "wild:pawsand",
       "kind": "wild",
-      "startFrame": 65549,
+      "startFrame": 65551,
       "before": [
         {
           "slug": "arthrobolt",
@@ -120898,7 +120900,7 @@
           "level": 9
         }
       ],
-      "endFrame": 65977,
+      "endFrame": 65979,
       "turns": 2,
       "outcome": "captured",
       "after": [
@@ -120943,7 +120945,7 @@
     {
       "opponent": "wild:tumblequill",
       "kind": "wild",
-      "startFrame": 66018,
+      "startFrame": 66020,
       "before": [
         {
           "slug": "arthrobolt",
@@ -120988,7 +120990,7 @@
           "level": 9
         }
       ],
-      "endFrame": 66269,
+      "endFrame": 66271,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -121033,7 +121035,7 @@
     {
       "opponent": "wild:tumblequill",
       "kind": "wild",
-      "startFrame": 66519,
+      "startFrame": 66521,
       "before": [
         {
           "slug": "arthrobolt",
@@ -121078,7 +121080,7 @@
           "level": 9
         }
       ],
-      "endFrame": 66770,
+      "endFrame": 66772,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -121123,7 +121125,7 @@
     {
       "opponent": "wild:elofly",
       "kind": "wild",
-      "startFrame": 67139,
+      "startFrame": 67141,
       "before": [
         {
           "slug": "arthrobolt",
@@ -121168,7 +121170,7 @@
           "level": 10
         }
       ],
-      "endFrame": 67388,
+      "endFrame": 67390,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -121213,7 +121215,7 @@
     {
       "opponent": "wild:pawsand",
       "kind": "wild",
-      "startFrame": 69140,
+      "startFrame": 69142,
       "before": [
         {
           "slug": "arthrobolt",
@@ -121258,7 +121260,7 @@
           "level": 9
         }
       ],
-      "endFrame": 69575,
+      "endFrame": 69577,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -121303,7 +121305,7 @@
     {
       "opponent": "wild:pawsand",
       "kind": "wild",
-      "startFrame": 69615,
+      "startFrame": 69617,
       "before": [
         {
           "slug": "arthrobolt",
@@ -121348,7 +121350,7 @@
           "level": 10
         }
       ],
-      "endFrame": 70026,
+      "endFrame": 70028,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -121393,7 +121395,7 @@
     {
       "opponent": "wild:pawsand",
       "kind": "wild",
-      "startFrame": 70171,
+      "startFrame": 70173,
       "before": [
         {
           "slug": "arthrobolt",
@@ -121438,7 +121440,7 @@
           "level": 10
         }
       ],
-      "endFrame": 70602,
+      "endFrame": 70604,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -121483,7 +121485,7 @@
     {
       "opponent": "spyder_route3_weaver",
       "kind": "trainer",
-      "startFrame": 71090,
+      "startFrame": 71092,
       "before": [
         {
           "slug": "arthrobolt",
@@ -121532,7 +121534,7 @@
           "level": 12
         }
       ],
-      "endFrame": 71844,
+      "endFrame": 71846,
       "turns": 5,
       "outcome": "won",
       "after": [
@@ -121577,7 +121579,7 @@
     {
       "opponent": "wild:tumblequill",
       "kind": "wild",
-      "startFrame": 72015,
+      "startFrame": 72017,
       "before": [
         {
           "slug": "arthrobolt",
@@ -121622,7 +121624,7 @@
           "level": 11
         }
       ],
-      "endFrame": 72266,
+      "endFrame": 72268,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -121667,7 +121669,7 @@
     {
       "opponent": "spyder_route3_twig",
       "kind": "trainer",
-      "startFrame": 72384,
+      "startFrame": 72386,
       "before": [
         {
           "slug": "arthrobolt",
@@ -121716,7 +121718,7 @@
           "level": 11
         }
       ],
-      "endFrame": 72902,
+      "endFrame": 72904,
       "turns": 3,
       "outcome": "won",
       "after": [
@@ -121761,7 +121763,7 @@
     {
       "opponent": "wild:tumblequill",
       "kind": "wild",
-      "startFrame": 72991,
+      "startFrame": 72993,
       "before": [
         {
           "slug": "arthrobolt",
@@ -121806,7 +121808,7 @@
           "level": 8
         }
       ],
-      "endFrame": 73240,
+      "endFrame": 73242,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -121851,7 +121853,7 @@
     {
       "opponent": "wild:pawsand",
       "kind": "wild",
-      "startFrame": 73280,
+      "startFrame": 73282,
       "before": [
         {
           "slug": "arthrobolt",
@@ -121896,7 +121898,7 @@
           "level": 7
         }
       ],
-      "endFrame": 73529,
+      "endFrame": 73531,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -121941,7 +121943,7 @@
     {
       "opponent": "wild:pawsand",
       "kind": "wild",
-      "startFrame": 73674,
+      "startFrame": 73676,
       "before": [
         {
           "slug": "arthrobolt",
@@ -121986,7 +121988,7 @@
           "level": 9
         }
       ],
-      "endFrame": 73923,
+      "endFrame": 73925,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -122031,7 +122033,7 @@
     {
       "opponent": "wild:pawsand",
       "kind": "wild",
-      "startFrame": 74194,
+      "startFrame": 74196,
       "before": [
         {
           "slug": "arthrobolt",
@@ -122076,7 +122078,7 @@
           "level": 9
         }
       ],
-      "endFrame": 74589,
+      "endFrame": 74591,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -122121,7 +122123,7 @@
     {
       "opponent": "wild:tumblequill",
       "kind": "wild",
-      "startFrame": 75094,
+      "startFrame": 75096,
       "before": [
         {
           "slug": "arthrobolt",
@@ -122166,7 +122168,7 @@
           "level": 10
         }
       ],
-      "endFrame": 75343,
+      "endFrame": 75345,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -122211,7 +122213,7 @@
     {
       "opponent": "wild:pawsand",
       "kind": "wild",
-      "startFrame": 76076,
+      "startFrame": 76078,
       "before": [
         {
           "slug": "arthrobolt",
@@ -122256,7 +122258,7 @@
           "level": 7
         }
       ],
-      "endFrame": 76325,
+      "endFrame": 76327,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -122301,7 +122303,7 @@
     {
       "opponent": "spyder_route3_roxby",
       "kind": "trainer",
-      "startFrame": 79541,
+      "startFrame": 79543,
       "before": [
         {
           "slug": "arthrobolt",
@@ -122350,7 +122352,7 @@
           "level": 13
         }
       ],
-      "endFrame": 81395,
+      "endFrame": 81397,
       "turns": 11,
       "outcome": "won",
       "after": [
@@ -122395,7 +122397,7 @@
     {
       "opponent": "wild:pawsand",
       "kind": "wild",
-      "startFrame": 82388,
+      "startFrame": 82390,
       "before": [
         {
           "slug": "arthrobolt",
@@ -122440,7 +122442,7 @@
           "level": 7
         }
       ],
-      "endFrame": 82871,
+      "endFrame": 82873,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -122485,7 +122487,7 @@
     {
       "opponent": "wild:pawsand",
       "kind": "wild",
-      "startFrame": 83205,
+      "startFrame": 83207,
       "before": [
         {
           "slug": "arthrobolt",
@@ -122530,7 +122532,7 @@
           "level": 10
         }
       ],
-      "endFrame": 83672,
+      "endFrame": 83674,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -122575,7 +122577,7 @@
     {
       "opponent": "wild:pawsand",
       "kind": "wild",
-      "startFrame": 83838,
+      "startFrame": 83840,
       "before": [
         {
           "slug": "arthrobolt",
@@ -122620,7 +122622,7 @@
           "level": 9
         }
       ],
-      "endFrame": 84341,
+      "endFrame": 84343,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -122665,7 +122667,7 @@
     {
       "opponent": "wild:shybulb",
       "kind": "wild",
-      "startFrame": 86045,
+      "startFrame": 86047,
       "before": [
         {
           "slug": "arthrobolt",
@@ -122710,7 +122712,7 @@
           "level": 8
         }
       ],
-      "endFrame": 86292,
+      "endFrame": 86294,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -122755,7 +122757,7 @@
     {
       "opponent": "wild:pawsand",
       "kind": "wild",
-      "startFrame": 87238,
+      "startFrame": 87240,
       "before": [
         {
           "slug": "arthrobolt",
@@ -122800,7 +122802,7 @@
           "level": 7
         }
       ],
-      "endFrame": 87487,
+      "endFrame": 87489,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -122845,7 +122847,7 @@
     {
       "opponent": "wild:pawsand",
       "kind": "wild",
-      "startFrame": 87971,
+      "startFrame": 87973,
       "before": [
         {
           "slug": "arthrobolt",
@@ -122890,7 +122892,7 @@
           "level": 8
         }
       ],
-      "endFrame": 88220,
+      "endFrame": 88222,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -122935,7 +122937,7 @@
     {
       "opponent": "wild:pawsand",
       "kind": "wild",
-      "startFrame": 88869,
+      "startFrame": 88871,
       "before": [
         {
           "slug": "arthrobolt",
@@ -122980,7 +122982,7 @@
           "level": 10
         }
       ],
-      "endFrame": 89118,
+      "endFrame": 89120,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -123025,7 +123027,7 @@
     {
       "opponent": "spyder_route3_surat",
       "kind": "trainer",
-      "startFrame": 89223,
+      "startFrame": 89225,
       "before": [
         {
           "slug": "arthrobolt",
@@ -123074,7 +123076,7 @@
           "level": 12
         }
       ],
-      "endFrame": 89773,
+      "endFrame": 89775,
       "turns": 3,
       "outcome": "won",
       "after": [
@@ -123119,7 +123121,7 @@
     {
       "opponent": "wild:pawsand",
       "kind": "wild",
-      "startFrame": 90532,
+      "startFrame": 90534,
       "before": [
         {
           "slug": "arthrobolt",
@@ -123164,7 +123166,7 @@
           "level": 10
         }
       ],
-      "endFrame": 90781,
+      "endFrame": 90783,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -123209,7 +123211,7 @@
     {
       "opponent": "wild:tumblequill",
       "kind": "wild",
-      "startFrame": 91412,
+      "startFrame": 91414,
       "before": [
         {
           "slug": "arthrobolt",
@@ -123254,7 +123256,7 @@
           "level": 9
         }
       ],
-      "endFrame": 91661,
+      "endFrame": 91663,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -123299,7 +123301,7 @@
     {
       "opponent": "wild:pawsand",
       "kind": "wild",
-      "startFrame": 92016,
+      "startFrame": 92018,
       "before": [
         {
           "slug": "arthrobolt",
@@ -123344,7 +123346,7 @@
           "level": 8
         }
       ],
-      "endFrame": 92265,
+      "endFrame": 92267,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -123389,7 +123391,7 @@
     {
       "opponent": "wild:pawsand",
       "kind": "wild",
-      "startFrame": 92629,
+      "startFrame": 92631,
       "before": [
         {
           "slug": "arthrobolt",
@@ -123434,7 +123436,7 @@
           "level": 8
         }
       ],
-      "endFrame": 92878,
+      "endFrame": 92880,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -123479,7 +123481,7 @@
     {
       "opponent": "wild:squabbit",
       "kind": "wild",
-      "startFrame": 93881,
+      "startFrame": 93883,
       "before": [
         {
           "slug": "arthrobolt",
@@ -123524,7 +123526,7 @@
           "level": 11
         }
       ],
-      "endFrame": 94128,
+      "endFrame": 94130,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -123569,7 +123571,7 @@
     {
       "opponent": "wild:cardiling",
       "kind": "wild",
-      "startFrame": 94319,
+      "startFrame": 94321,
       "before": [
         {
           "slug": "arthrobolt",
@@ -123614,7 +123616,7 @@
           "level": 10
         }
       ],
-      "endFrame": 94570,
+      "endFrame": 94572,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -123659,7 +123661,7 @@
     {
       "opponent": "wild:tumblequill",
       "kind": "wild",
-      "startFrame": 94928,
+      "startFrame": 94930,
       "before": [
         {
           "slug": "arthrobolt",
@@ -123704,7 +123706,7 @@
           "level": 10
         }
       ],
-      "endFrame": 95177,
+      "endFrame": 95179,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -123749,7 +123751,7 @@
     {
       "opponent": "spyder_route3_zoolander",
       "kind": "trainer",
-      "startFrame": 97053,
+      "startFrame": 97055,
       "before": [
         {
           "slug": "arthrobolt",
@@ -123806,7 +123808,7 @@
           "level": 16
         }
       ],
-      "endFrame": 98571,
+      "endFrame": 98573,
       "turns": 10,
       "outcome": "won",
       "after": [
@@ -123851,7 +123853,7 @@
     {
       "opponent": "wild:pawsand",
       "kind": "wild",
-      "startFrame": 99967,
+      "startFrame": 99969,
       "before": [
         {
           "slug": "arthrobolt",
@@ -123896,7 +123898,7 @@
           "level": 8
         }
       ],
-      "endFrame": 100548,
+      "endFrame": 100550,
       "turns": 3,
       "outcome": "won",
       "after": [
@@ -123941,7 +123943,7 @@
     {
       "opponent": "wild:seirein",
       "kind": "wild",
-      "startFrame": 100987,
+      "startFrame": 100989,
       "before": [
         {
           "slug": "arthrobolt",
@@ -123986,7 +123988,7 @@
           "level": 7
         }
       ],
-      "endFrame": 101390,
+      "endFrame": 101392,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -124031,7 +124033,7 @@
     {
       "opponent": "wild:seirein",
       "kind": "wild",
-      "startFrame": 101724,
+      "startFrame": 101726,
       "before": [
         {
           "slug": "arthrobolt",
@@ -124076,7 +124078,7 @@
           "level": 10
         }
       ],
-      "endFrame": 102105,
+      "endFrame": 102107,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -124121,7 +124123,7 @@
     {
       "opponent": "wild:squabbit",
       "kind": "wild",
-      "startFrame": 103129,
+      "startFrame": 103131,
       "before": [
         {
           "slug": "arthrobolt",
@@ -124166,7 +124168,7 @@
           "level": 8
         }
       ],
-      "endFrame": 103376,
+      "endFrame": 103378,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -124211,7 +124213,7 @@
     {
       "opponent": "wild:elofly",
       "kind": "wild",
-      "startFrame": 103411,
+      "startFrame": 103413,
       "before": [
         {
           "slug": "arthrobolt",
@@ -124256,7 +124258,7 @@
           "level": 7
         }
       ],
-      "endFrame": 103660,
+      "endFrame": 103662,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -124301,7 +124303,7 @@
     {
       "opponent": "wild:tumblequill",
       "kind": "wild",
-      "startFrame": 104090,
+      "startFrame": 104092,
       "before": [
         {
           "slug": "arthrobolt",
@@ -124346,7 +124348,7 @@
           "level": 8
         }
       ],
-      "endFrame": 104339,
+      "endFrame": 104341,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -124391,7 +124393,7 @@
     {
       "opponent": "wild:tumblequill",
       "kind": "wild",
-      "startFrame": 104568,
+      "startFrame": 104570,
       "before": [
         {
           "slug": "arthrobolt",
@@ -124436,7 +124438,7 @@
           "level": 10
         }
       ],
-      "endFrame": 104817,
+      "endFrame": 104819,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -124481,7 +124483,7 @@
     {
       "opponent": "wild:squabbit",
       "kind": "wild",
-      "startFrame": 105403,
+      "startFrame": 105405,
       "before": [
         {
           "slug": "arthrobolt",
@@ -124526,7 +124528,7 @@
           "level": 9
         }
       ],
-      "endFrame": 105794,
+      "endFrame": 105796,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -124571,7 +124573,7 @@
     {
       "opponent": "spyder_route3_connor",
       "kind": "trainer",
-      "startFrame": 105957,
+      "startFrame": 105959,
       "before": [
         {
           "slug": "arthrobolt",
@@ -124636,7 +124638,7 @@
           "level": 8
         }
       ],
-      "endFrame": 107049,
+      "endFrame": 107051,
       "turns": 6,
       "outcome": "won",
       "after": [
@@ -124681,7 +124683,7 @@
     {
       "opponent": "wild:pawsand",
       "kind": "wild",
-      "startFrame": 107398,
+      "startFrame": 107400,
       "before": [
         {
           "slug": "arthrobolt",
@@ -124726,7 +124728,7 @@
           "level": 8
         }
       ],
-      "endFrame": 107647,
+      "endFrame": 107649,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -124771,7 +124773,7 @@
     {
       "opponent": "wild:seirein",
       "kind": "wild",
-      "startFrame": 108107,
+      "startFrame": 108109,
       "before": [
         {
           "slug": "arthrobolt",
@@ -124816,7 +124818,7 @@
           "level": 9
         }
       ],
-      "endFrame": 108356,
+      "endFrame": 108358,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -124861,7 +124863,7 @@
     {
       "opponent": "wild:pawsand",
       "kind": "wild",
-      "startFrame": 108480,
+      "startFrame": 108482,
       "before": [
         {
           "slug": "arthrobolt",
@@ -124906,7 +124908,7 @@
           "level": 10
         }
       ],
-      "endFrame": 108729,
+      "endFrame": 108731,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -124951,7 +124953,7 @@
     {
       "opponent": "wild:elofly",
       "kind": "wild",
-      "startFrame": 109262,
+      "startFrame": 109264,
       "before": [
         {
           "slug": "arthrobolt",
@@ -124996,7 +124998,7 @@
           "level": 8
         }
       ],
-      "endFrame": 109631,
+      "endFrame": 109633,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -125041,7 +125043,7 @@
     {
       "opponent": "wild:tumblequill",
       "kind": "wild",
-      "startFrame": 110799,
+      "startFrame": 110801,
       "before": [
         {
           "slug": "arthrobolt",
@@ -125086,7 +125088,7 @@
           "level": 11
         }
       ],
-      "endFrame": 111048,
+      "endFrame": 111050,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -125131,7 +125133,7 @@
     {
       "opponent": "wild:shybulb",
       "kind": "wild",
-      "startFrame": 111863,
+      "startFrame": 111865,
       "before": [
         {
           "slug": "arthrobolt",
@@ -125176,7 +125178,7 @@
           "level": 10
         }
       ],
-      "endFrame": 112110,
+      "endFrame": 112112,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -125221,7 +125223,7 @@
     {
       "opponent": "spyder_wayfarer1_morningstar",
       "kind": "trainer",
-      "startFrame": 113267,
+      "startFrame": 113269,
       "before": [
         {
           "slug": "arthrobolt",
@@ -125270,7 +125272,7 @@
           "level": 12
         }
       ],
-      "endFrame": 113679,
+      "endFrame": 113681,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -125315,7 +125317,7 @@
     {
       "opponent": "spyder_wayfarer1_bravo",
       "kind": "trainer",
-      "startFrame": 113920,
+      "startFrame": 113922,
       "before": [
         {
           "slug": "arthrobolt",
@@ -125364,7 +125366,7 @@
           "level": 12
         }
       ],
-      "endFrame": 114330,
+      "endFrame": 114332,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -125409,7 +125411,7 @@
     {
       "opponent": "spyder_wayfarer1_victor",
       "kind": "trainer",
-      "startFrame": 114450,
+      "startFrame": 114452,
       "before": [
         {
           "slug": "arthrobolt",
@@ -125454,7 +125456,7 @@
           "level": 14
         }
       ],
-      "endFrame": 114946,
+      "endFrame": 114948,
       "turns": 3,
       "outcome": "won",
       "after": [
@@ -125499,7 +125501,7 @@
     {
       "opponent": "spyder_route3_qqq",
       "kind": "trainer",
-      "startFrame": 115010,
+      "startFrame": 115012,
       "before": [
         {
           "slug": "arthrobolt",
@@ -125544,7 +125546,7 @@
           "level": 16
         }
       ],
-      "endFrame": 115256,
+      "endFrame": 115258,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -125596,6 +125598,6 @@
     "shaftscheme": 1,
     "zoolanderWon": true
   },
-  "terminalStateSha256": "87400e3d8fbf558630da1d20fd5f304165d15ab25b390689182d149a83fd74c3",
-  "tapeSha256": "4500c0f05c2f6169f9d57d9dddc2430e2c9dd5849544c6297fff22c8d32cea2e"
+  "terminalStateSha256": "b264ef2f4c3f88d9cfa4cc3704077c8ef47ca937e60eff50f4d5f990cdfd0704",
+  "tapeSha256": "a518c22c22eed1910f6fe6cf79516e89513de6a665fea4efc3a84f9a0dec1458"
 }

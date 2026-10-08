@@ -49,6 +49,7 @@ function chooseNo(
 
 test("Tuxemon dialog boxes hold movement and consume action input", () => {
   expect(project.system).toEqual({
+    characterNames: true,
     inventory: { maxKinds: 99 },
     messageBlocksPlayer: true,
     // ${{var:name}} dialogue prints stored text variables through {v:id}.

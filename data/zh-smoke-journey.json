@@ -2,7 +2,7 @@
  "format": "pocket-tuxemon/zh-smoke-journey/v1",
  "worldTraversal": "seamless-v1",
  "hz": 60,
- "frames": 3187,
+ "frames": 3189,
  "map": "spyder_paper_town",
  "position": [
   26,
@@ -281,6 +281,8 @@
   8192,
   0,
   8192,
+  0,
+  128,
   0,
   8192,
   0,
@@ -3209,7 +3211,7 @@
   },
   {
    "name": "bedroom",
-   "frame": 1107,
+   "frame": 1109,
    "map": "spyder_bedroom",
    "position": [
     3,
@@ -3218,7 +3220,7 @@
   },
   {
    "name": "downstairs-mom",
-   "frame": 1309,
+   "frame": 1311,
    "map": "spyder_downstairs",
    "position": [
     7,
@@ -3227,7 +3229,7 @@
   },
   {
    "name": "paper-town",
-   "frame": 1360,
+   "frame": 1362,
    "map": "spyder_paper_town",
    "position": [
     10,
@@ -3236,7 +3238,7 @@
   },
   {
    "name": "first-battle",
-   "frame": 3186,
+   "frame": 3188,
    "map": "spyder_paper_town",
    "position": [
     26,
@@ -3256,7 +3258,7 @@
   },
   {
    "name": "bedroom",
-   "frame": 1107,
+   "frame": 1109,
    "map": "spyder_bedroom",
    "position": [
     3,
@@ -3265,7 +3267,7 @@
   },
   {
    "name": "downstairs-mom",
-   "frame": 1309,
+   "frame": 1311,
    "map": "spyder_downstairs",
    "position": [
     7,
@@ -3274,7 +3276,7 @@
   },
   {
    "name": "paper-town",
-   "frame": 1360,
+   "frame": 1362,
    "map": "spyder_paper_town",
    "position": [
     10,
@@ -3283,7 +3285,7 @@
   },
   {
    "name": "first-battle",
-   "frame": 3186,
+   "frame": 3188,
    "map": "spyder_paper_town",
    "position": [
     26,
@@ -3295,8 +3297,8 @@
   {
    "opponent": "spyder_billie",
    "kind": "trainer",
-   "startFrame": 2101,
-   "endFrame": 2906,
+   "startFrame": 2103,
+   "endFrame": 2908,
    "outcome": "won"
   }
  ],
@@ -3306,6 +3308,6 @@
   "dantebin": 1,
   "firstfightend": 1
  },
- "terminalStateSha256": "23c80f8cf0d52c8652ea2ddae1fd8e2e96326379f90947ede8fc96cf90d0b1c4",
- "tapeSha256": "42458b081b9e3f3dec61aa68e0239f330cb171ee532c98f1fe1b36b02cf3ba90"
+ "terminalStateSha256": "51e816e33468ba9636cd51ed2eb3bd78c0016516bc1738cd91e04f9cf586bb04",
+ "tapeSha256": "b0913c25b045e205b1ca931e44d0232914e83ad112fc3f392b4b7305878448f5"
 }

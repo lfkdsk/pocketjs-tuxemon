@@ -2,8 +2,8 @@
   "format": "pocket-tuxemon/gb6-later-loss/v1",
   "worldTraversal": "seamless-v1",
   "hz": 60,
-  "frames": 68082,
-  "prefixFrames": 64021,
+  "frames": 68084,
+  "prefixFrames": 64023,
   "masks": [
     0,
     8192,
@@ -277,6 +277,8 @@
     8192,
     0,
     8192,
+    0,
+    128,
     0,
     8192,
     0,
@@ -68090,8 +68092,8 @@
   ],
   "battle": {
     "opponent": "spyder_route3_wanda",
-    "startFrame": 64020,
-    "endFrame": 67791,
+    "startFrame": 64022,
+    "endFrame": 67793,
     "turns": 31,
     "outcome": "lost",
     "swaps": 27,
@@ -68115,7 +68117,7 @@
   },
   "texts": [
     {
-      "frame": 67792,
+      "frame": 67794,
       "map": "spyder_route3",
       "lines": [
         "The fishing's good in Flower City - but who wants to",
@@ -68123,34 +68125,34 @@
       ]
     },
     {
-      "frame": 67796,
+      "frame": 67798,
       "map": "spyder_route3",
       "lines": [
         "Here, you can have my Fishing Rod."
       ]
     },
     {
-      "frame": 67800,
+      "frame": 67802,
       "map": "spyder_route3",
       "lines": [
         "Fishing Rod"
       ]
     },
     {
-      "frame": 67824,
+      "frame": 67826,
       "map": "spyder_leather_center",
       "lines": [
         "You should heal your monsters before heading off."
       ]
     },
     {
-      "frame": 67864,
+      "frame": 67866,
       "map": "spyder_leather_center",
       "lines": [
         "You should heal your monsters before heading off."
       ]
     }
   ],
-  "terminalStateSha256": "5b5233ac499de8c8dd92d45604894ebccc0e92c5d1fb91609f1957052beb0b03",
-  "tapeSha256": "560be66d25e658c82fff63120b1882757e60309408f2b16d5bc9145b4419c5ea"
+  "terminalStateSha256": "5638a8b8e17464f6286c7f2fd7d7eea74ac72308fa7e67f0bc35ff9454bbede6",
+  "tapeSha256": "2eab6f19084b009789da99b2ae15e6834699d47e04b50131500ec92439bd8138"
 }

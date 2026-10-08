@@ -284,9 +284,9 @@
  "schemaErrors": [],
  "audioQoaPending": [],
  "byFate": {
-  "T1-lowered": 2249,
+  "T1-lowered": 2232,
   "T3-dropped": 12,
-  "T1": 37046,
+  "T1": 37063,
   "T4-dropped": 1716,
   "T2-dropped": 365,
   "structural": 792
@@ -725,10 +725,10 @@
    "note": "handled by the preceding party-picker scene completion"
   },
   {
-   "key": "act:rename_player:T1-lowered",
-   "fate": "T1-lowered",
+   "key": "act:rename_player:T1",
+   "fate": "T1",
    "count": 5,
-   "note": "rpgkit.nameInput; random-name button is not available"
+   "note": "rpgkit.nameInput with the upstream random-name table (gender_choice selects the row)"
   },
   {
    "key": "act:screen_transition:T1",
@@ -841,13 +841,13 @@
   {
    "key": "act:set_template:T1",
    "fate": "T1",
-   "count": 16,
-   "note": "KV1 restores the character's saved race/page appearance baseline"
+   "count": 28,
+   "note": "KV1 restores the character's saved race/page appearance baseline (walking and battle sheet)"
   },
   {
    "key": "act:set_template:T1-lowered",
    "fate": "T1-lowered",
-   "count": 44,
+   "count": 32,
    "note": "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
   },
   {
@@ -3346,11 +3346,11 @@
    "summary": {
     "types": 98,
     "uses": 13617,
-    "native": 13078,
-    "degraded": 259,
+    "native": 13089,
+    "degraded": 248,
     "placeholder": 0,
     "dropped": 280,
-    "nativePercent": 96,
+    "nativePercent": 96.1,
     "executablePercent": 97.9,
     "tier1": {
      "uses": 6423,
@@ -4245,13 +4245,13 @@
     {
      "type": "rename_player",
      "total": 5,
-     "native": 0,
-     "degraded": 5,
+     "native": 5,
+     "degraded": 0,
      "placeholder": 0,
      "dropped": 0,
      "reasons": {
-      "degraded": [
-       "rpgkit.nameInput; random-name button is not available"
+      "native": [
+       "rpgkit.nameInput with the upstream random-name table (gender_choice selects the row)"
       ]
      }
     },
@@ -4500,18 +4500,18 @@
     {
      "type": "set_template",
      "total": 24,
-     "native": 16,
-     "degraded": 8,
+     "native": 22,
+     "degraded": 2,
      "placeholder": 0,
      "dropped": 0,
      "reasons": {
       "native": [
-       "KV1 restores the character's saved race/page appearance baseline",
-       "KV1 selects a runtime walking appearance"
+       "KV1 restores the character's saved race/page appearance baseline (walking and battle sheet)",
+       "KV1 selects a runtime walking appearance",
+       "KV1 saves the race walking and battle-sheet baseline"
       ],
       "degraded": [
-       "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow",
-       "KV1 saves the race walking baseline; its combat-sheet choice remains battle-owned"
+       "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
       ]
      }
     },

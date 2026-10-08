@@ -11,7 +11,7 @@ When conversion discards a whole event, every source rule in it is Dropped.
 
 | Kind | Kinds | Uses | Native | Degraded | Placeholder | Dropped | S1 T1 baseline |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Actions | 98 | 13617 | 13078 | 259 | 0 | 280 | 6423 / 6246 (47.17% / 45.9%) |
+| Actions | 98 | 13617 | 13089 | 248 | 0 | 280 | 6423 / 6246 (47.17% / 45.9%) |
 | Conditions | 64 | 8663 | 8411 | 23 | 0 | 229 | 4766 / 4591 (55.02% / 53.0%) |
 
 The S1 acceptance baselines are 6,246 action uses (45.9%) and 4,591
@@ -21,8 +21,8 @@ Degraded count toward them. This import records 6423
 (55.02%), respectively: 177 above
 for actions and 175 above for conditions. The old
 type-table Native figure was 5,448 / 13,617 (40.0%); conversion-path accounting
-supersedes it with 13078 / 13617
-(96.0%). “Executable”
+supersedes it with 13089 / 13617
+(96.1%). “Executable”
 (native + degraded + deliberate P1 placeholder) is
 97.9% for actions and
 97.4% for conditions.
@@ -539,7 +539,7 @@ four-neighbour BFS with fixed tie-breaking selects the nearest walkable cell:
 | Action | `remove_step_tracker` | 5 | 0 | 0 | 0 | 5 |
 | Action | `remove_tech` | 0 | 0 | 0 | 2 | 2 |
 | Action | `rename_monster` | 2 | 0 | 0 | 0 | 2 |
-| Action | `rename_player` | 0 | 5 | 0 | 0 | 5 |
+| Action | `rename_player` | 5 | 0 | 0 | 0 | 5 |
 | Action | `screen_transition` | 25 | 0 | 0 | 0 | 25 |
 | Action | `set_bill` | 2 | 0 | 0 | 0 | 2 |
 | Action | `set_bubble` | 16 | 0 | 0 | 0 | 16 |
@@ -558,7 +558,7 @@ four-neighbour BFS with fixed tie-breaking selects the nearest walkable cell:
 | Action | `set_random_variable` | 1 | 0 | 0 | 0 | 1 |
 | Action | `set_step_tracker_milestone_shown` | 3 | 0 | 0 | 0 | 3 |
 | Action | `set_teleport_faint` | 29 | 0 | 0 | 0 | 29 |
-| Action | `set_template` | 16 | 8 | 0 | 0 | 24 |
+| Action | `set_template` | 22 | 2 | 0 | 0 | 24 |
 | Action | `set_tuxepedia` | 0 | 6 | 0 | 0 | 6 |
 | Action | `set_variable` | 709 | 0 | 0 | 6 | 715 |
 | Action | `start_battle` | 330 | 0 | 0 | 1 | 331 |

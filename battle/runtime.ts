@@ -1151,7 +1151,15 @@ export function createTuxemonBattleRules(source: BattleDbSource, enums: Variable
                   opponent: db.npcs?.[spectatorInfo.foe]?.art ?? null,
                 }
               : {
-                  player: db.ui.trainerSheets.adventurer ?? null,
+                  // The player's battle back-sheet follows the race choice:
+                  // set_template's combat_sheet is saved as the appearance
+                  // baseline (defaultCombatSheet), with a runtime override
+                  // (combatSheet); absent either, the baked adventurer sheet.
+                  player: db.ui.trainerSheets[
+                    context.playerAppearance?.combatSheet
+                      ?? context.playerAppearance?.defaultCombatSheet
+                      ?? "adventurer"
+                  ] ?? db.ui.trainerSheets.adventurer ?? null,
                   opponent: db.npcs?.[opponent]?.art ?? null,
                 },
             monsters,

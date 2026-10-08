@@ -1,13 +1,13 @@
 {
   "format": "pocket-tuxemon/daylight-goldens/v1",
   "worldTraversal": "seamless-v1",
-  "journeySha256": "ca3afd89e29d1cc78f57cc97294efdab7c40ddf00d9f806ee310f0f21db722f1",
+  "journeySha256": "5356a175711df1adbb192a5a28c6b04b9fbad09b8f09ec8b61092b9817bcd895",
   "width": 480,
   "height": 272,
   "checkpoint": {
     "name": "paper-town",
-    "frame": 1392,
-    "timelineFrame": 1393,
+    "frame": 1394,
+    "timelineFrame": 1395,
     "map": "spyder_paper_town",
     "position": [
       10,

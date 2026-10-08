@@ -120,14 +120,16 @@ test("all maps pass schema and reference valid transfer destinations", () => {
     // portrait backdrops (change_bg_monster) now native. The five pinned
     // Route 3 `bottom` exits are repaired to their physical down direction,
     // making each transfer native and its trailing face degraded instead of
-    // dropping both unreachable actions.
+    // dropping both unreachable actions. The six authored race choices save
+    // their matching combat sheet, moving those set_template uses from
+    // degraded to native.
     types: 98,
     uses: 13_617,
-    native: 6_869,
-    degraded: 2_824,
+    native: 6_875,
+    degraded: 2_818,
     placeholder: 708,
     dropped: 3_216,
-    nativePercent: 50.4,
+    nativePercent: 50.5,
     tier1: {
       uses: 6_323,
       percent: 46.43,
@@ -481,6 +483,7 @@ test("KV1 imports overlays, runtime appearances, and exact surface passage updat
     op: "appearance",
     target: "player",
     sprite: "adventurer",
+    combatSheet: "adventurer",
     saveDefault: true,
   });
   expect(nodes).toContainEqual({
@@ -1378,6 +1381,14 @@ test("G6 lowers Tuxemon rename and journal actions to registered scenes", () => 
   const playerRename = nodes.find((node) => node.op === "scene" && node.id === "rpgkit.nameInput"
     && (node.args as { default?: string } | undefined)?.default === "");
   expect(playerRename?.args).toMatchObject({ maxLength: 15, swallowCancel: true, columns: 10 });
+  // The authored rename_player prompts all carry the "random" flag, so the
+  // scene opens with the upstream name table keyed by the gender_choice enum
+  // (2 = gender_male -> the male row; 3 = nonbinary -> neutral, the fallback).
+  expect(playerRename?.args).toMatchObject({
+    randomNames: { 2: ["Finnick", "Alden", "Corbin", "Silas", "Dorian"] },
+    randomNamesKeyVariable: "v.gender_choice",
+    randomNamesFallbackKey: "3",
+  });
 
   const picker = nodes.find((node) => node.op === "scene" && node.id === "tux.monsterPicker");
   expect(picker?.args).toEqual({ variable: "v.rename", title: "Choose a Tuxemon" });
@@ -1398,7 +1409,7 @@ test("G6 lowers Tuxemon rename and journal actions to registered scenes", () => 
   expect(nodes.filter((node) => node.op === "ext" && node.call === "tux.set_tuxepedia")).toHaveLength(6);
 
   const rows = result.report.coverage.actions.rows;
-  expect(rows.find((row) => row.type === "rename_player")).toMatchObject({ degraded: 3, dropped: 2 });
+  expect(rows.find((row) => row.type === "rename_player")).toMatchObject({ native: 3, degraded: 0, dropped: 2 });
   expect(rows.find((row) => row.type === "rename_monster")).toMatchObject({ native: 1, dropped: 1 });
   expect(rows.find((row) => row.type === "open_journal")).toMatchObject({ degraded: 3, dropped: 11 });
   expect(rows.find((row) => row.type === "set_tuxepedia")).toMatchObject({ degraded: 6, dropped: 0 });

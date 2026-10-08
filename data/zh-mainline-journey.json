@@ -4,12 +4,12 @@
   "hz": 60,
   "worldTraversal": "seamless-v1",
   "source": {
-    "chaptersSha256": "a415820bff39cf46e668c84d313978faebcd3d9e520725326da6cd2437dfab66",
+    "chaptersSha256": "f271a22bd32eb8bdd38b8c3f364757e14c8869188acdf7558c2e54be20b61a9f",
     "tape": {
       "gb6": {
         "file": "data/gb6-mainline-journey.json",
-        "frames": 115828,
-        "tapeSha256": "4500c0f05c2f6169f9d57d9dddc2430e2c9dd5849544c6297fff22c8d32cea2e",
+        "frames": 115830,
+        "tapeSha256": "a518c22c22eed1910f6fe6cf79516e89513de6a665fea4efc3a84f9a0dec1458",
         "worldTraversal": "seamless-v1"
       },
       "j1": {
@@ -36,8 +36,8 @@
         "tapeSha256": "78de1c0c67a260bb4b5e97999900bbff629ce8a64de39d362f66889f0b046a61",
         "worldTraversal": "seamless-v1"
       },
-      "frames": 206816,
-      "sha256": "dfdcdc2fc49697973e96f69d966c6606f4d2de739df47aee5288de63bf42c110"
+      "frames": 206818,
+      "sha256": "82bb403f0fd7bd8172f1ff9cc244bd34d199809c2dc4cb3c87a45cdb18cf0369"
     }
   },
   "paginator": {
@@ -50,15 +50,9 @@
     "fontSha256": "cdce2afab9c057d893fc6f4d8e2e9e54f261ebf6dd6cc7a611c976b51edd2859",
     "charsetSha256": "9b49d0b8d4369963216c70b38a6990819e4433ca78ea8415cfb237bf7aaa07b2"
   },
-  "frames": 206816,
-  "tapeSha256": "640428bc4cdbd3220f53b60053081e9ab72c0a39800fca89683de01533d437f0",
+  "frames": 206818,
+  "tapeSha256": "099b6c0e27faa403fc3faed0a96777a3cbfd114a66bed02649087181e1f0b4d9",
   "edits": [
-    {
-      "frame": 116002,
-      "source": 8192,
-      "target": 0,
-      "reason": "remove"
-    },
     {
       "frame": 116004,
       "source": 8192,
@@ -66,13 +60,19 @@
       "reason": "remove"
     },
     {
-      "frame": 155110,
+      "frame": 116006,
       "source": 8192,
       "target": 0,
       "reason": "remove"
     },
     {
       "frame": 155112,
+      "source": 8192,
+      "target": 0,
+      "reason": "remove"
+    },
+    {
+      "frame": 155114,
       "source": 8192,
       "target": 0,
       "reason": "remove"
@@ -95,7 +95,7 @@
         4
       ],
       "facing": 3,
-      "frame": 206816,
+      "frame": 206818,
       "gold": 67773,
       "items": {
         "aardant": 1,
@@ -125,6 +125,6 @@
       ],
       "storySha256": "4c307e5d3170ec082da6579a09861a0450f3ff8742b138aa6979f762139f8836"
     },
-    "neutralSha256": "f83f288070ee8d500f54986e449a15cf118e0d9ad739708962ad43748ed56389"
+    "neutralSha256": "c4c5eb096ca8b1208901e7a222e052c9eb8d35568528c5e757b8400670df2d26"
   }
 }

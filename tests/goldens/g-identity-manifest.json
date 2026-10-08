@@ -1,0 +1,74 @@
+{
+  "format": "pocket-tuxemon/g-identity-battle-goldens/v1",
+  "source": {
+    "chooser": "start_tuxemon",
+    "battleMap": "spyder_paper_town",
+    "battleEvent": "e024_first_fight_start"
+  },
+  "frames": [
+    {
+      "id": "black-female",
+      "width": 480,
+      "height": 272,
+      "hostFrame": 309,
+      "raceCode": 1,
+      "sprite": "brownheroine_brown",
+      "combatSheet": "heroineblack",
+      "trainerKey": "ui:tile.battle/gfx/sprites/player/heroineblack#0",
+      "opponent": "spyder_billie",
+      "event": "sendOut",
+      "eventTicks": 16,
+      "file": "g-identity-black-female.480x272.png",
+      "rgbaFnv1a": "65015d0d",
+      "pngSha256": "40ca532fdca98e9bf8bb40d4598fdb3f62552bda64f396c52c9def7e286f7c92"
+    },
+    {
+      "id": "whatever",
+      "width": 480,
+      "height": 272,
+      "hostFrame": 315,
+      "raceCode": 4,
+      "sprite": "penguin",
+      "combatSheet": "penguin",
+      "trainerKey": "ui:tile.battle/gfx/sprites/player/penguin#0",
+      "opponent": "spyder_billie",
+      "event": "sendOut",
+      "eventTicks": 16,
+      "file": "g-identity-whatever.480x272.png",
+      "rgbaFnv1a": "22233232",
+      "pngSha256": "a9f3eb6ec7b894610131a3c6f2cddb136f551a176121d4dec8eb78c94e15e49e"
+    },
+    {
+      "id": "black-female",
+      "width": 960,
+      "height": 544,
+      "hostFrame": 309,
+      "raceCode": 1,
+      "sprite": "brownheroine_brown",
+      "combatSheet": "heroineblack",
+      "trainerKey": "ui:tile.battle/gfx/sprites/player/heroineblack#0",
+      "opponent": "spyder_billie",
+      "event": "sendOut",
+      "eventTicks": 16,
+      "file": "g-identity-black-female.960x544.png",
+      "rgbaFnv1a": "ab70674e",
+      "pngSha256": "6bad0209b7eba98f92cee555115077041af96c2662f3d9771331c4651865971d"
+    },
+    {
+      "id": "whatever",
+      "width": 960,
+      "height": 544,
+      "hostFrame": 315,
+      "raceCode": 4,
+      "sprite": "penguin",
+      "combatSheet": "penguin",
+      "trainerKey": "ui:tile.battle/gfx/sprites/player/penguin#0",
+      "opponent": "spyder_billie",
+      "event": "sendOut",
+      "eventTicks": 16,
+      "file": "g-identity-whatever.960x544.png",
+      "rgbaFnv1a": "213f93f6",
+      "pngSha256": "4087b30cbc175e832ea3a0e3d8f895ac101b0820f914ce6b6c78d1407b6397bf"
+    }
+  ]
+}

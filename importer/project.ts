@@ -94,6 +94,9 @@ export const DEFAULT_MAPS = ["spyder_bedroom", "spyder_paper_scoop", "spyder_dow
 const PLAYER_NAME = "Red"; // mod.yaml starting_names: npc_red -> "Red"
 const TUXEMON_NAME_CHARSET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890.-! ".split("");
 const MONSTER_RENAME_NAME_VARIABLE = "tux.rename.name";
+/** Per-NPC rename staging slot. The input scene writes here, then the
+ *  following changeName command copies the value into the live character. */
+const npcRenameVariable = (slug: string) => `tux.npc_name.${slug}`;
 const AREA_CELL_CAP = 64; // v1 has no event areas: expand up to this many cells
 
 export interface ImportOptions {
@@ -186,7 +189,8 @@ type FutureCommand = Command
   | { op: "lockInput" }
   | { op: "unlockInput" }
   | { op: "place"; target: "this" | { event: string }; x: number; y: number; dir?: Dir }
-  | { op: "moveRoute"; target: "player" | "this" | { event: string }; wait?: boolean; route: { steps: FutureMoveStep[]; repeat: boolean; skippable: boolean } };
+  | { op: "moveRoute"; target: "player" | "this" | { event: string }; wait?: boolean; route: { steps: FutureMoveStep[]; repeat: boolean; skippable: boolean } }
+  | { op: "changeName"; target?: "player" | "this" | { event: string }; name: string | { variable: string } };
 type FutureGameEvent = GameEvent & { w?: number; h?: number };
 
 const command = (value: FutureCommand): Command => value as Command;
@@ -207,6 +211,40 @@ import {
 // swaps in the merged zh_CN catalog (upstream zh + supplement + en fallback).
 let po: TextCatalog = createTextCatalog("en_US");
 let activeLang: ImportLang = "en_US";
+
+/** Upstream's random-name table (mods/npc_names.yaml): random_names[lang]
+ *  [gender]. Every language section in the pinned source is identical, so the
+ *  en_us rows are the table for both builds. The name-input scene draws one
+ *  candidate through its own seeded RNG when the player picks RANDOM. */
+let randomNameTable: Record<string, string[]> | null = null;
+function loadRandomNameTable(): Record<string, string[]> {
+  if (randomNameTable) return randomNameTable;
+  const path = join(TUXEMON_SRC, "mods/npc_names.yaml");
+  const doc = Bun.YAML.parse(readFileSync(path, "utf8")) as {
+    random_names?: Record<string, Record<string, unknown>>;
+  } | null;
+  const rows = doc?.random_names?.en_us ?? {};
+  const table: Record<string, string[]> = {};
+  for (const gender of ["male", "female", "neutral"] as const) {
+    const list = rows[gender];
+    table[gender] = Array.isArray(list) ? list.map(String).filter((n) => n.length > 0) : [];
+  }
+  randomNameTable = table;
+  return table;
+}
+
+/** The random-name table keyed by the gender_choice enum codes, so the
+ *  name-input scene can index it with the live gender_choice variable. The
+ *  nonbinary code maps to the neutral row, matching upstream's
+ *  unknown-gender -> neutral rule (the scene's fallback key). */
+function randomNameTableByCode(): Record<string, string[]> {
+  const names = loadRandomNameTable();
+  return {
+    [String(code("gender_choice", "gender_female"))]: names.female ?? [],
+    [String(code("gender_choice", "gender_male"))]: names.male ?? [],
+    [String(code("gender_choice", "gender_nonbinary"))]: names.neutral ?? [],
+  };
+}
 
 // Player-visible lines for the headless NPC-versus-NPC auto battle. Kept
 // local to the importer instead of IMPORT_UI so the zh_CN catalog merge in
@@ -1890,6 +1928,44 @@ function charTarget(who: string, isSelf: boolean): RouteTarget {
   return { event: `npc_${slug(who)}` };
 }
 
+/** Lower one Tuxemon rename_player action. Exported so the identity
+ *  acceptance can exercise the otherwise-unrepresented NPC-target form
+ *  without adding synthetic content to the shipped project. */
+export function lowerRenamePlayerAction(
+  character: string,
+  random = false,
+  self?: string,
+): Command[] {
+  const randomArgs: Record<string, JsonValue> = random
+    ? {
+        randomNames: randomNameTableByCode(),
+        randomNamesKeyVariable: varId("gender_choice"),
+        randomNamesFallbackKey: String(code("gender_choice", "gender_nonbinary")),
+      }
+    : {};
+  const args: Record<string, JsonValue> = {
+    maxLength: 15,
+    default: "",
+    title: po.get("name") ?? "Name",
+    charset: TUXEMON_NAME_CHARSET,
+    columns: 10,
+    swallowCancel: true,
+    ...randomArgs,
+  };
+  if (character === "player") {
+    return [{ op: "scene", id: "rpgkit.nameInput", args }];
+  }
+  const variable = varId(npcRenameVariable(character));
+  return [
+    { op: "scene", id: "rpgkit.nameInput", args: { ...args, variable } },
+    command({
+      op: "changeName",
+      target: charTarget(character, self === character),
+      name: { variable },
+    }),
+  ];
+}
+
 /** Tuxemon moverate (tiles/sec, walkrate 3.75, run 7.35) -> the kit's MV
  *  exponential speed grade 1..6 (grade 5 = 8 ticks/tile at 60 Hz). The
  *  grade scale is 2x per step, so the nearest grade is picked in log space. */
@@ -2676,8 +2752,8 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
           ? "player" as const
           : isSelf(character) ? "this" as const : { event: `npc_${slug(character)}` };
         if (sprite === "default") {
-          noteAction(a, a.type, "T1", "KV1 restores the character's saved race/page appearance baseline");
-          out.push({ op: "appearance", target, sprite: null });
+          noteAction(a, a.type, "T1", "KV1 restores the character's saved race/page appearance baseline (walking and battle sheet)");
+          out.push({ op: "appearance", target, sprite: null, ...(character === "player" ? { combatSheet: null } : {}) });
           break;
         }
         if (!ensureAppearanceSprite(sprite)) {
@@ -2689,15 +2765,16 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         noteAction(
           a,
           a.type,
-          saveDefault ? "T1-lowered" : "T1",
+          saveDefault ? "T1" : "T1",
           saveDefault
-            ? "KV1 saves the race walking baseline; its combat-sheet choice remains battle-owned"
+            ? "KV1 saves the race walking and battle-sheet baseline"
             : "KV1 selects a runtime walking appearance",
         );
         out.push({
           op: "appearance",
           target,
           sprite,
+          ...(saveDefault && combatSheet ? { combatSheet } : {}),
           ...(saveDefault ? { saveDefault: true } : {}),
         });
         break;
@@ -3343,25 +3420,36 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         noteAction(a, a.type, "T1", "resumeBgm");
         out.push({ op: "resumeBgm" });
         break;
-      case "rename_player":
+      case "rename_player": {
+        // Upstream (event/actions/rename_player.py): opens InputMenu with
+        // prompt=input_name, initial="", char_limit=15, and a RANDOM cell
+        // when the second arg is "random". The random draw picks from
+        // npc_names.yaml by the PLAYER's gender (default neutral) through
+        // Python's random; the kit scene draws the same table through its
+        // own seeded cursor so saves and rewinds reproduce the pick. The
+        // player's gender is the gender_choice enum variable (set by the
+        // pronoun events and the Spyder boot page), so the table is keyed
+        // by its codes; an unset/unknown code falls back to the neutral
+        // row (upstream maps an unknown gender to neutral).
+        const random = g[1] === "random";
         if (ctx.options.battle && g[0] === "player") {
-          noteAction(a, a.type, "T1-lowered", "rpgkit.nameInput; random-name button is not available");
-          out.push({
-            op: "scene",
-            id: "rpgkit.nameInput",
-            args: {
-              maxLength: 15,
-              default: "",
-              title: po.get("name") ?? "Name",
-              charset: TUXEMON_NAME_CHARSET,
-              columns: 10,
-              swallowCancel: true,
-            },
-          });
+          noteAction(a, a.type, random ? "T1" : "T1-lowered",
+            random
+              ? "rpgkit.nameInput with the upstream random-name table (gender_choice selects the row)"
+              : "rpgkit.nameInput; no random-name button (the source event omits it)");
+          out.push(...lowerRenamePlayerAction("player", random, ctx.self));
+        } else if (ctx.options.battle && g[0]) {
+          // Upstream rename_player.py:41-42 assigns the callback result to
+          // char.name. Keep the input value in an importer-owned slot, then
+          // copy it to the same live NPC that routes/appearance actions use.
+          noteAction(a, a.type, "T1",
+            `rpgkit.nameInput followed by live changeName for ${g[0]}`);
+          out.push(...lowerRenamePlayerAction(g[0], random, ctx.self));
         } else {
-          noteAction(a, a.type, "T2-dropped", "NPC rename and non-battle profiles have no name scene");
+          noteAction(a, a.type, "T2-dropped", "non-battle profiles have no name scene");
         }
         break;
+      }
       case "set_environment":
         if (ctx.options.battle) {
           noteAction(a, a.type, "T1", "tux.set_environment updates the active battle backdrop");
@@ -5443,6 +5531,10 @@ export function buildProject(
       ...(options.battle ? {
         textVariables: true,
         textTokens: ["today", "map_desc", "monster_0_name", "monster_0_level", "money"],
+        // Enables the kit's {char:<event-id>|this|player} resolver. Tuxemon
+        // rename_player can target NPCs, so imported dialogue must observe
+        // the same live per-character name table that changeName updates.
+        characterNames: true,
       } : {}),
     },
     start: {

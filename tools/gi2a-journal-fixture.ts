@@ -175,6 +175,9 @@ export async function captureGi2aJournal(
     holdDir: 0,
     holdTicks: 0,
     lastButtons: 0,
+    rng: 0,
+    random: false,
+    randomPool: [],
     ext: session.ext,
   };
   const nameInput = mount("rpgkit.nameInput", nameState as unknown as JsonValue);

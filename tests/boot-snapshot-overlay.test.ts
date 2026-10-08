@@ -136,17 +136,17 @@ describe("boot-snapshot overlay", () => {
     const runtime = createBootSnapshotOverlay().create(host);
     runtime.step(0, 0);
 
-    const spec = resolveSegment(ROOT, "radio-broadcast", 193217);
+    const spec = resolveSegment(ROOT, "radio-broadcast", 193219);
     let state = getState();
     let previous = radio.held >>> 0;
     for (const mask of spec.suffix) {
       state = stepSession(session, state, mainlineInput(mask, previous));
       previous = mask;
     }
-    // The terminal hash carries the cathedral bill's authored interest/
-    // late-fee/share metadata and the additional live-movement encounters.
+    // The terminal hash carries the deterministic player identity alongside
+    // the cathedral bill metadata and live-movement encounter state.
     expect(sha256(canonicalJson(state)))
-      .toBe("a388673c6afd4160128f8d4c41c77e6d04212abc173f60fdf2f8d4bcdf9f1239");
-    expect(state.frame).toBe(193217);
+      .toBe("043a9ddffdb162e32bf01d50bb2fa89f8e4e91bce3f3391d5670d873e064169d");
+    expect(state.frame).toBe(193219);
   });
 });

@@ -22,8 +22,8 @@ describe("J4 QuickJS continuation tape", () => {
       opponent: "wild:kernel",
       outcome: "won",
     });
-    // Terminal carries the cathedral bill's authored metadata now.
+    // Terminal includes the deterministic player identity selected in G6.
     expect(tape.terminalStateSha256)
-      .toBe("26032277d9391a611298f2367d752374d7bf6a7a8dfb9966fbc7399ef017d4e2");
+      .toBe("1aa53e4f01e9c52d4e80b58392eb837597d8865f980925c009fed5a0538be516");
   });
 });

@@ -27,16 +27,22 @@ interface NameInputProjection {
   buffer: string;
   cursor: number;
   charset: string[];
+  random: boolean;
 }
 
 /** Deterministic policy used only by generated acceptance journeys. It names
- * the player "A", chooses the current party row, closes read-only journal
- * pages, logs off PCs and leaves monster shops without buying, and confirms
- * through trade transitions; production input remains entirely user-driven. */
+ * a character from the deterministic RANDOM pool when one exists (and "A"
+ * otherwise), chooses the current party row, closes read-only journal pages,
+ * logs off PCs and leaves monster shops without buying, and confirms through
+ * trade transitions; production input remains entirely user-driven. */
 export function utilitySceneAutoplayMask(scene: Readonly<ActiveGameScene>): number {
   if (scene.id === NAME_INPUT_SCENE_ID) {
     const state = scene.state as unknown as NameInputProjection;
-    if (state.buffer.length === 0) return BTN_CONFIRM;
+    if (state.buffer.length === 0) {
+      if (!state.random) return BTN_CONFIRM;
+      const random = state.charset.length + 3;
+      return state.cursor === random ? BTN_CONFIRM : BTN_BITS.LEFT;
+    }
     const ok = state.charset.length + 1;
     return state.cursor === ok ? BTN_CONFIRM : BTN_BITS.LEFT;
   }

@@ -26,7 +26,7 @@ summary:
   the north end of Route 3, Route 4 and Flower City to the Captain's return
   in the Mansion and on through Candy Town, the hospital cure and Omnichannel
   Radio Tower broadcast, then across Routes E and B to the Data Center and
-  Kernel's defeat — the complete 206,816-frame Spyder mainline at 60 Hz,
+  Kernel's defeat — the complete 206,818-frame Spyder mainline at 60 Hz,
   driven by
   deterministic autoplay tapes — and every imported input lock is executed
   to its unlock. On the 67 placed outdoor maps, the streamed renderer paints
@@ -52,7 +52,7 @@ summary:
   the Radio Tower — 13 trainer + 1 wild — and 15 on the Kernel quest —
   12 trainer + 3 wild), and every trainer
   battle enters Battle Processing and ends `won` with its `battle_outcome`
-  written back. The frozen 32-minute 60 Hz tape (115,828 frames / 32 min 10 s)
+  written back. The frozen 32-minute 60 Hz tape (115,830 frames / 32 min 10 s)
   replays byte-identical at 60, 30 and 20 Hz, and both failure paths are
   verified — the first loss against Billie, and a later loss on Route 3
   with the faint-point teleport, the heal-before-leaving block and the
@@ -64,7 +64,10 @@ summary:
   clock. The 590 images are indexed single-tile entries, loaded on demand
   through one battle cache and detached/freed on exit.
 - **Names and Tuxepedia:** the authored player- and monster-name prompts use
-  saved, rewindable game scenes. Seen/caught status is persistent and monotonic;
+  saved, rewindable game scenes. Player prompts offer Tuxemon's gender-selected
+  deterministic random-name pools; the same imported action also supports NPC
+  targets, whose runtime names are visible through subsequent character-name
+  dialogue tokens. Seen/caught status is persistent and monotonic;
   journal previews and the normal browser render monster details through the
   same indexed, lazily loaded battle-image shards as combat.
 - **Performance:** each language uses 260 compact map shards plus 3 canonical
@@ -210,7 +213,7 @@ world is paused while the menu is open.
 - **Save code (export) / Load code (import):** the same save as URL-safe text,
   paged on screen. Every target keeps these two rows as a fallback. Codes are
   compressed, but still a few thousand characters
-  (3,209–5,297 at the `verify:save` points; 3,657 in the documented screenshot),
+  (3,740–5,644 at the `verify:save` code points; 3,657 in the documented screenshot),
   so they suit copying between tools more than typing on the on-screen
   keyboard. Additive project-schema upgrades change the encoded text, but the
   runtime accepts compatible older schema identities and rewrites the next
@@ -230,7 +233,7 @@ Screens: [menu](docs/screenshots/save/save-menu.480x272.png),
 (960×544 versions alongside; `bun run screens:save` re-renders them from the
 built game).
 
-CI also plays the 3,498-frame opening journey — bedroom, Paper Town, the
+CI also plays the 3,500-frame opening journey — bedroom, Paper Town, the
 first battle, Route 1 — in headless Chrome against the built site
 (`bun tools/verify-web-journey.ts`) and checks every checkpoint's state and
 pixels against the goldens.
@@ -267,7 +270,7 @@ are stored as canonical JSON in both languages.
 - **Desktop:** `bun run desktop -- --lang zh` (or `--lang en`). The in-game
   **R** switcher writes the choice to the app's data folder and asks for a
   restart.
-- **Default:** English. The Chinese project supplies all 84 kit-owned
+- **Default:** English. The Chinese project supplies all 85 kit-owned
   interface strings: button hints, shop chrome, save pages and their
   success/failure/loading results, name input and
   its on-screen keyboard actions, demo chrome and errors, the event-error
@@ -377,7 +380,7 @@ not a crash. Chapter snapshots and the nibble-dictionary tape are packed into
 the pak and read on demand, so the JS bundle keeps only a tiny chapter index;
 the tape is decoded once, on the first chapter selection, and every chapter
 plays a window of it. The committed chapter pack and all twenty thumbnails are
-rebaked against the current 206,816-frame recording; every chapter envelope
+rebaked against the current 206,818-frame recording; every chapter envelope
 passes decode, map-aware restore and suffix replay to the production terminal.
 `bun tools/verify-web-demo.ts` drives all of the above in headless Chrome,
 including a 600-frame autoplay that must reach a state byte-identical to a
@@ -482,7 +485,7 @@ then compare the completed session with a fresh production replay:
 bun run verify:psp:emu          # builds nothing; runs the already-built .prx
 ```
 
-The complete GB6+J1+J2+J3+J4 mainline (206,816 frames) runs under
+The complete GB6+J1+J2+J3+J4 mainline (206,818 frames) runs under
 PPSSPPHeadless as 28 bounded chapter-to-chapter segments: the no-argument
 retained-evidence gate (`bun tools/psp-mainline.ts verify`) reports 28/28
 PASS with no exemptions, each segment's receipt bound to its plan entry by

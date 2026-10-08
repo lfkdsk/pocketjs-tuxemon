@@ -1,12 +1,12 @@
 {
   "format": "pocket-tuxemon/gb6-route-goldens/v1",
   "worldTraversal": "seamless-v1",
-  "tapeSha256": "4500c0f05c2f6169f9d57d9dddc2430e2c9dd5849544c6297fff22c8d32cea2e",
+  "tapeSha256": "a518c22c22eed1910f6fe6cf79516e89513de6a665fea4efc3a84f9a0dec1458",
   "frames": [
     {
       "name": "cotton-town",
-      "frame": 5601,
-      "timelineFrame": 5602,
+      "frame": 5603,
+      "timelineFrame": 5604,
       "map": "spyder_cotton_town",
       "position": [
         21,
@@ -36,8 +36,8 @@
     },
     {
       "name": "route-2",
-      "frame": 9591,
-      "timelineFrame": 9592,
+      "frame": 9593,
+      "timelineFrame": 9594,
       "map": "spyder_route2",
       "position": [
         0,
@@ -67,8 +67,8 @@
     },
     {
       "name": "city-park",
-      "frame": 47265,
-      "timelineFrame": 47266,
+      "frame": 47267,
+      "timelineFrame": 47268,
       "map": "spyder_citypark",
       "position": [
         10,
@@ -98,8 +98,8 @@
     },
     {
       "name": "route-3-end",
-      "frame": 115827,
-      "timelineFrame": 115828,
+      "frame": 115829,
+      "timelineFrame": 115830,
       "map": "spyder_route3",
       "position": [
         4,
@@ -129,8 +129,8 @@
     },
     {
       "name": "cotton-town",
-      "frame": 5601,
-      "timelineFrame": 5602,
+      "frame": 5603,
+      "timelineFrame": 5604,
       "map": "spyder_cotton_town",
       "position": [
         21,
@@ -160,8 +160,8 @@
     },
     {
       "name": "route-2",
-      "frame": 9591,
-      "timelineFrame": 9592,
+      "frame": 9593,
+      "timelineFrame": 9594,
       "map": "spyder_route2",
       "position": [
         0,
@@ -191,8 +191,8 @@
     },
     {
       "name": "city-park",
-      "frame": 47265,
-      "timelineFrame": 47266,
+      "frame": 47267,
+      "timelineFrame": 47268,
       "map": "spyder_citypark",
       "position": [
         10,
@@ -222,8 +222,8 @@
     },
     {
       "name": "route-3-end",
-      "frame": 115827,
-      "timelineFrame": 115828,
+      "frame": 115829,
+      "timelineFrame": 115830,
       "map": "spyder_route3",
       "position": [
         4,

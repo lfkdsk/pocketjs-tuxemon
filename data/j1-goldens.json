@@ -1,14 +1,14 @@
 {
   "format": "pocket-tuxemon/j1-goldens/v1",
-  "baseFrames": 115828,
+  "baseFrames": 115830,
   "segmentTapeSha256": "1641dae719a5444de89543c2ea2783cca6992fd684a794b06bf5063c3479f676",
-  "combinedTapeSha256": "cfc0ee14d8b6972a163bd5cfc1cd304a1b8b0007893f40bd11df785bd5903c6a",
+  "combinedTapeSha256": "f4779b5e7fedf7e6e1742a2e5fe33241ec980e5d64a120cf44d9fb2dc01e6229",
   "frames": [
     {
       "name": "wayfarer-guestbook",
       "frame": 523,
-      "mergedFrame": 116351,
-      "timelineFrame": 116352,
+      "mergedFrame": 116353,
+      "timelineFrame": 116354,
       "map": "spyder_wayfarer_inn1",
       "position": [
         9,
@@ -48,8 +48,8 @@
     {
       "name": "route-4-billie",
       "frame": 5151,
-      "mergedFrame": 120979,
-      "timelineFrame": 120980,
+      "mergedFrame": 120981,
+      "timelineFrame": 120982,
       "map": "spyder_route4",
       "position": [
         2,
@@ -89,8 +89,8 @@
     {
       "name": "captain-found",
       "frame": 11711,
-      "mergedFrame": 127539,
-      "timelineFrame": 127540,
+      "mergedFrame": 127541,
+      "timelineFrame": 127542,
       "map": "spyder_mansion_basement",
       "position": [
         3,
@@ -146,8 +146,8 @@
     {
       "name": "wayfarer-guestbook",
       "frame": 523,
-      "mergedFrame": 116351,
-      "timelineFrame": 116352,
+      "mergedFrame": 116353,
+      "timelineFrame": 116354,
       "map": "spyder_wayfarer_inn1",
       "position": [
         9,
@@ -187,8 +187,8 @@
     {
       "name": "route-4-billie",
       "frame": 5151,
-      "mergedFrame": 120979,
-      "timelineFrame": 120980,
+      "mergedFrame": 120981,
+      "timelineFrame": 120982,
       "map": "spyder_route4",
       "position": [
         2,
@@ -228,8 +228,8 @@
     {
       "name": "captain-found",
       "frame": 11711,
-      "mergedFrame": 127539,
-      "timelineFrame": 127540,
+      "mergedFrame": 127541,
+      "timelineFrame": 127542,
       "map": "spyder_mansion_basement",
       "position": [
         3,

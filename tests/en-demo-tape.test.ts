@@ -69,7 +69,7 @@ function foldSegment(
 describe("en demo tape transcription", () => {
   test("inserts frames at the Nimrod paged box and the demo tape reaches the next chapter", () => {
     // The segment from route-3-north to flower-city crosses the first Nimrod
-    // corner window (canonical frame 116,002), which takes two pages under
+    // corner window (canonical frame 116,004), which takes two pages under
     // the production paginator.
     const from = chapter("route-3-north");
     const to = chapter("flower-city");
@@ -87,7 +87,7 @@ describe("en demo tape transcription", () => {
 
     // Exactly one box in this segment pages, needing four inserted frames.
     expect(result.insertions).toHaveLength(1);
-    expect(result.insertions[0]!.afterFrame).toBe(116002 - from.frame);
+    expect(result.insertions[0]!.afterFrame).toBe(116004 - from.frame);
     expect(result.insertions[0]!.masks).toEqual([0, CONFIRM, 0, CONFIRM]);
     expect(result.stats.insertedFrames).toBe(4);
     expect(result.stats.pagedBoxes).toBe(1);
@@ -171,9 +171,9 @@ describe("en demo importer gate", () => {
     );
     const byId = new Map(data!.index.map((e) => [e.id, e]));
     // route-3-north, flower-city and candy-town are the chapter frames.
-    expect(byId.get("route-3-north")!.frame).toBe(115828);
-    expect(byId.get("flower-city")!.frame).toBe(121020);
-    expect(byId.get("candy-town")!.frame).toBe(172064);
+    expect(byId.get("route-3-north")!.frame).toBe(115830);
+    expect(byId.get("flower-city")!.frame).toBe(121022);
+    expect(byId.get("candy-town")!.frame).toBe(172066);
   });
 
   test("a changed English tape disables the demo tape", () => {

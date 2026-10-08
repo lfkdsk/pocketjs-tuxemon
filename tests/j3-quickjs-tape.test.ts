@@ -20,8 +20,8 @@ describe("J3 QuickJS continuation tape", () => {
       opponent: "spyder_omnichannel_beaverbrook",
       outcome: "won",
     });
-    // Terminal carries the cathedral bill's authored metadata now.
+    // Terminal includes the deterministic player identity selected in G6.
     expect(tape.terminalStateSha256)
-      .toBe("a388673c6afd4160128f8d4c41c77e6d04212abc173f60fdf2f8d4bcdf9f1239");
+      .toBe("043a9ddffdb162e32bf01d50bb2fa89f8e4e91bce3f3391d5670d873e064169d");
   });
 });
