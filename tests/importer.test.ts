@@ -105,7 +105,11 @@ test("imported opening names and corner flashbacks retain authored dialog layout
 
 test("all maps pass schema and reference valid transfer destinations", () => {
   const result = buildProject(availableMapIds());
-  expect(result.project.system).toEqual({ messageBlocksPlayer: true, inventory: { maxKinds: 99 } });
+  expect(result.project.system).toEqual({
+    messageBlocksPlayer: true,
+    transferPresentation: "retain",
+    inventory: { maxKinds: 99 },
+  });
   expect(result.project.maps).toHaveLength(263);
   expect(result.report.schemaErrors).toEqual([]);
   expect(result.report.transferErrors).toEqual([]);
@@ -117,7 +121,7 @@ test("all maps pass schema and reference valid transfer destinations", () => {
   expect(result.report.coverage.actions.summary).toMatchObject({
     // Merged counts: G-COV-C step/numeric work, translated_dialog layout
     // args lowered natively to the kit's text-window layout, and the starter
-    // portrait backdrops (change_bg_monster) now native. The five pinned
+    // portrait backdrops (change_bg_monster) are safe lowerings. The five pinned
     // Route 3 `bottom` exits are repaired to their physical down direction,
     // making each transfer native and its trailing face degraded instead of
     // dropping both unreachable actions. The six authored race choices save
@@ -125,11 +129,11 @@ test("all maps pass schema and reference valid transfer destinations", () => {
     // degraded to native.
     types: 98,
     uses: 13_617,
-    native: 6_875,
-    degraded: 2_818,
+    native: 6_855,
+    degraded: 2_838,
     placeholder: 708,
     dropped: 3_216,
-    nativePercent: 50.5,
+    nativePercent: 50.3,
     tier1: {
       uses: 6_323,
       percent: 46.43,
@@ -211,12 +215,24 @@ test("all maps pass schema and reference valid transfer destinations", () => {
     ["screen_transition", 25],
     ["camera_position", 6],
     ["set_bubble", 16],
-    ["change_bg", 15],
   ] as const) {
     expect(coverageRows.find((row) => row.type === type)).toMatchObject({
       total,
       native: total,
       degraded: 0,
+      placeholder: 0,
+      dropped: 0,
+    });
+  }
+  for (const [type, total, native, degraded] of [
+    ["change_bg", 15, 6, 9],
+    ["change_bg_char", 4, 0, 4],
+    ["change_bg_monster", 7, 0, 7],
+  ] as const) {
+    expect(coverageRows.find((row) => row.type === type)).toMatchObject({
+      total,
+      native,
+      degraded,
       placeholder: 0,
       dropped: 0,
     });
@@ -432,6 +448,13 @@ test("KS1 imports fades, scripted camera, balloons, and blocking backdrops", () 
     op: "screenBackdrop",
     layer: "tux_backdrop",
     variant: "bg_gradient_blue_spyder_tumble_image",
+    whenModalOpen: "ignore",
+  });
+  expect(commands).toContainEqual({
+    op: "screenBackdrop",
+    layer: "tux_backdrop",
+    variant: "bg_gradient_blue_spyder_omnichannel_beaverbrook_character",
+    whenModalOpen: "ignore",
   });
 });
 
@@ -652,7 +675,7 @@ test("default import output remains byte-pinned", () => {
   // G-PC-LOCKER fix-2 lockerOverflow wording (the locker is implemented)
   // moves this hash.
   expect(createHash("sha256").update(bytes).digest("hex")).toBe(
-    "f803ae54c7eddc5570346d7419446205f6a021b57b79b708d48ee4868f42e4f4",
+    "ed4835eee778634feec9d8364229a23a35fbd599ead237dca3b83af25090fb64",
   );
 });
 
@@ -1086,7 +1109,7 @@ test("change_bg_monster shows the front battle sprite on the story backdrop", ()
   const nodes = objectNodes(result.project);
   const backdrops = nodes.filter((node) =>
     node.op === "screenBackdrop" && (node as { variant?: string }).variant?.endsWith("_monster")
-  ) as Array<{ layer: string; variant: string }>;
+  ) as Array<{ layer: string; variant: string; whenModalOpen?: string }>;
   // rockitten (player_house_bedroom, twice) + the five Spyder starters.
   expect(backdrops.map((b) => b.variant).sort()).toEqual([
     "bg_gradient_blue_budaye_monster",
@@ -1097,7 +1120,10 @@ test("change_bg_monster shows the front battle sprite on the story backdrop", ()
     "bg_gradient_blue_rockitten_monster",
     "bg_gradient_blue_rockitten_monster",
   ]);
-  for (const backdrop of backdrops) expect(backdrop.layer).toBe("tux_backdrop");
+  for (const backdrop of backdrops) {
+    expect(backdrop.layer).toBe("tux_backdrop");
+    expect(backdrop.whenModalOpen).toBe("ignore");
+  }
   // The old name card is gone. player_house_bedroom has no
   // `translated_dialog rockitten`, so any "Rockitten" text there would be
   // the removed name card; spyder_bedroom keeps the five `translated_dialog

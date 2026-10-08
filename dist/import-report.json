@@ -284,9 +284,9 @@
  "schemaErrors": [],
  "audioQoaPending": [],
  "byFate": {
-  "T1-lowered": 2232,
+  "T1-lowered": 2258,
   "T3-dropped": 12,
-  "T1": 37063,
+  "T1": 37037,
   "T4-dropped": 1716,
   "T2-dropped": 365,
   "structural": 792
@@ -355,20 +355,26 @@
   {
    "key": "act:change_bg:T1",
    "fate": "T1",
-   "count": 21,
+   "count": 6,
    "note": "KS1 closes the blocking screen backdrop"
   },
   {
-   "key": "act:change_bg_char:T1",
-   "fate": "T1",
-   "count": 4,
-   "note": "KV1 combat-sheet front art on a blocking screen backdrop"
+   "key": "act:change_bg:T1-lowered",
+   "fate": "T1-lowered",
+   "count": 15,
+   "note": "KS1 blocking screen backdrop; a covering modal is retained instead of being popped"
   },
   {
-   "key": "act:change_bg_monster:T1",
-   "fate": "T1",
+   "key": "act:change_bg_char:T1-lowered",
+   "fate": "T1-lowered",
+   "count": 4,
+   "note": "KV1 combat-sheet front art on a blocking screen backdrop; a covering modal is retained instead of being popped"
+  },
+  {
+   "key": "act:change_bg_monster:T1-lowered",
+   "fate": "T1-lowered",
    "count": 7,
-   "note": "monster front battle sprite centered on the blocking screen backdrop; the following dialog opens on top, like the upstream MonsterImageState"
+   "note": "monster front battle sprite centered on the blocking screen backdrop; a covering modal is retained instead of being popped"
   },
   {
    "key": "act:change_taste:T4-dropped",
@@ -3346,11 +3352,11 @@
    "summary": {
     "types": 98,
     "uses": 13617,
-    "native": 13089,
-    "degraded": 248,
+    "native": 13069,
+    "degraded": 268,
     "placeholder": 0,
     "dropped": 280,
-    "nativePercent": 96.1,
+    "nativePercent": 96,
     "executablePercent": 97.9,
     "tier1": {
      "uses": 6423,
@@ -3474,40 +3480,42 @@
     {
      "type": "change_bg",
      "total": 15,
-     "native": 15,
-     "degraded": 0,
+     "native": 6,
+     "degraded": 9,
      "placeholder": 0,
      "dropped": 0,
      "reasons": {
       "native": [
-       "KS1 closes the blocking screen backdrop",
-       "KS1 blocking screen backdrop"
+       "KS1 closes the blocking screen backdrop"
+      ],
+      "degraded": [
+       "KS1 blocking screen backdrop; a covering modal is retained instead of being popped"
       ]
      }
     },
     {
      "type": "change_bg_char",
      "total": 4,
-     "native": 4,
-     "degraded": 0,
+     "native": 0,
+     "degraded": 4,
      "placeholder": 0,
      "dropped": 0,
      "reasons": {
-      "native": [
-       "KV1 combat-sheet front art on a blocking screen backdrop"
+      "degraded": [
+       "KV1 combat-sheet front art on a blocking screen backdrop; a covering modal is retained instead of being popped"
       ]
      }
     },
     {
      "type": "change_bg_monster",
      "total": 7,
-     "native": 7,
-     "degraded": 0,
+     "native": 0,
+     "degraded": 7,
      "placeholder": 0,
      "dropped": 0,
      "reasons": {
-      "native": [
-       "monster front battle sprite centered on the blocking screen backdrop; the following dialog opens on top, like the upstream MonsterImageState"
+      "degraded": [
+       "monster front battle sprite centered on the blocking screen backdrop; a covering modal is retained instead of being popped"
       ]
      }
     },

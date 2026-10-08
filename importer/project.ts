@@ -2703,8 +2703,13 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
           noteAction(a, a.type, "T4-dropped", "background or optional foreground image is unavailable");
           break;
         }
-        noteAction(a, a.type, "T1", "KS1 blocking screen backdrop");
-        out.push({ op: "screenBackdrop", layer: SCREEN_BACKDROP_LAYER, variant });
+        noteAction(a, a.type, "T1-lowered", "KS1 blocking screen backdrop; a covering modal is retained instead of being popped");
+        out.push({
+          op: "screenBackdrop",
+          layer: SCREEN_BACKDROP_LAYER,
+          variant,
+          whenModalOpen: "ignore",
+        });
         break;
       }
       case "change_bg_char": {
@@ -2716,8 +2721,13 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
           noteAction(a, a.type, "T4-dropped", "background, NPC template, or combat-sheet front art is unavailable");
           break;
         }
-        noteAction(a, a.type, "T1", "KV1 combat-sheet front art on a blocking screen backdrop");
-        out.push({ op: "screenBackdrop", layer: SCREEN_BACKDROP_LAYER, variant });
+        noteAction(a, a.type, "T1-lowered", "KV1 combat-sheet front art on a blocking screen backdrop; a covering modal is retained instead of being popped");
+        out.push({
+          op: "screenBackdrop",
+          layer: SCREEN_BACKDROP_LAYER,
+          variant,
+          whenModalOpen: "ignore",
+        });
         break;
       }
       case "set_layer": {
@@ -3902,8 +3912,13 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
           noteAction(a, a.type, "T4-dropped", "background or monster front sprite is unavailable");
           break;
         }
-        noteAction(a, a.type, "T1", "monster front battle sprite centered on the blocking screen backdrop; the following dialog opens on top, like the upstream MonsterImageState");
-        out.push({ op: "screenBackdrop", layer: SCREEN_BACKDROP_LAYER, variant });
+        noteAction(a, a.type, "T1-lowered", "monster front battle sprite centered on the blocking screen backdrop; a covering modal is retained instead of being popped");
+        out.push({
+          op: "screenBackdrop",
+          layer: SCREEN_BACKDROP_LAYER,
+          variant,
+          whenModalOpen: "ignore",
+        });
         break;
       }
       default:
@@ -5527,6 +5542,7 @@ export function buildProject(
     // without the battle extension keeps the literal-braces behavior.
     system: {
       messageBlocksPlayer: true,
+      transferPresentation: "retain",
       inventory: { maxKinds: 99 },
       ...(options.battle ? {
         textVariables: true,

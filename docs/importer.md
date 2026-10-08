@@ -120,7 +120,7 @@ definitions below are the report's own:
 | `screen_transition` | two blocking `screenFade` commands that retain each fade half's source duration and RGBA colour. |
 | `play_map_animation` / `play_tile_animation` | `mapAnim` at the sampled character tile or fixed source tile. |
 | `set_layer` | a native screen `layer` selecting or clearing a packaged RGBA or PNG overlay. |
-| `camera_position`, `set_bubble`, `change_bg`, `change_bg_char`, `set_template` | native camera, balloon, backdrop and walking-appearance commands within the limits in [the status list](status.md#presentation). |
+| `camera_position`, `set_bubble`, `change_bg`, `change_bg_char`, `set_template` | native camera, balloon and walking-appearance commands plus modal-safe backdrop lowerings within the limits in [the status list](status.md#presentation). |
 
 ### Degraded examples
 

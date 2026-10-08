@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="10" height="10" tilewidth="16" tileheight="16" infinite="0">
+  <objectgroup id="1" name="events">
+    <object id="1" name="Persistent first backdrop" type="event" x="64" y="80" width="16" height="16">
+      <properties>
+        <property name="cond1" value="is button_pressed INTERACT"/>
+        <property name="act1" value="change_bg gradient_blue"/>
+        <property name="act2" value="translated_dialog g_persist_backdrop"/>
+        <property name="act3" value="wait 0.2"/>
+        <property name="act4" value="transition_teleport player,persist_target,4,4"/>
+      </properties>
+    </object>
+    <object id="2" name="Replacement while dialog is open" type="event" x="0" y="0" width="16" height="16">
+      <properties>
+        <property name="cond1" value="not variable_set g_persist_replaced:yes"/>
+        <property name="act1" value="wait 0.1"/>
+        <property name="act2" value="change_bg gradient_red"/>
+        <property name="act3" value="set_variable g_persist_replaced:yes"/>
+      </properties>
+    </object>
+  </objectgroup>
+</map>

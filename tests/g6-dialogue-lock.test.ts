@@ -52,6 +52,7 @@ test("Tuxemon dialog boxes hold movement and consume action input", () => {
     characterNames: true,
     inventory: { maxKinds: 99 },
     messageBlocksPlayer: true,
+    transferPresentation: "retain",
     // ${{var:name}} dialogue prints stored text variables through {v:id}.
     textVariables: true,
     textTokens: ["today", "map_desc", "monster_0_name", "monster_0_level", "money"],
@@ -132,4 +133,43 @@ test("declining the skip cannot escape the CEO monologue and preserves story ord
     expect(state.mapId).toBe("spyder_paper_scoop");
     expect(state.interp.error).toBeUndefined();
   }
+});
+
+test("Spyder's imported opening plays authored image backdrops in order", () => {
+  const expected = [
+    "bg_gradient_blue_spyder_omnichannel_beaverbrook_character",
+    "bg_gradient_blue_spyder_tumble_image",
+    "bg_gradient_blue_dollfin_monster",
+    "bg_gradient_blue_ignibus_monster",
+    "bg_gradient_blue_memnomnom_monster",
+    "bg_gradient_blue_budaye_monster",
+    "bg_gradient_blue_grintot_monster",
+    "bg_gradient_blue_spyder_monsters_image",
+    "bg_gradient_blue_spyder_morph_image",
+  ];
+  const observed: string[] = [];
+  const { session, state: initial } = bedroom();
+  let state = chooseNo(session, initial);
+  let last: string | undefined;
+
+  const sampleBackdrop = () => {
+    const variant = state.interp.screen?.backdrop?.variant;
+    if (variant === last) return;
+    last = variant;
+    if (variant) observed.push(variant);
+  };
+
+  sampleBackdrop();
+  for (let frame = 0; frame < 2_500; frame++) {
+    const modal = state.interp.modal;
+    const confirmEdge = modal?.kind === "text" && modal.complete && frame % 2 === 0;
+    state = stepSession(session, state, { ...NONE, confirmEdge });
+    sampleBackdrop();
+    if (state.mapId !== "spyder_bedroom") break;
+  }
+
+  expect(observed).toEqual(expected);
+  expect(state.mapId).toBe("spyder_paper_scoop");
+  expect(state.interp.screen?.backdrop?.variant).toBe("bg_gradient_blue_spyder_morph_image");
+  expect(state.interp.error).toBeUndefined();
 });

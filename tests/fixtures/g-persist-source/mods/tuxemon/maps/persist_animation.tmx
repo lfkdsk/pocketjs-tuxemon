@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="10" height="10" tilewidth="16" tileheight="16" infinite="0">
+  <objectgroup id="1" name="events">
+    <object id="1" name="Persistent animation" type="event" x="64" y="80" width="16" height="16">
+      <properties>
+        <property name="cond1" value="is button_pressed INTERACT"/>
+        <property name="act1" value="play_map_animation grass,0.1,loop,player"/>
+        <property name="act2" value="wait 0.2"/>
+        <property name="act3" value="transition_teleport player,persist_target,4,4"/>
+      </properties>
+    </object>
+  </objectgroup>
+</map>

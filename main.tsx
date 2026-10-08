@@ -43,6 +43,7 @@ import { setBattleSceneLang } from "./ui/battle-scene-locale.ts";
 import { createTuxemonTextTokens } from "./battle/text-tokens.ts";
 import enMapDescriptions from "./dist/map-descriptions.json";
 import enMonthNames from "./data/month-names.json";
+import { TUXEMON_COMPATIBLE_SAVE_CONTENT } from "./data/save-compat.ts";
 import { createAnimatedProvider } from "./ui/animated-repository.ts";
 import { createSaveMenu } from "./ui/save-menu.tsx";
 import { persistAutosave } from "./ui/save-game.ts";
@@ -337,6 +338,7 @@ mount(() => (
       immutableState
       project={project}
       maps={repository}
+      compatibleSaveContent={TUXEMON_COMPATIBLE_SAVE_CONTENT}
       extensions={extensions}
       battle={rules}
       battleScene={TuxemonBattleScene}

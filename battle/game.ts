@@ -2,6 +2,7 @@ import battleDbJson from "../data/battle-db.json";
 import variableEnumsJson from "../dist/variable-enums.json";
 import mapDescriptionsJson from "../dist/map-descriptions.json";
 import monthNamesJson from "../data/month-names.json";
+import { TUXEMON_COMPATIBLE_SAVE_CONTENT } from "../data/save-compat.ts";
 
 import { validateBattleDb } from "../importer/battle-schema.ts";
 import { createTuxemonExtensions } from "./extension.ts";
@@ -49,6 +50,7 @@ export function createTuxemonSessionOptions(
 ): SessionOptions {
   const base: SessionOptions = {
     ...TUXEMON_SESSION_OPTIONS,
+    compatibleSaveContent: TUXEMON_COMPATIBLE_SAVE_CONTENT,
     ...overrides,
     worldTraversal,
   };

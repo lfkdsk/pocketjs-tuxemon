@@ -1,0 +1,5 @@
+- slug: sunny
+  name: weather_sunny
+  temperature: warm
+  wind: calm
+  modifiers: []
