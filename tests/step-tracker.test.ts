@@ -6,7 +6,12 @@ import {
   tuxemonExtensionState,
   type TuxemonExtensionState,
 } from "../battle/extension.ts";
-import { TUXEMON_BATTLE_DB as DB, TUXEMON_EXTENSIONS as extensions, TUXEMON_SESSION_OPTIONS } from "../battle/game.ts";
+import {
+  createTuxemonSessionOptions,
+  TUXEMON_BATTLE_DB as DB,
+  TUXEMON_EXTENSIONS as extensions,
+  TUXEMON_SESSION_OPTIONS,
+} from "../battle/game.ts";
 import {
   addStepTracker,
   advanceStepTracker,
@@ -17,8 +22,11 @@ import {
   type StepTrackerState,
 } from "../battle/step-tracker.ts";
 import { availableMapIds, buildProject, G6_IMPORT_OPTIONS } from "../importer/project.ts";
+import { AttractController } from "../vendor/pocket-rpgkit/src/engine/attract.ts";
 import { BTN_BITS } from "../vendor/pocket-rpgkit/src/engine/camera.ts";
 import type { ExtensionReadContext } from "../vendor/pocket-rpgkit/src/engine/extensions.ts";
+import { canonicalJson, createSessionSnapshot } from "../vendor/pocket-rpgkit/src/engine/save.ts";
+import { restoreSessionSnapshot } from "../vendor/pocket-rpgkit/src/engine/save-restore.ts";
 import { createSession, startSession, stepSession, type Session, type SessionState } from "../vendor/pocket-rpgkit/src/engine/session.ts";
 import type { JsonValue, MapDef, Project } from "../vendor/pocket-rpgkit/src/engine/types.ts";
 
@@ -110,7 +118,7 @@ describe("real step-tracker import", () => {
   test("the whole corpus is converted", () => {
     const full = buildProject(availableMapIds(), G6_IMPORT_OPTIONS).report.coverage;
     const row = (kind: "actions" | "conditions", type: string) => full[kind].rows.find((r) => r.type === type);
-    expect(row("actions", "add_step_tracker")).toMatchObject({ total: 3, native: 0, degraded: 3, dropped: 0 });
+    expect(row("actions", "add_step_tracker")).toMatchObject({ total: 3, native: 3, degraded: 0, dropped: 0 });
     expect(row("actions", "remove_step_tracker")).toMatchObject({ total: 5, native: 5, dropped: 0 });
     expect(row("actions", "set_step_tracker_milestone_shown")).toMatchObject({ total: 3, native: 3, dropped: 0 });
     expect(row("conditions", "is step_tracker")).toMatchObject({ total: 7, native: 7, dropped: 0 });
@@ -161,6 +169,155 @@ describe("step trackers in a session", () => {
   }
 
   const trackers = (state: SessionState) => tuxemonExtensionState(state.ext, DB).stepTrackers;
+  const saveProjection = (state: SessionState) => canonicalJson({ ...state, frame: 0 });
+
+  function paidParkSession(hz: 60 | 30 | 20): { project: Project; session: Session; state: SessionState } {
+    const project: Project = structuredClone(BUILD.project);
+    // Isolate the authored successful-payment path from the sibling
+    // No-Money parallel: after Pay subtracts gold, that sibling can observe
+    // the intermediate balance before Pay clears its choice variable. Both
+    // retained events are unmodified real imports.
+    const entrance = project.maps.find((map) => map.id === "eclipse_park_entrance")!;
+    entrance.events = entrance.events?.filter((event) =>
+      event.id === "e006_pay" || event.id === "e011_teleport_park_r003");
+    const session = createSession(project, hz, createTuxemonSessionOptions(project));
+    let state = startSession(project, session);
+    // Trigger the real Eclipse Park `Pay` parallel. It grants the 25 park
+    // balls, walks to the authored portal, adds steps_park, then transfers.
+    state.sw.variables["v.paypark"] = 3;
+    for (let guard = 0; guard < 3_000; guard++) {
+      const modal = state.interp.modal;
+      state = stepSession(session, state, {
+        buttons: 0,
+        confirmEdge: modal?.kind === "text" && modal.complete,
+      });
+      if (state.mapId === "eclipse_park" && state.fade === null && !state.interp.main) break;
+    }
+    expect(state.mapId).toBe("eclipse_park");
+    expect(state.sw.items.tuxeball_park).toBe(25);
+    // add_step_tracker runs at (4,9); the real transfer to (8,3) emits one
+    // signed relocation of -2, winding the freshly-created 500 back to 502.
+    expect(trackers(state)?.player?.steps_park?.countdown).toBe(502);
+    expect([state.move.tx, state.move.ty]).toEqual([8, 3]);
+    return { project, session, state };
+  }
+
+  test("the real paid tracker uses signed four-direction deltas at every rate and across save/rewind", () => {
+    const outcomes = ([60, 30, 20] as const).map((hz) => {
+      const { project, session, state: paid } = paidParkSession(hz);
+      let state = landOne(session, paid, BTN_BITS.DOWN);
+      expect(trackers(state)?.player?.steps_park?.countdown).toBe(501);
+      state = landOne(session, state, BTN_BITS.RIGHT);
+      expect(trackers(state)?.player?.steps_park?.countdown).toBe(500);
+
+      const restored = restoreSessionSnapshot(
+        session,
+        structuredClone(createSessionSnapshot(session, state, 0)),
+      );
+      const directUp = landOne(session, state, BTN_BITS.UP);
+      const replayUp = landOne(session, restored, BTN_BITS.UP);
+      expect(trackers(directUp)?.player?.steps_park?.countdown).toBe(501);
+      expect(saveProjection(replayUp)).toBe(saveProjection(directUp));
+      const direct = landOne(session, directUp, BTN_BITS.LEFT);
+      const replay = landOne(session, replayUp, BTN_BITS.LEFT);
+      expect(trackers(direct)?.player?.steps_park?.countdown).toBe(502);
+      expect(saveProjection(replay)).toBe(saveProjection(direct));
+      expect([direct.move.tx, direct.move.ty]).toEqual([8, 3]);
+
+      if (hz === 60) {
+        const options = {
+          hz,
+          attractEnabled: false,
+          rewindSeconds: 0.8,
+          keyframeIntervalFrames: 7,
+          idleFrames: 60_000,
+          ...createTuxemonSessionOptions(project),
+        } as const;
+        const keyed = new AttractController(project, [], options);
+        const fromZero = new AttractController(project, [], { ...options, keyframeMaxBytes: 0 });
+        keyed.loadState(paid, 0);
+        fromZero.loadState(paid, 0);
+        const masks = [
+          BTN_BITS.DOWN, ...new Array(11).fill(0),
+          BTN_BITS.RIGHT, ...new Array(11).fill(0),
+          BTN_BITS.UP, ...new Array(11).fill(0),
+          BTN_BITS.LEFT, ...new Array(11).fill(0),
+        ];
+        for (const mask of masks) { keyed.step(mask); fromZero.step(mask); }
+        const terminal = canonicalJson(keyed.state);
+        expect(canonicalJson(fromZero.state)).toBe(terminal);
+        expect(trackers(keyed.state)?.player?.steps_park?.countdown).toBe(502);
+        keyed.step(0x0100);
+        fromZero.step(0x0100);
+        expect(keyed.length).toBe(0);
+        expect(canonicalJson(keyed.state)).toBe(canonicalJson(fromZero.state));
+        for (const mask of masks) { keyed.step(mask); fromZero.step(mask); }
+        expect(canonicalJson(keyed.state)).toBe(terminal);
+        expect(canonicalJson(fromZero.state)).toBe(terminal);
+      }
+      return { x: direct.move.tx, y: direct.move.ty, countdown: trackers(direct)?.player?.steps_park?.countdown };
+    });
+    expect(outcomes[1]).toEqual(outcomes[0]);
+    expect(outcomes[2]).toEqual(outcomes[0]);
+  });
+
+  test("the real south transfer applies one signed jump at every rate and refolds through rewind", () => {
+    const outcomes = ([60, 30, 20] as const).map((hz) => {
+      const paid = paidParkSession(hz);
+      const project: Project = {
+        ...paid.project,
+        start: { map: "eclipse_park", x: 38, y: 38, dir: "down" },
+      };
+      const session = createSession(project, hz, createTuxemonSessionOptions(project));
+      let state = startSession(project, session, paid.state.sw, paid.state.ext);
+      expect(trackers(state)?.player?.steps_park?.countdown).toBe(502);
+      const origin = state;
+      state = landOne(session, state, BTN_BITS.DOWN);
+      expect(trackers(state)?.player?.steps_park?.countdown).toBe(501);
+      for (let guard = 0; guard < 600 && (state.mapId !== "eclipse_park_south" || state.fade); guard++) {
+        state = stepSession(session, state, { buttons: 0 });
+      }
+      expect(state.mapId).toBe("eclipse_park_south");
+      expect([state.move.tx, state.move.ty]).toEqual([58, 0]);
+      // (38,39) -> (58,0): dx+dy = 20-39 = -19. Together with
+      // the ordinary +1 landing, countdown 502 becomes 520.
+      expect(trackers(state)?.player?.steps_park?.countdown).toBe(520);
+      const restored = restoreSessionSnapshot(
+        session,
+        structuredClone(createSessionSnapshot(session, state, 0)),
+      );
+      expect(saveProjection(restored)).toBe(saveProjection(state));
+
+      if (hz === 60) {
+        const options = {
+          hz,
+          attractEnabled: false,
+          rewindSeconds: 1,
+          keyframeIntervalFrames: 7,
+          idleFrames: 60_000,
+          ...createTuxemonSessionOptions(project),
+        } as const;
+        const keyed = new AttractController(project, [], options);
+        const fromZero = new AttractController(project, [], { ...options, keyframeMaxBytes: 0 });
+        keyed.loadState(origin, 0);
+        fromZero.loadState(origin, 0);
+        const masks = [BTN_BITS.DOWN, ...new Array(59).fill(0)];
+        for (const mask of masks) { keyed.step(mask); fromZero.step(mask); }
+        const terminal = canonicalJson(keyed.state);
+        expect(keyed.state.mapId).toBe("eclipse_park_south");
+        expect(canonicalJson(fromZero.state)).toBe(terminal);
+        keyed.step(0x0100);
+        fromZero.step(0x0100);
+        expect(keyed.length).toBe(0);
+        for (const mask of masks) { keyed.step(mask); fromZero.step(mask); }
+        expect(canonicalJson(keyed.state)).toBe(terminal);
+        expect(canonicalJson(fromZero.state)).toBe(terminal);
+      }
+      return { map: state.mapId, countdown: trackers(state)?.player?.steps_park?.countdown };
+    });
+    expect(outcomes[1]).toEqual(outcomes[0]);
+    expect(outcomes[2]).toEqual(outcomes[0]);
+  });
 
   test("each completed tile counts once and the 100-steps alert is shown once", () => {
     let { session, state } = parkSession(101, {});

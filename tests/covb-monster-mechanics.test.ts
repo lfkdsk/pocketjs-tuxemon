@@ -18,13 +18,16 @@ import { battleDbToTuxemonBattleDb } from "../battle/from-battle-db.ts";
 import { spawnMonster } from "../battle/spawn.ts";
 import type { SpawnedMonsterSnapshot } from "../battle/types.ts";
 import { runPolicyBattle } from "../battle/tuxemon.ts";
-import { buildProject } from "../importer/project.ts";
+import { buildProject, G6_IMPORT_OPTIONS } from "../importer/project.ts";
+import { loadAllFileEvents } from "../importer/source.ts";
 import { validateBattleDb } from "../importer/battle-schema.ts";
 import {
   createSession,
   startSession,
   stepSession,
 } from "../vendor/pocket-rpgkit/src/engine/session.ts";
+import { createSessionSnapshot } from "../vendor/pocket-rpgkit/src/engine/save.ts";
+import { restoreSessionSnapshot } from "../vendor/pocket-rpgkit/src/engine/save-restore.ts";
 import type {
   Command,
   JsonValue,
@@ -122,6 +125,25 @@ describe("COV-B add_tech", () => {
 });
 
 describe("COV-B plague system", () => {
+  test("the two real admissions are one-shot before a party-sized box can fill", () => {
+    const admissions = loadAllFileEvents().filter((event) =>
+      event.acts.some((action) => action.type === "quarantine" && action.args[2] === "in"));
+    expect(admissions.map((event) => [event.source, event.name])).toEqual([
+      ["spyder_candy_town.tmx", "After infected"],
+      ["spyder_candy_town.tmx", "Seen Candy + Infected"],
+    ]);
+    for (const event of admissions) {
+      expect(event.conds.map((condition) => condition.raw))
+        .toContain("not variable_set confiscation_done:yes");
+      expect(event.acts.map((action) => action.raw))
+        .toContain("set_variable confiscation_done:yes");
+    }
+    const spyder = loadAllFileEvents().find((event) =>
+      event.source === "spyder.yaml" &&
+      event.acts.some((action) => action.raw === "create_kennel player,quarantine,true"));
+    expect(spyder).toBeDefined();
+  });
+
   test("char_plague infects and inoculates a whole party; party_infected counts", () => {
     const commands = addPlayerMonster(addPlayerMonster([], "rockitten", 5), "budaye", 5);
     commands.push({ op: "ext", call: "tux.char_plague", args: { plague: "spyderbite", condition: "infected" } });
@@ -175,8 +197,9 @@ describe("COV-B plague system", () => {
 
   test("a full quarantine box never deletes the admitted monster", () => {
     // Fill the hidden box to capacity, then admit one infected party monster.
-    // Upstream transfers only after box insertion succeeds, so the monster
-    // stays in the party (inoculated) rather than disappearing.
+    // The authored campaign can perform "in" only once, before the hidden
+    // capacity-30 box is visible, so this external-state safety behavior is
+    // intentionally different from upstream's rename/merge overflow bug.
     const fillRng = { rng: 7, rngDraws: 0 };
     const boxedMonsters = Array.from({ length: 30 }, (_, i) =>
       spawnMonster(DB, rulesDb, fillRng, "rockitten", 5, { iid: `box-${i}` }));
@@ -192,7 +215,7 @@ describe("COV-B plague system", () => {
     const after = tuxemonExtensionState(result.state.ext, DB);
     expect(after.party).toHaveLength(1);
     expect(after.boxes!.quarantine!.monsters).toHaveLength(30);
-    // The monster stayed in the party and was inoculated first, like upstream.
+    // The monster stays in the party and is still inoculated first.
     expect(after.plagueByIid[after.party[0]!.iid!]!.spyderbite).toBe("inoculated");
   });
 
@@ -235,9 +258,9 @@ describe("COV-B plague system", () => {
     expect(after.party).toHaveLength(1);
   });
 
-  test("a release with a full party and kennel keeps the monster in quarantine", () => {
-    // One infected monster confiscated, then released with party (6) and
-    // kennel (30) both full: the monster must stay in the box, not vanish.
+  test("a release with a full party overflows a full Kennel like upstream", () => {
+    // One infected monster released with party (6) and kennel (30) both
+    // full: upstream appends it to the Kennel without a capacity check.
     const fillRng = { rng: 9, rngDraws: 0 };
     const party = Array.from({ length: 6 }, (_, i) =>
       spawnMonster(DB, rulesDb, fillRng, "rockitten", 5, { iid: `p-${i}` }));
@@ -257,11 +280,59 @@ describe("COV-B plague system", () => {
     const result = run(commands, packTuxemonExtensionState(state as never));
     const after = tuxemonExtensionState(result.state.ext, DB);
     expect(after.party).toHaveLength(6);
-    expect(after.kennel).toHaveLength(30);
-    expect(after.boxes!.quarantine!.monsters).toHaveLength(1);
-    expect(after.boxes!.quarantine!.monsters[0]!.iid).toBe("q-1");
-    // Inoculated before the failed move, like upstream.
+    expect(after.kennel).toHaveLength(31);
+    expect(after.kennel[30]!.iid).toBe("q-1");
+    expect(after.kennelBox).toBe(true);
+    expect(after.boxes!.quarantine!.monsters).toHaveLength(0);
     expect(after.plagueByIid["q-1"]!.spyderbite).toBe("inoculated");
+  });
+
+  test("real Garvan dialogue releases into a full Kennel and survives save/load", () => {
+    const imported = buildProject(["spyder_candy_hospital1"], G6_IMPORT_OPTIONS).project;
+    imported.start = { map: "spyder_candy_hospital1", x: 1, y: 10, dir: "down" };
+    imported.maps[0]!.events = imported.maps[0]!.events?.filter((event) =>
+      event.id === "e024_create_garvan" || event.id === "npc_spyder_hospital1_smith");
+
+    const rng = { rng: 31, rngDraws: 0 };
+    const party = Array.from({ length: 6 }, (_, index) =>
+      spawnMonster(DB, rulesDb, rng, "rockitten", 5, { iid: `real-p-${index}` }));
+    const kennel = Array.from({ length: 30 }, (_, index) =>
+      spawnMonster(DB, rulesDb, rng, "rockitten", 5, { iid: `real-k-${index}` }));
+    const quarantined = spawnMonster(DB, rulesDb, rng, "budaye", 5, { iid: "real-q" });
+    const initial = packTuxemonExtensionState({
+      ...initialTuxemonExtensionState(),
+      party,
+      kennel,
+      kennelBox: true,
+      boxes: { quarantine: { hidden: true, capacity: 30, monsters: [quarantined] } },
+      plagueByIid: { "real-q": { spyderbite: "infected" } },
+    });
+    const session = createSession(imported, 60, { extensions: createTuxemonExtensions(DB) });
+    let state = startSession(imported, session, undefined, initial);
+    for (let frame = 0; frame < 10; frame++) state = stepSession(session, state, { buttons: 0 });
+    expect(state.chars.chars.npc_spyder_hospital1_smith).toBeDefined();
+    state = stepSession(session, state, { buttons: 0, confirmEdge: true });
+    for (let guard = 0; guard < 600; guard++) {
+      const modal = state.interp.modal;
+      state = stepSession(session, state, {
+        buttons: 0,
+        confirmEdge: modal?.kind === "text" && modal.complete,
+      });
+      if (state.sw.variables["v.quarantine_garvan"] === 1 && !state.interp.main && !state.interp.modal) break;
+    }
+    expect(state.sw.variables["v.quarantine_garvan"]).toBe(1);
+    const released = tuxemonExtensionState(state.ext, DB);
+    expect(released.party).toHaveLength(6);
+    expect(released.kennel).toHaveLength(31);
+    expect(released.kennel[30]!.iid).toBe("real-q");
+    expect(released.boxes!.quarantine!.monsters).toHaveLength(0);
+    const restored = restoreSessionSnapshot(
+      session,
+      structuredClone(createSessionSnapshot(session, state, 0)),
+    );
+    const loaded = tuxemonExtensionState(restored.ext, DB);
+    expect(loaded.kennel).toHaveLength(31);
+    expect(loaded.kennel[30]!.iid).toBe("real-q");
   });
 });
 

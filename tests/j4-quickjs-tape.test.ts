@@ -24,6 +24,6 @@ describe("J4 QuickJS continuation tape", () => {
     });
     // Terminal includes the deterministic player identity selected in G6.
     expect(tape.terminalStateSha256)
-      .toBe("1aa53e4f01e9c52d4e80b58392eb837597d8865f980925c009fed5a0538be516");
+      .toBe("f8361bb0321d84bad105c948531ca93f8609a9bc81b1cfd04c8ce0957e4e8aca");
   });
 });

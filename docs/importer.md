@@ -98,6 +98,8 @@ definitions below are the report's own:
 | `char_wander` | `moveControl` random wander with the source's exact 60 Hz attempt interval and inclusive bounds. The attempt clock resets before modal, movement, observation and bounds checks; cardinally adjacent NPCs pause while the player faces them, and skipped attempts consume no seeded-RNG draw. |
 | `set_facing_mode` | `moveControl` facingMode (locked / followMovement). |
 | `char_position` | an exact `place` after import validates that both coordinates are integers inside the map; invalid source coordinates fail the import, as upstream raises instead of clamping. An immediately following `char_face` folds into the placement direction. |
+| `add_step_tracker player,…` | `tux.add_step_tracker`; the opted-in `playerStep` hook reports signed `dx`/`dy` for ordinary steps, transfers and direct placement. Trackers consume `dx+dy`; the shared daycare consumes one step per hook call. |
+| `char_run` (both authored uses) | no command: Christie and Bjorn are idle at the call, so upstream's moving-only run-rate change is an exact no-op and cannot latch onto a later forced route. |
 | `is battle_outcome` | `tux.battle_outcome` extension condition reading live battle history. |
 | `is check_char_parameter player,moving,1` | the live `playerMoving` condition on an automatic page. It is map-wide and observes whether the player had a committed interpolating step at the start of the reference tick, matching upstream's event-before-world-update ordering. |
 | `is/not check_char_parameter player,name,<value>` | `tux.player_name_is` compares the live saved player name exactly and case-sensitively. |
@@ -128,10 +130,8 @@ definitions below are the report's own:
 |---|---|
 | `char_face player,<dir>` | a `moveRoute` with the kit's native `faceUp`/`faceDown`/… step; the step applies on the next boundary tick (upstream faces immediately), so the turn lands one tick after the command. A `char_face` immediately after a `char_position` folds into the placement's `dir` instead, and a spawn-event `char_face npc,<dir>` becomes the NPC page's native initial `dir`. |
 | `add_tracker` | a `switch`; step counters are not modeled. |
-| `add_step_tracker player,…` | `tux.add_step_tracker`; the kit's `playerStep` hook (shared with the daycare) moves every player tracker by one per completed tile, where upstream subtracts the signed tile delta (dx+dy) and also counts teleports. |
 | `transition_teleport` with an out-of-range landing | coordinates clamped into the target map; an isolated landing is repaired to the nearest walkable cell by deterministic four-neighbour BFS. |
 | `char_speed` | `moveControl` routeSpeed scoped to the active or next forced route, then cleared when that route ends as upstream clears custom speed on idle; tiles/s still maps to the nearest MV exponential grade. |
-| `char_run` | `moveControl` routeSpeed at the run rate (grade 5); the boost scopes to the character's next forced route and is gone when the route ends, so a wandering NPC with no forced route is unaffected (matching upstream's idle no-op) and a page already moving at grade 5 sees no change. |
 | `choice_npc` | static `extChoice` list; the shared label is extended with each option's translated name so the lines stay distinguishable (upstream tells options apart by per-option NPC portraits, which need kit option-image support). |
 | `get_party_monster` (dojo, gym) | `tux.get_party_monsters` dumps the party iids into `iid_slot_*`; NPC trainer parties are staged live (not folded) when an event inspects them, so the dojo and gym calls find a party. |
 | `load_yaml` | a gating variable; the referenced events are merged at import time and unlock when the action runs. |
@@ -171,9 +171,12 @@ The latter restores the walking appearance and closes the label on shore.
 Generated shoreline pages are coalesced separately from source-authored event
 areas, so adding Surf does not split or renumber existing area-event IDs; their
 item/appearance guards also keep them absent from pre-Surfboard runtime state.
-This preserves the seven cooperating `char_in` uses and five surface-facing
-uses without pretending the project schema has a general live-player-cell
-predicate. Two unrelated surface-facing uses remain dropped.
+This preserves the seven cooperating `char_in` uses and all five labelled
+surface-facing uses without pretending the project schema has a general
+live-player-cell predicate. The other two dropped `char_facing_tile` rows are
+not terrain queries: they are ordinary no-label facing triggers on Radio
+events whose sole `tune_radio` action is unsupported, so no event remains to
+attach the otherwise-native trigger to.
 
 The 38 `is check_char_parameter player,moving,1` encounter guards use the
 native map-wide `playerMoving` condition on automatic pages. The sampled value
@@ -191,7 +194,7 @@ compete for one arrival edge.
 
 | Tuxemon | Reason |
 |---|---|
-| unsupported live-cell terrain predicates outside the Spyder Surf cluster | project conditions still do not expose a general current/facing terrain-label query; the two remaining unrelated surface-facing uses emit nothing. Live movement guards are native; completed-step movement guards and the known Surf cluster use the specialized lowerings described above. |
+| `tune_radio` | the two Radio events have native ordinary facing/button triggers, but their only action is unsupported, so the empty events are omitted. They do not carry terrain labels and are not evidence for a missing live-cell predicate. |
 | `char_facing player,top/bottom`, `button_pressed K_RETURN` | these legacy source arguments are invalid in the pinned Tuxemon runtime: directions are `up/down/left/right`, and `K_RETURN` is not an intention constant. They remain fixed false instead of being reported as native triggers, except that the five geometrically proved Route 3 south exits repair their pinned `bottom` typo to `down` in the guard, trailing face and transfer direction. |
 | `add_step_tracker` and friends for a non-player character | the kit's step hook reports only the player's completed tiles (the pinned content tracks the player only). |
 | `copy_variable` between enum-coded variables | enum codes are numbered per variable, so only variables that hold text copy verbatim. |

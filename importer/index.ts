@@ -236,8 +236,10 @@ withdraw with a quantity picker, and disband); \`create_kennel\`,
 (it moves infected monsters between the party and the hidden \`boxes.quarantine\`
 box, honouring the box's own capacity; unlike upstream it keeps an
 over-capacity monster inoculated in the party instead of renaming the full
-box into a successor, and a release to a full party plus kennel keeps the
-monster in the box instead of overflowing the Kennel past its capacity),
+box into a successor. That branch is unreachable in the authored campaign:
+both admissions share one one-shot guard and can move at most the six-member
+party into a hidden capacity-30 box. Release matches upstream, including a
+full-party release appending past the ordinary Kennel capacity),
 and \`park_experience\` with the unreachable
 Eclipse park session. Plague-state rows stay deterministic without being
 claimed as full P2 behavior. The long-term target remains zero Placeholder

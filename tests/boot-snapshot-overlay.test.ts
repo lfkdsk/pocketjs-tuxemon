@@ -136,7 +136,7 @@ describe("boot-snapshot overlay", () => {
     const runtime = createBootSnapshotOverlay().create(host);
     runtime.step(0, 0);
 
-    const spec = resolveSegment(ROOT, "radio-broadcast", 193219);
+    const spec = resolveSegment(ROOT, "radio-broadcast", 193231);
     let state = getState();
     let previous = radio.held >>> 0;
     for (const mask of spec.suffix) {
@@ -146,7 +146,7 @@ describe("boot-snapshot overlay", () => {
     // The terminal hash carries the deterministic player identity alongside
     // the cathedral bill metadata and live-movement encounter state.
     expect(sha256(canonicalJson(state)))
-      .toBe("043a9ddffdb162e32bf01d50bb2fa89f8e4e91bce3f3391d5670d873e064169d");
-    expect(state.frame).toBe(193219);
+      .toBe("e35a750132fec6a380f153c473f65b52beaa478f37a8f979c219a56c6ad87a77");
+    expect(state.frame).toBe(193231);
   });
 });

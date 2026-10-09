@@ -4,12 +4,12 @@
   "hz": 60,
   "worldTraversal": "seamless-v1",
   "source": {
-    "chaptersSha256": "f271a22bd32eb8bdd38b8c3f364757e14c8869188acdf7558c2e54be20b61a9f",
+    "chaptersSha256": "5159e7a7dde65207a07228f1e2e79ca29f9b9a48b02e424a31e7f18be1cf820a",
     "tape": {
       "gb6": {
         "file": "data/gb6-mainline-journey.json",
-        "frames": 115830,
-        "tapeSha256": "a518c22c22eed1910f6fe6cf79516e89513de6a665fea4efc3a84f9a0dec1458",
+        "frames": 115842,
+        "tapeSha256": "c6d889b63d82518662978fe49dcb958e15f34b8d13ab8e822fc4eb5d99ddfb12",
         "worldTraversal": "seamless-v1"
       },
       "j1": {
@@ -36,8 +36,8 @@
         "tapeSha256": "78de1c0c67a260bb4b5e97999900bbff629ce8a64de39d362f66889f0b046a61",
         "worldTraversal": "seamless-v1"
       },
-      "frames": 206818,
-      "sha256": "82bb403f0fd7bd8172f1ff9cc244bd34d199809c2dc4cb3c87a45cdb18cf0369"
+      "frames": 206830,
+      "sha256": "a7951a364b92cd16d458d87206dd73004fb59c9812463dade0fc675a18cdd3ca"
     }
   },
   "paginator": {
@@ -50,8 +50,8 @@
     "fontSha256": "cdce2afab9c057d893fc6f4d8e2e9e54f261ebf6dd6cc7a611c976b51edd2859",
     "charsetSha256": "9b49d0b8d4369963216c70b38a6990819e4433ca78ea8415cfb237bf7aaa07b2"
   },
-  "frames": 206818,
-  "tapeSha256": "82bb403f0fd7bd8172f1ff9cc244bd34d199809c2dc4cb3c87a45cdb18cf0369",
+  "frames": 206830,
+  "tapeSha256": "a7951a364b92cd16d458d87206dd73004fb59c9812463dade0fc675a18cdd3ca",
   "insertions": [],
   "dialogs": {
     "textBoxes": 645,
@@ -98,6 +98,6 @@
       ],
       "storySha256": "4c307e5d3170ec082da6579a09861a0450f3ff8742b138aa6979f762139f8836"
     },
-    "neutralSha256": "b05bbd0f88eed7976ce27c1efbac4bda3ca387df2ec32a140286116d247e1963"
+    "neutralSha256": "9da31419f0c8960f8e7e8b882d271213e23c7e092d7c253ad70b5b830f000f06"
   }
 }

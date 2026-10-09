@@ -48,11 +48,17 @@ const SESSION_OPTIONS = { extensions: createTuxemonExtensions({} as never) } as 
 const FEATURES = ["animation", "camera", "balloon", "backdrop"] as const;
 const TARGET = "persist_target";
 const ROOT = resolve(import.meta.dir, "..");
-const SAVE_FIXTURES = ["main-4019a9b8", "main-0fc1580c"] as const;
+const SAVE_FIXTURES = ["main-4019a9b8", "main-0fc1580c", "main-a19bc37b"] as const;
 
 interface PublishedSaveMetadata {
   content: { manifest: string; schema: string };
-  tape: { path: string; sha256: string };
+  tape: {
+    path: string;
+    /** Whole source-tape identity at the recorded predecessor commit. */
+    sha256: string;
+    /** Portable copy check for the prefix actually used after this save. */
+    continuationPrefix?: { frames: number; sha256: string };
+  };
   save: {
     frame: number;
     timelineFrame: number;
@@ -323,7 +329,7 @@ describe("imported Tuxemon presentation state survives map transfer", () => {
 });
 
 test("published predecessor slots load exactly and only resave under the current identity", () => {
-  const current = loadPublishedSave("main-0fc1580c");
+  const current = loadPublishedSave("main-a19bc37b");
   const tape = JSON.parse(readFileSync(resolve(ROOT, current.metadata.tape.path), "utf8")) as {
     worldTraversal: WorldTraversalMode;
   };
@@ -364,21 +370,31 @@ test("published predecessor slots load exactly and only resave under the current
     };
     refuse({ ...metadata.content, manifest: "f".repeat(64) });
     refuse({ ...metadata.content, schema: "e".repeat(64) });
+    const mismatchedSchema = TUXEMON_COMPATIBLE_SAVE_CONTENT.find((candidate) =>
+      candidate.schema !== metadata.content.schema
+      && !TUXEMON_COMPATIBLE_SAVE_CONTENT.some((accepted) =>
+        accepted.manifest === metadata.content.manifest
+        && accepted.schema === candidate.schema
+      )
+    )?.schema;
+    expect(mismatchedSchema).toBeDefined();
     refuse({
       manifest: metadata.content.manifest,
-      schema: session.content!.schema,
+      schema: mismatchedSchema!,
     });
   }
 });
 
 test("the immediate main predecessor slot continues on the current tape", () => {
-  const { envelope, metadata } = loadPublishedSave("main-0fc1580c");
+  const { envelope, metadata } = loadPublishedSave("main-a19bc37b");
   const tapeBytes = readFileSync(resolve(ROOT, metadata.tape.path));
-  expect(sha256(tapeBytes)).toBe(metadata.tape.sha256);
   const tape = JSON.parse(tapeBytes.toString("utf8")) as {
     worldTraversal: WorldTraversalMode;
     masks: number[];
   };
+  expect(metadata.tape.continuationPrefix?.frames).toBe(metadata.continuation.targetFrame);
+  expect(sha256(JSON.stringify(tape.masks.slice(0, metadata.continuation.targetFrame))))
+    .toBe(metadata.tape.continuationPrefix!.sha256);
   expect(metadata.continuation.targetFrame - metadata.save.frame)
     .toBe(metadata.continuation.frames);
 

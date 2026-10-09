@@ -1,7 +1,7 @@
 {
   "format": "pocket-tuxemon/gb6-route-goldens/v1",
   "worldTraversal": "seamless-v1",
-  "tapeSha256": "a518c22c22eed1910f6fe6cf79516e89513de6a665fea4efc3a84f9a0dec1458",
+  "tapeSha256": "c6d889b63d82518662978fe49dcb958e15f34b8d13ab8e822fc4eb5d99ddfb12",
   "frames": [
     {
       "name": "cotton-town",
@@ -98,8 +98,8 @@
     },
     {
       "name": "route-3-end",
-      "frame": 115829,
-      "timelineFrame": 115830,
+      "frame": 115841,
+      "timelineFrame": 115842,
       "map": "spyder_route3",
       "position": [
         4,
@@ -222,8 +222,8 @@
     },
     {
       "name": "route-3-end",
-      "frame": 115829,
-      "timelineFrame": 115830,
+      "frame": 115841,
+      "timelineFrame": 115842,
       "map": "spyder_route3",
       "position": [
         4,

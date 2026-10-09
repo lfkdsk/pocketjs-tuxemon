@@ -284,9 +284,9 @@
  "schemaErrors": [],
  "audioQoaPending": [],
  "byFate": {
-  "T1-lowered": 2258,
+  "T1-lowered": 2057,
   "T3-dropped": 12,
-  "T1": 37037,
+  "T1": 37238,
   "T4-dropped": 1716,
   "T2-dropped": 365,
   "structural": 792
@@ -323,10 +323,10 @@
    "note": "tux.add_monster spawns into the persistent party"
   },
   {
-   "key": "act:add_step_tracker:T1-lowered",
-   "fate": "T1-lowered",
+   "key": "act:add_step_tracker:T1",
+   "fate": "T1",
    "count": 199,
-   "note": "tux.add_step_tracker saves a countdown advanced by the kit playerStep hook: one per completed tile, where upstream applies the signed tile delta (dx+dy, so up/left steps and teleport jumps also count)"
+   "note": "tux.add_step_tracker saves a countdown advanced by signed player displacement (dx+dy), including teleport and direct-placement jumps; daycare still advances once per movement event"
   },
   {
    "key": "act:add_tech:T1",
@@ -455,10 +455,10 @@
    "note": "validated in-bounds direct place command"
   },
   {
-   "key": "act:char_run:T1-lowered",
-   "fate": "T1-lowered",
+   "key": "act:char_run:T1",
+   "fate": "T1",
    "count": 2,
-   "note": "tux.char_run scopes the run rate to the next forced route; autonomous wander is unaffected"
+   "note": "both authored calls occur while idle, so upstream char_run is an exact no-op"
   },
   {
    "key": "act:char_speed:T1-lowered",
@@ -674,7 +674,7 @@
    "key": "act:quarantine:T1-lowered",
    "fate": "T1-lowered",
    "count": 8,
-   "note": "tux.quarantine transfers infected monsters to/from the hidden quarantine box, honouring its own capacity; a full box keeps the monster in the party and a full party+kennel release keeps it in the box (upstream renames a full box into a successor and overflows the Kennel past its capacity)"
+   "note": "tux.quarantine transfers infected monsters to/from the hidden quarantine box and matches upstream Kennel overflow; the full preferred-box rename/merge differs only for authored-unreachable external state"
   },
   {
    "key": "act:random_encounter:T1",
@@ -3352,8 +3352,8 @@
    "summary": {
     "types": 98,
     "uses": 13617,
-    "native": 13069,
-    "degraded": 268,
+    "native": 13074,
+    "degraded": 263,
     "placeholder": 0,
     "dropped": 280,
     "nativePercent": 96,
@@ -3414,13 +3414,13 @@
     {
      "type": "add_step_tracker",
      "total": 3,
-     "native": 0,
-     "degraded": 3,
+     "native": 3,
+     "degraded": 0,
      "placeholder": 0,
      "dropped": 0,
      "reasons": {
-      "degraded": [
-       "tux.add_step_tracker saves a countdown advanced by the kit playerStep hook: one per completed tile, where upstream applies the signed tile delta (dx+dy, so up/left steps and teleport jumps also count)"
+      "native": [
+       "tux.add_step_tracker saves a countdown advanced by signed player displacement (dx+dy), including teleport and direct-placement jumps; daycare still advances once per movement event"
       ]
      }
     },
@@ -3609,13 +3609,13 @@
     {
      "type": "char_run",
      "total": 2,
-     "native": 0,
-     "degraded": 2,
+     "native": 2,
+     "degraded": 0,
      "placeholder": 0,
      "dropped": 0,
      "reasons": {
-      "degraded": [
-       "tux.char_run scopes the run rate to the next forced route; autonomous wander is unaffected"
+      "native": [
+       "both authored calls occur while idle, so upstream char_run is an exact no-op"
       ]
      }
     },
@@ -4112,7 +4112,7 @@
      "dropped": 0,
      "reasons": {
       "degraded": [
-       "tux.quarantine transfers infected monsters to/from the hidden quarantine box, honouring its own capacity; a full box keeps the monster in the party and a full party+kennel release keeps it in the box (upstream renames a full box into a successor and overflows the Kennel past its capacity)"
+       "tux.quarantine transfers infected monsters to/from the hidden quarantine box and matches upstream Kennel overflow; the full preferred-box rename/merge differs only for authored-unreachable external state"
       ]
      }
     },

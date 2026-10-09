@@ -110,7 +110,7 @@ describe("real daycare import", () => {
     for (const map of BUILD.project.maps) {
       expect(map.events?.some((event) => event.id === "zz_tux_runtime_daycare_step")).toBe(false);
     }
-    expect(extensions.playerStep).toEqual({ call: "tux.player_step", args: {} });
+    expect(extensions.playerStep).toEqual({ call: "tux.player_step", args: {}, displacement: true });
   });
 });
 

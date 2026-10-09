@@ -192,12 +192,12 @@ describe("J3 Omnichannel and Radio Tower location goldens", () => {
     expect(manifest.frames.map(({ name, map, frame, mergedFrame, width, height }) =>
       [name, map, frame, mergedFrame, width, height]
     )).toEqual([
-      ["omnichannel-wall", "spyder_omnichannel1", 7_479, 187_596, 480, 272],
-      ["radio-tower-entry", "spyder_radiotower", 11_772, 191_889, 480, 272],
-      ["radio-broadcast", "spyder_radiotower", 13_101, 193_218, 480, 272],
-      ["omnichannel-wall", "spyder_omnichannel1", 7_479, 187_596, 960, 544],
-      ["radio-tower-entry", "spyder_radiotower", 11_772, 191_889, 960, 544],
-      ["radio-broadcast", "spyder_radiotower", 13_101, 193_218, 960, 544],
+      ["omnichannel-wall", "spyder_omnichannel1", 7_479, 187_608, 480, 272],
+      ["radio-tower-entry", "spyder_radiotower", 11_772, 191_901, 480, 272],
+      ["radio-broadcast", "spyder_radiotower", 13_101, 193_230, 480, 272],
+      ["omnichannel-wall", "spyder_omnichannel1", 7_479, 187_608, 960, 544],
+      ["radio-tower-entry", "spyder_radiotower", 11_772, 191_901, 960, 544],
+      ["radio-broadcast", "spyder_radiotower", 13_101, 193_230, 960, 544],
     ]);
   });
 

@@ -5,9 +5,9 @@
 // marks them shown. The `step_tracker` condition is true while a milestone
 // is triggered and not yet shown.
 //
-// The kit's playerStep hook reports one completed player tile without its
-// direction, so every step moves the countdown by one. Upstream feeds the
-// tile delta (dx + dy) instead: steps up or left wind the countdown back.
+// Tuxemon opts into the kit hook's signed displacement context. Each ordinary
+// step, transfer or direct placement feeds dx + dy, matching upstream: steps
+// up or left wind the countdown back instead of always counting down.
 
 export interface StepTrackerState {
   countdown: number;

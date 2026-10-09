@@ -602,9 +602,11 @@ function tuxemonStateProblem(
   if (!Array.isArray(state.party) || state.party.length > PARTY_LIMIT) {
     return `party must contain at most ${PARTY_LIMIT} monsters`;
   }
-  if (!Array.isArray(state.kennel) || state.kennel.length > KENNEL_LIMIT) {
-    return `kennel must contain at most ${KENNEL_LIMIT} monsters`;
-  }
+  // Upstream's quarantine release can append past the normal Kennel limit.
+  // Ordinary capture/storage paths still enforce KENNEL_LIMIT before they
+  // publish; the validator must retain the resulting upstream-compatible
+  // overflow state across save/load.
+  if (!Array.isArray(state.kennel)) return "kennel must be an array";
   const identities = new Set<string>();
   const groups: [string, unknown[]][] = [["party", state.party], ["kennel", state.kennel]];
   if (state.kennelBox !== undefined && state.kennelBox !== true) return "kennelBox must be true when present";
@@ -1644,9 +1646,10 @@ function setKennelVisibleCommand() {
   };
 }
 
-/** One invocation represents one completed player tile: it advances the
- * daycare and the player's step trackers. The engine hook does not mutate
- * unused saves: without either sparse payload this returns no result at all. */
+/** One invocation represents one upstream entity_moved event: daycare gains
+ * one step, while trackers consume the signed coordinate delta (dx + dy).
+ * The engine hook does not mutate unused saves: without either sparse payload
+ * this returns no result at all. */
 function playerStepCommand(source: BattleDbSource) {
   let cachedSource: BattleDb | null = null;
   let cachedRules: ReturnType<typeof battleDbToTuxemonBattleDb> | null = null;
@@ -1665,7 +1668,12 @@ function playerStepCommand(source: BattleDbSource) {
       next = { ...next, daycare: result.daycare };
       gold = result.gold;
     }
-    const stepTrackers = stepCharacterTrackers(current.stepTrackers, "player");
+    // Default to the historical one-tile value for direct command calls and
+    // older hosts. The registered hook opts into the signed displacement.
+    const movement = context.playerStep
+      ? context.playerStep.dx + context.playerStep.dy
+      : 1;
+    const stepTrackers = stepCharacterTrackers(current.stepTrackers, "player", movement);
     if (stepTrackers) next = { ...next, stepTrackers };
     return {
       ext: json(next),
@@ -1937,12 +1945,11 @@ function charPlagueCommand() {
  *  only after it lands in the party or the kennel (party overflow goes to
  *  the kennel, like upstream).
  *
- *  Degraded from upstream in two deliberate ways: admission honours the
- *  box's own `capacity` (a full box keeps the monster, inoculated, in the
- *  party) instead of upstream's routing policy, which renames a full
- *  preferred box and merges it into a successor; and release to a full party
- *  plus a full kennel leaves the monster, inoculated, in the quarantine box,
- *  whereas upstream's `_release_to_kennel` appends past the Kennel capacity. */
+ *  One authored-unreachable difference remains: admission honours the box's
+ *  own `capacity` (a full box keeps the monster, inoculated, in the party)
+ *  instead of upstream's routing policy, which renames a full preferred box
+ *  and merges it into a successor. Release matches upstream and can append
+ *  past the ordinary Kennel capacity when the party is full. */
 function quarantineCommand() {
   return (context: ExtensionCommandContext, value: JsonValue) => {
     const args = argsRecord(value, "tux.quarantine");
@@ -2003,16 +2010,15 @@ function quarantineCommand() {
     const removedIids = new Set<string>();
     for (const monster of releasing) {
       if (!monster.iid) continue;
-      // Inoculate before the move, like upstream; the monster leaves the
-      // box only once it has a home (the party, or the kennel on party
-      // overflow). A full party and kennel leaves it inoculated in the box.
+      // Inoculate before the move, like upstream; a full party releases to
+      // the Kennel even when its ordinary capacity is already exhausted.
       plagueByIid[monster.iid] = { ...(plagueByIid[monster.iid] ?? {}), [plague]: "inoculated" };
       if (party.length < PARTY_LIMIT) { party.push(monster); removedIids.add(monster.iid); }
-      else if (kennel.length < KENNEL_LIMIT) { kennel.push(monster); removedIids.add(monster.iid); }
+      else { kennel.push(monster); removedIids.add(monster.iid); }
     }
     const monsters = box.monsters.filter((monster) =>
       monster.iid === undefined || !removedIids.has(monster.iid));
-    return { ext: json({ ...current, party, kennel, plagueByIid,
+    return { ext: json({ ...current, party, kennel, kennelBox: true, plagueByIid,
       boxes: { ...current.boxes, [QUARANTINE_BOX]: { ...box, monsters } } }) };
   };
 }
@@ -2759,7 +2765,7 @@ export function createTuxemonExtensions(
       if (!handler) throw new Error(`unknown Tuxemon extension condition ${JSON.stringify(call)}`);
       return handler(context, args);
     },
-    playerStep: { call: "tux.player_step", args: {} },
+    playerStep: { call: "tux.player_step", args: {}, displacement: true },
     commands: {
       "tux.add_monster": addMonsterCommand(source),
       "tux.set_monster_health": healthCommand(),

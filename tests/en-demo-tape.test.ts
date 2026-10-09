@@ -87,7 +87,7 @@ describe("en demo tape transcription", () => {
 
     // Exactly one box in this segment pages, needing four inserted frames.
     expect(result.insertions).toHaveLength(1);
-    expect(result.insertions[0]!.afterFrame).toBe(116004 - from.frame);
+    expect(result.insertions[0]!.afterFrame).toBe(116016 - from.frame);
     expect(result.insertions[0]!.masks).toEqual([0, CONFIRM, 0, CONFIRM]);
     expect(result.stats.insertedFrames).toBe(4);
     expect(result.stats.pagedBoxes).toBe(1);
@@ -171,9 +171,9 @@ describe("en demo importer gate", () => {
     );
     const byId = new Map(data!.index.map((e) => [e.id, e]));
     // route-3-north, flower-city and candy-town are the chapter frames.
-    expect(byId.get("route-3-north")!.frame).toBe(115830);
-    expect(byId.get("flower-city")!.frame).toBe(121022);
-    expect(byId.get("candy-town")!.frame).toBe(172066);
+    expect(byId.get("route-3-north")!.frame).toBe(115842);
+    expect(byId.get("flower-city")!.frame).toBe(121034);
+    expect(byId.get("candy-town")!.frame).toBe(172078);
   });
 
   test("a changed English tape disables the demo tape", () => {

@@ -359,6 +359,37 @@ test("real Taba speed and facing lock are route-scoped and multi-Hz/save stable"
   expect(canonicalJson(speedZero.state)).toBe(speedBefore);
 });
 
+test("real beachcomber char_run is an idle no-op with no saved speed latch", () => {
+  const keep = new Set(["e016_create_beachcomber", "npc_spyder_route1_bjorn"]);
+  const project = realProject("spyder_route1", (event) => keep.has(event.id));
+  project.start = { map: "spyder_route1", x: 13, y: 10, dir: "down" };
+  const bjorn = project.maps[0]!.events?.find((event) => event.id === "npc_spyder_route1_bjorn")!;
+  expect(bjorn.pages.some((page) => JSON.stringify(page.commands).includes("routeSpeed"))).toBeFalse();
+
+  for (const hz of [60, 30, 20] as const) {
+    const session = createSession(project, hz, OPTIONS);
+    let state = startSession(project, session);
+    state = foldReferenceTicks(session, state, 6);
+    expect(state.chars.chars.npc_spyder_route1_bjorn).toBeDefined();
+    state = stepSession(session, state, { buttons: 0, confirmEdge: true });
+    for (let guard = 0; guard < 600; guard++) {
+      const modal = state.interp.modal;
+      state = stepSession(session, state, {
+        buttons: 0,
+        confirmEdge: modal?.kind === "text" && modal.complete,
+      });
+      if (!state.interp.main && !state.interp.modal) break;
+    }
+    expect(state.interp.main).toBeNull();
+    expect(state.interp.moveControls?.events.npc_spyder_route1_bjorn?.routeSpeed).toBeUndefined();
+    const restored = restoreSessionSnapshot(
+      session,
+      decodeEnvelopeText(encodeEnvelope(createSessionSnapshot(session, state, 0))),
+    );
+    expect(restored.interp.moveControls?.events.npc_spyder_route1_bjorn?.routeSpeed).toBeUndefined();
+  }
+});
+
 test("real TV direct placement is exact at every Hz and survives save/replay", () => {
   const project = realProject("spyder_paper_rival_downstairs", (event) => event.id === "e010_tv_yes");
   // The importer-wide default start is blocked on this interior. The real

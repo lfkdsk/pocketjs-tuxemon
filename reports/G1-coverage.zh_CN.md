@@ -11,7 +11,7 @@ When conversion discards a whole event, every source rule in it is Dropped.
 
 | Kind | Kinds | Uses | Native | Degraded | Placeholder | Dropped | S1 T1 baseline |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Actions | 98 | 13617 | 13069 | 268 | 0 | 280 | 6423 / 6246 (47.17% / 45.9%) |
+| Actions | 98 | 13617 | 13074 | 263 | 0 | 280 | 6423 / 6246 (47.17% / 45.9%) |
 | Conditions | 64 | 8663 | 8411 | 23 | 0 | 229 | 4766 / 4591 (55.02% / 53.0%) |
 
 The S1 acceptance baselines are 6,246 action uses (45.9%) and 4,591
@@ -21,7 +21,7 @@ Degraded count toward them. This import records 6423
 (55.02%), respectively: 177 above
 for actions and 175 above for conditions. The old
 type-table Native figure was 5,448 / 13,617 (40.0%); conversion-path accounting
-supersedes it with 13069 / 13617
+supersedes it with 13074 / 13617
 (96.0%). “Executable”
 (native + degraded + deliberate P1 placeholder) is
 97.9% for actions and
@@ -99,8 +99,10 @@ withdraw with a quantity picker, and disband); `create_kennel`,
 (it moves infected monsters between the party and the hidden `boxes.quarantine`
 box, honouring the box's own capacity; unlike upstream it keeps an
 over-capacity monster inoculated in the party instead of renaming the full
-box into a successor, and a release to a full party plus kennel keeps the
-monster in the box instead of overflowing the Kennel past its capacity),
+box into a successor. That branch is unreachable in the authored campaign:
+both admissions share one one-shot guard and can move at most the six-member
+party into a hidden capacity-30 box. Release matches upstream, including a
+full-party release appending past the ordinary Kennel capacity),
 and `park_experience` with the unreachable
 Eclipse park session. Plague-state rows stay deterministic without being
 claimed as full P2 behavior. The long-term target remains zero Placeholder
@@ -480,7 +482,7 @@ four-neighbour BFS with fixed tie-breaking selects the nearest walkable cell:
 | Action | `access_pc` | 0 | 10 | 0 | 0 | 10 |
 | Action | `add_item` | 117 | 0 | 0 | 1 | 118 |
 | Action | `add_monster` | 792 | 0 | 0 | 0 | 792 |
-| Action | `add_step_tracker` | 0 | 3 | 0 | 0 | 3 |
+| Action | `add_step_tracker` | 3 | 0 | 0 | 0 | 3 |
 | Action | `add_tech` | 12 | 0 | 0 | 0 | 12 |
 | Action | `add_tracker` | 0 | 24 | 0 | 0 | 24 |
 | Action | `autosave` | 6 | 0 | 0 | 0 | 6 |
@@ -493,7 +495,7 @@ four-neighbour BFS with fixed tie-breaking selects the nearest walkable cell:
 | Action | `char_move` | 64 | 13 | 0 | 0 | 77 |
 | Action | `char_plague` | 13 | 0 | 0 | 0 | 13 |
 | Action | `char_position` | 1 | 0 | 0 | 0 | 1 |
-| Action | `char_run` | 0 | 2 | 0 | 0 | 2 |
+| Action | `char_run` | 2 | 0 | 0 | 0 | 2 |
 | Action | `char_speed` | 0 | 19 | 0 | 0 | 19 |
 | Action | `char_stop` | 88 | 0 | 0 | 0 | 88 |
 | Action | `char_talk` | 772 | 0 | 0 | 0 | 772 |

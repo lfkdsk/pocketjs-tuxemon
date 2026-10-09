@@ -56,7 +56,7 @@ const worldTraversal = journeyWorldTraversal(journey, "G7 maintained journey");
 const GAME_OPTIONS = { extensions: TUXEMON_EXTENSIONS, battle: TUXEMON_BATTLE_RULES, scenes: TUXEMON_SCENES } as const;
 // Terminal state after the legacy timeline carries the deterministic player
 // identity; the story terminal — spyder_route1@14,19 — is unchanged.
-const LEGACY_TERMINAL_STATE_SHA256 = "859324d5e9706945b204708bf48ed8c1bce462ea0d033c4bf27d269c1eeee58f";
+const LEGACY_TERMINAL_STATE_SHA256 = "84c1ad56b0a6e45ea54cddce04c89ae21691fd57f761e54041b959698b53fc4e";
 const BEFORE_HANDOFF_FRAME = 3_482;
 const MID_HANDOFF_FRAME = 3_496;
 const AFTER_HANDOFF_FRAME = 3_500;

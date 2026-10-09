@@ -1,5 +1,5 @@
 // Full-mainline PSP emulator runner: build and run the GB6+J1+J2+J3+J4
-// mainline (206,818 frames) as 28 bounded chapter segments under
+// mainline (206,830 frames) as 28 bounded chapter segments under
 // PPSSPPHeadless, verify each terminal against its desktop pin, and collect
 // the raw profile/bench plus per-segment metrics into reports/psp-mainline/.
 //
@@ -56,18 +56,18 @@ export const SPLIT_ENVELOPES = [
   { id: "seg-58414", frame: 58414 },
   { id: "seg-71527", frame: 71527 },
   { id: "seg-84640", frame: 84640 },
-  { id: "seg-97753", frame: 97753 },
-  { id: "seg-136603", frame: 136603 },
-  { id: "seg-150820", frame: 150820 },
+  { id: "seg-97765", frame: 97765 },
+  { id: "seg-136615", frame: 136615 },
+  { id: "seg-150832", frame: 150832 },
 ];
 
 // The pinned full-mainline extent this plan must cover: the J4 quest ends the
-// Spyder campaign at frame 206,818, split into 28 bounded segments. These are
+// Spyder campaign at frame 206,830, split into 28 bounded segments. These are
 // independent of the plan's own self-report (the plan is hand-written), so a
 // deleted or reordered segment is caught even though `verify` only walks the
 // plan as given.
 export const EXPECTED_SEGMENTS = 28;
-export const EXPECTED_END_FRAME = 206818;
+export const EXPECTED_END_FRAME = 206830;
 
 /** The fixed 28-segment identity table: every plan entry's id, chapter and
  *  [start, end) window, in order. This is independent of the plan's own
@@ -88,23 +88,23 @@ export const EXPECTED_PLAN_IDENTITIES: ReadonlyArray<{ id: string; chapter: stri
   { id: "09-city-park-a", chapter: "city-park", start: 47245, end: 58414 },
   { id: "10-route3-a", chapter: "seg-58414", start: 58414, end: 71851 },
   { id: "11-route3-b", chapter: "seg-71527", start: 71851, end: 84641 },
-  { id: "12-route3-c", chapter: "seg-84640", start: 84641, end: 98582 },
-  { id: "13-leather-town", chapter: "seg-97753", start: 98582, end: 115830 },
-  { id: "14-route-3-north", chapter: "route-3-north", start: 115830, end: 121022 },
-  { id: "15-flower-city", chapter: "flower-city", start: 121022, end: 128706 },
-  { id: "16-captain-returns-a", chapter: "captain-returns", start: 128706, end: 137404 },
-  { id: "17-dojo", chapter: "seg-136603", start: 137404, end: 150999 },
-  { id: "18-route5", chapter: "seg-150820", start: 150999, end: 172066 },
-  { id: "19-candy-town", chapter: "candy-town", start: 172066, end: 178667 },
-  { id: "20-greenwash", chapter: "greenwash-aardant", start: 178667, end: 180106 },
-  { id: "21-hospital-cure", chapter: "hospital-cure", start: 180106, end: 187584 },
-  { id: "22-omnichannel", chapter: "omnichannel-open", start: 187584, end: 193196 },
-  { id: "23-radio-broadcast", chapter: "radio-broadcast", start: 193196, end: 195067 },
-  { id: "24-kernel-briefing", chapter: "kernel-briefing", start: 195067, end: 196185 },
-  { id: "25-surfboard", chapter: "surfboard", start: 196185, end: 198332 },
-  { id: "26-route-b", chapter: "route-b", start: 198332, end: 201824 },
-  { id: "27-data-center", chapter: "data-center", start: 201824, end: 206807 },
-  { id: "28-kernel-defeated", chapter: "kernel-defeated", start: 206807, end: 206818 },
+  { id: "12-route3-c", chapter: "seg-84640", start: 84641, end: 98594 },
+  { id: "13-leather-town", chapter: "seg-97765", start: 98594, end: 115842 },
+  { id: "14-route-3-north", chapter: "route-3-north", start: 115842, end: 121034 },
+  { id: "15-flower-city", chapter: "flower-city", start: 121034, end: 128718 },
+  { id: "16-captain-returns-a", chapter: "captain-returns", start: 128718, end: 137416 },
+  { id: "17-dojo", chapter: "seg-136615", start: 137416, end: 151011 },
+  { id: "18-route5", chapter: "seg-150832", start: 151011, end: 172078 },
+  { id: "19-candy-town", chapter: "candy-town", start: 172078, end: 178679 },
+  { id: "20-greenwash", chapter: "greenwash-aardant", start: 178679, end: 180118 },
+  { id: "21-hospital-cure", chapter: "hospital-cure", start: 180118, end: 187596 },
+  { id: "22-omnichannel", chapter: "omnichannel-open", start: 187596, end: 193208 },
+  { id: "23-radio-broadcast", chapter: "radio-broadcast", start: 193208, end: 195079 },
+  { id: "24-kernel-briefing", chapter: "kernel-briefing", start: 195079, end: 196197 },
+  { id: "25-surfboard", chapter: "surfboard", start: 196197, end: 198344 },
+  { id: "26-route-b", chapter: "route-b", start: 198344, end: 201836 },
+  { id: "27-data-center", chapter: "data-center", start: 201836, end: 206819 },
+  { id: "28-kernel-defeated", chapter: "kernel-defeated", start: 206819, end: 206830 },
 ];
 
 /** The 28-segment plan (exported so the coverage invariants are testable
@@ -136,13 +136,13 @@ export function buildPlan(): PlanEntry[] {
     { id: "09-city-park-a", chapter: "city-park", end: g("seg-58414") },
     { id: "10-route3-a", chapter: "seg-58414", end: g("seg-71527") },
     { id: "11-route3-b", chapter: "seg-71527", end: g("seg-84640") },
-    { id: "12-route3-c", chapter: "seg-84640", end: g("seg-97753") },
-    { id: "13-leather-town", chapter: "seg-97753", end: byId.get("route-3-north")!.frame },
+    { id: "12-route3-c", chapter: "seg-84640", end: g("seg-97765") },
+    { id: "13-leather-town", chapter: "seg-97765", end: byId.get("route-3-north")!.frame },
     { id: "14-route-3-north", chapter: "route-3-north", end: byId.get("flower-city")!.frame },
     { id: "15-flower-city", chapter: "flower-city", end: byId.get("captain-returns")!.frame },
-    { id: "16-captain-returns-a", chapter: "captain-returns", end: g("seg-136603") },
-    { id: "17-dojo", chapter: "seg-136603", end: g("seg-150820") },
-    { id: "18-route5", chapter: "seg-150820", end: byId.get("candy-town")!.frame },
+    { id: "16-captain-returns-a", chapter: "captain-returns", end: g("seg-136615") },
+    { id: "17-dojo", chapter: "seg-136615", end: g("seg-150832") },
+    { id: "18-route5", chapter: "seg-150832", end: byId.get("candy-town")!.frame },
     { id: "19-candy-town", chapter: "candy-town", end: byId.get("greenwash-aardant")!.frame },
     { id: "20-greenwash", chapter: "greenwash-aardant", end: byId.get("hospital-cure")!.frame },
     { id: "21-hospital-cure", chapter: "hospital-cure", end: byId.get("omnichannel-open")!.frame },

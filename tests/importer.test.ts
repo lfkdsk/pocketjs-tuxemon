@@ -129,11 +129,11 @@ test("all maps pass schema and reference valid transfer destinations", () => {
     // degraded to native.
     types: 98,
     uses: 13_617,
-    native: 6_855,
+    native: 6_857,
     degraded: 2_838,
     placeholder: 708,
-    dropped: 3_216,
-    nativePercent: 50.3,
+    dropped: 3_214,
+    nativePercent: 50.4,
     tier1: {
       uses: 6_323,
       percent: 46.43,
@@ -654,7 +654,7 @@ test("default import output remains byte-pinned", () => {
   // The deterministic clock, native presentation/terrain mappings, the full
   // content-derived GM1 audio table and commands, sys.music_fading fadeout
   // guard, GI scene lowering, and the
-  // GI-1b movement/party lowering (choice_npc icon rows, dropped char_run,
+  // GI-1b movement/party lowering (choice_npc icon rows, idle char_run no-ops,
   // get_party_monster iid slots, NPC-lifetime party clears), the G-PORTRAIT
   // monster backdrops and choice_monster menu-face icons (lazy on-demand IMG
   // entries), the GI-2b storage/trade/shop dispositions, imported item icon
@@ -914,24 +914,24 @@ test("ImportOptions.routes emits K2 arbitrary targets and path steps", () => {
   expect(result.report.options?.routes).toBeTrue();
 });
 
-test("ImportOptions.moveControl emits KM1 stop, run, speed and facing controls", () => {
+test("ImportOptions.moveControl keeps authored idle char_run calls as exact no-ops", () => {
+  const charRun = buildProject(["route1", "spyder_route1"], { moveControl: true });
+  const runNodes = objectNodes(charRun.project);
+  // Both real char_run calls happen while their NPC is idle. Upstream does
+  // not latch a run rate onto a future route, so neither may leave a pending
+  // routeSpeed control (Christie's following pathfind keeps page speed).
+  expect(runNodes.some((node) =>
+    node.op === "moveControl" && (node.control as { kind?: string })?.kind === "routeSpeed"
+  )).toBeFalse();
+  const charRunRow = charRun.report.coverage.actions.rows.find((row) => row.type === "char_run");
+  expect(charRunRow).toMatchObject({ total: 2, native: 2, degraded: 0, dropped: 0 });
+
   const nodes = objectNodes(buildProject(["route1", "taba_town", "tuxe_mart_taba"], { moveControl: true }).project);
   // char_stop player -> a stop control on the player
   expect(nodes.some((node) =>
     node.op === "moveControl" && node.target === "player" &&
     (node.control as { kind?: string })?.kind === "stop"
   )).toBeTrue();
-  // char_run christie -> a routeSpeed control: the run rate (7.35 tiles/s)
-  // is grade 5, scoped to her next forced route (the following pathfind),
-  // and gone when that route ends.
-  expect(nodes.some((node) =>
-    node.op === "moveControl" && (node.control as { kind?: string; value?: number })?.kind === "routeSpeed" &&
-    (node.control as { value?: number })?.value === 5
-  )).toBeTrue();
-  // no persistent run control is emitted (it would speed every later route)
-  expect(nodes.some((node) =>
-    node.op === "moveControl" && (node.control as { kind?: string })?.kind === "run"
-  )).toBeFalse();
   // char_speed kay_wren,7 -> the nearest MV grade to 7 tiles/s is 5,
   // scoped to the next forced route like the upstream idle reset.
   expect(nodes.some((node) =>
@@ -1545,6 +1545,40 @@ test("imports live player-name guards and rejects impossible legacy triggers", (
   ]) {
     expect(spyder.events?.some((event) => event.name === name), name).toBeFalse();
   }
+});
+
+test("the only labelled facing guards are the five Surf checks; two Radio drops are action-owned", () => {
+  const source = loadAllFileEvents();
+  const facing = source.flatMap((event) => event.conds
+    .filter((condition) => condition.type === "char_facing_tile")
+    .map((condition) => ({
+      source: event.source,
+      name: event.name,
+      args: condition.args,
+      radio: event.acts.some((action) => action.type === "tune_radio"),
+    })));
+  expect(facing.filter((entry) => entry.args.length > 1)).toEqual([
+    { source: "spyder.yaml", name: "Choice Surf", args: ["player", "surfable"], radio: false },
+    { source: "spyder.yaml", name: "Push Into Water Down", args: ["player", "surfable"], radio: false },
+    { source: "spyder.yaml", name: "Push Into Water Left", args: ["player", "surfable"], radio: false },
+    { source: "spyder.yaml", name: "Push Into Water Right", args: ["player", "surfable"], radio: false },
+    { source: "spyder.yaml", name: "Push Into Water Up", args: ["player", "surfable"], radio: false },
+  ]);
+  expect(facing.filter((entry) => entry.radio)).toEqual([
+    { source: "spyder_leather_house1.tmx", name: "Radio", args: ["player"], radio: true },
+    { source: "spyder_paper_rival_bedroom.yaml", name: "Radio", args: ["player"], radio: true },
+  ]);
+
+  const radios = buildProject(
+    ["spyder_leather_house1", "spyder_paper_rival_bedroom"],
+    G6_IMPORT_OPTIONS,
+  );
+  expect(radios.report.coverage.actions.rows.find((row) => row.type === "tune_radio"))
+    .toMatchObject({ total: 2, dropped: 2 });
+  expect(radios.report.coverage.conditions.rows.find((row) => row.type === "is char_facing_tile")
+    ?.reasons.dropped).toContain("every action was removed, so no project event was emitted");
+  expect(radios.project.maps.flatMap((map) => map.events ?? []).some((event) => event.name === "Radio"))
+    .toBeFalse();
 });
 
 test("Spyder surf boundaries require the Surfboard, enter water, and dismount", () => {

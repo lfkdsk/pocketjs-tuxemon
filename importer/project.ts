@@ -3334,21 +3334,13 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         break;
       }
       case "char_run":
-        if (!ctx.options.moveControl) {
-          noteAction(a, a.type, "T2-dropped", "runtime pathfinding / other-event routes / NPC motion props");
-          break;
-        }
         // Upstream char_run swaps to the absolute run rate (7.35 tiles/s)
-        // only while the character is already moving, reverting on idle.
-        // The kit's routeSpeed control scopes a grade to one forced route:
-        // the boost latches onto the next (or current) route and is gone
-        // when it ends, so route1's "char_run then pathfind" keeps the fast
-        // path without speeding later routes. A wandering NPC with no
-        // forced route (spyder_route1's beachcomber) is unaffected, matching
-        // upstream's idle no-op; on a page already moving at grade 5 the
-        // run rate is a no-op too (grade 5 is already ~7.5 tiles/s).
-        noteAction(a, a.type, "T1-lowered", "tux.char_run scopes the run rate to the next forced route; autonomous wander is unaffected");
-        out.push(command({ op: "moveControl", target: charTarget(g[0]!, isSelf(g[0])), control: { kind: "routeSpeed", value: speedGrade(7.35) } }));
+        // only while the character is already moving, never latching onto a
+        // later route, and reverts on idle. Both authored uses invoke it while
+        // idle (Christie before pathfind; Bjorn after dialogue), so they are
+        // exact no-ops. Emitting routeSpeed would incorrectly accelerate the
+        // next forced route and leave a latent saved override for Bjorn.
+        noteAction(a, a.type, "T1", "both authored calls occur while idle, so upstream char_run is an exact no-op");
         break;
       case "set_facing_mode": {
         const FACING: Record<string, FacingMode> = {
@@ -3783,8 +3775,8 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         noteAction(
           a,
           a.type,
-          "T1-lowered",
-          "tux.add_step_tracker saves a countdown advanced by the kit playerStep hook: one per completed tile, where upstream applies the signed tile delta (dx+dy, so up/left steps and teleport jumps also count)",
+          "T1",
+          "tux.add_step_tracker saves a countdown advanced by signed player displacement (dx+dy), including teleport and direct-placement jumps; daycare still advances once per movement event",
         );
         out.push({ op: "ext", call: "tux.add_step_tracker", args: {
           character, tracker, countdown, milestones,
@@ -3896,7 +3888,7 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         }
         const args: Record<string, JsonValue> = { character, plague, action };
         if (g[3] !== undefined && g[3] !== "") args.amount = Number(g[3]);
-        noteAction(a, a.type, "T1-lowered", "tux.quarantine transfers infected monsters to/from the hidden quarantine box, honouring its own capacity; a full box keeps the monster in the party and a full party+kennel release keeps it in the box (upstream renames a full box into a successor and overflows the Kennel past its capacity)");
+        noteAction(a, a.type, "T1-lowered", "tux.quarantine transfers infected monsters to/from the hidden quarantine box and matches upstream Kennel overflow; the full preferred-box rename/merge differs only for authored-unreachable external state");
         out.push({ op: "ext", call: "tux.quarantine", args });
         break;
       }

@@ -6,8 +6,9 @@ its recorded RPG Kit submodule, and Tuxemon
 not hand-authored envelopes or toy projects:
 
 - `main-4019a9b8/` preserves the older published content pair.
-- `main-0fc1580c/` is the immediate pre-integration main and carries the
-  current mainline tape hash and continuation digest.
+- `main-0fc1580c/` preserves the previous integration's content pair.
+- `main-a19bc37b/` is the immediate pre-residual main and carries the current
+  mainline tape hash and continuation digest.
 
 To reproduce a fixture, make a detached checkout of the named game commit with
 recursive submodules, run `bun install --frozen-lockfile`, run the importer

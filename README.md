@@ -26,7 +26,7 @@ summary:
   the north end of Route 3, Route 4 and Flower City to the Captain's return
   in the Mansion and on through Candy Town, the hospital cure and Omnichannel
   Radio Tower broadcast, then across Routes E and B to the Data Center and
-  Kernel's defeat — the complete 206,818-frame Spyder mainline at 60 Hz,
+  Kernel's defeat — the complete 206,830-frame Spyder mainline at 60 Hz,
   driven by
   deterministic autoplay tapes — and every imported input lock is executed
   to its unlock. On the 67 placed outdoor maps, the streamed renderer paints
@@ -52,7 +52,7 @@ summary:
   the Radio Tower — 13 trainer + 1 wild — and 15 on the Kernel quest —
   12 trainer + 3 wild), and every trainer
   battle enters Battle Processing and ends `won` with its `battle_outcome`
-  written back. The frozen 32-minute 60 Hz tape (115,830 frames / 32 min 10 s)
+  written back. The frozen 32-minute 60 Hz tape (115,842 frames / 32 min 10 s)
   replays byte-identical at 60, 30 and 20 Hz, and both failure paths are
   verified — the first loss against Billie, and a later loss on Route 3
   with the faint-point teleport, the heal-before-leaving block and the
@@ -380,7 +380,7 @@ not a crash. Chapter snapshots and the nibble-dictionary tape are packed into
 the pak and read on demand, so the JS bundle keeps only a tiny chapter index;
 the tape is decoded once, on the first chapter selection, and every chapter
 plays a window of it. The committed chapter pack and all twenty thumbnails are
-rebaked against the current 206,818-frame recording; every chapter envelope
+rebaked against the current 206,830-frame recording; every chapter envelope
 passes decode, map-aware restore and suffix replay to the production terminal.
 `bun tools/verify-web-demo.ts` drives all of the above in headless Chrome,
 including a 600-frame autoplay that must reach a state byte-identical to a
@@ -485,7 +485,7 @@ then compare the completed session with a fresh production replay:
 bun run verify:psp:emu          # builds nothing; runs the already-built .prx
 ```
 
-The complete GB6+J1+J2+J3+J4 mainline (206,818 frames) runs under
+The complete GB6+J1+J2+J3+J4 mainline (206,830 frames) runs under
 PPSSPPHeadless as 28 bounded chapter-to-chapter segments: the no-argument
 retained-evidence gate (`bun tools/psp-mainline.ts verify`) reports 28/28
 PASS with no exemptions, each segment's receipt bound to its plan entry by
