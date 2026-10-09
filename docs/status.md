@@ -159,6 +159,7 @@ Per-action numbers come from the import coverage report,
 | Feature | Status | Notes |
 | --- | --- | --- |
 | Determinism, locks, freeze scan, journey replays, pixel goldens | Done | [verification](verification.md) |
+| Order-independent visual tests | Done | Generated-bundle probes restore every global descriptor they touch, while fixed-time screenshot boots explicitly start without a chapter snapshot and force their requested language. The two CI rest halves, reversed registration, fixed-seed random orders and standalone visual files exercise the same committed goldens; see [CI](ci.md). |
 | Journey-bound screenshot generation | Done | The GB6 route, J1, J4 and daylight generators derive their 11 checkpoints from the maintained tapes, validate tape identity and exact reducer map/tile/frame state before painting, and record camera/player geometry in their manifests. The long-tape generators restore validated save snapshots into the production GameView instead of feeding reducer-authored masks through the UI paginator. `verify:goldens:sync` runs the shared state checks without rendering or writing files and is a CI journey leg; see [verification](verification.md#goldens). |
 | Parallel CI with Pages deploy | Done | The slowest journey leg (`verify:chapters`) sets the wall-clock; see [ci](ci.md) |
 | Item icon atlas | Done | 143 upstream icons baked into one declared `items` sheet (16×16 cells, TILESET pak entry); 1 item without upstream art (`elianeoutput`) uses a shared placeholder cell. See `reports/G1-coverage.md` → Economy and item catalog. |

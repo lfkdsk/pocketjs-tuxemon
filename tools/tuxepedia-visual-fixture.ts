@@ -110,7 +110,9 @@ export async function captureTuxepedia(
   }
   const globals = {
     ...FIXED_TIME_HOST_GLOBALS,
-    ...(lang === "zh_CN" ? { __pocketTuxemonLang: "zh_CN" } : {}),
+    // Force both languages: an English capture must not inherit a Chinese
+    // override or stored preference from an earlier test in the process.
+    __pocketTuxemonLang: lang,
   };
   // The sim host keeps host globals past boot; restore the language override so
   // a later zh capture cannot leak into another test's detectLang() call.

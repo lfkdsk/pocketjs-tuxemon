@@ -88,9 +88,14 @@ export const FIXED_INITIAL_CIVIL_TIME: Readonly<CivilDateTime> = Object.freeze({
   minute: 0,
 });
 
-/** Host globals injected by deterministic bundle tests before module eval. */
+/** Host globals injected by deterministic bundle tests before module eval.
+ * The absent chapter-wrapper values are explicit so a prior bundle probe
+ * cannot turn a fresh screenshot boot into a resumed journey segment. */
 export const FIXED_TIME_HOST_GLOBALS = Object.freeze({
   __pocketTuxemonInitialCivilTime: FIXED_INITIAL_CIVIL_TIME,
+  __pocketTuxemonBootSnapshot: undefined,
+  __pocketTuxemonBootFrame: undefined,
+  __pocketTuxemonBootReady: undefined,
 });
 
 const DAY_NAMES = Object.freeze([

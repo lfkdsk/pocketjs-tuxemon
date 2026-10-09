@@ -249,20 +249,26 @@ describe("Simplified Chinese kit interface visuals", () => {
     const all = await captures();
     const checks: Record<"small" | "large", GlyphCheck[]> = {
       small: [
+        { case: "save-menu", text: "存档菜单", region: { x0: 30, y0: 20, x1: 160, y1: 60 }, ink: "light", fontSlot: 1 },
         { case: "save-success", text: "已保存", region: { x0: 40, y0: 45, x1: 440, y1: 175 }, ink: "light", fontSlot: 1 },
         { case: "save-failure", text: "失败", region: { x0: 40, y0: 45, x1: 440, y1: 175 }, ink: "light", fontSlot: 1 },
+        { case: "demo-menu", text: "演示菜单", region: { x0: 25, y0: 15, x1: 160, y1: 55 }, ink: "light", fontSlot: 1 },
         { case: "shop", text: "购买", region: { x0: 220, y0: 70, x1: 300, y1: 105 }, ink: "light" },
         { case: "name-input", text: "删除", region: { x0: 300, y0: 185, x1: 380, y1: 225 }, ink: "light" },
         { case: "button-hints", text: "○ 确定 · × 返回", region: { x0: 350, y0: 140, x1: 470, y1: 175 }, ink: "light" },
-        { case: "battle-status", text: "105／105", region: { x0: 390, y0: 110, x1: 475, y1: 150 }, ink: "dark" },
+        { case: "event-error", text: "事件错误", region: { x0: 180, y0: 100, x1: 300, y1: 145 }, ink: "light", fontSlot: 1 },
+        { case: "battle-status", text: "螺母兽 要做什么？", region: { x0: 0, y0: 215, x1: 240, y1: 270 }, ink: "dark" },
       ],
       large: [
+        { case: "save-menu", text: "存档菜单", region: { x0: 270, y0: 155, x1: 450, y1: 200 }, ink: "light", fontSlot: 1 },
         { case: "save-success", text: "已保存", region: { x0: 280, y0: 180, x1: 680, y1: 320 }, ink: "light", fontSlot: 1 },
         { case: "save-failure", text: "失败", region: { x0: 280, y0: 180, x1: 680, y1: 320 }, ink: "light", fontSlot: 1 },
+        { case: "demo-menu", text: "演示菜单", region: { x0: 265, y0: 150, x1: 450, y1: 200 }, ink: "light", fontSlot: 1 },
         { case: "shop", text: "购买", region: { x0: 700, y0: 340, x1: 780, y1: 385 }, ink: "light" },
         { case: "name-input", text: "删除", region: { x0: 630, y0: 390, x1: 730, y1: 450 }, ink: "light" },
         { case: "button-hints", text: "○ 确定 · × 返回", region: { x0: 820, y0: 400, x1: 950, y1: 455 }, ink: "light" },
-        { case: "battle-status", text: "105／105", region: { x0: 780, y0: 220, x1: 950, y1: 300 }, ink: "dark", scale: 2 },
+        { case: "event-error", text: "事件错误", region: { x0: 420, y0: 235, x1: 560, y1: 285 }, ink: "light", fontSlot: 1 },
+        { case: "battle-status", text: "螺母兽 要做什么？", region: { x0: 0, y0: 430, x1: 490, y1: 540 }, ink: "dark", scale: 2 },
       ],
     };
     for (const size of ["small", "large"] as const) {

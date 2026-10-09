@@ -417,11 +417,25 @@ describe("PSP segment wrapper baking (no SDK)", () => {
     let terminalAt = -1;
     let exitAt = -1;
     let calls = 0;
-    const saved: Record<string, unknown> = {};
-    for (const k of ["frame", "__pspLog", "__pspRoundTrip", "__pspExit",
-      "__pocketTuxemonBootReady", "__rpgSessionState"]) {
-      saved[k] = g[k];
-    }
+    // bakeSegmentBundle's prefix writes the time/snapshot/frame globals before
+    // its wrapper replaces frame. Preserve descriptors (including absence),
+    // not only values: leaving an own property with value undefined can still
+    // change a later host probe.
+    const touched = [
+      "frame",
+      "__pspLog",
+      "__pspRoundTrip",
+      "__pspExit",
+      "__pocketTuxemonInitialCivilTime",
+      "__pocketTuxemonBootSnapshot",
+      "__pocketTuxemonBootFrame",
+      "__pocketTuxemonBootReady",
+      "__rpgSessionState",
+    ] as const;
+    const saved = new Map(touched.map((key) => [
+      key,
+      Object.getOwnPropertyDescriptor(globalThis, key),
+    ] as const));
     try {
       g.frame = () => {};
       g.__pspLog = (line: string) => {
@@ -443,7 +457,13 @@ describe("PSP segment wrapper baking (no SDK)", () => {
       expect((terminals[0] as { frame: number }).frame).toBe(L);
       expect(exitAt).toBe(terminalAt + 1);
     } finally {
-      for (const [k, v] of Object.entries(saved)) g[k] = v;
+      for (const [key, descriptor] of saved) {
+        delete g[key];
+        if (descriptor) Object.defineProperty(globalThis, key, descriptor);
+      }
+    }
+    for (const [key, descriptor] of saved) {
+      expect(Object.getOwnPropertyDescriptor(globalThis, key)).toEqual(descriptor);
     }
   });
 });
