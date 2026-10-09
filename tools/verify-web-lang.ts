@@ -19,6 +19,7 @@ import { existsSync, mkdirSync, rmSync, statSync, writeFileSync } from "node:fs"
 import { join, resolve } from "node:path";
 
 import { FIXED_INITIAL_CIVIL_TIME } from "../battle/time-weather.ts";
+import { registerCleanup, spawnHeadlessChrome } from "./headless-chrome.ts";
 
 const ROOT = resolve(import.meta.dir, "..");
 const SITE = resolve(ROOT, "dist/web");
@@ -50,26 +51,12 @@ const server = Bun.serve({
   },
 });
 
-const proc = Bun.spawn([
-  CHROME, "--headless=new", "--no-sandbox", "--disable-dev-shm-usage", "--remote-debugging-port=0",
-  `--user-data-dir=${OUT}/profile`, "--no-first-run", "--disable-background-networking",
-  "--window-size=1280,900", "--force-device-scale-factor=1", "about:blank",
-], { stdout: "ignore", stderr: "pipe" });
-const reader = proc.stderr.getReader();
-let text = "";
-let wsUrl = "";
-while (!wsUrl) {
-  const { value, done } = await reader.read();
-  if (done) throw new Error("chrome exited: " + text);
-  text += new TextDecoder().decode(value);
-  const m = /DevTools listening on (ws:\/\/\S+)/.exec(text);
-  if (m) {
-    const port = new URL(m[1]!).port;
-    const targets = (await (await fetch(`http://127.0.0.1:${port}/json/list`)).json()) as any[];
-    wsUrl = targets.find((t) => t.type === "page").webSocketDebuggerUrl;
-  }
-}
-reader.releaseLock();
+// The browser and the server are torn down on every exit path (pass, fail,
+// throw, signal) via the shared cleanup registry in headless-chrome.ts.
+registerCleanup(() => server.stop(true));
+const chrome = await spawnHeadlessChrome(CHROME, join(OUT, "profile"), "1280,900");
+registerCleanup(() => chrome.close());
+const wsUrl = chrome.wsUrl;
 
 const ws = new WebSocket(wsUrl);
 await new Promise((r) => ws.addEventListener("open", r, { once: true }));
@@ -282,7 +269,7 @@ await send("Emulation.clearDeviceMetricsOverride");
 
 await new Promise((r) => setTimeout(r, 200));
 ws.close();
-proc.kill();
+chrome.close();
 server.stop(true);
 
 if (errors.length > 0) {

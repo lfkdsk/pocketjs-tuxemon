@@ -40,6 +40,7 @@ import { chapterReference, liveStateDigests } from "./zh-demo-reference.ts";
 import { readInlineProject } from "./generated-project.ts";
 import { journeyWorldTraversal } from "./gb6-journey.ts";
 import { productionPaginator } from "./zh-tape.ts";
+import { registerCleanup, spawnHeadlessChrome } from "./headless-chrome.ts";
 
 const ROOT = resolve(import.meta.dir, "..");
 const SITE = resolve(ROOT, "dist/web");
@@ -218,26 +219,12 @@ const server = Bun.serve({
   },
 });
 
-const proc = Bun.spawn([
-  CHROME, "--headless=new", "--no-sandbox", "--disable-dev-shm-usage", "--remote-debugging-port=0",
-  `--user-data-dir=${OUT}/profile`, "--no-first-run", "--disable-background-networking",
-  "--window-size=1200,900", "--force-device-scale-factor=1", "about:blank",
-], { stdout: "ignore", stderr: "pipe" });
-const reader = proc.stderr.getReader();
-let text = "";
-let wsUrl = "";
-while (!wsUrl) {
-  const { value, done } = await reader.read();
-  if (done) throw new Error("chrome exited: " + text);
-  text += new TextDecoder().decode(value);
-  const m = /DevTools listening on (ws:\/\/\S+)/.exec(text);
-  if (m) {
-    const port = new URL(m[1]!).port;
-    const targets = (await (await fetch(`http://127.0.0.1:${port}/json/list`)).json()) as any[];
-    wsUrl = targets.find((t) => t.type === "page").webSocketDebuggerUrl;
-  }
-}
-reader.releaseLock();
+// The browser and the server are torn down on every exit path (pass, fail,
+// throw, signal) via the shared cleanup registry in headless-chrome.ts.
+registerCleanup(() => server.stop(true));
+const chrome = await spawnHeadlessChrome(CHROME, join(OUT, "profile"));
+registerCleanup(() => chrome.close());
+const wsUrl = chrome.wsUrl;
 
 const ws = new WebSocket(wsUrl);
 await new Promise((r) => ws.addEventListener("open", r, { once: true }));
@@ -626,6 +613,6 @@ console.log(`console errors: ${errors.length}${errors.length ? "\n  " + errors.s
 check("no console errors", errors.length === 0);
 console.log(failures === 0 ? "WEB DEMO PASS" : `WEB DEMO FAIL (${failures})`);
 ws.close();
-proc.kill();
+chrome.close();
 server.stop(true);
 process.exit(failures === 0 ? 0 : 1);
