@@ -56,7 +56,9 @@ jobs:
       matrix:
         # Explicit groups of roughly a minute each: bun's --shard cuts the
         # sorted file list into contiguous runs, which bunches the slow
-        # battle and replay suites together. New test files land in "rest".
+        # battle and replay suites together. New test files land in one of
+        # the two "rest" halves by name. One process for all of them peaked
+        # at 11.5 GB resident and was killed on the 16 GB runner.
         include:
           - name: importer
             files: tests/importer.test.ts
@@ -64,8 +66,10 @@ jobs:
             files: tests/g7-repository.test.ts tests/g6-golden.test.ts
           - name: locks, battle data and terrain
             files: tests/g6-locks.test.ts tests/battle-db-adapter.test.ts tests/battle-golden.test.ts tests/terrain.test.ts
-          - name: rest
-            files: rest
+          - name: rest (a-l)
+            files: rest-a-l
+          - name: rest (m-z)
+            files: rest-m-z
     steps:
       - uses: actions/checkout@v7
         with:
@@ -74,9 +78,16 @@ jobs:
       - name: Test
         run: |
           files="${{ matrix.files }}"
-          if [ "$files" = rest ]; then
-            files=$(ls tests/*.test.ts | grep -v -E '(importer|g7-repository|g6-golden|g6-locks|battle-db-adapter|battle-golden|terrain)\.test\.ts$')
-          fi
+          case "$files" in
+            rest-a-l|rest-m-z)
+              rest=$(ls tests/*.test.ts | grep -v -E '(importer|g7-repository|g6-golden|g6-locks|battle-db-adapter|battle-golden|terrain)\.test\.ts$')
+              if [ "$files" = rest-a-l ]; then
+                files=$(printf '%s\n' $rest | grep -E '^tests/[a-l]')
+              else
+                files=$(printf '%s\n' $rest | grep -v -E '^tests/[a-l]')
+              fi
+              ;;
+          esac
           bun test $files
 
   journey:
