@@ -15,6 +15,7 @@ import {
   type PartialSeamPromotion,
 } from "../importer/project.ts";
 import { loadAllMaps, type TuxEvent, type TuxMap } from "../importer/source.ts";
+import { importTerrainSurfaceLabels } from "../importer/terrain.ts";
 import { buildOutdoorWorldIndex, outdoorWorldPortalId } from "../importer/world.ts";
 import type {
   OutdoorWorldIndex,
@@ -87,6 +88,25 @@ function targetShape(portal: Readonly<WorldPortal>) {
   return { map: portal.targetMap, x: portal.target.x, y: portal.target.y };
 }
 
+/** Every source cell and its continuous target cell are Surf water. */
+function surfOnly(portal: Readonly<WorldPortal>, opening: Readonly<WorldSeamOpening>): boolean {
+  const sourceWater = surfable(portal.sourceMap);
+  const targetWater = surfable(portal.targetMap);
+  const sourceWidth = mapsById.get(portal.sourceMap)!.width;
+  const targetWidth = mapsById.get(portal.targetMap)!.width;
+  const offset = opening.expectedTargetSpan.start - opening.sourceSpan.start;
+  return cells(portal).every((cell) => {
+    const tangent = opening.sourceSide === "north" || opening.sourceSide === "south" ? cell.x : cell.y;
+    const target = tangent + offset;
+    const targetCell = opening.targetSide === "north" ? { x: target, y: 0 }
+      : opening.targetSide === "south" ? { x: target, y: mapsById.get(portal.targetMap)!.height - 1 }
+      : opening.targetSide === "west" ? { x: 0, y: target }
+      : { x: targetWidth - 1, y: target };
+    return sourceWater.has(cell.y * sourceWidth + cell.x) &&
+      targetWater.has(targetCell.y * targetWidth + targetCell.x);
+  });
+}
+
 function portalOnlyAssessment(
   portal: Readonly<WorldPortal>,
   opening: Readonly<WorldSeamOpening>,
@@ -98,8 +118,13 @@ function portalOnlyAssessment(
   if (portal.sourceMap === "classic_route_2" && portal.touchingSides.includes("west") && guard === "right") {
     return "unsafe: the west-edge event requires/faces right, so it is not an outward physical crossing and its source intent is ambiguous";
   }
+  const water = surfOnly(portal, opening);
   if (opening.issues.includes("wrong-target-edge")) {
-    return "unsafe: the authored destination is inside the target or on its same-side edge, not the adjacent opposite edge";
+    return "unsafe: the authored destination is inside the target or on its same-side edge, not the adjacent opposite edge" +
+      (water ? "; every lane is also Surf water on both sides" : "");
+  }
+  if (water) {
+    return "unsafe: every lane is Surf water on both sides; the runtime proves a crossing against immutable terrain, where water stays solid until a map visit opens it, so a seamless surf crossing needs a kit-level surface-aware proof";
   }
   if (opening.issues.includes("offset-mismatch")) {
     return "unsafe: the authored destination changes the tangent coordinate, so a direct crossing would change placement semantics";
@@ -122,6 +147,9 @@ function contactFor(
 }
 
 const maps = loadAllMaps();
+const mapsById = new Map(maps.map((map) => [map.slug, map] as const));
+const surfaceLabels = importTerrainSurfaceLabels(maps.map((map) => map.slug));
+const surfable = (mapId: string): Set<number> => new Set(surfaceLabels[mapId]?.surfable ?? []);
 const sources = sourcePortals(maps);
 const { index } = buildOutdoorWorldIndex(maps);
 const imported = buildProject(availableMapIds(), G6_IMPORT_OPTIONS);
@@ -154,17 +182,16 @@ const promotionById = new Map(handoff.partialPromotions.map((promotion) =>
 const partial = handoff.partialPromotions.map((promotion: PartialSeamPromotion) => {
   const portal = portalById.get(promotion.portalId) ?? fail(`${promotion.portalId}: missing portal`);
   const source = sources.get(promotion.portalId) ?? fail(`${promotion.portalId}: missing source event`);
-  const legacyCells = cells(portal).filter((cell) =>
-    cell.x !== promotion.source.x || cell.y !== promotion.source.y
-  );
   return {
     portalId: promotion.portalId,
-    category: "partial-fixed-destination" as const,
+    category: "lane-mapped-fixed-destination" as const,
     source: sourceShape(portal, source),
     target: targetShape(portal),
-    seamlessCell: { ...promotion.source },
-    legacyCells,
-    assessment: "partially safe: only the authored fixed destination's already-coordinate-continuous lane is seamless; funneling lanes retain the original fade and landing",
+    seamlessLanes: promotion.lanes.map((lane) => ({ ...lane })),
+    legacyCells: promotion.legacyLanes.map((cell) => ({ ...cell })),
+    assessment: promotion.legacyLanes.length === 0
+      ? "safe: the maps sit edge to edge and every lane passes the terrain proof, so each lane lands on its own coordinate-continuous neighbour cell instead of the authored funnel landing"
+      : "partially safe: lanes that pass the terrain proof land on their continuous neighbour cell; the rest keep the original fade and fixed landing",
   };
 });
 
@@ -240,8 +267,8 @@ expectCount("outdoor-to-outdoor portal actions", portals.length, 348);
 expectCount("raw coordinate-preserving openings", safeIds.size, 258);
 expectCount("runtime seamless portal ids", handoff.enabledTransfers, 283);
 expectCount("partial portal ids", partial.length, 25);
-expectCount("partial seamless cells", handoff.partialSeamlessCells, 25);
-expectCount("partial legacy cells", handoff.partialLegacyCells, 50);
+expectCount("partial seamless cells", handoff.partialSeamlessCells, 75);
+expectCount("partial legacy cells", handoff.partialLegacyCells, 0);
 expectCount("wholly legacy portal ids", whollyLegacy.length, 65);
 expectCount("legacy portal-only", whollyLegacyByCategory["portal-only"], 14);
 expectCount("legacy linked gaps", whollyLegacyByCategory["linked-gap"], 33);
