@@ -135,6 +135,18 @@ describe("real seamless crossing capture", () => {
       expect(x, frame.file).toBeLessThan(image.width);
       expect(y, frame.file).toBeLessThan(image.height);
     }
+    // The horizontal capture walks a lane that upstream funnels to the
+    // fixed landing y=17: it must stay on its own row (no sideways jump)
+    // and land on the continuous neighbour cell.
+    for (const viewport of WORLD_SEAM_VIEWPORTS) {
+      const frames = crossing.frames.filter((frame) =>
+        frame.orientation === "horizontal" && frame.viewport.width === viewport.width
+      );
+      const row = frames[0]!.player.worldPixel[1];
+      expect(frames.map((frame) => frame.player.worldPixel[1])).toEqual(frames.map(() => row));
+      const landing = frames.find((frame) => frame.capture === "landing")!;
+      expect([landing.activeMap, ...landing.player.tile]).toEqual(["classic_route_5", 39, 16]);
+    }
     for (const sheet of crossing.contactSheets) {
       const path = join(output, sheet.file);
       const bytes = new Uint8Array(readFileSync(path));
