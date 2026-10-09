@@ -48,7 +48,7 @@ const SESSION_OPTIONS = { extensions: createTuxemonExtensions({} as never) } as 
 const FEATURES = ["animation", "camera", "balloon", "backdrop"] as const;
 const TARGET = "persist_target";
 const ROOT = resolve(import.meta.dir, "..");
-const SAVE_FIXTURES = ["main-4019a9b8", "main-0fc1580c", "main-a19bc37b"] as const;
+const SAVE_FIXTURES = ["main-4019a9b8", "main-0fc1580c", "main-a19bc37b", "main-bbeef6b4"] as const;
 
 interface PublishedSaveMetadata {
   content: { manifest: string; schema: string };
@@ -329,7 +329,7 @@ describe("imported Tuxemon presentation state survives map transfer", () => {
 });
 
 test("published predecessor slots load exactly and only resave under the current identity", () => {
-  const current = loadPublishedSave("main-a19bc37b");
+  const current = loadPublishedSave("main-bbeef6b4");
   const tape = JSON.parse(readFileSync(resolve(ROOT, current.metadata.tape.path), "utf8")) as {
     worldTraversal: WorldTraversalMode;
   };
@@ -386,7 +386,7 @@ test("published predecessor slots load exactly and only resave under the current
 });
 
 test("the immediate main predecessor slot continues on the current tape", () => {
-  const { envelope, metadata } = loadPublishedSave("main-a19bc37b");
+  const { envelope, metadata } = loadPublishedSave("main-bbeef6b4");
   const tapeBytes = readFileSync(resolve(ROOT, metadata.tape.path));
   const tape = JSON.parse(tapeBytes.toString("utf8")) as {
     worldTraversal: WorldTraversalMode;
