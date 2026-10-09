@@ -3963,6 +3963,9 @@ interface SpatialPage {
   cmds: Command[];
   /** Commands whose coordinates follow the final coalesced rectangle. */
   regionCommands?: (x: number, y: number, w: number, h: number) => Command[];
+  /** Per-cell commands. A rectangle owned by this page alone is emitted as
+   * one 1x1 event per cell; its first cell keeps the rectangle's id. */
+  cellCommands?: (x: number, y: number) => Command[];
   cells: readonly [number, number][];
 }
 
@@ -3979,11 +3982,40 @@ const SPYDER_SURF_EVENTS = new Set([
 const isSpyderSurfEvent = (event: TuxEvent): boolean =>
   event.source === "spyder.yaml" && SPYDER_SURF_EVENTS.has(event.name);
 
+/** Retarget a promoted portal's top-level transfer per source cell: a
+ * seamless lane lands on its continuous neighbour cell; any other cell keeps
+ * the authored fixed landing and loses the handoff marker, so it runs the
+ * legacy fade. Returns undefined for commands without a promoted portal. */
+function laneCommands(
+  cmds: readonly Command[],
+  seamLanes: SeamLaneTargets,
+  emitted?: Set<string>,
+): ((x: number, y: number) => Command[]) | undefined {
+  const transfer = cmds.find((command): command is Extract<Command, { op: "transfer" }> =>
+    command.op === "transfer" && !!command.handoff && seamLanes.has(command.handoff.portalId)
+  );
+  if (!transfer) return undefined;
+  const portalId = transfer.handoff!.portalId;
+  const lanes = seamLanes.get(portalId)!;
+  return (x, y) => {
+    const target = lanes.get(`${x},${y}`);
+    if (target) emitted?.add(`${portalId}@${x},${y}`);
+    return cmds.map((command) => {
+      if (command !== transfer) return command;
+      if (target) return { ...transfer, x: target.x, y: target.y, handoff: { ...transfer.handoff! } };
+      const { handoff: _handoff, ...legacy } = transfer;
+      return legacy;
+    });
+  };
+}
+
 function convertMap(
   m: TuxMap,
   options: ImportOptions,
   surfaceLabels: Readonly<Record<string, readonly number[]>>,
   seamlessPortalIds: ReadonlySet<string>,
+  seamLanes: SeamLaneTargets = new Map(),
+  emittedSeamLanes?: Set<string>,
 ): { map: MapDef; sprites: Record<string, SpriteDef> } {
   const events: GameEvent[] = [];
   const sprites: Record<string, SpriteDef> = {};
@@ -4180,6 +4212,7 @@ function convertMap(
       }
 
       const cmds = convertActions(e.acts, { m, options, economies, surfaceLabels, sourceEvent: e, seamlessPortalIds });
+      const cellCommands = laneCommands(cmds, seamLanes, emittedSeamLanes);
       if (!cmds.length) {
         const reason = "every action was removed, so no project event was emitted";
         eventCoverage.dropAll(reason);
@@ -4216,6 +4249,7 @@ function convertMap(
             trigger,
             cls: live,
             cmds,
+            ...(cellCommands ? { cellCommands } : {}),
             cells,
           });
           note("trigger", `${k}(area)`, "T1", "K1 rectangular event area (overlaps partitioned after guard sampling)");
@@ -4243,7 +4277,15 @@ function convertMap(
         cells.forEach(([x, y], i) => {
           const key = `${trigger}|${x},${y}`;
           const list = cellPages.get(key) ?? cellPages.set(key, []).get(key)!;
-          list.push({ id: cells.length > 1 ? `${base}_${i}` : base, name: e.name, x, y, trigger, cls: live, cmds });
+          list.push({
+            id: cells.length > 1 ? `${base}_${i}` : base,
+            name: e.name,
+            x,
+            y,
+            trigger,
+            cls: live,
+            cmds: cellCommands?.(x, y) ?? cmds,
+          });
         });
         note("trigger", k, cells.length > 1 ? "T1-lowered" : "T1", cells.length > 1 ? "area expanded to one event per cell" : trigger);
         continue;
@@ -4506,6 +4548,29 @@ function convertMap(
           const first = pages[0]!;
           let condition: FuturePageCondition | undefined;
           let commands: Command[];
+          if (pages.length === 1 && first.cellCommands) {
+            const page = pageCondition(first.cls, options);
+            const rectId = `${first.id}_r${String(++region).padStart(3, "0")}`;
+            for (let dy = 0; dy < h; dy++) {
+              for (let dx = 0; dx < w; dx++) {
+                events.push(gameEvent({
+                  id: dx === 0 && dy === 0 ? rectId : `${rectId}_${dx}_${dy}`,
+                  name: first.name,
+                  x: x + dx,
+                  y: y + dy,
+                  w: 1,
+                  h: 1,
+                  pages: [{
+                    trigger,
+                    condition: page.cond,
+                    sprite: null,
+                    commands: guard(page.rest, first.cellCommands(x + dx, y + dy)),
+                  }],
+                }));
+              }
+            }
+            continue;
+          }
           if (pages.length === 1) {
             const page = pageCondition(first.cls, options);
             condition = page.cond;
@@ -5004,14 +5069,31 @@ export interface TransferError {
   reason: "missing-map" | "out-of-bounds";
 }
 
+/** One lane of a fixed-destination opening that crosses seamlessly. */
+export interface SeamLane {
+  source: { x: number; y: number };
+  /** The coordinate-continuous neighbour cell the lane now lands on. */
+  target: { x: number; y: number };
+  /** True for the one lane whose authored fixed landing is already this cell. */
+  authored: boolean;
+}
+
 export interface PartialSeamPromotion {
   portalId: string;
   sourceMap: string;
+  /** The authored lane (the one the fixed destination already continues). */
   source: { x: number; y: number };
   targetMap: string;
+  /** The authored fixed destination. */
   target: { x: number; y: number };
-  /** The one lane already preserved by the authored fixed destination. */
-  reason: "fixed-destination-aligned-lane";
+  /** Every lane of the authored rectangle is walkable across the seam, so
+   * each lane lands on its own continuous neighbour cell instead of being
+   * funnelled to the fixed destination. */
+  reason: "fixed-destination-continuous-lanes" | "fixed-destination-aligned-lane";
+  /** Seamless lanes, one contiguous run in tangent order. */
+  lanes: SeamLane[];
+  /** Source cells that keep the authored fade and fixed landing. */
+  legacyLanes: { x: number; y: number }[];
   sourceCells: number;
   legacyCells: number;
 }
@@ -5075,10 +5157,14 @@ function sourcePortalEvents(): Map<string, { map: TuxMap; event: TuxEvent; actio
   return sources;
 }
 
-/** A fixed-destination rectangle has exactly one lane whose authored landing
- * is already the coordinate-continuous neighbour cell. Promote only that lane:
- * all funneling lanes keep their exact legacy fade and landing. This is a
- * generated geometric proof, not a map-id allowlist. */
+/** A fixed-destination rectangle funnels every lane to one authored cell,
+ * and that cell is the coordinate-continuous neighbour of exactly one lane.
+ * The maps already sit edge to edge, so each lane has its own continuous
+ * neighbour cell. Every lane whose walk across the edge passes the final
+ * terrain proof lands on that cell instead (one contiguous run, so the
+ * runtime opening span stays a single interval); any other lane keeps the
+ * authored fade and fixed landing. This is a generated geometric proof, not a
+ * map-id allowlist. */
 function planPartialSeamPromotions(
   index: Readonly<OutdoorWorldIndex>,
   layout: Readonly<WorldLayout>,
@@ -5113,43 +5199,81 @@ function planPartialSeamPromotions(
       sourceDirection(source.map.slug, source.event.acts[1]?.args[1]) === expectedDirection;
     if (!simpleConditions || !simpleActions || source.event.behavs.length !== 0) continue;
 
-    const targetTangent = diagnostic.actualTarget.tangent;
-    const sourceTangent = targetTangent - opening.offset;
-    if (sourceTangent < opening.source.span.start || sourceTangent >= opening.source.span.end ||
-        targetTangent < opening.target.span.start || targetTangent >= opening.target.span.end) continue;
-    const sourceCell = edgeCell(sourcePlacement, opening.source.side, sourceTangent);
-    const targetCell = edgeCell(targetPlacement, opening.target.side, targetTangent);
-    if (!transferCellIsWalkable(source.map, sourceCell.x, sourceCell.y)) continue;
-    const targetMap = allMaps.get(opening.target.mapId);
-    if (!targetMap || !transferCellIsWalkable(targetMap, targetCell.x, targetCell.y)) continue;
-    if (Number(source.action.args[2]) !== targetCell.x || Number(source.action.args[3]) !== targetCell.y) continue;
+    const authoredTangent = diagnostic.actualTarget.tangent - opening.offset;
+    const authoredTarget = { x: Number(source.action.args[2]), y: Number(source.action.args[3]) };
+    const authoredCell = edgeCell(targetPlacement, opening.target.side, diagnostic.actualTarget.tangent);
+    if (authoredTangent < opening.source.span.start || authoredTangent >= opening.source.span.end ||
+        authoredCell.x !== authoredTarget.x || authoredCell.y !== authoredTarget.y) continue;
     const sourceProof = passageProofs[opening.source.mapId];
     const targetProof = passageProofs[opening.target.mapId];
-    if (!sourceProof || !targetProof) continue;
+    const targetMap = allMaps.get(opening.target.mapId);
+    if (!sourceProof || !targetProof || !targetMap) continue;
     const step = DIR_STEP[expectedDirection];
-    const inner = { x: sourceCell.x - step.x, y: sourceCell.y - step.y };
-    if (!terrainCanStep(sourceProof, inner.x, inner.y, expectedDirection) ||
-        terrainCellBlocksExit(sourceProof, sourceCell.x, sourceCell.y, expectedDirection) ||
-        !terrainCellCanEnter(
-          targetProof,
-          targetCell.x,
-          targetCell.y,
-          OPPOSITE_DIR[expectedDirection],
-        )) continue;
-
+    const laneCrosses = (sourceTangent: number): SeamLane | null => {
+      const targetTangent = sourceTangent + opening.offset;
+      if (targetTangent < opening.target.span.start || targetTangent >= opening.target.span.end) return null;
+      const sourceCell = edgeCell(sourcePlacement, opening.source.side, sourceTangent);
+      const targetCell = edgeCell(targetPlacement, opening.target.side, targetTangent);
+      if (!transferCellIsWalkable(source.map, sourceCell.x, sourceCell.y)) return null;
+      if (!transferCellIsWalkable(targetMap, targetCell.x, targetCell.y)) return null;
+      const inner = { x: sourceCell.x - step.x, y: sourceCell.y - step.y };
+      if (!terrainCanStep(sourceProof, inner.x, inner.y, expectedDirection) ||
+          terrainCellBlocksExit(sourceProof, sourceCell.x, sourceCell.y, expectedDirection) ||
+          !terrainCellCanEnter(targetProof, targetCell.x, targetCell.y, OPPOSITE_DIR[expectedDirection])) {
+        return null;
+      }
+      return { source: sourceCell, target: targetCell, authored: sourceTangent === authoredTangent };
+    };
+    const crossing = new Map<number, SeamLane>();
+    for (let tangent = opening.source.span.start; tangent < opening.source.span.end; tangent++) {
+      const lane = laneCrosses(tangent);
+      if (lane) crossing.set(tangent, lane);
+    }
+    // One contiguous run: the run through the authored lane when it crosses,
+    // otherwise the longest (lowest first) run.
+    const runs: number[][] = [];
+    for (let tangent = opening.source.span.start; tangent < opening.source.span.end; tangent++) {
+      if (!crossing.has(tangent)) continue;
+      const last = runs.at(-1);
+      if (last && last.at(-1) === tangent - 1) last.push(tangent);
+      else runs.push([tangent]);
+    }
+    const run = runs.find((candidate) => candidate.includes(authoredTangent)) ??
+      runs.reduce<number[] | undefined>((best, candidate) =>
+        !best || candidate.length > best.length ? candidate : best, undefined);
+    if (!run) continue;
+    const lanes = run.map((tangent) => crossing.get(tangent)!);
+    const legacyLanes: { x: number; y: number }[] = [];
+    for (let tangent = opening.source.span.start; tangent < opening.source.span.end; tangent++) {
+      if (!run.includes(tangent)) legacyLanes.push(edgeCell(sourcePlacement, opening.source.side, tangent));
+    }
     const sourceCells = opening.source.span.end - opening.source.span.start;
     promotions.push({
       portalId,
       sourceMap: opening.source.mapId,
-      source: sourceCell,
+      source: edgeCell(sourcePlacement, opening.source.side, authoredTangent),
       targetMap: opening.target.mapId,
-      target: targetCell,
-      reason: "fixed-destination-aligned-lane",
+      target: authoredTarget,
+      reason: lanes.length > 1 || legacyLanes.length === 0
+        ? "fixed-destination-continuous-lanes"
+        : "fixed-destination-aligned-lane",
+      lanes,
+      legacyLanes,
       sourceCells,
-      legacyCells: sourceCells - 1,
+      legacyCells: legacyLanes.length,
     });
   }
   return promotions;
+}
+
+/** Source cell -> continuous landing, per promoted portal id. */
+export type SeamLaneTargets = ReadonlyMap<string, ReadonlyMap<string, { x: number; y: number }>>;
+
+function seamLaneTargets(promotions: readonly PartialSeamPromotion[]): SeamLaneTargets {
+  return new Map(promotions.map((promotion) => [
+    promotion.portalId,
+    new Map(promotion.lanes.map((lane) => [`${lane.source.x},${lane.source.y}`, lane.target] as const)),
+  ] as const));
 }
 
 function applyPartialSeamPromotions(
@@ -5161,10 +5285,11 @@ function applyPartialSeamPromotions(
   for (const component of next.components) for (const opening of component.openings) {
     const promotion = promoted.get(opening.portalId);
     if (!promotion) continue;
-    const sourceTangent = opening.axis === "x" ? promotion.source.x : promotion.source.y;
-    const targetTangent = opening.axis === "x" ? promotion.target.x : promotion.target.y;
-    opening.source.span = { start: sourceTangent, end: sourceTangent + 1 };
-    opening.target.span = { start: targetTangent, end: targetTangent + 1 };
+    const tangent = (cell: { x: number; y: number }): number => opening.axis === "x" ? cell.x : cell.y;
+    const first = promotion.lanes[0]!;
+    const last = promotion.lanes.at(-1)!;
+    opening.source.span = { start: tangent(first.source), end: tangent(last.source) + 1 };
+    opening.target.span = { start: tangent(first.target), end: tangent(last.target) + 1 };
     opening.compatibility = "coordinate-preserving";
   }
   return next;
@@ -5369,7 +5494,7 @@ function seamlessHandoffReport(
     enabledPortalIds: [...enabledPortalIds].sort(),
     notEnabledSafePortalIds: notEnabledSafePortalIds.sort(),
     partialPromotions: [...partialPromotions],
-    partialSeamlessCells: partialPromotions.length,
+    partialSeamlessCells: partialPromotions.reduce((sum, promotion) => sum + promotion.lanes.length, 0),
     partialLegacyCells: partialPromotions.reduce((sum, promotion) => sum + promotion.legacyCells, 0),
     fullyLegacyPortalOnlyPortalIds: [...portalOnlyIds]
       .filter((portalId) => !runtimeSeamlessPortalIds.has(portalId))
@@ -5422,6 +5547,11 @@ export function buildProject(
     component.openings.map((opening) => opening.portalId)
   ) ?? []);
   const surfaceLabels = providedSurfaceLabels ?? importTerrainSurfaceLabels(want);
+  const partialSeamPromotions = sourceWorldLayout
+    ? planPartialSeamPromotions(world.index, sourceWorldLayout)
+    : [];
+  const seamLanes = seamLaneTargets(partialSeamPromotions);
+  const emittedSeamLanes = new Set<string>();
 
   // Register authored presentation assets before trigger pruning. A fixed
   // source guard may make a command unreachable in today's campaign, but the
@@ -5450,7 +5580,7 @@ export function buildProject(
   for (const s of want) {
     const m = allMaps.get(s);
     if (!m) throw new Error(`no map ${s}`);
-    const r = convertMap(m, options, surfaceLabels[s] ?? {}, candidateHandoffPortalIds);
+    const r = convertMap(m, options, surfaceLabels[s] ?? {}, candidateHandoffPortalIds, seamLanes, emittedSeamLanes);
     mapDefs.push(r.map);
     Object.assign(sprites, r.sprites);
     const tuxemonSlug = m.props.slug ?? m.slug;
@@ -5461,9 +5591,16 @@ export function buildProject(
     a < b ? -1 : a > b ? 1 : 0
   )));
 
-  const partialSeamPromotions = sourceWorldLayout
-    ? planPartialSeamPromotions(world.index, sourceWorldLayout)
-    : [];
+  // Every planned lane of a selected source map must have been emitted as its
+  // own retargeted cell; a lane folded into a shared rectangle would keep the
+  // fixed landing and silently fail closed.
+  for (const promotion of partialSeamPromotions) {
+    if (!selectedMaps.has(promotion.sourceMap)) continue;
+    for (const lane of promotion.lanes) {
+      const key = `${promotion.portalId}@${lane.source.x},${lane.source.y}`;
+      if (!emittedSeamLanes.has(key)) throw new Error(`seamless lane ${key} was not emitted per cell`);
+    }
+  }
   const worldLayout = sourceWorldLayout
     ? applyPartialSeamPromotions(sourceWorldLayout, partialSeamPromotions)
     : undefined;
