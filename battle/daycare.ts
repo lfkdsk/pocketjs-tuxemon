@@ -264,7 +264,7 @@ export function daycareHybridName(first: string, second: string): string {
   return result.charAt(0).toUpperCase() + result.slice(1);
 }
 
-function weightedTaste(
+export function weightedTaste(
   sourceDb: BattleDb,
   type: "warm" | "cold",
   excluded: ReadonlySet<string>,

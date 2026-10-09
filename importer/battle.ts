@@ -1582,6 +1582,8 @@ export function writeBattleArtifacts(options: BattleImportOptions): BattleBuild 
     techniques: Object.fromEntries(Object.keys(db.techniques).sort().map((slug) => [slug, po.get(slug) ?? slug])),
     items: Object.fromEntries(Object.keys(db.items).sort().map((slug) => [slug, po.get(slug) ?? slug])),
     npcs: Object.fromEntries([...selection.npcs].sort().map((slug) => [slug, po.get(slug) ?? npcTitle(slug)])),
+    // The taste row's `name` is its `taste_<slug>` msgid (db/taste/taste.yaml).
+    tastes: Object.fromEntries(Object.keys(db.tastes).sort().map((slug) => [slug, po.get(`taste_${slug}`) ?? slug])),
   };
   writeFileSync(join(outputRoot, `data/battle-names${suffix}.json`), jsonBytes(battleNames));
   // Upstream's today_string is T.translate(month_key) + " " + day for every

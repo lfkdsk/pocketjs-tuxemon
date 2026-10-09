@@ -12,6 +12,7 @@ import {
   type RadioVisualCapture,
 } from "../tools/radio-visual-fixture.ts";
 import { TUXEMON_UI_THEME } from "../ui/tuxemon-theme.ts";
+import { unpack } from "../vendor/pocket-rpgkit/vendor/pocketjs/framework/compiler/pak.ts";
 import { fnv1a, treeHasText } from "../vendor/pocket-rpgkit/vendor/pocketjs/hosts/sim/sim.ts";
 
 const ROOT = resolve(import.meta.dir, "..");
@@ -87,7 +88,33 @@ function countLogicalColour(
   return count;
 }
 
+function countLogicalNonColour(
+  capture: RadioVisualCapture,
+  visualCase: RadioVisualCase,
+  rect: { x: number; y: number; width: number; height: number },
+  colour: readonly [number, number, number],
+): number {
+  const scale = Math.min(capture.width / 480, capture.height / 272);
+  const left = Math.floor((capture.width - 480 * scale) / 2);
+  const top = Math.floor((capture.height - 272 * scale) / 2);
+  const pixels = capture.cases[visualCase].rgba;
+  let count = 0;
+  for (let y = Math.floor(top + rect.y * scale); y < Math.ceil(top + (rect.y + rect.height) * scale); y++) {
+    for (let x = Math.floor(left + rect.x * scale); x < Math.ceil(left + (rect.x + rect.width) * scale); x++) {
+      const offset = (y * capture.width + x) * 4;
+      if (pixels[offset] !== colour[0] || pixels[offset + 1] !== colour[1] || pixels[offset + 2] !== colour[2]) count++;
+    }
+  }
+  return count;
+}
+
 describe("production radio tuner visuals", () => {
+  simTest("reuses the existing 18px atlas instead of baking a radio-only 24px atlas", () => {
+    const keys = unpack(new Uint8Array(readFileSync(BUNDLE + ".pak"))).map((entry) => entry.key);
+    expect(keys).toContain("ui:font.3");
+    expect(keys).not.toContain("ui:font.5");
+  });
+
   simTest("match inspected tuner and broadcast PNGs at both viewports", async () => {
     expect(manifest.format).toBe("pocket-tuxemon/radio-goldens/v1");
     expect(manifest.frames).toHaveLength(RADIO_VISUAL_VIEWPORTS.length * RADIO_VISUAL_CASES.length);
@@ -122,6 +149,14 @@ describe("production radio tuner visuals", () => {
       // panel. The threshold scales by area, so both logical resolutions
       // assert the same semantic region rather than only pinning a hash.
       const scale = Math.min(capture.width / 480, capture.height / 272);
+      // The reused 18px atlas still paints a substantial, unclipped 94.7
+      // inside its otherwise paper-coloured box at both raster densities.
+      expect(countLogicalNonColour(
+        capture,
+        "tuner",
+        { x: 122, y: 46, width: 160, height: 44 },
+        rgb(TUXEMON_UI_THEME.paper),
+      )).toBeGreaterThan(150 * scale * scale);
       expect(countLogicalColour(
         capture,
         "tuner",

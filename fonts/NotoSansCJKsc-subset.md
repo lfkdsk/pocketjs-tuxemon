@@ -7,8 +7,8 @@ character file, so every listed character is baked into the app's font atlases f
 - Source: [NotoSansCJKsc-Regular.otf](https://github.com/notofonts/noto-cjk/blob/f8d157532fbfaeda587e826d4cd5b21a49186f7c/Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Regular.otf)
   at commit `f8d157532fbfaeda587e826d4cd5b21a49186f7c`.
 - Source SHA-256: `2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b` (16437364 bytes).
-- Characters: 2479 (the characters of this app's text that Inter does not map).
-- Subset size: 667196 bytes.
+- Characters: 2482 (the characters of this app's text that Inter does not map).
+- Subset size: 668196 bytes.
 
 Each glyph keeps the source advance width and outline at the source units per em, and the
 font keeps the source ascender and descender, so baked advances match the full font.

@@ -20,6 +20,9 @@ export interface BattleNames {
    *  (English and zh_CN); slugs the catalog does not carry fall back to a
    *  title-cased slug in the resolver. */
   npcs: Record<string, string>;
+  /** Taste display names (the taste row's `taste_<slug>` msgid), keyed by
+   *  taste slug. Optional so tables written before tastes were named load. */
+  tastes?: Record<string, string>;
 }
 
 const enNames = enNamesJson as unknown as BattleNames;
@@ -28,20 +31,21 @@ const titleCase = (slug: string): string => slug
   .map((part) => part ? part[0]!.toUpperCase() + part.slice(1) : part)
   .join(" ");
 
-export type BattleNameKind = "monster" | "technique" | "item" | "npc";
+export type BattleNameKind = "monster" | "technique" | "item" | "npc" | "taste";
 
 const TABLE_KEY: Record<BattleNameKind, keyof BattleNames> = {
   monster: "monsters",
   technique: "techniques",
   item: "items",
   npc: "npcs",
+  taste: "tastes",
 };
 
 function tableFor(
   lang: GameLang,
   kind: BattleNameKind,
   localized?: BattleNames,
-): Record<string, string> | undefined {
+): Readonly<Record<string, string>> | undefined {
   const names = lang === "zh_CN" ? (localized ?? zhData.current()?.names) : enNames;
   return names?.[TABLE_KEY[kind]];
 }

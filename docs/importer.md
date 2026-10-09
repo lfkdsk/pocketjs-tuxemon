@@ -115,7 +115,7 @@ definitions below are the report's own:
 | `is/not char_healed player` | `tux.char_healed` requires a non-empty party whose members are all at full HP; status ailments do not change the answer. |
 | `add_monster`, `set_monster_health`, `set_monster_status`, `set_monster_level`, `evolution`, `remove_monster` | the matching `tux.*` extension command. All three authored level boosts preserve the monster iid, apply the exact level and experience floors, recalculate stats while retaining the HP deficit, learn scheduled moves, and mark a newly available evolution. `remove_monster` resolves the iid globally and deletes from the player party, kennel, or an NPC party. A trainer's battle party stays in `npcParties` for the rest of the NPC's lifetime. |
 | `get_party_monster` (Nimrod `Zircon Back`, ApexPlayer cheat) | `tux.get_party_monsters` writes the selected trainer's or player's iids into `iid_slot_*`, which the following `remove_monster` consumes. |
-| `get_player_monster` | `extChoice` over the live party for the 15 general enum pickers. The two uses that feed an adjacent `rename_monster` open a saved, non-cancellable party-picker scene, retain the selected monster's stable iid, and skip name entry when the party is empty. |
+| `get_player_monster` | `extChoice` over the live party for the 15 general enum pickers, with the active language's prompt and monster display names (including nicknames). The two uses that feed an adjacent `rename_monster` open a saved, non-cancellable party-picker scene, retain the selected monster's stable iid, and skip name entry when the party is empty. A paid unfiltered picker exits before its follow-up choice and charge when the party is empty. |
 | `choice_monster` | an authored `choices` box whose rows show the monster's static menu-face icon beside its translated name; each row writes its positive enum code into the result variable. |
 | `open_shop` (item economy) | the kit `shop` command with imported goods, prices and stock. |
 | `open_shop …,buy_monster` | the `tux.monsterShop` scene with the economy's monster rows (price, level, stock); purchases are saved per stock label. |
@@ -132,6 +132,9 @@ definitions below are the report's own:
 | `play_map_animation` / `play_tile_animation` | `mapAnim` at the sampled character tile or fixed source tile. |
 | `set_layer` | a native screen `layer` selecting or clearing a packaged RGBA or PNG overlay. |
 | `camera_position`, `set_bubble`, `change_bg`, `change_bg_char`, `set_template` | native camera, balloon and walking-appearance commands plus modal-safe backdrop lowerings within the limits in [the status list](status.md#presentation). |
+| `dojo_method <var>,monster` | a cancellable `extChoice` (`tux.dojo_devolve`) over the qualifying history forms; the pick devolves the party monster and fills the `devolution_ended` line into `v.dojo.message`, cancel writes `<var>`'s no_choice code (the map's refund event). |
+| `dojo_method <var>,technique` | `extChoice` `tux.dojo_forget`, then `tux.dojo_learn` (or `tux.dojo_learn_single` for one candidate) and the `tuxemon_new_tech` line. No selected monster, no learnable candidate, or cancellation clears the event's positive `is variable_set` gates and `exit`s before either the charge or the map's success line. |
+| `change_taste <var>,<cold\|warm>,<taste\|random>` | `tux.change_taste` plus the `taste_change_report` line, then `<var>` is cleared so one selection yields one change. |
 
 ### Degraded examples
 

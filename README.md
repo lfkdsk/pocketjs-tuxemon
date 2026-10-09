@@ -78,7 +78,7 @@ summary:
   maps cross a 128 KiB compact-decode cap, trading a small amount of storage
   for bounded first-visit latency on QuickJS. Indexed battle art plus its lazy
   database occupies 3,516,960 B in the pak. The current bilingual Web game pak
-  is 90,996,368 B, including English and Chinese content, CJK font atlases, all
+  is 91,483,568 B, including English and Chinese content, CJK font atlases, all
   content-resolvable audio, its attribution list and demo data. The desktop
   launcher removes the 24 QOA music payloads (22,481,712 B) from that target's
   startup read: its pak is 55,559,552 B and those files retain their exact
@@ -347,7 +347,7 @@ Known limitations:
 - **PSP ships in English and Chinese.** `bun run build:psp:zh` (see the
   [PSP](#psp) section below) builds the Chinese package: it keeps the zh_CN
   shards and the five Chinese startup documents and emits `font-archive.bin`,
-  a 2bpp CJK glyph archive (~1.1 MiB, 2,446 chars × 6 strikes) the PSP reads
+  a 2bpp CJK glyph archive (~1.1 MiB, 2,482 chars × 6 strikes) the PSP reads
   on demand from the memory stick, capped at 256 resident glyphs per slot
   across six slots (~67 KiB). Without the archive installed on the memory
   stick every CJK glyph renders as tofu (the PSP section gives the path).

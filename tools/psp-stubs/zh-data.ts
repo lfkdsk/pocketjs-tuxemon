@@ -17,6 +17,7 @@ interface UnavailableZhData {
     techniques: Record<string, string>;
     items: Record<string, string>;
     npcs: Record<string, string>;
+    tastes?: Record<string, string>;
   };
   mapDescriptions: Record<string, string>;
   monthNames: string[];

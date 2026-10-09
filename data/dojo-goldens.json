@@ -1,0 +1,149 @@
+{
+  "format": "pocket-tuxemon/dojo-goldens/v1",
+  "frames": [
+    {
+      "lang": "en_US",
+      "case": "forget",
+      "width": 480,
+      "height": 272,
+      "file": "dojo-forget.480x272.png",
+      "rgbaFnv1a": "e68b18b2",
+      "pngSha256": "735f1465a0496652f6b452a8b59b8d620726d77663298f11a61bf895d0a6b860"
+    },
+    {
+      "lang": "en_US",
+      "case": "forget",
+      "width": 960,
+      "height": 544,
+      "file": "dojo-forget.960x544.png",
+      "rgbaFnv1a": "80a65924",
+      "pngSha256": "857cc55152e6fe1af967f5a3468d0726fa16de0390425b72d62a4f6b7da5dfd8"
+    },
+    {
+      "lang": "en_US",
+      "case": "learned",
+      "width": 480,
+      "height": 272,
+      "file": "dojo-learned.480x272.png",
+      "rgbaFnv1a": "3dda1784",
+      "pngSha256": "56dfbce05e8e3d089c45063066004c6d216397f497a984a4a445a7ed277e7448"
+    },
+    {
+      "lang": "en_US",
+      "case": "learned",
+      "width": 960,
+      "height": 544,
+      "file": "dojo-learned.960x544.png",
+      "rgbaFnv1a": "5082070d",
+      "pngSha256": "b74a776269a8badad0ff507ec2a5262511a0b890e63b707937d68213a0d1c6e4"
+    },
+    {
+      "lang": "en_US",
+      "case": "devolve",
+      "width": 480,
+      "height": 272,
+      "file": "dojo-devolve.480x272.png",
+      "rgbaFnv1a": "79c62454",
+      "pngSha256": "92f2d10c3d4dd42fe1eb8723256271a28b72f81c9e5a9b33caf8135c30517f25"
+    },
+    {
+      "lang": "en_US",
+      "case": "devolve",
+      "width": 960,
+      "height": 544,
+      "file": "dojo-devolve.960x544.png",
+      "rgbaFnv1a": "700865aa",
+      "pngSha256": "8ea9d33e37c18cc0b7279758ebd9e72df4ce17939389d1d32634c509b586960e"
+    },
+    {
+      "lang": "en_US",
+      "case": "taste",
+      "width": 480,
+      "height": 272,
+      "file": "dojo-taste.480x272.png",
+      "rgbaFnv1a": "43e1ffc1",
+      "pngSha256": "115207aac9dc8c5b6b70a2496bc722e18d290607d4a20342162dbec781dda541"
+    },
+    {
+      "lang": "en_US",
+      "case": "taste",
+      "width": 960,
+      "height": 544,
+      "file": "dojo-taste.960x544.png",
+      "rgbaFnv1a": "d6e730a0",
+      "pngSha256": "a27e83d385c3fd9a020b8f963438fb3b18d78e3d1402b2b04eab2984de900008"
+    },
+    {
+      "lang": "zh_CN",
+      "case": "forget",
+      "width": 480,
+      "height": 272,
+      "file": "dojo-forget.zh.480x272.png",
+      "rgbaFnv1a": "b3bc73a8",
+      "pngSha256": "c6673202e3a5ee1d9c946824d1af3504d857368393ac83e3046e2cb6e75ad82c"
+    },
+    {
+      "lang": "zh_CN",
+      "case": "forget",
+      "width": 960,
+      "height": 544,
+      "file": "dojo-forget.zh.960x544.png",
+      "rgbaFnv1a": "b1165dba",
+      "pngSha256": "25431d4a0713373f4ad6edd567f1ee0c4d645b9623b1443597d3270e168af5f3"
+    },
+    {
+      "lang": "zh_CN",
+      "case": "learned",
+      "width": 480,
+      "height": 272,
+      "file": "dojo-learned.zh.480x272.png",
+      "rgbaFnv1a": "7703c85c",
+      "pngSha256": "67ec5bd05a51713a56fecddd5a06f3b4e86113d281a5d123d94f6ca30f9fc329"
+    },
+    {
+      "lang": "zh_CN",
+      "case": "learned",
+      "width": 960,
+      "height": 544,
+      "file": "dojo-learned.zh.960x544.png",
+      "rgbaFnv1a": "a6507c65",
+      "pngSha256": "f55cae941e64ae54a10d0b217d4be9910607b7b376e2d21471fce4499f8e3a38"
+    },
+    {
+      "lang": "zh_CN",
+      "case": "devolve",
+      "width": 480,
+      "height": 272,
+      "file": "dojo-devolve.zh.480x272.png",
+      "rgbaFnv1a": "44a1401d",
+      "pngSha256": "788fe43865a3fe23d7374ffc42eb7a32bb657403972e9331787c32141516bc15"
+    },
+    {
+      "lang": "zh_CN",
+      "case": "devolve",
+      "width": 960,
+      "height": 544,
+      "file": "dojo-devolve.zh.960x544.png",
+      "rgbaFnv1a": "d3732de3",
+      "pngSha256": "e014abab24075f0730e3da3064b1adaef0f8c2a2b4e6ff1d4b1ffb965fe333f9"
+    },
+    {
+      "lang": "zh_CN",
+      "case": "taste",
+      "width": 480,
+      "height": 272,
+      "file": "dojo-taste.zh.480x272.png",
+      "rgbaFnv1a": "70bea894",
+      "pngSha256": "f77cbc2f6e18c5666a01209c2f30e856eaa983978ebd168d36b120007f68900f"
+    },
+    {
+      "lang": "zh_CN",
+      "case": "taste",
+      "width": 960,
+      "height": 544,
+      "file": "dojo-taste.zh.960x544.png",
+      "rgbaFnv1a": "4d3f3971",
+      "pngSha256": "e18cdef4a9db4fd38168f80c572d9ef8f8be0bb3b6a9b4fdbdf922ff9b2a93e1"
+    }
+  ]
+}

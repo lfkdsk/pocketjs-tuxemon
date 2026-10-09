@@ -55,8 +55,10 @@ const SAVE_FIXTURES = [
   "main-78493afa",
   "main-bbeef6b4",
   "main-3a9e95b2",
+  "main-97dadd0b",
+  "main-e799febb",
 ] as const;
-const IMMEDIATE_PREDECESSOR_FIXTURE = "main-3a9e95b2" as const;
+const IMMEDIATE_PREDECESSOR_FIXTURE = "main-e799febb" as const;
 
 interface PublishedSaveMetadata {
   content: { manifest: string; schema: string };
@@ -393,8 +395,11 @@ test("published predecessor slots load exactly and only resave under the current
   }
 });
 
-test("the immediate main predecessor slot continues on the current tape", () => {
-  const { envelope, metadata } = loadPublishedSave(IMMEDIATE_PREDECESSOR_FIXTURE);
+/** Slots recorded on the still-current mainline tape continue on it. */
+const CONTINUING_FIXTURES = ["main-78493afa", "main-3a9e95b2", IMMEDIATE_PREDECESSOR_FIXTURE] as const;
+
+for (const name of CONTINUING_FIXTURES) test(`the ${name} main slot continues on the current tape`, () => {
+  const { envelope, metadata } = loadPublishedSave(name);
   const tapeBytes = readFileSync(resolve(ROOT, metadata.tape.path));
   const tape = JSON.parse(tapeBytes.toString("utf8")) as {
     worldTraversal: WorldTraversalMode;

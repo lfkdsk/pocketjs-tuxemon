@@ -838,5 +838,19 @@
   "spyder_wayfarer1_nightshade": "Nightshade",
   "spyder_wayfarer1_ratcher": "Ratcher",
   "spyder_wayfarer1_victor": "Victor"
+ },
+ "tastes": {
+  "bland": "Bland",
+  "dry": "Dry",
+  "flakey": "Flakey",
+  "hearty": "Hearty",
+  "mild": "Mild",
+  "peppy": "Peppy",
+  "refined": "Refined",
+  "salty": "Salty",
+  "savory": "Savory",
+  "soft": "Soft",
+  "sweet": "Sweet",
+  "zesty": "Zesty"
  }
 }

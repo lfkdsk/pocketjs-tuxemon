@@ -14,6 +14,11 @@ not hand-authored envelopes or toy projects:
 - `main-3a9e95b2/` is the main before deterministic map-entry time updates and
   exact integer-frame movement, and carries the current mainline tape hash and
   continuation digest.
+- `main-97dadd0b/` is the immediate pre-Dojo main and carries the current
+  mainline tape hash and continuation digest.
+- `main-e799febb/` is the integration predecessor with the playable Radio,
+  deterministic map-entry time and exact NPC speeds. It carries the current
+  mainline tape hash and continuation digest.
 
 To reproduce a fixture, make a detached checkout of the named game commit with
 recursive submodules, run `bun install --frozen-lockfile`, run the importer

@@ -286,8 +286,8 @@
  "byFate": {
   "T1-lowered": 2004,
   "T3-dropped": 10,
-  "T1": 37945,
-  "T4-dropped": 1424,
+  "T1": 37950,
+  "T4-dropped": 1419,
   "T2-dropped": 186,
   "structural": 793
  },
@@ -377,10 +377,10 @@
    "note": "monster front battle sprite centered on the blocking screen backdrop; a covering modal is retained instead of being popped"
   },
   {
-   "key": "act:change_taste:T4-dropped",
-   "fate": "T4-dropped",
+   "key": "act:change_taste:T1",
+   "fate": "T1",
    "count": 2,
-   "note": "presentation / meta"
+   "note": "tux.change_taste assigns the named or rarity-weighted random taste, recalculates stats, reports old and new taste, then consumes the monster selection"
   },
   {
    "key": "act:char_face(after position):T1",
@@ -533,10 +533,16 @@
    "note": "tux.daycare two-slot storage, per-step training, deterministic breeding and newborn collection"
   },
   {
-   "key": "act:dojo_method:T4-dropped",
-   "fate": "T4-dropped",
-   "count": 3,
-   "note": "presentation / meta"
+   "key": "act:dojo_method(monster):T1",
+   "fate": "T1",
+   "count": 2,
+   "note": "devolution menu over the monster's qualifying history forms; the pick transfers its properties, registers the form as caught and reports; cancel writes the no_choice code the map refunds"
+  },
+  {
+   "key": "act:dojo_method(technique):T1",
+   "fate": "T1",
+   "count": 1,
+   "note": "forget menu over known moves, then the learnable moveset rows (one is learned directly) and a report; cancelling, no selection or nothing learnable leaves the monster unchanged and ends the paid service without a charge"
   },
   {
    "key": "act:evolution:T1",
@@ -4252,12 +4258,12 @@
    "summary": {
     "types": 98,
     "uses": 13617,
-    "native": 13108,
+    "native": 13113,
     "degraded": 242,
     "placeholder": 0,
-    "dropped": 267,
+    "dropped": 262,
     "nativePercent": 96.3,
-    "executablePercent": 98,
+    "executablePercent": 98.1,
     "tier1": {
      "uses": 6425,
      "percent": 47.18,
@@ -4422,13 +4428,13 @@
     {
      "type": "change_taste",
      "total": 2,
-     "native": 0,
+     "native": 2,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 2,
+     "dropped": 0,
      "reasons": {
-      "dropped": [
-       "presentation / meta"
+      "native": [
+       "tux.change_taste assigns the named or rarity-weighted random taste, recalculates stats, reports old and new taste, then consumes the monster selection"
       ]
      }
     },
@@ -4671,13 +4677,14 @@
     {
      "type": "dojo_method",
      "total": 3,
-     "native": 0,
+     "native": 3,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 3,
+     "dropped": 0,
      "reasons": {
-      "dropped": [
-       "presentation / meta"
+      "native": [
+       "devolution menu over the monster's qualifying history forms; the pick transfers its properties, registers the form as caught and reports; cancel writes the no_choice code the map refunds",
+       "forget menu over known moves, then the learnable moveset rows (one is learned directly) and a report; cancelling, no selection or nothing learnable leaves the monster unchanged and ends the paid service without a charge"
       ]
      }
     },

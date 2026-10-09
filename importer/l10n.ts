@@ -273,6 +273,10 @@ export interface ImportUiStrings {
   radioTuning: string;
   radioBack: string;
   radioNext: string;
+  chooseMonsterPrompt: string;
+  dojoDevolvePrompt: string;
+  dojoForgetPrompt: string;
+  dojoLearnPrompt: string;
 }
 
 export const IMPORT_UI: Record<ImportLang, ImportUiStrings> = {
@@ -302,6 +306,10 @@ export const IMPORT_UI: Record<ImportLang, ImportUiStrings> = {
     radioTuning: "Tuning: {station}",
     radioBack: "Return",
     radioNext: "Continue",
+    chooseMonsterPrompt: "Choose a monster",
+    dojoDevolvePrompt: "Return to which form?",
+    dojoForgetPrompt: "Forget which technique?",
+    dojoLearnPrompt: "Learn which technique?",
   },
   zh_CN: {
     nextPage: "下一页 >",
@@ -329,5 +337,9 @@ export const IMPORT_UI: Record<ImportLang, ImportUiStrings> = {
     radioTuning: "正在调谐：{station}",
     radioBack: "返回",
     radioNext: "继续",
+    chooseMonsterPrompt: "选择一只精灵",
+    dojoDevolvePrompt: "要退回到哪种形态？",
+    dojoForgetPrompt: "要遗忘哪个招式？",
+    dojoLearnPrompt: "要学会哪个招式？",
   },
 };

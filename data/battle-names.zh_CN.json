@@ -838,5 +838,19 @@
   "spyder_wayfarer1_nightshade": "夜来香",
   "spyder_wayfarer1_ratcher": "雷切尔",
   "spyder_wayfarer1_victor": "胜利者"
+ },
+ "tastes": {
+  "bland": "清淡",
+  "dry": "干涩",
+  "flakey": "酥脆",
+  "hearty": "醇厚",
+  "mild": "温和",
+  "peppy": "活力",
+  "refined": "清雅",
+  "salty": "咸",
+  "savory": "鲜香",
+  "soft": "绵软",
+  "sweet": "甜",
+  "zesty": "香辣"
  }
 }

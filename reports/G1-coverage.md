@@ -11,7 +11,7 @@ When conversion discards a whole event, every source rule in it is Dropped.
 
 | Kind | Kinds | Uses | Native | Degraded | Placeholder | Dropped | S1 T1 baseline |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Actions | 98 | 13617 | 13108 | 242 | 0 | 267 | 6425 / 6246 (47.18% / 45.9%) |
+| Actions | 98 | 13617 | 13113 | 242 | 0 | 262 | 6425 / 6246 (47.18% / 45.9%) |
 | Conditions | 64 | 8663 | 8423 | 21 | 0 | 219 | 4772 / 4591 (55.08% / 53.0%) |
 
 The S1 acceptance baselines are 6,246 action uses (45.9%) and 4,591
@@ -21,10 +21,10 @@ Degraded count toward them. This import records 6425
 (55.08%), respectively: 179 above
 for actions and 181 above for conditions. The old
 type-table Native figure was 5,448 / 13,617 (40.0%); conversion-path accounting
-supersedes it with 13108 / 13617
+supersedes it with 13113 / 13617
 (96.3%). “Executable”
 (native + degraded + deliberate P1 placeholder) is
-98.0% for actions and
+98.1% for actions and
 97.5% for conditions.
 
 Definitions:
@@ -492,7 +492,7 @@ four-neighbour BFS with fixed tie-breaking selects the nearest walkable cell:
 | Action | `change_bg` | 6 | 9 | 0 | 0 | 15 |
 | Action | `change_bg_char` | 0 | 4 | 0 | 0 | 4 |
 | Action | `change_bg_monster` | 0 | 7 | 0 | 0 | 7 |
-| Action | `change_taste` | 0 | 0 | 0 | 2 | 2 |
+| Action | `change_taste` | 2 | 0 | 0 | 0 | 2 |
 | Action | `char_face` | 1889 | 124 | 0 | 14 | 2027 |
 | Action | `char_move` | 64 | 13 | 0 | 0 | 77 |
 | Action | `char_plague` | 13 | 0 | 0 | 0 | 13 |
@@ -509,7 +509,7 @@ four-neighbour BFS with fixed tie-breaking selects the nearest walkable cell:
 | Action | `create_kennel` | 1 | 0 | 0 | 0 | 1 |
 | Action | `create_npc` | 1328 | 0 | 0 | 175 | 1503 |
 | Action | `daycare` | 2 | 0 | 0 | 0 | 2 |
-| Action | `dojo_method` | 0 | 0 | 0 | 3 | 3 |
+| Action | `dojo_method` | 3 | 0 | 0 | 0 | 3 |
 | Action | `evolution` | 2 | 0 | 0 | 0 | 2 |
 | Action | `fadeout_music` | 1 | 0 | 0 | 0 | 1 |
 | Action | `format_variable` | 10 | 0 | 0 | 0 | 10 |

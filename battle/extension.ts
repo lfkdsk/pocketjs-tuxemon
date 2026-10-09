@@ -29,6 +29,17 @@ import {
   type StepTrackers,
 } from "./step-tracker.ts";
 import { battleDbToTuxemonBattleDb } from "./from-battle-db.ts";
+import { battleDisplayNameFor, type BattleNames } from "./battle-names.ts";
+import {
+  applyTasteSnapshot,
+  chooseTaste,
+  devolveMonsterSnapshot,
+  dojoDevolutionTargets,
+  dojoLearnableMoves,
+  relearnMonsterSnapshot,
+  tasteChangeAvailable,
+  type TasteType,
+} from "./dojo.ts";
 import { eligibleEvolution, evolveMonsterSnapshot } from "./progression.ts";
 import { applyPendingOverrides, spawnMonster, spawnMonsterWithRandom } from "./spawn.ts";
 import { calculateBaseStats, monsterFromSnapshot } from "./stats.ts";
@@ -197,6 +208,9 @@ export interface TuxemonExtensionRuntimeOptions {
   /** Content language the save is written with; recorded in the encoded ext
    *  so a load in the other language can be refused with a clear message. */
   lang?: GameLang;
+  /** Localized display names for headless zh_CN sessions; the live game
+   *  reads the boot-loaded table instead. */
+  battleNames?: BattleNames;
 }
 
 /** The game's content languages. Kept in the battle layer so the save codec
@@ -1457,6 +1471,252 @@ function applyMonsterRenameCommand() {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Spyder Dojo: dojo_method and change_taste (battle/dojo.ts holds the pure
+// transforms). The monster is the party member whose iid the named variable
+// holds (get_player_monster writes it); a no_choice/no_options code or a
+// stale iid selects nothing, as upstream get_valid_uuid does.
+
+function dojoTarget(
+  context: ExtensionReadContext,
+  args: Record<string, unknown>,
+  call: string,
+): { state: TuxemonExtensionState; monster: SpawnedMonsterSnapshot } | null {
+  if (!nonEmptyString(args.variable)) throw new Error(`${call}: variable must be a non-empty string`);
+  const iid = context.variables[args.variable];
+  if (!nonEmptyString(iid)) return null;
+  const state = currentExtensionState(context.ext);
+  const monster = state.party.find((candidate) => candidate.iid === iid);
+  return monster ? { state, monster } : null;
+}
+
+function variableArg(args: Record<string, unknown>, field: string, call: string): string {
+  const value = args[field];
+  if (!nonEmptyString(value)) throw new Error(`${call}: ${field} must be a non-empty string`);
+  return value;
+}
+
+function tasteTypeArg(args: Record<string, unknown>, call: string): TasteType {
+  if (args.type !== "cold" && args.type !== "warm") throw new Error(`${call}: type must be cold or warm`);
+  return args.type;
+}
+
+function storedSlug(context: ExtensionReadContext, variable: string): string | undefined {
+  const value = context.variables[variable];
+  return nonEmptyString(value) ? value : undefined;
+}
+
+function replacePartyMonster(
+  state: TuxemonExtensionState,
+  iid: string,
+  monster: SpawnedMonsterSnapshot,
+): TuxemonExtensionState {
+  return { ...state, party: state.party.map((member) => member.iid === iid ? monster : member) };
+}
+
+function dojoConditions(source: BattleDbSource): Record<string, (context: ExtensionReadContext, value: JsonValue) => boolean> {
+  return {
+    "tux.dojo_monster": (context, value) =>
+      dojoTarget(context, argsRecord(value, "tux.dojo_monster"), "tux.dojo_monster") !== null,
+    "tux.dojo_devolvable": (context, value) => {
+      const target = dojoTarget(context, argsRecord(value, "tux.dojo_devolvable"), "tux.dojo_devolvable");
+      return target !== null && dojoDevolutionTargets(resolveBattleDb(source), target.monster).length > 0;
+    },
+    "tux.dojo_learnable": (context, value) => {
+      const args = argsRecord(value, "tux.dojo_learnable");
+      const target = dojoTarget(context, args, "tux.dojo_learnable");
+      if (!target) return false;
+      const forget = args.forget === undefined ? undefined : storedSlug(context, variableArg(args, "forget", "tux.dojo_learnable"));
+      const count = dojoLearnableMoves(resolveBattleDb(source), target.monster, forget).length;
+      return args.exactlyOne === true ? count === 1 : count > 0;
+    },
+    "tux.taste_changeable": (context, value) => {
+      const args = argsRecord(value, "tux.taste_changeable");
+      const target = dojoTarget(context, args, "tux.taste_changeable");
+      const wanted = variableArg(args, "taste", "tux.taste_changeable");
+      return target !== null
+        && tasteChangeAvailable(resolveBattleDb(source), target.monster, tasteTypeArg(args, "tux.taste_changeable"), wanted);
+    },
+  };
+}
+
+/** A result report: `message` carries the active catalog's str.format
+ *  template, its variable and literal fields; the filled sentence is written
+ *  to the variable for a `{v:}` text box. */
+function reportWrites(
+  args: Record<string, unknown>,
+  call: string,
+  values: Readonly<Record<string, string>>,
+): Record<string, string> {
+  const message = record(args.message);
+  if (!message || !nonEmptyString(message.variable) || !nonEmptyString(message.template)) {
+    throw new Error(`${call}: message must carry a variable and a template`);
+  }
+  const fields = message.fields === undefined ? {} : record(message.fields);
+  if (!fields || !Object.values(fields).every((value) => typeof value === "string")) {
+    throw new Error(`${call}: message.fields must map names to strings`);
+  }
+  const all: Record<string, unknown> = { ...fields, ...values };
+  const text = message.template.replace(/\{([a-z_]+)\}/g, (token, field: string) =>
+    typeof all[field] === "string" ? all[field] as string : token);
+  return { [message.variable]: text };
+}
+
+interface DojoNames {
+  monster(monster: Pick<SpawnedMonsterSnapshot, "slug" | "nickname">): string;
+  species(slug: string): string;
+  technique(slug: string): string;
+  taste(slug: string): string;
+}
+
+function dojoNames(source: BattleDbSource, lang: GameLang, names: BattleNames | undefined): DojoNames {
+  const species = (slug: string) => resolveBattleDb(source).monsters[slug]?.name ?? title(slug);
+  return {
+    monster: (monster) => monster.nickname ?? species(monster.slug),
+    species,
+    technique: (slug) => battleDisplayNameFor(lang, "technique", slug, names),
+    taste: (slug) => battleDisplayNameFor(lang, "taste", slug, names),
+  };
+}
+
+function dojoChoices(
+  source: BattleDbSource,
+  names: DojoNames,
+): Record<string, NonNullable<ExtensionOptions["choices"]>[string]> {
+  return {
+    // devolve(): the menu lists the qualifying history forms. Cancelling
+    // writes the variable's no_choice code, which the Dojo map already
+    // answers with its own refund event.
+    "tux.dojo_devolve": {
+      options(context, value) {
+        const target = dojoTarget(context, argsRecord(value, "tux.dojo_devolve"), "tux.dojo_devolve");
+        if (!target) return [];
+        return dojoDevolutionTargets(resolveBattleDb(source), target.monster)
+          .map((slug) => ({ key: slug, label: names.species(slug) }));
+      },
+      resolve(context, value, result) {
+        const call = "tux.dojo_devolve";
+        const args = argsRecord(value, call);
+        if (result.kind === "cancel") {
+          if (!safeInteger(args.cancelCode)) throw new Error(`${call}: cancelCode must be a safe integer`);
+          return { writes: { [variableArg(args, "variable", call)]: args.cancelCode } };
+        }
+        const target = dojoTarget(context, args, call);
+        if (!target) return;
+        const db = resolveBattleDb(source);
+        if (!dojoDevolutionTargets(db, target.monster).includes(result.key)) {
+          throw new Error(`${call}: '${result.key}' is not a devolution of '${target.monster.slug}'`);
+        }
+        const devolved = devolveMonsterSnapshot(
+          db,
+          battleDbToTuxemonBattleDb(db),
+          target.monster,
+          result.key,
+          context.random,
+        );
+        const state = registerCaughtMonster(
+          replacePartyMonster(target.state, target.monster.iid!, devolved),
+          result.key,
+        );
+        return {
+          ext: json(state),
+          writes: reportWrites(args, call, {
+            name: names.monster(target.monster),
+            evolve: names.species(result.key),
+          }),
+        };
+      },
+    },
+    // get_tech: the current moves; the pick is only recorded here so a later
+    // cancel of the learn menu leaves the monster untouched.
+    "tux.dojo_forget": {
+      options(context, value) {
+        const target = dojoTarget(context, argsRecord(value, "tux.dojo_forget"), "tux.dojo_forget");
+        if (!target) return [];
+        return [...new Set(target.monster.moves)].map((slug) => ({ key: slug, label: names.technique(slug) }));
+      },
+      resolve(_context, value, result) {
+        const args = argsRecord(value, "tux.dojo_forget");
+        if (result.kind === "cancel") return;
+        return { writes: { [variableArg(args, "forget", "tux.dojo_forget")]: result.key } };
+      },
+    },
+    // set_var: the learnable list after forgetting; the pick applies the
+    // forget and the learn together.
+    "tux.dojo_learn": {
+      options(context, value) {
+        const call = "tux.dojo_learn";
+        const args = argsRecord(value, call);
+        const target = dojoTarget(context, args, call);
+        if (!target) return [];
+        const forget = storedSlug(context, variableArg(args, "forget", call));
+        return dojoLearnableMoves(resolveBattleDb(source), target.monster, forget)
+          .map((slug) => ({ key: slug, label: names.technique(slug) }));
+      },
+      resolve(context, value, result) {
+        if (result.kind === "cancel") return;
+        return applyRelearn(source, names, context, argsRecord(value, "tux.dojo_learn"), "tux.dojo_learn", result.key);
+      },
+    },
+  };
+}
+
+function applyRelearn(
+  source: BattleDbSource,
+  names: DojoNames,
+  context: ExtensionCommandContext,
+  args: Record<string, unknown>,
+  call: string,
+  learn: string | undefined,
+) {
+  const target = dojoTarget(context, args, call);
+  const forget = storedSlug(context, variableArg(args, "forget", call));
+  if (!target || forget === undefined || !target.monster.moves.includes(forget)) return;
+  const learnable = dojoLearnableMoves(resolveBattleDb(source), target.monster, forget);
+  const chosen = learn ?? (learnable.length === 1 ? learnable[0] : undefined);
+  if (chosen === undefined || !learnable.includes(chosen)) {
+    throw new Error(`${call}: '${String(chosen)}' is not learnable by '${target.monster.slug}'`);
+  }
+  const updated = relearnMonsterSnapshot(target.monster, forget, chosen);
+  return {
+    ext: json(replacePartyMonster(target.state, target.monster.iid!, updated)),
+    writes: reportWrites(args, call, { name: names.monster(updated), tech: names.technique(chosen) }),
+  };
+}
+
+/** dojo_method technique with exactly one learnable move after forgetting:
+ *  upstream learns it without opening the second menu. */
+function dojoLearnSingleCommand(source: BattleDbSource, names: DojoNames) {
+  return (context: ExtensionCommandContext, value: JsonValue) =>
+    applyRelearn(source, names, context, argsRecord(value, "tux.dojo_learn_single"), "tux.dojo_learn_single", undefined);
+}
+
+/** change_taste <variable>,<cold|warm>,<slug|random>, reporting upstream's
+ *  taste_change_report with the tastes' display names. */
+function changeTasteCommand(source: BattleDbSource, names: DojoNames) {
+  return (context: ExtensionCommandContext, value: JsonValue) => {
+    const call = "tux.change_taste";
+    const args = argsRecord(value, call);
+    const type = tasteTypeArg(args, call);
+    const wanted = variableArg(args, "taste", call);
+    const target = dojoTarget(context, args, call);
+    if (!target) return;
+    const db = resolveBattleDb(source);
+    const taste = chooseTaste(db, target.monster, type, wanted, context.random);
+    if (taste === null) return;
+    const old = type === "cold" ? target.monster.tasteCold : target.monster.tasteWarm;
+    const updated = applyTasteSnapshot(battleDbToTuxemonBattleDb(db), target.monster, type, taste);
+    return {
+      ext: json(replacePartyMonster(target.state, target.monster.iid!, updated)),
+      writes: reportWrites(args, call, {
+        name: names.monster(updated),
+        old: names.taste(old),
+        new: names.taste(taste),
+      }),
+    };
+  };
+}
+
 function partyFor(state: TuxemonExtensionState, character: string): readonly (SpawnedMonsterSnapshot | PendingMonster)[] {
   return character === "player" ? state.party : state.npcParties[character] ?? [];
 }
@@ -1562,7 +1822,10 @@ function matchingParty(
  *  at least one row. Cancel writes the enum code for "no_choice"; a select
  *  writes the monster iid, which remove_monster and the monster ext commands
  *  read back. */
-function partyMonstersChoice(source: BattleDbSource): NonNullable<ExtensionOptions["choices"]>[string] {
+function partyMonstersChoice(
+  source: BattleDbSource,
+  names: DojoNames,
+): NonNullable<ExtensionOptions["choices"]>[string] {
   return {
     options(context, args) {
       const parsed = filterArgs(args, "tux.party_monsters");
@@ -1570,7 +1833,7 @@ function partyMonstersChoice(source: BattleDbSource): NonNullable<ExtensionOptio
       const state = currentExtensionState(context.ext);
       return matchingParty(state, db, parsed.filters).map((monster) => ({
         key: monster.iid!,
-        label: title(monster.slug),
+        label: names.monster(monster),
         data: { slug: monster.slug, level: monster.level },
       }));
     },
@@ -2808,6 +3071,7 @@ export function createTuxemonExtensions(
       : { maxDurationMinutes: options.weatherSchedule.maxDurationMinutes }),
   };
   const weatherSlugs = new Set(weatherSchedule.slugs);
+  const names = dojoNames(source, options.lang ?? "en_US", options.battleNames);
   const hemisphere = options.hemisphere ?? "northern";
   if (hemisphere !== "northern" && hemisphere !== "southern") {
     throw new Error(`Tuxemon extension: unsupported hemisphere '${String(hemisphere)}'`);
@@ -2915,6 +3179,8 @@ export function createTuxemonExtensions(
       "tux.set_monster_attribute": setMonsterAttributeCommand(),
       "tux.modify_monster_bond": modifyMonsterBondCommand(),
       "tux.add_tech": addTechCommand(source),
+      "tux.dojo_learn_single": dojoLearnSingleCommand(source, names),
+      "tux.change_taste": changeTasteCommand(source, names),
       "tux.char_plague": charPlagueCommand(),
       "tux.quarantine": quarantineCommand(),
       "tux.npc_battle": npcBattleCommand(source),
@@ -3119,6 +3385,7 @@ export function createTuxemonExtensions(
         return negate(count >= args.count, args);
       },
       "tux.party_match": partyMatchCondition(source),
+      ...dojoConditions(source),
       "tux.check_party_parameter": checkPartyParameterCondition(source),
       "tux.check_max_tech": checkMaxTechCondition(source),
       "tux.party_infected": partyInfectedCondition(),
@@ -3155,8 +3422,9 @@ export function createTuxemonExtensions(
       },
     },
     choices: {
-      "tux.party_monsters": partyMonstersChoice(source),
+      "tux.party_monsters": partyMonstersChoice(source, names),
       "tux.enum_choice": enumChoiceHandler(),
+      ...dojoChoices(source, names),
     },
     codec: {
       encode: (value) => ({

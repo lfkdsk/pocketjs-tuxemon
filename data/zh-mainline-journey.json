@@ -47,8 +47,8 @@
     "fallbacks": [
       "fonts/NotoSansCJKsc-subset.otf"
     ],
-    "fontSha256": "034d41b80baeec3c8dde522b05caec73db504e15e9f89fb8ce93d1418e354d9a",
-    "charsetSha256": "25c934fbc1e096a316a287e8f6bde4a049910e6554a6a9dea34b5b251c42548c"
+    "fontSha256": "ae47e6abb9cbef58c4d764516e7fe6402b7bb958e51aca52ab1be98029b459a0",
+    "charsetSha256": "f87d62b1dbfd82ddc08e27bdc7363005ff558b06bfd9ae35deba1b3afdaf3064"
   },
   "frames": 206830,
   "tapeSha256": "c61d3ada22ecb2a36eba2d61823b95bb6219f1f6d02a340c5bbc1d5ed384f340",

@@ -17,7 +17,10 @@ import { createTuxemonTextTokens } from "./text-tokens.ts";
 /** Shared zh_CN registration used by headless journeys and their tests. */
 export const TUXEMON_BATTLE_DB_ZH = validateBattleDb(battleDbJson);
 export const TUXEMON_VARIABLE_ENUMS_ZH = variableEnumsJson as VariableEnums;
-export const TUXEMON_EXTENSIONS_ZH = createTuxemonExtensions(TUXEMON_BATTLE_DB_ZH, { lang: "zh_CN" });
+export const TUXEMON_EXTENSIONS_ZH = createTuxemonExtensions(TUXEMON_BATTLE_DB_ZH, {
+  lang: "zh_CN",
+  battleNames: battleNamesJson,
+});
 export const TUXEMON_BATTLE_RULES_ZH = createTuxemonBattleRules(
   TUXEMON_BATTLE_DB_ZH,
   TUXEMON_VARIABLE_ENUMS_ZH,

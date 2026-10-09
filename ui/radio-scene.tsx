@@ -106,7 +106,7 @@ export const TuxemonRadioScene: Component<BattleSceneViewProps> = (props) => {
               debugName="radio-tuner-panel"
             >
               <Text
-                class="text-2xl"
+                class="text-lg"
                 style={{ posType: 1, insetL: 104, insetT: 6, width: 206, height: 44, lineHeight: 39, textColor: THEME.accent }}
                 debugName="radio-frequency"
               >

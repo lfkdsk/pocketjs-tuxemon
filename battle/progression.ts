@@ -265,7 +265,22 @@ export function evolveMonsterSnapshot(
     useItem: monster.waitingToEvolve,
   });
   if (target === null) return null;
+  return { target, monster: transferToSpecies(sourceDb, db, monster, target, random) };
+}
 
+/**
+ * Monster.spawn_base(target, level) followed by transfer_properties_from(old)
+ * and evolve_monster's evolution-method move learning. Upstream uses this
+ * exact chain for both evolution (EvolutionState._confirm) and the Dojo's
+ * devolution (dojo_method monster), so both callers share it.
+ */
+export function transferToSpecies(
+  sourceDb: BattleDb,
+  db: TuxemonBattleDb,
+  monster: BattleMonster,
+  target: string,
+  random: () => number,
+): SpawnedMonsterSnapshot {
   const spawned = spawnMonsterWithRandom(sourceDb, db, random, target, monster.level, {
     ...(monster.iid === undefined ? {} : { iid: monster.iid }),
   });
@@ -280,30 +295,27 @@ export function evolveMonsterSnapshot(
     zeroStats(),
   );
   return {
-    target,
-    monster: {
-      ...spawned,
-      ...(monster.iid === undefined ? {} : { iid: monster.iid }),
-      ...(monster.nickname === undefined ? {} : { nickname: monster.nickname }),
-      level: monster.level,
-      gender: evolvedGender(sourceDb, target, monster.gender, random),
-      tasteCold: monster.tasteCold,
-      tasteWarm: monster.tasteWarm,
-      individualValues: { ...monster.individualValues },
-      birthdate: [...monster.birthdate],
-      base,
-      currentHp: Math.min(monster.currentHp, base.hp),
-      moves: evolutionMoves(db, target, monster.level, stage, monster.moves.map(({ slug }) => slug)),
-      totalExperience: monster.totalExperience,
-      experienceModifier: 1,
-      moneyModifier: 0,
-      bond: Math.max(monster.bond, sourceDb.rules.bondStageFloors[stage] ?? 0),
-      trainingPoints: { ...monster.trainingPoints },
-      status: monster.status?.slug ?? null,
-      acquisition: "unknown",
-      captureDevice: monster.captureDevice,
-      waitingToEvolve: false,
-    },
+    ...spawned,
+    ...(monster.iid === undefined ? {} : { iid: monster.iid }),
+    ...(monster.nickname === undefined ? {} : { nickname: monster.nickname }),
+    level: monster.level,
+    gender: evolvedGender(sourceDb, target, monster.gender, random),
+    tasteCold: monster.tasteCold,
+    tasteWarm: monster.tasteWarm,
+    individualValues: { ...monster.individualValues },
+    birthdate: [...monster.birthdate],
+    base,
+    currentHp: Math.min(monster.currentHp, base.hp),
+    moves: evolutionMoves(db, target, monster.level, stage, monster.moves.map(({ slug }) => slug)),
+    totalExperience: monster.totalExperience,
+    experienceModifier: 1,
+    moneyModifier: 0,
+    bond: Math.max(monster.bond, sourceDb.rules.bondStageFloors[stage] ?? 0),
+    trainingPoints: { ...monster.trainingPoints },
+    status: monster.status?.slug ?? null,
+    acquisition: "unknown",
+    captureDevice: monster.captureDevice,
+    waitingToEvolve: false,
   };
 }
 

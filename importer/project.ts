@@ -1216,6 +1216,11 @@ function code(name: string, value: string): number {
   return i + 1;
 }
 
+/** Scratch variables the Dojo lowering writes: the technique picked to be
+ *  forgotten and the localized result sentence shown with {v:}. */
+const DOJO_FORGET_VARIABLE = "v.dojo.forget";
+const DOJO_MESSAGE_VARIABLE = "v.dojo.message";
+
 // ---------------------------------------------------------------------------
 // conditions -> clauses
 
@@ -1924,6 +1929,26 @@ function dialog(key: string, m: TuxMap, layout: TextBoxLayout = {}): Command[] {
   return out.length ? out : [{ op: "text", lines: [" "], ...layout }];
 }
 
+/** A result report: the extension fills the active catalog's Python
+ *  str.format template into a text variable, and one box shows it; the box
+ *  wraps the expanded sentence by rendered width. */
+function dojoReport(key: string, fields: Readonly<Record<string, string>> = {}): {
+  message: JsonValue;
+  show: Command;
+} {
+  dialogLookupKeys.add(key);
+  const template = po.get(key);
+  if (template === undefined) throw new Error(`report msgid ${key} is absent from the catalog`);
+  return {
+    message: { variable: DOJO_MESSAGE_VARIABLE, template, ...(Object.keys(fields).length ? { fields } : {}) },
+    show: {
+      op: "if",
+      if: { kind: "ext", call: "tux.variable_text", args: { variable: DOJO_MESSAGE_VARIABLE } },
+      then: [{ op: "text", lines: [`{v:${DOJO_MESSAGE_VARIABLE}}`] }],
+    },
+  };
+}
+
 function enumChoice(options: readonly string[], variable: string): Command {
   const make = (remaining: readonly string[]): Command => {
     const take = remaining.length <= 4 ? remaining.length : 3;
@@ -2165,6 +2190,24 @@ interface Ctx {
   seamlessPortalIds: ReadonlySet<string>;
   /** the NPC slug whose event runs these commands (talk pages), if any */
   self?: string;
+}
+
+/** End a source event without leaving its positive variable gates latched.
+ * Paid multi-event services use those gates to advance to their charge and
+ * result page; clearing them first makes a failed selection safely retryable. */
+function abortSourceEvent(ctx: Ctx): Command[] {
+  const gates = (ctx.sourceEvent?.conds ?? [])
+    .filter((condition) => condition.op === "is" && condition.type === "variable_set")
+    .flatMap((condition) => condition.args.map((arg) => arg.split(":")[0]!))
+    .filter((gate) => gate.length > 0);
+  return [
+    ...[...new Set(gates)].map((gate): Command => ({
+      op: "variable",
+      id: varId(gate),
+      set: { op: "set", value: 0 },
+    })),
+    { op: "exit" },
+  ];
 }
 
 function portalIdForAction(ctx: Readonly<Ctx>, action: Rule): string | null {
@@ -3774,6 +3817,16 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         } else if (ctx.options.extChoice && g[0]) {
           const name = g[0]!;
           const filters = partyFilter(g);
+          // Zhu's paid taste picker is the only unfiltered party picker whose
+          // source event charges later in the same action list. With no party,
+          // upstream writes no_options; stop before its taste menu and charge
+          // instead of selling a service that cannot change anything.
+          const abortPaidEmptySelection = filters.length === 0 && acts.slice(i + 1).some((later) =>
+            later.type === "modify_money"
+            && later.args[0] === "player"
+            && Number.isFinite(Number(later.args[1]))
+            && Number(later.args[1]) < 0
+          );
           const args: Record<string, JsonValue> = {
             variable: varId(name),
             cancelCode: code(name, "no_choice"),
@@ -3783,7 +3836,7 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
             op: "extChoice",
             call: "tux.party_monsters",
             args,
-            prompt: "Choose a monster",
+            prompt: IMPORT_UI[activeLang].chooseMonsterPrompt,
             ...(filters.length ? { cancel: true } : {}),
           });
           noteAction(a, a.type, "T1", "KC1 extChoice over the live party (empty party -> no_options; cancel -> no_choice)");
@@ -3792,7 +3845,10 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
             op: "if",
             if: { kind: "ext", call: "tux.party_match", args: { filters } },
             then: [choice],
-            else: [{ op: "variable", id: varId(name), set: { op: "set", value: code(name, "no_options") } }],
+            else: [
+              { op: "variable", id: varId(name), set: { op: "set", value: code(name, "no_options") } },
+              ...(abortPaidEmptySelection ? abortSourceEvent(ctx) : []),
+            ],
           });
         } else {
           noteAction(a, a.type, "T3-dropped", "monster/combat subsystem (P2)");
@@ -4137,6 +4193,127 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
           variant,
           whenModalOpen: "ignore",
         });
+        break;
+      }
+      case "dojo_method": {
+        const name = g[0];
+        const option = g[1];
+        if (!ctx.options.battle || !ctx.options.extChoice || !name || (option !== "monster" && option !== "technique")) {
+          noteAction(a, a.type, "T4-dropped", "needs the battle runtime, a monster variable and a monster/technique option");
+          break;
+        }
+        const variable = varId(name);
+        const ui = IMPORT_UI[activeLang];
+        if (option === "monster") {
+          noteAction(a, "dojo_method(monster)", "T1", "devolution menu over the monster's qualifying history forms; the pick transfers its properties, registers the form as caught and reports; cancel writes the no_choice code the map refunds");
+          const report = dojoReport("devolution_ended");
+          out.push(
+            { op: "variable", id: DOJO_MESSAGE_VARIABLE, set: { op: "set", value: 0 } },
+            {
+              op: "if",
+              if: { kind: "ext", call: "tux.dojo_devolvable", args: { variable } },
+              then: [
+                command({
+                  op: "extChoice",
+                  call: "tux.dojo_devolve",
+                  args: { variable, cancelCode: code(name, "no_choice"), message: report.message },
+                  prompt: ui.dojoDevolvePrompt,
+                  cancel: true,
+                }),
+                report.show,
+              ],
+              // No reversible monster (none selected, or no importable earlier
+              // form): answer like a cancelled pick so the map refunds the fee.
+              else: [{ op: "variable", id: variable, set: { op: "set", value: code(name, "no_choice") } }],
+            },
+          );
+          break;
+        }
+        noteAction(a, "dojo_method(technique)", "T1", "forget menu over known moves, then the learnable moveset rows (one is learned directly) and a report; cancelling, no selection or nothing learnable leaves the monster unchanged and ends the paid service without a charge");
+        // Anything other than a completed re-learn ends the service the way
+        // the map's own reset events do: the event's variable gates are
+        // cleared and the chain stops, so the follow-up charge and its
+        // "restored" line never run. Upstream would set dojo_notech when
+        // nothing is learnable, whose map line claims a technique was
+        // forgotten although none was.
+        const report = dojoReport("tuxemon_new_tech");
+        const learnArgs = { variable, forget: DOJO_FORGET_VARIABLE, message: report.message };
+        const ended = abortSourceEvent(ctx);
+        out.push(
+          { op: "variable", id: DOJO_FORGET_VARIABLE, set: { op: "set", value: 0 } },
+          { op: "variable", id: DOJO_MESSAGE_VARIABLE, set: { op: "set", value: 0 } },
+          {
+            op: "if",
+            if: { kind: "ext", call: "tux.dojo_monster", args: { variable } },
+            then: [{
+              op: "if",
+              if: { kind: "ext", call: "tux.dojo_learnable", args: { variable } },
+              then: [
+                command({
+                  op: "extChoice",
+                  call: "tux.dojo_forget",
+                  args: { variable, forget: DOJO_FORGET_VARIABLE },
+                  prompt: ui.dojoForgetPrompt,
+                  cancel: true,
+                }),
+                {
+                  op: "if",
+                  if: { kind: "ext", call: "tux.variable_text", args: { variable: DOJO_FORGET_VARIABLE } },
+                  then: [{
+                    op: "if",
+                    if: { kind: "ext", call: "tux.dojo_learnable", args: { variable, forget: DOJO_FORGET_VARIABLE, exactlyOne: true } },
+                    then: [{ op: "ext", call: "tux.dojo_learn_single", args: learnArgs }],
+                    else: [command({
+                      op: "extChoice",
+                      call: "tux.dojo_learn",
+                      args: learnArgs,
+                      prompt: ui.dojoLearnPrompt,
+                      cancel: true,
+                    })],
+                  }],
+                },
+                {
+                  op: "if",
+                  if: { kind: "ext", call: "tux.variable_text", args: { variable: DOJO_MESSAGE_VARIABLE } },
+                  then: [report.show],
+                  else: ended,
+                },
+              ],
+              else: ended,
+            }],
+            else: ended,
+          },
+        );
+        break;
+      }
+      case "change_taste": {
+        const [name, type, wanted] = g;
+        if (!ctx.options.battle || !name || (type !== "cold" && type !== "warm") || !wanted) {
+          noteAction(a, a.type, "T4-dropped", "needs the battle runtime, a monster variable, cold/warm and a taste");
+          break;
+        }
+        const variable = varId(name);
+        const report = dojoReport("taste_change_report", { type: po.get(`taste_${type}`) ?? type });
+        const args = { variable, type, taste: wanted };
+        noteAction(a, a.type, "T1", "tux.change_taste assigns the named or rarity-weighted random taste, recalculates stats, reports old and new taste, then consumes the monster selection");
+        out.push(
+          { op: "variable", id: DOJO_MESSAGE_VARIABLE, set: { op: "set", value: 0 } },
+          {
+            op: "if",
+            if: { kind: "ext", call: "tux.taste_changeable", args },
+            then: [
+              { op: "ext", call: "tux.change_taste", args: { ...args, message: report.message } },
+              report.show,
+              // Upstream samples every event guard before running any action
+              // (tuxemon/event/eventengine.py update/check_conditions), so the
+              // Dojo's "Talk Zhu End" -> "Talk Zhu Reset" hand-off lets the
+              // change event start once more and reroll the taste for the same
+              // payment. Consuming the picked monster after its report keeps
+              // one change per selection; the next purchase picks again.
+              { op: "variable", id: variable, set: { op: "set", value: 0 } },
+            ],
+          },
+        );
         break;
       }
       default:
