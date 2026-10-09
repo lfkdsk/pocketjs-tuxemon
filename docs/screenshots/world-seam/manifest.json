@@ -26,20 +26,20 @@
       "file": "world-seam-horizontal.480x272.phase-0.png",
       "camera": [
         3432,
-        848
+        832
       ],
       "player": {
         "tile": [
           0,
-          17
+          16
         ],
         "localPixel": [
           0,
-          272
+          256
         ],
         "worldPixel": [
           3664,
-          976
+          960
         ],
         "screenRect": [
           232,
@@ -74,9 +74,9 @@
         "created": 8,
         "pending": 0
       },
-      "nonBlackPixels": 84432,
-      "rgbaFnv1a": "61381111",
-      "pngSha256": "b325afab8ef9dc95d0cb5296312ecc14add60d76d041d089c70d3ab47daab4e5"
+      "nonBlackPixels": 92112,
+      "rgbaFnv1a": "da7bbc81",
+      "pngSha256": "52efdaa2e8a263653a8b501ad6302f6f95c813d182c22c1f8c45a32af00f7cf0"
     },
     {
       "orientation": "horizontal",
@@ -92,20 +92,20 @@
       "file": "world-seam-horizontal.480x272.phase-1.png",
       "camera": [
         3430,
-        848
+        832
       ],
       "player": {
         "tile": [
           0,
-          17
+          16
         ],
         "localPixel": [
           -2,
-          272
+          256
         ],
         "worldPixel": [
           3662,
-          976
+          960
         ],
         "screenRect": [
           232,
@@ -140,9 +140,9 @@
         "created": 8,
         "pending": 0
       },
-      "nonBlackPixels": 84432,
-      "rgbaFnv1a": "41df22e1",
-      "pngSha256": "adddf32c8be38e21c02090c0c91dfabfb35f9639cec967a32615a750bb0a913b"
+      "nonBlackPixels": 92112,
+      "rgbaFnv1a": "fb831f3d",
+      "pngSha256": "5bf590b8e7956528a88774462a224f6523c5f77d59808b5a42e19668e4c35667"
     },
     {
       "orientation": "horizontal",
@@ -158,20 +158,20 @@
       "file": "world-seam-horizontal.480x272.phase-2.png",
       "camera": [
         3428,
-        848
+        832
       ],
       "player": {
         "tile": [
           0,
-          17
+          16
         ],
         "localPixel": [
           -4,
-          272
+          256
         ],
         "worldPixel": [
           3660,
-          976
+          960
         ],
         "screenRect": [
           232,
@@ -206,9 +206,9 @@
         "created": 8,
         "pending": 0
       },
-      "nonBlackPixels": 84427,
-      "rgbaFnv1a": "fd9596e9",
-      "pngSha256": "a9319c5702cb0eff9b07b4ced3ccadfccf2e3838d78ad9f074cea23ff8971388"
+      "nonBlackPixels": 92107,
+      "rgbaFnv1a": "f01fcbb1",
+      "pngSha256": "851a9573519a060837e82a72990ccd813a2ee5bfb85610297765274acf3c0d3d"
     },
     {
       "orientation": "horizontal",
@@ -224,20 +224,20 @@
       "file": "world-seam-horizontal.480x272.phase-3.png",
       "camera": [
         3426,
-        848
+        832
       ],
       "player": {
         "tile": [
           0,
-          17
+          16
         ],
         "localPixel": [
           -6,
-          272
+          256
         ],
         "worldPixel": [
           3658,
-          976
+          960
         ],
         "screenRect": [
           232,
@@ -272,9 +272,9 @@
         "created": 8,
         "pending": 0
       },
-      "nonBlackPixels": 84427,
-      "rgbaFnv1a": "759f6aa1",
-      "pngSha256": "12a6a13e27b45a2d7d55e34c8bac2f517f65efaf5cfcb6383a3b231a54283d48"
+      "nonBlackPixels": 92107,
+      "rgbaFnv1a": "559fa21d",
+      "pngSha256": "5de4e41ef03a3669b750aabde8b1239a26b7fc480d9b51b7d8af9eddd3fe9ca3"
     },
     {
       "orientation": "horizontal",
@@ -290,20 +290,20 @@
       "file": "world-seam-horizontal.480x272.phase-4.png",
       "camera": [
         3424,
-        848
+        832
       ],
       "player": {
         "tile": [
           0,
-          17
+          16
         ],
         "localPixel": [
           -8,
-          272
+          256
         ],
         "worldPixel": [
           3656,
-          976
+          960
         ],
         "screenRect": [
           232,
@@ -338,9 +338,9 @@
         "created": 8,
         "pending": 0
       },
-      "nonBlackPixels": 84432,
-      "rgbaFnv1a": "cc20097d",
-      "pngSha256": "4642d09a18dcabb2973da33e29c62e55a0fd76ad824f0ad59fc847de6a7b2d34"
+      "nonBlackPixels": 92112,
+      "rgbaFnv1a": "b9b20b61",
+      "pngSha256": "be4ee736f5e90cd0f38cb28666f35a7427c113daa4a657181afeab154f485929"
     },
     {
       "orientation": "horizontal",
@@ -356,20 +356,20 @@
       "file": "world-seam-horizontal.480x272.phase-5.png",
       "camera": [
         3422,
-        848
+        832
       ],
       "player": {
         "tile": [
           0,
-          17
+          16
         ],
         "localPixel": [
           -10,
-          272
+          256
         ],
         "worldPixel": [
           3654,
-          976
+          960
         ],
         "screenRect": [
           232,
@@ -404,9 +404,9 @@
         "created": 8,
         "pending": 0
       },
-      "nonBlackPixels": 84432,
-      "rgbaFnv1a": "79076e05",
-      "pngSha256": "ebbe0886d80da3d0109687745ba3586f7da713aff28c5b96fdbbd46fb939b6d7"
+      "nonBlackPixels": 92112,
+      "rgbaFnv1a": "00920091",
+      "pngSha256": "5fa1af886d96ec1e6fc39b6db56222536e16aed63e8d55507dd866957da9ab4e"
     },
     {
       "orientation": "horizontal",
@@ -422,20 +422,20 @@
       "file": "world-seam-horizontal.480x272.phase-6.png",
       "camera": [
         3420,
-        848
+        832
       ],
       "player": {
         "tile": [
           0,
-          17
+          16
         ],
         "localPixel": [
           -12,
-          272
+          256
         ],
         "worldPixel": [
           3652,
-          976
+          960
         ],
         "screenRect": [
           232,
@@ -470,9 +470,9 @@
         "created": 8,
         "pending": 0
       },
-      "nonBlackPixels": 84429,
-      "rgbaFnv1a": "570a2181",
-      "pngSha256": "1a800c35426cec8deb3d4016bd956f5bfe6cd0fbcff252af45063b3b79e41a2c"
+      "nonBlackPixels": 92109,
+      "rgbaFnv1a": "a9941361",
+      "pngSha256": "213a55002a51aced7b65f519c41317a067cd1a559f6245ca609f754f436b0d61"
     },
     {
       "orientation": "horizontal",
@@ -488,20 +488,20 @@
       "file": "world-seam-horizontal.480x272.phase-7.png",
       "camera": [
         3418,
-        848
+        832
       ],
       "player": {
         "tile": [
           0,
-          17
+          16
         ],
         "localPixel": [
           -14,
-          272
+          256
         ],
         "worldPixel": [
           3650,
-          976
+          960
         ],
         "screenRect": [
           232,
@@ -536,9 +536,9 @@
         "created": 8,
         "pending": 0
       },
-      "nonBlackPixels": 84429,
-      "rgbaFnv1a": "df2b4ebd",
-      "pngSha256": "fbde089e1019dc9a56ce5c55ea5afddfce2216111a0bebfa9d15e9d8a5a2bd11"
+      "nonBlackPixels": 92109,
+      "rgbaFnv1a": "b8b1f00d",
+      "pngSha256": "dbe80c66bc45a4db01e99d085e02f9514eeda12de8cc5d11159e43eb5ecda04e"
     },
     {
       "orientation": "horizontal",
@@ -554,20 +554,20 @@
       "file": "world-seam-horizontal.480x272.landing.png",
       "camera": [
         3416,
-        848
+        832
       ],
       "player": {
         "tile": [
           39,
-          17
+          16
         ],
         "localPixel": [
           624,
-          272
+          256
         ],
         "worldPixel": [
           3648,
-          976
+          960
         ],
         "screenRect": [
           232,
@@ -602,9 +602,9 @@
         "created": 8,
         "pending": 0
       },
-      "nonBlackPixels": 84432,
-      "rgbaFnv1a": "38832ee1",
-      "pngSha256": "c6e07bf9ca7c7d24ff01b85806bc491ad91b3c94ec66905ea255da7da356ed52"
+      "nonBlackPixels": 92112,
+      "rgbaFnv1a": "ecb34991",
+      "pngSha256": "42a318b3556bbec3b502ad137744ce16469a3b96b3f6bc7e495c22521942a121"
     },
     {
       "orientation": "vertical",
@@ -1214,20 +1214,20 @@
       "file": "world-seam-horizontal.960x544.phase-0.png",
       "camera": [
         3192,
-        712
+        696
       ],
       "player": {
         "tile": [
           0,
-          17
+          16
         ],
         "localPixel": [
           0,
-          272
+          256
         ],
         "worldPixel": [
           3664,
-          976
+          960
         ],
         "screenRect": [
           472,
@@ -1262,9 +1262,9 @@
         "created": 16,
         "pending": 0
       },
-      "nonBlackPixels": 299472,
-      "rgbaFnv1a": "93ec0771",
-      "pngSha256": "9d9e5c6372041b442b639f85cfc370a35027e4115ab3b84708bb25692ace74f2"
+      "nonBlackPixels": 307152,
+      "rgbaFnv1a": "152ef641",
+      "pngSha256": "3451886866c02a50d0f93d8ce675880ed9587ff24bb434811759b2e91fc5e8d6"
     },
     {
       "orientation": "horizontal",
@@ -1280,20 +1280,20 @@
       "file": "world-seam-horizontal.960x544.phase-1.png",
       "camera": [
         3190,
-        712
+        696
       ],
       "player": {
         "tile": [
           0,
-          17
+          16
         ],
         "localPixel": [
           -2,
-          272
+          256
         ],
         "worldPixel": [
           3662,
-          976
+          960
         ],
         "screenRect": [
           472,
@@ -1328,9 +1328,9 @@
         "created": 16,
         "pending": 0
       },
-      "nonBlackPixels": 299472,
-      "rgbaFnv1a": "651852c1",
-      "pngSha256": "99a18807bcd062a94f34b8e9a4d676aa4d825faec780de67f658d1ffa73c384c"
+      "nonBlackPixels": 307152,
+      "rgbaFnv1a": "051e67bd",
+      "pngSha256": "809527c0ee751bb5cfb46d28bc2d820b147b56b7620513db782a06b8eef89b00"
     },
     {
       "orientation": "horizontal",
@@ -1346,20 +1346,20 @@
       "file": "world-seam-horizontal.960x544.phase-2.png",
       "camera": [
         3188,
-        712
+        696
       ],
       "player": {
         "tile": [
           0,
-          17
+          16
         ],
         "localPixel": [
           -4,
-          272
+          256
         ],
         "worldPixel": [
           3660,
-          976
+          960
         ],
         "screenRect": [
           472,
@@ -1394,9 +1394,9 @@
         "created": 16,
         "pending": 0
       },
-      "nonBlackPixels": 299467,
-      "rgbaFnv1a": "b3da13c9",
-      "pngSha256": "90f25152a94b3ceabe1c8b67f79f81d222e352e43acb7ed61a9d4c294d1ca109"
+      "nonBlackPixels": 307147,
+      "rgbaFnv1a": "5492d9d1",
+      "pngSha256": "d01eb814c4dbb3c246f50e9d34b980c903ae373bd8e16e7d3fdc04302825eb4f"
     },
     {
       "orientation": "horizontal",
@@ -1412,20 +1412,20 @@
       "file": "world-seam-horizontal.960x544.phase-3.png",
       "camera": [
         3186,
-        712
+        696
       ],
       "player": {
         "tile": [
           0,
-          17
+          16
         ],
         "localPixel": [
           -6,
-          272
+          256
         ],
         "worldPixel": [
           3658,
-          976
+          960
         ],
         "screenRect": [
           472,
@@ -1460,9 +1460,9 @@
         "created": 16,
         "pending": 0
       },
-      "nonBlackPixels": 299467,
-      "rgbaFnv1a": "1fd4c7c1",
-      "pngSha256": "6973d477317ae53f9c7f05d681584e90b877810220c685e17fca6d3cd1a03ea0"
+      "nonBlackPixels": 307147,
+      "rgbaFnv1a": "3c74bbbd",
+      "pngSha256": "3a38c0ec746f6cc12c0ab8b1a3fb347dfa2de58d2e019ddcb76ca459cf1a29e4"
     },
     {
       "orientation": "horizontal",
@@ -1478,20 +1478,20 @@
       "file": "world-seam-horizontal.960x544.phase-4.png",
       "camera": [
         3184,
-        712
+        696
       ],
       "player": {
         "tile": [
           0,
-          17
+          16
         ],
         "localPixel": [
           -8,
-          272
+          256
         ],
         "worldPixel": [
           3656,
-          976
+          960
         ],
         "screenRect": [
           472,
@@ -1526,9 +1526,9 @@
         "created": 16,
         "pending": 0
       },
-      "nonBlackPixels": 299472,
-      "rgbaFnv1a": "5a327abd",
-      "pngSha256": "baf5c6067f63a090cbc527e55781904e6869f706bfe33733b0c9194ff5702cfd"
+      "nonBlackPixels": 307152,
+      "rgbaFnv1a": "5218a2a1",
+      "pngSha256": "5ddf79ccaa96259e1c29080642a5096505252d52407808f08c2c4b7a3c034b73"
     },
     {
       "orientation": "horizontal",
@@ -1544,20 +1544,20 @@
       "file": "world-seam-horizontal.960x544.phase-5.png",
       "camera": [
         3182,
-        712
+        696
       ],
       "player": {
         "tile": [
           0,
-          17
+          16
         ],
         "localPixel": [
           -10,
-          272
+          256
         ],
         "worldPixel": [
           3654,
-          976
+          960
         ],
         "screenRect": [
           472,
@@ -1592,9 +1592,9 @@
         "created": 16,
         "pending": 0
       },
-      "nonBlackPixels": 299472,
-      "rgbaFnv1a": "4efc4205",
-      "pngSha256": "d630f7770cd4c0511103cf78e1a36c3a70227d06cff87bc123bce0bd126671be"
+      "nonBlackPixels": 307152,
+      "rgbaFnv1a": "06bcf851",
+      "pngSha256": "954914578ba120345e225fc70e0047104229d4a79f5a045a56d1afd9d58c93ff"
     },
     {
       "orientation": "horizontal",
@@ -1610,20 +1610,20 @@
       "file": "world-seam-horizontal.960x544.phase-6.png",
       "camera": [
         3180,
-        712
+        696
       ],
       "player": {
         "tile": [
           0,
-          17
+          16
         ],
         "localPixel": [
           -12,
-          272
+          256
         ],
         "worldPixel": [
           3652,
-          976
+          960
         ],
         "screenRect": [
           472,
@@ -1658,9 +1658,9 @@
         "created": 16,
         "pending": 0
       },
-      "nonBlackPixels": 299469,
-      "rgbaFnv1a": "931b6001",
-      "pngSha256": "eaf45bdf5d9a0bbb6eb393ecbc027945e0402f514f01ccfdd369ec7e91174734"
+      "nonBlackPixels": 307149,
+      "rgbaFnv1a": "c41ef821",
+      "pngSha256": "a75f95a45e6f5cfeba53ce8e8f9c75273403da573cde96aa7c38b212da6a0cc6"
     },
     {
       "orientation": "horizontal",
@@ -1676,20 +1676,20 @@
       "file": "world-seam-horizontal.960x544.phase-7.png",
       "camera": [
         3178,
-        712
+        696
       ],
       "player": {
         "tile": [
           0,
-          17
+          16
         ],
         "localPixel": [
           -14,
-          272
+          256
         ],
         "worldPixel": [
           3650,
-          976
+          960
         ],
         "screenRect": [
           472,
@@ -1724,9 +1724,9 @@
         "created": 16,
         "pending": 0
       },
-      "nonBlackPixels": 299469,
-      "rgbaFnv1a": "32e5917d",
-      "pngSha256": "fd37875fab1d76c36870181221f800cc15d5598202e9cc2cb45743a2710be5bc"
+      "nonBlackPixels": 307149,
+      "rgbaFnv1a": "78b2694d",
+      "pngSha256": "b856472c17e465338bccb452d8eaff6f1aa2a7349aa7fbedbcbaf55eb8661dc1"
     },
     {
       "orientation": "horizontal",
@@ -1742,20 +1742,20 @@
       "file": "world-seam-horizontal.960x544.landing.png",
       "camera": [
         3176,
-        712
+        696
       ],
       "player": {
         "tile": [
           39,
-          17
+          16
         ],
         "localPixel": [
           624,
-          272
+          256
         ],
         "worldPixel": [
           3648,
-          976
+          960
         ],
         "screenRect": [
           472,
@@ -1790,9 +1790,9 @@
         "created": 16,
         "pending": 0
       },
-      "nonBlackPixels": 299472,
-      "rgbaFnv1a": "63ea7681",
-      "pngSha256": "c915d78c8645cabc10bde86a7a2aa8fa2d7002bdc23fd525f8a496de140e1919"
+      "nonBlackPixels": 307152,
+      "rgbaFnv1a": "40af4b91",
+      "pngSha256": "035122f9b5839f288967b634de55321cbe1b38f79db4530ee32c08530aa23a08"
     },
     {
       "orientation": "vertical",
@@ -2429,7 +2429,7 @@
           ]
         }
       ],
-      "pngSha256": "1cac1dd7746d7fbf7ce62c01e7fd6b9aa856e493a9f5af4d1e8f606fbdb8ff25"
+      "pngSha256": "91229665b785aeaa58758a18463dafc9feb360b2bb3678a91b803681d325ec88"
     },
     {
       "viewport": {
@@ -2470,7 +2470,7 @@
           ]
         }
       ],
-      "pngSha256": "1cab8c44cdbee4c6c8f1247353521a183d9e24ea0c43ad1d9885fe9db27513e3"
+      "pngSha256": "d8db7b5b238c67265d246434dd698a09287861a1efc5b846d54ad89cb147c9a1"
     }
   ]
 }

@@ -32,12 +32,13 @@ export interface WorldSeamCrossingPlan {
 export const WORLD_SEAM_CROSSINGS: readonly WorldSeamCrossingPlan[] = [
   {
     orientation: "horizontal",
-    // A portal-only fixed-destination rectangle whose aligned y=17 lane is
-    // now direct; the other two source cells still take the legacy fade.
+    // A fixed-destination rectangle that funnels y=16..18 to y=17 upstream.
+    // y=16 used to fade to the fixed landing; it now crosses to its own
+    // coordinate-continuous neighbour cell (39,16).
     sourceMap: "classic_aerolume_city",
     targetMap: "classic_route_5",
     sourceSide: "west",
-    start: [1, 17],
+    start: [1, 16],
     button: 0x0080,
     facing: 1,
     worldDelta: [-2, 0],
