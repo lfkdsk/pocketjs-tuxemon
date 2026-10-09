@@ -34,17 +34,43 @@ export interface BattleGoldenCase {
   };
 }
 
-function canonical(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(canonical);
-  if (value && typeof value === "object") {
-    return Object.fromEntries(
-      Object.keys(value as Record<string, unknown>).sort().map((key) => [
-        key,
-        canonical((value as Record<string, unknown>)[key]),
-      ]),
-    );
+/** JSON.stringify's view of a value inside an array: what it would drop
+ *  from an object is written as null there. */
+function omitted(value: unknown): boolean {
+  return value === undefined || typeof value === "function" || typeof value === "symbol";
+}
+
+/** Whether `a` and `b` serialise to the same JSON once object keys are
+ *  sorted, without building either string. The corpora compare half a
+ *  million events per run; sorting and stringifying both sides of each one
+ *  used to cost more than replaying the battles. */
+export function sameJson(a: unknown, b: unknown): boolean {
+  if (a === b || (omitted(a) && omitted(b))) return true;
+  if (Array.isArray(a)) {
+    if (!Array.isArray(b) || a.length !== b.length) return false;
+    for (let index = 0; index < a.length; index++) {
+      const left = omitted(a[index]) ? null : a[index];
+      const right = omitted(b[index]) ? null : b[index];
+      if (!sameJson(left, right)) return false;
+    }
+    return true;
   }
-  return value;
+  if (a !== null && typeof a === "object") {
+    if (b === null || typeof b !== "object" || Array.isArray(b)) return false;
+    const left = a as Record<string, unknown>;
+    const right = b as Record<string, unknown>;
+    let keys = 0;
+    for (const key of Object.keys(left)) {
+      if (omitted(left[key])) continue;
+      keys++;
+      if (!Object.hasOwn(right, key) || !sameJson(left[key], right[key])) return false;
+    }
+    for (const key of Object.keys(right)) if (!omitted(right[key])) keys--;
+    return keys === 0;
+  }
+  // Distinct primitives agree only where JSON maps both to null.
+  const isNull = (value: unknown) => value === null || (typeof value === "number" && !Number.isFinite(value));
+  return isNull(a) && isNull(b);
 }
 
 export function readBattleGolden(path: string): {
@@ -121,7 +147,7 @@ export function compareGoldenCase(
   const expected = golden.expected.trace;
   const count = Math.max(expected.length, actual.length);
   for (let index = 0; index < count; index++) {
-    if (JSON.stringify(canonical(expected[index])) !== JSON.stringify(canonical(actual[index]))) {
+    if (!sameJson(expected[index], actual[index])) {
       return `event ${index}\n  py: ${JSON.stringify(expected[index])}\n  ts: ${JSON.stringify(actual[index])}`;
     }
   }
