@@ -153,6 +153,7 @@ export async function captureGi2aJournal(
       slug: `fixture_${index + 1}`,
       label,
     })),
+    cancellable: false,
     phase: "choose",
     cancelled: false,
   };

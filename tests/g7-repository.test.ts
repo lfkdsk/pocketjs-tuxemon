@@ -55,8 +55,9 @@ const journey = JSON.parse(readFileSync(join(ROOT, "data/g6-journey.json"), "utf
 const worldTraversal = journeyWorldTraversal(journey, "G7 maintained journey");
 const GAME_OPTIONS = { extensions: TUXEMON_EXTENSIONS, battle: TUXEMON_BATTLE_RULES, scenes: TUXEMON_SCENES } as const;
 // Terminal state after the legacy timeline carries the deterministic player
-// identity; the story terminal — spyder_route1@14,19 — is unchanged.
-const LEGACY_TERMINAL_STATE_SHA256 = "84c1ad56b0a6e45ea54cddce04c89ae21691fd57f761e54041b959698b53fc4e";
+// identity and the eight map-entry calendar variables; the story terminal —
+// spyder_route1@14,19 — is unchanged.
+const LEGACY_TERMINAL_STATE_SHA256 = "ade42d2f11a167e202ea1fb506e66766fa51d97a56705473e37c0772fd2d2920";
 const BEFORE_HANDOFF_FRAME = 3_482;
 const MID_HANDOFF_FRAME = 3_496;
 const AFTER_HANDOFF_FRAME = 3_500;

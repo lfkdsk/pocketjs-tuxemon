@@ -100,9 +100,14 @@ describe("Tuxemon utility scenes", () => {
     const confirmed = rules.step(started!.state, { buttons: 0, confirmEdge: true }, 1);
     expect(rules.done(confirmed)).toEqual({ writes: { "v.rename": "txmn-two" } });
 
-    const fresh = rules.start(packed, { variable: "v.rename" }, 9, context(packed))!;
+    const fresh = rules.start(packed, { variable: "v.rename", cancellable: true }, 9, context(packed))!;
     const cancelled = rules.step(fresh.state, { buttons: 0, cancelEdge: true }, 1);
     expect(rules.done(cancelled)).toEqual({ cancelled: true });
+
+    const required = rules.start(packed, { variable: "v.rename", cancellable: false }, 9, context(packed))!;
+    const ignored = rules.step(required.state, { buttons: 0, cancelEdge: true }, 1);
+    expect(rules.done(ignored)).toBeNull();
+    expect((ignored as unknown as MonsterPickerSceneState).phase).toBe("choose");
     const empty = packTuxemonExtensionState(initialTuxemonExtensionState());
     expect(rules.start(empty, { variable: "v.rename" }, 9, context(empty))).toBeNull();
   });

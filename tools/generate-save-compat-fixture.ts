@@ -160,6 +160,10 @@ const metadata = {
   tape: {
     path: "data/gb6-mainline-journey.json",
     sha256: sha256(tapeBytes),
+    continuationPrefix: {
+      frames: continuation.frame,
+      sha256: sha256(JSON.stringify(tape.masks.slice(0, continuation.frame))),
+    },
   },
   save: {
     frame: saved.frame,

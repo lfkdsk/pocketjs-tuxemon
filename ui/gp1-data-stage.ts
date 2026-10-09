@@ -38,6 +38,8 @@ import {
 } from "../battle/storage-scenes.ts";
 import { TUXEMON_DAYCARE_SCENE_ID } from "../battle/daycare-scenes.ts";
 import { TuxemonDaycareScene } from "./daycare-scene.tsx";
+import { TUXEMON_RADIO_SCENE_ID } from "../battle/radio-scenes.ts";
+import { TuxemonRadioScene } from "./radio-scene.tsx";
 import { gp1Mark } from "./gp1-marks.ts";
 
 export {
@@ -65,6 +67,8 @@ export {
   TUXEMON_TRADE_SCENE_ID,
   TUXEMON_DAYCARE_SCENE_ID,
   TuxemonDaycareScene,
+  TUXEMON_RADIO_SCENE_ID,
+  TuxemonRadioScene,
 };
 
 gp1Mark("json-literals");

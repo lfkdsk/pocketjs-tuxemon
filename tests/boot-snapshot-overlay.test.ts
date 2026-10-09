@@ -144,9 +144,10 @@ describe("boot-snapshot overlay", () => {
       previous = mask;
     }
     // The terminal hash carries the deterministic player identity alongside
-    // the cathedral bill metadata and live-movement encounter state.
+    // the cathedral bill metadata, live-movement encounter state, and the
+    // calendar variables refreshed on map entry.
     expect(sha256(canonicalJson(state)))
-      .toBe("e35a750132fec6a380f153c473f65b52beaa478f37a8f979c219a56c6ad87a77");
+      .toBe("590452dceb93dfe0a2a88016610e602a6bc6f5334da6fa7b35c550f1f1f2548d");
     expect(state.frame).toBe(193231);
   });
 });

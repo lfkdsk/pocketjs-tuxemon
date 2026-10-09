@@ -210,10 +210,11 @@ resolver exactly — one RNG draw from the saved cursor, post-spawn seed, seeded
 AI policy on both sides — and a decisive fight is recorded per upstream. A true draw is Degraded: upstream raises before
 either result variable is written, so this port writes the draw code and
 the fighter (challenger) trainer code as a deterministic fallback. The
-other rows are global or legacy content. \`get_player_monster\` has
-${playerMonster?.native ?? 0} Native uses (the KC1 \`extChoice\` over the live
-party) and ${playerMonster?.degraded ?? 0} Degraded uses (the party picker that
-feeds an adjacent \`rename_monster\`); \`choice_monster\` has
+other rows are global or legacy content. All ${playerMonster?.native ?? 0}
+\`get_player_monster\` uses are Native: 15 use the KC1 \`extChoice\` over the
+live party, while the two that feed an adjacent \`rename_monster\` use a saved,
+non-cancellable party picker and keep the selected monster's stable iid.
+\`choice_monster\` has
 ${choiceMonster?.native ?? 0} Native uses: authored \`choices\` boxes whose rows
 show the monster's static menu-face icon beside its translated name (upstream's
 animated 24 px menu faces are baked to one 16 px frame, a visual downgrade).

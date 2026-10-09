@@ -20,8 +20,9 @@ describe("J3 QuickJS continuation tape", () => {
       opponent: "spyder_omnichannel_beaverbrook",
       outcome: "won",
     });
-    // Terminal includes the deterministic player identity selected in G6.
+    // Terminal includes the deterministic player identity selected in G6 and
+    // the calendar variables refreshed on map entry.
     expect(tape.terminalStateSha256)
-      .toBe("e35a750132fec6a380f153c473f65b52beaa478f37a8f979c219a56c6ad87a77");
+      .toBe("590452dceb93dfe0a2a88016610e602a6bc6f5334da6fa7b35c550f1f1f2548d");
   });
 });

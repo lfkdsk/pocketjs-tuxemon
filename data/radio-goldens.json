@@ -1,0 +1,37 @@
+{
+  "format": "pocket-tuxemon/radio-goldens/v1",
+  "frames": [
+    {
+      "case": "tuner",
+      "width": 480,
+      "height": 272,
+      "file": "radio-tuner.480x272.png",
+      "rgbaFnv1a": "50ff9844",
+      "pngSha256": "d9003419ff292b4332f61226b7b0341b0837afa1916c680f3541a2e6b99b7f8e"
+    },
+    {
+      "case": "broadcast",
+      "width": 480,
+      "height": 272,
+      "file": "radio-broadcast.480x272.png",
+      "rgbaFnv1a": "640cfdff",
+      "pngSha256": "b0e00dd52b59be6d1dc0148aa8124eb408bd1fc3db8d9dbd555512335fef67bb"
+    },
+    {
+      "case": "tuner",
+      "width": 960,
+      "height": 544,
+      "file": "radio-tuner.960x544.png",
+      "rgbaFnv1a": "14153197",
+      "pngSha256": "6bd0a1806df404469a3785176cd2c4708eeefcc016afe96c0e2d8c5911401d6b"
+    },
+    {
+      "case": "broadcast",
+      "width": 960,
+      "height": 544,
+      "file": "radio-broadcast.960x544.png",
+      "rgbaFnv1a": "eb9dbed9",
+      "pngSha256": "8384eaff0d0ebdb242b61dbe368cff2cabacd406a1ad4120fb0303fe17ea3ba3"
+    }
+  ]
+}

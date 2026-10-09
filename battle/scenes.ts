@@ -15,6 +15,9 @@ import {
   type GameLang,
 } from "./extension.ts";
 import { createStorageSceneRules } from "./storage-scenes.ts";
+import { radioSceneRules, TUXEMON_RADIO_SCENE_ID } from "./radio-scenes.ts";
+
+export { TUXEMON_RADIO_SCENE_ID } from "./radio-scenes.ts";
 
 export const TUXEMON_JOURNAL_SCENE_ID = "tux.journal";
 export const TUXEMON_MONSTER_PICKER_SCENE_ID = "tux.monsterPicker";
@@ -43,6 +46,8 @@ export interface MonsterPickerSceneState {
   variable: string;
   title: string;
   entries: MonsterPickerEntry[];
+  /** Upstream's unfiltered get_player_monster menu cannot be dismissed. */
+  cancellable: boolean;
   phase: "choose" | "done";
   cancelled: boolean;
 }
@@ -169,6 +174,7 @@ function pickerRules(index: readonly JournalMonsterIndexEntry[]): SceneRules {
           ? args.title
           : "Choose a Tuxemon",
         entries,
+        cancellable: args.cancellable === true,
         phase: "choose",
         cancelled: false,
       };
@@ -178,7 +184,7 @@ function pickerRules(index: readonly JournalMonsterIndexEntry[]): SceneRules {
     step(rawState, input: Readonly<SceneInput>) {
       const state = stateOf<MonsterPickerSceneState>(rawState);
       if (state.phase !== "choose") return rawState;
-      if (input.cancelEdge) {
+      if (input.cancelEdge && state.cancellable) {
         state.phase = "done";
         state.cancelled = true;
       } else if (input.confirmEdge) {
@@ -226,6 +232,7 @@ export function createTuxemonScenes(
       [NAME_INPUT_SCENE_ID]: nameInputRules,
       [TUXEMON_JOURNAL_SCENE_ID]: journalRules(index),
       [TUXEMON_MONSTER_PICKER_SCENE_ID]: pickerRules(index),
+      [TUXEMON_RADIO_SCENE_ID]: radioSceneRules,
       [TUXEMON_DAYCARE_SCENE_ID]: createDaycareSceneRules(source, (slug) => names.get(slug) ?? slug, lang),
       ...createStorageSceneRules(source, (slug) => names.get(slug) ?? slug, lang),
     },

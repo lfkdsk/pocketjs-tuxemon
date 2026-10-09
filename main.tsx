@@ -36,6 +36,8 @@ import {
   TUXEMON_TRADE_SCENE_ID,
   TUXEMON_DAYCARE_SCENE_ID,
   TuxemonDaycareScene,
+  TUXEMON_RADIO_SCENE_ID,
+  TuxemonRadioScene,
 } from "./ui/gp1-data-stage.ts";
 import { canSwitchLang, detectLang } from "./ui/language.ts";
 import { initZhFontStream } from "./ui/zh-font-stream.ts";
@@ -351,6 +353,7 @@ mount(() => (
         [TUXEMON_TRADE_SCENE_ID]: createTuxemonTradeScene(catalog),
         [TUXEMON_MONSTER_SHOP_SCENE_ID]: createTuxemonMonsterShopScene(catalog),
         [TUXEMON_DAYCARE_SCENE_ID]: TuxemonDaycareScene,
+        [TUXEMON_RADIO_SCENE_ID]: TuxemonRadioScene,
       }}
       assets={assets}
       world={createWorldRenderer({ npcPreview: { sandbox: TUXEMON_PREVIEW_HOOKS } })}

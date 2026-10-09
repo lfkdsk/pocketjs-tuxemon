@@ -107,14 +107,15 @@ definitions below are the report's own:
 | `char_position` | an exact `place` after import validates that both coordinates are integers inside the map; invalid source coordinates fail the import, as upstream raises instead of clamping. An immediately following `char_face` folds into the placement direction. |
 | `add_step_tracker player,…` | `tux.add_step_tracker`; the opted-in `playerStep` hook reports signed `dx`/`dy` for ordinary steps, transfers and direct placement. Trackers consume `dx+dy`; the shared daycare consumes one step per hook call. |
 | `char_run` (both authored uses) | no command: Christie and Bjorn are idle at the call, so upstream's moving-only run-rate change is an exact no-op and cannot latch onto a later forced route. |
+| `char_speed` | `moveControl` routeSpeed scoped to the active or next forced route, or to the first successfully committed tile after command-started wander, then cleared on idle as upstream does. The optional `tilesPerSecond` field carries the exact authored rate on the fixed 60 Hz clock; the MV grade remains as a fallback for older project documents. |
 | `is battle_outcome` | `tux.battle_outcome` extension condition reading live battle history. |
 | `is check_char_parameter player,moving,1` | the live `playerMoving` condition on an automatic page. It is map-wide and observes whether the player had a committed interpolating step at the start of the reference tick, matching upstream's event-before-world-update ordering. |
 | `is/not check_char_parameter player,name,<value>` | `tux.player_name_is` compares the live saved player name exactly and case-sensitively. |
 | `is/not has_tuxepedia player,<species>,seen/caught` | `tux.has_tuxepedia` reads the exact saved player Tuxepedia status; caught does not also count as seen. |
 | `is/not char_healed player` | `tux.char_healed` requires a non-empty party whose members are all at full HP; status ailments do not change the answer. |
-| `add_monster`, `set_monster_health`, `set_monster_status`, `evolution`, `remove_monster` | the matching `tux.*` extension command; `remove_monster` resolves the iid globally and deletes from the player party, kennel, or an NPC party. A trainer's battle party stays in `npcParties` for the rest of the NPC's lifetime. |
+| `add_monster`, `set_monster_health`, `set_monster_status`, `set_monster_level`, `evolution`, `remove_monster` | the matching `tux.*` extension command. All three authored level boosts preserve the monster iid, apply the exact level and experience floors, recalculate stats while retaining the HP deficit, learn scheduled moves, and mark a newly available evolution. `remove_monster` resolves the iid globally and deletes from the player party, kennel, or an NPC party. A trainer's battle party stays in `npcParties` for the rest of the NPC's lifetime. |
 | `get_party_monster` (Nimrod `Zircon Back`, ApexPlayer cheat) | `tux.get_party_monsters` writes the selected trainer's or player's iids into `iid_slot_*`, which the following `remove_monster` consumes. |
-| `get_player_monster` | `extChoice` over the live party (the KC1 enum picker), or the saved party-picker scene for the two uses that feed an adjacent `rename_monster`. |
+| `get_player_monster` | `extChoice` over the live party for the 15 general enum pickers. The two uses that feed an adjacent `rename_monster` open a saved, non-cancellable party-picker scene, retain the selected monster's stable iid, and skip name entry when the party is empty. |
 | `choice_monster` | an authored `choices` box whose rows show the monster's static menu-face icon beside its translated name; each row writes its positive enum code into the result variable. |
 | `open_shop` (item economy) | the kit `shop` command with imported goods, prices and stock. |
 | `open_shop …,buy_monster` | the `tux.monsterShop` scene with the economy's monster rows (price, level, stock); purchases are saved per stock label. |
@@ -126,6 +127,7 @@ definitions below are the report's own:
 | `pause_music` / `unpause_music` | `pauseBgm` / `resumeBgm`. |
 | `play_sound` | `playSe` with the authored volume carried through; resolves through `Project.audio` to a WAV pak entry. |
 | `is music_playing` / `not music_playing` | `bgmPlaying` (with `negate`); Tuxemon's paused/combat inversion is safe for the map-enter guard idiom. |
+| `tune_radio` | the blocking `tux.radio` tuner scene, with the authored 88–108 MHz range, 0.1 MHz steps, signal threshold and map/time/variable-first broadcast selection. It imports the source-order station catalog and translated dialogue, plays static when no signal is strong enough, supports controller/keyboard/scaled touch, and resumes the originating event at the same map position. |
 | `screen_transition` | two blocking `screenFade` commands that retain each fade half's source duration and RGBA colour. |
 | `play_map_animation` / `play_tile_animation` | `mapAnim` at the sampled character tile or fixed source tile. |
 | `set_layer` | a native screen `layer` selecting or clearing a packaged RGBA or PNG overlay. |
@@ -138,7 +140,6 @@ definitions below are the report's own:
 | `char_face player,<dir>` | a `moveRoute` with the kit's native `faceUp`/`faceDown`/… step; the step applies on the next boundary tick (upstream faces immediately), so the turn lands one tick after the command. A `char_face` immediately after a `char_position` folds into the placement's `dir` instead, and a spawn-event `char_face npc,<dir>` becomes the NPC page's native initial `dir`. |
 | `add_tracker` | a `switch`; step counters are not modeled. |
 | `transition_teleport` with an out-of-range landing | coordinates clamped into the target map; an isolated landing is repaired to the nearest walkable cell by deterministic four-neighbour BFS. |
-| `char_speed` | `moveControl` routeSpeed scoped to the active or next forced route, then cleared when that route ends as upstream clears custom speed on idle; tiles/s still maps to the nearest MV exponential grade. |
 | `choice_npc` | static `extChoice` list; the shared label is extended with each option's translated name so the lines stay distinguishable (upstream tells options apart by per-option NPC portraits, which need kit option-image support). |
 | `get_party_monster` (dojo, gym) | `tux.get_party_monsters` dumps the party iids into `iid_slot_*`; NPC trainer parties are staged live (not folded) when an event inspects them, so the dojo and gym calls find a party. |
 | `load_yaml` | a gating variable; the referenced events are merged at import time and unlock when the action runs. |
@@ -157,9 +158,11 @@ whole party and `quarantine` confiscates infected monsters into the hidden
 `boxes.quarantine` box.
 
 `time_is` now reads the deterministic saved calendar in all 128 materialized
-uses. `update_time` writes the eight upstream time variables; its three source
-uses sit in events dropped for other reasons, so the isolated importer fixture
-exercises that command shape directly.
+uses. `update_time` writes the eight upstream time variables. The shared
+Spyder and Xero `TeleporterState` events are lowered to the equivalent
+destination-map entry point and therefore refresh those variables once per
+transfer; the remaining source use belongs to `battle_menu.yaml`, which has no
+map and is not part of the imported title-screen Battle mode.
 
 Earlier in the project, all battles were placeholders (a text line plus win
 switches). Real battles replaced them: `start_battle`, `random_encounter`,
@@ -180,10 +183,9 @@ areas, so adding Surf does not split or renumber existing area-event IDs; their
 item/appearance guards also keep them absent from pre-Surfboard runtime state.
 This preserves the seven cooperating `char_in` uses and all five labelled
 surface-facing uses without pretending the project schema has a general
-live-player-cell predicate. The other two dropped `char_facing_tile` rows are
-not terrain queries: they are ordinary no-label facing triggers on Radio
-events whose sole `tune_radio` action is unsupported, so no event remains to
-attach the otherwise-native trigger to.
+live-player-cell predicate. The other two `char_facing_tile` rows are not
+terrain queries: they are ordinary no-label facing triggers on Radio events,
+and both now open the native imported tuner.
 
 The 38 `is check_char_parameter player,moving,1` encounter guards use the
 native map-wide `playerMoving` condition on automatic pages. The sampled value
@@ -201,14 +203,13 @@ compete for one arrival edge.
 
 | Tuxemon | Reason |
 |---|---|
-| `tune_radio` | the two Radio events have native ordinary facing/button triggers, but their only action is unsupported, so the empty events are omitted. They do not carry terrain labels and are not evidence for a missing live-cell predicate. |
 | `char_facing player,top/bottom`, `button_pressed K_RETURN` | these legacy source arguments are invalid in the pinned Tuxemon runtime: directions are `up/down/left/right`, and `K_RETURN` is not an intention constant. They remain fixed false instead of being reported as native triggers, except that the five geometrically proved Route 3 south exits repair their pinned `bottom` typo to `down` in the guard, trailing face and transfer direction. |
 | `add_step_tracker` and friends for a non-player character | the kit's step hook reports only the player's completed tiles (the pinned content tracks the player only). |
 | `copy_variable` between enum-coded variables | enum codes are numbered per variable, so only variables that hold text copy verbatim. |
 | `transition_teleport` targeting an NPC | only the player transfers. |
 | `create_npc`, `random_monster`, `not char_exists`, … in `test_spyder_cotton_*` / `battle_menu` scenario YAML | these files have no same-slug TMX and no `scenario=` reference, and no `load_yaml` pulls them in, so no map ever materializes them in the pinned source either. |
 | `translated_dialog` with a msgid absent from every catalog | five keys (three in `spyder_test_map`, `spyder_flower_sandy_willtrade`, `water_nice_mayor12`) exist in no `.po`; the fallback shows the raw key. |
-| `set_party_status`, `update_time`, `get_pending_moves`/`remove_tech` in `is current_state Combat*/Teleporter*`-guarded events | the kit does not run map fibers inside combat/menu/teleporter states. The combat move-deletion choice is covered by the battle runtime's deterministic progression (auto-forget the first move); the time variables are write-only in the corpus. |
+| `set_party_status`, `get_pending_moves`/`remove_tech` in `is current_state Combat*`-guarded events | the kit does not run map fibers inside combat/menu states. The combat move-deletion choice is covered by the battle runtime's deterministic progression (auto-forget the first move). The separate shared `update_time` TeleporterState hooks are lowered at destination-map entry as described above. |
 | rules inside structurally discarded events | the event never starts (inert, zero-size, fixed-false guard, trigger area outside the map, or over the 64-cell area cap), or it is not materialized by any map. |
 
 Per-rule drop reasons are retained in `dist/import-report.json`.
@@ -237,8 +238,8 @@ Current coverage (G6 profile):
 
 | Kind | Types | Uses | Native | Degraded | Placeholder | Dropped | Executable |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Actions | 98 | 13,617 | 13,040 | 287 | 0 | 290 | 97.9% |
-| Conditions | 64 | 8,663 | 8,368 | 56 | 0 | 239 | 97.2% |
+| Actions | 98 | 13,617 | 13,108 | 242 | 0 | 267 | 98.0% |
+| Conditions | 64 | 8,663 | 8,423 | 21 | 0 | 219 | 97.5% |
 
 ## Adding or changing a mapping
 

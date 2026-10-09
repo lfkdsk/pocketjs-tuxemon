@@ -4,7 +4,7 @@
   "hz": 60,
   "worldTraversal": "seamless-v1",
   "source": {
-    "chaptersSha256": "5159e7a7dde65207a07228f1e2e79ca29f9b9a48b02e424a31e7f18be1cf820a",
+    "chaptersSha256": "8a2a3077744e6d2f2737c9e0ea94c62db5646beeb9865353f7588426498247b1",
     "tape": {
       "gb6": {
         "file": "data/gb6-mainline-journey.json",
@@ -47,8 +47,8 @@
     "fallbacks": [
       "fonts/NotoSansCJKsc-subset.otf"
     ],
-    "fontSha256": "cdce2afab9c057d893fc6f4d8e2e9e54f261ebf6dd6cc7a611c976b51edd2859",
-    "charsetSha256": "9b49d0b8d4369963216c70b38a6990819e4433ca78ea8415cfb237bf7aaa07b2"
+    "fontSha256": "034d41b80baeec3c8dde522b05caec73db504e15e9f89fb8ce93d1418e354d9a",
+    "charsetSha256": "25c934fbc1e096a316a287e8f6bde4a049910e6554a6a9dea34b5b251c42548c"
   },
   "frames": 206830,
   "tapeSha256": "a7951a364b92cd16d458d87206dd73004fb59c9812463dade0fc675a18cdd3ca",
@@ -96,8 +96,8 @@
         "cardiling:4",
         "pawsand:12"
       ],
-      "storySha256": "4c307e5d3170ec082da6579a09861a0450f3ff8742b138aa6979f762139f8836"
+      "storySha256": "076586407513305744e782c68db73004805e1055779abfb44a91bf0ee8d2e1f1"
     },
-    "neutralSha256": "9da31419f0c8960f8e7e8b882d271213e23c7e092d7c253ad70b5b830f000f06"
+    "neutralSha256": "461b0f431795e18c352a3d4118721dfdafd4bd47163e24f263f439144ecfb04a"
   }
 }

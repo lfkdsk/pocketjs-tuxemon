@@ -270,6 +270,9 @@ export interface ImportUiStrings {
   shopMenu: Readonly<Record<string, string>>;
   shopPlaceholderNote: string;
   itemRemoved: (slug: string, sprite: string) => string;
+  radioTuning: string;
+  radioBack: string;
+  radioNext: string;
 }
 
 export const IMPORT_UI: Record<ImportLang, ImportUiStrings> = {
@@ -296,6 +299,9 @@ export const IMPORT_UI: Record<ImportLang, ImportUiStrings> = {
     },
     shopPlaceholderNote: "(P1 placeholder; trading is unavailable.)",
     itemRemoved: (slug, sprite) => `${slug} removed ${sprite}.`,
+    radioTuning: "Tuning: {station}",
+    radioBack: "Return",
+    radioNext: "Continue",
   },
   zh_CN: {
     nextPage: "下一页 >",
@@ -320,5 +326,8 @@ export const IMPORT_UI: Record<ImportLang, ImportUiStrings> = {
     },
     shopPlaceholderNote: "（P1 占位：暂不支持交易。）",
     itemRemoved: (slug, sprite) => `${slug} 移除了 ${sprite}。`,
+    radioTuning: "正在调谐：{station}",
+    radioBack: "返回",
+    radioNext: "继续",
   },
 };

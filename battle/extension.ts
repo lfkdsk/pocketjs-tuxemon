@@ -29,8 +29,9 @@ import {
   type StepTrackers,
 } from "./step-tracker.ts";
 import { battleDbToTuxemonBattleDb } from "./from-battle-db.ts";
-import { evolveMonsterSnapshot } from "./progression.ts";
+import { eligibleEvolution, evolveMonsterSnapshot } from "./progression.ts";
 import { applyPendingOverrides, spawnMonster, spawnMonsterWithRandom } from "./spawn.ts";
+import { calculateBaseStats, monsterFromSnapshot } from "./stats.ts";
 import { runPolicyBattle } from "./tuxemon.ts";
 import {
   advanceClock,
@@ -1123,6 +1124,95 @@ function updatePlayerMonsters(
   };
 }
 
+/** Pinned Monster.set_level for the authored non-UI event form. The action
+ * resets total experience to the new level floor, recalculates stats, keeps
+ * damage as an HP deficit while levelling up, learns every eligible scheduled
+ * move (upstream currently permits the list to grow past max_moves), and
+ * refreshes the pending-evolution flag. */
+function setMonsterLevelCommand(source: BattleDbSource) {
+  return (context: ExtensionCommandContext, value: JsonValue) => {
+    const args = argsRecord(value, "tux.set_monster_level");
+    const levelsAdded = args.levelsAdded === undefined ? 1 : args.levelsAdded;
+    if (!safeInteger(levelsAdded) || levelsAdded < 0) {
+      throw new Error("tux.set_monster_level: levelsAdded must be a non-negative integer");
+    }
+    if (args.inside !== undefined && typeof args.inside !== "boolean") {
+      throw new Error("tux.set_monster_level: inside must be boolean");
+    }
+    const variable = args.variable;
+    if (variable !== undefined && !nonEmptyString(variable)) {
+      throw new Error("tux.set_monster_level: variable must be a non-empty string");
+    }
+    const selected = variable === undefined ? null : context.variables[variable];
+    if (variable !== undefined && !nonEmptyString(selected)) return;
+
+    const db = resolveBattleDb(source);
+    const rulesDb = battleDbToTuxemonBattleDb(db);
+    const current = currentExtensionState(context.ext);
+    const party = [...current.party];
+    const experience = db.rules.experience.groups.default!;
+    const minLevel = db.rules.levelRange[0];
+    const maxLevel = db.rules.levelRange[1];
+
+    for (let index = 0; index < party.length; index++) {
+      const snapshot = party[index]!;
+      if (selected !== null && snapshot.iid !== selected) continue;
+      const oldLevel = snapshot.level;
+      const level = Math.max(minLevel, Math.min(maxLevel, oldLevel + levelsAdded));
+      const base = calculateBaseStats(
+        rulesDb,
+        snapshot.slug,
+        level,
+        snapshot.individualValues,
+        snapshot.tasteCold,
+        snapshot.tasteWarm,
+        snapshot.trainingPoints,
+      );
+      const oldHp = snapshot.currentHp ?? snapshot.base.hp;
+      const currentHp = level > oldLevel ? oldHp + base.hp - snapshot.base.hp : oldHp;
+      const moves = [...snapshot.moves];
+      if (level > oldLevel) {
+        const schedule = db.monsters[snapshot.slug]!.moveset;
+        for (const row of schedule) {
+          if (!(oldLevel < row.level && row.level <= level)) continue;
+          // MonsterMovesHandler.is_eligible resolves the first row for a
+          // duplicate technique, even while update_moves iterates every row.
+          const first = schedule.find((candidate) => candidate.technique === row.technique)!;
+          if (first.method !== "level_up" || first.level > level
+            || (first.evolutionStage !== undefined && first.evolutionStage !== snapshot.stage)
+            || moves.includes(row.technique)) continue;
+          moves.push(row.technique);
+        }
+      }
+      const updated: SpawnedMonsterSnapshot = {
+        ...snapshot,
+        level,
+        base,
+        currentHp,
+        moves,
+        totalExperience: Math.trunc(experience.multiplier * level ** experience.experienceCoefficient),
+      };
+      party[index] = updated;
+      if (level > oldLevel) {
+        const battleMonster = monsterFromSnapshot(rulesDb, index + 1, updated);
+        const members = party.map((member, memberIndex) =>
+          monsterFromSnapshot(rulesDb, memberIndex + 1, member));
+        party[index] = {
+          ...updated,
+          waitingToEvolve: eligibleEvolution(rulesDb, battleMonster, {
+            owned: true,
+            party: members,
+            variables: context.variables,
+            inside: args.inside === true,
+            useItem: false,
+          }) !== null,
+        };
+      }
+    }
+    return { ext: json({ ...current, party }) };
+  };
+}
+
 /** Upstream `get_monster_by_iid` resolves an iid across the player's party,
  *  every on-map NPC party and (for set_monster_attribute) the player's boxes.
  *  iids are unique across storages, so the first hit is the only hit. The
@@ -1866,6 +1956,31 @@ function setMonsterAttributeCommand() {
         (monster) => ({ ...monster, ...patch }),
         { boxes: true },
       )),
+    };
+  };
+}
+
+/** The authored friendship-scroll event uses the no-argument form of
+ *  modify_monster_bond: add one point to every monster in the player's
+ *  current party. Positive changes only need the upstream 0..100 clamp;
+ *  evolution-stage floors apply to decreases, which this corpus never asks
+ *  this command to perform. */
+function modifyMonsterBondCommand() {
+  return (context: ExtensionCommandContext, value: JsonValue) => {
+    const args = argsRecord(value, "tux.modify_monster_bond");
+    if (Object.keys(args).length !== 0) {
+      throw new Error("tux.modify_monster_bond: the imported no-argument form takes no fields");
+    }
+    const current = currentExtensionState(context.ext);
+    if (current.party.length === 0) return;
+    return {
+      ext: json({
+        ...current,
+        party: current.party.map((monster) => ({
+          ...monster,
+          bond: Math.min(100, (monster.bond ?? 25) + 1),
+        })),
+      }),
     };
   };
 }
@@ -2796,7 +2911,9 @@ export function createTuxemonExtensions(
       "tux.get_party_monsters": getPartyMonstersCommand(),
       "tux.clear_npc_party": clearNpcPartyCommand(),
       "tux.clear_npc_parties": clearNpcPartiesCommand(),
+      "tux.set_monster_level": setMonsterLevelCommand(source),
       "tux.set_monster_attribute": setMonsterAttributeCommand(),
+      "tux.modify_monster_bond": modifyMonsterBondCommand(),
       "tux.add_tech": addTechCommand(source),
       "tux.char_plague": charPlagueCommand(),
       "tux.quarantine": quarantineCommand(),

@@ -204,20 +204,20 @@ describe("time/weather coverage dispositions (all maps, G6)", () => {
     expect(setLayer.reasons.native?.[0]).toContain("KV1");
   });
 
-  test("update_time (3 source uses) is Dropped: every source event fails to materialize", () => {
-    // All three `update_time player` events live behind a folded
-    // `current_state TeleporterState` guard (spyder, xero) or in battle_menu,
-    // which has no .tmx and so is never a map. The converter still maps
-    // update_time to a tux.update_time ext command (see the schema test), but
-    // no source event reaches it, so coverage records Dropped, not Placeholder.
+  test("update_time lowers both transfer hooks and leaves only the absent battle menu dropped", () => {
+    // Spyder and Xero share an `is current_state TeleporterState` event. The
+    // kit runs no map fiber during transfer, so each is emitted at the
+    // equivalent destination-map entry point. battle_menu has no .tmx and is
+    // outside the imported title-screen Battle mode.
     const updateTime = row("update_time")!;
     expect(updateTime.total).toBe(3);
+    expect(updateTime.native).toBe(2);
     expect(updateTime.placeholder).toBe(0);
-    expect(updateTime.dropped).toBe(3);
-    const reasons = updateTime.reasons.dropped ?? [];
-    expect(reasons).toContain(
-      "fixed-false guard (is current_state: combat/menu/teleporter states do not run map fibers in the kit) prevents the source event from starting",
+    expect(updateTime.dropped).toBe(1);
+    expect(updateTime.reasons.native).toContain(
+      "TeleporterState update lowered to the destination map's once-per-entry page; tux.update_time reads the saved deterministic calendar",
     );
+    const reasons = updateTime.reasons.dropped ?? [];
     expect(reasons).toContain("source event is not materialized by any map");
   });
 

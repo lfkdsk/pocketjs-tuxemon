@@ -8,8 +8,12 @@ not hand-authored envelopes or toy projects:
 - `main-4019a9b8/` preserves the older published content pair.
 - `main-0fc1580c/` preserves the previous integration's content pair.
 - `main-a19bc37b/` preserves the pre-residual main's content pair.
+- `main-78493afa/` preserves the pre-exact-speed main's content pair.
 - `main-bbeef6b4/` is the main before the remaining outdoor seam lanes were
-  promoted and carries the current mainline tape hash and continuation digest.
+  promoted.
+- `main-3a9e95b2/` is the main before deterministic map-entry time updates and
+  exact integer-frame movement, and carries the current mainline tape hash and
+  continuation digest.
 
 To reproduce a fixture, make a detached checkout of the named game commit with
 recursive submodules, run `bun install --frozen-lockfile`, run the importer
@@ -22,8 +26,9 @@ TUXEMON_SRC=<tuxemon-checkout> bun tools/generate-save-compat-fixture.ts <output
 The tool replays `data/gb6-mainline-journey.json`, writes through
 `takeSaveSnapshot` and `saveSlot` at the first recoverable frame at or after
 frame 20, decodes it with `loadSlot`, and records the next recoverable frame at
-least 240 frames later. `metadata.json` pins source revisions, tape and
-envelope hashes, the save point, and the uninterrupted continuation digest.
+least 240 frames later. `metadata.json` pins source revisions, the full tape
+and portable continuation-prefix hashes, the envelope hash, the save point,
+and the uninterrupted continuation digest.
 
 The compatibility test reads both slot files verbatim through the current
 game's slot API. It replays the immediate predecessor with the still-current

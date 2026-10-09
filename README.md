@@ -113,8 +113,8 @@ summary:
   (960×544), against a 45 ms limit. Cold/hot medians, exact startup counts,
   load ranges, bundle identities and attribution are in
   [the verification guide](docs/verification.md#the-quickjs-benches).
-- **Import coverage:** 89.6% of Tuxemon action uses and 96.5% of condition
-  uses map natively to kit commands; 97.7% / 97.2% are executable (native,
+- **Import coverage:** 96.3% of Tuxemon action uses and 97.2% of condition
+  uses map natively to kit commands; 98.0% / 97.5% are executable (native,
   degraded, or a deliberate placeholder). The full per-type breakdown is in
   [reports/G1-coverage.md](reports/G1-coverage.md).
 - **Day/night:** a saved, rewindable calendar drives Tuxemon's time conditions

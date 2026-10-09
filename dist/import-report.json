@@ -284,12 +284,12 @@
  "schemaErrors": [],
  "audioQoaPending": [],
  "byFate": {
-  "T1-lowered": 2057,
-  "T3-dropped": 12,
-  "T1": 37238,
-  "T4-dropped": 1716,
-  "T2-dropped": 365,
-  "structural": 792
+  "T1-lowered": 2004,
+  "T3-dropped": 10,
+  "T1": 37945,
+  "T4-dropped": 1424,
+  "T2-dropped": 186,
+  "structural": 793
  },
  "rows": [
   {
@@ -461,10 +461,10 @@
    "note": "both authored calls occur while idle, so upstream char_run is an exact no-op"
   },
   {
-   "key": "act:char_speed:T1-lowered",
-   "fate": "T1-lowered",
+   "key": "act:char_speed:T1",
+   "fate": "T1",
    "count": 19,
-   "note": "route-scoped speed lifetime; tiles/sec -> nearest MV exponential grade"
+   "note": "exact tiles/sec on the fixed 60 Hz clock with upstream route-scoped lifetime"
   },
   {
    "key": "act:char_stop:T1",
@@ -569,10 +569,10 @@
    "note": "presentation / meta"
   },
   {
-   "key": "act:get_player_monster(rename):T1-lowered",
-   "fate": "T1-lowered",
+   "key": "act:get_player_monster(rename):T1",
+   "fate": "T1",
    "count": 2,
-   "note": "party picker specialized for the adjacent rename action"
+   "note": "non-cancellable live-party picker followed by the adjacent rename action"
   },
   {
    "key": "act:get_player_monster:T1",
@@ -611,10 +611,10 @@
    "note": "tux.modify_money adds/subtracts a variable amount (int is direct, float is a wallet ratio)"
   },
   {
-   "key": "act:modify_monster_bond:T4-dropped",
-   "fate": "T4-dropped",
+   "key": "act:modify_monster_bond:T1",
+   "fate": "T1",
    "count": 99,
-   "note": "presentation / meta"
+   "note": "authored no-argument form adds one bond point to every player-party monster"
   },
   {
    "key": "act:open_journal:T1-lowered",
@@ -755,10 +755,10 @@
    "note": "KS1 persistent balloon"
   },
   {
-   "key": "act:set_char_attribute:T4-dropped",
-   "fate": "T4-dropped",
+   "key": "act:set_char_attribute:T1",
+   "fate": "T1",
    "count": 6,
-   "note": "presentation / meta"
+   "note": "writes the persistent player gender through gender_choice"
   },
   {
    "key": "act:set_economy:T1",
@@ -809,10 +809,10 @@
    "note": "tux.set_monster_health updates persistent party HP"
   },
   {
-   "key": "act:set_monster_level:T4-dropped",
-   "fate": "T4-dropped",
+   "key": "act:set_monster_level:T1",
+   "fate": "T1",
    "count": 3,
-   "note": "presentation / meta"
+   "note": "tux.set_monster_level applies the exact level floor, stats, HP deficit, scheduled moves, and evolution readiness"
   },
   {
    "key": "act:set_monster_status:T1",
@@ -913,7 +913,7 @@
   {
    "key": "act:translated_dialog:T1",
    "fate": "T1",
-   "count": 2269,
+   "count": 2270,
    "note": "text boxes from the active .po catalog with native position and alignment"
   },
   {
@@ -931,14 +931,14 @@
   {
    "key": "act:translated_dialog_choice:T1",
    "fate": "T1",
-   "count": 173,
+   "count": 174,
    "note": "choices -> enum code"
   },
   {
-   "key": "act:tune_radio:T4-dropped",
-   "fate": "T4-dropped",
+   "key": "act:tune_radio:T1",
+   "fate": "T1",
    "count": 2,
-   "note": "presentation / meta"
+   "note": "imported FM tuner with exact band, signal, map/time broadcast selection, touch controls, and blocking scene lifetime"
   },
   {
    "key": "act:unlock_controls:T1",
@@ -951,6 +951,12 @@
    "fate": "T1",
    "count": 32,
    "note": "KV1 expands the source surface label to exact per-map passage overrides"
+  },
+  {
+   "key": "act:update_time:T1",
+   "fate": "T1",
+   "count": 179,
+   "note": "TeleporterState update lowered to the destination map's once-per-entry page; tux.update_time reads the saved deterministic calendar"
   },
   {
    "key": "act:variable_math:T1",
@@ -985,7 +991,7 @@
   {
    "key": "behav:talk:structural",
    "fate": "structural",
-   "count": 792,
+   "count": 793,
    "note": "talk -> NPC action page"
   },
   {
@@ -1073,10 +1079,10 @@
    "note": "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
   },
   {
-   "key": "cond:is char_gender:T3-dropped",
-   "fate": "T3-dropped",
+   "key": "cond:is char_gender:T1",
+   "fate": "T1",
    "count": 1,
-   "note": "monster/party/meta state unknown to P1: fixed answer"
+   "note": "live gender_choice is the imported player's persistent gender"
   },
   {
    "key": "cond:is char_healed:T1",
@@ -1147,13 +1153,13 @@
   {
    "key": "cond:is current_state:T1",
    "fate": "T1",
-   "count": 797,
+   "count": 976,
    "note": "WorldState arm -> derived worldIdle condition; scene/menu alternatives freeze map fibers"
   },
   {
    "key": "cond:is current_state:T2-dropped",
    "fate": "T2-dropped",
-   "count": 358,
+   "count": 179,
    "note": "combat/menu/teleporter states do not run map fibers in the kit; folded to their unreachable result"
   },
   {
@@ -1295,10 +1301,10 @@
    "note": "local.npc.<slug> presence resets on map entry"
   },
   {
-   "key": "cond:not char_gender:T3-dropped",
-   "fate": "T3-dropped",
+   "key": "cond:not char_gender:T1",
+   "fate": "T1",
    "count": 1,
-   "note": "monster/party/meta state unknown to P1: fixed answer"
+   "note": "live gender_choice is the imported player's persistent gender"
   },
   {
    "key": "cond:not char_healed:T1",
@@ -1405,14 +1411,8 @@
   {
    "key": "cond:not tile_property_updated:T1",
    "fate": "T1",
-   "count": 166,
+   "count": 198,
    "note": "empty source label keeps all([]) truth semantics"
-  },
-  {
-   "key": "cond:not tile_property_updated:T1-lowered",
-   "fate": "T1-lowered",
-   "count": 32,
-   "note": "KV1 representative cell under the corpus's atomic whole-label invariant"
   },
   {
    "key": "cond:not time_is:T1",
@@ -1435,7 +1435,7 @@
   {
    "key": "trigger:action:facingTile(area):T1",
    "fate": "T1",
-   "count": 359,
+   "count": 361,
    "note": "K1 rectangular event area (overlaps partitioned after guard sampling)"
   },
   {
@@ -1471,14 +1471,8 @@
   {
    "key": "trigger:never-true guard:T4-dropped",
    "fate": "T4-dropped",
-   "count": 802,
+   "count": 622,
    "note": "fixed-false guard (is current_state: combat/menu/teleporter states do not run map fibers in the kit) prevents the source event from starting"
-  },
-  {
-   "key": "trigger:no-op after conversion:T4-dropped",
-   "fate": "T4-dropped",
-   "count": 2,
-   "note": "every action was removed, so no project event was emitted"
   },
   {
    "key": "trigger:orphan input lock repair:T1-lowered",
@@ -1519,7 +1513,7 @@
   {
    "key": "trigger:talk:T1",
    "fate": "T1",
-   "count": 792,
+   "count": 793,
    "note": "NPC event action page (if-chain over talk guards)"
   },
   {
@@ -1539,6 +1533,12 @@
    "fate": "T1",
    "count": 454,
    "note": "K1 rectangular event area (overlaps partitioned after guard sampling)"
+  },
+  {
+   "key": "trigger:transfer update_time:T1",
+   "fate": "T1",
+   "count": 179,
+   "note": "TeleporterState update lowered to the destination map's once-per-entry page"
   }
  ],
  "transferRepairs": [
@@ -4252,15 +4252,15 @@
    "summary": {
     "types": 98,
     "uses": 13617,
-    "native": 13074,
-    "degraded": 263,
+    "native": 13108,
+    "degraded": 242,
     "placeholder": 0,
-    "dropped": 280,
-    "nativePercent": 96,
-    "executablePercent": 97.9,
+    "dropped": 267,
+    "nativePercent": 96.3,
+    "executablePercent": 98,
     "tier1": {
-     "uses": 6423,
-     "percent": 47.17,
+     "uses": 6425,
+     "percent": 47.18,
      "requiredUses": 6246,
      "requiredPercent": 45.9,
      "meetsBaseline": true
@@ -4522,13 +4522,13 @@
     {
      "type": "char_speed",
      "total": 19,
-     "native": 0,
-     "degraded": 19,
+     "native": 19,
+     "degraded": 0,
      "placeholder": 0,
      "dropped": 0,
      "reasons": {
-      "degraded": [
-       "route-scoped speed lifetime; tiles/sec -> nearest MV exponential grade"
+      "native": [
+       "exact tiles/sec on the fixed 60 Hz clock with upstream route-scoped lifetime"
       ]
      }
     },
@@ -4750,15 +4750,13 @@
     {
      "type": "get_player_monster",
      "total": 17,
-     "native": 15,
-     "degraded": 2,
+     "native": 17,
+     "degraded": 0,
      "placeholder": 0,
      "dropped": 0,
      "reasons": {
-      "degraded": [
-       "party picker specialized for the adjacent rename action"
-      ],
       "native": [
+       "non-cancellable live-party picker followed by the adjacent rename action",
        "KC1 extChoice over the live party (empty party -> no_options; cancel -> no_choice)"
       ]
      }
@@ -4832,13 +4830,13 @@
     {
      "type": "modify_monster_bond",
      "total": 1,
-     "native": 0,
+     "native": 1,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 1,
+     "dropped": 0,
      "reasons": {
-      "dropped": [
-       "presentation / meta"
+      "native": [
+       "authored no-argument form adds one bond point to every player-party monster"
       ]
      }
     },
@@ -5206,13 +5204,13 @@
     {
      "type": "set_char_attribute",
      "total": 3,
-     "native": 0,
+     "native": 3,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 3,
+     "dropped": 0,
      "reasons": {
-      "dropped": [
-       "presentation / meta"
+      "native": [
+       "writes the persistent player gender through gender_choice"
       ]
      }
     },
@@ -5327,13 +5325,13 @@
     {
      "type": "set_monster_level",
      "total": 3,
-     "native": 0,
+     "native": 3,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 3,
+     "dropped": 0,
      "reasons": {
-      "dropped": [
-       "presentation / meta"
+      "native": [
+       "tux.set_monster_level applies the exact level floor, stats, HP deficit, scheduled moves, and evolution readiness"
       ]
      }
     },
@@ -5542,17 +5540,16 @@
     {
      "type": "translated_dialog",
      "total": 2068,
-     "native": 2062,
+     "native": 2063,
      "degraded": 1,
      "placeholder": 0,
-     "dropped": 5,
+     "dropped": 4,
      "reasons": {
       "native": [
        "text boxes from the active .po catalog with native position and alignment",
        "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
       ],
       "dropped": [
-       "fixed-false guard (is char_gender: no imported runtime state or predicate) prevents the source event from starting",
        "fixed-false guard (is button_pressed: source button 'K_RETURN' is not a supported Tuxemon intention) prevents the source event from starting",
        "fixed-false guard (is current_state: combat/menu/teleporter states do not run map fibers in the kit) prevents the source event from starting"
       ],
@@ -5564,17 +5561,14 @@
     {
      "type": "translated_dialog_choice",
      "total": 149,
-     "native": 138,
+     "native": 139,
      "degraded": 10,
      "placeholder": 0,
-     "dropped": 1,
+     "dropped": 0,
      "reasons": {
       "native": [
        "choices -> enum code",
        "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
-      ],
-      "dropped": [
-       "fixed-false guard (is char_gender: no imported runtime state or predicate) prevents the source event from starting"
       ],
       "degraded": [
        "nested choice pages retain every option"
@@ -5584,13 +5578,13 @@
     {
      "type": "tune_radio",
      "total": 2,
-     "native": 0,
+     "native": 2,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 2,
+     "dropped": 0,
      "reasons": {
-      "dropped": [
-       "every action was removed, so no project event was emitted"
+      "native": [
+       "imported FM tuner with exact band, signal, map/time broadcast selection, touch controls, and blocking scene lifetime"
       ]
      }
     },
@@ -5623,14 +5617,16 @@
     {
      "type": "update_time",
      "total": 3,
-     "native": 0,
+     "native": 2,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 3,
+     "dropped": 1,
      "reasons": {
       "dropped": [
-       "source event is not materialized by any map",
-       "fixed-false guard (is current_state: combat/menu/teleporter states do not run map fibers in the kit) prevents the source event from starting"
+       "source event is not materialized by any map"
+      ],
+      "native": [
+       "TeleporterState update lowered to the destination map's once-per-entry page; tux.update_time reads the saved deterministic calendar"
       ]
      }
     },
@@ -5686,15 +5682,15 @@
    "summary": {
     "types": 64,
     "uses": 8663,
-    "native": 8411,
-    "degraded": 23,
+    "native": 8423,
+    "degraded": 21,
     "placeholder": 0,
-    "dropped": 229,
-    "nativePercent": 97.1,
-    "executablePercent": 97.4,
+    "dropped": 219,
+    "nativePercent": 97.2,
+    "executablePercent": 97.5,
     "tier1": {
-     "uses": 4766,
-     "percent": 55.02,
+     "uses": 4772,
+     "percent": 55.08,
      "requiredUses": 4591,
      "requiredPercent": 53,
      "meetsBaseline": true
@@ -5746,17 +5742,16 @@
     {
      "type": "is button_pressed",
      "total": 419,
-     "native": 416,
+     "native": 418,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 3,
+     "dropped": 1,
      "reasons": {
       "native": [
        "consumed by trigger selection",
        "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
       ],
       "dropped": [
-       "every action was removed, so no project event was emitted",
        "fixed-false guard (is button_pressed: source button 'K_RETURN' is not a supported Tuxemon intention) prevents the source event from starting"
       ]
      }
@@ -5833,16 +5828,13 @@
     {
      "type": "is char_facing_tile",
      "total": 344,
-     "native": 337,
+     "native": 339,
      "degraded": 5,
      "placeholder": 0,
-     "dropped": 2,
+     "dropped": 0,
      "reasons": {
       "native": [
        "consumed by trigger selection"
-      ],
-      "dropped": [
-       "every action was removed, so no project event was emitted"
       ],
       "degraded": [
        "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
@@ -5852,13 +5844,13 @@
     {
      "type": "is char_gender",
      "total": 1,
-     "native": 0,
+     "native": 1,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 1,
+     "dropped": 0,
      "reasons": {
-      "dropped": [
-       "fixed-false guard (is char_gender: no imported runtime state or predicate) prevents the source event from starting"
+      "native": [
+       "live gender_choice is the imported player's persistent gender"
       ]
      }
     },
@@ -6000,14 +5992,15 @@
     {
      "type": "is current_state",
      "total": 78,
-     "native": 70,
+     "native": 72,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 8,
+     "dropped": 6,
      "reasons": {
       "native": [
        "WorldState arm -> derived worldIdle condition; scene/menu alternatives freeze map fibers",
-       "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
+       "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow",
+       "TeleporterState update lowered to the destination map's once-per-entry page"
       ],
       "dropped": [
        "source event is not materialized by any map",
@@ -6320,13 +6313,13 @@
     {
      "type": "not char_gender",
      "total": 1,
-     "native": 0,
+     "native": 1,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 1,
+     "dropped": 0,
      "reasons": {
-      "dropped": [
-       "monster/party/meta state unknown to P1: fixed answer"
+      "native": [
+       "live gender_choice is the imported player's persistent gender"
       ]
      }
     },
@@ -6546,13 +6539,13 @@
     {
      "type": "not tile_property_updated",
      "total": 2,
-     "native": 0,
-     "degraded": 2,
+     "native": 2,
+     "degraded": 0,
      "placeholder": 0,
      "dropped": 0,
      "reasons": {
-      "degraded": [
-       "KV1 representative cell under the corpus's atomic whole-label invariant"
+      "native": [
+       "representative cell is exact under the proven atomic whole-label invariant"
       ]
      }
     },
@@ -6585,16 +6578,15 @@
     {
      "type": "not variable_set",
      "total": 671,
-     "native": 663,
+     "native": 665,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 8,
+     "dropped": 6,
      "reasons": {
       "native": [
        "page/if variable compare on the enum code"
       ],
       "dropped": [
-       "fixed-false guard (is char_gender: no imported runtime state or predicate) prevents the source event from starting",
        "fixed-false guard (is button_pressed: source button 'K_RETURN' is not a supported Tuxemon intention) prevents the source event from starting",
        "source event is not materialized by any map"
       ]
@@ -6708,10 +6700,10 @@
   },
   "all": {
    "maps": 263,
-   "events": 8225,
+   "events": 8227,
    "previewed": 1158,
    "fallback": 0,
-   "hidden": 7062,
+   "hidden": 7064,
    "rejected": 5,
    "reasons": {
     "duplicate-id": 0,
@@ -6730,10 +6722,10 @@
   },
   "mainline": {
    "maps": 99,
-   "events": 5252,
+   "events": 5254,
    "previewed": 464,
    "fallback": 0,
-   "hidden": 4788,
+   "hidden": 4790,
    "rejected": 0,
    "reasons": {
     "duplicate-id": 0,
@@ -7558,10 +7550,10 @@
    },
    {
     "mapId": "spyder_leather_house1",
-    "events": 21,
+    "events": 22,
     "previewed": 2,
     "fallback": 0,
-    "hidden": 19,
+    "hidden": 20,
     "rejected": 0,
     "reasons": {}
    },

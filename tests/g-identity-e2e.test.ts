@@ -17,6 +17,14 @@ import {
   TUXEMON_SCENES,
   TUXEMON_SESSION_OPTIONS,
 } from "../battle/game.ts";
+import {
+  initialTuxemonExtensionState,
+  packTuxemonExtensionState,
+  tuxemonExtensionState,
+} from "../battle/extension.ts";
+import { battleDbToTuxemonBattleDb } from "../battle/from-battle-db.ts";
+import { spawnMonster } from "../battle/spawn.ts";
+import { validateBattleDb } from "../importer/battle-schema.ts";
 import { BTN_BITS } from "../vendor/pocket-rpgkit/src/engine/camera.ts";
 import { createSwitchState } from "../vendor/pocket-rpgkit/src/engine/interpreter.ts";
 import type { NameInputState } from "../vendor/pocket-rpgkit/src/engine/name-input.ts";
@@ -36,6 +44,8 @@ import type {
 } from "../vendor/pocket-rpgkit/src/engine/types.ts";
 
 const ROOT = resolve(import.meta.dir, "..");
+const DB = validateBattleDb(JSON.parse(readFileSync(join(ROOT, "data/battle-db.json"), "utf8")));
+const RULES_DB = battleDbToTuxemonBattleDb(DB);
 const BTN_CONFIRM = 0x2000;
 const BTN_CANCEL = 0x4000;
 
@@ -153,6 +163,51 @@ function goldenPixel(
 }
 
 describe("G identity imported runtime", () => {
+  test("real healing-center monster rename is non-cancellable and writes the selected iid", () => {
+    const project = healingCenterRenameProject();
+    const rng = { rng: 73, rngDraws: 0 };
+    const first = spawnMonster(DB, RULES_DB, rng, "rockitten", 5, { iid: "rename-first" });
+    const second = spawnMonster(DB, RULES_DB, rng, "budaye", 5, { iid: "rename-second" });
+    const ext = packTuxemonExtensionState({
+      ...initialTuxemonExtensionState(),
+      party: [first, second],
+    });
+    const session = createSession(project, 60, TUXEMON_SESSION_OPTIONS);
+    let state = startSession(project, session, createSwitchState({
+      variables: { "v.happy": 2 },
+    }), ext);
+    const step = (input: SessionInput = { buttons: 0 }): void => {
+      state = stepSession(session, state, input);
+    };
+    for (let frame = 0; frame < 30 && state.scene === null; frame++) step();
+    expect(state.scene).toMatchObject({ kind: "scene", id: "tux.monsterPicker" });
+
+    step({ buttons: BTN_CANCEL, cancelEdge: true });
+    expect(state.scene).toMatchObject({ kind: "scene", id: "tux.monsterPicker" });
+    expect((state.scene!.state as unknown as { phase: string }).phase).toBe("choose");
+    step();
+    step({ buttons: BTN_BITS.DOWN, downEdge: true });
+    step();
+    step({ buttons: BTN_CONFIRM, confirmEdge: true });
+    const nameInputOpen = (): boolean =>
+      state.scene?.kind === "scene" && state.scene.id === "rpgkit.nameInput";
+    for (let frame = 0; frame < 20 && !nameInputOpen(); frame++) step();
+    expect(state.sw.variables["v.rename"]).toBe("rename-second");
+    expect(state.scene).toMatchObject({ kind: "scene", id: "rpgkit.nameInput" });
+
+    const rename = state.scene!.state as unknown as NameInputState;
+    rename.buffer = "Nova";
+    rename.cursor = rename.charset.length + 1;
+    step({ buttons: BTN_CONFIRM, confirmEdge: true });
+    for (let frame = 0; frame < 30 && state.interp.modal === null; frame++) step();
+    const renamed = tuxemonExtensionState(state.ext, DB);
+    expect(renamed.party.map((monster) => [monster.iid, monster.nickname])).toEqual([
+      ["rename-first", undefined],
+      ["rename-second", "Nova"],
+    ]);
+    expect(state.interp.modal).toMatchObject({ kind: "text" });
+  });
+
   test("real healing_center rename_player selects numeric gender pools and commits RANDOM", () => {
     const project = healingCenterRenameProject();
     const cases = [

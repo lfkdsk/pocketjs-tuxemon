@@ -59,6 +59,11 @@ import {
   type WeatherEntry,
 } from "./time-weather.ts";
 import { audioAssetIds, audioId, audioTable } from "./audio.ts";
+import {
+  loadRadioSource,
+  type RadioScalar,
+  type RadioStationSource,
+} from "./radio.ts";
 import { pyFloatFromText } from "../battle/text-variables.ts";
 import { validateSchema } from "../vendor/pocket-rpgkit/src/engine/schema-validate.ts";
 import type {
@@ -83,6 +88,7 @@ import type {
   SpriteDef,
   TextBoxLayout,
   TextBoxPosition,
+  VariableValue,
   WanderBounds,
   WorldLayout,
   WorldOpening,
@@ -304,6 +310,7 @@ function l10nReportSection() {
   return { ...gaps, missingKeyCategories: categorizeMissingKeys(gaps.missingKeys) };
 }
 const allMaps = new Map(loadAllMaps().map((m) => [m.slug, m]));
+const radioSource = loadRadioSource(TUXEMON_SRC);
 const FAINT_NOTICE_SWITCH = "sys.faint_notice";
 // GM1 fix 1: set by fadeout_music, cleared by play_music. Upstream clears
 // current_song the moment fadeout starts, so music_playing is false while
@@ -1345,6 +1352,31 @@ function clauses(
         return { k: "var", id: varId(k), op: not ? "!=" : "==", value: code(k, v) } as Clause;
       });
     }
+    case "char_gender": {
+      const character = a[0];
+      const gender = a[1];
+      const genderValue = gender === "male"
+        ? "gender_male"
+        : gender === "female"
+          ? "gender_female"
+          : gender === "nonbinary" || gender === "neuter"
+            ? "gender_nonbinary"
+            : null;
+      if (character !== "player" || genderValue === null) {
+        const reason = character !== "player"
+          ? "only the imported player's persistent gender is modelled"
+          : `unknown gender '${gender ?? ""}'`;
+        noteCondition(c, `${c.op} char_gender`, "T3-dropped", reason);
+        return K(false, `${c.op} char_gender: ${reason}`);
+      }
+      noteCondition(c, `${c.op} char_gender`, "T1", "live gender_choice is the imported player's persistent gender");
+      return [{
+        k: "var",
+        id: varId("gender_choice"),
+        op: not ? "!=" : "==",
+        value: code("gender_choice", genderValue),
+      }];
+    }
     case "char_exists":
       noteCondition(
         c,
@@ -1438,8 +1470,8 @@ function clauses(
       noteCondition(
         c,
         `${c.op} tile_property_updated`,
-        "T1-lowered",
-        "KV1 representative cell under the corpus's atomic whole-label invariant",
+        "T1",
+        "representative cell is exact under the proven atomic whole-label invariant",
       );
       return [{
         k: "native",
@@ -1967,8 +1999,8 @@ export function lowerRenamePlayerAction(
 }
 
 /** Tuxemon moverate (tiles/sec, walkrate 3.75, run 7.35) -> the kit's MV
- *  exponential speed grade 1..6 (grade 5 = 8 ticks/tile at 60 Hz). The
- *  grade scale is 2x per step, so the nearest grade is picked in log space. */
+ *  exponential compatibility grade 1..6. Exact route speed is carried in
+ *  tilesPerSecond; the grade remains required for older consumers. */
 function speedGrade(rate: number): MoveSpeed {
   const grade = Math.round(5 + Math.log2(rate / 7.5));
   return Math.max(1, Math.min(6, grade)) as MoveSpeed;
@@ -2195,6 +2227,105 @@ function itemShop(economy: EconomyRow): Command {
 }
 
 const poText = (key: string, fallback?: string): string | undefined => po.get(key)?.replaceAll("\\n", " ") ?? fallback;
+
+const RADIO_MIN_FREQUENCY = 88;
+const RADIO_MAX_FREQUENCY = 108;
+const RADIO_TUNING_STEP = 0.1;
+const RADIO_TUNING_TOLERANCE = 0.2;
+const RADIO_STRONG_SIGNAL = 80;
+const RADIO_FALLBACK_STATION = "station_scrambled_frequency";
+
+function radioVariableValue(name: string, value: RadioScalar): VariableValue {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    return enumTable.has(name) ? code(name, value) : value;
+  }
+  // The kit variable bank is string/number. The pinned catalog uses only
+  // string stage_of_day predicates and no set_variables, so fail closed if a
+  // future source introduces a Python bool/None that cannot compare exactly.
+  throw new Error(`radio variable ${name} uses unsupported ${value === null ? "null" : typeof value}`);
+}
+
+function radioVariables(values: Readonly<Record<string, RadioScalar>>): Record<string, VariableValue> {
+  return Object.fromEntries(Object.entries(values).map(([name, value]) => [
+    varId(name),
+    radioVariableValue(name, value),
+  ]));
+}
+
+function radioDialogue(keys: readonly string[], m: TuxMap): string[] {
+  return keys.map((key) => {
+    dialogLookupKeys.add(key);
+    return format(po.get(key) ?? key, m).replaceAll("\\n", "\n");
+  });
+}
+
+function radioStation(station: Readonly<RadioStationSource>, m: TuxMap): JsonValue {
+  return {
+    slug: station.slug,
+    label: poText(station.slug, station.slug)!,
+    ...(station.frequency === undefined ? {} : { frequency: station.frequency }),
+    defaultDialogue: radioDialogue(station.defaultDialogueKeys, m),
+    broadcasts: station.conditionalBroadcasts.map((broadcast) => ({
+      conditions: {
+        mapSlugs: broadcast.conditions.mapSlugs,
+        variables: radioVariables(broadcast.conditions.variables),
+      },
+      dialogue: radioDialogue(broadcast.dialogueKeys, m),
+      ...(broadcast.setVariables === undefined
+        ? {}
+        : { setVariables: radioVariables(broadcast.setVariables) }),
+    })),
+  };
+}
+
+/** Compile only the stations reachable from this map, but preserve the
+ * radio_data.yaml order used by upstream's equal-distance tie-break. */
+function radioScene(m: TuxMap, initialFrequency: number): Command {
+  const available = new Set([
+    ...(radioSource.mapStations[m.slug] ?? []),
+    ...(radioSource.mapStations.all_maps ?? []),
+  ]);
+  const stations = radioSource.stationOrder
+    .filter((slug) => available.has(slug))
+    .map((slug) => radioStation(radioSource.stations[slug]!, m));
+  if (!stations.some((value) =>
+    typeof value === "object" && value !== null && !Array.isArray(value) && value.slug === RADIO_FALLBACK_STATION
+  )) {
+    throw new Error(`radio map ${m.slug} has no ${RADIO_FALLBACK_STATION}`);
+  }
+  const ui = IMPORT_UI[activeLang];
+  return {
+    op: "scene",
+    id: "tux.radio",
+    args: {
+      map: m.slug,
+      initialFrequency,
+      minFrequency: RADIO_MIN_FREQUENCY,
+      maxFrequency: RADIO_MAX_FREQUENCY,
+      step: RADIO_TUNING_STEP,
+      tolerance: RADIO_TUNING_TOLERANCE,
+      strongThreshold: RADIO_STRONG_SIGNAL,
+      fallbackStation: RADIO_FALLBACK_STATION,
+      stations,
+      labels: {
+        title: poText("app_radio_tuner", "Radio Tuner")!,
+        tuner: poText("radio_tuner", "Tuner")!,
+        tuningStatic: poText("radio_tuning_static", "The signal is full of static...")!,
+        tuningStation: ui.radioTuning,
+        hint: poText("radio_tuner_hint", "Slide to tune into stations")!,
+        signal: poText("radio_signal_strength", "Signal Strength")!,
+        play: poText("radio_play_button", "Play Radio")!,
+        back: ui.radioBack,
+        next: ui.radioNext,
+        strong: poText("signal_strong", "Strong")!,
+        moderate: poText("signal_moderate", "Moderate")!,
+        weak: poText("signal_weak", "Weak")!,
+        none: poText("signal_none", "No Signal")!,
+      },
+    },
+  } as Command;
+}
 
 function labelArgs(entries: Record<string, string | undefined>): Record<string, JsonValue> {
   const out: Record<string, JsonValue> = {};
@@ -2530,6 +2661,27 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
           else out.push({ op: "variable", id: varId(k), set: { op: "set", value: code(k, value) } });
         }
         if (Object.keys(texts).length) out.push({ op: "ext", call: "tux.set_variable_text", args: { writes: texts } });
+        break;
+      }
+      case "set_char_attribute": {
+        const [character, attribute, raw] = g;
+        const genderValue = raw === "male"
+          ? "gender_male"
+          : raw === "female"
+            ? "gender_female"
+            : raw === "nonbinary" || raw === "neuter"
+              ? "gender_nonbinary"
+              : null;
+        if (character === "player" && attribute === "gender" && genderValue !== null) {
+          noteAction(a, a.type, "T1", "writes the persistent player gender through gender_choice");
+          out.push({
+            op: "variable",
+            id: varId("gender_choice"),
+            set: { op: "set", value: code("gender_choice", genderValue) },
+          });
+        } else {
+          noteAction(a, a.type, "T3-dropped", "only the imported player's gender attribute is modelled");
+        }
         break;
       }
       case "clear_variable":
@@ -3329,8 +3481,12 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
           noteAction(a, "char_speed(invalid)", "T2-dropped", `moverate ${g[1]} is outside the upstream (0, 20) range`);
           break;
         }
-        noteAction(a, a.type, "T1-lowered", "route-scoped speed lifetime; tiles/sec -> nearest MV exponential grade");
-        out.push(command({ op: "moveControl", target: charTarget(g[0]!, isSelf(g[0])), control: { kind: "routeSpeed", value: speedGrade(rate) } }));
+        noteAction(a, a.type, "T1", "exact tiles/sec on the fixed 60 Hz clock with upstream route-scoped lifetime");
+        out.push(command({
+          op: "moveControl",
+          target: charTarget(g[0]!, isSelf(g[0])),
+          control: { kind: "routeSpeed", value: speedGrade(rate), tilesPerSecond: rate },
+        }));
         break;
       }
       case "char_run":
@@ -3530,21 +3686,53 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
           });
         } else noteAction(a, a.type, "T3-dropped", "monster subsystem or required arguments unavailable");
         break;
+      case "modify_monster_bond":
+        if (ctx.options.battle && g.every((value) => value === "")) {
+          noteAction(a, a.type, "T1", "authored no-argument form adds one bond point to every player-party monster");
+          out.push({ op: "ext", call: "tux.modify_monster_bond", args: {} });
+        } else {
+          noteAction(a, a.type, "T3-dropped", ctx.options.battle
+            ? "variable, fractional and random-range forms are absent from the imported corpus"
+            : "monster subsystem (P2)");
+        }
+        break;
       case "open_journal":
         if (ctx.options.battle && g[0]) {
           noteAction(a, a.type, "T1-lowered", "read-only tux.journal scene with compact imported details");
           out.push({ op: "scene", id: "tux.journal", args: { monster: g[0], reveal: true } });
         } else noteAction(a, a.type, "T3-dropped", "monster subsystem or target unavailable");
         break;
+      case "tune_radio": {
+        const frequency = g[1] === undefined || g[1] === "" ? NaN : Number(g[1]);
+        if (
+          ctx.options.battle &&
+          g[0] === "player" &&
+          Number.isFinite(frequency) &&
+          frequency >= RADIO_MIN_FREQUENCY &&
+          frequency <= RADIO_MAX_FREQUENCY
+        ) {
+          noteAction(a, a.type, "T1", "imported FM tuner with exact band, signal, map/time broadcast selection, touch controls, and blocking scene lifetime");
+          out.push(radioScene(ctx.m, frequency));
+        } else {
+          noteAction(a, a.type, "T3-dropped", ctx.options.battle
+            ? "only the authored player tuner form with an in-band frequency is available"
+            : "game scene runtime unavailable");
+        }
+        break;
+      }
       case "get_player_monster": {
         const rename = acts[i + 1];
         if (ctx.options.battle && g[0] && rename?.type === "rename_monster" && rename.args[0] === g[0]) {
           const variable = varId(g[0]);
-          noteAction(a, "get_player_monster(rename)", "T1-lowered", "party picker specialized for the adjacent rename action");
-          out.push({
+          noteAction(a, "get_player_monster(rename)", "T1", "non-cancellable live-party picker followed by the adjacent rename action");
+          const picker = command({
             op: "scene",
             id: "tux.monsterPicker",
-            args: { variable, title: po.get("menu_rename") ?? "Choose a Tuxemon" },
+            args: {
+              variable,
+              title: po.get("menu_rename") ?? "Choose a Tuxemon",
+              cancellable: false,
+            },
             onDone: [
               {
                 op: "ext",
@@ -3569,6 +3757,19 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
                 args: { variable, nameVariable: MONSTER_RENAME_NAME_VARIABLE },
               },
             ],
+          });
+          // Upstream writes no_options without opening a menu when the party
+          // is empty. Keep the rename completion branch wholly out of that
+          // path so a stale iid/name variable cannot open the name editor.
+          out.push({
+            op: "if",
+            if: { kind: "ext", call: "tux.party_match", args: { filters: [] } },
+            then: [picker],
+            else: [{
+              op: "variable",
+              id: variable,
+              set: { op: "set", value: code(g[0], "no_options") },
+            }],
           });
         } else if (ctx.options.extChoice && g[0]) {
           const name = g[0]!;
@@ -3606,6 +3807,31 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
           noteAction(a, a.type, "T3-dropped", "requires an adjacent get_player_monster picker");
         }
         break;
+      case "set_monster_level": {
+        if (!ctx.options.battle) {
+          noteAction(a, a.type, "T3-dropped", "monster/combat subsystem (P2)");
+          break;
+        }
+        const variable = g[0] || undefined;
+        const levelsAdded = g[1] === undefined || g[1] === "" ? 1 : Number(g[1]);
+        if (!Number.isSafeInteger(levelsAdded) || levelsAdded < 0 || parseFlag(g[2])) {
+          noteAction(a, a.type, "T3-dropped", parseFlag(g[2])
+            ? "the blocking level-up summary form is not used by the pinned maps"
+            : "negative or invalid scripted level delta is not used by the pinned maps");
+          break;
+        }
+        noteAction(a, a.type, "T1", "tux.set_monster_level applies the exact level floor, stats, HP deficit, scheduled moves, and evolution readiness");
+        out.push({
+          op: "ext",
+          call: "tux.set_monster_level",
+          args: {
+            ...(variable ? { variable: varId(variable) } : {}),
+            levelsAdded,
+            inside: ctx.m.props.inside === "true",
+          },
+        });
+        break;
+      }
       case "set_monster_attribute": {
         if (!ctx.options.battle) {
           noteAction(a, a.type, "T3-dropped", "monster/combat subsystem (P2)");
@@ -3982,6 +4208,17 @@ const SPYDER_SURF_EVENTS = new Set([
 const isSpyderSurfEvent = (event: TuxEvent): boolean =>
   event.source === "spyder.yaml" && SPYDER_SURF_EVENTS.has(event.name);
 
+/** Upstream evaluates this shared scenario event while TeleporterState owns
+ * the transition. The kit has no map fiber during its transfer phase, so the
+ * equivalent observable point is the destination map's once-per-entry page. */
+const isTransferUpdateTimeEvent = (event: TuxEvent): boolean =>
+  event.kind === "event" &&
+  (event.source === "spyder.yaml" || event.source === "xero.yaml") &&
+  event.acts.length === 1 && event.acts[0]?.type === "update_time" &&
+  event.conds.some((condition) =>
+    condition.op === "is" && condition.type === "current_state" &&
+    condition.args[0]?.split(":").includes("TeleporterState"));
+
 /** Retarget a promoted portal's top-level transfer per source cell: a
  * seamless lane lands on its continuous neighbour cell; any other cell keeps
  * the authored fixed landing and loses the handoff marker, so it runs the
@@ -4022,6 +4259,7 @@ function convertMap(
   const npcs = new Map<string, NpcAgg>();
   const hasSpyderSurfScenario = m.props.scenario === "spyder" &&
     m.events.some(isSpyderSurfEvent);
+  const hasTransferUpdateTime = options.battle && m.events.some(isTransferUpdateTimeEvent);
   const npcOf = (s: string, x = 0, y = 0): NpcAgg => npcs.get(s) ?? npcs.set(s, { slug: s, x, y, wander: false, talks: [] }).get(s)!;
   let n = 0;
   const nextId = (name: string) => `e${String(++n).padStart(3, "0")}_${slug(name)}`;
@@ -4095,6 +4333,17 @@ function convertMap(
           noteCondition(condition, `${condition.op} ${condition.type}`, exact ? "T1" : "T1-lowered", reason);
         }
         note("trigger", "surf(boundary lowering)", "T1-lowered", reason);
+        continue;
+      }
+      if (options.battle && isTransferUpdateTimeEvent(e)) {
+        const reason = "TeleporterState update lowered to the destination map's once-per-entry page";
+        for (const action of e.acts) {
+          noteAction(action, action.type, "T1", `${reason}; tux.update_time reads the saved deterministic calendar`);
+        }
+        for (const condition of e.conds) {
+          noteCondition(condition, `${condition.op} ${condition.type}`, "T1", reason);
+        }
+        note("trigger", "transfer update_time", "T1", reason);
         continue;
       }
       if (!e.conds.some((condition) => !condition.synthetic) && !e.behavs.length) {
@@ -4807,6 +5056,11 @@ function convertMap(
         commands: [
           clearNpcParties(),
           resetLayerVariant(),
+          ...(hasTransferUpdateTime ? [{
+            op: "ext" as const,
+            call: "tux.update_time",
+            args: { character: "player" },
+          }] : []),
           { op: "variable", id: NPC_PARTIES_CLEARED_VARIABLE, set: { op: "set", value: 1 } },
         ],
       }],

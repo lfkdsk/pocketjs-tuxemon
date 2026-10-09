@@ -16,6 +16,7 @@ import {
 } from "../battle/runtime.ts";
 import { battleDbToTuxemonBattleDb } from "../battle/from-battle-db.ts";
 import { spawnMonster } from "../battle/spawn.ts";
+import { calculateBaseStats } from "../battle/stats.ts";
 import type { SpawnedMonsterSnapshot } from "../battle/types.ts";
 import { runPolicyBattle } from "../battle/tuxemon.ts";
 import { buildProject, G6_IMPORT_OPTIONS } from "../importer/project.ts";
@@ -105,6 +106,116 @@ describe("COV-B set_monster_attribute", () => {
     const commands2 = addPlayerMonster([]);
     commands2.push({ op: "ext", call: "tux.set_monster_attribute", args: { variable: "v.missing", attribute: "gender", value: "male" } });
     expect(stateOf(run(commands2)).party[0]!.gender).toBe(baseline);
+  });
+});
+
+describe("native set_monster_level", () => {
+  test("the real Water chapter one-shot raises every monster by ten with exact persistent progression", () => {
+    const imported = buildProject([
+      "water_snow_village",
+      "water_underwater",
+      "spyder_test_map",
+    ], G6_IMPORT_OPTIONS);
+    expect(imported.report.coverage.actions.rows.find((row) => row.type === "set_monster_level"))
+      .toMatchObject({ total: 3, native: 3, degraded: 0, dropped: 0 });
+
+    const map = imported.project.maps.find((candidate) => candidate.id === "water_snow_village")!;
+    const boost = map.events?.find((event) => event.name === "Level Boost 10");
+    expect(boost).toBeDefined();
+    expect(JSON.stringify(boost)).toContain('"call":"tux.set_monster_level"');
+    map.events = [boost!];
+    imported.project.maps = [map];
+    imported.project.start = { map: map.id, x: 1, y: 1, dir: "down" };
+
+    const rng = { rng: 41, rngDraws: 0 };
+    const rockitten = spawnMonster(DB, rulesDb, rng, "rockitten", 20, { iid: "level-rock" });
+    const budaye = spawnMonster(DB, rulesDb, rng, "budaye", 8, { iid: "level-bud" });
+    rockitten.currentHp = rockitten.base.hp - 3;
+    budaye.currentHp = budaye.base.hp - 5;
+    const initial = packTuxemonExtensionState({
+      ...initialTuxemonExtensionState(),
+      party: [rockitten, budaye],
+    });
+    const session = createSession(imported.project, 60, { extensions: createTuxemonExtensions(DB) });
+    let state = startSession(imported.project, session, undefined, initial);
+    for (let guard = 0; guard < 12 && state.sw.variables["v.level_boost10"] !== 1; guard++) {
+      state = stepSession(session, state, { buttons: 0 });
+    }
+    expect(state.sw.variables["v.level_boost10"]).toBe(1);
+    const after = tuxemonExtensionState(state.ext, DB);
+    expect(after.party.map((monster) => monster.level)).toEqual([30, 18]);
+    expect(after.party.map((monster) => monster.iid)).toEqual(["level-rock", "level-bud"]);
+
+    const expectedRock = calculateBaseStats(
+      rulesDb, "rockitten", 30, rockitten.individualValues,
+      rockitten.tasteCold, rockitten.tasteWarm, rockitten.trainingPoints,
+    );
+    const expectedBud = calculateBaseStats(
+      rulesDb, "budaye", 18, budaye.individualValues,
+      budaye.tasteCold, budaye.tasteWarm, budaye.trainingPoints,
+    );
+    expect(after.party[0]!.base).toEqual(expectedRock);
+    expect(after.party[1]!.base).toEqual(expectedBud);
+    expect(after.party[0]!.currentHp).toBe(expectedRock.hp - 3);
+    expect(after.party[1]!.currentHp).toBe(expectedBud.hp - 5);
+    expect(after.party[0]!.totalExperience).toBe(30 ** 3);
+    expect(after.party[1]!.totalExperience).toBe(18 ** 3);
+    expect(after.party[0]!.moves).toContain("glower");
+    expect(after.party[1]!.moves).toEqual(["stick", "clamp_on", "mending", "tail_lash", "mobbing"]);
+    expect(after.party[0]!.waitingToEvolve).toBeTrue();
+
+    // Its authored flag disables the page; more idle ticks cannot award the
+    // same boost twice.
+    for (let frame = 0; frame < 20; frame++) state = stepSession(session, state, { buttons: 0 });
+    expect(tuxemonExtensionState(state.ext, DB).party.map((monster) => monster.level)).toEqual([30, 18]);
+  });
+});
+
+describe("COV-B modify_monster_bond", () => {
+  test("the real friendship-scroll milestone adds one saved bond point", () => {
+    const imported = buildProject(["spyder_bedroom"], G6_IMPORT_OPTIONS);
+    const bondEvent = imported.project.maps[0]!.events?.find((event) =>
+      event.name === "Bond Up 1000 Steps");
+    expect(bondEvent).toBeDefined();
+    expect(JSON.stringify(bondEvent)).toContain('"call":"tux.modify_monster_bond"');
+    expect(imported.report.coverage.actions.rows.find((row) => row.type === "modify_monster_bond"))
+      .toMatchObject({ total: 1, native: 1, degraded: 0, dropped: 0 });
+    imported.project.maps[0]!.events = [bondEvent!];
+
+    const rng = { rng: 19, rngDraws: 0 };
+    const monster = {
+      ...spawnMonster(DB, rulesDb, rng, "rockitten", 5, { iid: "bond-real" }),
+      bond: 25,
+    };
+    const initial = packTuxemonExtensionState({
+      ...initialTuxemonExtensionState(),
+      party: [monster],
+      stepTrackers: {
+        player: {
+          steps_bonding: {
+            countdown: 0,
+            initialCountdown: 1000,
+            milestones: [0],
+            status: { "0": false },
+          },
+        },
+      },
+    });
+    const session = createSession(imported.project, 60, { extensions: createTuxemonExtensions(DB) });
+    let state = startSession(imported.project, session, undefined, initial);
+    state.sw.variables["v.start_bonding"] = 1;
+    state.sw.items.friendship_scroll = 1;
+    for (let guard = 0; guard < 10 && state.sw.variables["v.start_bonding"] !== 0; guard++) {
+      state = stepSession(session, state, { buttons: 0 });
+    }
+    const after = tuxemonExtensionState(state.ext, DB);
+    expect(after.party[0]!.bond).toBe(26);
+    expect(after.stepTrackers?.player?.steps_bonding).toMatchObject({
+      countdown: 1000,
+      milestones: [0],
+      status: {},
+    });
+    expect(state.sw.variables["v.start_bonding"]).toBe(0);
   });
 });
 

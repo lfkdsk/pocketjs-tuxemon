@@ -126,17 +126,18 @@ test("all maps pass schema and reference valid transfer destinations", () => {
     // making each transfer native and its trailing face degraded instead of
     // dropping both unreachable actions. The six authored race choices save
     // their matching combat sheet, moving those set_template uses from
-    // degraded to native.
+    // degraded to native. Exact scripted level boosts and the non-cancellable
+    // adjacent rename picker now preserve their pinned state changes too.
     types: 98,
     uses: 13_617,
-    native: 6_857,
+    native: 6_862,
     degraded: 2_838,
     placeholder: 708,
-    dropped: 3_214,
+    dropped: 3_209,
     nativePercent: 50.4,
     tier1: {
-      uses: 6_323,
-      percent: 46.43,
+      uses: 6_325,
+      percent: 46.45,
       requiredUses: 6_246,
       meetsBaseline: true,
     },
@@ -144,14 +145,14 @@ test("all maps pass schema and reference valid transfer destinations", () => {
   expect(result.report.coverage.conditions.summary).toMatchObject({
     types: 64,
     uses: 8_663,
-    native: 4_376,
-    degraded: 1_245,
+    native: 4_382,
+    degraded: 1_243,
     placeholder: 859,
-    dropped: 2_183,
-    nativePercent: 50.5,
+    dropped: 2_179,
+    nativePercent: 50.6,
     tier1: {
-      uses: 4_313,
-      percent: 49.79,
+      uses: 4_315,
+      percent: 49.81,
       requiredUses: 4_591,
       meetsBaseline: false,
     },
@@ -183,9 +184,9 @@ test("all maps pass schema and reference valid transfer destinations", () => {
   // Dialogs with upstream position/alignment args lower natively to the
   // kit's text-window layout, in the same row as the other dialogs.
   expect(coverageRows.find((row) => row.type === "translated_dialog")).toMatchObject({
-    native: 2019,
+    native: 2020,
     degraded: 0,
-    dropped: 49,
+    dropped: 48,
   });
   expect(coverageRows.find((row) => row.type === "translated_dialog(layout)")).toBeUndefined();
   expect(coverageRows.find((row) => row.type === "set_monster_status")).toMatchObject({
@@ -560,7 +561,28 @@ test("KV1 imports overlays, runtime appearances, and exact surface passage updat
   expect(result.report.coverage.actions.rows.find((row) => row.type === "update_tile_properties"))
     .toMatchObject({ total: 2, native: 2, dropped: 0 });
   expect(result.report.coverage.conditions.rows.find((row) => row.type === "not tile_property_updated"))
-    .toMatchObject({ total: 2, degraded: 2, dropped: 0 });
+    .toMatchObject({ total: 2, native: 2, degraded: 0, dropped: 0 });
+
+  // Trigger the real shared Spyder event on an imported map. The first tick
+  // sees the authored all-zero label and updates every cell; the next tick's
+  // representative condition sees that exact synchronized result.
+  const live = buildProject(["spyder_citypark"], G6_IMPORT_OPTIONS).project;
+  live.start = { map: "spyder_citypark", x: 1, y: 1, dir: "down" };
+  live.maps[0]!.events = live.maps[0]!.events?.filter((event) => event.name === "Allow Swim");
+  const session = createSession(live, 60, {
+    extensions: TUXEMON_EXTENSIONS,
+    battle: TUXEMON_BATTLE_RULES,
+    scenes: TUXEMON_SCENES,
+  });
+  let state = startSession(live, session);
+  state.sw.variables["v.swimming"] = 2;
+  state = stepSession(session, state, { buttons: 0 });
+  expect(Object.values(state.interp.tileProperties ?? {})).toHaveLength(23);
+  expect(Object.values(state.interp.tileProperties ?? {}).every((cell) => cell.passage === "pass"))
+    .toBeTrue();
+  const first = JSON.stringify(state.interp.tileProperties);
+  state = stepSession(session, state, { buttons: 0 });
+  expect(JSON.stringify(state.interp.tileProperties)).toBe(first);
 });
 
 test("inert source events cannot freeze the Cotton Cafe", () => {
@@ -675,7 +697,7 @@ test("default import output remains byte-pinned", () => {
   // G-PC-LOCKER fix-2 lockerOverflow wording (the locker is implemented)
   // moves this hash.
   expect(createHash("sha256").update(bytes).digest("hex")).toBe(
-    "ed4835eee778634feec9d8364229a23a35fbd599ead237dca3b83af25090fb64",
+    "a1047ff491cc6dcae79af4f3cf5b84fab2d4aa7e7d7d81f162e622fb49f61dce",
   );
 });
 
@@ -932,12 +954,19 @@ test("ImportOptions.moveControl keeps authored idle char_run calls as exact no-o
     node.op === "moveControl" && node.target === "player" &&
     (node.control as { kind?: string })?.kind === "stop"
   )).toBeTrue();
-  // char_speed kay_wren,7 -> the nearest MV grade to 7 tiles/s is 5,
-  // scoped to the next forced route like the upstream idle reset.
+  // char_speed kay_wren,7 keeps the nearest grade as a compatibility fallback,
+  // while the exact rate is scoped to the next forced route like upstream.
   expect(nodes.some((node) =>
-    node.op === "moveControl" && (node.control as { kind?: string; value?: number })?.kind === "routeSpeed" &&
-    (node.control as { value?: number })?.value === 5
+    node.op === "moveControl" &&
+    (node.control as { kind?: string; value?: number; tilesPerSecond?: number })?.kind === "routeSpeed" &&
+    (node.control as { value?: number; tilesPerSecond?: number })?.value === 5 &&
+    (node.control as { value?: number; tilesPerSecond?: number })?.tilesPerSecond === 7
   )).toBeTrue();
+  const speedRow = buildProject(["tuxe_mart_taba"], { moveControl: true })
+    .report.coverage.actions.rows.find((row) => row.type === "char_speed");
+  // Coverage totals describe the whole source corpus; calls on maps omitted by
+  // this focused build are deliberately reported as unmaterialized.
+  expect(speedRow).toMatchObject({ total: 19, native: 1, degraded: 0, dropped: 18 });
   // set_facing_mode callie_wren,locked -> facingMode locked
   expect(nodes.some((node) =>
     node.op === "moveControl" && (node.control as { kind?: string; value?: string })?.kind === "facingMode" &&
@@ -1417,7 +1446,11 @@ test("G6 lowers Tuxemon rename and journal actions to registered scenes", () => 
   });
 
   const picker = nodes.find((node) => node.op === "scene" && node.id === "tux.monsterPicker");
-  expect(picker?.args).toEqual({ variable: "v.rename", title: "Choose a Tuxemon" });
+  expect(picker?.args).toEqual({
+    variable: "v.rename",
+    title: "Choose a Tuxemon",
+    cancellable: false,
+  });
   expect(picker?.onDone).toEqual([
     {
       op: "ext",
@@ -1439,6 +1472,54 @@ test("G6 lowers Tuxemon rename and journal actions to registered scenes", () => 
   expect(rows.find((row) => row.type === "rename_monster")).toMatchObject({ native: 1, dropped: 1 });
   expect(rows.find((row) => row.type === "open_journal")).toMatchObject({ degraded: 3, dropped: 11 });
   expect(rows.find((row) => row.type === "set_tuxepedia")).toMatchObject({ degraded: 6, dropped: 0 });
+  expect(rows.find((row) => row.type === "get_player_monster")).toMatchObject({ native: 1, degraded: 0, dropped: 16 });
+});
+
+test("real player gender events write persistent identity and select both Granny branches", () => {
+  const opening = buildProject(["start_tuxemon"], G6_IMPORT_OPTIONS);
+  const pronounHe = opening.project.maps[0]!.events?.find((event) => event.name === "Pronoun He")!;
+  const genderWrites = objectNodes(pronounHe).filter((node) =>
+    node.op === "variable" && node.id === "v.gender_choice" &&
+    (node.set as { value?: number } | undefined)?.value === 2
+  );
+  // One write is set_char_attribute, the other is the authored set_variable.
+  // Keeping both makes this assertion sensitive to dropping either source action.
+  expect(genderWrites).toHaveLength(2);
+  expect(opening.report.coverage.actions.rows.find((row) => row.type === "set_char_attribute"))
+    .toMatchObject({ total: 3, native: 3, degraded: 0, dropped: 0 });
+
+  opening.project.maps[0]!.events = [pronounHe];
+  const openingSession = createSession(opening.project, 60);
+  let openingState = startSession(opening.project, openingSession);
+  openingState.sw.variables["v.pronoun_choice"] = 1;
+  openingState = stepSession(openingSession, openingState, { buttons: 0 });
+  expect(numericVariable(openingState, "v.gender_choice")).toBe(2);
+
+  const built = buildProject(["cotton_misa_house"], G6_IMPORT_OPTIONS);
+  const project = applyTerrain(built.project, importTerrain({ mapIds: ["cotton_misa_house"] }).fragment);
+  project.start = { map: "cotton_misa_house", x: 5, y: 5, dir: "up" };
+  const granny = project.maps[0]!.events?.find((event) => event.id === "npc_cotton_misa_gramps")!;
+  project.maps[0]!.events = [granny];
+  expect(built.report.coverage.conditions.rows.find((row) => row.type === "is char_gender"))
+    .toMatchObject({ total: 1, native: 1, degraded: 0, dropped: 0 });
+  expect(built.report.coverage.conditions.rows.find((row) => row.type === "not char_gender"))
+    .toMatchObject({ total: 1, native: 1, degraded: 0, dropped: 0 });
+
+  const talk = (gender: number): string[] => {
+    const session = createSession(project, 60);
+    let state = startSession(project, session);
+    state.sw.variables["local.npc.cotton_misa_gramps"] = 1;
+    state.sw.variables["v.gender_choice"] = gender;
+    state = stepSession(session, state, { buttons: 0 });
+    state = stepSession(session, state, { buttons: BTN_CONFIRM, confirmEdge: true });
+    for (let guard = 0; guard < 20 && state.interp.modal?.kind !== "text"; guard++) {
+      state = stepSession(session, state, { buttons: 0 });
+    }
+    expect(state.interp.modal?.kind).toBe("text");
+    return state.interp.modal?.kind === "text" ? state.interp.modal.lines : [];
+  };
+  expect(talk(2)).toEqual(["Are you here to ask for my grand-daughter's hand?"]);
+  expect(talk(1)).toEqual(["Oh! You must be one of those friends my", "granddaughter was talking about!"]);
 });
 
 test("faint recovery preserves its notice and yields to the first-loss cutscene", () => {
@@ -1547,7 +1628,7 @@ test("imports live player-name guards and rejects impossible legacy triggers", (
   }
 });
 
-test("the only labelled facing guards are the five Surf checks; two Radio drops are action-owned", () => {
+test("the only labelled facing guards are the five Surf checks; both Radio events stay playable", () => {
   const source = loadAllFileEvents();
   const facing = source.flatMap((event) => event.conds
     .filter((condition) => condition.type === "char_facing_tile")
@@ -1574,11 +1655,15 @@ test("the only labelled facing guards are the five Surf checks; two Radio drops 
     G6_IMPORT_OPTIONS,
   );
   expect(radios.report.coverage.actions.rows.find((row) => row.type === "tune_radio"))
-    .toMatchObject({ total: 2, dropped: 2 });
+    .toMatchObject({ total: 2, native: 2, degraded: 0, dropped: 0 });
   expect(radios.report.coverage.conditions.rows.find((row) => row.type === "is char_facing_tile")
-    ?.reasons.dropped).toContain("every action was removed, so no project event was emitted");
-  expect(radios.project.maps.flatMap((map) => map.events ?? []).some((event) => event.name === "Radio"))
-    .toBeFalse();
+  ).toMatchObject({ total: 344, native: 6, degraded: 0, dropped: 338 });
+  expect(radios.project.maps.flatMap((map) => map.events ?? []).filter((event) => event.name === "Radio"))
+    .toHaveLength(2);
+  const scenes = objectNodes(radios.project).filter((node) => node.op === "scene" && node.id === "tux.radio");
+  expect(scenes).toHaveLength(2);
+  expect(scenes.every((scene) => (scene.args as { initialFrequency?: number }).initialFrequency === 94.7))
+    .toBeTrue();
 });
 
 test("Spyder surf boundaries require the Surfboard, enter water, and dismount", () => {

@@ -21,6 +21,8 @@ const BUILDER = join(ROOT, "tests/fixtures/build-g-persist-fixture.ts");
 const TUXEMON_REVISION = "9e6258ff726b786040a267e8bdbbf037b560285e";
 
 const COPIED_UPSTREAM_FILES = [
+  "mods/radio_data.yaml",
+  "mods/radio_map_lists.yaml",
   "mods/tuxemon/db/animation/tileset.yaml",
   "mods/tuxemon/animations/tileset/grass.png",
   "mods/tuxemon/gfx/bubbles/exclamation.png",
