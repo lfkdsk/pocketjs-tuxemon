@@ -146,8 +146,8 @@ describe("runtime WorldLayout projection", () => {
       topologySafeOpenings: 258,
       runtimeEligibleOpenings: 283,
       enabledTransfers: 283,
-      partialSeamlessCells: 25,
-      partialLegacyCells: 50,
+      partialSeamlessCells: 75,
+      partialLegacyCells: 0,
     });
     expect(imported.report.seamlessHandoff.notEnabledSafePortalIds).toEqual([]);
     expect(imported.report.seamlessHandoff.fullyLegacyPortalOnlyPortalIds).toEqual([
@@ -215,8 +215,16 @@ describe("runtime WorldLayout projection", () => {
             const target = mapById.get(transfer.map)!;
             const facing = sideDirection[opening.source.side] as Dir4;
             const partial = partialById.get(portalId);
-            const sourceX = partial?.source.x ?? event.x;
-            const sourceY = partial?.source.y ?? event.y;
+            // Every promoted lane is its own 1x1 event at its source cell.
+            const sourceX = event.x;
+            const sourceY = event.y;
+            if (partial) {
+              expect([event.w ?? 1, event.h ?? 1], portalId).toEqual([1, 1]);
+              expect(partial.lanes, portalId).toContainEqual(expect.objectContaining({
+                source: { x: sourceX, y: sourceY },
+                target: { x: transfer.x, y: transfer.y },
+              }));
+            }
             const resolved = resolver.resolve({
               portalId,
               sourceMapId: map.id,
@@ -235,28 +243,22 @@ describe("runtime WorldLayout projection", () => {
             expect(resolved, portalId).toEqual({ direction: facing });
             expect(cellBlocksExit(passage.get(map.id)!, sourceX, sourceY, facing), portalId).toBeFalse();
             expect(canEnter(passage.get(target.id)!, transfer.x, transfer.y, opposite[facing]), portalId).toBeTrue();
-            if (partial) {
-              const otherTangent = opening.source.span.start === (opening.axis === "x" ? sourceX : sourceY)
-                ? opening.source.span.end
-                : opening.source.span.start - 1;
-              const other = opening.axis === "x"
-                ? { x: otherTangent, y: sourceY }
-                : { x: sourceX, y: otherTangent };
+            for (const legacy of partial?.legacyLanes ?? []) {
               expect(resolver.resolve({
                 portalId,
                 sourceMapId: map.id,
                 targetMapId: transfer.map,
-                sourceX: other.x,
-                sourceY: other.y,
-                targetX: transfer.x,
-                targetY: transfer.y,
+                sourceX: legacy.x,
+                sourceY: legacy.y,
+                targetX: partial!.target.x,
+                targetY: partial!.target.y,
                 sourceWidth: map.width,
                 sourceHeight: map.height,
                 targetWidth: target.width,
                 targetHeight: target.height,
                 facing,
                 transferDirection,
-              }), `${portalId} non-aligned lane`).toBeNull();
+              }), `${portalId} legacy lane`).toBeNull();
             }
           }
           for (const instruction of compile(page.commands)) {

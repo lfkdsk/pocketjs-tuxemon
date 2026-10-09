@@ -393,8 +393,8 @@ export const DEMO_WARP_SPAWNS = [
   },
   {
     "id": "classic_aerolume_city",
-    "x": 1,
-    "y": 17
+    "x": 0,
+    "y": 15
   },
   {
     "id": "classic_gym_astra",
@@ -468,13 +468,13 @@ export const DEMO_WARP_SPAWNS = [
   },
   {
     "id": "classic_route_1",
-    "x": 33,
+    "x": 32,
     "y": 18
   },
   {
     "id": "classic_route_2",
-    "x": 1,
-    "y": 3
+    "x": 0,
+    "y": 1
   },
   {
     "id": "classic_route_3",
@@ -483,23 +483,23 @@ export const DEMO_WARP_SPAWNS = [
   },
   {
     "id": "classic_route_5",
-    "x": 38,
-    "y": 17
+    "x": 39,
+    "y": 15
   },
   {
     "id": "classic_route_6",
     "x": 1,
-    "y": 2
+    "y": 1
   },
   {
     "id": "classic_route_7",
-    "x": 36,
+    "x": 35,
     "y": 1
   },
   {
     "id": "classic_route_8",
     "x": 1,
-    "y": 16
+    "y": 15
   },
   {
     "id": "classic_steamshore_city",
@@ -514,12 +514,12 @@ export const DEMO_WARP_SPAWNS = [
   {
     "id": "classic_thornwood_city",
     "x": 1,
-    "y": 17
+    "y": 16
   },
   {
     "id": "classic_umbrastar_city",
-    "x": 1,
-    "y": 17
+    "x": 0,
+    "y": 15
   },
   {
     "id": "classic_valorhold_city",

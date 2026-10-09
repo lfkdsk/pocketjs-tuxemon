@@ -84,6 +84,14 @@ const AEROLUME_BUILD = buildProject(
   ["classic_aerolume_city", "classic_route_5"],
   G6_IMPORT_OPTIONS,
 );
+const HEARTHROCK_BUILD = buildProject(
+  ["classic_hearthrock_city", "classic_route_1"],
+  G6_IMPORT_OPTIONS,
+);
+const ROUTEC_BUILD = buildProject(
+  ["spyder_routec", "spyder_candy_town"],
+  G6_IMPORT_OPTIONS,
+);
 
 function withPreviewFixtures(project: Project): Project {
   const actor = (id: string, x: number, y: number, sprite: string): GameEvent => ({
@@ -132,56 +140,73 @@ describe("new seamless outdoor promotions", () => {
     }
   });
 
-  test("a wide fixed-destination portal promotes only its coordinate-aligned lane", () => {
-    const aligned = projectAt(
-      AEROLUME_BUILD.project,
-      "classic_aerolume_city",
-      1,
-      17,
-      "left",
-    );
-    const started = startSettled(aligned);
-    const onset = approach(started.session, started.state, BTN_BITS.LEFT);
-    expect(onset.fade).toBeNull();
-    expect(onset.handoff).toMatchObject({
-      portalId: "classic_aerolume_city:tmx:classic_aerolume_city.tmx:286:a0",
-      sourceMapId: "classic_aerolume_city",
-      targetMapId: "classic_route_5",
-      sourceX: 0,
-      sourceY: 17,
-      targetX: 39,
-      targetY: 17,
-      phase: 0,
-      totalTicks: 8,
-    });
-    const landed = finishHandoff(started.session, onset);
-    expect(landed.phases).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
-    expect([landed.state.mapId, landed.state.move.tx, landed.state.move.ty])
-      .toEqual(["classic_route_5", 39, 17]);
+  test("every lane of a wide fixed-destination portal crosses onto its own continuous cell", () => {
+    // The authored three-cell opening funnels y=16..18 to the fixed landing
+    // y=17. The maps sit edge to edge and every lane passes the terrain
+    // proof, so each lane now crosses to the neighbour cell beside it.
+    for (const y of [16, 17, 18]) {
+      const project = projectAt(AEROLUME_BUILD.project, "classic_aerolume_city", 1, y, "left");
+      const started = startSettled(project);
+      const onset = approach(started.session, started.state, BTN_BITS.LEFT);
+      expect(onset.fade, `Aerolume y=${y}`).toBeNull();
+      expect(onset.handoff, `Aerolume y=${y}`).toMatchObject({
+        portalId: "classic_aerolume_city:tmx:classic_aerolume_city.tmx:286:a0",
+        sourceMapId: "classic_aerolume_city",
+        targetMapId: "classic_route_5",
+        sourceX: 0,
+        sourceY: y,
+        targetX: 39,
+        targetY: y,
+        direction: 1,
+        phase: 0,
+        totalTicks: 8,
+      });
+      const landed = finishHandoff(started.session, onset);
+      expect(landed.phases, `Aerolume y=${y}`).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
+      expect([landed.state.mapId, landed.state.move.tx, landed.state.move.ty], `Aerolume y=${y}`)
+        .toEqual(["classic_route_5", 39, y]);
+      expect(landed.state.move.facing, `Aerolume y=${y}`).toBe(1);
+      expect(landed.state.leftMap?.mapId, `Aerolume y=${y}`).toBe("classic_aerolume_city");
+    }
+  });
 
-    // The authored three-cell opening funnels y=16 and y=18 to y=17. Those
-    // two lanes must keep the original fade and fixed landing instead of
-    // being silently rewritten as coordinate-preserving crossings.
-    for (const y of [16, 18]) {
-      const project = projectAt(
-        AEROLUME_BUILD.project,
-        "classic_aerolume_city",
-        1,
-        y,
-        "left",
-      );
-      const legacy = startSettled(project);
-      const legacyOnset = approach(legacy.session, legacy.state, BTN_BITS.LEFT);
-      expect(legacyOnset.handoff, `Aerolume y=${y}`).toBeUndefined();
-      expect(legacyOnset.fade, `Aerolume y=${y}`).toMatchObject({ phase: "out" });
-      const legacyLanded = finishLegacyTransfer(
-        legacy.session,
-        legacyOnset,
-        "classic_aerolume_city",
-      );
-      expect([legacyLanded.mapId, legacyLanded.move.tx, legacyLanded.move.ty], `Aerolume y=${y}`)
-        .toEqual(["classic_route_5", 39, 17]);
-      expect(legacyLanded.fade, `Aerolume y=${y}`).toBeNull();
+  test("a vertical funnel lane crosses north without a fade", () => {
+    for (const x of [32, 34]) {
+      const project = projectAt(HEARTHROCK_BUILD.project, "classic_hearthrock_city", x, 1, "up");
+      const started = startSettled(project);
+      const onset = approach(started.session, started.state, BTN_BITS.UP);
+      expect(onset.fade, `Hearthrock x=${x}`).toBeNull();
+      expect(onset.handoff, `Hearthrock x=${x}`).toMatchObject({
+        portalId: "classic_hearthrock_city:tmx:classic_hearthrock_city.tmx:300:a0",
+        sourceX: x,
+        sourceY: 0,
+        targetMapId: "classic_route_1",
+        targetX: x,
+        targetY: 19,
+        direction: 2,
+      });
+      const landed = finishHandoff(started.session, onset);
+      expect(landed.phases, `Hearthrock x=${x}`).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
+      expect([landed.state.mapId, landed.state.move.tx, landed.state.move.ty], `Hearthrock x=${x}`)
+        .toEqual(["classic_route_1", x, 19]);
+    }
+  });
+
+  test("surf-only openings keep the authored fade and fixed landing", () => {
+    // Route C's west opening is open water. The runtime proves a crossing
+    // against immutable terrain, where water is solid until a map visit
+    // opens it, so no lane of this opening is promoted.
+    const portalId = "spyder_routec:tmx:spyder_routec.tmx:155:a0";
+    expect(ROUTEC_BUILD.report.seamlessHandoff.partialPromotions
+      .map((promotion) => promotion.portalId)).not.toContain(portalId);
+    expect(ROUTEC_BUILD.report.seamlessHandoff.fullyLegacyPortalOnlyPortalIds).toContain(portalId);
+    const transfers = ROUTEC_BUILD.project.maps.find((map) => map.id === "spyder_routec")!.events!
+      .filter((event) => event.name?.startsWith("Teleport to Candy Town"))
+      .flatMap((event) => event.pages.flatMap((page) => JSON.stringify(page.commands)));
+    expect(transfers.length).toBeGreaterThan(0);
+    for (const commands of transfers) {
+      expect(commands).toContain('"map":"spyder_candy_town","x":39,"y":28');
+      expect(commands).not.toContain(portalId);
     }
   });
 
@@ -271,7 +296,7 @@ describe("new seamless outdoor promotions", () => {
     expect(canonicalJson(after.leftMap)).toBe(frozen);
   });
 
-  test("the areas=false importer profile keeps the same partial-promotion policy", () => {
+  test("the areas=false importer profile keeps the same lane policy", () => {
     const expanded = buildProject(
       ["classic_aerolume_city", "classic_route_5"],
       { ...G6_IMPORT_OPTIONS, areas: false },
@@ -282,14 +307,25 @@ describe("new seamless outdoor promotions", () => {
       source: { x: 0, y: 17 },
       targetMap: "classic_route_5",
       target: { x: 39, y: 17 },
-      reason: "fixed-destination-aligned-lane",
+      reason: "fixed-destination-continuous-lanes",
+      lanes: [16, 17, 18].map((y) => ({
+        source: { x: 0, y },
+        target: { x: 39, y },
+        authored: y === 17,
+      })),
+      legacyLanes: [],
       sourceCells: 3,
-      legacyCells: 2,
+      legacyCells: 0,
     });
-    const source = expanded.project.maps.find((map) => map.id === "classic_aerolume_city")!;
-    const cells = (source.events ?? [])
-      .filter((event) => event.id.startsWith("e005_teleport_to_route5_"))
-      .map((event) => [event.x, event.y]);
-    expect(cells).toEqual([[0, 16], [0, 17], [0, 18]]);
+    for (const build of [expanded, AEROLUME_BUILD]) {
+      const source = build.project.maps.find((map) => map.id === "classic_aerolume_city")!;
+      const lanes = (source.events ?? [])
+        .filter((event) => event.id.startsWith("e005_teleport_to_route5_"))
+        .map((event) => {
+          const transfer = event.pages[0]!.commands.find((command) => command.op === "transfer");
+          return [event.x, event.y, event.w ?? 1, event.h ?? 1, transfer && "y" in transfer ? transfer.y : null];
+        });
+      expect(lanes).toEqual([[0, 16, 1, 1, 16], [0, 17, 1, 1, 17], [0, 18, 1, 1, 18]]);
+    }
   });
 });

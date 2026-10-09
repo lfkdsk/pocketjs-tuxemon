@@ -2731,9 +2731,45 @@
      "x": 0,
      "y": 2
     },
-    "reason": "fixed-destination-aligned-lane",
+    "reason": "fixed-destination-continuous-lanes",
+    "lanes": [
+     {
+      "source": {
+       "x": 39,
+       "y": 1
+      },
+      "target": {
+       "x": 0,
+       "y": 1
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 39,
+       "y": 2
+      },
+      "target": {
+       "x": 0,
+       "y": 2
+      },
+      "authored": true
+     },
+     {
+      "source": {
+       "x": 39,
+       "y": 3
+      },
+      "target": {
+       "x": 0,
+       "y": 3
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
     "sourceCells": 3,
-    "legacyCells": 2
+    "legacyCells": 0
    },
    {
     "portalId": "classic_aerolume_city:tmx:classic_aerolume_city.tmx:286:a0",
@@ -2747,9 +2783,45 @@
      "x": 39,
      "y": 17
     },
-    "reason": "fixed-destination-aligned-lane",
+    "reason": "fixed-destination-continuous-lanes",
+    "lanes": [
+     {
+      "source": {
+       "x": 0,
+       "y": 16
+      },
+      "target": {
+       "x": 39,
+       "y": 16
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 0,
+       "y": 17
+      },
+      "target": {
+       "x": 39,
+       "y": 17
+      },
+      "authored": true
+     },
+     {
+      "source": {
+       "x": 0,
+       "y": 18
+      },
+      "target": {
+       "x": 39,
+       "y": 18
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
     "sourceCells": 3,
-    "legacyCells": 2
+    "legacyCells": 0
    },
    {
     "portalId": "classic_hearthrock_city:tmx:classic_hearthrock_city.tmx:300:a0",
@@ -2763,9 +2835,45 @@
      "x": 33,
      "y": 19
     },
-    "reason": "fixed-destination-aligned-lane",
+    "reason": "fixed-destination-continuous-lanes",
+    "lanes": [
+     {
+      "source": {
+       "x": 32,
+       "y": 0
+      },
+      "target": {
+       "x": 32,
+       "y": 19
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 33,
+       "y": 0
+      },
+      "target": {
+       "x": 33,
+       "y": 19
+      },
+      "authored": true
+     },
+     {
+      "source": {
+       "x": 34,
+       "y": 0
+      },
+      "target": {
+       "x": 34,
+       "y": 19
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
     "sourceCells": 3,
-    "legacyCells": 2
+    "legacyCells": 0
    },
    {
     "portalId": "classic_hearthrock_city:tmx:classic_hearthrock_city.tmx:301:a0",
@@ -2779,9 +2887,45 @@
      "x": 0,
      "y": 16
     },
-    "reason": "fixed-destination-aligned-lane",
+    "reason": "fixed-destination-continuous-lanes",
+    "lanes": [
+     {
+      "source": {
+       "x": 39,
+       "y": 15
+      },
+      "target": {
+       "x": 0,
+       "y": 15
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 39,
+       "y": 16
+      },
+      "target": {
+       "x": 0,
+       "y": 16
+      },
+      "authored": true
+     },
+     {
+      "source": {
+       "x": 39,
+       "y": 17
+      },
+      "target": {
+       "x": 0,
+       "y": 17
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
     "sourceCells": 3,
-    "legacyCells": 2
+    "legacyCells": 0
    },
    {
     "portalId": "classic_route_1:tmx:classic_route_1.tmx:293:a0",
@@ -2795,9 +2939,45 @@
      "x": 33,
      "y": 0
     },
-    "reason": "fixed-destination-aligned-lane",
+    "reason": "fixed-destination-continuous-lanes",
+    "lanes": [
+     {
+      "source": {
+       "x": 32,
+       "y": 19
+      },
+      "target": {
+       "x": 32,
+       "y": 0
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 33,
+       "y": 19
+      },
+      "target": {
+       "x": 33,
+       "y": 0
+      },
+      "authored": true
+     },
+     {
+      "source": {
+       "x": 34,
+       "y": 19
+      },
+      "target": {
+       "x": 34,
+       "y": 0
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
     "sourceCells": 3,
-    "legacyCells": 2
+    "legacyCells": 0
    },
    {
     "portalId": "classic_route_1:tmx:classic_route_1.tmx:294:a0",
@@ -2811,9 +2991,45 @@
      "x": 6,
      "y": 19
     },
-    "reason": "fixed-destination-aligned-lane",
+    "reason": "fixed-destination-continuous-lanes",
+    "lanes": [
+     {
+      "source": {
+       "x": 5,
+       "y": 0
+      },
+      "target": {
+       "x": 5,
+       "y": 19
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 6,
+       "y": 0
+      },
+      "target": {
+       "x": 6,
+       "y": 19
+      },
+      "authored": true
+     },
+     {
+      "source": {
+       "x": 7,
+       "y": 0
+      },
+      "target": {
+       "x": 7,
+       "y": 19
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
     "sourceCells": 3,
-    "legacyCells": 2
+    "legacyCells": 0
    },
    {
     "portalId": "classic_route_2:tmx:classic_route_2.tmx:286:a0",
@@ -2827,9 +3043,45 @@
      "x": 0,
      "y": 17
     },
-    "reason": "fixed-destination-aligned-lane",
+    "reason": "fixed-destination-continuous-lanes",
+    "lanes": [
+     {
+      "source": {
+       "x": 39,
+       "y": 16
+      },
+      "target": {
+       "x": 0,
+       "y": 16
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 39,
+       "y": 17
+      },
+      "target": {
+       "x": 0,
+       "y": 17
+      },
+      "authored": true
+     },
+     {
+      "source": {
+       "x": 39,
+       "y": 18
+      },
+      "target": {
+       "x": 0,
+       "y": 18
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
     "sourceCells": 3,
-    "legacyCells": 2
+    "legacyCells": 0
    },
    {
     "portalId": "classic_route_3:tmx:classic_route_3.tmx:286:a0",
@@ -2843,9 +3095,45 @@
      "x": 17,
      "y": 0
     },
-    "reason": "fixed-destination-aligned-lane",
+    "reason": "fixed-destination-continuous-lanes",
+    "lanes": [
+     {
+      "source": {
+       "x": 16,
+       "y": 19
+      },
+      "target": {
+       "x": 16,
+       "y": 0
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 17,
+       "y": 19
+      },
+      "target": {
+       "x": 17,
+       "y": 0
+      },
+      "authored": true
+     },
+     {
+      "source": {
+       "x": 18,
+       "y": 19
+      },
+      "target": {
+       "x": 18,
+       "y": 0
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
     "sourceCells": 3,
-    "legacyCells": 2
+    "legacyCells": 0
    },
    {
     "portalId": "classic_route_5:tmx:classic_route_5.tmx:285:a0",
@@ -2859,9 +3147,45 @@
      "x": 39,
      "y": 2
     },
-    "reason": "fixed-destination-aligned-lane",
+    "reason": "fixed-destination-continuous-lanes",
+    "lanes": [
+     {
+      "source": {
+       "x": 0,
+       "y": 1
+      },
+      "target": {
+       "x": 39,
+       "y": 1
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 0,
+       "y": 2
+      },
+      "target": {
+       "x": 39,
+       "y": 2
+      },
+      "authored": true
+     },
+     {
+      "source": {
+       "x": 0,
+       "y": 3
+      },
+      "target": {
+       "x": 39,
+       "y": 3
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
     "sourceCells": 3,
-    "legacyCells": 2
+    "legacyCells": 0
    },
    {
     "portalId": "classic_route_5:tmx:classic_route_5.tmx:286:a0",
@@ -2875,9 +3199,45 @@
      "x": 0,
      "y": 17
     },
-    "reason": "fixed-destination-aligned-lane",
+    "reason": "fixed-destination-continuous-lanes",
+    "lanes": [
+     {
+      "source": {
+       "x": 39,
+       "y": 16
+      },
+      "target": {
+       "x": 0,
+       "y": 16
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 39,
+       "y": 17
+      },
+      "target": {
+       "x": 0,
+       "y": 17
+      },
+      "authored": true
+     },
+     {
+      "source": {
+       "x": 39,
+       "y": 18
+      },
+      "target": {
+       "x": 0,
+       "y": 18
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
     "sourceCells": 3,
-    "legacyCells": 2
+    "legacyCells": 0
    },
    {
     "portalId": "classic_route_6:tmx:classic_route_6.tmx:285:a0",
@@ -2891,9 +3251,45 @@
      "x": 0,
      "y": 17
     },
-    "reason": "fixed-destination-aligned-lane",
+    "reason": "fixed-destination-continuous-lanes",
+    "lanes": [
+     {
+      "source": {
+       "x": 39,
+       "y": 16
+      },
+      "target": {
+       "x": 0,
+       "y": 16
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 39,
+       "y": 17
+      },
+      "target": {
+       "x": 0,
+       "y": 17
+      },
+      "authored": true
+     },
+     {
+      "source": {
+       "x": 39,
+       "y": 18
+      },
+      "target": {
+       "x": 0,
+       "y": 18
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
     "sourceCells": 3,
-    "legacyCells": 2
+    "legacyCells": 0
    },
    {
     "portalId": "classic_route_6:tmx:classic_route_6.tmx:286:a0",
@@ -2907,9 +3303,45 @@
      "x": 39,
      "y": 2
     },
-    "reason": "fixed-destination-aligned-lane",
+    "reason": "fixed-destination-continuous-lanes",
+    "lanes": [
+     {
+      "source": {
+       "x": 0,
+       "y": 1
+      },
+      "target": {
+       "x": 39,
+       "y": 1
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 0,
+       "y": 2
+      },
+      "target": {
+       "x": 39,
+       "y": 2
+      },
+      "authored": true
+     },
+     {
+      "source": {
+       "x": 0,
+       "y": 3
+      },
+      "target": {
+       "x": 39,
+       "y": 3
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
     "sourceCells": 3,
-    "legacyCells": 2
+    "legacyCells": 0
    },
    {
     "portalId": "classic_route_7:tmx:classic_route_7.tmx:285:a0",
@@ -2923,9 +3355,45 @@
      "x": 3,
      "y": 0
     },
-    "reason": "fixed-destination-aligned-lane",
+    "reason": "fixed-destination-continuous-lanes",
+    "lanes": [
+     {
+      "source": {
+       "x": 2,
+       "y": 19
+      },
+      "target": {
+       "x": 2,
+       "y": 0
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 3,
+       "y": 19
+      },
+      "target": {
+       "x": 3,
+       "y": 0
+      },
+      "authored": true
+     },
+     {
+      "source": {
+       "x": 4,
+       "y": 19
+      },
+      "target": {
+       "x": 4,
+       "y": 0
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
     "sourceCells": 3,
-    "legacyCells": 2
+    "legacyCells": 0
    },
    {
     "portalId": "classic_route_7:tmx:classic_route_7.tmx:286:a0",
@@ -2939,9 +3407,45 @@
      "x": 36,
      "y": 19
     },
-    "reason": "fixed-destination-aligned-lane",
+    "reason": "fixed-destination-continuous-lanes",
+    "lanes": [
+     {
+      "source": {
+       "x": 35,
+       "y": 0
+      },
+      "target": {
+       "x": 35,
+       "y": 19
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 36,
+       "y": 0
+      },
+      "target": {
+       "x": 36,
+       "y": 19
+      },
+      "authored": true
+     },
+     {
+      "source": {
+       "x": 37,
+       "y": 0
+      },
+      "target": {
+       "x": 37,
+       "y": 19
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
     "sourceCells": 3,
-    "legacyCells": 2
+    "legacyCells": 0
    },
    {
     "portalId": "classic_route_8:tmx:classic_route_8.tmx:285:a0",
@@ -2955,9 +3459,45 @@
      "x": 39,
      "y": 16
     },
-    "reason": "fixed-destination-aligned-lane",
+    "reason": "fixed-destination-continuous-lanes",
+    "lanes": [
+     {
+      "source": {
+       "x": 0,
+       "y": 15
+      },
+      "target": {
+       "x": 39,
+       "y": 15
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 0,
+       "y": 16
+      },
+      "target": {
+       "x": 39,
+       "y": 16
+      },
+      "authored": true
+     },
+     {
+      "source": {
+       "x": 0,
+       "y": 17
+      },
+      "target": {
+       "x": 39,
+       "y": 17
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
     "sourceCells": 3,
-    "legacyCells": 2
+    "legacyCells": 0
    },
    {
     "portalId": "classic_route_8:tmx:classic_route_8.tmx:286:a0",
@@ -2971,9 +3511,45 @@
      "x": 0,
      "y": 17
     },
-    "reason": "fixed-destination-aligned-lane",
+    "reason": "fixed-destination-continuous-lanes",
+    "lanes": [
+     {
+      "source": {
+       "x": 39,
+       "y": 16
+      },
+      "target": {
+       "x": 0,
+       "y": 16
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 39,
+       "y": 17
+      },
+      "target": {
+       "x": 0,
+       "y": 17
+      },
+      "authored": true
+     },
+     {
+      "source": {
+       "x": 39,
+       "y": 18
+      },
+      "target": {
+       "x": 0,
+       "y": 18
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
     "sourceCells": 3,
-    "legacyCells": 2
+    "legacyCells": 0
    },
    {
     "portalId": "classic_steamshore_city:tmx:classic_steamshore_city.tmx:286:a0",
@@ -2987,9 +3563,45 @@
      "x": 6,
      "y": 0
     },
-    "reason": "fixed-destination-aligned-lane",
+    "reason": "fixed-destination-continuous-lanes",
+    "lanes": [
+     {
+      "source": {
+       "x": 5,
+       "y": 19
+      },
+      "target": {
+       "x": 5,
+       "y": 0
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 6,
+       "y": 19
+      },
+      "target": {
+       "x": 6,
+       "y": 0
+      },
+      "authored": true
+     },
+     {
+      "source": {
+       "x": 7,
+       "y": 19
+      },
+      "target": {
+       "x": 7,
+       "y": 0
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
     "sourceCells": 3,
-    "legacyCells": 2
+    "legacyCells": 0
    },
    {
     "portalId": "classic_steamshore_city:tmx:classic_steamshore_city.tmx:287:a0",
@@ -3003,9 +3615,45 @@
      "x": 0,
      "y": 3
     },
-    "reason": "fixed-destination-aligned-lane",
+    "reason": "fixed-destination-continuous-lanes",
+    "lanes": [
+     {
+      "source": {
+       "x": 39,
+       "y": 2
+      },
+      "target": {
+       "x": 0,
+       "y": 2
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 39,
+       "y": 3
+      },
+      "target": {
+       "x": 0,
+       "y": 3
+      },
+      "authored": true
+     },
+     {
+      "source": {
+       "x": 39,
+       "y": 4
+      },
+      "target": {
+       "x": 0,
+       "y": 4
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
     "sourceCells": 3,
-    "legacyCells": 2
+    "legacyCells": 0
    },
    {
     "portalId": "classic_thornwood_city:tmx:classic_thornwood_city.tmx:285:a0",
@@ -3019,9 +3667,45 @@
      "x": 39,
      "y": 17
     },
-    "reason": "fixed-destination-aligned-lane",
+    "reason": "fixed-destination-continuous-lanes",
+    "lanes": [
+     {
+      "source": {
+       "x": 0,
+       "y": 16
+      },
+      "target": {
+       "x": 39,
+       "y": 16
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 0,
+       "y": 17
+      },
+      "target": {
+       "x": 39,
+       "y": 17
+      },
+      "authored": true
+     },
+     {
+      "source": {
+       "x": 0,
+       "y": 18
+      },
+      "target": {
+       "x": 39,
+       "y": 18
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
     "sourceCells": 3,
-    "legacyCells": 2
+    "legacyCells": 0
    },
    {
     "portalId": "classic_thornwood_city:tmx:classic_thornwood_city.tmx:286:a0",
@@ -3035,9 +3719,45 @@
      "x": 0,
      "y": 2
     },
-    "reason": "fixed-destination-aligned-lane",
+    "reason": "fixed-destination-continuous-lanes",
+    "lanes": [
+     {
+      "source": {
+       "x": 39,
+       "y": 1
+      },
+      "target": {
+       "x": 0,
+       "y": 1
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 39,
+       "y": 2
+      },
+      "target": {
+       "x": 0,
+       "y": 2
+      },
+      "authored": true
+     },
+     {
+      "source": {
+       "x": 39,
+       "y": 3
+      },
+      "target": {
+       "x": 0,
+       "y": 3
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
     "sourceCells": 3,
-    "legacyCells": 2
+    "legacyCells": 0
    },
    {
     "portalId": "classic_thornwood_city:tmx:classic_thornwood_city.tmx:287:a0",
@@ -3051,9 +3771,45 @@
      "x": 36,
      "y": 0
     },
-    "reason": "fixed-destination-aligned-lane",
+    "reason": "fixed-destination-continuous-lanes",
+    "lanes": [
+     {
+      "source": {
+       "x": 35,
+       "y": 19
+      },
+      "target": {
+       "x": 35,
+       "y": 0
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 36,
+       "y": 19
+      },
+      "target": {
+       "x": 36,
+       "y": 0
+      },
+      "authored": true
+     },
+     {
+      "source": {
+       "x": 37,
+       "y": 19
+      },
+      "target": {
+       "x": 37,
+       "y": 0
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
     "sourceCells": 3,
-    "legacyCells": 2
+    "legacyCells": 0
    },
    {
     "portalId": "classic_thornwood_city:tmx:classic_thornwood_city.tmx:288:a0",
@@ -3067,9 +3823,45 @@
      "x": 17,
      "y": 19
     },
-    "reason": "fixed-destination-aligned-lane",
+    "reason": "fixed-destination-continuous-lanes",
+    "lanes": [
+     {
+      "source": {
+       "x": 16,
+       "y": 0
+      },
+      "target": {
+       "x": 16,
+       "y": 19
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 17,
+       "y": 0
+      },
+      "target": {
+       "x": 17,
+       "y": 19
+      },
+      "authored": true
+     },
+     {
+      "source": {
+       "x": 18,
+       "y": 0
+      },
+      "target": {
+       "x": 18,
+       "y": 19
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
     "sourceCells": 3,
-    "legacyCells": 2
+    "legacyCells": 0
    },
    {
     "portalId": "classic_umbrastar_city:tmx:classic_umbrastar_city.tmx:285:a0",
@@ -3083,9 +3875,45 @@
      "x": 39,
      "y": 17
     },
-    "reason": "fixed-destination-aligned-lane",
+    "reason": "fixed-destination-continuous-lanes",
+    "lanes": [
+     {
+      "source": {
+       "x": 0,
+       "y": 16
+      },
+      "target": {
+       "x": 39,
+       "y": 16
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 0,
+       "y": 17
+      },
+      "target": {
+       "x": 39,
+       "y": 17
+      },
+      "authored": true
+     },
+     {
+      "source": {
+       "x": 0,
+       "y": 18
+      },
+      "target": {
+       "x": 39,
+       "y": 18
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
     "sourceCells": 3,
-    "legacyCells": 2
+    "legacyCells": 0
    },
    {
     "portalId": "classic_valorhold_city:tmx:classic_valorhold_city.tmx:285:a0",
@@ -3099,9 +3927,45 @@
      "x": 39,
      "y": 17
     },
-    "reason": "fixed-destination-aligned-lane",
+    "reason": "fixed-destination-continuous-lanes",
+    "lanes": [
+     {
+      "source": {
+       "x": 0,
+       "y": 16
+      },
+      "target": {
+       "x": 39,
+       "y": 16
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 0,
+       "y": 17
+      },
+      "target": {
+       "x": 39,
+       "y": 17
+      },
+      "authored": true
+     },
+     {
+      "source": {
+       "x": 0,
+       "y": 18
+      },
+      "target": {
+       "x": 39,
+       "y": 18
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
     "sourceCells": 3,
-    "legacyCells": 2
+    "legacyCells": 0
    },
    {
     "portalId": "classic_valorhold_city:tmx:classic_valorhold_city.tmx:286:a0",
@@ -3115,13 +3979,49 @@
      "x": 3,
      "y": 19
     },
-    "reason": "fixed-destination-aligned-lane",
+    "reason": "fixed-destination-continuous-lanes",
+    "lanes": [
+     {
+      "source": {
+       "x": 2,
+       "y": 0
+      },
+      "target": {
+       "x": 2,
+       "y": 19
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 3,
+       "y": 0
+      },
+      "target": {
+       "x": 3,
+       "y": 19
+      },
+      "authored": true
+     },
+     {
+      "source": {
+       "x": 4,
+       "y": 0
+      },
+      "target": {
+       "x": 4,
+       "y": 19
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
     "sourceCells": 3,
-    "legacyCells": 2
+    "legacyCells": 0
    }
   ],
-  "partialSeamlessCells": 25,
-  "partialLegacyCells": 50,
+  "partialSeamlessCells": 75,
+  "partialLegacyCells": 0,
   "fullyLegacyPortalOnlyPortalIds": [
    "classic_route_2:tmx:classic_route_2.tmx:285:a0",
    "classic_route_3:tmx:classic_route_3.tmx:285:a0",
@@ -5808,10 +6708,10 @@
   },
   "all": {
    "maps": 263,
-   "events": 8175,
+   "events": 8225,
    "previewed": 1158,
    "fallback": 0,
-   "hidden": 7012,
+   "hidden": 7062,
    "rejected": 5,
    "reasons": {
     "duplicate-id": 0,

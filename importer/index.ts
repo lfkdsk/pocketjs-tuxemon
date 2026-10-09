@@ -129,7 +129,7 @@ export function coverageMarkdown(report: ImportReport): string {
     : "- None";
   const partialPromotions = report.seamlessHandoff.partialPromotions.length
     ? report.seamlessHandoff.partialPromotions.map((promotion) =>
-      `| \`${promotion.portalId}\` | \`${promotion.sourceMap}@${promotion.source.x},${promotion.source.y}\` | \`${promotion.targetMap}@${promotion.target.x},${promotion.target.y}\` | ${promotion.legacyCells} |`
+      `| \`${promotion.portalId}\` | ${promotion.lanes.map((lane) => `\`${promotion.sourceMap}@${lane.source.x},${lane.source.y}\` → \`${lane.target.x},${lane.target.y}\``).join("<br>")} | \`${promotion.targetMap}@${promotion.target.x},${promotion.target.y}\` | ${promotion.legacyCells} |`
     ).join("\n")
     : "| None | — | — | 0 |";
   const fullyLegacyPortalOnly = report.seamlessHandoff.fullyLegacyPortalOnlyPortalIds.length
@@ -316,10 +316,11 @@ ${worldRows}
 The generated project opts into \`${report.seamlessHandoff.mode}\`. Of
 ${report.seamlessHandoff.topologySafeOpenings} coordinate-preserving topology openings,
 all are runtime-direct. A further ${report.seamlessHandoff.partialPromotions.length} fixed-destination
-rectangles each expose their one already-coordinate-continuous lane without changing
-the authored fixed landing: ${report.seamlessHandoff.partialSeamlessCells} such cells are
-seamless and ${report.seamlessHandoff.partialLegacyCells} funneling cells in the same
-rectangles keep the legacy fade. In total ${report.seamlessHandoff.enabledTransfers} of
+rectangles funnel every lane to one authored landing on a neighbour placed edge to edge;
+each lane that passes the terrain proof now lands on its own coordinate-continuous
+neighbour cell instead: ${report.seamlessHandoff.partialSeamlessCells} such cells are
+seamless and ${report.seamlessHandoff.partialLegacyCells} cells in the same
+rectangles keep the legacy fade and fixed landing. In total ${report.seamlessHandoff.enabledTransfers} of
 ${report.seamlessHandoff.runtimeEligibleOpenings} eligible portal IDs carry a stable
 \`handoff.portalId\`. The source maps selected for this build contain
 ${report.seamlessHandoff.sourceTransferActions} transfer-like actions
@@ -334,9 +335,9 @@ Safe topology openings not emitted as runtime-direct transfers:
 
 ${missingSafeOpenings}
 
-Partially promoted fixed-destination openings:
+Fixed-destination openings promoted lane by lane:
 
-| Portal | Seamless source cell | Authored target | Legacy cells retained |
+| Portal | Seamless lanes (source → landing) | Authored target | Legacy cells retained |
 |---|---|---|---:|
 ${partialPromotions}
 

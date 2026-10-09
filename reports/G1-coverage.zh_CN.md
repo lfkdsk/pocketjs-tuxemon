@@ -178,10 +178,11 @@ accepted seams; generated 71
 The generated project opts into `seamless-v1`. Of
 258 coordinate-preserving topology openings,
 all are runtime-direct. A further 25 fixed-destination
-rectangles each expose their one already-coordinate-continuous lane without changing
-the authored fixed landing: 25 such cells are
-seamless and 50 funneling cells in the same
-rectangles keep the legacy fade. In total 283 of
+rectangles funnel every lane to one authored landing on a neighbour placed edge to edge;
+each lane that passes the terrain proof now lands on its own coordinate-continuous
+neighbour cell instead: 75 such cells are
+seamless and 0 cells in the same
+rectangles keep the legacy fade and fixed landing. In total 283 of
 283 eligible portal IDs carry a stable
 `handoff.portalId`. The source maps selected for this build contain
 1161 transfer-like actions
@@ -203,35 +204,35 @@ Safe topology openings not emitted as runtime-direct transfers:
 
 - None
 
-Partially promoted fixed-destination openings:
+Fixed-destination openings promoted lane by lane:
 
-| Portal | Seamless source cell | Authored target | Legacy cells retained |
+| Portal | Seamless lanes (source → landing) | Authored target | Legacy cells retained |
 |---|---|---|---:|
-| `classic_aerolume_city:tmx:classic_aerolume_city.tmx:285:a0` | `classic_aerolume_city@39,2` | `classic_route_6@0,2` | 2 |
-| `classic_aerolume_city:tmx:classic_aerolume_city.tmx:286:a0` | `classic_aerolume_city@0,17` | `classic_route_5@39,17` | 2 |
-| `classic_hearthrock_city:tmx:classic_hearthrock_city.tmx:300:a0` | `classic_hearthrock_city@33,0` | `classic_route_1@33,19` | 2 |
-| `classic_hearthrock_city:tmx:classic_hearthrock_city.tmx:301:a0` | `classic_hearthrock_city@39,16` | `classic_route_8@0,16` | 2 |
-| `classic_route_1:tmx:classic_route_1.tmx:293:a0` | `classic_route_1@33,19` | `classic_hearthrock_city@33,0` | 2 |
-| `classic_route_1:tmx:classic_route_1.tmx:294:a0` | `classic_route_1@6,0` | `classic_steamshore_city@6,19` | 2 |
-| `classic_route_2:tmx:classic_route_2.tmx:286:a0` | `classic_route_2@39,17` | `classic_thornwood_city@0,17` | 2 |
-| `classic_route_3:tmx:classic_route_3.tmx:286:a0` | `classic_route_3@17,19` | `classic_thornwood_city@17,0` | 2 |
-| `classic_route_5:tmx:classic_route_5.tmx:285:a0` | `classic_route_5@0,2` | `classic_thornwood_city@39,2` | 2 |
-| `classic_route_5:tmx:classic_route_5.tmx:286:a0` | `classic_route_5@39,17` | `classic_aerolume_city@0,17` | 2 |
-| `classic_route_6:tmx:classic_route_6.tmx:285:a0` | `classic_route_6@39,17` | `classic_umbrastar_city@0,17` | 2 |
-| `classic_route_6:tmx:classic_route_6.tmx:286:a0` | `classic_route_6@0,2` | `classic_aerolume_city@39,2` | 2 |
-| `classic_route_7:tmx:classic_route_7.tmx:285:a0` | `classic_route_7@3,19` | `classic_valorhold_city@3,0` | 2 |
-| `classic_route_7:tmx:classic_route_7.tmx:286:a0` | `classic_route_7@36,0` | `classic_thornwood_city@36,19` | 2 |
-| `classic_route_8:tmx:classic_route_8.tmx:285:a0` | `classic_route_8@0,16` | `classic_hearthrock_city@39,16` | 2 |
-| `classic_route_8:tmx:classic_route_8.tmx:286:a0` | `classic_route_8@39,17` | `classic_valorhold_city@0,17` | 2 |
-| `classic_steamshore_city:tmx:classic_steamshore_city.tmx:286:a0` | `classic_steamshore_city@6,19` | `classic_route_1@6,0` | 2 |
-| `classic_steamshore_city:tmx:classic_steamshore_city.tmx:287:a0` | `classic_steamshore_city@39,3` | `classic_route_2@0,3` | 2 |
-| `classic_thornwood_city:tmx:classic_thornwood_city.tmx:285:a0` | `classic_thornwood_city@0,17` | `classic_route_2@39,17` | 2 |
-| `classic_thornwood_city:tmx:classic_thornwood_city.tmx:286:a0` | `classic_thornwood_city@39,2` | `classic_route_5@0,2` | 2 |
-| `classic_thornwood_city:tmx:classic_thornwood_city.tmx:287:a0` | `classic_thornwood_city@36,19` | `classic_route_7@36,0` | 2 |
-| `classic_thornwood_city:tmx:classic_thornwood_city.tmx:288:a0` | `classic_thornwood_city@17,0` | `classic_route_3@17,19` | 2 |
-| `classic_umbrastar_city:tmx:classic_umbrastar_city.tmx:285:a0` | `classic_umbrastar_city@0,17` | `classic_route_6@39,17` | 2 |
-| `classic_valorhold_city:tmx:classic_valorhold_city.tmx:285:a0` | `classic_valorhold_city@0,17` | `classic_route_8@39,17` | 2 |
-| `classic_valorhold_city:tmx:classic_valorhold_city.tmx:286:a0` | `classic_valorhold_city@3,0` | `classic_route_7@3,19` | 2 |
+| `classic_aerolume_city:tmx:classic_aerolume_city.tmx:285:a0` | `classic_aerolume_city@39,1` → `0,1`<br>`classic_aerolume_city@39,2` → `0,2`<br>`classic_aerolume_city@39,3` → `0,3` | `classic_route_6@0,2` | 0 |
+| `classic_aerolume_city:tmx:classic_aerolume_city.tmx:286:a0` | `classic_aerolume_city@0,16` → `39,16`<br>`classic_aerolume_city@0,17` → `39,17`<br>`classic_aerolume_city@0,18` → `39,18` | `classic_route_5@39,17` | 0 |
+| `classic_hearthrock_city:tmx:classic_hearthrock_city.tmx:300:a0` | `classic_hearthrock_city@32,0` → `32,19`<br>`classic_hearthrock_city@33,0` → `33,19`<br>`classic_hearthrock_city@34,0` → `34,19` | `classic_route_1@33,19` | 0 |
+| `classic_hearthrock_city:tmx:classic_hearthrock_city.tmx:301:a0` | `classic_hearthrock_city@39,15` → `0,15`<br>`classic_hearthrock_city@39,16` → `0,16`<br>`classic_hearthrock_city@39,17` → `0,17` | `classic_route_8@0,16` | 0 |
+| `classic_route_1:tmx:classic_route_1.tmx:293:a0` | `classic_route_1@32,19` → `32,0`<br>`classic_route_1@33,19` → `33,0`<br>`classic_route_1@34,19` → `34,0` | `classic_hearthrock_city@33,0` | 0 |
+| `classic_route_1:tmx:classic_route_1.tmx:294:a0` | `classic_route_1@5,0` → `5,19`<br>`classic_route_1@6,0` → `6,19`<br>`classic_route_1@7,0` → `7,19` | `classic_steamshore_city@6,19` | 0 |
+| `classic_route_2:tmx:classic_route_2.tmx:286:a0` | `classic_route_2@39,16` → `0,16`<br>`classic_route_2@39,17` → `0,17`<br>`classic_route_2@39,18` → `0,18` | `classic_thornwood_city@0,17` | 0 |
+| `classic_route_3:tmx:classic_route_3.tmx:286:a0` | `classic_route_3@16,19` → `16,0`<br>`classic_route_3@17,19` → `17,0`<br>`classic_route_3@18,19` → `18,0` | `classic_thornwood_city@17,0` | 0 |
+| `classic_route_5:tmx:classic_route_5.tmx:285:a0` | `classic_route_5@0,1` → `39,1`<br>`classic_route_5@0,2` → `39,2`<br>`classic_route_5@0,3` → `39,3` | `classic_thornwood_city@39,2` | 0 |
+| `classic_route_5:tmx:classic_route_5.tmx:286:a0` | `classic_route_5@39,16` → `0,16`<br>`classic_route_5@39,17` → `0,17`<br>`classic_route_5@39,18` → `0,18` | `classic_aerolume_city@0,17` | 0 |
+| `classic_route_6:tmx:classic_route_6.tmx:285:a0` | `classic_route_6@39,16` → `0,16`<br>`classic_route_6@39,17` → `0,17`<br>`classic_route_6@39,18` → `0,18` | `classic_umbrastar_city@0,17` | 0 |
+| `classic_route_6:tmx:classic_route_6.tmx:286:a0` | `classic_route_6@0,1` → `39,1`<br>`classic_route_6@0,2` → `39,2`<br>`classic_route_6@0,3` → `39,3` | `classic_aerolume_city@39,2` | 0 |
+| `classic_route_7:tmx:classic_route_7.tmx:285:a0` | `classic_route_7@2,19` → `2,0`<br>`classic_route_7@3,19` → `3,0`<br>`classic_route_7@4,19` → `4,0` | `classic_valorhold_city@3,0` | 0 |
+| `classic_route_7:tmx:classic_route_7.tmx:286:a0` | `classic_route_7@35,0` → `35,19`<br>`classic_route_7@36,0` → `36,19`<br>`classic_route_7@37,0` → `37,19` | `classic_thornwood_city@36,19` | 0 |
+| `classic_route_8:tmx:classic_route_8.tmx:285:a0` | `classic_route_8@0,15` → `39,15`<br>`classic_route_8@0,16` → `39,16`<br>`classic_route_8@0,17` → `39,17` | `classic_hearthrock_city@39,16` | 0 |
+| `classic_route_8:tmx:classic_route_8.tmx:286:a0` | `classic_route_8@39,16` → `0,16`<br>`classic_route_8@39,17` → `0,17`<br>`classic_route_8@39,18` → `0,18` | `classic_valorhold_city@0,17` | 0 |
+| `classic_steamshore_city:tmx:classic_steamshore_city.tmx:286:a0` | `classic_steamshore_city@5,19` → `5,0`<br>`classic_steamshore_city@6,19` → `6,0`<br>`classic_steamshore_city@7,19` → `7,0` | `classic_route_1@6,0` | 0 |
+| `classic_steamshore_city:tmx:classic_steamshore_city.tmx:287:a0` | `classic_steamshore_city@39,2` → `0,2`<br>`classic_steamshore_city@39,3` → `0,3`<br>`classic_steamshore_city@39,4` → `0,4` | `classic_route_2@0,3` | 0 |
+| `classic_thornwood_city:tmx:classic_thornwood_city.tmx:285:a0` | `classic_thornwood_city@0,16` → `39,16`<br>`classic_thornwood_city@0,17` → `39,17`<br>`classic_thornwood_city@0,18` → `39,18` | `classic_route_2@39,17` | 0 |
+| `classic_thornwood_city:tmx:classic_thornwood_city.tmx:286:a0` | `classic_thornwood_city@39,1` → `0,1`<br>`classic_thornwood_city@39,2` → `0,2`<br>`classic_thornwood_city@39,3` → `0,3` | `classic_route_5@0,2` | 0 |
+| `classic_thornwood_city:tmx:classic_thornwood_city.tmx:287:a0` | `classic_thornwood_city@35,19` → `35,0`<br>`classic_thornwood_city@36,19` → `36,0`<br>`classic_thornwood_city@37,19` → `37,0` | `classic_route_7@36,0` | 0 |
+| `classic_thornwood_city:tmx:classic_thornwood_city.tmx:288:a0` | `classic_thornwood_city@16,0` → `16,19`<br>`classic_thornwood_city@17,0` → `17,19`<br>`classic_thornwood_city@18,0` → `18,19` | `classic_route_3@17,19` | 0 |
+| `classic_umbrastar_city:tmx:classic_umbrastar_city.tmx:285:a0` | `classic_umbrastar_city@0,16` → `39,16`<br>`classic_umbrastar_city@0,17` → `39,17`<br>`classic_umbrastar_city@0,18` → `39,18` | `classic_route_6@39,17` | 0 |
+| `classic_valorhold_city:tmx:classic_valorhold_city.tmx:285:a0` | `classic_valorhold_city@0,16` → `39,16`<br>`classic_valorhold_city@0,17` → `39,17`<br>`classic_valorhold_city@0,18` → `39,18` | `classic_route_8@39,17` | 0 |
+| `classic_valorhold_city:tmx:classic_valorhold_city.tmx:286:a0` | `classic_valorhold_city@2,0` → `2,19`<br>`classic_valorhold_city@3,0` → `3,19`<br>`classic_valorhold_city@4,0` → `4,19` | `classic_route_7@3,19` | 0 |
 
 Portal-only openings that remain wholly legacy:
 
@@ -275,7 +276,7 @@ repeats it at every mainline chapter.
 游戏钩子的缓存键去掉步数倒计时，时钟与天气只保留日期、小时与天气（`time_is` 的每个属性都由日期和小时决定）；扰动探针在同一小时内把分钟拨 15。
 下表是新游戏状态下的结果；各主线章节的结果见 `bun run verify:preview:coverage`。
 
-- All maps / 全部地图: 263 maps, 8175 events: 1158 previewable (0 from the static rules), 7012 hidden, 5 rejected; 99.6% of the events that paint are previewable; 165 maps show at least one character.
+- All maps / 全部地图: 263 maps, 8225 events: 1158 previewable (0 from the static rules), 7062 hidden, 5 rejected; 99.6% of the events that paint are previewable; 165 maps show at least one character.
 - Mainline (`spyder_*`) / 主线: 99 maps, 5252 events: 464 previewable (0 from the static rules), 4788 hidden, 0 rejected; 100.0% of the events that paint are previewable; 89 maps show at least one character.
 
 | Reject reason / 拒绝原因 | All / 全部 | Mainline / 主线 | Meaning / 含义 |
