@@ -33,11 +33,13 @@ summary:
   neighbouring ground, upper layers and animated tiles across authored seams,
   with map, texture-shard and NPC-art caches bounded to the current world
   working set. The project now opts into `seamless-v1`: all 258
-  coordinate-preserving outdoor openings plus the coordinate-continuous lane
-  of 25 fixed-destination openings cross atomically in eight ticks with no
-  fade (283 portal IDs total). The other 50 lanes in those wide openings keep
-  their authored funnel landing and fade; 65 wholly legacy outdoor portals,
-  plus indoor, faint and story transfers, also keep their legacy transition.
+  coordinate-preserving outdoor openings plus all 75 lanes of 25
+  fixed-destination openings cross atomically in eight ticks with no fade
+  (283 portal IDs total). Upstream funnels each of those wide openings to one
+  fixed landing; here every lane lands on the neighbour cell beside it. 65
+  wholly legacy outdoor portals (surf-only water openings, layout gaps, story
+  and same-map teleports), plus indoor and faint transfers, keep their legacy
+  transition.
   Neighbouring maps preview statically decidable
   NPCs, and a completed handoff saves a frozen snapshot of the map just left
   so actors behind the player do not jump back to their entry poses.

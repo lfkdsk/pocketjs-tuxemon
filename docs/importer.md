@@ -19,10 +19,17 @@ animated tiles can be visible across a seam, while its working-set driver
 bounds parsed and compiled maps and the game evicts terrain and NPC-art
 provider entries outside the corresponding visible/active sets. The transfer
 interpreter uses stable portal IDs to perform an eight-tick atomic handoff for
-proved direct `playerTouch` crossings. A wide fixed-destination portal may
-mark only its already-coordinate-continuous lane; every other lane keeps the
-same event, fade and fixed landing. Final cooked-terrain exit/entry proofs
-make this lowering fail closed. The deterministic inventory in
+proved direct `playerTouch` crossings. A wide fixed-destination portal on a
+seam funnels every lane to one authored landing; each lane whose walk across
+the edge passes the final cooked-terrain exit/entry proof is emitted as its
+own 1×1 event whose transfer lands on that lane's coordinate-continuous
+neighbour cell (the first cell keeps the original area-event id, so no other
+event is renumbered). Lanes that fail the proof keep the authored fade and
+fixed landing and carry no handoff marker. The runtime resolver additionally
+requires the landing to be the continuous cell, so the lowering fails closed.
+Surf-only water openings (Spyder Route C to Candy Town, Paper Town and Candy
+Port; Classic Route 4 to Stormpeak) stay legacy: the runtime proves a crossing
+against immutable terrain, where water is solid until a map visit opens it. The deterministic inventory in
 `reports/outdoor-seam-audit.json` records every promoted and retained outdoor
 portal.
 
