@@ -43,6 +43,7 @@ import { canSwitchLang, detectLang } from "./ui/language.ts";
 import { initZhFontStream } from "./ui/zh-font-stream.ts";
 import { setBattleSceneLang } from "./ui/battle-scene-locale.ts";
 import { createTuxemonTextTokens } from "./battle/text-tokens.ts";
+import { TUXEMON_HANDOFF_CAPABILITY } from "./battle/handoff.ts";
 import enMapDescriptions from "./dist/map-descriptions.json";
 import enMonthNames from "./data/month-names.json";
 import { TUXEMON_COMPATIBLE_SAVE_CONTENT } from "./data/save-compat.ts";
@@ -368,6 +369,7 @@ mount(() => (
       }}
       assets={assets}
       world={createWorldRenderer({ npcPreview: { sandbox: TUXEMON_PREVIEW_HOOKS } })}
+      handoffCapability={TUXEMON_HANDOFF_CAPABILITY}
       createWorldCacheDriver={(session, layout) => {
         // NPC art of the visible neighbours the session holds stays resident
         // for the neighbour preview.

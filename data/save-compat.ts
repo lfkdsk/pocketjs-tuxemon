@@ -4,6 +4,14 @@ import type { MapContentVersion } from "../vendor/pocket-rpgkit/src/engine/map-r
  * New saves are always stamped with the current build identity. */
 export const TUXEMON_COMPATIBLE_SAVE_CONTENT = Object.freeze([
   {
+    manifest: "e097077e01674a27d654bf647ea1a533ffa46108dd9b0873e4e18da7b759988a",
+    schema: "138048a55ff7d728806120306745c007401d62eec7e5ed1a5da39720429da022",
+  },
+  {
+    manifest: "8dbaf5c7a2aafb9ee45079c12e309131179b0c77f313c14bc2c76fe251a3ded3",
+    schema: "138048a55ff7d728806120306745c007401d62eec7e5ed1a5da39720429da022",
+  },
+  {
     manifest: "4b08ab85260a93f78cd6582fb2e2d6ea5744101b37519a8a4f78d6bc0b231b36",
     schema: "138048a55ff7d728806120306745c007401d62eec7e5ed1a5da39720429da022",
   },

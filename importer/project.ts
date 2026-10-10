@@ -43,6 +43,7 @@ import {
   importTerrainPassageProofs,
   importTerrainSurfaceLabels,
   terrainCanStep,
+  terrainCellBlocksEntry,
   terrainCellBlocksExit,
   terrainCellCanEnter,
   type TerrainSurfaceLabels,
@@ -4974,24 +4975,47 @@ function convertMap(
           const first = pages[0]!;
           let condition: FuturePageCondition | undefined;
           let commands: Command[];
-          if (pages.length === 1 && first.cellCommands) {
-            const page = pageCondition(first.cls, options);
-            const rectId = `${first.id}_r${String(++region).padStart(3, "0")}`;
+          if (pages.some((page) => page.cellCommands)) {
+            const regionId = String(++region).padStart(3, "0");
             for (let dy = 0; dy < h; dy++) {
               for (let dx = 0; dx < w; dx++) {
+                const cellX = x + dx;
+                const cellY = y + dy;
+                let cellCondition: FuturePageCondition | undefined;
+                let cellBody: Command[];
+                if (pages.length === 1) {
+                  const page = pageCondition(first.cls, options);
+                  cellCondition = page.cond;
+                  cellBody = guard(page.rest, first.cellCommands!(cellX, cellY));
+                } else {
+                  const flag = (i: number) => `local.area.${m.slug}.${regionId}.${i}`;
+                  cellBody = [];
+                  pages.forEach((page, i) => {
+                    if (page.cls.length) {
+                      cellBody.push(
+                        { op: "switch", id: flag(i), value: false },
+                        ...guard(page.cls, [{ op: "switch", id: flag(i), value: true }]),
+                      );
+                    }
+                  });
+                  pages.forEach((page, i) => {
+                    const body = page.cellCommands?.(cellX, cellY) ??
+                      page.regionCommands?.(cellX, cellY, 1, 1) ?? page.cmds;
+                    cellBody.push(...(page.cls.length
+                      ? [{ op: "if", if: { kind: "switch", id: flag(i), value: true }, then: body } as Command]
+                      : body));
+                  });
+                }
                 events.push(gameEvent({
-                  id: dx === 0 && dy === 0 ? rectId : `${rectId}_${dx}_${dy}`,
-                  name: first.name,
-                  x: x + dx,
-                  y: y + dy,
+                  id: dx === 0 && dy === 0
+                    ? `${first.id}_r${regionId}`
+                    : `${first.id}_r${regionId}_${dx}_${dy}`,
+                  name: pages.map((page) => page.name).join(" + "),
+                  x: cellX,
+                  y: cellY,
                   w: 1,
                   h: 1,
-                  pages: [{
-                    trigger,
-                    condition: page.cond,
-                    sprite: null,
-                    commands: guard(page.rest, first.cellCommands(x + dx, y + dy)),
-                  }],
+                  pages: [{ trigger, condition: cellCondition, sprite: null, commands: cellBody }],
                 }));
               }
             }
@@ -5512,7 +5536,8 @@ export interface SeamLane {
 export interface PartialSeamPromotion {
   portalId: string;
   sourceMap: string;
-  /** The authored lane (the one the fixed destination already continues). */
+  /** The authored tangent lane, or its same-tangent source lane when the
+   * authored destination names the wrong target edge. */
   source: { x: number; y: number };
   targetMap: string;
   /** The authored fixed destination. */
@@ -5520,7 +5545,12 @@ export interface PartialSeamPromotion {
   /** Every lane of the authored rectangle is walkable across the seam, so
    * each lane lands on its own continuous neighbour cell instead of being
    * funnelled to the fixed destination. */
-  reason: "fixed-destination-continuous-lanes" | "fixed-destination-aligned-lane";
+  reason:
+    | "fixed-destination-continuous-lanes"
+    | "fixed-destination-aligned-lane"
+    | "surf-continuous-lanes";
+  /** Trusted WorldOpening capability required to ignore target solid. */
+  movementCapability?: "surf";
   /** Seamless lanes, one contiguous run in tangent order. */
   lanes: SeamLane[];
   /** Source cells that keep the authored fade and fixed landing. */
@@ -5599,6 +5629,7 @@ function sourcePortalEvents(): Map<string, { map: TuxMap; event: TuxEvent; actio
 function planPartialSeamPromotions(
   index: Readonly<OutdoorWorldIndex>,
   layout: Readonly<WorldLayout>,
+  surfaceLabels: TerrainSurfaceLabels,
 ): PartialSeamPromotion[] {
   const indexed = new Map<string, Readonly<WorldSeamOpening>>();
   for (const world of index.worlds) for (const seam of world.seams) {
@@ -5607,11 +5638,16 @@ function planPartialSeamPromotions(
   const sourceByPortal = sourcePortalEvents();
   const { openings, placements } = worldBindings(layout);
   const passageProofs = importTerrainPassageProofs([...placements.keys()]);
+  const surfable = new Map([...placements.keys()].map((mapId) => [
+    mapId,
+    new Set(surfaceLabels[mapId]?.surfable ?? []),
+  ] as const));
   const promotions: PartialSeamPromotion[] = [];
   for (const [portalId, opening] of [...openings].sort(([a], [b]) => a.localeCompare(b))) {
     const diagnostic = indexed.get(portalId);
     if (!diagnostic || diagnostic.compatibility !== "portal-only" ||
-        diagnostic.issues.length !== 1 || diagnostic.issues[0] !== "fixed-destination") continue;
+        !diagnostic.issues.includes("fixed-destination") ||
+        diagnostic.issues.some((issue) => issue !== "fixed-destination" && issue !== "wrong-target-edge")) continue;
     const source = sourceByPortal.get(portalId);
     const sourcePlacement = placements.get(opening.source.mapId);
     const targetPlacement = placements.get(opening.target.mapId);
@@ -5633,32 +5669,64 @@ function planPartialSeamPromotions(
     const authoredTangent = diagnostic.actualTarget.tangent - opening.offset;
     const authoredTarget = { x: Number(source.action.args[2]), y: Number(source.action.args[3]) };
     const authoredCell = edgeCell(targetPlacement, opening.target.side, diagnostic.actualTarget.tangent);
-    if (authoredTangent < opening.source.span.start || authoredTangent >= opening.source.span.end ||
-        authoredCell.x !== authoredTarget.x || authoredCell.y !== authoredTarget.y) continue;
+    if (authoredTangent < opening.source.span.start || authoredTangent >= opening.source.span.end) continue;
     const sourceProof = passageProofs[opening.source.mapId];
     const targetProof = passageProofs[opening.target.mapId];
     const targetMap = allMaps.get(opening.target.mapId);
     if (!sourceProof || !targetProof || !targetMap) continue;
     const step = DIR_STEP[expectedDirection];
-    const laneCrosses = (sourceTangent: number): SeamLane | null => {
+    const sourceWater = surfable.get(opening.source.mapId)!;
+    const targetWater = surfable.get(opening.target.mapId)!;
+    const sourceCells = opening.source.span.end - opening.source.span.start;
+    const sourceRectMatchesOpening = source.event.w * source.event.h === sourceCells;
+    const laneCrosses = (sourceTangent: number, capability: "surf" | undefined): SeamLane | null => {
       const targetTangent = sourceTangent + opening.offset;
       if (targetTangent < opening.target.span.start || targetTangent >= opening.target.span.end) return null;
       const sourceCell = edgeCell(sourcePlacement, opening.source.side, sourceTangent);
       const targetCell = edgeCell(targetPlacement, opening.target.side, targetTangent);
-      if (!transferCellIsWalkable(source.map, sourceCell.x, sourceCell.y)) return null;
-      if (!transferCellIsWalkable(targetMap, targetCell.x, targetCell.y)) return null;
-      const inner = { x: sourceCell.x - step.x, y: sourceCell.y - step.y };
-      if (!terrainCanStep(sourceProof, inner.x, inner.y, expectedDirection) ||
-          terrainCellBlocksExit(sourceProof, sourceCell.x, sourceCell.y, expectedDirection) ||
-          !terrainCellCanEnter(targetProof, targetCell.x, targetCell.y, OPPOSITE_DIR[expectedDirection])) {
-        return null;
+      if (capability === "surf") {
+        const sourceIndex = sourceCell.y * sourcePlacement.width + sourceCell.x;
+        const targetIndex = targetCell.y * targetPlacement.width + targetCell.x;
+        if (!sourceRectMatchesOpening || !sourceWater.has(sourceIndex) || !targetWater.has(targetIndex) ||
+            terrainCellBlocksExit(sourceProof, sourceCell.x, sourceCell.y, expectedDirection) ||
+            terrainCellBlocksEntry(targetProof, targetCell.x, targetCell.y, OPPOSITE_DIR[expectedDirection])) {
+          return null;
+        }
+      } else {
+        if (!transferCellIsWalkable(source.map, sourceCell.x, sourceCell.y) ||
+            !transferCellIsWalkable(targetMap, targetCell.x, targetCell.y)) return null;
+        const inner = { x: sourceCell.x - step.x, y: sourceCell.y - step.y };
+        if (!terrainCanStep(sourceProof, inner.x, inner.y, expectedDirection) ||
+            terrainCellBlocksExit(sourceProof, sourceCell.x, sourceCell.y, expectedDirection) ||
+            !terrainCellCanEnter(targetProof, targetCell.x, targetCell.y, OPPOSITE_DIR[expectedDirection])) {
+          return null;
+        }
       }
-      return { source: sourceCell, target: targetCell, authored: sourceTangent === authoredTangent };
+      return {
+        source: sourceCell,
+        target: targetCell,
+        authored: sourceTangent === authoredTangent &&
+          authoredCell.x === authoredTarget.x && authoredCell.y === authoredTarget.y,
+      };
     };
-    const crossing = new Map<number, SeamLane>();
+    const surfLanes: SeamLane[] = [];
     for (let tangent = opening.source.span.start; tangent < opening.source.span.end; tangent++) {
-      const lane = laneCrosses(tangent);
-      if (lane) crossing.set(tangent, lane);
+      const lane = laneCrosses(tangent, "surf");
+      if (lane) surfLanes.push(lane);
+    }
+    const movementCapability = surfLanes.length === sourceCells ? "surf" as const : undefined;
+    const crossing = new Map<number, SeamLane>();
+    if (movementCapability) {
+      for (const lane of surfLanes) {
+        crossing.set(opening.axis === "x" ? lane.source.x : lane.source.y, lane);
+      }
+    } else {
+      if (diagnostic.issues.length !== 1 || diagnostic.issues[0] !== "fixed-destination" ||
+          authoredCell.x !== authoredTarget.x || authoredCell.y !== authoredTarget.y) continue;
+      for (let tangent = opening.source.span.start; tangent < opening.source.span.end; tangent++) {
+        const lane = laneCrosses(tangent, undefined);
+        if (lane) crossing.set(tangent, lane);
+      }
     }
     // One contiguous run: the run through the authored lane when it crosses,
     // otherwise the longest (lowest first) run.
@@ -5669,7 +5737,9 @@ function planPartialSeamPromotions(
       if (last && last.at(-1) === tangent - 1) last.push(tangent);
       else runs.push([tangent]);
     }
-    const run = runs.find((candidate) => candidate.includes(authoredTangent)) ??
+    const run = movementCapability
+      ? runs.length === 1 && runs[0]!.length === sourceCells ? runs[0] : undefined
+      : runs.find((candidate) => candidate.includes(authoredTangent)) ??
       runs.reduce<number[] | undefined>((best, candidate) =>
         !best || candidate.length > best.length ? candidate : best, undefined);
     if (!run) continue;
@@ -5678,16 +5748,18 @@ function planPartialSeamPromotions(
     for (let tangent = opening.source.span.start; tangent < opening.source.span.end; tangent++) {
       if (!run.includes(tangent)) legacyLanes.push(edgeCell(sourcePlacement, opening.source.side, tangent));
     }
-    const sourceCells = opening.source.span.end - opening.source.span.start;
     promotions.push({
       portalId,
       sourceMap: opening.source.mapId,
       source: edgeCell(sourcePlacement, opening.source.side, authoredTangent),
       targetMap: opening.target.mapId,
       target: authoredTarget,
-      reason: lanes.length > 1 || legacyLanes.length === 0
-        ? "fixed-destination-continuous-lanes"
-        : "fixed-destination-aligned-lane",
+      reason: movementCapability
+        ? "surf-continuous-lanes"
+        : lanes.length > 1 || legacyLanes.length === 0
+          ? "fixed-destination-continuous-lanes"
+          : "fixed-destination-aligned-lane",
+      ...(movementCapability ? { movementCapability } : {}),
       lanes,
       legacyLanes,
       sourceCells,
@@ -5722,6 +5794,7 @@ function applyPartialSeamPromotions(
     opening.source.span = { start: tangent(first.source), end: tangent(last.source) + 1 };
     opening.target.span = { start: tangent(first.target), end: tangent(last.target) + 1 };
     opening.compatibility = "coordinate-preserving";
+    if (promotion.movementCapability) opening.movementCapability = promotion.movementCapability;
   }
   return next;
 }
@@ -5979,7 +6052,7 @@ export function buildProject(
   ) ?? []);
   const surfaceLabels = providedSurfaceLabels ?? importTerrainSurfaceLabels(want);
   const partialSeamPromotions = sourceWorldLayout
-    ? planPartialSeamPromotions(world.index, sourceWorldLayout)
+    ? planPartialSeamPromotions(world.index, sourceWorldLayout, surfaceLabels)
     : [];
   const seamLanes = seamLaneTargets(partialSeamPromotions);
   const emittedSeamLanes = new Set<string>();

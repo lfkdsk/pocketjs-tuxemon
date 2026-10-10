@@ -908,6 +908,21 @@ export function terrainCellBlocksExit(
   return ((code & 0xf) | ((code >> 8) & 0xf)) & DIR_BIT[exit] ? true : false;
 }
 
+/** Mirrors the target-side directional part of engine `canEnter`, without
+ * consulting the solid bit. Capability-gated seam proofs use this to retain
+ * authored entry masks while allowing a labelled surface such as water. */
+export function terrainCellBlocksEntry(
+  proof: Readonly<TerrainPassageProof>,
+  x: number,
+  y: number,
+  entry: Dir,
+): boolean {
+  const index = proofIndex(proof, x, y);
+  if (index === null) return true;
+  const code = proof.codes[index] ?? 0;
+  return ((((code & 0xf) | ((code >> 4) & 0xf)) & DIR_BIT[entry]) !== 0);
+}
+
 /** Mirrors engine `canEnter` with an explicit entry edge. */
 export function terrainCellCanEnter(
   proof: Readonly<TerrainPassageProof>,
@@ -917,8 +932,7 @@ export function terrainCellCanEnter(
 ): boolean {
   const index = proofIndex(proof, x, y);
   if (index === null || proof.solid.has(index)) return false;
-  const code = proof.codes[index] ?? 0;
-  return ((((code & 0xf) | ((code >> 4) & 0xf)) & DIR_BIT[entry]) === 0);
+  return !terrainCellBlocksEntry(proof, x, y, entry);
 }
 
 /** Mirrors engine `canStepFrom` for one adjacent terrain step. */

@@ -9,6 +9,7 @@ import { createTuxemonExtensions } from "./extension.ts";
 import { createTuxemonBattleRules, type VariableEnums } from "./runtime.ts";
 import { createTuxemonScenes } from "./scenes.ts";
 import { createTuxemonTextTokens } from "./text-tokens.ts";
+import { TUXEMON_HANDOFF_CAPABILITY } from "./handoff.ts";
 import type { SessionOptions } from "../vendor/pocket-rpgkit/src/engine/session.ts";
 import type { ProjectSource, WorldTraversalMode } from "../vendor/pocket-rpgkit/src/engine/types.ts";
 import { createWorldHandoffResolver } from "../vendor/pocket-rpgkit/src/engine/world-handoff.ts";
@@ -36,6 +37,7 @@ export const TUXEMON_SESSION_OPTIONS = Object.freeze({
   battle: TUXEMON_BATTLE_RULES,
   scenes: TUXEMON_SCENES,
   textTokens: TUXEMON_TEXT_TOKENS,
+  handoffCapability: TUXEMON_HANDOFF_CAPABILITY,
 });
 
 /** Build the complete game session wiring for a concrete generated project.

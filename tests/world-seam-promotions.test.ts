@@ -3,6 +3,7 @@ import { describe, expect, test } from "bun:test";
 import { createTuxemonSessionOptions } from "../battle/game.ts";
 import { TUXEMON_PREVIEW_HOOKS } from "../battle/preview-hooks.ts";
 import { buildProject, G6_IMPORT_OPTIONS } from "../importer/project.ts";
+import { importTerrainSurfaceLabels } from "../importer/terrain.ts";
 import { BTN_BITS } from "../vendor/pocket-rpgkit/src/engine/camera.ts";
 import { restoreSessionSnapshot } from "../vendor/pocket-rpgkit/src/engine/save-restore.ts";
 import {
@@ -88,10 +89,53 @@ const HEARTHROCK_BUILD = buildProject(
   ["classic_hearthrock_city", "classic_route_1"],
   G6_IMPORT_OPTIONS,
 );
-const ROUTEC_BUILD = buildProject(
-  ["spyder_routec", "spyder_candy_town"],
-  G6_IMPORT_OPTIONS,
-);
+const SURF_MAP_IDS = [
+  "classic_route_3",
+  "classic_route_4",
+  "classic_stormpeak_city",
+  "spyder_candy_port",
+  "spyder_candy_town",
+  "spyder_paper_town",
+  "spyder_routec",
+] as const;
+const SURF_BUILD = buildProject([...SURF_MAP_IDS], G6_IMPORT_OPTIONS);
+const SURF_LABELS = importTerrainSurfaceLabels([...SURF_MAP_IDS]);
+const EXPECTED_SURF_PORTALS: Array<[string, number]> = [
+  ["classic_route_3:tmx:classic_route_3.tmx:285:a0", 8],
+  ["classic_route_4:tmx:classic_route_4.tmx:285:a0", 7],
+  ["classic_route_4:tmx:classic_route_4.tmx:286:a0", 8],
+  ["classic_stormpeak_city:tmx:classic_stormpeak_city.tmx:290:a0", 7],
+  ["spyder_candy_town:tmx:spyder_candy_town.tmx:100:a0", 8],
+  ["spyder_paper_town:tmx:spyder_paper_town.tmx:217:a0", 4],
+  ["spyder_routec:tmx:spyder_routec.tmx:155:a0", 8],
+  ["spyder_routec:tmx:spyder_routec.tmx:156:a0", 4],
+  ["spyder_routec:tmx:spyder_routec.tmx:275:a0", 8],
+] as const;
+
+const SURF_DIRECTIONS = {
+  north: { dir: "up", button: BTN_BITS.UP, facing: 2, dx: 0, dy: -1 },
+  east: { dir: "right", button: BTN_BITS.RIGHT, facing: 3, dx: 1, dy: 0 },
+  south: { dir: "down", button: BTN_BITS.DOWN, facing: 0, dx: 0, dy: 1 },
+  west: { dir: "left", button: BTN_BITS.LEFT, facing: 1, dx: -1, dy: 0 },
+} as const;
+
+function surfState(state: SessionState, mapId: string): SessionState {
+  const tileProperties = Object.fromEntries(
+    (SURF_LABELS[mapId]?.surfable ?? []).map((index) => [String(index), { passage: "pass" as const }]),
+  );
+  const sw = {
+    ...state.sw,
+    variables: { ...state.sw.variables, "v.swimming": 2 },
+    playerAppearance: { sprite: "swimmer" },
+  };
+  return {
+    ...state,
+    sw,
+    // SessionState.sw aliases the interpreter switch bank. Preserve that
+    // invariant when seeding the exact steady state produced by Allow Swim.
+    interp: { ...state.interp, sw, tileProperties },
+  };
+}
 
 function withPreviewFixtures(project: Project): Project {
   const actor = (id: string, x: number, y: number, sprite: string): GameEvent => ({
@@ -102,10 +146,10 @@ function withPreviewFixtures(project: Project): Project {
   });
   return {
     ...project,
-    maps: project.maps.map((map) => map.id === "classic_aerolume_city"
-      ? { ...map, events: [...(map.events ?? []), actor("fixture_source_npc", 2, 17, "fixture.source")] }
-      : map.id === "classic_route_5"
-        ? { ...map, events: [...(map.events ?? []), actor("fixture_target_npc", 37, 17, "fixture.target")] }
+    maps: project.maps.map((map) => map.id === "spyder_routec"
+      ? { ...map, events: [...(map.events ?? []), actor("fixture_source_npc", 2, 8, "fixture.source")] }
+      : map.id === "spyder_candy_town"
+        ? { ...map, events: [...(map.events ?? []), actor("fixture_target_npc", 38, 28, "fixture.target")] }
         : map),
   };
 }
@@ -192,21 +236,80 @@ describe("new seamless outdoor promotions", () => {
     }
   });
 
-  test("surf-only openings keep the authored fade and fixed landing", () => {
-    // Route C's west opening is open water. The runtime proves a crossing
-    // against immutable terrain, where water is solid until a map visit
-    // opens it, so no lane of this opening is promoted.
-    const portalId = "spyder_routec:tmx:spyder_routec.tmx:155:a0";
-    expect(ROUTEC_BUILD.report.seamlessHandoff.partialPromotions
-      .map((promotion) => promotion.portalId)).not.toContain(portalId);
-    expect(ROUTEC_BUILD.report.seamlessHandoff.fullyLegacyPortalOnlyPortalIds).toContain(portalId);
-    const transfers = ROUTEC_BUILD.project.maps.find((map) => map.id === "spyder_routec")!.events!
-      .filter((event) => event.name?.startsWith("Teleport to Candy Town"))
-      .flatMap((event) => event.pages.flatMap((page) => JSON.stringify(page.commands)));
-    expect(transfers.length).toBeGreaterThan(0);
-    for (const commands of transfers) {
-      expect(commands).toContain('"map":"spyder_candy_town","x":39,"y":28');
-      expect(commands).not.toContain(portalId);
+  test("all 62 lanes of the nine Surf openings cross atomically only while swimming", () => {
+    const promotions = SURF_BUILD.report.seamlessHandoff.partialPromotions
+      .filter((promotion) => promotion.movementCapability === "surf");
+    expect(promotions.map((promotion) => [promotion.portalId, promotion.lanes.length]))
+      .toEqual(EXPECTED_SURF_PORTALS);
+    expect(promotions.reduce((sum, promotion) => sum + promotion.lanes.length, 0)).toBe(62);
+
+    const openings = new Map(SURF_BUILD.project.worldLayout!.components.flatMap((component) =>
+      component.openings.map((opening) => [opening.portalId, opening] as const)
+    ));
+    for (const promotion of promotions) {
+      const opening = openings.get(promotion.portalId)!;
+      expect(opening.movementCapability, promotion.portalId).toBe("surf");
+      const travel = SURF_DIRECTIONS[opening.source.side];
+      const representative = promotion.lanes[Math.floor(promotion.lanes.length / 2)]!;
+
+      // Without the imported swimming state, the capability must never create
+      // an atomic walk. Compare every frame with the legacy traversal: Spyder
+      // water remains solid, while Classic retains its authored fade behavior.
+      const dryProject = projectAt(
+        SURF_BUILD.project,
+        promotion.sourceMap,
+        representative.source.x - travel.dx,
+        representative.source.y - travel.dy,
+        travel.dir,
+      );
+      const dry = startSettled(dryProject);
+      const legacySession = createSession(
+        dryProject,
+        60,
+        createTuxemonSessionOptions(dryProject, "legacy-transfer"),
+      );
+      let legacy = startSession(dryProject, legacySession);
+      for (let frame = 0; frame < 120; frame++) legacy = stepSession(legacySession, legacy, IDLE);
+      let blocked = dry.state;
+      for (let frame = 0; frame < 60; frame++) {
+        blocked = stepSession(dry.session, blocked, { buttons: travel.button });
+        legacy = stepSession(legacySession, legacy, { buttons: travel.button });
+        expect(blocked.handoff, `${promotion.portalId} dry`).toBeUndefined();
+        expect(canonicalJson(blocked), `${promotion.portalId} dry frame ${frame}`)
+          .toBe(canonicalJson(legacy));
+      }
+
+      for (const lane of promotion.lanes) {
+        const project = projectAt(
+          SURF_BUILD.project,
+          promotion.sourceMap,
+          lane.source.x - travel.dx,
+          lane.source.y - travel.dy,
+          travel.dir,
+        );
+        const started = startSettled(project);
+        const swimming = surfState(started.state, promotion.sourceMap);
+        const onset = approach(started.session, swimming, travel.button);
+        expect(onset.fade, `${promotion.portalId}@${lane.source.x},${lane.source.y}`).toBeNull();
+        expect(onset.handoff, `${promotion.portalId}@${lane.source.x},${lane.source.y}`).toMatchObject({
+          portalId: promotion.portalId,
+          sourceMapId: promotion.sourceMap,
+          targetMapId: promotion.targetMap,
+          sourceX: lane.source.x,
+          sourceY: lane.source.y,
+          targetX: lane.target.x,
+          targetY: lane.target.y,
+          direction: travel.facing,
+          phase: 0,
+          totalTicks: 8,
+        });
+        const landed = finishHandoff(started.session, onset);
+        expect(landed.phases, `${promotion.portalId}@${lane.source.x},${lane.source.y}`)
+          .toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
+        expect([landed.state.mapId, landed.state.move.tx, landed.state.move.ty])
+          .toEqual([promotion.targetMap, lane.target.x, lane.target.y]);
+        expect(landed.state.leftMap?.mapId).toBe(promotion.sourceMap);
+      }
     }
   });
 
@@ -243,18 +346,19 @@ describe("new seamless outdoor promotions", () => {
     expect(canonicalJson(normalizeHostFrame(restoredAfter, settled))).toBe(canonicalJson(settled));
   });
 
-  test("the new partial seam previews the target and freezes source NPCs at commit", () => {
+  test("a Surf seam previews the target and freezes source NPCs at commit", () => {
     const project = projectAt(
-      withPreviewFixtures(AEROLUME_BUILD.project),
-      "classic_aerolume_city",
+      withPreviewFixtures(SURF_BUILD.project),
+      "spyder_routec",
       1,
-      17,
+      8,
       "left",
     );
     const started = startSettled(project);
+    const swimming = surfState(started.state, "spyder_routec");
     const reader = createSandboxPreviewReader(started.session, TUXEMON_PREVIEW_HOOKS);
-    const target = started.session.maps.get("classic_route_5")!;
-    reader.observe(started.state);
+    const target = started.session.maps.get("spyder_candy_town")!;
+    reader.observe(swimming);
     reader.read(target);
     for (let guard = 0; reader.stats.pending > 0; guard++) {
       if (guard > 1_000) throw new Error("world seam promotion: preview did not settle");
@@ -262,15 +366,15 @@ describe("new seamless outdoor promotions", () => {
     }
     const preview = reader.read(target)!;
     expect(preview.rejected).toEqual([]);
-    expect(preview.actors.map((actor) => actor.eventId)).toEqual(["fixture_target_npc"]);
+    expect(preview.actors.map((actor) => actor.eventId)).toContain("fixture_target_npc");
 
-    const onset = approach(started.session, started.state, BTN_BITS.LEFT);
+    const onset = approach(started.session, swimming, BTN_BITS.LEFT);
     expect(onset.handoff).toMatchObject({
-      portalId: "classic_aerolume_city:tmx:classic_aerolume_city.tmx:286:a0",
+      portalId: "spyder_routec:tmx:spyder_routec.tmx:155:a0",
       sourceX: 0,
-      sourceY: 17,
+      sourceY: 8,
       targetX: 39,
-      targetY: 17,
+      targetY: 28,
       totalTicks: 8,
     });
     let phase7 = onset;
@@ -279,9 +383,9 @@ describe("new seamless outdoor promotions", () => {
       sandboxActors(started.session, phase7).map((actor) => [actor.eventId, actor] as const),
     );
     const committed = stepSession(started.session, phase7, IDLE);
-    expect(committed.mapId).toBe("classic_route_5");
-    expect(committed.leftMap?.mapId).toBe("classic_aerolume_city");
-    expect(committed.leftMap?.actors.map((actor) => actor.eventId)).toEqual(["fixture_source_npc"]);
+    expect(committed.mapId).toBe("spyder_candy_town");
+    expect(committed.leftMap?.mapId).toBe("spyder_routec");
+    expect(committed.leftMap?.actors.map((actor) => actor.eventId)).toContain("fixture_source_npc");
     for (const actor of committed.leftMap!.actors) {
       const before = liveAtPhase7.get(actor.eventId);
       expect(before, actor.eventId).toBeDefined();

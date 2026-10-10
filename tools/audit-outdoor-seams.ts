@@ -184,12 +184,18 @@ const partial = handoff.partialPromotions.map((promotion: PartialSeamPromotion) 
   const source = sources.get(promotion.portalId) ?? fail(`${promotion.portalId}: missing source event`);
   return {
     portalId: promotion.portalId,
-    category: "lane-mapped-fixed-destination" as const,
+    category: promotion.movementCapability
+      ? "surf-capability-lanes" as const
+      : "lane-mapped-fixed-destination" as const,
+    reason: promotion.reason,
+    movementCapability: promotion.movementCapability ?? null,
     source: sourceShape(portal, source),
     target: targetShape(portal),
     seamlessLanes: promotion.lanes.map((lane) => ({ ...lane })),
     legacyCells: promotion.legacyLanes.map((cell) => ({ ...cell })),
-    assessment: promotion.legacyLanes.length === 0
+    assessment: promotion.movementCapability
+      ? "safe while Surf-capable: every lane is Surf water on both sides and the maps sit edge to edge; the trusted opening capability gates the atomic crossing and relaxes only target solidity, while every lane lands on its coordinate-continuous neighbour cell"
+      : promotion.legacyLanes.length === 0
       ? "safe: the maps sit edge to edge and every lane passes the terrain proof, so each lane lands on its own coordinate-continuous neighbour cell instead of the authored funnel landing"
       : "partially safe: lanes that pass the terrain proof land on their continuous neighbour cell; the rest keep the original fade and fixed landing",
   };
@@ -265,12 +271,12 @@ const whollyLegacyByCategory = {
 
 expectCount("outdoor-to-outdoor portal actions", portals.length, 348);
 expectCount("raw coordinate-preserving openings", safeIds.size, 258);
-expectCount("runtime seamless portal ids", handoff.enabledTransfers, 283);
-expectCount("partial portal ids", partial.length, 25);
-expectCount("partial seamless cells", handoff.partialSeamlessCells, 75);
+expectCount("runtime seamless portal ids", handoff.enabledTransfers, 292);
+expectCount("partial portal ids", partial.length, 34);
+expectCount("partial seamless cells", handoff.partialSeamlessCells, 137);
 expectCount("partial legacy cells", handoff.partialLegacyCells, 0);
-expectCount("wholly legacy portal ids", whollyLegacy.length, 65);
-expectCount("legacy portal-only", whollyLegacyByCategory["portal-only"], 14);
+expectCount("wholly legacy portal ids", whollyLegacy.length, 56);
+expectCount("legacy portal-only", whollyLegacyByCategory["portal-only"], 5);
 expectCount("legacy linked gaps", whollyLegacyByCategory["linked-gap"], 33);
 expectCount("legacy rejected contacts", whollyLegacyByCategory["rejected-contact"], 4);
 expectCount("legacy story/nonseam", whollyLegacyByCategory["outdoor-nonseam-or-story"], 14);
