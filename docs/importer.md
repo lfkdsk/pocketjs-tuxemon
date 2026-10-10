@@ -134,7 +134,7 @@ definitions below are the report's own:
 | `camera_position`, `set_bubble`, `change_bg`, `change_bg_char`, `set_template` | native camera, balloon and walking-appearance commands plus modal-safe backdrop lowerings within the limits in [the status list](status.md#presentation). |
 | `dojo_method <var>,monster` | a cancellable `extChoice` (`tux.dojo_devolve`) over the qualifying history forms; the pick devolves the party monster and fills the `devolution_ended` line into `v.dojo.message`, cancel writes `<var>`'s no_choice code (the map's refund event). |
 | `dojo_method <var>,technique` | `extChoice` `tux.dojo_forget`, then `tux.dojo_learn` (or `tux.dojo_learn_single` for one candidate) and the `tuxemon_new_tech` line. No selected monster, no learnable candidate, or cancellation clears the event's positive `is variable_set` gates and `exit`s before either the charge or the map's success line. |
-| `change_taste <var>,<cold\|warm>,<taste\|random>` | `tux.change_taste` plus the `taste_change_report` line, then `<var>` is cleared so one selection yields one change. |
+| `change_taste <var>,<cold\|warm>,<taste\|random>` | `tux.change_taste` plus the `taste_change_report` line, then `<var>` is cleared so one selection yields one change. The exact Spyder Zhu reset page is consumed after its three authored clears, preserving the source engine's pre-sampled event hand-off so another paid choice works in the same visit or after loading a save. |
 
 ### Degraded examples
 

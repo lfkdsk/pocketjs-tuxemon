@@ -4333,6 +4333,32 @@ const BLOCKING = new Set<Command["op"]>([
 ]);
 const hasBlocking = (cmds: Command[]): boolean =>
   cmds.some((c) => BLOCKING.has(c.op) || (c.op === "if" && (hasBlocking(c.then) || hasBlocking(c.else ?? []))) || (c.op === "choices"));
+
+const ZHU_RESET_ACTIONS = [
+  "set_variable zhu_yn:null",
+  "set_variable zhu_taste_choice:null",
+  "set_variable which_taste:null",
+] as const;
+
+/** The pinned Zhu service relies on Tuxemon sampling every event guard before
+ * running that frame's actions. Once Talk Zhu End writes the enum-coded null,
+ * Talk Zhu Reset is already queued beside the next Taste event upstream. Our
+ * independent parallel pages resample Reset first and would otherwise keep its
+ * guard latched, erasing the second purchase's choices every frame. Consume
+ * only this exact source reset after it has cleared the three transaction
+ * fields; 0 is outside zhu_taste_done's enum and therefore closes its guard. */
+function isPinnedZhuTasteReset(m: TuxMap, event: TuxEvent): boolean {
+  return m.slug === "spyder_dojo1" &&
+    event.source === "spyder_dojo1.yaml" &&
+    event.origin === "yaml" &&
+    event.kind === "event" &&
+    event.name === "Talk Zhu Reset" &&
+    event.behavs.length === 0 &&
+    event.conds.length === 1 &&
+    event.conds[0]!.raw === "is variable_set zhu_taste_done:null" &&
+    event.acts.length === ZHU_RESET_ACTIONS.length &&
+    event.acts.every((action, index) => action.raw === ZHU_RESET_ACTIONS[index]);
+}
 const hasCommand = (cmds: readonly Command[], wanted: FutureCommand["op"]): boolean =>
   cmds.some((c) => {
     if ((c as FutureCommand).op === wanted) return true;
@@ -4639,6 +4665,15 @@ function convertMap(
       }
 
       const cmds = convertActions(e.acts, { m, options, economies, surfaceLabels, sourceEvent: e, seamlessPortalIds });
+      if (isPinnedZhuTasteReset(m, e)) {
+        cmds.push({ op: "variable", id: "v.zhu_taste_done", set: { op: "set", value: 0 } });
+        note(
+          "trigger",
+          "pinned Zhu transaction reset",
+          "T1-lowered",
+          "consume the exact reset page after its three source clears so a later paid taste choice remains queued",
+        );
+      }
       const cellCommands = laneCommands(cmds, seamLanes, emittedSeamLanes);
       if (!cmds.length) {
         const reason = "every action was removed, so no project event was emitted";

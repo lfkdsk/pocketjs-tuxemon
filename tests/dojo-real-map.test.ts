@@ -85,17 +85,20 @@ class Dojo {
 
   constructor(
     readonly lang: Lang,
-    npc: keyof typeof NPC_TILES,
+    readonly npc: keyof typeof NPC_TILES,
     party: SpawnedMonsterSnapshot[],
     gold: number,
     variables: Record<string, number> = {},
     project = dojoProject(lang),
+    saveCode?: string,
   ) {
     project.start = { map: project.maps[0]!.id, ...NPC_TILES[npc], dir: "up" } as Project["start"];
     this.session = createSession(project, 60, lang === "zh_CN" ? TUXEMON_SESSION_OPTIONS_ZH : TUXEMON_SESSION_OPTIONS);
     const ext = packTuxemonExtensionState({ ...initialTuxemonExtensionState(), party });
-    this.state = startSession(project, this.session, createSwitchState({ variables }), ext);
-    this.state.sw.gold = gold;
+    this.state = saveCode
+      ? restoreSave(this.session, importSaveCode(this.session, saveCode))
+      : startSession(project, this.session, createSwitchState({ variables }), ext);
+    if (!saveCode) this.state.sw.gold = gold;
     this.idle(30);
   }
 
@@ -185,13 +188,14 @@ class Dojo {
   }
 
   /** Save through the game's save code and load it into a fresh session. */
-  reloaded(): TuxemonExtensionState {
+  reload(): Dojo {
     const snapshot = takeSaveSnapshot(this.session, this.state, 0);
     const code = exportSaveCode(this.session, snapshot);
-    const project = dojoProject(this.lang);
-    const fresh = createSession(project, 60, this.lang === "zh_CN" ? TUXEMON_SESSION_OPTIONS_ZH : TUXEMON_SESSION_OPTIONS);
-    const restored = restoreSave(fresh, importSaveCode(fresh, code));
-    return tuxemonExtensionState(restored.ext, DB);
+    return new Dojo(this.lang, this.npc, [], 0, {}, dojoProject(this.lang), code);
+  }
+
+  reloaded(): TuxemonExtensionState {
+    return this.reload().ext();
   }
 }
 
@@ -205,22 +209,53 @@ const NO = { index: 1 } as const;
 describe("Spyder Dojo taste change (change_taste) on the imported map", () => {
   const zhuMet = { "v.zhufirsttime": code("zhufirsttime", "yes") };
 
-  test("a paid cold taste change rerolls once, recalculates stats, reports, and survives a save", () => {
-    const lead = monster("aardart", 20, "zhu-lead");
-    const dojo = new Dojo("en_US", "zhu", [lead], 1000, zhuMet).talk(YES, { key: "zhu-lead" }, { label: "Cold Taste" });
-    const changed = dojo.monster("zhu-lead");
-    expect(changed.tasteCold).not.toBe(lead.tasteCold);
-    expect(changed.tasteWarm).toBe(lead.tasteWarm);
-    expect(DB.tastes[changed.tasteCold]!.type).toBe("cold");
-    expect(changed.base).toEqual(calculateBaseStats(
-      RULES, changed.slug, changed.level, changed.individualValues, changed.tasteCold, changed.tasteWarm, changed.trainingPoints,
+  test("cold taste changes can be bought twice, then again after a save/load", () => {
+    const lead = monster("aardart", 20, "zhu-repeat");
+    expect([lead.tasteCold, lead.tasteWarm]).toEqual(["soft", "zesty"]);
+
+    const dojo = new Dojo("en_US", "zhu", [lead], 1000, zhuMet)
+      .talk(YES, { key: "zhu-repeat" }, { label: "Cold Taste" });
+    const first = dojo.monster("zhu-repeat");
+    expect([first.tasteCold, first.tasteWarm, dojo.state.sw.gold]).toEqual(["mild", "zesty", 950]);
+    expect(first.base).toEqual(calculateBaseStats(
+      RULES, first.slug, first.level, first.individualValues, first.tasteCold, first.tasteWarm, first.trainingPoints,
     ));
-    expect(dojo.state.sw.gold).toBe(950);
-    const name = (slug: string) => `${slug[0]!.toUpperCase()}${slug.slice(1)}`;
-    const reports = dojo.said.filter((line) => line.includes("changed from"));
-    expect(reports).toEqual([`Aardart's Cold Taste changed from ${name(lead.tasteCold)} to ${name(changed.tasteCold)}!`]);
-    expect(dojo.choices.map((choice) => choice.options)).toEqual([["Yes", "No"], ["Aardart"], ["Cold Taste", "Warm Taste"]]);
-    expect(dojo.reloaded().party[0]).toEqual(changed);
+
+    dojo.talk(YES, { key: "zhu-repeat" }, { label: "Cold Taste" });
+    const second = dojo.monster("zhu-repeat");
+    expect([second.tasteCold, second.tasteWarm, dojo.state.sw.gold]).toEqual(["bland", "zesty", 900]);
+    expect(second.base).toEqual(calculateBaseStats(
+      RULES, second.slug, second.level, second.individualValues, second.tasteCold, second.tasteWarm, second.trainingPoints,
+    ));
+
+    const restored = dojo.reload();
+    expect(restored.monster("zhu-repeat")).toEqual(second);
+    expect(restored.state.sw.gold).toBe(900);
+    restored.talk(YES, { key: "zhu-repeat" }, { label: "Cold Taste" });
+    const third = restored.monster("zhu-repeat");
+    expect([third.tasteCold, third.tasteWarm, restored.state.sw.gold]).toEqual(["dry", "zesty", 850]);
+    expect(third.base).toEqual(calculateBaseStats(
+      RULES, third.slug, third.level, third.individualValues, third.tasteCold, third.tasteWarm, third.trainingPoints,
+    ));
+
+    expect(dojo.said.filter((line) => line.includes("changed from"))).toEqual([
+      "Aardart's Cold Taste changed from Soft to Mild!",
+      "Aardart's Cold Taste changed from Mild to Bland!",
+    ]);
+    expect(restored.said.filter((line) => line.includes("changed from"))).toEqual([
+      "Aardart's Cold Taste changed from Bland to Dry!",
+    ]);
+    const menu = [["Yes", "No"], ["Aardart"], ["Cold Taste", "Warm Taste"]];
+    expect(dojo.choices.map((choice) => choice.options)).toEqual([...menu, ...menu]);
+    expect(restored.choices.map((choice) => choice.options)).toEqual(menu);
+    expect(restored.state.sw.variables).toMatchObject({
+      "v.zhu_yn": 2,
+      "v.zhu_taste_choice": 1,
+      "v.which_taste": 1,
+      "v.zhu_taste_done": 0,
+      "v.tasteful_zhu": 0,
+      "v.dojo.message": 0,
+    });
   });
 
   test("a warm taste change in Chinese names the monster and both tastes", () => {
