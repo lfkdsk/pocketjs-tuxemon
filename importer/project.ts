@@ -4129,7 +4129,20 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         }
         break;
       case "park_experience":
-        noteAction(a, a.type, "T3-dropped", "Safari-park session (Eclipse park); not part of the Spyder campaign");
+        if (ctx.options.battle && (g[0] === "start" || g[0] === "stop")) {
+          noteAction(a, a.type, "T1", g[0] === "start"
+            ? "tux.park_experience activates the saved Eclipse Park session"
+            : "tux.park_experience deactivates the session, clears park_out and blocks on the summary scene");
+          out.push({ op: "ext", call: "tux.park_experience", args: { action: g[0] } });
+          if (g[0] === "stop") {
+            out.push({ op: "variable", id: varId("park_out"), set: { op: "set", value: 0 } });
+            out.push({ op: "scene", id: "tux.parkSummary", args: {} } as Command);
+          }
+        } else {
+          noteAction(a, a.type, "T4-dropped", ctx.options.battle
+            ? "park_experience requires start or stop"
+            : "monster/combat subsystem (P2)");
+        }
         break;
       case "update_time":
         noteAction(a, a.type, "T1", "tux.update_time writes eight variables from the saved deterministic calendar");

@@ -61,6 +61,12 @@ import {
 } from "./time-weather.ts";
 import type { DaycareExtensionState, SpawnedMonsterSnapshot, Stats } from "./types.ts";
 import { STAT_NAMES } from "./types.ts";
+import {
+  activateParkSession,
+  deactivateParkSession,
+  parkSessionProblem,
+  type ParkSessionState,
+} from "./park.ts";
 
 export const PARTY_LIMIT = 6;
 export const KENNEL_LIMIT = 30;
@@ -180,6 +186,9 @@ export interface TuxemonExtensionState {
   daycare?: DaycareExtensionState;
   /** Sparse per-character step trackers (character -> tracker id). */
   stepTrackers?: StepTrackers;
+  /** Sparse Eclipse Park session. Absent until the first park action so old
+   *  saves and the main campaign retain their exact hot-path shape. */
+  parkSession?: ParkSessionState;
 }
 
 export interface MonsterBox {
@@ -678,6 +687,10 @@ function tuxemonStateProblem(
   }
   if (state.stepTrackers !== undefined) {
     const problem = stepTrackersProblem(state.stepTrackers);
+    if (problem) return problem;
+  }
+  if (state.parkSession !== undefined) {
+    const problem = parkSessionProblem(state.parkSession);
     if (problem) return problem;
   }
   for (const [group, values] of groups) {
@@ -2095,6 +2108,20 @@ function milestoneShownCommand() {
   };
 }
 
+function parkExperienceCommand() {
+  return (context: ExtensionCommandContext, value: JsonValue) => {
+    const args = argsRecord(value, "tux.park_experience");
+    if (args.action !== "start" && args.action !== "stop") {
+      throw new Error("tux.park_experience: action must be 'start' or 'stop'");
+    }
+    const current = currentExtensionState(context.ext);
+    const parkSession = args.action === "start"
+      ? activateParkSession(current.parkSession)
+      : deactivateParkSession(current.parkSession);
+    return { ext: json({ ...current, parkSession }) };
+  };
+}
+
 function stepTrackerCondition(context: ExtensionReadContext, value: JsonValue): boolean {
   const { args, character, tracker } = trackerArgs(value, "tux.step_tracker");
   const milestone = finiteArg(args.milestone, "tux.step_tracker", "milestone");
@@ -3197,6 +3224,7 @@ export function createTuxemonExtensions(
       "tux.add_step_tracker": addStepTrackerCommand(),
       "tux.remove_step_tracker": removeStepTrackerCommand(),
       "tux.set_step_tracker_milestone_shown": milestoneShownCommand(),
+      "tux.park_experience": parkExperienceCommand(),
       "tux.set_variable_text": setVariableTextCommand,
       "tux.variable_math": variableMathCommand,
       "tux.format_variable": formatVariableCommand,
