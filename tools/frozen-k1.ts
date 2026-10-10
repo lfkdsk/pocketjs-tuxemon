@@ -43,6 +43,7 @@ const SCAN_OPTIONS = {
     "tux.monsterShop": SCAN_SCENE_RULES,
     "tux.daycare": SCAN_SCENE_RULES,
     "tux.radio": SCAN_SCENE_RULES,
+    "tux.parkSummary": SCAN_SCENE_RULES,
   },
 } as const;
 
