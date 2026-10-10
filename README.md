@@ -370,6 +370,24 @@ map warp is in the in-game menu, or use a `?map=` link (below).
 - **Autoplay** — play the chapter's tape suffix automatically at 1×, 2× or
   4×. Any button takes over live play; **L** rewinds three seconds.
 
+### Eclipse Park
+
+Eclipse Park sits outside the Spyder campaign, so use **SELECT → Map warp →
+`eclipse_park_entrance`** to reach its safe `(4,3)` spawn. On the web, the
+equivalent link is `?map=eclipse_park_entrance&x=4&y=3`. Walk to the reception
+counter, face down and accept the 500-gold admission: that authored entrance
+flow gives you 25 Park Balls, starts the 500-step counter and transfers you
+into the park. Warping straight to `eclipse_park` is useful for map browsing,
+but deliberately does not start a complete park session.
+
+Wild encounters inside the paid session use the dedicated **Ball / Food /
+Doll / Run** menu. Ball attempts consume a Park Ball and either catch the
+Tuxemon or let it break free; Run always leaves that encounter. Food and Doll
+remain visible but disabled because the pinned Tuxemon version contains only
+unfinished scaffolding for them. Leaving the park or reaching the step limit
+shows a bilingual session summary, then returns you to the entrance. The
+menus and summary support controller, keyboard and scaled touch.
+
 The same actions are available as deep links, so a specific scene can be
 bookmarked or shared:
 

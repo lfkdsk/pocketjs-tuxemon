@@ -106,6 +106,7 @@ definitions below are the report's own:
 | `set_facing_mode` | `moveControl` facingMode (locked / followMovement). |
 | `char_position` | an exact `place` after import validates that both coordinates are integers inside the map; invalid source coordinates fail the import, as upstream raises instead of clamping. An immediately following `char_face` folds into the placement direction. |
 | `add_step_tracker player,…` | `tux.add_step_tracker`; the opted-in `playerStep` hook reports signed `dx`/`dy` for ordinary steps, transfers and direct placement. Trackers consume `dx+dy`; the shared daycare consumes one step per hook call. |
+| `park_experience start` / `stop` | `tux.park_experience` over the sparse saved Eclipse Park session. Start preserves client-lifetime encounter statistics while activating Park capture rules; stop deactivates once, clears `park_out` and blocks on the bilingual settlement scene before the authored exit cleanup continues. All 8 uses are Native. |
 | `char_run` (both authored uses) | no command: Christie and Bjorn are idle at the call, so upstream's moving-only run-rate change is an exact no-op and cannot latch onto a later forced route. |
 | `char_speed` | `moveControl` routeSpeed scoped to the active or next forced route, or to the first successfully committed tile after command-started wander, then cleared on idle as upstream does. The optional `tilesPerSecond` field carries the exact authored rate on the fixed 60 Hz clock; the MV grade remains as a fallback for older project documents. |
 | `is battle_outcome` | `tux.battle_outcome` extension condition reading live battle history. |
@@ -141,7 +142,7 @@ definitions below are the report's own:
 | Tuxemon | Lowering |
 |---|---|
 | `char_face player,<dir>` | a `moveRoute` with the kit's native `faceUp`/`faceDown`/… step; the step applies on the next boundary tick (upstream faces immediately), so the turn lands one tick after the command. A `char_face` immediately after a `char_position` folds into the placement's `dir` instead, and a spawn-event `char_face npc,<dir>` becomes the NPC page's native initial `dir`. |
-| `add_tracker` | a `switch`; step counters are not modeled. |
+| `add_tracker` | a boolean `switch`; this distinct tracker action has no numeric counter. Authored step countdowns use the native `add_step_tracker` mapping above. |
 | `transition_teleport` with an out-of-range landing | coordinates clamped into the target map; an isolated landing is repaired to the nearest walkable cell by deterministic four-neighbour BFS. |
 | `choice_npc` | static `extChoice` list; the shared label is extended with each option's translated name so the lines stay distinguishable (upstream tells options apart by per-option NPC portraits, which need kit option-image support). |
 | `get_party_monster` (dojo, gym) | `tux.get_party_monsters` dumps the party iids into `iid_slot_*`; NPC trainer parties are staged live (not folded) when an event inspects them, so the dojo and gym calls find a party. |
