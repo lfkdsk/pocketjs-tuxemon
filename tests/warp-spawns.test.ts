@@ -102,10 +102,13 @@ describe("warp spawn index", () => {
     // tracker), so a bare majority of spawns keep a transfer landing while
     // the rest fall back to the nearest event-free cell. A jump here means
     // the importer's event geometry or landing set changed, not just the data.
-    // Route 3's repaired south-edge event now occupies its former transfer
-    // landing, so the demo index chooses the adjacent clear fallback cell.
-    expect(counts.transfer).toBe(134);
-    expect(counts.fallback).toBe(111);
+    // Route 3's repaired south-edge event occupies one former transfer
+    // landing. Its promoted Route 4 Surf opening now also preserves each
+    // lane's opposite-edge target instead of contributing the authored fixed
+    // (20,19) landing; the remaining incoming landings are event cells, so
+    // the demo index chooses the nearest clear fallback cell.
+    expect(counts.transfer).toBe(133);
+    expect(counts.fallback).toBe(112);
     expect(counts.blocked).toBe(BLOCKED_MAPS.length);
   });
 
