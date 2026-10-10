@@ -16,8 +16,8 @@
       "width": 480,
       "height": 272,
       "file": "park-summary.480x272.png",
-      "rgbaFnv1a": "84cb6503",
-      "pngSha256": "cc2cfbebec47aa7d47609e47d9f6efcc7ab4524c9ca0bf05f98b12e943774466"
+      "rgbaFnv1a": "ce232500",
+      "pngSha256": "d972040ceaff1019351c779b318b16477110a522482aa6fa0164bc0a86d48d7a"
     },
     {
       "lang": "en_US",
@@ -34,8 +34,8 @@
       "width": 960,
       "height": 544,
       "file": "park-summary.960x544.png",
-      "rgbaFnv1a": "dfc276bc",
-      "pngSha256": "3e07e5ea8ceba92e0bdf873bfda342c43ad71b5a3245ef50f1f7443b3a2bffcc"
+      "rgbaFnv1a": "d968d6ea",
+      "pngSha256": "626d775d7216b6fcf32a8a87518ea7b4492a8007d62af1a44a22549005a8e2f2"
     },
     {
       "lang": "zh_CN",
@@ -52,8 +52,8 @@
       "width": 480,
       "height": 272,
       "file": "park-summary.zh.480x272.png",
-      "rgbaFnv1a": "7dbe227e",
-      "pngSha256": "4aea5c12307c35cd65ba3a2b7afb7c55c32093e59db85584700edb9628183bdb"
+      "rgbaFnv1a": "018bdcf1",
+      "pngSha256": "6b2adccb852d8c4cfeb724575e6d116e997b43f9eeb67a3d752bac10cf1ee3bb"
     },
     {
       "lang": "zh_CN",
@@ -70,8 +70,8 @@
       "width": 960,
       "height": 544,
       "file": "park-summary.zh.960x544.png",
-      "rgbaFnv1a": "f6c2398f",
-      "pngSha256": "64f295fc2e38acf8be6a66824296ed147290539c9021ec00c54590e034fa0ae1"
+      "rgbaFnv1a": "c1d51a1d",
+      "pngSha256": "31ecd888460502f2b18cd1a5f0e3c96c22c0d9ec423903a123a5509ca3d1344f"
     }
   ]
 }
