@@ -42,6 +42,7 @@ const GAME_OPTIONS = {
     "tux.monsterShop": LOCK_SCENE_RULES,
     "tux.daycare": LOCK_SCENE_RULES,
     "tux.radio": LOCK_SCENE_RULES,
+    "tux.parkSummary": LOCK_SCENE_RULES,
   },
 } as const;
 
