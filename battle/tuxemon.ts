@@ -49,6 +49,14 @@ const RANGE_MAP: Record<string, readonly [StatName | "level", StatName | "resist
 };
 const PERSISTENT_STATUSES = new Set(["burn", "poison"]);
 const BOND_STATUSES = new Set(["grabbed", "lifeleech", "lifegift"]);
+const PARK_FAILURE_FLAVORS = [
+  "afraid",
+  "stare",
+  "wander",
+  "resting",
+  "playful",
+  "alert",
+] as const;
 
 interface TechniqueResult {
   success: boolean;
@@ -839,7 +847,22 @@ function performCapture(
     ...roll,
     quantity: state.inventory[item.slug] ?? 0,
   });
-  if (!roll.success) return;
+  if (!roll.success) {
+    if (action.parkCapture) {
+      const parkFlavor = randomChoice(state, PARK_FAILURE_FLAVORS);
+      // ParkEffect._handle_capture_failure rewrites every queued action
+      // performed by the wild target, preserving the action target and queue
+      // position while replacing its method with Technique.create("empty").
+      for (const queued of state.queue) {
+        if (queued.user !== target.uid) continue;
+        queued.kind = "technique";
+        queued.ref = "empty";
+        queued.parkFlavor = parkFlavor;
+        delete queued.moveIndex;
+      }
+    }
+    return;
+  }
 
   target.captureDevice = item.slug;
   target.acquisition = "captured";
@@ -1299,6 +1322,7 @@ function performTechnique(
     hpBefore: before,
     hp: partyHp(state),
     statuses: partyStatuses(state),
+    ...(action.parkFlavor ? { parkFlavor: action.parkFlavor } : {}),
   });
 }
 
@@ -1774,6 +1798,7 @@ export function reduceBattle(
       user,
       target: decision.target,
       ref: decision.item,
+      ...(capture && decision.menuState === "MainParkMenuState" ? { parkCapture: true } : {}),
     });
   } finally {
     draftIndexes.delete(state);

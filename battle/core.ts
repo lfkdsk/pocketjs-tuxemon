@@ -55,6 +55,11 @@ export interface BattleAction {
   target: number;
   ref: string;
   moveIndex?: number;
+  /** Dedicated Park capture marker. Failed captures rewrite the wild
+   * monster's queued action to the empty flavour technique. */
+  parkCapture?: true;
+  /** One of upstream ParkEffect's six idle narration keys. */
+  parkFlavor?: string;
   /** EnqueuedAction.sub_priority, consumed even when sorting ignores it. */
   subPriority: number;
 }

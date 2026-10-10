@@ -19,6 +19,7 @@ export interface BattleSceneLabels {
   attackMissed: string;
   damage: (amount: number) => string;
   used: (name: string, technique: string) => string;
+  parkFlavor: (key: string, name: string) => string;
   grewLevels: (name: string, levels: number) => string;
   gainedXp: (name: string, xp: number) => string;
   fainted: (name: string) => string;
@@ -63,6 +64,17 @@ const EN: BattleSceneLabels = {
   attackMissed: "The attack missed!",
   damage: (amount) => `${Math.trunc(amount)} damage!`,
   used: (name, technique) => `${name} used ${technique}!`,
+  parkFlavor: (key, name) => {
+    switch (key) {
+      case "afraid": return `${name} recoils, its body tense and ready to flee.`;
+      case "stare": return `${name} fixes its gaze on you, unreadable and still.`;
+      case "wander": return `${name} moves slowly, lost in thought or instinct.`;
+      case "resting": return `${name} curls up, its breath slow and steady.`;
+      case "playful": return `${name} dashes around, kicking up dust in excitement.`;
+      case "alert": return `${name} suddenly stops, sensing something nearby.`;
+      default: return `${name} watches you carefully.`;
+    }
+  },
   grewLevels: (name, levels) => `${name} grew ${levels} level${levels === 1 ? "" : "s"}!`,
   gainedXp: (name, xp) => `${name} gained ${xp} XP!`,
   fainted: (name) => `${name} fainted!`,
@@ -118,6 +130,17 @@ const ZH: BattleSceneLabels = {
   attackMissed: "攻击没有命中！",
   damage: (amount) => `${Math.trunc(amount)} 点伤害！`,
   used: (name, technique) => `${name} 使用了 ${technique}！`,
+  parkFlavor: (key, name) => {
+    switch (key) {
+      case "afraid": return `${name} 往后一缩，绷紧身体准备逃跑。`;
+      case "stare": return `${name} 一动不动地盯着你，令人捉摸不透。`;
+      case "wander": return `${name} 缓缓踱步，仿佛沉浸在本能与思绪中。`;
+      case "resting": return `${name} 蜷起身体，呼吸缓慢而平稳。`;
+      case "playful": return `${name} 兴奋地四处奔跑，扬起一阵尘土。`;
+      case "alert": return `${name} 突然停下，察觉到附近的动静。`;
+      default: return `${name} 小心地观察着你。`;
+    }
+  },
   grewLevels: (name, levels) => `${name} 升到了 ${levels} 级！`,
   gainedXp: (name, xp) => `${name} 获得了 ${xp} 点经验！`,
   fainted: (name) => `${name} 倒下了！`,

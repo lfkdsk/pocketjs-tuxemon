@@ -1272,21 +1272,9 @@ export function createTuxemonBattleRules(source: BattleDbSource, enums: Variable
             // a positive check, so it consumes no item and leaves the same
             // encounter/menu active instead of ending the battle.
             const battle = cloneBattleState(state.battle);
-            const roll = nextRandom(battle);
-            if (state.park.turnsRemaining === 0 || roll < state.park.fleeRate) {
+            if (state.park.turnsRemaining === 0 || nextRandom(battle) < state.park.fleeRate) {
               state.battle = battle;
             } else {
-              // ParkEffect rewrites every queued action from the wild target
-              // to the mechanically empty technique after a failed capture.
-              // Rewriting before the capture reducer is equivalent: success
-              // ends the battle before the action runs, while failure lets
-              // the empty flavour turn execute without hurting the player.
-              for (const action of battle.queue) {
-                if (action.user !== selected.target) continue;
-                action.kind = "technique";
-                action.ref = "empty";
-                delete action.moveIndex;
-              }
               state.battle = reduceBattle(rulesDb, battle, {
                 type: "capture",
                 item: "tuxeball_park",

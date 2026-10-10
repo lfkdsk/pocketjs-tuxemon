@@ -117,7 +117,7 @@ describe("Eclipse Park session state", () => {
       ...emptyParkSession(false),
       successfulCaptures: 6,
       history: ["alpha", "bravo", "charlie", "delta", "echo", "foxtrot"].map(
-        (monster, index) => ({ monster, turnsRemaining: 30 - index }),
+        (monster, index) => ({ monster, turnsRemaining: [12, 30, 8, 24, 16, 20][index]! }),
       ),
     };
 
@@ -478,6 +478,17 @@ describe("dedicated Eclipse Park encounter", () => {
       successfulCaptures: 0,
     });
     expect(after.menu.map(({ slug }) => slug)).toEqual(["park_ball", "park_food", "park_doll", "run"]);
+
+    const expired = tuxemonRuntimeBattleState(parkBattle(901).value);
+    expired.park = { ...expired.park!, turnsRemaining: 0 };
+    const expiredAfter = tuxemonRuntimeBattleState(encounter.rules.step(
+      expired as unknown as JsonValue,
+      { buttons: 0, confirmEdge: true },
+      0,
+    ));
+    expect(expiredAfter.battle.rngDraws).toBe(expired.battle.rngDraws);
+    expect(expiredAfter.battle.inventory.tuxeball_park).toBe(25);
+    expect(expiredAfter.battle.phase).toBe("decision");
   });
 
   test("a failed throw is counted and consumed while a voluntary run always exits", () => {
@@ -498,11 +509,15 @@ describe("dedicated Eclipse Park encounter", () => {
     const player = failure.battle.parties[0][0]!;
     expect(player.currentHp).toBe(player.base.hp);
     const enemyUid = failure.battle.parties[1][0]!.uid;
-    expect(failure.battle.events.find((event) =>
-      event.type === "technique" && event.user === enemyUid)).toMatchObject({
+    const emptyTurn = failure.battle.events.find((event) =>
+      event.type === "technique" && event.user === enemyUid);
+    expect(emptyTurn).toMatchObject({
       technique: "empty",
       damage: 0,
     });
+    expect(typeof emptyTurn?.parkFlavor).toBe("string");
+    expect(["afraid", "stare", "wander", "resting", "playful", "alert"])
+      .toContain(String(emptyTurn?.parkFlavor));
 
     const voluntary = parkBattle(901);
     let state = tuxemonRuntimeBattleState(voluntary.value);

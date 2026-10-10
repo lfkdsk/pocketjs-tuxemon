@@ -83,6 +83,9 @@ function eventMessage(state: Runtime, event: BattleEvent | null, monsters: reado
     case "sendOut": return L.entersBattle(monster(event.monster));
     case "decision": return L.chose(monster(event.user), battleDisplayName("technique", String(event.technique ?? "move")));
     case "technique": {
+      if (typeof event.parkFlavor === "string") {
+        return L.parkFlavor(event.parkFlavor, monster(event.user));
+      }
       if (tick >= 34 && event.hit === false) return L.attackMissed;
       if (tick >= 34 && Number(event.damage) > 0) return L.damage(Number(event.damage));
       return L.used(monster(event.user), battleDisplayName("technique", String(event.technique ?? "move")));
