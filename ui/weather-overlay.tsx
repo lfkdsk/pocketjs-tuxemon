@@ -1,15 +1,12 @@
-// WX1 weather particle overlay.
+// Weather particles mounted through GameView's worldOverlay slot.
 //
-// A render-only sibling of GameView: it paints rain, snow, wind streaks and
-// fog veils above the world using a fixed pool of image nodes repositioned
-// every frame from the saved reference tick (see battle/weather-visuals.ts).
+// It paints rain, snow, wind streaks and fog veils above the world using a
+// fixed pool of image nodes repositioned every frame from the saved reference
+// tick (see battle/weather-visuals.ts). GameView paints this slot below its
+// daylight tint, dialogs, and fades, so those effects composite naturally.
 // It hides indoors (the imported TMX `inside` set), while a scene or battle
 // is open, while the save/load or demo menu is open, and for weathers without
-// a profile. Particles self-dim with the daylight grade because this overlay
-// sits above the tint layer; the kit
-// capability that would let them be veiled by the tint instead (a
-// game-injectable layer slot between the world frame and ScreenEffectsLayer)
-// is described in docs/status.md (weather particles).
+// a profile.
 
 import { type Component } from "solid-js";
 import { onFrame } from "@pocketjs/framework/lifecycle";
@@ -21,7 +18,6 @@ import { weatherEnvelopeInto, type WeatherEnvelope } from "../battle/extension.t
 import {
   MAX_WEATHER_PARTICLES,
   WEATHER_PROFILES,
-  stageDimAt,
   weatherAgeTicks,
   weatherParticleInto,
   weatherSlugHash,
@@ -70,7 +66,6 @@ const slotStyle = (width: number, height: number): SlotStyle => ({
 });
 
 /**
- * Mounts after GameView so it paints above the world, tint, and dialogs.
  * All per-frame state lives in this closure; the component itself renders
  * once and never touches Solid reactivity again.
  */
@@ -78,6 +73,7 @@ export const WeatherOverlay: Component<{
   bridge: WeatherStateBridge;
   suspended?: () => boolean;
 }> = (props) => {
+  const suspended = props.suspended;
   const root = createElement("view");
   setProp(root, "style", { posType: 1, insetL: 0, insetT: 0, width: 0, height: 0 });
   setProp(root, "debugName", "tux-weather-overlay");
@@ -179,17 +175,19 @@ export const WeatherOverlay: Component<{
     positionBatch = profileBatches[slug]!;
   };
 
-  // Allocation-regression switch: when true, the overlay mounts normally
-  // (nodes, texture preload, batches) but its frame handler is a no-op, so
-  // a QuickJS mem walk can diff frame-handler cost on/off without the
-  // mount-time allocations changing the heap between runs.
-  const noFrame = (globalThis as typeof globalThis & {
-    __pocketTuxemonWeatherOverlayNoFrame?: boolean;
-  }).__pocketTuxemonWeatherOverlayNoFrame === true;
-
-  onFrame(() => {
-    if (noFrame) return;
-    if (props.suspended?.()) {
+  // Allocation-regression control. The QuickJS probe mounts and warms the
+  // identical active overlay in both runs, then flips this stable object's
+  // field only at the measured window so its diff cannot include divergent
+  // texture/layout warm-up.
+  const probeGlobals = globalThis as typeof globalThis & {
+    __pocketTuxemonWeatherOverlayFrameControl?: { disabled: boolean };
+    __pocketTuxemonWeatherOverlayProbe?: () => void;
+    __pocketTuxemonWeatherOverlayProbeNoop?: () => void;
+  };
+  const frameControl = probeGlobals.__pocketTuxemonWeatherOverlayFrameControl;
+  const updateWeather = (): void => {
+    if (frameControl?.disabled === true) return;
+    if (suspended?.()) {
       if (activeSlug !== "") {
         hideAll();
         activeSlug = "";
@@ -220,19 +218,17 @@ export const WeatherOverlay: Component<{
       }
       return;
     }
-    const viewport = hostViewport(getOps());
-    const viewportWidth = viewport?.w ?? 480;
-    const viewportHeight = viewport?.h ?? 272;
     if (activeSlug !== envelope.slug) {
       activate(profile, envelope.slug);
       activeSlug = envelope.slug;
     }
     const batch = positionBatch;
     if (!batch) return;
-    // Match GameView's world frame: clips each axis to min(map, viewport) and
-    // centers undersized maps, so particles never fall in the letterbox.
-    // Read the world size into locals instead of materializing a fallback
-    // object for maps absent from the table.
+    // Match the active map's clipped/letterboxed frame without materializing
+    // an object on the QuickJS hot path.
+    const viewport = hostViewport(getOps());
+    const viewportWidth = viewport?.w ?? 480;
+    const viewportHeight = viewport?.h ?? 272;
     const world = (TERRAIN_WORLD as Record<string, { w: number; h: number }>)[state.mapId];
     const sizeW = world ? world.w : viewportWidth;
     const sizeH = world ? world.h : viewportHeight;
@@ -240,7 +236,6 @@ export const WeatherOverlay: Component<{
     const frameY = Math.max(0, Math.floor((viewportHeight - sizeH) / 2));
     const frameWidth = Math.min(sizeW, viewportWidth);
     const frameHeight = Math.min(sizeH, viewportHeight);
-    const dim = stageDimAt(envelope.minuteOfDay);
     const age = weatherAgeTicks(envelope.refTick, envelope.enteredAtTick);
     const placement = placementScratch;
     for (let index = 0; index < profile.count; index++) {
@@ -252,7 +247,7 @@ export const WeatherOverlay: Component<{
         age,
         frameWidth,
         frameHeight,
-        dim,
+        1,
         placement,
       );
       batch.set(index * 2, frameX + placement.x);
@@ -264,7 +259,13 @@ export const WeatherOverlay: Component<{
       slot.visible = placement.opacity > 0;
     }
     batch.commit();
-  });
+  };
+
+  if (frameControl) {
+    probeGlobals.__pocketTuxemonWeatherOverlayProbe = updateWeather;
+    probeGlobals.__pocketTuxemonWeatherOverlayProbeNoop = (): void => {};
+  }
+  onFrame(updateWeather);
 
   return root as never;
 };

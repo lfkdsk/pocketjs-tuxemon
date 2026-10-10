@@ -461,13 +461,13 @@ mod g6_quickjs_bench {
                 "globalThis.__pocketTuxemonWeatherOverlay=false;",
             )?;
         }
-        // Allocation-regression switch: mount the overlay but make its frame
-        // handler a no-op, so the mem walk diffs frame-handler cost without
-        // mount-time allocations changing the heap between runs.
-        if std::env::var("G6_WEATHER_OVERLAY_NO_FRAME").is_ok() {
+        // Every counting-allocator run gives the weather overlay the same
+        // stable control object. mem_walk flips its field only after warm-up,
+        // so active/no-frame windows begin from identical presentation state.
+        if count_allocs {
             guest.eval(
-                "g6-weather-overlay-no-frame",
-                "globalThis.__pocketTuxemonWeatherOverlayNoFrame=true;",
+                "g6-weather-overlay-frame-control",
+                "globalThis.__pocketTuxemonWeatherOverlayFrameControl={disabled:false};",
             )?;
         }
         let audio = audio::AudioSurface::new(audio_host.client(0));
@@ -2338,9 +2338,9 @@ mod g6_quickjs_bench {
     /// and report QuickJS cumulative allocation count, live malloc bytes,
     /// and GC-threshold transitions. Used to prove the weather overlay's
     /// per-frame path is zero-allocation: the regression
-    /// (weather-alloc-regression.sh) runs the same bundle with the overlay's
-    /// frame handler active vs skipped (G6_WEATHER_OVERLAY_NO_FRAME, overlay
-    /// mounted identically in both) on the same tape window and diffs.
+    /// (weather-alloc-regression.sh) mounts and warms the same bundle to a
+    /// real tape state, then calls the registered overlay handler or a no-op
+    /// through the same compiled eval loop and diffs the allocator totals.
     /// G6_MEM_START skips to a later tape position (warm-up replay) so the
     /// probe can measure an outdoor segment where the overlay is active. The
     /// measured window is [start, start+frames): warm-up replays
@@ -2376,6 +2376,11 @@ mod g6_quickjs_bench {
         seed_maps(&maps, &data);
         let battle = PathBuf::from(std::env::var("G6_BATTLE").expect("G6_BATTLE"));
         seed_battle(&battle, &data);
+        let portraits = PathBuf::from(std::env::var("G6_PORTRAITS").expect("G6_PORTRAITS"));
+        seed_img_entries(&portraits, "portraits", &data);
+        let choice_icons =
+            PathBuf::from(std::env::var("G6_CHOICE_ICONS").expect("G6_CHOICE_ICONS"));
+        seed_img_entries(&choice_icons, "choice-icons", &data);
         let animated = PathBuf::from(std::env::var("G6_ANIMATED").expect("G6_ANIMATED"));
         seed_animated(&animated, &data);
         let npc_src = PathBuf::from(std::env::var("G6_NPC_SRC").expect("G6_NPC_SRC"));
@@ -2406,6 +2411,86 @@ mod g6_quickjs_bench {
         // outdoor segment (the G6 tape opens indoors in a bedroom).
         for index in 0..start {
             let _sample = bench.frame(index, journey.masks[index], None, false);
+        }
+        let direct_probe = std::env::var("G6_WEATHER_DIRECT_PROBE").is_ok();
+        if direct_probe {
+            let prime_frames: usize = std::env::var("G6_WEATHER_PROBE_PRIME_FRAMES")
+                .ok()
+                .and_then(|value| value.parse().ok())
+                .unwrap_or(0);
+            if prime_frames > 0 {
+                bench
+                    .rt
+                    .guest
+                    .eval(
+                        "g6-weather-overlay-prime-freeze",
+                        "globalThis.__pocketTuxemonWeatherOverlayFrameControl.disabled=true;",
+                    )
+                    .unwrap();
+                for offset in 0..prime_frames {
+                    let index = start + offset;
+                    let _sample = bench.frame(index, journey.masks[index], None, false);
+                }
+                bench
+                    .rt
+                    .guest
+                    .eval(
+                        "g6-weather-overlay-prime-release",
+                        "globalThis.__pocketTuxemonWeatherOverlayFrameControl.disabled=false;",
+                    )
+                    .unwrap();
+            }
+            let target = if std::env::var("G6_WEATHER_OVERLAY_NO_FRAME").is_ok() {
+                "globalThis.__pocketTuxemonWeatherOverlayProbeNoop"
+            } else {
+                "globalThis.__pocketTuxemonWeatherOverlayProbe"
+            };
+            bench
+                .rt
+                .guest
+                .eval(
+                    "g6-weather-overlay-probe-target",
+                    &format!("globalThis.__pocketTuxemonWeatherOverlayProbeTarget={target};"),
+                )
+                .unwrap();
+            let (count_start, size_start) = qjs_malloc_stats(&bench.rt.guest);
+            let (alloc_start, bytes_start) = alloc_counts();
+            bench
+                .rt
+                .guest
+                .eval(
+                    "g6-weather-overlay-direct-probe",
+                    &format!(
+                        "for(let i=0;i<{frames};i++)globalThis.__pocketTuxemonWeatherOverlayProbeTarget();"
+                    ),
+                )
+                .unwrap();
+            let (count_end, size_end) = qjs_malloc_stats(&bench.rt.guest);
+            let (alloc_end, bytes_end) = alloc_counts();
+            println!(
+                "MEM_WALK viewport={viewport} weather={weather} overlay_off={} no_frame={} direct_probe=true start={start} frames={frames} prime_frames={prime_frames} alloc_count_delta={} alloc_bytes_delta={} malloc_count_delta={} malloc_size_start={} malloc_size_end={} malloc_size_min={} malloc_size_max={} gc_threshold_transitions=0",
+                std::env::var("G6_WEATHER_OVERLAY_OFF").is_ok(),
+                std::env::var("G6_WEATHER_OVERLAY_NO_FRAME").is_ok(),
+                alloc_end - alloc_start,
+                bytes_end - bytes_start,
+                count_end - count_start,
+                size_start,
+                size_end,
+                size_start.min(size_end),
+                size_start.max(size_end),
+            );
+            let _ = std::fs::remove_dir_all(data);
+            return;
+        }
+        if std::env::var("G6_WEATHER_OVERLAY_NO_FRAME").is_ok() {
+            bench
+                .rt
+                .guest
+                .eval(
+                    "g6-weather-overlay-freeze-window",
+                    "globalThis.__pocketTuxemonWeatherOverlayFrameControl.disabled=true;",
+                )
+                .unwrap();
         }
         let (count_start, size_start) = qjs_malloc_stats(&bench.rt.guest);
         let (alloc_start, bytes_start) = alloc_counts();
@@ -2444,7 +2529,7 @@ mod g6_quickjs_bench {
         let (count_end, size_end) = qjs_malloc_stats(&bench.rt.guest);
         let (alloc_end, bytes_end) = alloc_counts();
         println!(
-            "MEM_WALK viewport={viewport} weather={weather} overlay_off={} no_frame={} start={start} frames={frames} alloc_count_delta={} alloc_bytes_delta={} malloc_count_delta={} malloc_size_start={} malloc_size_end={} malloc_size_min={} malloc_size_max={} gc_threshold_transitions={gc_threshold_transitions}",
+            "MEM_WALK viewport={viewport} weather={weather} overlay_off={} no_frame={} direct_probe=false start={start} frames={frames} alloc_count_delta={} alloc_bytes_delta={} malloc_count_delta={} malloc_size_start={} malloc_size_end={} malloc_size_min={} malloc_size_max={} gc_threshold_transitions={gc_threshold_transitions}",
             std::env::var("G6_WEATHER_OVERLAY_OFF").is_ok(),
             std::env::var("G6_WEATHER_OVERLAY_NO_FRAME").is_ok(),
             alloc_end - alloc_start,

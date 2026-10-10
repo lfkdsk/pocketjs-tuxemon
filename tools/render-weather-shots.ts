@@ -1,5 +1,6 @@
-// Render weather particle screenshots for visual inspection:
-// rain/snow/clear x indoor/outdoor x 480x272 and 960x544.
+// Render weather particle screenshots for visual inspection, including the
+// production layer-order cases: rain at night, rain behind a dialog, and
+// rain behind a cross-map fade at 480x272 and 960x544.
 //
 // Usage: bun tools/render-weather-shots.ts
 // Writes docs/screenshots/weather/*.png and a manifest with per-shot pixel stats.
@@ -11,7 +12,10 @@ import { join, resolve } from "node:path";
 import { FIXED_INITIAL_CIVIL_TIME } from "../battle/time-weather.ts";
 import { encodePNG } from "../vendor/pocket-rpgkit/vendor/pocketjs/tests/png.ts";
 import { bootWorld } from "../vendor/pocket-rpgkit/vendor/pocketjs/hosts/sim/sim.ts";
-import type { SessionState } from "../vendor/pocket-rpgkit/src/engine/session.ts";
+import {
+  fadeOpacity,
+  type SessionState,
+} from "../vendor/pocket-rpgkit/src/engine/session.ts";
 
 const ROOT = resolve(import.meta.dir, "..");
 const BUNDLE = join(ROOT, "dist/main");
@@ -33,6 +37,9 @@ const checkpoint = (name: string) => {
 };
 const INDOOR = checkpoint("bedroom");
 const OUTDOOR = checkpoint("paper-town");
+const DIALOG = { frame: 1610, map: "spyder_paper_town", position: [24, 13] as [number, number] };
+const TRANSFER_FADE = { frame: 1381, map: "spyder_paper_town", position: [10, 7] as [number, number] };
+const TRANSFER_BLACK = { frame: 1377, map: "spyder_paper_town", position: [10, 7] as [number, number] };
 
 const WEATHERS = ["rain", "snow", "sunny", "thunderstorm", "foggy"] as const;
 const NIGHT_WEATHERS = ["sunny", "rain", "snow", "foggy"] as const;
@@ -109,39 +116,69 @@ async function capture(
 const shots: ShotStats[] = [];
 mkdirSync(OUT, { recursive: true });
 
+function writeShot(rgba: Uint8Array, file: string, mapId: string): void {
+  const png = encodePNG(rgba, file.endsWith("960x544.png") ? 960 : 480, file.endsWith("960x544.png") ? 544 : 272);
+  writeFileSync(join(OUT, file), png);
+  const shot = stats(rgba, file, createHash("sha256").update(png).digest("hex"));
+  shots.push(shot);
+  console.log(`${file} map=${mapId} lum=${shot.meanLuminance} blue=${shot.blueBias} streak=${shot.blueStreak} white=${shot.brightWhite}`);
+}
+
 for (const viewport of VIEWPORTS) {
   for (const [locationName, location] of [["indoor", INDOOR], ["outdoor", OUTDOOR]] as const) {
     for (const weather of WEATHERS) {
       const { rgba, state } = await capture(weather, location, viewport);
       const file = `${weather}-${locationName}-${viewport.name}.png`;
-      const png = encodePNG(rgba, viewport.width, viewport.height);
-      writeFileSync(join(OUT, file), png);
-      const shot = stats(rgba, file, createHash("sha256").update(png).digest("hex"));
-      shots.push(shot);
-      console.log(`${file} map=${state.mapId} lum=${shot.meanLuminance} blue=${shot.blueBias} streak=${shot.blueStreak} white=${shot.brightWhite}`);
+      writeShot(rgba, file, state.mapId);
     }
   }
 }
 
-// Night outdoor variants document the actual day/night behavior: the overlay
-// paints above the daylight tint and self-dims particle opacity (night 0.45),
-// rather than being veiled by the tint.
-const nightViewport = VIEWPORTS[0]!;
-for (const weather of NIGHT_WEATHERS) {
-  const { rgba, state } = await capture(weather, OUTDOOR, nightViewport, NIGHT_CIVIL_TIME);
-  const file = `${weather}-outdoor-night-${nightViewport.name}.png`;
-  const png = encodePNG(rgba, nightViewport.width, nightViewport.height);
-  writeFileSync(join(OUT, file), png);
-  const shot = stats(rgba, file, createHash("sha256").update(png).digest("hex"));
-  shots.push(shot);
-  console.log(`${file} map=${state.mapId} lum=${shot.meanLuminance} blue=${shot.blueBias} streak=${shot.blueStreak} white=${shot.brightWhite}`);
+// Night outdoor variants show the real daylight tint composited above the
+// particles at both supported logical resolutions.
+for (const viewport of VIEWPORTS) {
+  for (const weather of NIGHT_WEATHERS) {
+    const { rgba, state } = await capture(weather, OUTDOOR, viewport, NIGHT_CIVIL_TIME);
+    writeShot(rgba, `${weather}-outdoor-night-${viewport.name}.png`, state.mapId);
+  }
+}
+
+// Layer sentinels from the real G6 mainline. Sunny counterparts make the
+// semantic tests independent of the map pixels beneath the presentation.
+for (const viewport of VIEWPORTS) {
+  for (const weather of ["sunny", "rain"] as const) {
+    const dialog = await capture(weather, DIALOG, viewport);
+    if (dialog.state.interp.modal?.kind !== "text") {
+      throw new Error(`weather shots: expected text dialog at f${DIALOG.frame}`);
+    }
+    writeShot(dialog.rgba, `${weather}-dialog-${viewport.name}.png`, dialog.state.mapId);
+
+    const fade = await capture(weather, TRANSFER_FADE, viewport);
+    const opacity = fadeOpacity(fade.state.fade);
+    if (Math.abs(opacity - 5 / 9) > 1e-9) {
+      throw new Error(`weather shots: expected 5/9 transfer fade at f${TRANSFER_FADE.frame}, got ${opacity}`);
+    }
+    writeShot(fade.rgba, `${weather}-transfer-fade-${viewport.name}.png`, fade.state.mapId);
+
+    const black = await capture(weather, TRANSFER_BLACK, viewport);
+    if (fadeOpacity(black.state.fade) !== 1) {
+      throw new Error(`weather shots: expected opaque transfer fade at f${TRANSFER_BLACK.frame}`);
+    }
+    writeShot(black.rgba, `${weather}-transfer-black-${viewport.name}.png`, black.state.mapId);
+  }
 }
 
 writeFileSync(join(OUT, "manifest.json"), JSON.stringify({
   format: "pocket-tuxemon/wx1-shots/v1",
   civil: FIXED_INITIAL_CIVIL_TIME,
   nightCivil: NIGHT_CIVIL_TIME,
-  checkpoints: { indoor: INDOOR.name, outdoor: OUTDOOR.name },
+  checkpoints: {
+    indoor: INDOOR.name,
+    outdoor: OUTDOOR.name,
+    dialogFrame: DIALOG.frame,
+    transferFadeFrame: TRANSFER_FADE.frame,
+    transferBlackFrame: TRANSFER_BLACK.frame,
+  },
   shots,
 }, null, 1) + "\n");
 console.log(`wrote ${shots.length} shots to ${OUT}`);

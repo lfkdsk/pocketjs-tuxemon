@@ -69,6 +69,7 @@ import { createDemo } from "./vendor/pocket-rpgkit/src/ui/demo/index.ts";
 import { frameProfileMark } from "./vendor/pocket-rpgkit/src/frame-profile.ts";
 import { createGameWorldCacheDriver } from "./ui/game-world-cache-driver.ts";
 import type { WorldStreamedTerrainStats } from "./vendor/pocket-rpgkit/src/ui/WorldStreamedTerrain.tsx";
+import type { GameWorldOverlayProps } from "./vendor/pocket-rpgkit/src/ui/GameView.tsx";
 import { createDemoOptions, hasDemoChapters } from "./ui/demo-tape.ts";
 import type {
   GameViewDemoConfig,
@@ -334,8 +335,18 @@ const overlayWithBoot: GameViewOverlayConfig = {
   },
 };
 
+function TuxemonWeatherOverlay(_props: GameWorldOverlayProps) {
+  return (
+    <WeatherOverlay
+      bridge={weatherBridge}
+      suspended={() =>
+        weatherOverlaySuspended(demoMenu, saveMenuRuntime, tuxepediaConfig.runtimeRef.current)
+        || (langMenuRuntime?.isOpen() ?? false)}
+    />
+  );
+}
+
 mount(() => (
-  <>
     <GameView
       immutableState
       project={project}
@@ -388,6 +399,7 @@ mount(() => (
       demo={demo}
       overlay={overlayWithBoot}
       effects={Effects}
+      worldOverlay={weatherOverlayEnabled ? TuxemonWeatherOverlay : undefined}
       screenPresentation={{
         fingerprint: () => "",
         effects: PortraitBackdropEffects,
@@ -400,14 +412,5 @@ mount(() => (
         },
       }}
     />
-    {weatherOverlayEnabled && (
-      <WeatherOverlay
-        bridge={weatherBridge}
-        suspended={() =>
-          weatherOverlaySuspended(demoMenu, saveMenuRuntime, tuxepediaConfig.runtimeRef.current)
-          || (langMenuRuntime?.isOpen() ?? false)}
-      />
-    )}
-  </>
 ));
 gp1Mark("mount");

@@ -10,9 +10,7 @@ import {
 import { timeWeatherAt } from "../battle/time-weather.ts";
 import {
   MAX_WEATHER_PARTICLES,
-  STAGE_DIM,
   WEATHER_PROFILES,
-  stageDimAt,
   weatherAgeTicks,
   weatherParticle,
   weatherParticleInto,
@@ -73,13 +71,10 @@ describe("weather particle placement", () => {
     expect(p1.y).not.toBe(p0.y);
   });
 
-  test("stage dim darkens particles at night", () => {
-    expect(stageDimAt(9 * 60)).toBe(STAGE_DIM.morning);
-    expect(stageDimAt(21 * 60)).toBe(STAGE_DIM.night);
-    expect(STAGE_DIM.night).toBeLessThan(STAGE_DIM.morning);
-    const day = place("rain", 0, 0, STAGE_DIM.morning);
-    const night = place("rain", 0, 0, STAGE_DIM.night);
-    expect(night.opacity).toBeLessThan(day.opacity);
+  test("caller opacity scale is applied to particle alpha", () => {
+    const full = place("rain", 0, 0, 1);
+    const half = place("rain", 0, 0, 0.5);
+    expect(half.opacity).toBeLessThan(full.opacity);
   });
 
   test("fog gets per-node opacity variation", () => {
@@ -224,6 +219,8 @@ describe("weather overlay menu suspension", () => {
     expect(weatherOverlaySuspended(menu(false), menu(true))).toBeTrue();
     expect(weatherOverlaySuspended(menu(true), menu(true))).toBeTrue();
     expect(weatherOverlaySuspended(menu(false), menu(false))).toBeFalse();
+    expect(weatherOverlaySuspended(menu(false), menu(false), menu(true))).toBeTrue();
+    expect(weatherOverlaySuspended(menu(false), menu(false), menu(false))).toBeFalse();
   });
 });
 
@@ -262,7 +259,7 @@ describe("zero-alloc particle placement", () => {
       for (const viewport of [VIEWPORT, { width: 960, height: 544 }]) {
         for (const age of [0, 1, 999, 65_535, 65_536, 1_000_000]) {
           for (let index = 0; index < profile.count; index++) {
-            for (const dim of [STAGE_DIM.night, 1]) {
+            for (const dim of [0.45, 1]) {
               const fresh = weatherParticle(
                 profile, hash, index, age, viewport.width, viewport.height, dim,
               );

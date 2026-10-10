@@ -16,7 +16,10 @@
  },
  "checkpoints": {
   "indoor": "bedroom",
-  "outdoor": "paper-town"
+  "outdoor": "paper-town",
+  "dialogFrame": 1610,
+  "transferFadeFrame": 1381,
+  "transferBlackFrame": 1377
  },
  "shots": [
   {
@@ -61,43 +64,43 @@
   },
   {
    "file": "rain-outdoor-480x272.png",
-   "sha256": "526002f85598189670a5718240df459fb283ea14d6182d4535693708497e66a2",
-   "meanLuminance": 140.935,
-   "blueBias": -9.983,
-   "blueStreak": 0.0781,
-   "brightWhite": 0.0162
+   "sha256": "593e2e2a1c367f3ac085671e8395f03c5e51e8e761652995914c80398b2f60c8",
+   "meanLuminance": 135.262,
+   "blueBias": 1.098,
+   "blueStreak": 0.1713,
+   "brightWhite": 0.0147
   },
   {
    "file": "snow-outdoor-480x272.png",
-   "sha256": "e899f97c602f383189dd8ae0bf78b12b7274314bbb3bd883c68352329beb11f2",
-   "meanLuminance": 140.637,
-   "blueBias": -10.288,
-   "blueStreak": 0.0775,
-   "brightWhite": 0.0168
+   "sha256": "ce954094cfc0a35ed9b1dffe94a9e4b3b6222bc08cadf8b81eed3a2eae4b5eda",
+   "meanLuminance": 134.963,
+   "blueBias": 0.774,
+   "blueStreak": 0.1707,
+   "brightWhite": 0.0152
   },
   {
    "file": "sunny-outdoor-480x272.png",
-   "sha256": "e43e3ff1d9b1460ed3fcf754d9fa1e55679482fccb72ab78aac5772f829744cd",
-   "meanLuminance": 140.332,
-   "blueBias": -10.298,
-   "blueStreak": 0.0776,
-   "brightWhite": 0.0155
+   "sha256": "7522745d663d6fce38d052fba224ecc58e4b638f7001c04a5c1c4fafb169c50c",
+   "meanLuminance": 134.652,
+   "blueBias": 0.807,
+   "blueStreak": 0.171,
+   "brightWhite": 0.0139
   },
   {
    "file": "thunderstorm-outdoor-480x272.png",
-   "sha256": "e482f5349e90a757606b4d77ef1bd666b8abbc84cdf0164c1912bb08c583ef03",
-   "meanLuminance": 141.074,
-   "blueBias": -9.766,
-   "blueStreak": 0.0779,
-   "brightWhite": 0.0175
+   "sha256": "7e3c795dc28ade0f4802f3ece7585bb2981066754ec06bba0280cf718386b94e",
+   "meanLuminance": 135.45,
+   "blueBias": 1.217,
+   "blueStreak": 0.1713,
+   "brightWhite": 0.0153
   },
   {
    "file": "foggy-outdoor-480x272.png",
-   "sha256": "e31c03692a14c40087f25f5093bdb157158da5fe08709ee2fa2e1f8e7e2a2b7b",
-   "meanLuminance": 143.72,
-   "blueBias": -9.761,
-   "blueStreak": 0.0776,
-   "brightWhite": 0.016
+   "sha256": "68ed8137e6fb94fa896fc4f62e60aaa3f4de58b201fdd5f121013c4f4f21cd66",
+   "meanLuminance": 138.244,
+   "blueBias": 1.189,
+   "blueStreak": 0.171,
+   "brightWhite": 0.0145
   },
   {
    "file": "rain-indoor-960x544.png",
@@ -141,74 +144,202 @@
   },
   {
    "file": "rain-outdoor-960x544.png",
-   "sha256": "af498d57178e1ac50b4f050f0721dd9dc21b7947236a758f57ea46dec31a7f1f",
-   "meanLuminance": 51.316,
-   "blueBias": -2.001,
-   "blueStreak": 0.0385,
-   "brightWhite": 0.0044
+   "sha256": "21dcaa570eb16f5d1bc5fe7fa36fd62b4e54489a57bb74a2881add3cd0b1986e",
+   "meanLuminance": 122.466,
+   "blueBias": 20.852,
+   "blueStreak": 0.3268,
+   "brightWhite": 0.0049
   },
   {
    "file": "snow-outdoor-960x544.png",
-   "sha256": "28bf94f4c1d41c1fa769d7342e6b5b81ddd4dd6ecb568996d5273df0888a3e26",
-   "meanLuminance": 51.236,
-   "blueBias": -2.066,
-   "blueStreak": 0.0384,
-   "brightWhite": 0.0047
+   "sha256": "6ec031597c5dfe71eda721fefa537e6b7087a54a7bcc426d684d5fe4cb6dbe40",
+   "meanLuminance": 122.392,
+   "blueBias": 20.787,
+   "blueStreak": 0.3266,
+   "brightWhite": 0.0051
   },
   {
    "file": "sunny-outdoor-960x544.png",
-   "sha256": "af74daa5b15fca6a0b56fd0cd58e56a2c9738a389c94c010c8713ee41bcd629e",
-   "meanLuminance": 51.159,
-   "blueBias": -2.069,
-   "blueStreak": 0.0384,
-   "brightWhite": 0.0044
+   "sha256": "adab9b887a54132e9d97b8a16d7174b9f1b3f7eb927b56ff5b67fdfe03f52733",
+   "meanLuminance": 122.307,
+   "blueBias": 20.805,
+   "blueStreak": 0.3267,
+   "brightWhite": 0.0048
   },
   {
    "file": "thunderstorm-outdoor-960x544.png",
-   "sha256": "5136344a7f8d78eb21efe943915598c085814f20584b46a499df22a86d80dbac",
-   "meanLuminance": 51.387,
-   "blueBias": -1.966,
-   "blueStreak": 0.0385,
-   "brightWhite": 0.0046
+   "sha256": "274d23a5dbe8000c52b59e4e30ad2e40810eeea7b67bf9917282e11e62a9527f",
+   "meanLuminance": 122.516,
+   "blueBias": 20.877,
+   "blueStreak": 0.3268,
+   "brightWhite": 0.005
   },
   {
    "file": "foggy-outdoor-960x544.png",
-   "sha256": "75c95504fc85c7edd9b5328aad2dcdf2f2e3de10ac386814ebcad48cb5a8bb24",
-   "meanLuminance": 52.203,
-   "blueBias": -1.864,
-   "blueStreak": 0.0385,
-   "brightWhite": 0.0045
+   "sha256": "0b7c7c5b9563731ef7144a5b4e702e340b64ce71d871c14ac860857ecb72d89e",
+   "meanLuminance": 123.4,
+   "blueBias": 21.003,
+   "blueStreak": 0.3267,
+   "brightWhite": 0.0048
   },
   {
    "file": "sunny-outdoor-night-480x272.png",
-   "sha256": "74bdbf68b27978e8b26c9234d4676cd9836916e3a1d13f2c7a9d14dfa21861ea",
-   "meanLuminance": 51.148,
-   "blueBias": 61.062,
+   "sha256": "b0d5fd531ad2403dfa90144ac5a9477d1c5905316cc5f37c0b67a473d598f9ec",
+   "meanLuminance": 49.62,
+   "blueBias": 64.061,
    "blueStreak": 0,
    "brightWhite": 0
   },
   {
    "file": "rain-outdoor-night-480x272.png",
-   "sha256": "fa838f47332b7bc863b5d6bc43fcbf76f791d3f9cdcd6e7436c77040438fdb51",
-   "meanLuminance": 51.679,
-   "blueBias": 60.999,
-   "blueStreak": 0.0024,
+   "sha256": "bb81386ebe4d7cfd4448aa7602a0aad0bdea27572e9e518d9494c1334b395220",
+   "meanLuminance": 50.17,
+   "blueBias": 63.984,
+   "blueStreak": 0.0023,
    "brightWhite": 0
   },
   {
    "file": "snow-outdoor-night-480x272.png",
-   "sha256": "d7777a23000503578279f2bece553618c2167cb662e4f10501a45b7178f1ad62",
-   "meanLuminance": 51.385,
-   "blueBias": 60.99,
-   "blueStreak": 0.0011,
+   "sha256": "42e11904e8af0ce9cd15c2ca05014663897eb0684915b1e15075ca874db6d13c",
+   "meanLuminance": 49.869,
+   "blueBias": 63.967,
+   "blueStreak": 0.0003,
    "brightWhite": 0
   },
   {
    "file": "foggy-outdoor-night-480x272.png",
-   "sha256": "b32866395a81af827e866f236a387f674d1f108ade35374ca2d9287bd317ab56",
-   "meanLuminance": 54.459,
-   "blueBias": 60.133,
-   "blueStreak": 0.0015,
+   "sha256": "4778e3497df930cc229e8dc7141ac36797586f9f080f484e58042865dd2b4815",
+   "meanLuminance": 52.947,
+   "blueBias": 63.001,
+   "blueStreak": 0,
+   "brightWhite": 0
+  },
+  {
+   "file": "sunny-outdoor-night-960x544.png",
+   "sha256": "c0e78c09abfa3d27c6eb6e8c674d13195376bd239a033c6718e3dcf0ad4e3328",
+   "meanLuminance": 46.332,
+   "blueBias": 69.408,
+   "blueStreak": 0,
+   "brightWhite": 0
+  },
+  {
+   "file": "rain-outdoor-night-960x544.png",
+   "sha256": "9f86ef3f500a07b03e766f9958adb45e9cd43575e92ffd2afa25c9aaaec0e847",
+   "meanLuminance": 46.471,
+   "blueBias": 69.382,
+   "blueStreak": 0.0006,
+   "brightWhite": 0
+  },
+  {
+   "file": "snow-outdoor-night-960x544.png",
+   "sha256": "76cd83d39bde6e110c0473d1a1f7a80fb43c39cc93960a2b70de1099478f16a8",
+   "meanLuminance": 46.396,
+   "blueBias": 69.381,
+   "blueStreak": 0.0001,
+   "brightWhite": 0
+  },
+  {
+   "file": "foggy-outdoor-night-960x544.png",
+   "sha256": "d162d5b2955c45dc65b87249744106aaeb5ccee18e7fc8d4b7739eb4baabf4ab",
+   "meanLuminance": 47.231,
+   "blueBias": 69.168,
+   "blueStreak": 0,
+   "brightWhite": 0
+  },
+  {
+   "file": "sunny-dialog-480x272.png",
+   "sha256": "5be8d15faa013a69a96ff687746159a2569028170d9bd6533231ba6087fbe30e",
+   "meanLuminance": 106.013,
+   "blueBias": 2.715,
+   "blueStreak": 0.0403,
+   "brightWhite": 0.0111
+  },
+  {
+   "file": "sunny-transfer-fade-480x272.png",
+   "sha256": "ca86990cb7ad0099f42d4e023d8494aade1204b607c0e18e120b59ffc34a4352",
+   "meanLuminance": 59.93,
+   "blueBias": -0.069,
+   "blueStreak": 0,
+   "brightWhite": 0
+  },
+  {
+   "file": "sunny-transfer-black-480x272.png",
+   "sha256": "8c62b033070fbefc0436247eb9151cfa260d938b0c73e2f0dae868c9198b60a2",
+   "meanLuminance": 0,
+   "blueBias": 0,
+   "blueStreak": 0,
+   "brightWhite": 0
+  },
+  {
+   "file": "rain-dialog-480x272.png",
+   "sha256": "85719eea5689e13f270091bf9e5c810a56e9d5a656c4d4fc00cc47916ed073aa",
+   "meanLuminance": 106.389,
+   "blueBias": 2.956,
+   "blueStreak": 0.0406,
+   "brightWhite": 0.0117
+  },
+  {
+   "file": "rain-transfer-fade-480x272.png",
+   "sha256": "1120bebb4318b358fed70fa01c13a422a74c0681324de36823a13f082da15c85",
+   "meanLuminance": 60.185,
+   "blueBias": 0.037,
+   "blueStreak": 0,
+   "brightWhite": 0
+  },
+  {
+   "file": "rain-transfer-black-480x272.png",
+   "sha256": "8c62b033070fbefc0436247eb9151cfa260d938b0c73e2f0dae868c9198b60a2",
+   "meanLuminance": 0,
+   "blueBias": 0,
+   "blueStreak": 0,
+   "brightWhite": 0
+  },
+  {
+   "file": "sunny-dialog-960x544.png",
+   "sha256": "95efcc39a6e3bbe1b7ed363b33b6b7ead6b97492a2d2f6a09c788a3d452330bd",
+   "meanLuminance": 110.952,
+   "blueBias": 5.08,
+   "blueStreak": 0.0909,
+   "brightWhite": 0.004
+  },
+  {
+   "file": "sunny-transfer-fade-960x544.png",
+   "sha256": "cf4abc162955f07f88801a6c8bae0fbd65a761358df319de692ba36e4cfdfff9",
+   "meanLuminance": 54.231,
+   "blueBias": 9.226,
+   "blueStreak": 0,
+   "brightWhite": 0
+  },
+  {
+   "file": "sunny-transfer-black-960x544.png",
+   "sha256": "fb41a881fc8e133667d33c9c1a0663194a4c4fce02247fffdfac6898a8b270e9",
+   "meanLuminance": 0,
+   "blueBias": 0,
+   "blueStreak": 0,
+   "brightWhite": 0
+  },
+  {
+   "file": "rain-dialog-960x544.png",
+   "sha256": "bd05088d40e697c5c635b8468ebddee1e9fe5b9639ed49381881c74342688f26",
+   "meanLuminance": 111.114,
+   "blueBias": 5.166,
+   "blueStreak": 0.091,
+   "brightWhite": 0.0041
+  },
+  {
+   "file": "rain-transfer-fade-960x544.png",
+   "sha256": "050d39967d15d38b33ca30aa4832e4af759c559f97ed62565e7c2d9612418141",
+   "meanLuminance": 54.302,
+   "blueBias": 9.245,
+   "blueStreak": 0,
+   "brightWhite": 0
+  },
+  {
+   "file": "rain-transfer-black-960x544.png",
+   "sha256": "fb41a881fc8e133667d33c9c1a0663194a4c4fce02247fffdfac6898a8b270e9",
+   "meanLuminance": 0,
+   "blueBias": 0,
+   "blueStreak": 0,
    "brightWhite": 0
   }
  ]

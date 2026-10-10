@@ -2,22 +2,20 @@
 # Weather overlay allocation regression (QuickJS).
 #
 # Proves the particle overlay's steady-state and activation frames allocate
-# nothing on the QuickJS JS heap. For each of two GB6 tape windows it replays
-# the same frames twice — once with the overlay's frame handler active, once
-# with the handler skipped (G6_WEATHER_OVERLAY_NO_FRAME) — and diffs the
-# counting allocator's cumulative allocation count and bytes. The overlay is
-# mounted identically in both runs (nodes, texture preload, batches), so the
-# heaps match and the diff isolates the frame handler exactly. The base game
-# allocates thousands of times per frame, so an absolute-zero assertion is
-# impossible; the on/no-frame diff isolates the overlay. QuickJS allocation
-# counts are deterministic for a fixed tape, so the diff must be exactly 0.
+# nothing on the QuickJS JS heap. For each of two GB6 tape windows it warms the
+# real built game to the named state, then invokes the pre-registered overlay
+# handler repeatedly on that frozen state and compares it with the same number
+# of calls to a pre-registered no-op. The activation case freezes the handler
+# for the real five-frame indoor-to-outdoor transfer first, so its first probe
+# call executes profile activation. Mount, warm-up and eval-loop allocations
+# are identical; the diff isolates the handler and must be exactly 0.
 #
 # Windows (data/gb6-mainline-journey.json map transitions):
 #   steady     start=1500 frames=500  spyder_paper_town, overlay active,
 #              no map transfer inside the window
-#   activation start=1430 frames=60   covers the frame-1434 transfer from
-#              spyder_downstairs (indoor, overlay hidden) to spyder_paper_town
-#              (outdoor), i.e. the overlay's first activation
+#   activation start=1430 frames=60   primes through the frame-1434 transfer
+#              from spyder_downstairs (indoor, overlay hidden) to
+#              spyder_paper_town (outdoor), then measures first activation
 #
 # The steady window kills a per-frame allocation regression (e.g. an iterator
 # in the envelope slug scan); the activation window kills an activation-time
@@ -61,11 +59,12 @@ run_mem_walk() {
   shift 2
   env G6_COUNT_ALLOCS=1 G6_DIST="$app_dist" G6_JOURNEY="$journey" \
     G6_MAPS="$root/dist/maps" G6_BATTLE="$root/dist/battle" \
+    G6_PORTRAITS="$root/dist/portraits" G6_CHOICE_ICONS="$root/dist/choice-icons" \
     G6_AUDIO_ROOT="$root/assets/audio" G6_AUDIO_MANIFEST="$root/assets/audio/manifest.json" \
     G6_ANIMATED="$root/dist/animated" G6_NPC_SRC="$root/dist/npc-src" \
     G6_TERRAIN_STREAM="$root/dist/terrain-stream" G6_BENCH_ROOT="$bench_root" \
     G6_BENCH_W=480 G6_BENCH_H=272 G6_WEATHER=rain \
-    G6_MEM_START="$start" G6_MEM_FRAMES="$frames" "$@" \
+    G6_MEM_START="$start" G6_MEM_FRAMES="$frames" G6_WEATHER_DIRECT_PROBE=1 "$@" \
     "$binary" g6_quickjs_bench::mem_walk --ignored --exact --nocapture \
     | grep -E '^MEM_WALK'
 }
@@ -78,8 +77,10 @@ field() {
 status=0
 for window in "steady 1500 500" "activation 1430 60"; do
   read -r name start frames <<<"$window"
-  on=$(run_mem_walk "$start" "$frames")
-  off=$(run_mem_walk "$start" "$frames" G6_WEATHER_OVERLAY_NO_FRAME=1)
+  prime=0
+  [[ "$name" == "activation" ]] && prime=5
+  on=$(run_mem_walk "$start" "$frames" G6_WEATHER_PROBE_PRIME_FRAMES="$prime")
+  off=$(run_mem_walk "$start" "$frames" G6_WEATHER_PROBE_PRIME_FRAMES="$prime" G6_WEATHER_OVERLAY_NO_FRAME=1)
   on_count=$(field "$on" alloc_count_delta)
   off_count=$(field "$off" alloc_count_delta)
   on_bytes=$(field "$on" alloc_bytes_delta)

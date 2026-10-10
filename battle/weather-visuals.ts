@@ -9,8 +9,6 @@
 // every tick boundary without an age wrap (a wrap would only be invisible if
 // it were a common multiple of every profile's motion periods).
 
-import { stageOfDayFromMinute, type StageOfDay } from "./time-weather.ts";
-
 // Texture path literals: the PocketJS bundler bakes an image only when its
 // path string is scanned from bundle source, so these stay literal constants.
 export const WEATHER_RAINDROP_TEXTURE = "assets/weather/raindrop.png";
@@ -56,19 +54,6 @@ export const MAX_WEATHER_PARTICLES = Math.max(
   ...Object.values(WEATHER_PROFILES).map((profile) => profile.count),
 );
 
-/** Particle opacity follows the daylight grade so night rain stays dim. */
-export const STAGE_DIM: Readonly<Record<StageOfDay, number>> = Object.freeze({
-  dawn: 0.85,
-  morning: 1,
-  afternoon: 1,
-  dusk: 0.75,
-  night: 0.45,
-});
-
-export function stageDimAt(minuteOfDay: number): number {
-  return STAGE_DIM[stageOfDayFromMinute(minuteOfDay)];
-}
-
 /** FNV-1a, so a weather slug seeds its particle field deterministically. */
 export function weatherSlugHash(slug: string): number {
   let hash = 0x811c9dc5;
@@ -94,7 +79,7 @@ export interface ParticlePlacement {
   /** Integer px, already wrapped into the viewport. */
   x: number;
   y: number;
-  /** Per-node opacity 0..1 after stage dimming and per-node variation. */
+  /** Per-node opacity 0..1 after caller scaling and per-node variation. */
   opacity: number;
 }
 
@@ -113,7 +98,7 @@ export function weatherParticleInto(
   ageTicks: number,
   viewportWidth: number,
   viewportHeight: number,
-  stageDim: number,
+  opacityScale: number,
   out: ParticlePlacement,
 ): void {
   const seedX = mix2(Math.imul(index * 2 + 1, slugHashValue ^ 0x9e3779b9));
@@ -140,7 +125,7 @@ export function weatherParticleInto(
   out.y = Math.min(maxY, yFp >> 8);
   // Fog veils get per-node opacity variation for an organic overlap.
   const variation = profile.kind === "fog" ? 0.6 + 0.4 * ((seedX % 1000) / 1000) : 1;
-  out.opacity = Math.round(profile.opacity * stageDim * variation * 255) / 255;
+  out.opacity = Math.round(profile.opacity * opacityScale * variation * 255) / 255;
 }
 
 /**
@@ -156,7 +141,7 @@ export function weatherParticle(
   ageTicks: number,
   viewportWidth: number,
   viewportHeight: number,
-  stageDim: number,
+  opacityScale: number,
 ): ParticlePlacement {
   const out: ParticlePlacement = { x: 0, y: 0, opacity: 0 };
   weatherParticleInto(
@@ -166,7 +151,7 @@ export function weatherParticle(
     ageTicks,
     viewportWidth,
     viewportHeight,
-    stageDim,
+    opacityScale,
     out,
   );
   return out;

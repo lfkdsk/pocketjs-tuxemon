@@ -46,6 +46,28 @@ function diff(a: Uint8Array, b: Uint8Array): { count: number; lum: number; blueB
   return { count, lum: count ? lum / count : 0, blueBias: count ? blueBias / count : 0 };
 }
 
+function regionDiffCount(
+  a: Uint8Array,
+  b: Uint8Array,
+  width: number,
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number,
+): number {
+  let count = 0;
+  for (let y = y0; y < y1; y++) {
+    for (let x = x0; x < x1; x++) {
+      const offset = (y * width + x) * 4;
+      if (a[offset] !== b[offset]
+        || a[offset + 1] !== b[offset + 1]
+        || a[offset + 2] !== b[offset + 2]
+        || a[offset + 3] !== b[offset + 3]) count++;
+    }
+  }
+  return count;
+}
+
 describe("weather particle screenshots", () => {
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as ShotManifest;
 
@@ -100,13 +122,12 @@ describe("weather particle screenshots", () => {
     }
   });
 
-  visualTest("particles stay inside the world frame at 960x544 (no letterbox rain)", () => {
+  visualTest("particles stay inside the active-map frame at 960x544", () => {
     const rain = loadShot("rain-outdoor-960x544.png");
     const sunny = loadShot("sunny-outdoor-960x544.png");
     const delta = diff(rain.rgba, sunny.rgba);
     expect(delta.count).toBeGreaterThan(150);
-    // Paper Town is 640x320 centered at (160,112) in 960x544; every differing
-    // pixel must fall inside that frame.
+    // Paper Town is 640x320 centered at (160,112) in 960x544.
     for (let index = 0; index < rain.rgba.length; index += 4) {
       const pixel = index / 4;
       const x = pixel % 960;
@@ -123,14 +144,13 @@ describe("weather particle screenshots", () => {
     }
   });
 
-  visualTest("the night daylight grade darkens the world and the particles with it", () => {
+  visualTest("the night daylight tint darkens the world and the particles beneath it", () => {
     const daySunny = manifest.shots.find((shot) => shot.file === "sunny-outdoor-480x272.png")!;
     const nightSunny = manifest.shots.find((shot) => shot.file === "sunny-outdoor-night-480x272.png")!;
     // The world itself is tinted dark at 22:00.
     expect(nightSunny.meanLuminance).toBeLessThan(daySunny.meanLuminance / 2);
-    // Rain still reads as streaks at night, but dimmer than in daylight:
-    // the overlay paints above the tint and self-dims (night 0.45), which is
-    // the documented Partial limitation.
+    // Rain still reads as streaks at night, but the composited tint makes the
+    // changed pixels dimmer than their daylight counterparts.
     const dayRain = diff(loadShot("rain-outdoor-480x272.png").rgba, loadShot("sunny-outdoor-480x272.png").rgba);
     const nightRain = diff(loadShot("rain-outdoor-night-480x272.png").rgba, loadShot("sunny-outdoor-night-480x272.png").rgba);
     expect(nightRain.count).toBeGreaterThan(150);
@@ -149,4 +169,42 @@ describe("weather particle screenshots", () => {
     const nightSunnyStat = manifest.shots.find((shot) => shot.file === "sunny-outdoor-night-480x272.png")!;
     expect(nightFoggy.meanLuminance).toBeGreaterThan(nightSunnyStat.meanLuminance);
   });
+
+  for (const viewport of ["480x272", "960x544"] as const) {
+    visualTest(`dialog pixels cover rain at ${viewport}`, () => {
+      const rain = loadShot(`rain-dialog-${viewport}.png`);
+      const sunny = loadShot(`sunny-dialog-${viewport}.png`);
+      // The opaque message paper: weather may differ elsewhere, but cannot
+      // alter any pixel well inside the dialog panel. UI keeps its authored
+      // 90 px height at both logical resolutions.
+      expect(regionDiffCount(
+        rain.rgba,
+        sunny.rgba,
+        rain.width,
+        36,
+        rain.height - 66,
+        rain.width - 36,
+        rain.height - 18,
+      )).toBe(0);
+      expect(diff(rain.rgba, sunny.rgba).count).toBeGreaterThan(100);
+    });
+
+    visualTest(`opaque cross-map fade covers every rain pixel at ${viewport}`, () => {
+      const rain = loadShot(`rain-transfer-black-${viewport}.png`);
+      const sunny = loadShot(`sunny-transfer-black-${viewport}.png`);
+      expect(rain.rgba).toEqual(sunny.rgba);
+      let nonBlack = 0;
+      for (let index = 0; index < rain.rgba.length; index += 4) {
+        if (rain.rgba[index] !== 0 || rain.rgba[index + 1] !== 0
+          || rain.rgba[index + 2] !== 0 || rain.rgba[index + 3] !== 255) nonBlack++;
+      }
+      expect(nonBlack).toBe(0);
+    });
+
+    visualTest(`rain remains visible beneath the intermediate cross-map fade at ${viewport}`, () => {
+      const rain = loadShot(`rain-transfer-fade-${viewport}.png`);
+      const sunny = loadShot(`sunny-transfer-fade-${viewport}.png`);
+      expect(diff(rain.rgba, sunny.rgba).count).toBeGreaterThan(50);
+    });
+  }
 });

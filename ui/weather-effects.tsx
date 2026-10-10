@@ -1,7 +1,6 @@
-// Composes the kit's audio effects with the weather overlay's state bridge.
-// The effects slot is the only GameView child that receives a live
-// `state: () => SessionState` accessor; storing it in the bridge lets the
-// sibling WeatherOverlay read reducer state without a kit change.
+// GameView host-side audio effects. Weather paints through the independent
+// worldOverlay slot, but keeps this raw reducer accessor bridge so its
+// QuickJS frame path does not cross an allocating reactive-props accessor.
 
 import { onCleanup } from "solid-js";
 import { audioHost } from "@pocketjs/framework/audio";
