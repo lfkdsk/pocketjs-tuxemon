@@ -58,8 +58,9 @@ const SAVE_FIXTURES = [
   "main-97dadd0b",
   "main-e799febb",
   "main-c38f8e72",
+  "main-c6d57a62",
 ] as const;
-const IMMEDIATE_PREDECESSOR_FIXTURE = "main-c38f8e72" as const;
+const IMMEDIATE_PREDECESSOR_FIXTURE = "main-c6d57a62" as const;
 
 interface PublishedSaveMetadata {
   content: { manifest: string; schema: string };
