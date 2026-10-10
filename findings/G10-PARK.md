@@ -2,159 +2,88 @@
 
 ## 结论
 
-- Tuxemon 上游的 8 个 `park_experience` 调用现已全部 Native：入口的
-  `start` 激活可存档的公园会话，7 个 `stop` 都会停用会话、清除
-  `park_out`、只打开一次结算页，再让原地图的传送、回收公园球和移除计步器继续执行。
-- 真实 Eclipse Park 随机遇敌现在进入专用 Ball / Food / Doll / Run 交互。
-  Park Ball 使用上游捕获公式并消耗库存；失败、成功、主动逃跑和遇敌先逃走均有独立结果；
-  sightings、失败数、成功数和成功捕获 history 都随存档、读档和倒带保持确定性。
-- 入口仍完全由原地图事件驱动：500 gold、25 个 Park Ball、500 步、100 步提醒和
-  计步耗尽离场均未手写成另一套流程。英文、中文、键盘/手柄和缩放触摸均可用，
-  8 张生产截图在两档分辨率通过 golden、全文和语义像素断言，并以 3 倍图肉眼核对。
-- 当前 main 的真实存档可原样加载并继续；组件 schema、RPG Kit 与 PocketJS 均未改。
-  GB6 和 J1–J4 终态与 main 完全一致。全套本机 CI、Web、PSP、变异和 QuickJS
-  交错性能门禁全部通过，结论为 **PASS**。
+- 复审指出的四项阻断均已修复：投球前的 positive flee 检查现在只消耗一次随机数并保持同一遭遇；捕获失败会把野怪已排队动作改成 `empty`，玩家怪兽不受伤；两项规定的 flee 变异都能被测试杀死；全部分支提交已通过 rebase 去除 `Co-authored-by` 尾注且作者保持不变。
+- 次要差异也已对齐：成功率显示一位小数，捕获 highlights 保留上游首次出现顺序且不再截断；失败后的六种英文/中文 Park 风味文字进入真实 battle presentation。
+- 原交付能力未回退：8 个 `park_experience` 调用仍全部 Native，真实 Eclipse Park 入口、捕获、计步离场、结算、存读档、倒带、双语与触屏路径均通过；当前 main 的真实存档可加载并继续，GB6 与 J1–J4 终态不变。
+- 完整导入、类型检查、1,243 项测试、全部 journey、Web、PSP、双语画面和真实 QuickJS 交错性能门禁均通过，结论为 **PASS**。
 
 ## 基线与交付版本
 
 - 游戏 main：`c6d57a6272d8426e190c49c94512dc5cf58a5220`。
-- 游戏实现与状态文档树：`a825d87fac9941cd4fb01106e02e9239dbb980bf`
-  （本报告是其后的文档提交）。
+- 游戏实现与测试树：`88e2ec587dde0128ff6b92e669083c3b9da7adf9`（本报告是其后的文档提交）。
 - Pocket RPG Kit：`65280e9bd09647ec76d03ba660d08aafa20bc531`，无改动。
 - PocketJS：`862040bd77edc49b1f815beff63952b6616a14c6`，无改动。
 - Tuxemon：`9e6258ff726b786040a267e8bdbbf037b560285e`。
-- 所有提交作者均为 `lfkdsk <lfkdsk@gmail.com>`，未 push；`bun.lock` 未改。
+- 所有提交作者均为 `lfkdsk <lfkdsk@gmail.com>`；未 push，`bun.lock` 未改。
 
-## 上游语义对照
+## 复审修复：原因、修法与证据
 
-### 会话、入口与离场
+### F1：投球前 flee 检查保持遭遇
 
-上游 `tuxemon/event/actions/park_experience.py:33-54` 对 `start` 只调用
-`activate_session()`；`stop` 先 `deactivate_session()`、删除 `park_out`，再压入阻塞的
-`ParkState`，等它关闭后动作才结束。`tuxemon/park_tracker.py:81-137` 进一步证明
-activate 不会清空 client-lifetime tracker/history；只有显式 `reset_session()` 才清空。
+上游 `tuxemon/states/park_menu.py:145-151` 在 flee 判定为真时只写日志，随后返回菜单；它不投球、不扣球，也不结束遭遇。上游 `tuxemon/park_tracker.py:207-215` 与 `:229-236` 给每次遭遇 30 回合，base speed 大于 80 时 flee rate 为 10%，否则为 5%。
 
-真实入口 `mods/tuxemon/maps/eclipse_park_entrance.yaml:54-62` 依次扣 500 gold、发 25 个
-`tuxeball_park`、创建 `steps_park` 的 500 / `[100,0]` tracker，然后执行
-`park_experience start`。主园区的主动离开路径在
-`mods/tuxemon/maps/eclipse_park.yaml:234-245`，耗尽计步器路径在 `:266-272`；其它逃生
-路径位于同文件 `:384-386`、`eclipse_park_south.yaml:183-189`、`:253-255` 和
-`eclipse_park_cave.yaml:30-36`、`:76-78`。因此源数据是 **1 start + 7 stop**，限制是
-500 步而不是墙钟时间。
+旧移植在 positive check 后调用 `endBattle("ran")`，把日志分支误作成功逃跑。`battle/runtime.ts:1268-1293` 现在先 clone battle：回合为零时直接短路且不抽 RNG；否则只抽一次 flee roll。positive check 仅保存推进后的 RNG，保留 decision phase、null outcome、25 个 Park Ball、事件、双方队伍和四项菜单；negative check 才提交 Park Ball。`battle/runtime.ts:1127-1136` 明确实现 `speed > 80 ? 0.1 : 0.05`。玩家主动选择 Run 仍按上游无条件离开，见 `battle/runtime.ts:1294-1310`。
 
-### 公园遇敌与捕获
+`tests/park-session.test.ts:458-492` 同时钉住高速 10%、低速 5%、positive check 的一次 RNG、遭遇不结束、不扣球、不新增事件、不改野怪与菜单，以及零回合不抽 RNG。
 
-- `tuxemon/states/park_menu.py:32-40` 定义 Ball / Food / Doll / Run；`:68-74` 要求活跃
-  Park session 并在每次遇敌登记 sighting，`:94-129` 绘制四项菜单及禁用状态。
-- `tuxemon/states/park_menu.py:145-151` 在投球前先做逃跑检查，所以怪物先逃走时不消耗球；
-  `:131-133` 的 Run 无普通战斗逃跑判定。
-- `tuxemon/park_tracker.py:181-236` 给每次遇敌 30 回合，基础逃跑率 5%，base speed
-  大于 80 时为 10%，回合耗尽自动逃跑。
-- `tuxemon/core/effects/park.py:85-105` 复用 status/device/shake 捕获公式；`:107-133`
-  在失败时记 failed attempt，在成功时加入队伍、登记图鉴、记 successful capture 并归档遇敌。
-- `tuxemon/states/park.py:43-112` 的结算包含独特 sightings、总尝试、成功、失败、成功率、
-  高频 sightings 和 history highlights。本移植保留同一组可见统计。
-- 公园球的唯一专用数据是 `mods/tuxemon/db/item/tuxeball_park.yaml:1-21` 的
-  `park capture`。Food / Doll 在上游菜单中存在，但 pinned 数据没有对应 park effect，且
-  attraction/aggression 仍被上游标为 placeholder（`tuxemon/park_tracker.py:217-223`）；因此
-  两项保留可见但禁用，不伪造尚不存在的玩法。
+### F2：捕获失败改写为空动作
 
-## 自动导入与持久状态
+上游 `tuxemon/core/effects/park.py:97-120` 在捕获失败时从六种风味技巧中选一项，并把目标野怪已排队动作改写成 `Technique.create("empty")`；`tuxemon/combat/action_queue.py:208-215` 保留原 action target。公园里失败投球因此不会让玩家怪兽受伤。
 
-`importer/project.ts:4131-4145` 把合法 start/stop 降为 `tux.park_experience`；stop 后追加
-清 `park_out` 和阻塞的 `tux.parkSummary` scene。全语料覆盖结果是：
+`battle/core.ts:51-64` 给 Park capture 与风味键增加可序列化标记。`battle/tuxemon.ts:824-864` 只在失败的 Park capture 上抽取六种风味，逐项保留队列位置与 target，把该野怪的排队动作改成 `empty` 并删除原 move index；成功捕获不会额外消耗风味 RNG。`battle/tuxemon.ts:1305-1326` 把风味随 technique event 传给 presentation。`ui/battle-scene.tsx:82-91` 与 `ui/battle-scene-locale.ts:59-77,125-143` 显示六种完整英文/中文叙述。
 
-| action | total | Native | Degraded | Placeholder | Dropped |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| `park_experience` | 8 | 8 | 0 | 0 | 0 |
+`tests/park-session.test.ts:494-520` 证明失败会扣一球并计一次 failure，但玩家 HP 等于满血、野怪 technique 为 `empty`、damage 为 0，且风味属于六个上游键之一。
 
-没有地图 allowlist 或手改导入产物。`battle/park.ts:1-79` 实现稀疏的 Park session：旧存档
-和从未到访公园的状态完全没有该字段；首次 start 才创建它，再次 start 保留累计统计。
-`:89-152` 对所有计数和 history 严格验证，并生成稳定排序、最多五项的结算摘要。
-`summaryPending?: true` 是一次性 stop→scene handoff；`battle/scenes.ts:270-308` 在 scene
-启动时立即消费它，因此相邻 exit guard 不会叠出两张结算页。
+### F3：flee 测试有牙
 
-`battle/extension.ts:2111-2122` 注册 start/stop 命令。真实 Eclipse 遇敌没有显式
-environment，`battle/runtime.ts:1128-1140` 因而从已保存的 map environment 继承
-`park` / `night_park`，只在活跃 Park session 中启用专用 battle profile，同时登记 sighting、
-30 回合和 5%/10% 逃跑率。`:471-494` 生成四格菜单；`:1272-1327` 实现先逃走、
-Park Ball 捕获、统计和无条件 Run。普通战斗仍不能使用 Park Ball。
+两项规定变异均在隔离副本执行，未修改交付 worktree：
 
-Park dependency closure 由导入器自动扩展，最终生成数据为 269 monsters、245 techniques、
-114 items、13 elements、12 tastes、35 statuses、22 encounters、205 NPCs、10 environments、
-213 trainer parties / 611 trainer monster slots、283 battle slots、286 random encounter uses 和
-17 wild encounter uses；Eclipse Park 的 Pairagrim、日/夜环境、公园球和 UI 美术都来自 pinned source。
+- 删除投球前 flee guard 后，`bun test tests/park-session.test.ts` 变红；原本应停在 RNG draw 5 的遭遇继续执行到 draw 12。
+- 对调高速/低速的 `0.1` 与 `0.05` 后，同一测试变红；高速 Pairagrim 期望 `0.1`，实际得到 `0.05`。
 
-## 玩家入口与界面
+恢复未变异代码后聚焦测试与完整测试均全绿。第一项同时证明测试不是只看 flee rate 常量，第二项证明两个 rate 分支都被真正辨识。
 
-Spyder 主线不会经过 Eclipse Park。玩家可用 **SELECT → Map warp →
-`eclipse_park_entrance`** 到达安全出生点 `(4,3)`；Web 等价链接为
-`?map=eclipse_park_entrance&x=4&y=3`。到接待台面朝下并接受 500-gold 入场，才会得到
-25 个 Park Ball、启动 tracker 并传入内园。直接 warp 到 `eclipse_park` 只适合浏览地图，
-不会伪造一个完整会话。说明已写入 `README.md:373-389`，状态表在
-`docs/status.md:92` 标为 Done，导入命令表在 `docs/importer.md:108-110`。
+### F4：提交尾注
 
-`ui/battle-scene.tsx:219-225` 显示 Park Ball 数量，英文与中文完整显示 Ball / Food /
-Doll / Run、遇敌提示、捕获/挣脱/逃走叙述。`battle/scenes.ts:240-267` 保存 JSON-safe 的
-双语结算模板，`ui/park-scene.tsx:45-154` 绘制统计、sightings、highlights 和全宽触摸关闭键；
-生产入口在 `main.tsx:367-372` 注册。
+以 `origin/main` 为基线对全部 14 个分支提交执行 `git rebase --exec`，每个提交只保留原 subject，并对 amend 显式设置 `core.hooksPath=/dev/null`。rebase 前后的 tree 均为 `0b2a61cc43495774a44cb05fab4bbe3beb8f8e5d`，代码字节未变；全部 author 仍为 `lfkdsk <lfkdsk@gmail.com>`。
 
-## 真实地图、存读档、倒带与变异
+最终要求的命令 `git log origin/main..HEAD --format=%B | grep -i co-authored` 无输出并返回 1，说明范围内没有任何 `Co-authored-by` 尾注。
 
-`tests/park-session.test.ts` 不重建假的地图事件：它从真实导入的 `eclipse_park` 读取
-`e018_encounters_8_r001`（`(13,3)`、`4×3`、playerTouch、`eclipse_park` table、1%），
-固定 saved RNG cursor 459 后得到 level-6 Pairagrim。60/30/20 Hz 都完成相同捕获：
-Park Ball 25→24、production `battle_last_result` captured code 7、Pairagrim 入队并进 caught、
-session 得到一次 sighting / capture / history。每档都通过真实 snapshot restore；完整捕获
-倒带回公园菜单，再按同一 input refold，keyframe 与 from-zero 两条路径字节一致。
+### 显示精度与完整 highlights
 
-同文件还覆盖失败投球（球被消耗、failure +1）、怪物先逃走（不消耗球）、主动 Run（必定退出）、
-严格 state validation 以及英文/中文 JSON round-trip 结算。聚焦结果为
-`10 pass / 0 fail / 121 assertions`。
+`ui/park-scene.tsx:45-48` 用 `toFixed(1)` 显示百分比，双语生产画面均钉住 `60.0%`。`battle/park.ts:127-150` 的 highlights 按 history 第一次插入顺序输出全部物种，不再排序或 `.slice(0, 5)`；常见 sightings 的 top-five 规则保持不变。`tests/park-session.test.ts:115-131` 用六个不同物种证明第六项不会丢失。
 
-`tests/step-tracker.test.ts:180-370` 从真实入口 Pay event 开始，证明 25 个球、tracker、传送、
-四方向移动、跨南园传送、存读档、倒带/refold 和 60/30/20 Hz 一致；100 步提示只显示一次。
-tracker 到 0 时先出现结算，关闭后才按原地图事件回入口 `(5,4)` 并移除 tracker 和临时球。
+## 原功能完整性
 
-在隔离副本中做了两项变异：
+### 自动导入与会话
 
-- 删除 map environment 继承，真实 Park flow 准确出现 2 项失败；
-- 禁用 capture accounting，统计相关测试准确出现 2 项失败；
-- 恢复未变异代码后同一聚焦集 `10/10` 全绿。
+`importer/project.ts:4131-4145` 把合法 start/stop 导成 `tux.park_experience`；全语料仍为 8/8 Native、0 Degraded、0 Placeholder、0 Dropped。入口事件继续按源数据扣 500 gold、发 25 个 Park Ball、创建 500 步 tracker；7 条 stop 路径继续先停用会话、清 `park_out`、打开一次阻塞结算，再执行原地图传送和回收球。
 
-变异没有在交付 worktree 中改代码。
+Park 状态仍是可选稀疏 extension 字段，未改 RPG Kit schema。未到访公园的旧存档没有额外热路径；session 的 sightings、失败、成功与 capture history 均随 snapshot、存档和倒带保存。
 
-## 双语截图与肉眼核对
+### 玩家入口
 
-`tests/park-visual.test.ts:101-217` 对生产 bundle 串行启动 English / zh_CN × 480×272 /
-960×544，分别捕获 encounter 和 summary，共 8 张 golden。测试逐字检查所有 HUD、四格命令、
-完整结算文字，明确拒绝 `…` / `...` 截断；还检查选中 Park Ball、禁用项、菜单纸面、结算标题、
-关闭按钮的语义像素，以及两档视口的 scaled-touch close。结果为
-`4 pass / 0 fail / 106 assertions`。
+Spyder 主线不会经过 Eclipse Park。玩家使用 **SELECT → Map warp → `eclipse_park_entrance`** 到安全出生点 `(4,3)`，在接待台面朝下接受 500-gold 入场，随后取得 Park Ball 与 tracker 并进入内园。Web 等价链接是 `?map=eclipse_park_entrance&x=4&y=3`。说明位于 `README.md:373-389`，`docs/status.md:92` 保持 Done，导入命令表位于 `docs/importer.md:108-110`。
 
-四张 English/中文 encounter/summary contact sheet 把 480×272 与 960×544 都放大 3 倍；
-逐张打开核对后确认 Pairagrim/Nut 美术、日间 Park 背景、文字、禁用态、两栏统计和触摸按钮
-均可读、无裁切、无空白或错位。四个 touch-close probe 全部成功。
+## 测试、画面与兼容
 
-## 存档兼容
+### 真实地图、存读档与倒带
 
-本功能只给游戏 extension state 增加可选稀疏字段，没有改 RPG Kit schema；schema identity
-仍为 `9435a3b7f420c7e7876a7d211e8b2842bdc60e483c54c60cd550d7f5effc7d1c`。
-Park session 自身在真实捕获和 tracker 测试中完成 snapshot restore、倒带和 refold。
+`tests/park-session.test.ts` 从真实导入的 `eclipse_park` event 与 encounter table 触发 level-6 Pairagrim，而不是重建假的地图事件。60/30/20 Hz 均完成相同捕获：球 25→24、production result code 为 captured、Pairagrim 入队并进入 caught、session 写入 sighting/capture/history；三档都通过 snapshot restore。完整捕获可倒带回 Park 菜单，再按相同 input refold，keyframe 与 from-zero 路径字节一致。
 
-另在 main 的隔离 checkout 中生成未手改的真实 slot：frame 26、
-`spyder_paper_scoop (4,8)`，envelope SHA-256
-`351f0d0d97211a755fbfd53d0902ea54d1980a8632d8351684ded3e185b72576`，旧 content manifest
-`300693bb2544fd063701e53806673ffa07f4646ccf6ae5abba7d1e1d3117909c`。交付构建原样加载它，
-沿当前 tape 再跑 257 帧到 frame 283 / 同位置，canonical state SHA-256
-`5c40d03f6bd42b6278914cf9874a8074a8e3c07cde04910cd0c1ae4b30bfc0fd`；重存只使用当前
-identity，伪造或混配 identity 仍拒绝。完整兼容聚焦结果为
-`9 pass / 0 fail / 178 assertions`。
+同文件还覆盖 start/stop 严格验证、失败投球、positive flee no-op、零回合短路、主动 Run、完整 highlights，以及英文/中文 JSON round-trip 结算。`tests/step-tracker.test.ts:180-370` 继续从真实入口 Pay event 证明 25 个球、500 步、100 步提示、跨园区传送、耗尽离场、存读档、倒带/refold 与多 hz 一致。
 
-## 主线终态
+### 双语截图与肉眼核对
 
-Eclipse Park 不在 Spyder mainline。五段都在交付构建从 frame zero 重放，canonical 终态与
-main 完全一致，所以逐字段差异为 **0**，无需重录：
+`tests/park-visual.test.ts:131-183` 逐字钉住英文/中文 `60.0%` 与完整结算文字，并拒绝省略号截断；`:185-210` 对标题、选中 Park Ball、禁用选项、菜单纸面和关闭按钮做语义像素断言。English / zh_CN × 480×272 / 960×544 的四张刷新后 settlement golden 均字节匹配。
+
+四张 settlement golden 都以 3 倍打开肉眼检查：一位小数清晰，两栏统计、highlight 与触摸按钮无裁切、重叠、空白或错位。CJK 子集检查覆盖 2,482 个字符，新增中文风味没有缺字。
+
+### 当前 main 存档与主线终态
+
+在 main 隔离 checkout 生成的真实 slot（frame 26、`spyder_paper_scoop (4,8)`）可由交付构建原样加载，再沿当前 tape 继续到 frame 283；重存使用当前 identity，伪造或混配 identity 仍拒绝。schema identity 仍为 `9435a3b7f420c7e7876a7d211e8b2842bdc60e483c54c60cd550d7f5effc7d1c`。
+
+五段主线从 frame zero 重放，canonical 终态与 main 完全一致，逐字段差异为 0：
 
 | Segment | terminal state SHA-256 |
 | --- | --- |
@@ -164,92 +93,64 @@ main 完全一致，所以逐字段差异为 **0**，无需重录：
 | J3 | `590452dceb93dfe0a2a88016610e602a6bc6f5334da6fa7b35c550f1f1f2548d` |
 | J4 | `3fedbe7d848623d3f80b687f087a30f0e647ff4aa064cf0986ede38629719232` |
 
-两条 battle defeat/recovery tape、章节、中文 tape/demo、英文 demo、save journey 和
-206,830-frame built-world 的 233 个 checkpoints 也全部通过。
+两条 battle defeat/recovery tape、章节、中文 tape/demo、英文 demo、save journey，以及 206,830-frame built-world 的 233 个 checkpoints 也全部通过。
 
 ## QuickJS 性能
 
-所有样本使用 PocketJS desktop host 的真实 QuickJS，绑定 CPU 7；测量时没有并行测试或
-subagent 命令。main→branch→branch→main 做两轮交错。
+所有数据来自 PocketJS desktop host 的真实 QuickJS。没有本任务测试或 subagent 与测量并行；main→branch→branch→main 交错取样。首轮冷启动窗口受外部持续 CPU 负载污染而作废，以下为重跑的完整交错窗口；只按与 main 的相对回退判定，不声称所有样本低于 250 ms。
 
 ### 冷启动
 
-规格中的历史 expected hash `a5e82cc…` 已对当前 main 失效；main 和本分支实际都生成
-`8446fbfd8da7061c3b62e10f70fc0e87262d87466d1122c9c8ad0cb8edca6990`，证明稀疏 Park
-state 不改变 fresh startup。每边 12 个 fresh process：
+每边 12 个 fresh process；24 份 canonical state 都是 `8446fbfd8da7061c3b62e10f70fc0e87262d87466d1122c9c8ad0cb8edca6990`：
 
 | metric | main | branch | delta |
 | --- | ---: | ---: | ---: |
-| startup mean | 213.432 ms | 214.328 ms | +0.420% |
-| startup median | 212.805 ms | 212.541 ms | −0.124% |
-| startup min / max | 207.106 / 224.748 ms | 207.080 / 229.156 ms | — |
-| first-frame CPU mean | 2.271 ms | 2.291 ms | +0.888% |
+| startup mean | 235.309 ms | 237.177 ms | +0.794% |
+| startup median | 234.156 ms | 235.349 ms | +0.510% |
+| startup min / max | 231.978 / 247.531 ms | 231.652 / 251.546 ms | — |
+| first-frame QuickJS mean | 2.399 ms | 2.450 ms | +2.126% |
 
-全部低于 250 ms startup / 50 ms frame 门槛。
+相对回退均低于 3%。
 
-### 3,500-frame 真实 G6 replay
+### 3,500-frame G6 replay
 
-每边四个 fresh process，全部到达 state
-`8253ccefb8054a93070f2062c74e6c3b528e3e123d65a0fbd6b175e57008f9d2`：
+每边四个 fresh process，8 份最终状态均为 `8253ccefb8054a93070f2062c74e6c3b528e3e123d65a0fbd6b175e57008f9d2`：
 
 | metric mean | main | branch | delta |
 | --- | ---: | ---: | ---: |
-| replay QuickJS+core CPU | 4370.139 ms | 4463.683 ms | +2.141% |
-| all-frame p95 | 2.3215 ms | 2.36925 ms | +2.057% |
-| battle-steady p95 | 0.5105 ms | 0.4945 ms | −3.134% |
-| battle-entry CPU | 15.984 ms | 15.45675 ms | −3.299% |
+| replay QuickJS+core CPU | 4418.143 ms | 4381.500 ms | −0.829% |
+| all-frame p95 | 2.2978 ms | 2.3115 ms | +0.598% |
+| battle-steady p95 | 0.4903 ms | 0.4773 ms | −2.652% |
+| battle-entry CPU | 15.524 ms | 14.592 ms | −6.002% |
 
-最慢 branch frame 为 26.839 ms，低于 50 ms。
+最慢 branch frame 为 31.720 ms。
 
 ### Park 专用场景
 
-三个 fresh QuickJS process 各测一次真实 encounter mount + 120 steady frames，再测 settlement
-mount + 120 steady frames；50 ms mount 与 steady assertions 均通过：
+三个 fresh QuickJS process 分别测 encounter mount + 120 steady frames，再测 settlement mount + 120 steady frames；50 ms mount/steady assertion 三次均通过：
 
-| scene | mount QuickJS+core mean | steady p95 mean | worst steady | structural max |
-| --- | ---: | ---: | ---: | ---: |
-| Park encounter | 8.740 ms | 0.138 ms | 0.215 ms | 0 |
-| settlement | 3.373 ms | 1.963 ms | 5.353 ms | 72 |
-
-结构变化数保留为诊断数据；任务门槛是帧时间，最坏 settlement steady frame 仍只有 5.353 ms。
+| scene | mount mean / max | worst p95 | worst steady frame |
+| --- | ---: | ---: | ---: |
+| Park encounter | 8.717 / 9.072 ms | 0.143 ms | 0.222 ms |
+| settlement | 3.348 / 3.382 ms | 1.975 ms | 5.467 ms |
 
 ## 全门禁
 
 ### 生成、编译与测试
 
-- `bun run import` 连跑两次无 diff；determinism 为 4,780 files / 67,437,448 bytes / SHA-256
-  `26d9d138d6a90d3fd15c98fa58d148d2abac0702c84134e9041406b87038457b`。
-- `bunx tsc --noEmit`、l10n、CJK、`bun run build`、`bun run build:wasm` 全部 exit 0。
-- CI test 五组：importer `53 pass`；replays `12 pass`；locks/battle/terrain `22 pass`；
-  rest a–l `592 pass / 107971 assertions`；rest m–z `562 pass / 50509 assertions`；均 0 fail。
+- `bun run import` 连跑两次无 diff；determinism 为 4,780 files / 67,437,448 bytes / SHA-256 `26d9d138d6a90d3fd15c98fa58d148d2abac0702c84134e9041406b87038457b`。
+- `bunx tsc --noEmit`、l10n 11/11、CJK 2,482 covered、`bun run build`、`bun run build:wasm` 全部 exit 0；Wasm 为 360,011 bytes。
+- 完整 `bun run test`：`1243 pass / 0 fail / 232410 assertions`，141 files，414.57 s。
+- CI test 五组：importer 53、replays 12、locks/battle/terrain 22、rest a–l 592、rest m–z 564，全部 0 fail。
 - freeze scan 执行 263 maps：0 permanent locks、0 blocking fibers、0 errors。
 
 ### Journey、Web 与 PSP
 
-- `verify:gb6:mainline`、J1–J4 mainline、golden sync、failure tapes、locks、frozen、chapters、
-  zh tape/demo、en demo、save、preview coverage 和 bootworld replay 全部 PASS。
-- `bun run web`、English Web journey、zh opening、demo controls、三首 imported music 均 PASS，
-  0 console errors。
-- PSP snapshots 重新生成；CI 的 `bun run build:psp --skip-assets` 和完整 PSP 构建均 PASS。
-- 最终 `git diff --check`（HEAD 与全提交区间）和 `bunx tsc --noEmit` 再跑均 exit 0；
-  report 前 worktree clean。
+- 16 项 journey/verification 命令全部通过，包括 GB6、J1–J4、failure tapes、locks、frozen、chapters、zh tape/demo、en demo、save、preview coverage 与 bootworld replay。
+- `bun run web`、English Web journey、zh opening、demo controls、三首 imported music 全部 PASS，0 console errors。
+- PSP snapshots 已刷新；CI 的 `bun run build:psp --skip-assets` 与完整 PSP 构建均 PASS。
+- 四张刷新后 Park settlement golden、最终 `git diff --check`、最终 `bunx tsc --noEmit`、作者与 footer 审计全部通过；worktree clean。
 
-## 提交
-
-| Commit | Change |
-| --- | --- |
-| `b5a1b3c8` | preserve Eclipse Park sessions in the importer |
-| `77849f57` | add the Park capture runtime and UI mode |
-| `2d72cf17` | exercise real Eclipse sessions, rates, saves and rewind |
-| `f14fdeea` | pin bilingual production visuals |
-| `20faac04` | load and continue the latest published slot |
-| `e8178d11` | explain player access and feature status |
-| `047f40e7` | register the Park settlement in lock scans |
-| `3a7de24b` | pin the expanded battle runtime slice |
-| `a825d87f` | register the Park settlement in freeze scans |
-
-组件仓和 PocketJS 不需要提交或合入顺序；只需合并以上游戏仓提交和本报告。
-
-subagent 使用：4 个 / 上游语义、运行时与导入架构、测试与 CI/性能、UI 与文档并行核查 / 明显省时
+subagent 使用：3 个 / 上游语义、测试辨识力、CI与交付审计 / 明显省时。
 
 PASS
