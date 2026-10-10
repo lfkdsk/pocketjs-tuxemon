@@ -7584,8 +7584,8 @@
    "reasons": {
     "duplicate-id": 0,
     "entry-transfer": 0,
-    "entry-scene": 0,
-    "entry-error": 5,
+    "entry-scene": 5,
+    "entry-error": 0,
     "entry-runtime-branch": 0,
     "facing-condition": 0,
     "runtime-condition": 0,
@@ -7924,7 +7924,7 @@
     "hidden": 37,
     "rejected": 4,
     "reasons": {
-     "entry-error": 4
+     "entry-scene": 4
     }
    },
    {
@@ -7944,7 +7944,7 @@
     "hidden": 11,
     "rejected": 1,
     "reasons": {
-     "entry-error": 1
+     "entry-scene": 1
     }
    },
    {

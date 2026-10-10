@@ -1,0 +1,77 @@
+{
+  "format": "pocket-tuxemon/park-goldens/v1",
+  "frames": [
+    {
+      "lang": "en_US",
+      "case": "encounter",
+      "width": 480,
+      "height": 272,
+      "file": "park-encounter.480x272.png",
+      "rgbaFnv1a": "b3b53bbc",
+      "pngSha256": "2018087d355ac350d2c2a755b36fc0df5ad1b07ce30a53a9c0422a20adc29d12"
+    },
+    {
+      "lang": "en_US",
+      "case": "summary",
+      "width": 480,
+      "height": 272,
+      "file": "park-summary.480x272.png",
+      "rgbaFnv1a": "84cb6503",
+      "pngSha256": "cc2cfbebec47aa7d47609e47d9f6efcc7ab4524c9ca0bf05f98b12e943774466"
+    },
+    {
+      "lang": "en_US",
+      "case": "encounter",
+      "width": 960,
+      "height": 544,
+      "file": "park-encounter.960x544.png",
+      "rgbaFnv1a": "3c27bfd7",
+      "pngSha256": "9713aa7437eda429e4f4ac4c80678ae7a4f7c9758e76a71536d7486a05a6c4b7"
+    },
+    {
+      "lang": "en_US",
+      "case": "summary",
+      "width": 960,
+      "height": 544,
+      "file": "park-summary.960x544.png",
+      "rgbaFnv1a": "dfc276bc",
+      "pngSha256": "3e07e5ea8ceba92e0bdf873bfda342c43ad71b5a3245ef50f1f7443b3a2bffcc"
+    },
+    {
+      "lang": "zh_CN",
+      "case": "encounter",
+      "width": 480,
+      "height": 272,
+      "file": "park-encounter.zh.480x272.png",
+      "rgbaFnv1a": "1ea6c14d",
+      "pngSha256": "cf5b51deeb4bf438b556506a517771c089ad91659af0b5eb37ecaaeb5b79737b"
+    },
+    {
+      "lang": "zh_CN",
+      "case": "summary",
+      "width": 480,
+      "height": 272,
+      "file": "park-summary.zh.480x272.png",
+      "rgbaFnv1a": "7dbe227e",
+      "pngSha256": "4aea5c12307c35cd65ba3a2b7afb7c55c32093e59db85584700edb9628183bdb"
+    },
+    {
+      "lang": "zh_CN",
+      "case": "encounter",
+      "width": 960,
+      "height": 544,
+      "file": "park-encounter.zh.960x544.png",
+      "rgbaFnv1a": "ed075c7c",
+      "pngSha256": "d916da653984b088ff67da1cf1615f0a539210707ed0b60d824272d6b6591f8e"
+    },
+    {
+      "lang": "zh_CN",
+      "case": "summary",
+      "width": 960,
+      "height": 544,
+      "file": "park-summary.zh.960x544.png",
+      "rgbaFnv1a": "f6c2398f",
+      "pngSha256": "64f295fc2e38acf8be6a66824296ed147290539c9021ec00c54590e034fa0ae1"
+    }
+  ]
+}

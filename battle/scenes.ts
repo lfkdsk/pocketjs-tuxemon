@@ -249,21 +249,21 @@ function parkLabels(lang: GameLang): ParkSummarySceneLabels {
     close: "返回公园入口",
     seenOnce: "遇见 1 次",
     seenTimes: "遇见 {count} 次",
-    averageTurns: "平均剩余 {turns} 回合",
+    averageTurns: "余 {turns} 回合",
   } : {
     title: "Eclipse Park Results",
-    uniqueSeen: "Unique sightings",
+    uniqueSeen: "Species seen",
     attempts: "Capture attempts",
-    successful: "Successful catches",
-    failed: "Failed catches",
+    successful: "Caught",
+    failed: "Missed",
     successRate: "Success rate",
     topSightings: "Top sightings",
     highlights: "Capture highlights",
     none: "No encounters recorded",
     close: "Return to the park entrance",
-    seenOnce: "seen 1 time",
-    seenTimes: "seen {count} times",
-    averageTurns: "avg {turns} turns remaining",
+    seenOnce: "seen once",
+    seenTimes: "seen {count}×",
+    averageTurns: "{turns} turns left",
   };
 }
 

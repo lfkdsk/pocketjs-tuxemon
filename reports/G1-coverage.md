@@ -286,8 +286,8 @@ repeats it at every mainline chapter.
 |---|---:|---:|---|
 | `duplicate-id` | 0 | 0 | two events share one id / 两个事件同 id |
 | `entry-transfer` | 0 | 0 | the map's entry transfers away / 进图即传送走（整图） |
-| `entry-scene` | 0 | 0 | the map's entry starts a battle or scene / 进图即开战斗或场景（整图） |
-| `entry-error` | 5 | 0 | the map's entry raised an error / 进图报错（整图） |
+| `entry-scene` | 5 | 0 | the map's entry starts a battle or scene / 进图即开战斗或场景（整图） |
+| `entry-error` | 0 | 0 | the map's entry raised an error / 进图报错（整图） |
 | `entry-runtime-branch` | 0 | 0 | an entry program branches on facing, timer or BGM / 入口程序按朝向、计时器或 BGM 分支（整图） |
 | `facing-condition` | 0 | 0 | a page condition reads the player's facing / 页条件读玩家朝向 |
 | `runtime-condition` | 0 | 0 | a page condition reads the timer or BGM / 页条件读计时器或 BGM |
@@ -333,9 +333,9 @@ Maps with a previewable or rejected event / 有可预览或被拒绝事件的地
 | `eclipse_lion_mountain_low` | 20 | 2 | 0 | 18 | 0 | — |
 | `eclipse_lion_mountain_middle` | 32 | 6 | 0 | 26 | 0 | — |
 | `eclipse_obsidian_center` | 21 | 1 | 0 | 20 | 0 | — |
-| `eclipse_park` | 41 | 0 | 0 | 37 | 4 | entry-error:4 |
+| `eclipse_park` | 41 | 0 | 0 | 37 | 4 | entry-scene:4 |
 | `eclipse_park_cabin` | 7 | 1 | 0 | 6 | 0 | — |
-| `eclipse_park_cave` | 12 | 0 | 0 | 11 | 1 | entry-error:1 |
+| `eclipse_park_cave` | 12 | 0 | 0 | 11 | 1 | entry-scene:1 |
 | `eclipse_park_entrance` | 15 | 2 | 0 | 13 | 0 | — |
 | `eclipse_route7` | 61 | 14 | 0 | 47 | 0 | — |
 | `healing_center` | 16 | 2 | 0 | 14 | 0 | — |
