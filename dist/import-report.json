@@ -284,7 +284,7 @@
  "schemaErrors": [],
  "audioQoaPending": [],
  "byFate": {
-  "T1-lowered": 2001,
+  "T1-lowered": 2002,
   "T3-dropped": 10,
   "T1": 37950,
   "T4-dropped": 1419,
@@ -1485,6 +1485,12 @@
    "fate": "T1-lowered",
    "count": 1,
    "note": "safety unlock appended to taba_ba_br_master_foyer:e003_stop_and_talk_r001"
+  },
+  {
+   "key": "trigger:pinned Zhu transaction reset:T1-lowered",
+   "fate": "T1-lowered",
+   "count": 1,
+   "note": "consume the exact reset page after its three source clears so a later paid taste choice remains queued"
   },
   {
    "key": "trigger:spawn:T1-lowered",
