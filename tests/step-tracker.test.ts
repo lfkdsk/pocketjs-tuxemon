@@ -21,6 +21,8 @@ import {
   stepTrackersProblem,
   type StepTrackerState,
 } from "../battle/step-tracker.ts";
+import { emptyParkSession } from "../battle/park.ts";
+import type { ParkSummarySceneState } from "../battle/scenes.ts";
 import { availableMapIds, buildProject, G6_IMPORT_OPTIONS } from "../importer/project.ts";
 import { AttractController } from "../vendor/pocket-rpgkit/src/engine/attract.ts";
 import { BTN_BITS } from "../vendor/pocket-rpgkit/src/engine/camera.ts";
@@ -146,6 +148,7 @@ describe("step trackers in a session", () => {
       state.stepTrackers = {
         player: { steps_park: { countdown, initialCountdown: 500, milestones: [100, 0], status } },
       };
+      state.parkSession = emptyParkSession(true);
     });
     // The park's Tuxeball event sends a player without park balls back out.
     const fresh = startSession(project, createSession(project, 60, TUXEMON_SESSION_OPTIONS)).sw;
@@ -338,11 +341,26 @@ describe("step trackers in a session", () => {
     expect(trackers(state)?.player?.steps_park?.status).toEqual({ "100": true });
   });
 
-  test("running out of steps sends the player back to the entrance and removes the tracker", () => {
+  test("running out of steps settles the session, then returns to the entrance and removes the tracker", () => {
     let { session, state } = parkSession(1, { "100": true });
     state = landOne(session, state, BTN_BITS.DOWN);
-    for (let frame = 0; frame < 240 && state.mapId === park.id; frame++) {
+    for (let frame = 0; frame < 240 && state.scene === null; frame++) {
       state = stepSession(session, state, { buttons: 0, confirmEdge: state.interp.modal?.kind === "text" });
+    }
+    expect(state.scene?.kind).toBe("scene");
+    expect(state.scene!.state as unknown as ParkSummarySceneState).toMatchObject({
+      kind: "parkSummary",
+      phase: "summary",
+      uniqueSeen: 0,
+      attempts: 0,
+    });
+    expect(tuxemonExtensionState(state.ext, DB).parkSession?.active).toBeFalse();
+    expect(state.sw.items.tuxeball_park ?? 0).toBe(0);
+    expect(trackers(state)?.player?.steps_park?.countdown).toBe(0);
+
+    state = stepSession(session, state, { buttons: 0, confirmEdge: true });
+    for (let frame = 0; frame < 240 && state.mapId === park.id; frame++) {
+      state = stepSession(session, state, { buttons: 0 });
     }
     for (let frame = 0; frame < 120; frame++) state = stepSession(session, state, { buttons: 0 });
     expect(state.mapId).toBe("eclipse_park_entrance");

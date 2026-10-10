@@ -10,6 +10,7 @@ import type {
 import { createDaycareSceneRules, TUXEMON_DAYCARE_SCENE_ID } from "./daycare-scenes.ts";
 import {
   resolveBattleDb,
+  packTuxemonExtensionState,
   tuxemonExtensionState,
   type BattleDbSource,
   type GameLang,
@@ -66,8 +67,9 @@ export interface ParkSummarySceneLabels {
   highlights: string;
   none: string;
   close: string;
-  seenTimes: (count: number) => string;
-  averageTurns: (turns: number) => string;
+  seenOnce: string;
+  seenTimes: string;
+  averageTurns: string;
 }
 
 export interface ParkSummarySceneState extends ParkSummary {
@@ -245,8 +247,9 @@ function parkLabels(lang: GameLang): ParkSummarySceneLabels {
     highlights: "捕获亮点",
     none: "暂无记录",
     close: "返回公园入口",
-    seenTimes: (count) => `遇见 ${count} 次`,
-    averageTurns: (turns) => `平均剩余 ${turns.toFixed(1)} 回合`,
+    seenOnce: "遇见 1 次",
+    seenTimes: "遇见 {count} 次",
+    averageTurns: "平均剩余 {turns} 回合",
   } : {
     title: "Eclipse Park Results",
     uniqueSeen: "Unique sightings",
@@ -258,8 +261,9 @@ function parkLabels(lang: GameLang): ParkSummarySceneLabels {
     highlights: "Capture highlights",
     none: "No encounters recorded",
     close: "Return to the park entrance",
-    seenTimes: (count) => `seen ${count} time${count === 1 ? "" : "s"}`,
-    averageTurns: (turns) => `avg ${turns.toFixed(1)} turns remaining`,
+    seenOnce: "seen 1 time",
+    seenTimes: "seen {count} times",
+    averageTurns: "avg {turns} turns remaining",
   };
 }
 
@@ -267,7 +271,10 @@ function parkSummaryRules(names: ReadonlyMap<string, string>, lang: GameLang): S
   return {
     start(ext) {
       const current = tuxemonExtensionState(ext);
-      const summary = parkSummary(current.parkSession ?? emptyParkSession(false));
+      const parkSession = current.parkSession ?? emptyParkSession(false);
+      if (parkSession.summaryPending !== true) return null;
+      const summary = parkSummary(parkSession);
+      const { summaryPending: _summaryPending, ...settled } = parkSession;
       const state: ParkSummarySceneState = {
         kind: "parkSummary",
         phase: "summary",
@@ -282,7 +289,10 @@ function parkSummaryRules(names: ReadonlyMap<string, string>, lang: GameLang): S
           name: names.get(entry.monster) ?? entry.monster,
         })),
       };
-      return { ext, state: state as unknown as JsonValue };
+      return {
+        ext: packTuxemonExtensionState({ ...current, parkSession: settled }),
+        state: state as unknown as JsonValue,
+      };
     },
     step(rawState, input) {
       const state = stateOf<ParkSummarySceneState>(rawState);

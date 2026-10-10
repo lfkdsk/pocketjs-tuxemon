@@ -10,6 +10,16 @@ import { Panel } from "../vendor/pocket-rpgkit/src/ui/Panel.tsx";
 import { SceneCanvas } from "./journal-scene.tsx";
 import { TUXEMON_UI_THEME as THEME } from "./tuxemon-theme.ts";
 
+function seenLabel(state: ParkSummarySceneState, count: number): string {
+  return count === 1
+    ? state.labels.seenOnce
+    : state.labels.seenTimes.replace("{count}", String(count));
+}
+
+function averageTurnsLabel(state: ParkSummarySceneState, turns: number): string {
+  return state.labels.averageTurns.replace("{turns}", turns.toFixed(1));
+}
+
 function statCell(label: string, value: string, left: number, top: number) {
   return (
     <View
@@ -85,7 +95,7 @@ export const TuxemonParkSummaryScene: Component<BattleSceneViewProps> = (props) 
                 style={{ posType: 1, insetL: 10, insetT: 27 + index() * 16, width: 196, height: 16, lineHeight: 14, textColor: THEME.ink }}
                 debugName="park-summary-sighting-row"
               >
-                {`${entry.name} · ${state().labels.seenTimes(entry.count)}`}
+                {`${entry.name} · ${seenLabel(state(), entry.count)}`}
               </Text>
             )}
           </For>
@@ -118,7 +128,7 @@ export const TuxemonParkSummaryScene: Component<BattleSceneViewProps> = (props) 
                 style={{ posType: 1, insetL: 10, insetT: 27 + index() * 16, width: 196, height: 16, lineHeight: 14, textColor: THEME.ink }}
                 debugName="park-summary-highlight-row"
               >
-                {`${entry.name} · ${state().labels.averageTurns(entry.averageTurnsRemaining)}`}
+                {`${entry.name} · ${averageTurnsLabel(state(), entry.averageTurnsRemaining)}`}
               </Text>
             )}
           </For>

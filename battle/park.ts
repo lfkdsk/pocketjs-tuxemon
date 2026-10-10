@@ -4,6 +4,10 @@
  * means projects and legacy saves that never visit the park pay no cost. */
 export interface ParkSessionState {
   active: boolean;
+  /** Sparse one-shot handoff from `stop` to the blocking settlement scene.
+   * The scene consumes it at start so overlapping exit guards cannot show the
+   * same summary twice. */
+  summaryPending?: true;
   sightings: Record<string, number>;
   failedAttempts: number;
   successfulCaptures: number;
@@ -29,14 +33,20 @@ export function emptyParkSession(active = false): ParkSessionState {
 export function activateParkSession(
   current: Readonly<ParkSessionState> | undefined,
 ): ParkSessionState {
-  return current ? { ...current, active: true } : emptyParkSession(true);
+  if (!current) return emptyParkSession(true);
+  const { summaryPending: _summaryPending, ...rest } = current;
+  return { ...rest, active: true };
 }
 
 /** Mirrors ParkSession.deactivate_session(). */
 export function deactivateParkSession(
   current: Readonly<ParkSessionState> | undefined,
 ): ParkSessionState {
-  return current ? { ...current, active: false } : emptyParkSession(false);
+  if (!current) return { ...emptyParkSession(false), summaryPending: true };
+  if (current.active || current.summaryPending) {
+    return { ...current, active: false, summaryPending: true };
+  }
+  return { ...current, active: false };
 }
 
 export function recordParkSighting(
@@ -79,6 +89,9 @@ const nonNegativeInteger = (value: unknown): value is number =>
 export function parkSessionProblem(value: unknown): string | null {
   const state = record(value);
   if (!state || typeof state.active !== "boolean") return "parkSession.active must be boolean";
+  if (state.summaryPending !== undefined && state.summaryPending !== true) {
+    return "parkSession.summaryPending must be true when present";
+  }
   if (!nonNegativeInteger(state.failedAttempts)) {
     return "parkSession.failedAttempts must be a non-negative safe integer";
   }

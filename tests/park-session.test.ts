@@ -9,6 +9,7 @@ import {
   tuxemonExtensionProblem,
   tuxemonExtensionState,
 } from "../battle/extension.ts";
+import { TUXEMON_SESSION_OPTIONS, TUXEMON_VARIABLE_ENUMS } from "../battle/game.ts";
 import { battleDbToTuxemonBattleDb } from "../battle/from-battle-db.ts";
 import {
   BATTLE_EVENT_TICKS,
@@ -32,7 +33,18 @@ import {
 } from "../battle/park.ts";
 import { availableMapIds, buildProject, G6_IMPORT_OPTIONS } from "../importer/project.ts";
 import { validateBattleDb } from "../importer/battle-schema.ts";
-import type { JsonValue } from "../vendor/pocket-rpgkit/src/engine/types.ts";
+import { AttractController } from "../vendor/pocket-rpgkit/src/engine/attract.ts";
+import { BTN_BITS } from "../vendor/pocket-rpgkit/src/engine/camera.ts";
+import { canonicalJson, createSessionSnapshot } from "../vendor/pocket-rpgkit/src/engine/save.ts";
+import { restoreSessionSnapshot } from "../vendor/pocket-rpgkit/src/engine/save-restore.ts";
+import {
+  createSession,
+  startSession,
+  stepSession,
+  type Session,
+  type SessionState,
+} from "../vendor/pocket-rpgkit/src/engine/session.ts";
+import type { JsonValue, Project } from "../vendor/pocket-rpgkit/src/engine/types.ts";
 import type { BattleRules } from "../vendor/pocket-rpgkit/src/engine/battle.ts";
 
 const PARK_MAPS = ["eclipse_park_entrance", "eclipse_park", "eclipse_park_south", "eclipse_park_cave"];
@@ -47,6 +59,11 @@ const ENUMS: VariableEnums = {
   battle_last_winner: [],
   battle_last_loser: [],
 };
+const BTN_CONFIRM = 0x2000;
+const BTN_REWIND = 0x0100;
+const REAL_ENCOUNTER_RNG = 459;
+const CAPTURED_RESULT_CODE = TUXEMON_VARIABLE_ENUMS.battle_last_result!.indexOf("captured") + 1;
+const REAL_PARK_PROJECT = buildProject(["eclipse_park"], G6_IMPORT_OPTIONS).project;
 
 function nodes(value: unknown, out: Record<string, unknown>[] = []): Record<string, unknown>[] {
   if (Array.isArray(value)) for (const child of value) nodes(child, out);
@@ -104,7 +121,8 @@ describe("Eclipse Park session state", () => {
     const started = command(commandContext(initial), { action: "start" })!.ext!;
     expect(tuxemonExtensionState(started, TUXEMON_BATTLE_DB).parkSession).toEqual(emptyParkSession(true));
     const stopped = command(commandContext(started), { action: "stop" })!.ext!;
-    expect(tuxemonExtensionState(stopped, TUXEMON_BATTLE_DB).parkSession).toEqual(emptyParkSession(false));
+    expect(tuxemonExtensionState(stopped, TUXEMON_BATTLE_DB).parkSession)
+      .toEqual({ ...emptyParkSession(false), summaryPending: true });
     expect(tuxemonExtensionProblem(stopped, TUXEMON_BATTLE_DB)).toBeNull();
     expect(() => command(commandContext(stopped), { action: "pause" })).toThrow(/start.*stop/);
 
@@ -140,6 +158,174 @@ describe("real Eclipse Park import", () => {
     const full = buildProject(availableMapIds(), G6_IMPORT_OPTIONS);
     expect(full.report.coverage.actions.rows.find((entry) => entry.type === "park_experience"))
       .toMatchObject({ total: 8, native: 8, degraded: 0, placeholder: 0, dropped: 0 });
+  });
+});
+
+function realParkExtension(): JsonValue {
+  const player = spawnMonster(
+    TUXEMON_BATTLE_DB,
+    RULE_DB,
+    { rng: 0x4150, rngDraws: 0 },
+    "nut",
+    12,
+    { iid: "txmn-real-park-player" },
+  );
+  return packTuxemonExtensionState({
+    ...initialTuxemonExtensionState(),
+    party: [player],
+    environment: "park",
+    parkSession: emptyParkSession(true),
+    nextMonsterId: 2,
+  });
+}
+
+function startRealParkEncounter(hz: 60 | 30 | 20): {
+  project: Project;
+  session: Session;
+  state: SessionState;
+} {
+  const project = structuredClone(REAL_PARK_PROJECT);
+  project.start = { map: "eclipse_park", x: 12, y: 3, dir: "right" };
+  const session = createSession(project, hz, TUXEMON_SESSION_OPTIONS);
+  let state = startSession(project, session, undefined, realParkExtension());
+  state.sw.items.tuxeball_park = 25;
+  state.sw.rng = REAL_ENCOUNTER_RNG;
+
+  for (let frame = 0; frame < 120 && state.scene === null; frame++) {
+    state = stepSession(session, state, { buttons: BTN_BITS.RIGHT });
+  }
+  expect(state.scene?.kind, `real Park encounter at ${hz} Hz`).toBe("battle");
+  expect([state.move.tx, state.move.ty]).toEqual([13, 3]);
+
+  for (let frame = 0; frame < 1_000; frame++) {
+    if (state.scene?.kind !== "battle") break;
+    const battle = tuxemonRuntimeBattleState(state.scene.state);
+    if (battle.eventCursor >= battle.battle.events.length) break;
+    state = stepSession(session, state, { buttons: 0, confirmEdge: true });
+  }
+  expect(state.scene?.kind).toBe("battle");
+  const battle = tuxemonRuntimeBattleState(state.scene!.state);
+  expect(battle.eventCursor).toBe(battle.battle.events.length);
+  expect(battle.park).toMatchObject({ monster: "pairagrim", turnsRemaining: 30 });
+  return { project, session, state };
+}
+
+function finishRealParkCapture(hz: 60 | 30 | 20): {
+  project: Project;
+  session: Session;
+  atMenu: SessionState;
+  state: SessionState;
+} {
+  const started = startRealParkEncounter(hz);
+  const atMenu = started.state;
+  let state = stepSession(started.session, atMenu, { buttons: 0, confirmEdge: true });
+  expect(tuxemonRuntimeBattleState(state.scene!.state).battle.result?.battleLastResult).toBe("captured");
+  for (let frame = 0; frame < 1_000 && state.scene !== null; frame++) {
+    state = stepSession(started.session, state, { buttons: 0, confirmEdge: true });
+  }
+  expect(state.scene).toBeNull();
+  for (let frame = 0; frame < 30 && state.interp.main; frame++) {
+    state = stepSession(started.session, state, { buttons: 0 });
+  }
+  expect(state.interp.error).toBeUndefined();
+  expect(state.interp.main).toBeNull();
+  return { ...started, atMenu, state };
+}
+
+function realCaptureProjection(state: SessionState) {
+  const ext = tuxemonExtensionState(state.ext, TUXEMON_BATTLE_DB);
+  return {
+    map: state.mapId,
+    position: [state.move.tx, state.move.ty],
+    parkBalls: state.sw.items.tuxeball_park,
+    battleResult: state.sw.variables["v.battle_last_result"],
+    parkSession: ext.parkSession!,
+    caught: ext.caught,
+    party: ext.party.map((monster) => monster.slug),
+  };
+}
+
+describe("real Eclipse Park session flow", () => {
+  test("the unchanged 1% player-touch event enters Park mode and captures at every host rate", () => {
+    const encounter = REAL_PARK_PROJECT.maps[0]!.events?.find((event) => event.id === "e018_encounters_8_r001");
+    expect(encounter).toMatchObject({ x: 13, y: 3, w: 4, h: 3 });
+    expect(encounter!.pages[0]!.trigger).toBe("playerTouch");
+    expect(encounter!.pages[0]!.commands[0]).toEqual({
+      op: "battle",
+      setup: { kind: "random", table: "eclipse_park", probability: 1, inside: false },
+    });
+    expect((encounter!.pages[0]!.commands[0] as { setup: Record<string, unknown> }).setup)
+      .not.toHaveProperty("environment");
+
+    const outcomes = ([60, 30, 20] as const).map((hz) => {
+      const run = finishRealParkCapture(hz);
+      const projection = realCaptureProjection(run.state);
+      expect(projection).toMatchObject({
+        map: "eclipse_park",
+        position: [13, 3],
+        parkBalls: 24,
+        battleResult: CAPTURED_RESULT_CODE,
+        parkSession: {
+          active: true,
+          sightings: { pairagrim: 1 },
+          failedAttempts: 0,
+          successfulCaptures: 1,
+          history: [{ monster: "pairagrim", turnsRemaining: 30 }],
+        },
+        caught: ["pairagrim"],
+        party: ["nut", "pairagrim"],
+      });
+
+      const restored = restoreSessionSnapshot(
+        run.session,
+        structuredClone(createSessionSnapshot(run.session, run.state, 0)),
+      );
+      expect(realCaptureProjection(restored)).toEqual(projection);
+      return projection;
+    });
+    expect(outcomes[1]).toEqual(outcomes[0]);
+    expect(outcomes[2]).toEqual(outcomes[0]);
+  });
+
+  test("a completed real capture rewinds to the Park menu and refolds byte-identically", () => {
+    const { project, atMenu } = finishRealParkCapture(60);
+    const options = {
+      hz: 60,
+      attractEnabled: false,
+      rewindSeconds: 10,
+      keyframeIntervalFrames: 7,
+      idleFrames: 60_000,
+      ...TUXEMON_SESSION_OPTIONS,
+    } as const;
+    const keyed = new AttractController(project, [], options);
+    const fromZero = new AttractController(project, [], { ...options, keyframeMaxBytes: 0 });
+    keyed.loadState(atMenu, 0);
+    fromZero.loadState(atMenu, 0);
+
+    const masks: number[] = [];
+    for (let frame = 0; frame < 600 && keyed.state.scene !== null; frame++) {
+      const mask = frame % 2 === 0 ? BTN_CONFIRM : 0;
+      masks.push(mask);
+      keyed.step(mask);
+      fromZero.step(mask);
+    }
+    expect(keyed.state.scene).toBeNull();
+    expect(canonicalJson(fromZero.state)).toBe(canonicalJson(keyed.state));
+    const terminal = canonicalJson(keyed.state);
+
+    keyed.step(BTN_REWIND);
+    fromZero.step(BTN_REWIND);
+    expect(canonicalJson(keyed.state)).toBe(canonicalJson(atMenu));
+    expect(canonicalJson(fromZero.state)).toBe(canonicalJson(atMenu));
+    expect(tuxemonExtensionState(keyed.state.ext, TUXEMON_BATTLE_DB).parkSession)
+      .toMatchObject({ successfulCaptures: 0, sightings: { pairagrim: 1 } });
+
+    for (const mask of masks) {
+      keyed.step(mask);
+      fromZero.step(mask);
+    }
+    expect(canonicalJson(keyed.state)).toBe(terminal);
+    expect(canonicalJson(fromZero.state)).toBe(terminal);
   });
 });
 
@@ -281,7 +467,7 @@ describe("dedicated Eclipse Park encounter", () => {
 describe("Park summary scene", () => {
   test("blocks until close and exposes complete English and Chinese summaries", () => {
     let park = emptyParkSession(false);
-    park = { ...park, sightings: { pairagrim: 3 }, failedAttempts: 1, successfulCaptures: 1,
+    park = { ...park, summaryPending: true, sightings: { pairagrim: 3 }, failedAttempts: 1, successfulCaptures: 1,
       history: [{ monster: "pairagrim", turnsRemaining: 30 }] };
     const ext = packTuxemonExtensionState({ ...initialTuxemonExtensionState(), parkSession: park });
     for (const lang of ["en_US", "zh_CN"] as const) {
@@ -299,6 +485,9 @@ describe("Park summary scene", () => {
         sightings: [{ monster: "pairagrim", count: 3 }],
       });
       expect(state.labels.title).toBe(lang === "zh_CN" ? "Eclipse 公园结算" : "Eclipse Park Results");
+      expect(JSON.parse(JSON.stringify(state))).toEqual(state);
+      expect(tuxemonExtensionState(started.ext, TUXEMON_BATTLE_DB).parkSession)
+        .not.toHaveProperty("summaryPending");
       expect(rules.done(started.state)).toBeNull();
       const closed = rules.step(started.state, { buttons: 0, selectIndex: 0 }, 1);
       expect(rules.done(closed)).toEqual({});

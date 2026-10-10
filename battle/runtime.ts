@@ -1125,9 +1125,10 @@ export function createTuxemonBattleRules(source: BattleDbSource, enums: Variable
           return null;
         }
 
+        const environment = setup.environment ?? ext.environment!;
         let parkInfo: ParkBattleInfo | null = null;
         if (kind === "wild" && ext.parkSession?.active
-          && (setup.environment === "park" || setup.environment === "night_park")) {
+          && (environment === "park" || environment === "night_park")) {
           const parkMonster = enemy[0]!.slug;
           const parkSession = recordParkSighting(startedExt.parkSession ?? ext.parkSession, parkMonster);
           startedExt = clone({ ...startedExt, parkSession });
@@ -1157,7 +1158,6 @@ export function createTuxemonBattleRules(source: BattleDbSource, enums: Variable
           // the reducer's selectAction accepts "ai" at runtime.
           ...(spectatorInfo ? { policy: "ai" as unknown as "first" } : {}),
         });
-        const environment = setup.environment ?? ext.environment!;
         const battleEnvironment = db.environments[environment] ?? db.environments.grass;
         if (!battleEnvironment?.background || !battleEnvironment.island) {
           throw new Error(`Tuxemon battle environment '${environment}' has incomplete presentation art`);
