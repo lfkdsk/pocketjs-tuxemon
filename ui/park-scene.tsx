@@ -44,7 +44,7 @@ function statCell(label: string, value: string, left: number, top: number) {
 
 export const TuxemonParkSummaryScene: Component<BattleSceneViewProps> = (props) => {
   const state = (): ParkSummarySceneState => props.state as unknown as ParkSummarySceneState;
-  const percentage = () => `${Math.round(state().successRate * 100)}%`;
+  const percentage = () => `${(state().successRate * 100).toFixed(1)}%`;
   const close = () => props.onSelectIndex?.(PARK_SUMMARY_TOUCH_CLOSE);
 
   return (

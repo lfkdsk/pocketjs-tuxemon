@@ -37,7 +37,6 @@ export interface BattleSceneLabels {
   battleEnded: string;
   whatWill: (name: string) => string;
   parkPrompt: string;
-  parkMonsterFled: (name: string) => string;
   chooseTechnique: string;
   chooseTuxemon: string;
   chooseCapture: string;
@@ -81,7 +80,6 @@ const EN: BattleSceneLabels = {
   battleEnded: "The battle ended.",
   whatWill: (name) => `What will ${name} do?`,
   parkPrompt: "What will you do?",
-  parkMonsterFled: (name) => `${name} fled!`,
   chooseTechnique: "Choose a technique",
   chooseTuxemon: "Choose a Tuxemon",
   chooseCapture: "Choose a capture device",
@@ -137,7 +135,6 @@ const ZH: BattleSceneLabels = {
   battleEnded: "战斗结束了。",
   whatWill: (name) => `${name} 要做什么？`,
   parkPrompt: "你要做什么？",
-  parkMonsterFled: (name) => `${name} 逃走了！`,
   chooseTechnique: "选择招式",
   chooseTuxemon: "选择一只精灵",
   chooseCapture: "选择捕获道具",

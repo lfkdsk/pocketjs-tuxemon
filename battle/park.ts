@@ -147,7 +147,6 @@ export function parkSummary(session: Readonly<ParkSessionState>): ParkSummary {
         monster,
         averageTurnsRemaining: turns.reduce((sum, value) => sum + value, 0) / turns.length,
       }))
-      .sort((a, b) => b.averageTurnsRemaining - a.averageTurnsRemaining || a.monster.localeCompare(b.monster))
-      .slice(0, 5),
+      .sort((a, b) => b.averageTurnsRemaining - a.averageTurnsRemaining || a.monster.localeCompare(b.monster)),
   };
 }

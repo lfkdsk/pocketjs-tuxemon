@@ -129,10 +129,10 @@ const encounterText = {
 } as const;
 
 const summaryText = {
-  en_US: "Eclipse Park ResultsSpecies seen1Capture attempts5Caught3Missed2Success rate60%" +
+  en_US: "Eclipse Park ResultsSpecies seen1Capture attempts5Caught3Missed2Success rate60.0%" +
     "Top sightingsPairagrim · seen 12×Capture highlightsPairagrim · 28.0 turns left" +
     "Return to the park entrance",
-  zh_CN: "Eclipse 公园结算发现种类1捕获尝试5成功捕获3捕获失败2成功率60%" +
+  zh_CN: "Eclipse 公园结算发现种类1捕获尝试5成功捕获3捕获失败2成功率60.0%" +
     "常见精灵双头鸟 · 遇见 12 次捕获亮点双头鸟 · 余 28.0 回合返回公园入口",
 } as const;
 

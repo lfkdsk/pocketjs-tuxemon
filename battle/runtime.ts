@@ -141,8 +141,6 @@ export interface ParkBattleInfo {
   monster: string;
   turnsRemaining: number;
   fleeRate: number;
-  /** True only when the opponent's pre-throw flee check ended the encounter. */
-  monsterFled: boolean;
 }
 
 export interface RuntimeBattleState {
@@ -444,8 +442,7 @@ function runtimeState(value: JsonValue): RuntimeBattleState {
     || value.park !== undefined && (!isRecord(value.park)
       || typeof value.park.monster !== "string" || value.park.monster.length === 0
       || !safeInteger(value.park.turnsRemaining) || value.park.turnsRemaining < 0
-      || !finite(value.park.fleeRate) || value.park.fleeRate < 0 || value.park.fleeRate > 1
-      || typeof value.park.monsterFled !== "boolean")) {
+      || !finite(value.park.fleeRate) || value.park.fleeRate < 0 || value.park.fleeRate > 1)) {
     throw new Error("Tuxemon battle runtime state is invalid");
   }
   return value as unknown as RuntimeBattleState;
@@ -1136,7 +1133,6 @@ export function createTuxemonBattleRules(source: BattleDbSource, enums: Variable
             monster: parkMonster,
             turnsRemaining: PARK_ENCOUNTER_TURNS,
             fleeRate: enemy[0]!.base.speed > 80 ? 0.1 : 0.05,
-            monsterFled: false,
           };
         }
 
@@ -1272,25 +1268,25 @@ export function createTuxemonBattleRules(source: BattleDbSource, enums: Variable
         if (state.park && state.menuMode === "root") {
           if (selected.kind === "capture") {
             // Upstream checks whether the wild monster flees immediately
-            // before enqueueing the Park Ball. A flee consumes no item.
+            // before enqueueing the Park Ball. The pinned Park menu only logs
+            // a positive check, so it consumes no item and leaves the same
+            // encounter/menu active instead of ending the battle.
             const battle = cloneBattleState(state.battle);
             const roll = nextRandom(battle);
             if (state.park.turnsRemaining === 0 || roll < state.park.fleeRate) {
-              const target = getMonster(battle, selected.target!);
-              const user = getMonster(battle, battle.awaiting!.uid);
-              battle.events.push({
-                type: "run",
-                turn: battle.turn,
-                user: target.uid,
-                target: user.uid,
-                chance: state.park.fleeRate,
-                roll,
-                success: true,
-                runAttempts: battle.runAttempts,
-              });
-              state.park = { ...state.park, monsterFled: true };
-              state.battle = endBattle(battle, makeRules(rulesDb), "ran");
+              state.battle = battle;
             } else {
+              // ParkEffect rewrites every queued action from the wild target
+              // to the mechanically empty technique after a failed capture.
+              // Rewriting before the capture reducer is equivalent: success
+              // ends the battle before the action runs, while failure lets
+              // the empty flavour turn execute without hurting the player.
+              for (const action of battle.queue) {
+                if (action.user !== selected.target) continue;
+                action.kind = "technique";
+                action.ref = "empty";
+                delete action.moveIndex;
+              }
               state.battle = reduceBattle(rulesDb, battle, {
                 type: "capture",
                 item: "tuxeball_park",

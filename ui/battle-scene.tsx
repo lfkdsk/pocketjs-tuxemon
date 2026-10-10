@@ -109,9 +109,7 @@ function eventMessage(state: Runtime, event: BattleEvent | null, monsters: reado
         ? L.captured(monster(event.target))
         : L.brokeFree(monster(event.target));
     }
-    case "run": return state.park?.monsterFled
-      ? L.parkMonsterFled(monster(event.user))
-      : event.success ? L.gotAway : L.couldntEscape;
+    case "run": return event.success ? L.gotAway : L.couldntEscape;
     case "swap": return L.entersBattle(monster(event.target));
     case "end": return event.outcome === "won" ? L.victory
       : event.outcome === "lost" ? L.partyDefeated

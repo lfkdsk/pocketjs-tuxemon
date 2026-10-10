@@ -112,6 +112,25 @@ describe("Eclipse Park session state", () => {
     });
   });
 
+  test("summary keeps every capture highlight like the scrolling upstream menu", () => {
+    const session = {
+      ...emptyParkSession(false),
+      successfulCaptures: 6,
+      history: ["alpha", "bravo", "charlie", "delta", "echo", "foxtrot"].map(
+        (monster, index) => ({ monster, turnsRemaining: 30 - index }),
+      ),
+    };
+
+    expect(parkSummary(session).highlights.map(({ monster }) => monster)).toEqual([
+      "alpha",
+      "bravo",
+      "charlie",
+      "delta",
+      "echo",
+      "foxtrot",
+    ]);
+  });
+
   test("extension start/stop is sparse, saved and strictly validated", () => {
     const extensions = createTuxemonExtensions(TUXEMON_BATTLE_DB);
     const command = extensions.commands!["tux.park_experience"]!;
@@ -338,7 +357,7 @@ function revealMenu(rules: BattleRules, value: JsonValue): JsonValue {
   throw new Error("Park battle presentation did not reach its menu");
 }
 
-function parkBattle(seed: number): { rules: BattleRules; value: JsonValue } {
+function parkBattle(seed: number, species = "pairagrim"): { rules: BattleRules; value: JsonValue } {
   const rules = createTuxemonBattleRules(TUXEMON_BATTLE_DB, ENUMS);
   const player = spawnMonster(
     TUXEMON_BATTLE_DB,
@@ -358,7 +377,7 @@ function parkBattle(seed: number): { rules: BattleRules; value: JsonValue } {
   const extValue = packTuxemonExtensionState(ext);
   const started = rules.start(extValue, {
     kind: "wild",
-    species: "pairagrim",
+    species,
     level: 5,
     environment: "park",
   }, seed, {
@@ -371,7 +390,7 @@ function parkBattle(seed: number): { rules: BattleRules; value: JsonValue } {
   });
   if (!started) throw new Error("Park battle did not start");
   expect(tuxemonExtensionState(started.ext, TUXEMON_BATTLE_DB).parkSession?.sightings)
-    .toEqual({ pairagrim: 1 });
+    .toEqual({ [species]: 1 });
   return { rules, value: revealMenu(rules, started.state) };
 }
 
@@ -436,13 +455,38 @@ describe("dedicated Eclipse Park encounter", () => {
     expect(persisted.party.some((monster) => monster.slug === "pairagrim")).toBeTrue();
   });
 
+  test("a positive pre-throw flee check leaves the same encounter untouched", () => {
+    const encounter = parkBattle(1);
+    const before = tuxemonRuntimeBattleState(encounter.value);
+    expect(before.park?.fleeRate).toBe(0.1);
+    expect(tuxemonRuntimeBattleState(parkBattle(1, "nut").value).park?.fleeRate).toBe(0.05);
+
+    const after = tuxemonRuntimeBattleState(encounter.rules.step(
+      encounter.value,
+      { buttons: 0, confirmEdge: true },
+      0,
+    ));
+    expect(after.battle.rngDraws).toBe(before.battle.rngDraws + 1);
+    expect(after.battle.phase).toBe("decision");
+    expect(after.battle.outcome).toBeNull();
+    expect(after.battle.inventory.tuxeball_park).toBe(25);
+    expect(after.battle.events).toEqual(before.battle.events);
+    expect(after.battle.parties[1]).toEqual(before.battle.parties[1]);
+    expect(after.ext.parkSession).toMatchObject({
+      sightings: { pairagrim: 1 },
+      failedAttempts: 0,
+      successfulCaptures: 0,
+    });
+    expect(after.menu.map(({ slug }) => slug)).toEqual(["park_ball", "park_food", "park_doll", "run"]);
+  });
+
   test("a failed throw is counted and consumed while a voluntary run always exits", () => {
     let failed: { rules: BattleRules; value: JsonValue } | null = null;
     for (let seed = 1; seed <= 2_000 && !failed; seed++) {
       const candidate = parkBattle(seed);
       const thrown = candidate.rules.step(candidate.value, { buttons: 0, confirmEdge: true }, 0);
       const state = tuxemonRuntimeBattleState(thrown);
-      if (!state.park?.monsterFled && state.battle.events.some((event) =>
+      if (state.battle.events.some((event) =>
         event.type === "capture" && event.success === false)) {
         failed = { rules: candidate.rules, value: thrown };
       }
@@ -451,6 +495,14 @@ describe("dedicated Eclipse Park encounter", () => {
     const failure = tuxemonRuntimeBattleState(failed!.value);
     expect(failure.battle.inventory.tuxeball_park).toBe(24);
     expect(failure.ext.parkSession).toMatchObject({ failedAttempts: 1, successfulCaptures: 0 });
+    const player = failure.battle.parties[0][0]!;
+    expect(player.currentHp).toBe(player.base.hp);
+    const enemyUid = failure.battle.parties[1][0]!.uid;
+    expect(failure.battle.events.find((event) =>
+      event.type === "technique" && event.user === enemyUid)).toMatchObject({
+      technique: "empty",
+      damage: 0,
+    });
 
     const voluntary = parkBattle(901);
     let state = tuxemonRuntimeBattleState(voluntary.value);
