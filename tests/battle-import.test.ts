@@ -84,32 +84,32 @@ describe("GB1 battle database", () => {
     expect(report.runtimeDbBytes).toBe(readFileSync(join(ROOT, "data/battle-runtime-db.json")).byteLength);
   });
 
-  test("matches the generated Spyder campaign slice", () => {
+  test("matches the generated Spyder and Eclipse Park runtime slice", () => {
     expect(report.scope).toBe("spyder");
     expect(report.sourceRevision).toBe("9e6258ff726b786040a267e8bdbbf037b560285e");
     expect(report.counts).toEqual({
       monsters: 269,
       techniques: 245,
-      items: 113,
+      items: 114,
       elements: 13,
       tastes: 12,
       statuses: 35,
-      encounters: 21,
+      encounters: 22,
       npcs: 205,
-      environments: 8,
+      environments: 10,
       trainerParties: 213,
       trainerMonsterSlots: 611,
       battleSlots: 283,
-      randomEncounterUses: 261,
+      randomEncounterUses: 286,
       wildEncounterUses: 17,
     });
     expect(report.art.categories["monster-sheets"].sourceFiles).toBe(269);
     expect(report.art.categories["technique-animations"].sourceFiles).toBe(130);
-    expect(report.art.categories["capture-devices"].sourceFiles).toBe(27);
-    expect(report.art.categories.backgrounds.sourceFiles).toBe(8);
+    expect(report.art.categories["capture-devices"].sourceFiles).toBe(28);
+    expect(report.art.categories.backgrounds.sourceFiles).toBe(10);
     expect(report.art.categories.islands.sourceFiles).toBe(6);
     expect(report.art.categories["trainer-sheets"].sourceFiles).toBe(61);
-    expect(report.art.sourceBytes).toBe(1_926_596);
+    expect(report.art.sourceBytes).toBe(1_953_249);
   });
 
   test("retains the stat, move, capture, status, and encounter rule inputs", () => {
