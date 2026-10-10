@@ -19,6 +19,9 @@ not hand-authored envelopes or toy projects:
 - `main-e799febb/` is the integration predecessor with the playable Radio,
   deterministic map-entry time and exact NPC speeds. It carries the current
   mainline tape hash and continuation digest.
+- `main-c38f8e72/` is the immediate integration predecessor with
+  order-independent screenshot verification. It carries the current mainline
+  tape hash and continuation digest.
 
 To reproduce a fixture, make a detached checkout of the named game commit with
 recursive submodules, run `bun install --frozen-lockfile`, run the importer
