@@ -132,11 +132,11 @@ const ZH: BattleSceneLabels = {
   used: (name, technique) => `${name} 使用了 ${technique}！`,
   parkFlavor: (key, name) => {
     switch (key) {
-      case "afraid": return `${name} 往后一缩，绷紧身体准备逃跑。`;
+      case "afraid": return `${name} 往后一缩，身体紧张，准备逃跑。`;
       case "stare": return `${name} 一动不动地盯着你，令人捉摸不透。`;
-      case "wander": return `${name} 缓缓踱步，仿佛沉浸在本能与思绪中。`;
-      case "resting": return `${name} 蜷起身体，呼吸缓慢而平稳。`;
-      case "playful": return `${name} 兴奋地四处奔跑，扬起一阵尘土。`;
+      case "wander": return `${name} 慢慢走动，好像正在思考。`;
+      case "resting": return `${name} 坐下休息，呼吸缓慢而平稳。`;
+      case "playful": return `${name} 兴奋地跑来跑去，带起一阵尘土。`;
       case "alert": return `${name} 突然停下，察觉到附近的动静。`;
       default: return `${name} 小心地观察着你。`;
     }
