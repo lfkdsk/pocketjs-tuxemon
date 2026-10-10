@@ -1,7 +1,8 @@
 // Capture real production horizontal and vertical seamless handoffs. The
-// diagnostic entry hook chooses a deterministic tile one step inside each
-// source map; ordinary game input then triggers the authored edge event and
-// reducer-owned phase 0..7 handoff. No session state is synthesized.
+// diagnostic entry hook chooses a deterministic source tile; ordinary game
+// input (including the real Surfboard prompt for the water case) then triggers
+// the authored edge event and reducer-owned phase 0..7 handoff. No session
+// state is synthesized.
 
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -18,6 +19,11 @@ import type {
   WorldPlacement,
 } from "../vendor/pocket-rpgkit/src/engine/types.ts";
 import type { WorldStreamedTerrainStats } from "../vendor/pocket-rpgkit/src/ui/WorldStreamedTerrain.tsx";
+import {
+  captureGoldenCheckpoints,
+  loadGoldenSyncPlan,
+  restoreGoldenCheckpoint,
+} from "./golden-sync.ts";
 import {
   assertWorldSeamManifest,
   type WorldSeamBandStats,
@@ -38,16 +44,9 @@ import {
 const ROOT = resolve(import.meta.dir, "..");
 const BUNDLE = join(ROOT, "dist/main");
 const PROJECT = join(ROOT, "dist/project-shell.json");
-const JOURNEY = join(ROOT, "data/g6-journey.json");
 const OUTPUT = join(ROOT, WORLD_SEAM_OUTPUT);
 const TILE = 16;
 const PLAYER_HEIGHT = 32;
-
-interface JourneyFile {
-  hz: number;
-  masks: number[];
-  checkpoints: Array<{ name: string; frame: number; map: string }>;
-}
 
 interface ProjectShell {
   worldTraversal?: string;
@@ -72,13 +71,22 @@ const project = JSON.parse(readFileSync(PROJECT, "utf8")) as ProjectShell;
 if (project.worldTraversal !== "seamless-v1" || !project.worldLayout) {
   throw new Error("world seam goldens: dist/project-shell.json is not a seamless-v1 project");
 }
-const journey = JSON.parse(readFileSync(JOURNEY, "utf8")) as JourneyFile;
-if (journey.hz !== 60) throw new Error(`world seam goldens: expected a 60 Hz warm-up tape, got ${journey.hz}`);
-// The Paper Town north opening is story-gated until the first Billie battle.
-// Warm through the maintained Route 1 endpoint, then use the diagnostic entry
-// hook to place the same progressed state beside each capture seam.
-const warmup = journey.checkpoints.find((checkpoint) => checkpoint.name === "route-1");
-if (!warmup) throw new Error("world seam goldens: missing route-1 warm-up checkpoint");
+// Use the maintained mainline state immediately after collecting the
+// Surfboard. The production bundle restores the real reducer snapshot, then
+// the diagnostic entry hook changes only the map/start tile while preserving
+// its inventory and story banks.
+const goldenPlan = loadGoldenSyncPlan(ROOT);
+const surfboardCheckpoint = goldenPlan.mainline.find((checkpoint) =>
+  checkpoint.suite === "j4" && checkpoint.name === "surfboard-collected"
+);
+if (!surfboardCheckpoint) throw new Error("world seam goldens: missing Surfboard checkpoint");
+const [surfboardCapture] = captureGoldenCheckpoints(
+  goldenPlan.mainlineMasks,
+  [surfboardCheckpoint],
+  goldenPlan.worldTraversal,
+  ROOT,
+);
+if (!surfboardCapture) throw new Error("world seam goldens: failed to capture Surfboard checkpoint");
 /** Let entry autoruns create their NPCs and release controls before the real
  * directional approach. Stream readiness alone can arrive first. */
 const ENTRY_SETTLE_FRAMES = 120;
@@ -106,6 +114,12 @@ function assertCaptureOpening(plan: WorldSeamCrossingPlan): void {
       tangent >= candidate.source.span.start && tangent < candidate.source.span.end;
   });
   if (!opening) throw new Error(`world seam goldens: ${plan.orientation} capture has no seamless opening`);
+  if (opening.movementCapability !== plan.movementCapability) {
+    throw new Error(
+      `world seam goldens: ${plan.orientation} opening capability is ` +
+        `${opening.movementCapability ?? "none"}, expected ${plan.movementCapability ?? "none"}`,
+    );
+  }
 }
 for (const plan of WORLD_SEAM_CROSSINGS) assertCaptureOpening(plan);
 
@@ -119,6 +133,53 @@ function stateAndCamera(label: string): { state: SessionState; camera: CameraSta
   const camera = globalThis.__rpgGameCamera as CameraState | undefined;
   if (!state || !camera) throw new Error(`world seam goldens: missing state/camera during ${label}`);
   return { state, camera };
+}
+
+const CONFIRM = 0x2000;
+
+/** Exercise the imported Choice Surf page. The player is on shore facing the
+ * edge water cell; Yes sets v.swimming, applies the swimmer appearance and
+ * performs the ordinary forced step whose playerTouch portal starts phase 0. */
+function startSurfHandoff(world: SimWorld, plan: WorldSeamCrossingPlan): void {
+  step(world, plan.button);
+  step(world);
+  step(world, CONFIRM);
+  step(world);
+  for (let guard = 0; guard < 480; guard++) {
+    const state = stateAndCamera("Surf setup").state;
+    if (state.handoff) {
+      if (state.handoff.phase !== 0 || state.sw.variables["v.swimming"] !== 2 ||
+          state.sw.playerAppearance?.sprite !== "swimmer") {
+        throw new Error("world seam goldens: Surf interaction reached an invalid handoff state");
+      }
+      return;
+    }
+    const modal = state.interp.modal;
+    if (modal?.kind === "choices" || (modal?.kind === "text" && modal.complete)) {
+      step(world, CONFIRM);
+      if (stateAndCamera("Surf confirmation").state.handoff) return;
+      step(world);
+    } else if (state.sw.variables["v.swimming"] === 2 &&
+        state.sw.playerAppearance?.sprite === "swimmer" && state.playerRoute === null) {
+      // The imported Surf action has stepped from shore onto the inner water
+      // cell. Ordinary held input now enters the edge portal cell.
+      step(world, plan.button);
+    } else {
+      step(world);
+    }
+    const next = stateAndCamera("Surf setup advance").state;
+    if (next.fade || next.scene || next.mapId !== plan.sourceMap) {
+      throw new Error("world seam goldens: Surf setup left the source before seamless phase 0");
+    }
+  }
+  const stuck = stateAndCamera("Surf setup timeout").state;
+  throw new Error(
+    `world seam goldens: Surf interaction did not start a handoff ` +
+      `(${stuck.mapId}@${stuck.move.tx},${stuck.move.ty} facing=${stuck.move.facing} ` +
+      `modal=${stuck.interp.modal?.kind ?? "none"} surfboard=${stuck.sw.items.surfboard ?? 0} ` +
+      `swimming=${String(stuck.sw.variables["v.swimming"])} ` +
+      `appearance=${stuck.sw.playerAppearance?.sprite ?? "none"})`,
+  );
 }
 
 function bandStats(
@@ -214,6 +275,11 @@ function capture(
       sourceMap: plan.sourceMap,
       targetMap: plan.targetMap,
       activeMap: state.mapId,
+      movementCapability: plan.movementCapability ?? null,
+      swimming: typeof state.sw.variables["v.swimming"] === "number"
+        ? state.sw.variables["v.swimming"]
+        : null,
+      appearance: state.sw.playerAppearance?.sprite ?? null,
       file,
       camera: [camera.x, camera.y],
       player: {
@@ -279,10 +345,9 @@ for (const viewport of WORLD_SEAM_VIEWPORTS) {
     undefined,
     viewport,
   );
-  for (let frame = 0; frame <= warmup.frame; frame++) step(world, journey.masks[frame] ?? 0);
-  const warmState = stateAndCamera("warm-up").state;
-  if (warmState.mapId !== warmup.map) {
-    throw new Error(`world seam goldens: warm-up reached ${warmState.mapId}, expected ${warmup.map}`);
+  const warmState = await restoreGoldenCheckpoint(world, diagnostics, surfboardCapture, 1);
+  if ((warmState.sw.items.surfboard ?? 0) < 1) {
+    throw new Error("world seam goldens: maintained checkpoint has no Surfboard");
   }
 
   let requestSequence = 0;
@@ -327,18 +392,23 @@ for (const viewport of WORLD_SEAM_VIEWPORTS) {
     }
 
     let started = false;
-    for (let guard = 0; guard < 240; guard++) {
-      step(world, plan.button);
-      const state = stateAndCamera(`${plan.orientation} approach`).state;
-      if (state.handoff) {
-        if (state.handoff.phase !== 0) {
-          throw new Error(`world seam goldens: ${plan.orientation} first observed phase ${state.handoff.phase}`);
+    if (plan.movementCapability === "surf") {
+      startSurfHandoff(world, plan);
+      started = true;
+    } else {
+      for (let guard = 0; guard < 240; guard++) {
+        step(world, plan.button);
+        const state = stateAndCamera(`${plan.orientation} approach`).state;
+        if (state.handoff) {
+          if (state.handoff.phase !== 0) {
+            throw new Error(`world seam goldens: ${plan.orientation} first observed phase ${state.handoff.phase}`);
+          }
+          started = true;
+          break;
         }
-        started = true;
-        break;
-      }
-      if (state.fade || state.mapId !== plan.sourceMap) {
-        throw new Error(`world seam goldens: ${plan.orientation} used a legacy transfer instead of a handoff`);
+        if (state.fade || state.mapId !== plan.sourceMap) {
+          throw new Error(`world seam goldens: ${plan.orientation} used a legacy transfer instead of a handoff`);
+        }
       }
     }
     if (!started) {

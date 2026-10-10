@@ -478,8 +478,8 @@ export const DEMO_WARP_SPAWNS = [
   },
   {
     "id": "classic_route_3",
-    "x": 20,
-    "y": 19
+    "x": 12,
+    "y": 7
   },
   {
     "id": "classic_route_5",

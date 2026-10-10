@@ -17,6 +17,12 @@ import {
 import { walkPose } from "../vendor/pocket-rpgkit/src/engine/movement.ts";
 import { fnv1a } from "../vendor/pocket-rpgkit/vendor/pocketjs/hosts/sim/sim.ts";
 
+const SWIMMER = {
+  idle: [0, 1, 2, 3].map((facing) => `assets/characters/npc-swimmer-idle-${facing}.png`),
+  walkL: [0, 1, 2, 3].map((facing) => `assets/characters/npc-swimmer-walk-l-${facing}.png`),
+  walkR: [0, 1, 2, 3].map((facing) => `assets/characters/npc-swimmer-walk-r-${facing}.png`),
+};
+
 interface Rect extends Array<number> {
   0: number;
   1: number;
@@ -135,9 +141,8 @@ describe("real seamless crossing capture", () => {
       expect(x, frame.file).toBeLessThan(image.width);
       expect(y, frame.file).toBeLessThan(image.height);
     }
-    // The horizontal capture walks a lane that upstream funnels to the
-    // fixed landing y=17: it must stay on its own row (no sideways jump)
-    // and land on the continuous neighbour cell.
+    // The horizontal capture uses the real Surfboard interaction and stays on
+    // the same world row while landing on Route C's continuous water cell.
     for (const viewport of WORLD_SEAM_VIEWPORTS) {
       const frames = crossing.frames.filter((frame) =>
         frame.orientation === "horizontal" && frame.viewport.width === viewport.width
@@ -145,7 +150,10 @@ describe("real seamless crossing capture", () => {
       const row = frames[0]!.player.worldPixel[1];
       expect(frames.map((frame) => frame.player.worldPixel[1])).toEqual(frames.map(() => row));
       const landing = frames.find((frame) => frame.capture === "landing")!;
-      expect([landing.activeMap, ...landing.player.tile]).toEqual(["classic_route_5", 39, 16]);
+      expect([landing.activeMap, ...landing.player.tile]).toEqual(["spyder_routec", 0, 14]);
+      expect(frames.every((frame) =>
+        frame.movementCapability === "surf" && frame.swimming === 2 && frame.appearance === "swimmer"
+      )).toBeTrue();
     }
     for (const sheet of crossing.contactSheets) {
       const path = join(output, sheet.file);
@@ -167,7 +175,12 @@ describe("real seamless crossing capture", () => {
     const crossing = JSON.parse(readFileSync(manifestPath, "utf8")) as WorldSeamManifest;
     for (const frame of crossing.frames) {
       const pose = walkPose(frame.player.movePhase);
-      const imageKey = (pose === 1 ? PLAYER.walkL : pose === 2 ? PLAYER.walkR : PLAYER.idle)[frame.player.facing];
+      const spriteFrames = frame.appearance === "swimmer" ? SWIMMER : PLAYER;
+      const imageKey = (pose === 1
+        ? spriteFrames.walkL
+        : pose === 2
+          ? spriteFrames.walkR
+          : spriteFrames.idle)[frame.player.facing]!;
       const sprite = decodePng(new Uint8Array(readFileSync(join(ROOT, imageKey))), imageKey);
       const targetPath = join(output, frame.file);
       const target = decodePng(new Uint8Array(readFileSync(targetPath)), targetPath);
@@ -186,7 +199,7 @@ describe("real seamless crossing capture", () => {
           sprite.rgba[source + 3] === target.rgba[painted + 3]
         ) matching++;
       }
-      expect(opaque, frame.file).toBeGreaterThan(150);
+      expect(opaque, frame.file).toBeGreaterThan(frame.appearance === "swimmer" ? 100 : 150);
       expect(matching, frame.file).toBe(opaque);
       expect(frame.upper.visibleMaps, frame.file).toContain(frame.sourceMap);
       expect(frame.upper.visibleMaps, frame.file).toContain(frame.targetMap);

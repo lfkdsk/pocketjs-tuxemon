@@ -200,15 +200,15 @@
   {
    "id": "classic_route_3",
    "name": "classic_route_3",
-   "x": 20,
-   "y": 19,
-   "from": "transfer"
+   "x": 12,
+   "y": 7,
+   "from": "fallback"
   },
   {
    "id": "classic_route_4",
    "name": "classic_route_4",
-   "x": 20,
-   "y": 0,
+   "x": 16,
+   "y": 19,
    "from": "blocked"
   },
   {

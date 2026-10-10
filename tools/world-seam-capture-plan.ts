@@ -1,6 +1,6 @@
 import type { Facing, WorldSide } from "../vendor/pocket-rpgkit/src/engine/types.ts";
 
-export const WORLD_SEAM_FORMAT = "pocket-tuxemon/world-seam-crossings/v2" as const;
+export const WORLD_SEAM_FORMAT = "pocket-tuxemon/world-seam-crossings/v3" as const;
 export const WORLD_SEAM_OUTPUT = "docs/screenshots/world-seam" as const;
 export const WORLD_SEAM_PHASES = [0, 1, 2, 3, 4, 5, 6, 7, "landing"] as const;
 
@@ -27,21 +27,23 @@ export interface WorldSeamCrossingPlan {
   button: number;
   facing: Facing;
   worldDelta: readonly [number, number];
+  /** Optional trusted opening capability exercised through ordinary play. */
+  movementCapability?: "surf";
 }
 
 export const WORLD_SEAM_CROSSINGS: readonly WorldSeamCrossingPlan[] = [
   {
     orientation: "horizontal",
-    // A fixed-destination rectangle that funnels y=16..18 to y=17 upstream.
-    // y=16 used to fade to the fixed landing; it now crosses to its own
-    // coordinate-continuous neighbour cell (39,16).
-    sourceMap: "classic_aerolume_city",
-    targetMap: "classic_route_5",
-    sourceSide: "west",
-    start: [1, 16],
-    button: 0x0080,
-    facing: 1,
-    worldDelta: [-2, 0],
+    // The player starts on shore, uses the imported Surfboard interaction,
+    // and its forced step onto the east-edge water lane starts this handoff.
+    sourceMap: "spyder_candy_town",
+    targetMap: "spyder_routec",
+    sourceSide: "east",
+    start: [37, 34],
+    button: 0x0020,
+    facing: 3,
+    worldDelta: [2, 0],
+    movementCapability: "surf",
   },
   {
     orientation: "vertical",
@@ -71,6 +73,9 @@ export interface WorldSeamCaptureFrame {
   viewport: { width: number; height: number };
   capture: WorldSeamPhase;
   phase: number | null;
+  movementCapability: "surf" | null;
+  swimming: number | null;
+  appearance: string | null;
   sourceMap: string;
   targetMap: string;
   activeMap: string;
@@ -166,6 +171,13 @@ export function assertWorldSeamManifest(manifest: WorldSeamManifest): void {
         }
         if (frame.sourceMap !== crossing.sourceMap || frame.targetMap !== crossing.targetMap) {
           fail(`${frame.file} has the wrong crossing maps`);
+        }
+        if (frame.movementCapability !== (crossing.movementCapability ?? null)) {
+          fail(`${frame.file} has movement capability ${frame.movementCapability ?? "none"}`);
+        }
+        if (crossing.movementCapability === "surf" &&
+            (frame.swimming !== 2 || frame.appearance !== "swimmer")) {
+          fail(`${frame.file} is not in the imported Surf state`);
         }
         const expectedMap = capture === "landing" ? crossing.targetMap : crossing.sourceMap;
         if (frame.activeMap !== expectedMap) fail(`${frame.file} active map is ${frame.activeMap}, expected ${expectedMap}`);

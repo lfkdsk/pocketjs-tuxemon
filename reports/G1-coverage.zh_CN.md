@@ -178,13 +178,13 @@ accepted seams; generated 71
 
 The generated project opts into `seamless-v1`. Of
 258 coordinate-preserving topology openings,
-all are runtime-direct. A further 25 fixed-destination
+all are runtime-direct. A further 34 fixed-destination
 rectangles funnel every lane to one authored landing on a neighbour placed edge to edge;
 each lane that passes the terrain proof now lands on its own coordinate-continuous
-neighbour cell instead: 75 such cells are
+neighbour cell instead: 137 such cells are
 seamless and 0 cells in the same
-rectangles keep the legacy fade and fixed landing. In total 283 of
-283 eligible portal IDs carry a stable
+rectangles keep the legacy fade and fixed landing. In total 292 of
+292 eligible portal IDs carry a stable
 `handoff.portalId`. The source maps selected for this build contain
 1161 transfer-like actions
 (`transition_teleport` plus faint recovery). Exclusions are classified without
@@ -198,7 +198,7 @@ per-map overrides:
 | `non-tmx-overlay` | 163 |
 | `outdoor-nonseam-or-story` | 118 |
 | `outside-world-layout` | 310 |
-| `portal-only-opening` | 14 |
+| `portal-only-opening` | 5 |
 | `rejected-contact` | 4 |
 
 Safe topology openings not emitted as runtime-direct transfers:
@@ -216,7 +216,10 @@ Fixed-destination openings promoted lane by lane:
 | `classic_route_1:tmx:classic_route_1.tmx:293:a0` | `classic_route_1@32,19` → `32,0`<br>`classic_route_1@33,19` → `33,0`<br>`classic_route_1@34,19` → `34,0` | `classic_hearthrock_city@33,0` | 0 |
 | `classic_route_1:tmx:classic_route_1.tmx:294:a0` | `classic_route_1@5,0` → `5,19`<br>`classic_route_1@6,0` → `6,19`<br>`classic_route_1@7,0` → `7,19` | `classic_steamshore_city@6,19` | 0 |
 | `classic_route_2:tmx:classic_route_2.tmx:286:a0` | `classic_route_2@39,16` → `0,16`<br>`classic_route_2@39,17` → `0,17`<br>`classic_route_2@39,18` → `0,18` | `classic_thornwood_city@0,17` | 0 |
+| `classic_route_3:tmx:classic_route_3.tmx:285:a0` | `classic_route_3@16,0` → `16,19`<br>`classic_route_3@17,0` → `17,19`<br>`classic_route_3@18,0` → `18,19`<br>`classic_route_3@19,0` → `19,19`<br>`classic_route_3@20,0` → `20,19`<br>`classic_route_3@21,0` → `21,19`<br>`classic_route_3@22,0` → `22,19`<br>`classic_route_3@23,0` → `23,19` | `classic_route_4@20,0` | 0 |
 | `classic_route_3:tmx:classic_route_3.tmx:286:a0` | `classic_route_3@16,19` → `16,0`<br>`classic_route_3@17,19` → `17,0`<br>`classic_route_3@18,19` → `18,0` | `classic_thornwood_city@17,0` | 0 |
+| `classic_route_4:tmx:classic_route_4.tmx:285:a0` | `classic_route_4@15,0` → `15,19`<br>`classic_route_4@16,0` → `16,19`<br>`classic_route_4@17,0` → `17,19`<br>`classic_route_4@18,0` → `18,19`<br>`classic_route_4@19,0` → `19,19`<br>`classic_route_4@20,0` → `20,19`<br>`classic_route_4@21,0` → `21,19` | `classic_stormpeak_city@18,19` | 0 |
+| `classic_route_4:tmx:classic_route_4.tmx:286:a0` | `classic_route_4@16,19` → `16,0`<br>`classic_route_4@17,19` → `17,0`<br>`classic_route_4@18,19` → `18,0`<br>`classic_route_4@19,19` → `19,0`<br>`classic_route_4@20,19` → `20,0`<br>`classic_route_4@21,19` → `21,0`<br>`classic_route_4@22,19` → `22,0`<br>`classic_route_4@23,19` → `23,0` | `classic_route_3@20,19` | 0 |
 | `classic_route_5:tmx:classic_route_5.tmx:285:a0` | `classic_route_5@0,1` → `39,1`<br>`classic_route_5@0,2` → `39,2`<br>`classic_route_5@0,3` → `39,3` | `classic_thornwood_city@39,2` | 0 |
 | `classic_route_5:tmx:classic_route_5.tmx:286:a0` | `classic_route_5@39,16` → `0,16`<br>`classic_route_5@39,17` → `0,17`<br>`classic_route_5@39,18` → `0,18` | `classic_aerolume_city@0,17` | 0 |
 | `classic_route_6:tmx:classic_route_6.tmx:285:a0` | `classic_route_6@39,16` → `0,16`<br>`classic_route_6@39,17` → `0,17`<br>`classic_route_6@39,18` → `0,18` | `classic_umbrastar_city@0,17` | 0 |
@@ -227,6 +230,7 @@ Fixed-destination openings promoted lane by lane:
 | `classic_route_8:tmx:classic_route_8.tmx:286:a0` | `classic_route_8@39,16` → `0,16`<br>`classic_route_8@39,17` → `0,17`<br>`classic_route_8@39,18` → `0,18` | `classic_valorhold_city@0,17` | 0 |
 | `classic_steamshore_city:tmx:classic_steamshore_city.tmx:286:a0` | `classic_steamshore_city@5,19` → `5,0`<br>`classic_steamshore_city@6,19` → `6,0`<br>`classic_steamshore_city@7,19` → `7,0` | `classic_route_1@6,0` | 0 |
 | `classic_steamshore_city:tmx:classic_steamshore_city.tmx:287:a0` | `classic_steamshore_city@39,2` → `0,2`<br>`classic_steamshore_city@39,3` → `0,3`<br>`classic_steamshore_city@39,4` → `0,4` | `classic_route_2@0,3` | 0 |
+| `classic_stormpeak_city:tmx:classic_stormpeak_city.tmx:290:a0` | `classic_stormpeak_city@15,19` → `15,0`<br>`classic_stormpeak_city@16,19` → `16,0`<br>`classic_stormpeak_city@17,19` → `17,0`<br>`classic_stormpeak_city@18,19` → `18,0`<br>`classic_stormpeak_city@19,19` → `19,0`<br>`classic_stormpeak_city@20,19` → `20,0`<br>`classic_stormpeak_city@21,19` → `21,0` | `classic_route_4@18,0` | 0 |
 | `classic_thornwood_city:tmx:classic_thornwood_city.tmx:285:a0` | `classic_thornwood_city@0,16` → `39,16`<br>`classic_thornwood_city@0,17` → `39,17`<br>`classic_thornwood_city@0,18` → `39,18` | `classic_route_2@39,17` | 0 |
 | `classic_thornwood_city:tmx:classic_thornwood_city.tmx:286:a0` | `classic_thornwood_city@39,1` → `0,1`<br>`classic_thornwood_city@39,2` → `0,2`<br>`classic_thornwood_city@39,3` → `0,3` | `classic_route_5@0,2` | 0 |
 | `classic_thornwood_city:tmx:classic_thornwood_city.tmx:287:a0` | `classic_thornwood_city@35,19` → `35,0`<br>`classic_thornwood_city@36,19` → `36,0`<br>`classic_thornwood_city@37,19` → `37,0` | `classic_route_7@36,0` | 0 |
@@ -234,23 +238,19 @@ Fixed-destination openings promoted lane by lane:
 | `classic_umbrastar_city:tmx:classic_umbrastar_city.tmx:285:a0` | `classic_umbrastar_city@0,16` → `39,16`<br>`classic_umbrastar_city@0,17` → `39,17`<br>`classic_umbrastar_city@0,18` → `39,18` | `classic_route_6@39,17` | 0 |
 | `classic_valorhold_city:tmx:classic_valorhold_city.tmx:285:a0` | `classic_valorhold_city@0,16` → `39,16`<br>`classic_valorhold_city@0,17` → `39,17`<br>`classic_valorhold_city@0,18` → `39,18` | `classic_route_8@39,17` | 0 |
 | `classic_valorhold_city:tmx:classic_valorhold_city.tmx:286:a0` | `classic_valorhold_city@2,0` → `2,19`<br>`classic_valorhold_city@3,0` → `3,19`<br>`classic_valorhold_city@4,0` → `4,19` | `classic_route_7@3,19` | 0 |
+| `spyder_candy_town:tmx:spyder_candy_town.tmx:100:a0` | `spyder_candy_town@39,28` → `0,8`<br>`spyder_candy_town@39,29` → `0,9`<br>`spyder_candy_town@39,30` → `0,10`<br>`spyder_candy_town@39,31` → `0,11`<br>`spyder_candy_town@39,32` → `0,12`<br>`spyder_candy_town@39,33` → `0,13`<br>`spyder_candy_town@39,34` → `0,14`<br>`spyder_candy_town@39,35` → `0,15` | `spyder_routec@0,8` | 0 |
+| `spyder_paper_town:tmx:spyder_paper_town.tmx:217:a0` | `spyder_paper_town@0,14` → `39,34`<br>`spyder_paper_town@0,15` → `39,35`<br>`spyder_paper_town@0,16` → `39,36`<br>`spyder_paper_town@0,17` → `39,37` | `spyder_routec@39,35` | 0 |
+| `spyder_routec:tmx:spyder_routec.tmx:155:a0` | `spyder_routec@0,8` → `39,28`<br>`spyder_routec@0,9` → `39,29`<br>`spyder_routec@0,10` → `39,30`<br>`spyder_routec@0,11` → `39,31`<br>`spyder_routec@0,12` → `39,32`<br>`spyder_routec@0,13` → `39,33`<br>`spyder_routec@0,14` → `39,34`<br>`spyder_routec@0,15` → `39,35` | `spyder_candy_town@39,28` | 0 |
+| `spyder_routec:tmx:spyder_routec.tmx:156:a0` | `spyder_routec@39,34` → `0,14`<br>`spyder_routec@39,35` → `0,15`<br>`spyder_routec@39,36` → `0,16`<br>`spyder_routec@39,37` → `0,17` | `spyder_paper_town@0,15` | 0 |
+| `spyder_routec:tmx:spyder_routec.tmx:275:a0` | `spyder_routec@0,30` → `39,10`<br>`spyder_routec@0,31` → `39,11`<br>`spyder_routec@0,32` → `39,12`<br>`spyder_routec@0,33` → `39,13`<br>`spyder_routec@0,34` → `39,14`<br>`spyder_routec@0,35` → `39,15`<br>`spyder_routec@0,36` → `39,16`<br>`spyder_routec@0,37` → `39,17` | `spyder_candy_port@39,15` | 0 |
 
 Portal-only openings that remain wholly legacy:
 
 - `classic_route_2:tmx:classic_route_2.tmx:285:a0`
-- `classic_route_3:tmx:classic_route_3.tmx:285:a0`
-- `classic_route_4:tmx:classic_route_4.tmx:285:a0`
-- `classic_route_4:tmx:classic_route_4.tmx:286:a0`
-- `classic_stormpeak_city:tmx:classic_stormpeak_city.tmx:290:a0`
 - `route1_sanglorian:tmx:route1_sanglorian.tmx:129:a0`
 - `route1_sanglorian:tmx:route1_sanglorian.tmx:130:a0`
 - `route1_sanglorian:tmx:route1_sanglorian.tmx:160:a0`
 - `routea:tmx:routea.tmx:45:a0`
-- `spyder_candy_town:tmx:spyder_candy_town.tmx:100:a0`
-- `spyder_paper_town:tmx:spyder_paper_town.tmx:217:a0`
-- `spyder_routec:tmx:spyder_routec.tmx:155:a0`
-- `spyder_routec:tmx:spyder_routec.tmx:156:a0`
-- `spyder_routec:tmx:spyder_routec.tmx:275:a0`
 
 Topology-only exclusions use their natural units: 39
 portal-only openings (including 1
@@ -277,8 +277,8 @@ repeats it at every mainline chapter.
 游戏钩子的缓存键去掉步数倒计时，时钟与天气只保留日期、小时与天气（`time_is` 的每个属性都由日期和小时决定）；扰动探针在同一小时内把分钟拨 15。
 下表是新游戏状态下的结果；各主线章节的结果见 `bun run verify:preview:coverage`。
 
-- All maps / 全部地图: 263 maps, 8227 events: 1158 previewable (0 from the static rules), 7064 hidden, 5 rejected; 99.6% of the events that paint are previewable; 165 maps show at least one character.
-- Mainline (`spyder_*`) / 主线: 99 maps, 5254 events: 464 previewable (0 from the static rules), 4790 hidden, 0 rejected; 100.0% of the events that paint are previewable; 89 maps show at least one character.
+- All maps / 全部地图: 263 maps, 8280 events: 1158 previewable (0 from the static rules), 7117 hidden, 5 rejected; 99.6% of the events that paint are previewable; 165 maps show at least one character.
+- Mainline (`spyder_*`) / 主线: 99 maps, 5281 events: 464 previewable (0 from the static rules), 4817 hidden, 0 rejected; 100.0% of the events that paint are previewable; 89 maps show at least one character.
 
 | Reject reason / 拒绝原因 | All / 全部 | Mainline / 主线 | Meaning / 含义 |
 |---|---:|---:|---|
@@ -357,7 +357,7 @@ Maps with a previewable or rejected event / 有可预览或被拒绝事件的地
 | `spyder_candy_inn2` | 32 | 3 | 0 | 29 | 0 | — |
 | `spyder_candy_port` | 70 | 1 | 0 | 69 | 0 | — |
 | `spyder_candy_scoop` | 27 | 2 | 0 | 25 | 0 | — |
-| `spyder_candy_town` | 111 | 5 | 0 | 106 | 0 | — |
+| `spyder_candy_town` | 118 | 5 | 0 | 113 | 0 | — |
 | `spyder_citypark` | 143 | 13 | 0 | 130 | 0 | — |
 | `spyder_citypark_house1` | 20 | 1 | 0 | 19 | 0 | — |
 | `spyder_cotton_artshop` | 52 | 8 | 0 | 44 | 0 | — |
@@ -406,7 +406,7 @@ Maps with a previewable or rejected event / 有可预览或被拒绝事件的地
 | `spyder_paper_daycare` | 25 | 1 | 0 | 24 | 0 | — |
 | `spyder_paper_manor` | 20 | 1 | 0 | 19 | 0 | — |
 | `spyder_paper_scoop` | 45 | 7 | 0 | 38 | 0 | — |
-| `spyder_paper_town` | 93 | 2 | 0 | 91 | 0 | — |
+| `spyder_paper_town` | 96 | 2 | 0 | 94 | 0 | — |
 | `spyder_radiotower` | 34 | 5 | 0 | 29 | 0 | — |
 | `spyder_route1` | 77 | 1 | 0 | 76 | 0 | — |
 | `spyder_route2` | 131 | 3 | 0 | 128 | 0 | — |
@@ -416,7 +416,7 @@ Maps with a previewable or rejected event / 有可预览或被拒绝事件的地
 | `spyder_route6` | 134 | 10 | 0 | 124 | 0 | — |
 | `spyder_routea` | 125 | 15 | 0 | 110 | 0 | — |
 | `spyder_routeb` | 61 | 5 | 0 | 56 | 0 | — |
-| `spyder_routec` | 206 | 15 | 0 | 191 | 0 | — |
+| `spyder_routec` | 223 | 15 | 0 | 208 | 0 | — |
 | `spyder_routee` | 60 | 2 | 0 | 58 | 0 | — |
 | `spyder_scoop1` | 41 | 8 | 0 | 33 | 0 | — |
 | `spyder_scoop2` | 27 | 1 | 0 | 26 | 0 | — |

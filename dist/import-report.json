@@ -284,7 +284,7 @@
  "schemaErrors": [],
  "audioQoaPending": [],
  "byFate": {
-  "T1-lowered": 2004,
+  "T1-lowered": 2001,
   "T3-dropped": 10,
   "T1": 37950,
   "T4-dropped": 1419,
@@ -1495,7 +1495,7 @@
   {
    "key": "trigger:stacked event areas:T1-lowered",
    "fate": "T1-lowered",
-   "count": 471,
+   "count": 468,
    "note": "partitioned: match flags then bodies"
   },
   {
@@ -2436,8 +2436,8 @@
   "mode": "seamless-v1",
   "sourceTransferActions": 1161,
   "topologySafeOpenings": 258,
-  "runtimeEligibleOpenings": 283,
-  "enabledTransfers": 283,
+  "runtimeEligibleOpenings": 292,
+  "enabledTransfers": 292,
   "enabledPortalIds": [
    "candy_town:tmx:candy_town.tmx:197:a0",
    "candy_town:tmx:candy_town.tmx:198:a0",
@@ -2461,7 +2461,10 @@
    "classic_route_1:tmx:classic_route_1.tmx:293:a0",
    "classic_route_1:tmx:classic_route_1.tmx:294:a0",
    "classic_route_2:tmx:classic_route_2.tmx:286:a0",
+   "classic_route_3:tmx:classic_route_3.tmx:285:a0",
    "classic_route_3:tmx:classic_route_3.tmx:286:a0",
+   "classic_route_4:tmx:classic_route_4.tmx:285:a0",
+   "classic_route_4:tmx:classic_route_4.tmx:286:a0",
    "classic_route_5:tmx:classic_route_5.tmx:285:a0",
    "classic_route_5:tmx:classic_route_5.tmx:286:a0",
    "classic_route_6:tmx:classic_route_6.tmx:285:a0",
@@ -2472,6 +2475,7 @@
    "classic_route_8:tmx:classic_route_8.tmx:286:a0",
    "classic_steamshore_city:tmx:classic_steamshore_city.tmx:286:a0",
    "classic_steamshore_city:tmx:classic_steamshore_city.tmx:287:a0",
+   "classic_stormpeak_city:tmx:classic_stormpeak_city.tmx:290:a0",
    "classic_thornwood_city:tmx:classic_thornwood_city.tmx:285:a0",
    "classic_thornwood_city:tmx:classic_thornwood_city.tmx:286:a0",
    "classic_thornwood_city:tmx:classic_thornwood_city.tmx:287:a0",
@@ -2558,6 +2562,7 @@
    "spyder_brideswood:tmx:spyder_brideswood.tmx:306:a0",
    "spyder_brideswood:tmx:spyder_brideswood.tmx:307:a0",
    "spyder_brideswood:tmx:spyder_brideswood.tmx:308:a0",
+   "spyder_candy_town:tmx:spyder_candy_town.tmx:100:a0",
    "spyder_candy_town:tmx:spyder_candy_town.tmx:102:a0",
    "spyder_candy_town:tmx:spyder_candy_town.tmx:103:a0",
    "spyder_candy_town:tmx:spyder_candy_town.tmx:104:a0",
@@ -2616,6 +2621,7 @@
    "spyder_leather_town:tmx:spyder_leather_town.tmx:315:a0",
    "spyder_paper_town:tmx:spyder_paper_town.tmx:142:a0",
    "spyder_paper_town:tmx:spyder_paper_town.tmx:143:a0",
+   "spyder_paper_town:tmx:spyder_paper_town.tmx:217:a0",
    "spyder_paper_town:tmx:spyder_paper_town.tmx:282:a0",
    "spyder_paper_town:tmx:spyder_paper_town.tmx:283:a0",
    "spyder_route1:tmx:spyder_route1.tmx:118:a0",
@@ -2668,6 +2674,9 @@
    "spyder_routea:tmx:spyder_routea.tmx:45:a0",
    "spyder_routeb:tmx:spyder_routeb.tmx:51:a0",
    "spyder_routeb:tmx:spyder_routeb.tmx:52:a0",
+   "spyder_routec:tmx:spyder_routec.tmx:155:a0",
+   "spyder_routec:tmx:spyder_routec.tmx:156:a0",
+   "spyder_routec:tmx:spyder_routec.tmx:275:a0",
    "spyder_routec:tmx:spyder_routec.tmx:276:a0",
    "spyder_routec:tmx:spyder_routec.tmx:277:a0",
    "spyder_routec:tmx:spyder_routec.tmx:278:a0",
@@ -3090,6 +3099,114 @@
     "legacyCells": 0
    },
    {
+    "portalId": "classic_route_3:tmx:classic_route_3.tmx:285:a0",
+    "sourceMap": "classic_route_3",
+    "source": {
+     "x": 20,
+     "y": 0
+    },
+    "targetMap": "classic_route_4",
+    "target": {
+     "x": 20,
+     "y": 0
+    },
+    "reason": "surf-continuous-lanes",
+    "movementCapability": "surf",
+    "lanes": [
+     {
+      "source": {
+       "x": 16,
+       "y": 0
+      },
+      "target": {
+       "x": 16,
+       "y": 19
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 17,
+       "y": 0
+      },
+      "target": {
+       "x": 17,
+       "y": 19
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 18,
+       "y": 0
+      },
+      "target": {
+       "x": 18,
+       "y": 19
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 19,
+       "y": 0
+      },
+      "target": {
+       "x": 19,
+       "y": 19
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 20,
+       "y": 0
+      },
+      "target": {
+       "x": 20,
+       "y": 19
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 21,
+       "y": 0
+      },
+      "target": {
+       "x": 21,
+       "y": 19
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 22,
+       "y": 0
+      },
+      "target": {
+       "x": 22,
+       "y": 19
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 23,
+       "y": 0
+      },
+      "target": {
+       "x": 23,
+       "y": 19
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
+    "sourceCells": 8,
+    "legacyCells": 0
+   },
+   {
     "portalId": "classic_route_3:tmx:classic_route_3.tmx:286:a0",
     "sourceMap": "classic_route_3",
     "source": {
@@ -3139,6 +3256,211 @@
     ],
     "legacyLanes": [],
     "sourceCells": 3,
+    "legacyCells": 0
+   },
+   {
+    "portalId": "classic_route_4:tmx:classic_route_4.tmx:285:a0",
+    "sourceMap": "classic_route_4",
+    "source": {
+     "x": 18,
+     "y": 0
+    },
+    "targetMap": "classic_stormpeak_city",
+    "target": {
+     "x": 18,
+     "y": 19
+    },
+    "reason": "surf-continuous-lanes",
+    "movementCapability": "surf",
+    "lanes": [
+     {
+      "source": {
+       "x": 15,
+       "y": 0
+      },
+      "target": {
+       "x": 15,
+       "y": 19
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 16,
+       "y": 0
+      },
+      "target": {
+       "x": 16,
+       "y": 19
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 17,
+       "y": 0
+      },
+      "target": {
+       "x": 17,
+       "y": 19
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 18,
+       "y": 0
+      },
+      "target": {
+       "x": 18,
+       "y": 19
+      },
+      "authored": true
+     },
+     {
+      "source": {
+       "x": 19,
+       "y": 0
+      },
+      "target": {
+       "x": 19,
+       "y": 19
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 20,
+       "y": 0
+      },
+      "target": {
+       "x": 20,
+       "y": 19
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 21,
+       "y": 0
+      },
+      "target": {
+       "x": 21,
+       "y": 19
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
+    "sourceCells": 7,
+    "legacyCells": 0
+   },
+   {
+    "portalId": "classic_route_4:tmx:classic_route_4.tmx:286:a0",
+    "sourceMap": "classic_route_4",
+    "source": {
+     "x": 20,
+     "y": 19
+    },
+    "targetMap": "classic_route_3",
+    "target": {
+     "x": 20,
+     "y": 19
+    },
+    "reason": "surf-continuous-lanes",
+    "movementCapability": "surf",
+    "lanes": [
+     {
+      "source": {
+       "x": 16,
+       "y": 19
+      },
+      "target": {
+       "x": 16,
+       "y": 0
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 17,
+       "y": 19
+      },
+      "target": {
+       "x": 17,
+       "y": 0
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 18,
+       "y": 19
+      },
+      "target": {
+       "x": 18,
+       "y": 0
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 19,
+       "y": 19
+      },
+      "target": {
+       "x": 19,
+       "y": 0
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 20,
+       "y": 19
+      },
+      "target": {
+       "x": 20,
+       "y": 0
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 21,
+       "y": 19
+      },
+      "target": {
+       "x": 21,
+       "y": 0
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 22,
+       "y": 19
+      },
+      "target": {
+       "x": 22,
+       "y": 0
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 23,
+       "y": 19
+      },
+      "target": {
+       "x": 23,
+       "y": 0
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
+    "sourceCells": 8,
     "legacyCells": 0
    },
    {
@@ -3662,6 +3984,103 @@
     "legacyCells": 0
    },
    {
+    "portalId": "classic_stormpeak_city:tmx:classic_stormpeak_city.tmx:290:a0",
+    "sourceMap": "classic_stormpeak_city",
+    "source": {
+     "x": 18,
+     "y": 19
+    },
+    "targetMap": "classic_route_4",
+    "target": {
+     "x": 18,
+     "y": 0
+    },
+    "reason": "surf-continuous-lanes",
+    "movementCapability": "surf",
+    "lanes": [
+     {
+      "source": {
+       "x": 15,
+       "y": 19
+      },
+      "target": {
+       "x": 15,
+       "y": 0
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 16,
+       "y": 19
+      },
+      "target": {
+       "x": 16,
+       "y": 0
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 17,
+       "y": 19
+      },
+      "target": {
+       "x": 17,
+       "y": 0
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 18,
+       "y": 19
+      },
+      "target": {
+       "x": 18,
+       "y": 0
+      },
+      "authored": true
+     },
+     {
+      "source": {
+       "x": 19,
+       "y": 19
+      },
+      "target": {
+       "x": 19,
+       "y": 0
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 20,
+       "y": 19
+      },
+      "target": {
+       "x": 20,
+       "y": 0
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 21,
+       "y": 19
+      },
+      "target": {
+       "x": 21,
+       "y": 0
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
+    "sourceCells": 7,
+    "legacyCells": 0
+   },
+   {
     "portalId": "classic_thornwood_city:tmx:classic_thornwood_city.tmx:285:a0",
     "sourceMap": "classic_thornwood_city",
     "source": {
@@ -4024,25 +4443,468 @@
     "legacyLanes": [],
     "sourceCells": 3,
     "legacyCells": 0
+   },
+   {
+    "portalId": "spyder_candy_town:tmx:spyder_candy_town.tmx:100:a0",
+    "sourceMap": "spyder_candy_town",
+    "source": {
+     "x": 39,
+     "y": 28
+    },
+    "targetMap": "spyder_routec",
+    "target": {
+     "x": 0,
+     "y": 8
+    },
+    "reason": "surf-continuous-lanes",
+    "movementCapability": "surf",
+    "lanes": [
+     {
+      "source": {
+       "x": 39,
+       "y": 28
+      },
+      "target": {
+       "x": 0,
+       "y": 8
+      },
+      "authored": true
+     },
+     {
+      "source": {
+       "x": 39,
+       "y": 29
+      },
+      "target": {
+       "x": 0,
+       "y": 9
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 39,
+       "y": 30
+      },
+      "target": {
+       "x": 0,
+       "y": 10
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 39,
+       "y": 31
+      },
+      "target": {
+       "x": 0,
+       "y": 11
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 39,
+       "y": 32
+      },
+      "target": {
+       "x": 0,
+       "y": 12
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 39,
+       "y": 33
+      },
+      "target": {
+       "x": 0,
+       "y": 13
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 39,
+       "y": 34
+      },
+      "target": {
+       "x": 0,
+       "y": 14
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 39,
+       "y": 35
+      },
+      "target": {
+       "x": 0,
+       "y": 15
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
+    "sourceCells": 8,
+    "legacyCells": 0
+   },
+   {
+    "portalId": "spyder_paper_town:tmx:spyder_paper_town.tmx:217:a0",
+    "sourceMap": "spyder_paper_town",
+    "source": {
+     "x": 0,
+     "y": 15
+    },
+    "targetMap": "spyder_routec",
+    "target": {
+     "x": 39,
+     "y": 35
+    },
+    "reason": "surf-continuous-lanes",
+    "movementCapability": "surf",
+    "lanes": [
+     {
+      "source": {
+       "x": 0,
+       "y": 14
+      },
+      "target": {
+       "x": 39,
+       "y": 34
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 0,
+       "y": 15
+      },
+      "target": {
+       "x": 39,
+       "y": 35
+      },
+      "authored": true
+     },
+     {
+      "source": {
+       "x": 0,
+       "y": 16
+      },
+      "target": {
+       "x": 39,
+       "y": 36
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 0,
+       "y": 17
+      },
+      "target": {
+       "x": 39,
+       "y": 37
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
+    "sourceCells": 4,
+    "legacyCells": 0
+   },
+   {
+    "portalId": "spyder_routec:tmx:spyder_routec.tmx:155:a0",
+    "sourceMap": "spyder_routec",
+    "source": {
+     "x": 0,
+     "y": 8
+    },
+    "targetMap": "spyder_candy_town",
+    "target": {
+     "x": 39,
+     "y": 28
+    },
+    "reason": "surf-continuous-lanes",
+    "movementCapability": "surf",
+    "lanes": [
+     {
+      "source": {
+       "x": 0,
+       "y": 8
+      },
+      "target": {
+       "x": 39,
+       "y": 28
+      },
+      "authored": true
+     },
+     {
+      "source": {
+       "x": 0,
+       "y": 9
+      },
+      "target": {
+       "x": 39,
+       "y": 29
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 0,
+       "y": 10
+      },
+      "target": {
+       "x": 39,
+       "y": 30
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 0,
+       "y": 11
+      },
+      "target": {
+       "x": 39,
+       "y": 31
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 0,
+       "y": 12
+      },
+      "target": {
+       "x": 39,
+       "y": 32
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 0,
+       "y": 13
+      },
+      "target": {
+       "x": 39,
+       "y": 33
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 0,
+       "y": 14
+      },
+      "target": {
+       "x": 39,
+       "y": 34
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 0,
+       "y": 15
+      },
+      "target": {
+       "x": 39,
+       "y": 35
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
+    "sourceCells": 8,
+    "legacyCells": 0
+   },
+   {
+    "portalId": "spyder_routec:tmx:spyder_routec.tmx:156:a0",
+    "sourceMap": "spyder_routec",
+    "source": {
+     "x": 39,
+     "y": 35
+    },
+    "targetMap": "spyder_paper_town",
+    "target": {
+     "x": 0,
+     "y": 15
+    },
+    "reason": "surf-continuous-lanes",
+    "movementCapability": "surf",
+    "lanes": [
+     {
+      "source": {
+       "x": 39,
+       "y": 34
+      },
+      "target": {
+       "x": 0,
+       "y": 14
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 39,
+       "y": 35
+      },
+      "target": {
+       "x": 0,
+       "y": 15
+      },
+      "authored": true
+     },
+     {
+      "source": {
+       "x": 39,
+       "y": 36
+      },
+      "target": {
+       "x": 0,
+       "y": 16
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 39,
+       "y": 37
+      },
+      "target": {
+       "x": 0,
+       "y": 17
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
+    "sourceCells": 4,
+    "legacyCells": 0
+   },
+   {
+    "portalId": "spyder_routec:tmx:spyder_routec.tmx:275:a0",
+    "sourceMap": "spyder_routec",
+    "source": {
+     "x": 0,
+     "y": 35
+    },
+    "targetMap": "spyder_candy_port",
+    "target": {
+     "x": 39,
+     "y": 15
+    },
+    "reason": "surf-continuous-lanes",
+    "movementCapability": "surf",
+    "lanes": [
+     {
+      "source": {
+       "x": 0,
+       "y": 30
+      },
+      "target": {
+       "x": 39,
+       "y": 10
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 0,
+       "y": 31
+      },
+      "target": {
+       "x": 39,
+       "y": 11
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 0,
+       "y": 32
+      },
+      "target": {
+       "x": 39,
+       "y": 12
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 0,
+       "y": 33
+      },
+      "target": {
+       "x": 39,
+       "y": 13
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 0,
+       "y": 34
+      },
+      "target": {
+       "x": 39,
+       "y": 14
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 0,
+       "y": 35
+      },
+      "target": {
+       "x": 39,
+       "y": 15
+      },
+      "authored": true
+     },
+     {
+      "source": {
+       "x": 0,
+       "y": 36
+      },
+      "target": {
+       "x": 39,
+       "y": 16
+      },
+      "authored": false
+     },
+     {
+      "source": {
+       "x": 0,
+       "y": 37
+      },
+      "target": {
+       "x": 39,
+       "y": 17
+      },
+      "authored": false
+     }
+    ],
+    "legacyLanes": [],
+    "sourceCells": 8,
+    "legacyCells": 0
    }
   ],
-  "partialSeamlessCells": 75,
+  "partialSeamlessCells": 137,
   "partialLegacyCells": 0,
   "fullyLegacyPortalOnlyPortalIds": [
    "classic_route_2:tmx:classic_route_2.tmx:285:a0",
-   "classic_route_3:tmx:classic_route_3.tmx:285:a0",
-   "classic_route_4:tmx:classic_route_4.tmx:285:a0",
-   "classic_route_4:tmx:classic_route_4.tmx:286:a0",
-   "classic_stormpeak_city:tmx:classic_stormpeak_city.tmx:290:a0",
    "route1_sanglorian:tmx:route1_sanglorian.tmx:129:a0",
    "route1_sanglorian:tmx:route1_sanglorian.tmx:130:a0",
    "route1_sanglorian:tmx:route1_sanglorian.tmx:160:a0",
-   "routea:tmx:routea.tmx:45:a0",
-   "spyder_candy_town:tmx:spyder_candy_town.tmx:100:a0",
-   "spyder_paper_town:tmx:spyder_paper_town.tmx:217:a0",
-   "spyder_routec:tmx:spyder_routec.tmx:155:a0",
-   "spyder_routec:tmx:spyder_routec.tmx:156:a0",
-   "spyder_routec:tmx:spyder_routec.tmx:275:a0"
+   "routea:tmx:routea.tmx:45:a0"
   ],
   "notEnabled": [
    {
@@ -4071,7 +4933,7 @@
    },
    {
     "reason": "portal-only-opening",
-    "count": 14
+    "count": 5
    },
    {
     "reason": "rejected-contact",
@@ -6707,10 +7569,10 @@
   },
   "all": {
    "maps": 263,
-   "events": 8227,
+   "events": 8280,
    "previewed": 1158,
    "fallback": 0,
-   "hidden": 7064,
+   "hidden": 7117,
    "rejected": 5,
    "reasons": {
     "duplicate-id": 0,
@@ -6729,10 +7591,10 @@
   },
   "mainline": {
    "maps": 99,
-   "events": 5254,
+   "events": 5281,
    "previewed": 464,
    "fallback": 0,
-   "hidden": 4790,
+   "hidden": 4817,
    "rejected": 0,
    "reasons": {
     "duplicate-id": 0,
@@ -7287,10 +8149,10 @@
    },
    {
     "mapId": "spyder_candy_town",
-    "events": 111,
+    "events": 118,
     "previewed": 5,
     "fallback": 0,
-    "hidden": 106,
+    "hidden": 113,
     "rejected": 0,
     "reasons": {}
    },
@@ -7728,10 +8590,10 @@
    },
    {
     "mapId": "spyder_paper_town",
-    "events": 93,
+    "events": 96,
     "previewed": 2,
     "fallback": 0,
-    "hidden": 91,
+    "hidden": 94,
     "rejected": 0,
     "reasons": {}
    },
@@ -7818,10 +8680,10 @@
    },
    {
     "mapId": "spyder_routec",
-    "events": 206,
+    "events": 223,
     "previewed": 15,
     "fallback": 0,
-    "hidden": 191,
+    "hidden": 208,
     "rejected": 0,
     "reasons": {}
    },

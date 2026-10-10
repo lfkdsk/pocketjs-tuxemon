@@ -1,5 +1,5 @@
 {
-  "format": "pocket-tuxemon/world-seam-crossings/v2",
+  "format": "pocket-tuxemon/world-seam-crossings/v3",
   "phases": [
     0,
     1,
@@ -20,26 +20,29 @@
       },
       "capture": 0,
       "phase": 0,
-      "sourceMap": "classic_aerolume_city",
-      "targetMap": "classic_route_5",
-      "activeMap": "classic_aerolume_city",
+      "sourceMap": "spyder_candy_town",
+      "targetMap": "spyder_routec",
+      "activeMap": "spyder_candy_town",
+      "movementCapability": "surf",
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-horizontal.480x272.phase-0.png",
       "camera": [
-        3432,
-        832
+        712,
+        2656
       ],
       "player": {
         "tile": [
-          0,
-          16
+          39,
+          34
         ],
         "localPixel": [
-          0,
-          256
+          624,
+          544
         ],
         "worldPixel": [
-          3664,
-          960
+          944,
+          2784
         ],
         "screenRect": [
           232,
@@ -47,36 +50,38 @@
           16,
           32
         ],
-        "facing": 1,
+        "facing": 3,
         "movePhase": 0
       },
       "fade": null,
       "scene": null,
       "ground": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_routec"
         ],
-        "textures": 8,
-        "resident": 8,
-        "pooled": 5,
-        "created": 13,
+        "textures": 10,
+        "resident": 10,
+        "pooled": 0,
+        "created": 10,
         "pending": 0
       },
       "upper": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_routec"
         ],
-        "textures": 0,
-        "resident": 0,
-        "pooled": 8,
-        "created": 8,
+        "textures": 6,
+        "resident": 6,
+        "pooled": 0,
+        "created": 6,
         "pending": 0
       },
-      "nonBlackPixels": 92112,
-      "rgbaFnv1a": "da7bbc81",
-      "pngSha256": "52efdaa2e8a263653a8b501ad6302f6f95c813d182c22c1f8c45a32af00f7cf0"
+      "nonBlackPixels": 130395,
+      "rgbaFnv1a": "4167270d",
+      "pngSha256": "3e309f5f2b511677da4fac08fe803aac114722a93041f949849edc8a0cedc75f"
     },
     {
       "orientation": "horizontal",
@@ -86,26 +91,29 @@
       },
       "capture": 1,
       "phase": 1,
-      "sourceMap": "classic_aerolume_city",
-      "targetMap": "classic_route_5",
-      "activeMap": "classic_aerolume_city",
+      "sourceMap": "spyder_candy_town",
+      "targetMap": "spyder_routec",
+      "activeMap": "spyder_candy_town",
+      "movementCapability": "surf",
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-horizontal.480x272.phase-1.png",
       "camera": [
-        3430,
-        832
+        714,
+        2656
       ],
       "player": {
         "tile": [
-          0,
-          16
+          39,
+          34
         ],
         "localPixel": [
-          -2,
-          256
+          626,
+          544
         ],
         "worldPixel": [
-          3662,
-          960
+          946,
+          2784
         ],
         "screenRect": [
           232,
@@ -113,36 +121,38 @@
           16,
           32
         ],
-        "facing": 1,
+        "facing": 3,
         "movePhase": 1
       },
       "fade": null,
       "scene": null,
       "ground": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_routec"
         ],
-        "textures": 8,
-        "resident": 8,
-        "pooled": 5,
-        "created": 13,
+        "textures": 10,
+        "resident": 10,
+        "pooled": 0,
+        "created": 10,
         "pending": 0
       },
       "upper": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_routec"
         ],
-        "textures": 0,
-        "resident": 0,
-        "pooled": 8,
-        "created": 8,
+        "textures": 6,
+        "resident": 6,
+        "pooled": 0,
+        "created": 6,
         "pending": 0
       },
-      "nonBlackPixels": 92112,
-      "rgbaFnv1a": "fb831f3d",
-      "pngSha256": "5bf590b8e7956528a88774462a224f6523c5f77d59808b5a42e19668e4c35667"
+      "nonBlackPixels": 130391,
+      "rgbaFnv1a": "42509787",
+      "pngSha256": "4f4a40499f429d28a114710be33344405a468e8d84c57016997b20d08bc0c2d5"
     },
     {
       "orientation": "horizontal",
@@ -152,26 +162,29 @@
       },
       "capture": 2,
       "phase": 2,
-      "sourceMap": "classic_aerolume_city",
-      "targetMap": "classic_route_5",
-      "activeMap": "classic_aerolume_city",
+      "sourceMap": "spyder_candy_town",
+      "targetMap": "spyder_routec",
+      "activeMap": "spyder_candy_town",
+      "movementCapability": "surf",
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-horizontal.480x272.phase-2.png",
       "camera": [
-        3428,
-        832
+        716,
+        2656
       ],
       "player": {
         "tile": [
-          0,
-          16
+          39,
+          34
         ],
         "localPixel": [
-          -4,
-          256
+          628,
+          544
         ],
         "worldPixel": [
-          3660,
-          960
+          948,
+          2784
         ],
         "screenRect": [
           232,
@@ -179,36 +192,38 @@
           16,
           32
         ],
-        "facing": 1,
+        "facing": 3,
         "movePhase": 2
       },
       "fade": null,
       "scene": null,
       "ground": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_routec"
         ],
-        "textures": 8,
-        "resident": 8,
-        "pooled": 5,
-        "created": 13,
+        "textures": 10,
+        "resident": 10,
+        "pooled": 0,
+        "created": 10,
         "pending": 0
       },
       "upper": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_routec"
         ],
-        "textures": 0,
-        "resident": 0,
-        "pooled": 8,
-        "created": 8,
+        "textures": 6,
+        "resident": 6,
+        "pooled": 0,
+        "created": 6,
         "pending": 0
       },
-      "nonBlackPixels": 92107,
-      "rgbaFnv1a": "f01fcbb1",
-      "pngSha256": "851a9573519a060837e82a72990ccd813a2ee5bfb85610297765274acf3c0d3d"
+      "nonBlackPixels": 130388,
+      "rgbaFnv1a": "aaba97ab",
+      "pngSha256": "e061e6b726837f078fc918e363ebf6809b2eac35e479322dfa60b9963e7a5723"
     },
     {
       "orientation": "horizontal",
@@ -218,26 +233,29 @@
       },
       "capture": 3,
       "phase": 3,
-      "sourceMap": "classic_aerolume_city",
-      "targetMap": "classic_route_5",
-      "activeMap": "classic_aerolume_city",
+      "sourceMap": "spyder_candy_town",
+      "targetMap": "spyder_routec",
+      "activeMap": "spyder_candy_town",
+      "movementCapability": "surf",
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-horizontal.480x272.phase-3.png",
       "camera": [
-        3426,
-        832
+        718,
+        2656
       ],
       "player": {
         "tile": [
-          0,
-          16
+          39,
+          34
         ],
         "localPixel": [
-          -6,
-          256
+          630,
+          544
         ],
         "worldPixel": [
-          3658,
-          960
+          950,
+          2784
         ],
         "screenRect": [
           232,
@@ -245,36 +263,38 @@
           16,
           32
         ],
-        "facing": 1,
+        "facing": 3,
         "movePhase": 3
       },
       "fade": null,
       "scene": null,
       "ground": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_routec"
         ],
-        "textures": 8,
-        "resident": 8,
-        "pooled": 5,
-        "created": 13,
+        "textures": 10,
+        "resident": 10,
+        "pooled": 0,
+        "created": 10,
         "pending": 0
       },
       "upper": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_routec"
         ],
-        "textures": 0,
-        "resident": 0,
-        "pooled": 8,
-        "created": 8,
+        "textures": 6,
+        "resident": 6,
+        "pooled": 0,
+        "created": 6,
         "pending": 0
       },
-      "nonBlackPixels": 92107,
-      "rgbaFnv1a": "559fa21d",
-      "pngSha256": "5de4e41ef03a3669b750aabde8b1239a26b7fc480d9b51b7d8af9eddd3fe9ca3"
+      "nonBlackPixels": 130381,
+      "rgbaFnv1a": "18aea059",
+      "pngSha256": "1f3e1e66af4dc2f0f45749e7f1d406b70b5bfcb94e6494c783c17e9fdac558cd"
     },
     {
       "orientation": "horizontal",
@@ -284,26 +304,29 @@
       },
       "capture": 4,
       "phase": 4,
-      "sourceMap": "classic_aerolume_city",
-      "targetMap": "classic_route_5",
-      "activeMap": "classic_aerolume_city",
+      "sourceMap": "spyder_candy_town",
+      "targetMap": "spyder_routec",
+      "activeMap": "spyder_candy_town",
+      "movementCapability": "surf",
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-horizontal.480x272.phase-4.png",
       "camera": [
-        3424,
-        832
+        720,
+        2656
       ],
       "player": {
         "tile": [
-          0,
-          16
+          39,
+          34
         ],
         "localPixel": [
-          -8,
-          256
+          632,
+          544
         ],
         "worldPixel": [
-          3656,
-          960
+          952,
+          2784
         ],
         "screenRect": [
           232,
@@ -311,36 +334,38 @@
           16,
           32
         ],
-        "facing": 1,
+        "facing": 3,
         "movePhase": 4
       },
       "fade": null,
       "scene": null,
       "ground": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_routec"
         ],
-        "textures": 8,
-        "resident": 8,
-        "pooled": 5,
-        "created": 13,
+        "textures": 10,
+        "resident": 10,
+        "pooled": 0,
+        "created": 10,
         "pending": 0
       },
       "upper": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_routec"
         ],
-        "textures": 0,
-        "resident": 0,
-        "pooled": 8,
-        "created": 8,
+        "textures": 6,
+        "resident": 6,
+        "pooled": 0,
+        "created": 6,
         "pending": 0
       },
-      "nonBlackPixels": 92112,
-      "rgbaFnv1a": "b9b20b61",
-      "pngSha256": "be4ee736f5e90cd0f38cb28666f35a7427c113daa4a657181afeab154f485929"
+      "nonBlackPixels": 130378,
+      "rgbaFnv1a": "11ead02a",
+      "pngSha256": "b90be5122dbb02deb409cd2f63414c3fa146528e1a589e6bd571297526489806"
     },
     {
       "orientation": "horizontal",
@@ -350,26 +375,29 @@
       },
       "capture": 5,
       "phase": 5,
-      "sourceMap": "classic_aerolume_city",
-      "targetMap": "classic_route_5",
-      "activeMap": "classic_aerolume_city",
+      "sourceMap": "spyder_candy_town",
+      "targetMap": "spyder_routec",
+      "activeMap": "spyder_candy_town",
+      "movementCapability": "surf",
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-horizontal.480x272.phase-5.png",
       "camera": [
-        3422,
-        832
+        722,
+        2656
       ],
       "player": {
         "tile": [
-          0,
-          16
+          39,
+          34
         ],
         "localPixel": [
-          -10,
-          256
+          634,
+          544
         ],
         "worldPixel": [
-          3654,
-          960
+          954,
+          2784
         ],
         "screenRect": [
           232,
@@ -377,36 +405,38 @@
           16,
           32
         ],
-        "facing": 1,
+        "facing": 3,
         "movePhase": 5
       },
       "fade": null,
       "scene": null,
       "ground": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_routec"
         ],
-        "textures": 8,
-        "resident": 8,
-        "pooled": 5,
-        "created": 13,
+        "textures": 12,
+        "resident": 12,
+        "pooled": 0,
+        "created": 12,
         "pending": 0
       },
       "upper": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_routec"
         ],
-        "textures": 0,
-        "resident": 0,
-        "pooled": 8,
-        "created": 8,
+        "textures": 6,
+        "resident": 6,
+        "pooled": 0,
+        "created": 6,
         "pending": 0
       },
-      "nonBlackPixels": 92112,
-      "rgbaFnv1a": "00920091",
-      "pngSha256": "5fa1af886d96ec1e6fc39b6db56222536e16aed63e8d55507dd866957da9ab4e"
+      "nonBlackPixels": 130378,
+      "rgbaFnv1a": "b2f89ef0",
+      "pngSha256": "da9ea82521bc8e9f7c18b67371830586adbca9ba68c536937a285a46733920b5"
     },
     {
       "orientation": "horizontal",
@@ -416,26 +446,29 @@
       },
       "capture": 6,
       "phase": 6,
-      "sourceMap": "classic_aerolume_city",
-      "targetMap": "classic_route_5",
-      "activeMap": "classic_aerolume_city",
+      "sourceMap": "spyder_candy_town",
+      "targetMap": "spyder_routec",
+      "activeMap": "spyder_candy_town",
+      "movementCapability": "surf",
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-horizontal.480x272.phase-6.png",
       "camera": [
-        3420,
-        832
+        724,
+        2656
       ],
       "player": {
         "tile": [
-          0,
-          16
+          39,
+          34
         ],
         "localPixel": [
-          -12,
-          256
+          636,
+          544
         ],
         "worldPixel": [
-          3652,
-          960
+          956,
+          2784
         ],
         "screenRect": [
           232,
@@ -443,36 +476,38 @@
           16,
           32
         ],
-        "facing": 1,
+        "facing": 3,
         "movePhase": 6
       },
       "fade": null,
       "scene": null,
       "ground": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_routec"
         ],
-        "textures": 8,
-        "resident": 8,
-        "pooled": 5,
-        "created": 13,
+        "textures": 12,
+        "resident": 12,
+        "pooled": 0,
+        "created": 12,
         "pending": 0
       },
       "upper": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_routec"
         ],
-        "textures": 0,
-        "resident": 0,
-        "pooled": 8,
-        "created": 8,
+        "textures": 6,
+        "resident": 6,
+        "pooled": 0,
+        "created": 6,
         "pending": 0
       },
-      "nonBlackPixels": 92109,
-      "rgbaFnv1a": "a9941361",
-      "pngSha256": "213a55002a51aced7b65f519c41317a067cd1a559f6245ca609f754f436b0d61"
+      "nonBlackPixels": 130378,
+      "rgbaFnv1a": "817e0735",
+      "pngSha256": "69de0d3f1ff00e65aeab13a0f74ed6af081952238f8fe316cb9721ed7da04b20"
     },
     {
       "orientation": "horizontal",
@@ -482,26 +517,29 @@
       },
       "capture": 7,
       "phase": 7,
-      "sourceMap": "classic_aerolume_city",
-      "targetMap": "classic_route_5",
-      "activeMap": "classic_aerolume_city",
+      "sourceMap": "spyder_candy_town",
+      "targetMap": "spyder_routec",
+      "activeMap": "spyder_candy_town",
+      "movementCapability": "surf",
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-horizontal.480x272.phase-7.png",
       "camera": [
-        3418,
-        832
+        726,
+        2656
       ],
       "player": {
         "tile": [
-          0,
-          16
+          39,
+          34
         ],
         "localPixel": [
-          -14,
-          256
+          638,
+          544
         ],
         "worldPixel": [
-          3650,
-          960
+          958,
+          2784
         ],
         "screenRect": [
           232,
@@ -509,36 +547,38 @@
           16,
           32
         ],
-        "facing": 1,
+        "facing": 3,
         "movePhase": 7
       },
       "fade": null,
       "scene": null,
       "ground": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_routec"
         ],
-        "textures": 8,
-        "resident": 8,
-        "pooled": 5,
-        "created": 13,
+        "textures": 12,
+        "resident": 12,
+        "pooled": 0,
+        "created": 12,
         "pending": 0
       },
       "upper": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_routec"
         ],
-        "textures": 0,
-        "resident": 0,
-        "pooled": 8,
-        "created": 8,
+        "textures": 6,
+        "resident": 6,
+        "pooled": 0,
+        "created": 6,
         "pending": 0
       },
-      "nonBlackPixels": 92109,
-      "rgbaFnv1a": "b8b1f00d",
-      "pngSha256": "dbe80c66bc45a4db01e99d085e02f9514eeda12de8cc5d11159e43eb5ecda04e"
+      "nonBlackPixels": 130378,
+      "rgbaFnv1a": "95b6a506",
+      "pngSha256": "2b2da0c19f26682f90fcb0e689acff270f43d3f8d0a32d9f524c73c15ceda25d"
     },
     {
       "orientation": "horizontal",
@@ -548,26 +588,29 @@
       },
       "capture": "landing",
       "phase": null,
-      "sourceMap": "classic_aerolume_city",
-      "targetMap": "classic_route_5",
-      "activeMap": "classic_route_5",
+      "sourceMap": "spyder_candy_town",
+      "targetMap": "spyder_routec",
+      "activeMap": "spyder_routec",
+      "movementCapability": "surf",
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-horizontal.480x272.landing.png",
       "camera": [
-        3416,
-        832
+        728,
+        2656
       ],
       "player": {
         "tile": [
-          39,
-          16
+          0,
+          14
         ],
         "localPixel": [
-          624,
-          256
+          0,
+          224
         ],
         "worldPixel": [
-          3648,
-          960
+          960,
+          2784
         ],
         "screenRect": [
           232,
@@ -575,36 +618,38 @@
           16,
           32
         ],
-        "facing": 1,
+        "facing": 3,
         "movePhase": 0
       },
       "fade": null,
       "scene": null,
       "ground": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_routec"
         ],
-        "textures": 8,
-        "resident": 8,
-        "pooled": 5,
-        "created": 13,
+        "textures": 12,
+        "resident": 12,
+        "pooled": 0,
+        "created": 12,
         "pending": 0
       },
       "upper": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_routec"
         ],
-        "textures": 0,
-        "resident": 0,
-        "pooled": 8,
-        "created": 8,
+        "textures": 6,
+        "resident": 6,
+        "pooled": 0,
+        "created": 6,
         "pending": 0
       },
-      "nonBlackPixels": 92112,
-      "rgbaFnv1a": "ecb34991",
-      "pngSha256": "42a318b3556bbec3b502ad137744ce16469a3b96b3f6bc7e495c22521942a121"
+      "nonBlackPixels": 130378,
+      "rgbaFnv1a": "215cac77",
+      "pngSha256": "4930a88ad8a01dd2cdfabda2800dc9101ac12e250277461b0b7a402ee555ef67"
     },
     {
       "orientation": "vertical",
@@ -617,6 +662,9 @@
       "sourceMap": "route3",
       "targetMap": "leather_town",
       "activeMap": "route3",
+      "movementCapability": null,
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-vertical.480x272.phase-0.png",
       "camera": [
         392,
@@ -653,8 +701,8 @@
         ],
         "textures": 6,
         "resident": 6,
-        "pooled": 7,
-        "created": 13,
+        "pooled": 6,
+        "created": 12,
         "pending": 0
       },
       "upper": {
@@ -664,13 +712,13 @@
         ],
         "textures": 5,
         "resident": 5,
-        "pooled": 3,
-        "created": 8,
+        "pooled": 1,
+        "created": 6,
         "pending": 0
       },
-      "nonBlackPixels": 97870,
-      "rgbaFnv1a": "c8294dcc",
-      "pngSha256": "16807fd6f4810bb4a2073355cce61cf474ee31821a8da737bb8f989c013686c9"
+      "nonBlackPixels": 97886,
+      "rgbaFnv1a": "7c1eafbd",
+      "pngSha256": "ea3b6b123b262e79dacbed521f40baf2e120a4a0c5d57dad8dec6ab1021203dc"
     },
     {
       "orientation": "vertical",
@@ -683,6 +731,9 @@
       "sourceMap": "route3",
       "targetMap": "leather_town",
       "activeMap": "route3",
+      "movementCapability": null,
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-vertical.480x272.phase-1.png",
       "camera": [
         392,
@@ -719,8 +770,8 @@
         ],
         "textures": 6,
         "resident": 6,
-        "pooled": 7,
-        "created": 13,
+        "pooled": 6,
+        "created": 12,
         "pending": 0
       },
       "upper": {
@@ -730,13 +781,13 @@
         ],
         "textures": 5,
         "resident": 5,
-        "pooled": 3,
-        "created": 8,
+        "pooled": 1,
+        "created": 6,
         "pending": 0
       },
-      "nonBlackPixels": 97870,
-      "rgbaFnv1a": "0fa82198",
-      "pngSha256": "fa693782cd64a5eadaf0020ba7a3c060fa2eebfb3b70426df60dc8f0f876d936"
+      "nonBlackPixels": 97886,
+      "rgbaFnv1a": "f94c34b9",
+      "pngSha256": "8001041fe9840452aa5ce5d02ac7c75624fd068828d867d0129eca4d6cf7490a"
     },
     {
       "orientation": "vertical",
@@ -749,6 +800,9 @@
       "sourceMap": "route3",
       "targetMap": "leather_town",
       "activeMap": "route3",
+      "movementCapability": null,
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-vertical.480x272.phase-2.png",
       "camera": [
         392,
@@ -785,8 +839,8 @@
         ],
         "textures": 6,
         "resident": 6,
-        "pooled": 7,
-        "created": 13,
+        "pooled": 6,
+        "created": 12,
         "pending": 0
       },
       "upper": {
@@ -796,13 +850,13 @@
         ],
         "textures": 5,
         "resident": 5,
-        "pooled": 3,
-        "created": 8,
+        "pooled": 1,
+        "created": 6,
         "pending": 0
       },
-      "nonBlackPixels": 97871,
-      "rgbaFnv1a": "5cbe1061",
-      "pngSha256": "820df9d859ebc6863940a49195521ef92f5637abde7658b733c85d538ca6214f"
+      "nonBlackPixels": 97886,
+      "rgbaFnv1a": "d6052d60",
+      "pngSha256": "e2f290c27fecc2126cae04ad901097301feb79c2434061a8cfe28ace7fd0f83f"
     },
     {
       "orientation": "vertical",
@@ -815,6 +869,9 @@
       "sourceMap": "route3",
       "targetMap": "leather_town",
       "activeMap": "route3",
+      "movementCapability": null,
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-vertical.480x272.phase-3.png",
       "camera": [
         392,
@@ -851,8 +908,8 @@
         ],
         "textures": 6,
         "resident": 6,
-        "pooled": 7,
-        "created": 13,
+        "pooled": 6,
+        "created": 12,
         "pending": 0
       },
       "upper": {
@@ -862,13 +919,13 @@
         ],
         "textures": 5,
         "resident": 5,
-        "pooled": 3,
-        "created": 8,
+        "pooled": 1,
+        "created": 6,
         "pending": 0
       },
-      "nonBlackPixels": 97871,
-      "rgbaFnv1a": "11f7551b",
-      "pngSha256": "34651ecc22cb1ec00f45bb0c2fb14aabecb7b1bfc2c471e98c02a301c314c2d6"
+      "nonBlackPixels": 97886,
+      "rgbaFnv1a": "299d8226",
+      "pngSha256": "b28ecefa34eb47a3e546dd552ccd6794eb931cb209cb23c06e445b2115036706"
     },
     {
       "orientation": "vertical",
@@ -881,6 +938,9 @@
       "sourceMap": "route3",
       "targetMap": "leather_town",
       "activeMap": "route3",
+      "movementCapability": null,
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-vertical.480x272.phase-4.png",
       "camera": [
         392,
@@ -917,8 +977,8 @@
         ],
         "textures": 6,
         "resident": 6,
-        "pooled": 7,
-        "created": 13,
+        "pooled": 6,
+        "created": 12,
         "pending": 0
       },
       "upper": {
@@ -928,13 +988,13 @@
         ],
         "textures": 5,
         "resident": 5,
-        "pooled": 3,
-        "created": 8,
+        "pooled": 1,
+        "created": 6,
         "pending": 0
       },
-      "nonBlackPixels": 97870,
-      "rgbaFnv1a": "989f9df6",
-      "pngSha256": "164eea4d581e8625e555209018ab5d0dfe00b021bde003d212b870f014b6ad8e"
+      "nonBlackPixels": 97886,
+      "rgbaFnv1a": "2070bee7",
+      "pngSha256": "1add61a6ff349f0783316fe28b750ca07776e04900327579d909e46119b81633"
     },
     {
       "orientation": "vertical",
@@ -947,6 +1007,9 @@
       "sourceMap": "route3",
       "targetMap": "leather_town",
       "activeMap": "route3",
+      "movementCapability": null,
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-vertical.480x272.phase-5.png",
       "camera": [
         392,
@@ -983,8 +1046,8 @@
         ],
         "textures": 6,
         "resident": 6,
-        "pooled": 7,
-        "created": 13,
+        "pooled": 6,
+        "created": 12,
         "pending": 0
       },
       "upper": {
@@ -994,13 +1057,13 @@
         ],
         "textures": 5,
         "resident": 5,
-        "pooled": 3,
-        "created": 8,
+        "pooled": 1,
+        "created": 6,
         "pending": 0
       },
-      "nonBlackPixels": 97870,
-      "rgbaFnv1a": "764162fb",
-      "pngSha256": "92e2e6ef3ab5768a0ef52e68b1b6823c41717353c201e9e5f98d6f9a01495a4b"
+      "nonBlackPixels": 97886,
+      "rgbaFnv1a": "c82c4ccd",
+      "pngSha256": "240f76b1cb8aa848076a00b01e26b3de58fe0a011ef2824d21abf26a42b2f573"
     },
     {
       "orientation": "vertical",
@@ -1013,6 +1076,9 @@
       "sourceMap": "route3",
       "targetMap": "leather_town",
       "activeMap": "route3",
+      "movementCapability": null,
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-vertical.480x272.phase-6.png",
       "camera": [
         392,
@@ -1049,8 +1115,8 @@
         ],
         "textures": 6,
         "resident": 6,
-        "pooled": 7,
-        "created": 13,
+        "pooled": 6,
+        "created": 12,
         "pending": 0
       },
       "upper": {
@@ -1060,13 +1126,13 @@
         ],
         "textures": 5,
         "resident": 5,
-        "pooled": 3,
-        "created": 8,
+        "pooled": 1,
+        "created": 6,
         "pending": 0
       },
-      "nonBlackPixels": 97871,
-      "rgbaFnv1a": "45ae3b30",
-      "pngSha256": "e0427ae534f6d1caac0b997bfb756ca7cfcdc00ecae2912728b30a9eb1f6cf1b"
+      "nonBlackPixels": 97886,
+      "rgbaFnv1a": "634c041b",
+      "pngSha256": "dd8667d8d30cd619fa8ea12d82043ea9fbe51da0adbda3b37d3f8e212c2263b3"
     },
     {
       "orientation": "vertical",
@@ -1079,6 +1145,9 @@
       "sourceMap": "route3",
       "targetMap": "leather_town",
       "activeMap": "route3",
+      "movementCapability": null,
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-vertical.480x272.phase-7.png",
       "camera": [
         392,
@@ -1115,8 +1184,8 @@
         ],
         "textures": 6,
         "resident": 6,
-        "pooled": 7,
-        "created": 13,
+        "pooled": 6,
+        "created": 12,
         "pending": 0
       },
       "upper": {
@@ -1126,13 +1195,13 @@
         ],
         "textures": 5,
         "resident": 5,
-        "pooled": 3,
-        "created": 8,
+        "pooled": 1,
+        "created": 6,
         "pending": 0
       },
-      "nonBlackPixels": 97871,
-      "rgbaFnv1a": "4da5c652",
-      "pngSha256": "0de1d06c37b49c09e17c38597cfe05e5c62fd79055cd9cca462e87212dd9c937"
+      "nonBlackPixels": 97886,
+      "rgbaFnv1a": "f5a5cd4b",
+      "pngSha256": "f7254310f20888892d81e64d3a1e9495a09ce70cbb32af4a5234db002f1ed1a9"
     },
     {
       "orientation": "vertical",
@@ -1145,6 +1214,9 @@
       "sourceMap": "route3",
       "targetMap": "leather_town",
       "activeMap": "leather_town",
+      "movementCapability": null,
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-vertical.480x272.landing.png",
       "camera": [
         392,
@@ -1181,8 +1253,8 @@
         ],
         "textures": 6,
         "resident": 6,
-        "pooled": 7,
-        "created": 13,
+        "pooled": 6,
+        "created": 12,
         "pending": 0
       },
       "upper": {
@@ -1192,13 +1264,13 @@
         ],
         "textures": 5,
         "resident": 5,
-        "pooled": 3,
-        "created": 8,
+        "pooled": 1,
+        "created": 6,
         "pending": 0
       },
-      "nonBlackPixels": 97870,
-      "rgbaFnv1a": "33b61363",
-      "pngSha256": "ff0a057e5a183236c21796773a1d81f5f38bb12f9be1711f2901007409fb9117"
+      "nonBlackPixels": 97886,
+      "rgbaFnv1a": "29801fe5",
+      "pngSha256": "05776817d455ad8719ee28ae3efc2bf1848693ba13d6c10bb0adf6809e3f79d0"
     },
     {
       "orientation": "horizontal",
@@ -1208,26 +1280,29 @@
       },
       "capture": 0,
       "phase": 0,
-      "sourceMap": "classic_aerolume_city",
-      "targetMap": "classic_route_5",
-      "activeMap": "classic_aerolume_city",
+      "sourceMap": "spyder_candy_town",
+      "targetMap": "spyder_routec",
+      "activeMap": "spyder_candy_town",
+      "movementCapability": "surf",
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-horizontal.960x544.phase-0.png",
       "camera": [
-        3192,
-        696
+        472,
+        2520
       ],
       "player": {
         "tile": [
-          0,
-          16
+          39,
+          34
         ],
         "localPixel": [
-          0,
-          256
+          624,
+          544
         ],
         "worldPixel": [
-          3664,
-          960
+          944,
+          2784
         ],
         "screenRect": [
           472,
@@ -1235,36 +1310,40 @@
           16,
           32
         ],
-        "facing": 1,
+        "facing": 3,
         "movePhase": 0
       },
       "fade": null,
       "scene": null,
       "ground": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_dryadsgrove",
+          "spyder_routec"
         ],
-        "textures": 12,
-        "resident": 12,
-        "pooled": 12,
-        "created": 24,
+        "textures": 20,
+        "resident": 20,
+        "pooled": 2,
+        "created": 22,
         "pending": 0
       },
       "upper": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_dryadsgrove",
+          "spyder_routec"
         ],
-        "textures": 0,
-        "resident": 0,
-        "pooled": 16,
-        "created": 16,
+        "textures": 10,
+        "resident": 10,
+        "pooled": 0,
+        "created": 10,
         "pending": 0
       },
-      "nonBlackPixels": 307152,
-      "rgbaFnv1a": "152ef641",
-      "pngSha256": "3451886866c02a50d0f93d8ce675880ed9587ff24bb434811759b2e91fc5e8d6"
+      "nonBlackPixels": 521806,
+      "rgbaFnv1a": "93945c71",
+      "pngSha256": "19b42270c2b7f4342392909d45832c47d9b54af246fe96fbefd3a311a7955808"
     },
     {
       "orientation": "horizontal",
@@ -1274,26 +1353,29 @@
       },
       "capture": 1,
       "phase": 1,
-      "sourceMap": "classic_aerolume_city",
-      "targetMap": "classic_route_5",
-      "activeMap": "classic_aerolume_city",
+      "sourceMap": "spyder_candy_town",
+      "targetMap": "spyder_routec",
+      "activeMap": "spyder_candy_town",
+      "movementCapability": "surf",
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-horizontal.960x544.phase-1.png",
       "camera": [
-        3190,
-        696
+        474,
+        2520
       ],
       "player": {
         "tile": [
-          0,
-          16
+          39,
+          34
         ],
         "localPixel": [
-          -2,
-          256
+          626,
+          544
         ],
         "worldPixel": [
-          3662,
-          960
+          946,
+          2784
         ],
         "screenRect": [
           472,
@@ -1301,36 +1383,40 @@
           16,
           32
         ],
-        "facing": 1,
+        "facing": 3,
         "movePhase": 1
       },
       "fade": null,
       "scene": null,
       "ground": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_dryadsgrove",
+          "spyder_routec"
         ],
-        "textures": 12,
-        "resident": 12,
-        "pooled": 12,
-        "created": 24,
+        "textures": 20,
+        "resident": 20,
+        "pooled": 2,
+        "created": 22,
         "pending": 0
       },
       "upper": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_dryadsgrove",
+          "spyder_routec"
         ],
-        "textures": 0,
-        "resident": 0,
-        "pooled": 16,
-        "created": 16,
+        "textures": 10,
+        "resident": 10,
+        "pooled": 0,
+        "created": 10,
         "pending": 0
       },
-      "nonBlackPixels": 307152,
-      "rgbaFnv1a": "051e67bd",
-      "pngSha256": "809527c0ee751bb5cfb46d28bc2d820b147b56b7620513db782a06b8eef89b00"
+      "nonBlackPixels": 521806,
+      "rgbaFnv1a": "55d1358d",
+      "pngSha256": "63828ce5578843ab8c8510f950dac212fcf526c9753e7c2898575e09fb9bde04"
     },
     {
       "orientation": "horizontal",
@@ -1340,26 +1426,29 @@
       },
       "capture": 2,
       "phase": 2,
-      "sourceMap": "classic_aerolume_city",
-      "targetMap": "classic_route_5",
-      "activeMap": "classic_aerolume_city",
+      "sourceMap": "spyder_candy_town",
+      "targetMap": "spyder_routec",
+      "activeMap": "spyder_candy_town",
+      "movementCapability": "surf",
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-horizontal.960x544.phase-2.png",
       "camera": [
-        3188,
-        696
+        476,
+        2520
       ],
       "player": {
         "tile": [
-          0,
-          16
+          39,
+          34
         ],
         "localPixel": [
-          -4,
-          256
+          628,
+          544
         ],
         "worldPixel": [
-          3660,
-          960
+          948,
+          2784
         ],
         "screenRect": [
           472,
@@ -1367,36 +1456,40 @@
           16,
           32
         ],
-        "facing": 1,
+        "facing": 3,
         "movePhase": 2
       },
       "fade": null,
       "scene": null,
       "ground": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_dryadsgrove",
+          "spyder_routec"
         ],
-        "textures": 12,
-        "resident": 12,
-        "pooled": 12,
-        "created": 24,
+        "textures": 20,
+        "resident": 20,
+        "pooled": 2,
+        "created": 22,
         "pending": 0
       },
       "upper": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_dryadsgrove",
+          "spyder_routec"
         ],
-        "textures": 0,
-        "resident": 0,
-        "pooled": 16,
-        "created": 16,
+        "textures": 10,
+        "resident": 10,
+        "pooled": 0,
+        "created": 10,
         "pending": 0
       },
-      "nonBlackPixels": 307147,
-      "rgbaFnv1a": "5492d9d1",
-      "pngSha256": "d01eb814c4dbb3c246f50e9d34b980c903ae373bd8e16e7d3fdc04302825eb4f"
+      "nonBlackPixels": 521806,
+      "rgbaFnv1a": "e9dcd9c2",
+      "pngSha256": "6d3a26d8d59fba65f18a5f2e1db3b7cf13dd7b644a6418d8f05d5359bebdae13"
     },
     {
       "orientation": "horizontal",
@@ -1406,26 +1499,29 @@
       },
       "capture": 3,
       "phase": 3,
-      "sourceMap": "classic_aerolume_city",
-      "targetMap": "classic_route_5",
-      "activeMap": "classic_aerolume_city",
+      "sourceMap": "spyder_candy_town",
+      "targetMap": "spyder_routec",
+      "activeMap": "spyder_candy_town",
+      "movementCapability": "surf",
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-horizontal.960x544.phase-3.png",
       "camera": [
-        3186,
-        696
+        478,
+        2520
       ],
       "player": {
         "tile": [
-          0,
-          16
+          39,
+          34
         ],
         "localPixel": [
-          -6,
-          256
+          630,
+          544
         ],
         "worldPixel": [
-          3658,
-          960
+          950,
+          2784
         ],
         "screenRect": [
           472,
@@ -1433,36 +1529,40 @@
           16,
           32
         ],
-        "facing": 1,
+        "facing": 3,
         "movePhase": 3
       },
       "fade": null,
       "scene": null,
       "ground": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_dryadsgrove",
+          "spyder_routec"
         ],
-        "textures": 12,
-        "resident": 12,
-        "pooled": 12,
-        "created": 24,
+        "textures": 20,
+        "resident": 20,
+        "pooled": 2,
+        "created": 22,
         "pending": 0
       },
       "upper": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_dryadsgrove",
+          "spyder_routec"
         ],
-        "textures": 0,
-        "resident": 0,
-        "pooled": 16,
-        "created": 16,
+        "textures": 10,
+        "resident": 10,
+        "pooled": 0,
+        "created": 10,
         "pending": 0
       },
-      "nonBlackPixels": 307147,
-      "rgbaFnv1a": "3c74bbbd",
-      "pngSha256": "3a38c0ec746f6cc12c0ab8b1a3fb347dfa2de58d2e019ddcb76ca459cf1a29e4"
+      "nonBlackPixels": 521806,
+      "rgbaFnv1a": "ad5c1f00",
+      "pngSha256": "28ab08de3fe6b356aeaaf128eac38cb670995a4887846a740f5a504671118a06"
     },
     {
       "orientation": "horizontal",
@@ -1472,26 +1572,29 @@
       },
       "capture": 4,
       "phase": 4,
-      "sourceMap": "classic_aerolume_city",
-      "targetMap": "classic_route_5",
-      "activeMap": "classic_aerolume_city",
+      "sourceMap": "spyder_candy_town",
+      "targetMap": "spyder_routec",
+      "activeMap": "spyder_candy_town",
+      "movementCapability": "surf",
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-horizontal.960x544.phase-4.png",
       "camera": [
-        3184,
-        696
+        480,
+        2520
       ],
       "player": {
         "tile": [
-          0,
-          16
+          39,
+          34
         ],
         "localPixel": [
-          -8,
-          256
+          632,
+          544
         ],
         "worldPixel": [
-          3656,
-          960
+          952,
+          2784
         ],
         "screenRect": [
           472,
@@ -1499,36 +1602,40 @@
           16,
           32
         ],
-        "facing": 1,
+        "facing": 3,
         "movePhase": 4
       },
       "fade": null,
       "scene": null,
       "ground": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_dryadsgrove",
+          "spyder_routec"
         ],
-        "textures": 12,
-        "resident": 12,
-        "pooled": 12,
-        "created": 24,
+        "textures": 20,
+        "resident": 20,
+        "pooled": 2,
+        "created": 22,
         "pending": 0
       },
       "upper": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_dryadsgrove",
+          "spyder_routec"
         ],
-        "textures": 0,
-        "resident": 0,
-        "pooled": 16,
-        "created": 16,
+        "textures": 10,
+        "resident": 10,
+        "pooled": 0,
+        "created": 10,
         "pending": 0
       },
-      "nonBlackPixels": 307152,
-      "rgbaFnv1a": "5218a2a1",
-      "pngSha256": "5ddf79ccaa96259e1c29080642a5096505252d52407808f08c2c4b7a3c034b73"
+      "nonBlackPixels": 521806,
+      "rgbaFnv1a": "66d7ceb5",
+      "pngSha256": "b057368da299ebda37ad80aa5c88181347a96e68ef751a41fa641468a044eca5"
     },
     {
       "orientation": "horizontal",
@@ -1538,26 +1645,29 @@
       },
       "capture": 5,
       "phase": 5,
-      "sourceMap": "classic_aerolume_city",
-      "targetMap": "classic_route_5",
-      "activeMap": "classic_aerolume_city",
+      "sourceMap": "spyder_candy_town",
+      "targetMap": "spyder_routec",
+      "activeMap": "spyder_candy_town",
+      "movementCapability": "surf",
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-horizontal.960x544.phase-5.png",
       "camera": [
-        3182,
-        696
+        482,
+        2520
       ],
       "player": {
         "tile": [
-          0,
-          16
+          39,
+          34
         ],
         "localPixel": [
-          -10,
-          256
+          634,
+          544
         ],
         "worldPixel": [
-          3654,
-          960
+          954,
+          2784
         ],
         "screenRect": [
           472,
@@ -1565,36 +1675,40 @@
           16,
           32
         ],
-        "facing": 1,
+        "facing": 3,
         "movePhase": 5
       },
       "fade": null,
       "scene": null,
       "ground": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_dryadsgrove",
+          "spyder_routec"
         ],
-        "textures": 12,
-        "resident": 12,
-        "pooled": 12,
-        "created": 24,
+        "textures": 20,
+        "resident": 20,
+        "pooled": 2,
+        "created": 22,
         "pending": 0
       },
       "upper": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_dryadsgrove",
+          "spyder_routec"
         ],
-        "textures": 0,
-        "resident": 0,
-        "pooled": 16,
-        "created": 16,
+        "textures": 10,
+        "resident": 10,
+        "pooled": 0,
+        "created": 10,
         "pending": 0
       },
-      "nonBlackPixels": 307152,
-      "rgbaFnv1a": "06bcf851",
-      "pngSha256": "954914578ba120345e225fc70e0047104229d4a79f5a045a56d1afd9d58c93ff"
+      "nonBlackPixels": 521803,
+      "rgbaFnv1a": "53fd000b",
+      "pngSha256": "1bb13365aa6fe43e054bac70710336f7afba5419b311b67cd5996e30dca9e7c4"
     },
     {
       "orientation": "horizontal",
@@ -1604,26 +1718,29 @@
       },
       "capture": 6,
       "phase": 6,
-      "sourceMap": "classic_aerolume_city",
-      "targetMap": "classic_route_5",
-      "activeMap": "classic_aerolume_city",
+      "sourceMap": "spyder_candy_town",
+      "targetMap": "spyder_routec",
+      "activeMap": "spyder_candy_town",
+      "movementCapability": "surf",
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-horizontal.960x544.phase-6.png",
       "camera": [
-        3180,
-        696
+        484,
+        2520
       ],
       "player": {
         "tile": [
-          0,
-          16
+          39,
+          34
         ],
         "localPixel": [
-          -12,
-          256
+          636,
+          544
         ],
         "worldPixel": [
-          3652,
-          960
+          956,
+          2784
         ],
         "screenRect": [
           472,
@@ -1631,36 +1748,40 @@
           16,
           32
         ],
-        "facing": 1,
+        "facing": 3,
         "movePhase": 6
       },
       "fade": null,
       "scene": null,
       "ground": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_dryadsgrove",
+          "spyder_routec"
         ],
-        "textures": 12,
-        "resident": 12,
-        "pooled": 12,
-        "created": 24,
+        "textures": 20,
+        "resident": 20,
+        "pooled": 2,
+        "created": 22,
         "pending": 0
       },
       "upper": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_dryadsgrove",
+          "spyder_routec"
         ],
-        "textures": 0,
-        "resident": 0,
-        "pooled": 16,
-        "created": 16,
+        "textures": 10,
+        "resident": 10,
+        "pooled": 0,
+        "created": 10,
         "pending": 0
       },
-      "nonBlackPixels": 307149,
-      "rgbaFnv1a": "c41ef821",
-      "pngSha256": "a75f95a45e6f5cfeba53ce8e8f9c75273403da573cde96aa7c38b212da6a0cc6"
+      "nonBlackPixels": 521796,
+      "rgbaFnv1a": "ebeb2cd3",
+      "pngSha256": "d335f6531ed639a1498707ca7cd139129e06e93b48b5b7681a32308e870e23e8"
     },
     {
       "orientation": "horizontal",
@@ -1670,26 +1791,29 @@
       },
       "capture": 7,
       "phase": 7,
-      "sourceMap": "classic_aerolume_city",
-      "targetMap": "classic_route_5",
-      "activeMap": "classic_aerolume_city",
+      "sourceMap": "spyder_candy_town",
+      "targetMap": "spyder_routec",
+      "activeMap": "spyder_candy_town",
+      "movementCapability": "surf",
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-horizontal.960x544.phase-7.png",
       "camera": [
-        3178,
-        696
+        486,
+        2520
       ],
       "player": {
         "tile": [
-          0,
-          16
+          39,
+          34
         ],
         "localPixel": [
-          -14,
-          256
+          638,
+          544
         ],
         "worldPixel": [
-          3650,
-          960
+          958,
+          2784
         ],
         "screenRect": [
           472,
@@ -1697,36 +1821,40 @@
           16,
           32
         ],
-        "facing": 1,
+        "facing": 3,
         "movePhase": 7
       },
       "fade": null,
       "scene": null,
       "ground": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_dryadsgrove",
+          "spyder_routec"
         ],
-        "textures": 12,
-        "resident": 12,
-        "pooled": 12,
-        "created": 24,
+        "textures": 20,
+        "resident": 20,
+        "pooled": 2,
+        "created": 22,
         "pending": 0
       },
       "upper": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_dryadsgrove",
+          "spyder_routec"
         ],
-        "textures": 0,
-        "resident": 0,
-        "pooled": 16,
-        "created": 16,
+        "textures": 10,
+        "resident": 10,
+        "pooled": 0,
+        "created": 10,
         "pending": 0
       },
-      "nonBlackPixels": 307149,
-      "rgbaFnv1a": "78b2694d",
-      "pngSha256": "b856472c17e465338bccb452d8eaff6f1aa2a7349aa7fbedbcbaf55eb8661dc1"
+      "nonBlackPixels": 521793,
+      "rgbaFnv1a": "a57735e5",
+      "pngSha256": "b304c2e419c5671512d16cef78d03cde15a294acc58e89a49dce2ef9116aefa3"
     },
     {
       "orientation": "horizontal",
@@ -1736,26 +1864,29 @@
       },
       "capture": "landing",
       "phase": null,
-      "sourceMap": "classic_aerolume_city",
-      "targetMap": "classic_route_5",
-      "activeMap": "classic_route_5",
+      "sourceMap": "spyder_candy_town",
+      "targetMap": "spyder_routec",
+      "activeMap": "spyder_routec",
+      "movementCapability": "surf",
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-horizontal.960x544.landing.png",
       "camera": [
-        3176,
-        696
+        488,
+        2520
       ],
       "player": {
         "tile": [
-          39,
-          16
+          0,
+          14
         ],
         "localPixel": [
-          624,
-          256
+          0,
+          224
         ],
         "worldPixel": [
-          3648,
-          960
+          960,
+          2784
         ],
         "screenRect": [
           472,
@@ -1763,36 +1894,40 @@
           16,
           32
         ],
-        "facing": 1,
+        "facing": 3,
         "movePhase": 0
       },
       "fade": null,
       "scene": null,
       "ground": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_dryadsgrove",
+          "spyder_routec"
         ],
-        "textures": 12,
-        "resident": 12,
-        "pooled": 12,
-        "created": 24,
+        "textures": 20,
+        "resident": 20,
+        "pooled": 2,
+        "created": 22,
         "pending": 0
       },
       "upper": {
         "visibleMaps": [
-          "classic_aerolume_city",
-          "classic_route_5"
+          "spyder_candy_port",
+          "spyder_candy_town",
+          "spyder_dryadsgrove",
+          "spyder_routec"
         ],
-        "textures": 0,
-        "resident": 0,
-        "pooled": 16,
-        "created": 16,
+        "textures": 10,
+        "resident": 10,
+        "pooled": 0,
+        "created": 10,
         "pending": 0
       },
-      "nonBlackPixels": 307152,
-      "rgbaFnv1a": "40af4b91",
-      "pngSha256": "035122f9b5839f288967b634de55321cbe1b38f79db4530ee32c08530aa23a08"
+      "nonBlackPixels": 521789,
+      "rgbaFnv1a": "5ba48558",
+      "pngSha256": "3320e20c4ccfa9f6e349f0c574bc0db5decd28689cecd8442aaddd13775a06e2"
     },
     {
       "orientation": "vertical",
@@ -1805,6 +1940,9 @@
       "sourceMap": "route3",
       "targetMap": "leather_town",
       "activeMap": "route3",
+      "movementCapability": null,
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-vertical.960x544.phase-0.png",
       "camera": [
         152,
@@ -1841,8 +1979,8 @@
         ],
         "textures": 12,
         "resident": 12,
-        "pooled": 12,
-        "created": 24,
+        "pooled": 10,
+        "created": 22,
         "pending": 0
       },
       "upper": {
@@ -1852,13 +1990,13 @@
         ],
         "textures": 8,
         "resident": 8,
-        "pooled": 8,
-        "created": 16,
+        "pooled": 2,
+        "created": 10,
         "pending": 0
       },
-      "nonBlackPixels": 325352,
-      "rgbaFnv1a": "bd33dd03",
-      "pngSha256": "4ab3807877298ab27f8012fbac55d68bddca11c5cc0561b60d43e7be13c68d38"
+      "nonBlackPixels": 325368,
+      "rgbaFnv1a": "5b011d66",
+      "pngSha256": "27f2ae024d0af9d7c01077805b917669b2142eef56ac1dfb77fc7ff8f3ddacc7"
     },
     {
       "orientation": "vertical",
@@ -1871,6 +2009,9 @@
       "sourceMap": "route3",
       "targetMap": "leather_town",
       "activeMap": "route3",
+      "movementCapability": null,
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-vertical.960x544.phase-1.png",
       "camera": [
         152,
@@ -1907,8 +2048,8 @@
         ],
         "textures": 12,
         "resident": 12,
-        "pooled": 12,
-        "created": 24,
+        "pooled": 10,
+        "created": 22,
         "pending": 0
       },
       "upper": {
@@ -1918,13 +2059,13 @@
         ],
         "textures": 8,
         "resident": 8,
-        "pooled": 8,
-        "created": 16,
+        "pooled": 2,
+        "created": 10,
         "pending": 0
       },
-      "nonBlackPixels": 325352,
-      "rgbaFnv1a": "c19c00ef",
-      "pngSha256": "a544274488417980e6faa5ded22c44e0907a560f53ef51ddda3be7bb797db8c9"
+      "nonBlackPixels": 325368,
+      "rgbaFnv1a": "176d1f8a",
+      "pngSha256": "5dafe24ef2fc0f029be48ae37a91ea08385523c099bf9694939e67a46045cb43"
     },
     {
       "orientation": "vertical",
@@ -1937,6 +2078,9 @@
       "sourceMap": "route3",
       "targetMap": "leather_town",
       "activeMap": "route3",
+      "movementCapability": null,
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-vertical.960x544.phase-2.png",
       "camera": [
         152,
@@ -1973,8 +2117,8 @@
         ],
         "textures": 12,
         "resident": 12,
-        "pooled": 12,
-        "created": 24,
+        "pooled": 10,
+        "created": 22,
         "pending": 0
       },
       "upper": {
@@ -1984,13 +2128,13 @@
         ],
         "textures": 8,
         "resident": 8,
-        "pooled": 8,
-        "created": 16,
+        "pooled": 2,
+        "created": 10,
         "pending": 0
       },
-      "nonBlackPixels": 325353,
-      "rgbaFnv1a": "33c021ab",
-      "pngSha256": "10dacf2bdba1821c4090db47ead119791a6c6e44a6cb0a48cb546a47c10eaaa2"
+      "nonBlackPixels": 325368,
+      "rgbaFnv1a": "603ed9c6",
+      "pngSha256": "dc44df607849ace77b566ba49879bd27b8b4f2f84dd1c7c79951a6eedea20387"
     },
     {
       "orientation": "vertical",
@@ -2003,6 +2147,9 @@
       "sourceMap": "route3",
       "targetMap": "leather_town",
       "activeMap": "route3",
+      "movementCapability": null,
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-vertical.960x544.phase-3.png",
       "camera": [
         152,
@@ -2039,8 +2186,8 @@
         ],
         "textures": 12,
         "resident": 12,
-        "pooled": 12,
-        "created": 24,
+        "pooled": 10,
+        "created": 22,
         "pending": 0
       },
       "upper": {
@@ -2050,13 +2197,13 @@
         ],
         "textures": 8,
         "resident": 8,
-        "pooled": 8,
-        "created": 16,
+        "pooled": 2,
+        "created": 10,
         "pending": 0
       },
-      "nonBlackPixels": 325353,
-      "rgbaFnv1a": "4621dbb3",
-      "pngSha256": "a0e24b9e41dbac1d9764e1d4c3e552016326da09840204fb98109659181cefc5"
+      "nonBlackPixels": 325368,
+      "rgbaFnv1a": "aa0f877a",
+      "pngSha256": "b42393e565f5e9d8e71cbc35f628c2bb74cffb85f1a06def78a9bca6fcf2574f"
     },
     {
       "orientation": "vertical",
@@ -2069,6 +2216,9 @@
       "sourceMap": "route3",
       "targetMap": "leather_town",
       "activeMap": "route3",
+      "movementCapability": null,
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-vertical.960x544.phase-4.png",
       "camera": [
         152,
@@ -2105,8 +2255,8 @@
         ],
         "textures": 12,
         "resident": 12,
-        "pooled": 12,
-        "created": 24,
+        "pooled": 10,
+        "created": 22,
         "pending": 0
       },
       "upper": {
@@ -2116,13 +2266,13 @@
         ],
         "textures": 8,
         "resident": 8,
-        "pooled": 8,
-        "created": 16,
+        "pooled": 2,
+        "created": 10,
         "pending": 0
       },
-      "nonBlackPixels": 325352,
-      "rgbaFnv1a": "47362698",
-      "pngSha256": "27f9f962cfc34aa5cf0c410ac307885e2fb82d02051f81ad0d8d5e990e80e0eb"
+      "nonBlackPixels": 325368,
+      "rgbaFnv1a": "a06d1aed",
+      "pngSha256": "eb5111918c33bbe6d5e3be643f21a5763d68ead3d11e37b95e5fbcf7d32b3fc5"
     },
     {
       "orientation": "vertical",
@@ -2135,6 +2285,9 @@
       "sourceMap": "route3",
       "targetMap": "leather_town",
       "activeMap": "route3",
+      "movementCapability": null,
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-vertical.960x544.phase-5.png",
       "camera": [
         152,
@@ -2171,8 +2324,8 @@
         ],
         "textures": 12,
         "resident": 12,
-        "pooled": 12,
-        "created": 24,
+        "pooled": 10,
+        "created": 22,
         "pending": 0
       },
       "upper": {
@@ -2182,13 +2335,13 @@
         ],
         "textures": 8,
         "resident": 8,
-        "pooled": 8,
-        "created": 16,
+        "pooled": 2,
+        "created": 10,
         "pending": 0
       },
-      "nonBlackPixels": 325352,
-      "rgbaFnv1a": "63be297a",
-      "pngSha256": "4408b68e9cc3570d55a7fc945f2d1181f4beb8577f3a72f124b41ea94d638135"
+      "nonBlackPixels": 325368,
+      "rgbaFnv1a": "d40cfe9c",
+      "pngSha256": "238bfc15d5e3b4d4b1cf588c24f19e9e33caf8c3a5f04876a598d5bc8354050b"
     },
     {
       "orientation": "vertical",
@@ -2201,6 +2354,9 @@
       "sourceMap": "route3",
       "targetMap": "leather_town",
       "activeMap": "route3",
+      "movementCapability": null,
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-vertical.960x544.phase-6.png",
       "camera": [
         152,
@@ -2237,8 +2393,8 @@
         ],
         "textures": 12,
         "resident": 12,
-        "pooled": 12,
-        "created": 24,
+        "pooled": 10,
+        "created": 22,
         "pending": 0
       },
       "upper": {
@@ -2248,13 +2404,13 @@
         ],
         "textures": 8,
         "resident": 8,
-        "pooled": 8,
-        "created": 16,
+        "pooled": 2,
+        "created": 10,
         "pending": 0
       },
-      "nonBlackPixels": 325353,
-      "rgbaFnv1a": "74998bb6",
-      "pngSha256": "5ffc6d30f8e10588852c83f4bd74e3f59f168f77058ec55bf945661d8a589ab4"
+      "nonBlackPixels": 325368,
+      "rgbaFnv1a": "e763a331",
+      "pngSha256": "1a4cf7d83b145b6aa88a54e75559612ed667c91b676f4c4f20583359fb7862bb"
     },
     {
       "orientation": "vertical",
@@ -2267,6 +2423,9 @@
       "sourceMap": "route3",
       "targetMap": "leather_town",
       "activeMap": "route3",
+      "movementCapability": null,
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-vertical.960x544.phase-7.png",
       "camera": [
         152,
@@ -2303,8 +2462,8 @@
         ],
         "textures": 12,
         "resident": 12,
-        "pooled": 12,
-        "created": 24,
+        "pooled": 10,
+        "created": 22,
         "pending": 0
       },
       "upper": {
@@ -2314,13 +2473,13 @@
         ],
         "textures": 8,
         "resident": 8,
-        "pooled": 8,
-        "created": 16,
+        "pooled": 2,
+        "created": 10,
         "pending": 0
       },
-      "nonBlackPixels": 325353,
-      "rgbaFnv1a": "99450260",
-      "pngSha256": "ac1360830edefed8d479cdf5da3e7c82c446e0e43c034c358497820f4a8c4f54"
+      "nonBlackPixels": 325368,
+      "rgbaFnv1a": "b8d66425",
+      "pngSha256": "46df78fe06838a65c98f812e6e19391566825b899aabc452b5e09a021421b599"
     },
     {
       "orientation": "vertical",
@@ -2333,6 +2492,9 @@
       "sourceMap": "route3",
       "targetMap": "leather_town",
       "activeMap": "leather_town",
+      "movementCapability": null,
+      "swimming": 2,
+      "appearance": "swimmer",
       "file": "world-seam-vertical.960x544.landing.png",
       "camera": [
         152,
@@ -2369,8 +2531,8 @@
         ],
         "textures": 12,
         "resident": 12,
-        "pooled": 12,
-        "created": 24,
+        "pooled": 10,
+        "created": 22,
         "pending": 0
       },
       "upper": {
@@ -2380,13 +2542,13 @@
         ],
         "textures": 8,
         "resident": 8,
-        "pooled": 8,
-        "created": 16,
+        "pooled": 2,
+        "created": 10,
         "pending": 0
       },
-      "nonBlackPixels": 325352,
-      "rgbaFnv1a": "c73bd4ed",
-      "pngSha256": "ebdb4ad85b0d248b9ced67f85d9964641f44dbca6b7cc7ee30693eda23def3c7"
+      "nonBlackPixels": 325368,
+      "rgbaFnv1a": "b1e02afb",
+      "pngSha256": "a76c4ca6e06a329f1d93d68504cc61cf6860df4a417b1af004bdf60fb2c7a67d"
     }
   ],
   "contactSheets": [
@@ -2429,7 +2591,7 @@
           ]
         }
       ],
-      "pngSha256": "91229665b785aeaa58758a18463dafc9feb360b2bb3678a91b803681d325ec88"
+      "pngSha256": "fa0378de48a7d72f1863a0458288e0062869e655f75aa6a5afef1a61eb2da3dd"
     },
     {
       "viewport": {
@@ -2470,7 +2632,7 @@
           ]
         }
       ],
-      "pngSha256": "d8db7b5b238c67265d246434dd698a09287861a1efc5b846d54ad89cb147c9a1"
+      "pngSha256": "db9b3ffe363f825f8472fb463c946e0edfa61c6d511c3f62d65a7c824c51cd6f"
     }
   ]
 }
