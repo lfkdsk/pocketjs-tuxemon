@@ -22,7 +22,8 @@ import {
   type TuxemonExtensionState,
 } from "./extension.ts";
 import { battleDbToTuxemonBattleDb } from "./from-battle-db.ts";
-import { nextRandom, type RngState } from "./core.ts";
+import { endBattle, nextRandom, type RngState } from "./core.ts";
+import { PARK_ENCOUNTER_TURNS, recordParkCapture, recordParkSighting } from "./park.ts";
 import {
   BATTLE_EVENT_TICKS,
   battleEventDuration,
@@ -33,9 +34,11 @@ import {
   canRun,
   canSwap,
   canUseBattleItem,
+  cloneBattleState,
   getMonster,
   getSide,
   createBattle,
+  makeRules,
   reduceBattle,
   usableMoves,
 } from "./tuxemon.ts";
@@ -134,6 +137,14 @@ export interface SpectatorInfo {
   };
 }
 
+export interface ParkBattleInfo {
+  monster: string;
+  turnsRemaining: number;
+  fleeRate: number;
+  /** True only when the opponent's pre-throw flee check ended the encounter. */
+  monsterFled: boolean;
+}
+
 export interface RuntimeBattleState {
   format: typeof TUXEMON_BATTLE_STATE_FORMAT;
   battle: TuxemonBattleState;
@@ -183,6 +194,8 @@ export interface RuntimeBattleState {
    *  end. The completion writes the battle_last_* result variables using
    *  the setup's codes rather than the player/trainer path. */
   spectator?: SpectatorInfo;
+  /** Present only for a wild encounter inside an active Eclipse Park session. */
+  park?: ParkBattleInfo;
 }
 
 export type BattleMenuMode = "root" | "technique" | "item" | "capture" | "swap";
@@ -427,7 +440,12 @@ function runtimeState(value: JsonValue): RuntimeBattleState {
     || !safeInteger(value.eventTicks) || value.eventTicks < 0
     || !safeInteger(value.menuIndex) || value.menuIndex < 0
     || !safeInteger(value.startingGold) || value.startingGold < 0
-    || typeof value.environment !== "string") {
+    || typeof value.environment !== "string"
+    || value.park !== undefined && (!isRecord(value.park)
+      || typeof value.park.monster !== "string" || value.park.monster.length === 0
+      || !safeInteger(value.park.turnsRemaining) || value.park.turnsRemaining < 0
+      || !finite(value.park.fleeRate) || value.park.fleeRate < 0 || value.park.fleeRate > 1
+      || typeof value.park.monsterFled !== "boolean")) {
     throw new Error("Tuxemon battle runtime state is invalid");
   }
   return value as unknown as RuntimeBattleState;
@@ -450,6 +468,31 @@ export function battleMenuEntries(
   if (!awaiting) return [];
   const monster = getMonster(state.battle, awaiting.uid);
   const targets = activeOpponents(state.battle, awaiting.uid);
+  if (state.park && mode === "root") {
+    const target = targets[0];
+    const quantity = state.battle.inventory.tuxeball_park ?? 0;
+    const ballAvailable = target !== undefined && canUseBattleItem(
+      db,
+      state.battle,
+      "tuxeball_park",
+      target.uid,
+      true,
+      "MainParkMenuState",
+    );
+    return [
+      {
+        kind: "capture",
+        slug: "park_ball",
+        cooldown: 0,
+        available: ballAvailable,
+        quantity,
+        ...(target ? { target: target.uid, targetSlug: target.slug, targetSlot: 1 } : {}),
+      },
+      { kind: "item", slug: "park_food", cooldown: 0, available: false },
+      { kind: "item", slug: "park_doll", cooldown: 0, available: false },
+      { kind: "run", slug: "run", cooldown: 0, available: true },
+    ];
+  }
   const techniqueEntries = (): BattleMenuEntry[] => {
     if (targets.length === 0) return [];
     const usableByTarget = new Map(targets.map((target) => [
@@ -1082,6 +1125,20 @@ export function createTuxemonBattleRules(source: BattleDbSource, enums: Variable
           return null;
         }
 
+        let parkInfo: ParkBattleInfo | null = null;
+        if (kind === "wild" && ext.parkSession?.active
+          && (setup.environment === "park" || setup.environment === "night_park")) {
+          const parkMonster = enemy[0]!.slug;
+          const parkSession = recordParkSighting(startedExt.parkSession ?? ext.parkSession, parkMonster);
+          startedExt = clone({ ...startedExt, parkSession });
+          parkInfo = {
+            monster: parkMonster,
+            turnsRemaining: PARK_ENCOUNTER_TURNS,
+            fleeRate: enemy[0]!.base.speed > 80 ? 0.1 : 0.05,
+            monsterFled: false,
+          };
+        }
+
         const battle = createBattle(rulesDb, {
           seed: rng.rng,
           kind,
@@ -1174,6 +1231,7 @@ export function createTuxemonBattleRules(source: BattleDbSource, enums: Variable
           eventTicks: 0,
           menuIndex: 0,
           ...(spectatorInfo ? { spectator: spectatorInfo } : {}),
+          ...(parkInfo ? { park: parkInfo } : {}),
         };
         state.menu = battleMenuEntries(state, rulesDb, "root");
         return { state: asJson(state), ext: packTuxemonExtensionState(startedExt) };
@@ -1211,6 +1269,66 @@ export function createTuxemonBattleRules(source: BattleDbSource, enums: Variable
         const index = Math.min(state.menuIndex, choices.length - 1);
         const selected = choices[index]!;
         if (!selected.available) return asJson(state);
+        if (state.park && state.menuMode === "root") {
+          if (selected.kind === "capture") {
+            // Upstream checks whether the wild monster flees immediately
+            // before enqueueing the Park Ball. A flee consumes no item.
+            const battle = cloneBattleState(state.battle);
+            const roll = nextRandom(battle);
+            if (state.park.turnsRemaining === 0 || roll < state.park.fleeRate) {
+              const target = getMonster(battle, selected.target!);
+              const user = getMonster(battle, battle.awaiting!.uid);
+              battle.events.push({
+                type: "run",
+                turn: battle.turn,
+                user: target.uid,
+                target: user.uid,
+                chance: state.park.fleeRate,
+                roll,
+                success: true,
+                runAttempts: battle.runAttempts,
+              });
+              state.park = { ...state.park, monsterFled: true };
+              state.battle = endBattle(battle, makeRules(rulesDb), "ran");
+            } else {
+              state.battle = reduceBattle(rulesDb, battle, {
+                type: "capture",
+                item: "tuxeball_park",
+                target: selected.target!,
+                menuState: "MainParkMenuState",
+              });
+              state.ext = {
+                ...state.ext,
+                parkSession: recordParkCapture(
+                  state.ext.parkSession!,
+                  state.park.monster,
+                  state.battle.capturedUid !== null,
+                  state.park.turnsRemaining,
+                ),
+              };
+            }
+          } else if (selected.kind === "run") {
+            // Park Run always leaves the encounter; it is not ordinary combat's
+            // level-based escape roll.
+            const battle = cloneBattleState(state.battle);
+            const user = getMonster(battle, battle.awaiting!.uid);
+            const target = activeOpponents(battle, user.uid)[0]!;
+            battle.events.push({
+              type: "run",
+              turn: battle.turn,
+              user: user.uid,
+              target: target.uid,
+              chance: 1,
+              roll: 0,
+              success: true,
+              runAttempts: battle.runAttempts,
+            });
+            state.battle = endBattle(battle, makeRules(rulesDb), "ran");
+          }
+          state.eventTicks = 0;
+          setMenu(state, rulesDb, "root");
+          return asJson(state);
+        }
         if (state.menuMode === "root" && selected.kind !== "run" && selected.kind !== "forfeit") {
           const mode = selected.kind === "fight" ? "technique"
             : selected.kind === "replacement" ? "swap"

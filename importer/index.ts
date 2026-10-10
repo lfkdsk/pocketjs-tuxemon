@@ -241,8 +241,10 @@ box into a successor. That branch is unreachable in the authored campaign:
 both admissions share one one-shot guard and can move at most the six-member
 party into a hidden capacity-30 box. Release matches upstream, including a
 full-party release appending past the ordinary Kennel capacity),
-and \`park_experience\` with the unreachable
-Eclipse park session. Plague-state rows stay deterministic without being
+\`park_experience\` is Native for all eight Eclipse actions: it activates a
+saved Park session, switches wild encounters to the dedicated Ball/Food/Doll/Run
+profile, records captures and blocks each stop event on the bilingual summary
+scene. Plague-state rows stay deterministic without being
 claimed as full P2 behavior. The long-term target remains zero Placeholder
 uses.
 

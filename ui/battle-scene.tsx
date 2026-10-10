@@ -109,7 +109,9 @@ function eventMessage(state: Runtime, event: BattleEvent | null, monsters: reado
         ? L.captured(monster(event.target))
         : L.brokeFree(monster(event.target));
     }
-    case "run": return event.success ? L.gotAway : L.couldntEscape;
+    case "run": return state.park?.monsterFled
+      ? L.parkMonsterFled(monster(event.user))
+      : event.success ? L.gotAway : L.couldntEscape;
     case "swap": return L.entersBattle(monster(event.target));
     case "end": return event.outcome === "won" ? L.victory
       : event.outcome === "lost" ? L.partyDefeated
@@ -217,7 +219,10 @@ function experienceProgress(totalExperience: number, level: number): { current: 
 /** Root command menu (Fight / Item / …): every entry is a game-chrome slug. */
 function rootMenuLabel(entry: Runtime["menu"][number]): string {
   if (entry.kind === "replacement") return battleSceneLabels().swap;
-  return battleSceneLabels().rootCommand(entry.slug);
+  const label = battleSceneLabels().rootCommand(entry.slug);
+  return entry.slug === "park_ball" && entry.quantity !== undefined
+    ? `${label} ×${entry.quantity}`
+    : label;
 }
 
 /** Submenus (technique / item / capture / party): entries name a database
@@ -345,7 +350,7 @@ export const TuxemonBattleScene: Component<BattleSceneViewProps> = (props) => {
       : result.outcome === "lost" ? L.partyDefeated
         : L.battleEnded;
     if (spectator()) return L.spectatorWatching;
-    return runtime().menuMode === "root" ? L.whatWill(monsterName(player()))
+    return runtime().menuMode === "root" ? runtime().park ? L.parkPrompt : L.whatWill(monsterName(player()))
       : runtime().menuMode === "technique" ? L.chooseTechnique
         : runtime().menuMode === "swap" ? L.chooseTuxemon
           : runtime().menuMode === "capture" ? L.chooseCapture

@@ -408,7 +408,14 @@ export interface TechniqueDecision {
 
 export type FutureBattleDecision =
   | { type: "item"; item: string; target: number }
-  | { type: "capture"; item: string; target: number }
+  | {
+      type: "capture";
+      item: string;
+      target: number;
+      /** Dedicated Park items are unavailable to the ordinary combat menu;
+       * only the serialized Park runtime supplies this marker. */
+      menuState?: "MainCombatMenuState" | "MainParkMenuState";
+    }
   | { type: "run" }
   | { type: "replacement"; uid: number };
 

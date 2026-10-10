@@ -58677,6 +58677,84 @@
     "loops": 0
    }
   },
+  "tuxeball_park": {
+   "sort": "utility",
+   "category": "capture",
+   "usableIn": [
+    "MainParkMenuState"
+   ],
+   "cost": null,
+   "consumable": true,
+   "effects": [
+    {
+     "type": "park",
+     "parameters": [
+      "capture"
+     ]
+    }
+   ],
+   "conditions": [
+    {
+     "type": "wild_monster",
+     "operator": "is"
+    }
+   ],
+   "behaviors": {
+    "requires_monster_menu": true,
+    "show_dialog_on_success": true,
+    "show_dialog_on_failure": true,
+    "consumable": true,
+    "visible": true,
+    "resellable": false,
+    "throwable": true,
+    "holdable": false,
+    "repairable": false,
+    "craftable": false,
+    "destroy_on_break": false,
+    "wear_on_use": false,
+    "block_evolution": false
+   },
+   "modifiers": [],
+   "statModifiers": {},
+   "immunityToStatus": [],
+   "captureSprite": {
+    "key": "ui:tile.battle/gfx/items/tuxeball_park#0",
+    "width": 32,
+    "height": 32,
+    "rect": [
+     0,
+     0,
+     24,
+     24
+    ]
+   },
+   "animation": {
+    "slug": "capture_1",
+    "pages": [
+     {
+      "key": "ui:tile.battle/animations/item/capture_1.page-0#0",
+      "width": 512,
+      "height": 64,
+      "rect": [
+       0,
+       0,
+       512,
+       64
+      ],
+      "firstFrame": 0,
+      "frames": 8,
+      "columns": 8,
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "contentWidth": 64,
+      "contentHeight": 64
+     }
+    ],
+    "durationMs": 100,
+    "flipAxes": "",
+    "loops": 0
+   }
+  },
   "tuxeball_peppy": {
    "sort": "utility",
    "category": "capture",
@@ -61075,6 +61153,22 @@
   }
  },
  "encounters": {
+  "eclipse_park": {
+   "type": "single",
+   "monsters": [
+    {
+     "monster": "pairagrim",
+     "level": [
+      5,
+      6
+     ],
+     "weight": 3.5,
+     "experienceModifier": 1,
+     "heldItems": [],
+     "variables": []
+    }
+   ]
+  },
   "spyder_citypark": {
    "type": "single",
    "monsters": [
@@ -74086,6 +74180,144 @@
     }
    }
   },
+  "night_park": {
+   "background": {
+    "key": "ui:tile.battle/gfx/ui/combat/night_cliff_background#0",
+    "width": 256,
+    "height": 128,
+    "rect": [
+     0,
+     0,
+     256,
+     108
+    ]
+   },
+   "island": {
+    "key": "ui:tile.battle/gfx/ui/island_sheet/grass_island_sheet#0",
+    "width": 256,
+    "height": 64,
+    "rect": [
+     0,
+     0,
+     192,
+     57
+    ]
+   },
+   "hud": {
+    "player": {
+     "key": "ui:tile.battle/gfx/ui/combat/park_hp_player#0",
+     "width": 128,
+     "height": 64,
+     "rect": [
+      0,
+      0,
+      104,
+      37
+     ]
+    },
+    "opponent": {
+     "key": "ui:tile.battle/gfx/ui/combat/park_hp_opponent#0",
+     "width": 128,
+     "height": 32,
+     "rect": [
+      0,
+      0,
+      100,
+      29
+     ]
+    },
+    "playerTray": {
+     "key": "ui:tile.battle/gfx/ui/combat/player_party_tray#0",
+     "width": 128,
+     "height": 8,
+     "rect": [
+      0,
+      0,
+      104,
+      6
+     ]
+    },
+    "opponentTray": {
+     "key": "ui:tile.battle/gfx/ui/combat/opponent_party_tray#0",
+     "width": 128,
+     "height": 8,
+     "rect": [
+      0,
+      0,
+      104,
+      6
+     ]
+    },
+    "doublePlayer": {
+     "key": "ui:tile.battle/gfx/ui/combat/double_player#0",
+     "width": 128,
+     "height": 32,
+     "rect": [
+      0,
+      0,
+      102,
+      32
+     ]
+    },
+    "doubleOpponent": {
+     "key": "ui:tile.battle/gfx/ui/combat/double_opponent#0",
+     "width": 128,
+     "height": 32,
+     "rect": [
+      0,
+      0,
+      99,
+      26
+     ]
+    }
+   },
+   "partyIcons": {
+    "icon_alive": {
+     "key": "ui:tile.battle/gfx/ui/icons/party/party_icon01#0",
+     "width": 8,
+     "height": 8,
+     "rect": [
+      0,
+      0,
+      7,
+      7
+     ]
+    },
+    "icon_empty": {
+     "key": "ui:tile.battle/gfx/ui/icons/party/party_empty#0",
+     "width": 8,
+     "height": 8,
+     "rect": [
+      0,
+      0,
+      7,
+      7
+     ]
+    },
+    "icon_faint": {
+     "key": "ui:tile.battle/gfx/ui/icons/party/party_icon03#0",
+     "width": 8,
+     "height": 8,
+     "rect": [
+      0,
+      0,
+      7,
+      7
+     ]
+    },
+    "icon_status": {
+     "key": "ui:tile.battle/gfx/ui/icons/party/party_icon02#0",
+     "width": 8,
+     "height": 8,
+     "rect": [
+      0,
+      0,
+      7,
+      7
+     ]
+    }
+   }
+  },
   "night_sand": {
    "background": {
     "key": "ui:tile.battle/gfx/ui/combat/night_sand_background#0",
@@ -74261,6 +74493,144 @@
     },
     "opponent": {
      "key": "ui:tile.battle/gfx/ui/combat/hp_opponent_nohp#0",
+     "width": 128,
+     "height": 32,
+     "rect": [
+      0,
+      0,
+      100,
+      29
+     ]
+    },
+    "playerTray": {
+     "key": "ui:tile.battle/gfx/ui/combat/player_party_tray#0",
+     "width": 128,
+     "height": 8,
+     "rect": [
+      0,
+      0,
+      104,
+      6
+     ]
+    },
+    "opponentTray": {
+     "key": "ui:tile.battle/gfx/ui/combat/opponent_party_tray#0",
+     "width": 128,
+     "height": 8,
+     "rect": [
+      0,
+      0,
+      104,
+      6
+     ]
+    },
+    "doublePlayer": {
+     "key": "ui:tile.battle/gfx/ui/combat/double_player#0",
+     "width": 128,
+     "height": 32,
+     "rect": [
+      0,
+      0,
+      102,
+      32
+     ]
+    },
+    "doubleOpponent": {
+     "key": "ui:tile.battle/gfx/ui/combat/double_opponent#0",
+     "width": 128,
+     "height": 32,
+     "rect": [
+      0,
+      0,
+      99,
+      26
+     ]
+    }
+   },
+   "partyIcons": {
+    "icon_alive": {
+     "key": "ui:tile.battle/gfx/ui/icons/party/party_icon01#0",
+     "width": 8,
+     "height": 8,
+     "rect": [
+      0,
+      0,
+      7,
+      7
+     ]
+    },
+    "icon_empty": {
+     "key": "ui:tile.battle/gfx/ui/icons/party/party_empty#0",
+     "width": 8,
+     "height": 8,
+     "rect": [
+      0,
+      0,
+      7,
+      7
+     ]
+    },
+    "icon_faint": {
+     "key": "ui:tile.battle/gfx/ui/icons/party/party_icon03#0",
+     "width": 8,
+     "height": 8,
+     "rect": [
+      0,
+      0,
+      7,
+      7
+     ]
+    },
+    "icon_status": {
+     "key": "ui:tile.battle/gfx/ui/icons/party/party_icon02#0",
+     "width": 8,
+     "height": 8,
+     "rect": [
+      0,
+      0,
+      7,
+      7
+     ]
+    }
+   }
+  },
+  "park": {
+   "background": {
+    "key": "ui:tile.battle/gfx/ui/combat/cliff_background#0",
+    "width": 256,
+    "height": 128,
+    "rect": [
+     0,
+     0,
+     256,
+     108
+    ]
+   },
+   "island": {
+    "key": "ui:tile.battle/gfx/ui/island_sheet/grass_island_sheet#0",
+    "width": 256,
+    "height": 64,
+    "rect": [
+     0,
+     0,
+     192,
+     57
+    ]
+   },
+   "hud": {
+    "player": {
+     "key": "ui:tile.battle/gfx/ui/combat/park_hp_player#0",
+     "width": 128,
+     "height": 64,
+     "rect": [
+      0,
+      0,
+      104,
+      37
+     ]
+    },
+    "opponent": {
+     "key": "ui:tile.battle/gfx/ui/combat/park_hp_opponent#0",
      "width": 128,
      "height": 32,
      "rect": [

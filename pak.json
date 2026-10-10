@@ -708,6 +708,10 @@
     "file": "dist/battle-zh/items/tuxeball_omni.json"
   },
   {
+    "key": "battle-zh/items/tuxeball_park.json",
+    "file": "dist/battle-zh/items/tuxeball_park.json"
+  },
+  {
     "key": "battle-zh/items/tuxeball_peppy.json",
     "file": "dist/battle-zh/items/tuxeball_peppy.json"
   },
@@ -3354,6 +3358,10 @@
   {
     "key": "battle/items/tuxeball_omni.json",
     "file": "dist/battle/items/tuxeball_omni.json"
+  },
+  {
+    "key": "battle/items/tuxeball_park.json",
+    "file": "dist/battle/items/tuxeball_park.json"
   },
   {
     "key": "battle/items/tuxeball_peppy.json",
@@ -11280,6 +11288,10 @@
     "file": "dist/battle-art/gfx/items/tuxeball_omni.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/items/tuxeball_park",
+    "file": "dist/battle-art/gfx/items/tuxeball_park.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/items/tuxeball_peppy",
     "file": "dist/battle-art/gfx/items/tuxeball_peppy.pkts"
   },
@@ -12640,6 +12652,10 @@
     "file": "dist/battle-art/gfx/ui/combat/cave_background.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/ui/combat/cliff_background",
+    "file": "dist/battle-art/gfx/ui/combat/cliff_background.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/ui/combat/crosshairs",
     "file": "dist/battle-art/gfx/ui/combat/crosshairs.pkts"
   },
@@ -12664,6 +12680,10 @@
     "file": "dist/battle-art/gfx/ui/combat/hp_player_nohp.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/ui/combat/night_cliff_background",
+    "file": "dist/battle-art/gfx/ui/combat/night_cliff_background.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/ui/combat/night_grass_background",
     "file": "dist/battle-art/gfx/ui/combat/night_grass_background.pkts"
   },
@@ -12682,6 +12702,14 @@
   {
     "key": "ui:tile.battle/gfx/ui/combat/opponent_party_tray",
     "file": "dist/battle-art/gfx/ui/combat/opponent_party_tray.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/ui/combat/park_hp_opponent",
+    "file": "dist/battle-art/gfx/ui/combat/park_hp_opponent.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/ui/combat/park_hp_player",
+    "file": "dist/battle-art/gfx/ui/combat/park_hp_player.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/ui/combat/player_party_tray",

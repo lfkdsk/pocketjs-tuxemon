@@ -285,8 +285,8 @@
  "audioQoaPending": [],
  "byFate": {
   "T1-lowered": 2002,
-  "T3-dropped": 10,
-  "T1": 37950,
+  "T3-dropped": 2,
+  "T1": 37958,
   "T4-dropped": 1419,
   "T2-dropped": 186,
   "structural": 793
@@ -635,10 +635,10 @@
    "note": "K4 shop with imported prices, buy-back prices, stock and variable conditions"
   },
   {
-   "key": "act:park_experience:T3-dropped",
-   "fate": "T3-dropped",
+   "key": "act:park_experience:T1",
+   "fate": "T1",
    "count": 8,
-   "note": "Safari-park session (Eclipse park); not part of the Spyder campaign"
+   "note": "tux.park_experience deactivates the session, clears park_out and blocks on the summary scene"
   },
   {
    "key": "act:pathfind:T1",
@@ -5126,11 +5126,11 @@
    "summary": {
     "types": 98,
     "uses": 13617,
-    "native": 13113,
+    "native": 13121,
     "degraded": 242,
     "placeholder": 0,
-    "dropped": 262,
-    "nativePercent": 96.3,
+    "dropped": 254,
+    "nativePercent": 96.4,
     "executablePercent": 98.1,
     "tier1": {
      "uses": 6425,
@@ -5758,13 +5758,14 @@
     {
      "type": "park_experience",
      "total": 8,
-     "native": 0,
+     "native": 8,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 8,
+     "dropped": 0,
      "reasons": {
-      "dropped": [
-       "Safari-park session (Eclipse park); not part of the Spyder campaign"
+      "native": [
+       "tux.park_experience deactivates the session, clears park_out and blocks on the summary scene",
+       "tux.park_experience activates the saved Eclipse Park session"
       ]
      }
     },
@@ -7582,9 +7583,9 @@
    "rejected": 5,
    "reasons": {
     "duplicate-id": 0,
-    "entry-transfer": 5,
+    "entry-transfer": 0,
     "entry-scene": 0,
-    "entry-error": 0,
+    "entry-error": 5,
     "entry-runtime-branch": 0,
     "facing-condition": 0,
     "runtime-condition": 0,
@@ -7923,7 +7924,7 @@
     "hidden": 37,
     "rejected": 4,
     "reasons": {
-     "entry-transfer": 4
+     "entry-error": 4
     }
    },
    {
@@ -7943,7 +7944,7 @@
     "hidden": 11,
     "rejected": 1,
     "reasons": {
-     "entry-transfer": 1
+     "entry-error": 1
     }
    },
    {

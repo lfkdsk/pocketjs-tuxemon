@@ -16,11 +16,14 @@ import {
 } from "./extension.ts";
 import { createStorageSceneRules } from "./storage-scenes.ts";
 import { radioSceneRules, TUXEMON_RADIO_SCENE_ID } from "./radio-scenes.ts";
+import { emptyParkSession, parkSummary, type ParkSummary } from "./park.ts";
 
 export { TUXEMON_RADIO_SCENE_ID } from "./radio-scenes.ts";
 
 export const TUXEMON_JOURNAL_SCENE_ID = "tux.journal";
 export const TUXEMON_MONSTER_PICKER_SCENE_ID = "tux.monsterPicker";
+export const TUXEMON_PARK_SUMMARY_SCENE_ID = "tux.parkSummary";
+export const PARK_SUMMARY_TOUCH_CLOSE = 0;
 
 export type JournalStatus = "unknown" | "seen" | "caught";
 
@@ -50,6 +53,29 @@ export interface MonsterPickerSceneState {
   cancellable: boolean;
   phase: "choose" | "done";
   cancelled: boolean;
+}
+
+export interface ParkSummarySceneLabels {
+  title: string;
+  uniqueSeen: string;
+  attempts: string;
+  successful: string;
+  failed: string;
+  successRate: string;
+  topSightings: string;
+  highlights: string;
+  none: string;
+  close: string;
+  seenTimes: (count: number) => string;
+  averageTurns: (turns: number) => string;
+}
+
+export interface ParkSummarySceneState extends ParkSummary {
+  kind: "parkSummary";
+  phase: "summary" | "done";
+  labels: ParkSummarySceneLabels;
+  sightings: Array<{ monster: string; name: string; count: number }>;
+  highlights: Array<{ monster: string; name: string; averageTurnsRemaining: number }>;
 }
 
 export interface TuxemonSceneCatalog {
@@ -207,6 +233,71 @@ function pickerRules(index: readonly JournalMonsterIndexEntry[]): SceneRules {
   };
 }
 
+function parkLabels(lang: GameLang): ParkSummarySceneLabels {
+  return lang === "zh_CN" ? {
+    title: "Eclipse 公园结算",
+    uniqueSeen: "发现种类",
+    attempts: "捕获尝试",
+    successful: "成功捕获",
+    failed: "捕获失败",
+    successRate: "成功率",
+    topSightings: "常见精灵",
+    highlights: "捕获亮点",
+    none: "暂无记录",
+    close: "返回公园入口",
+    seenTimes: (count) => `遇见 ${count} 次`,
+    averageTurns: (turns) => `平均剩余 ${turns.toFixed(1)} 回合`,
+  } : {
+    title: "Eclipse Park Results",
+    uniqueSeen: "Unique sightings",
+    attempts: "Capture attempts",
+    successful: "Successful catches",
+    failed: "Failed catches",
+    successRate: "Success rate",
+    topSightings: "Top sightings",
+    highlights: "Capture highlights",
+    none: "No encounters recorded",
+    close: "Return to the park entrance",
+    seenTimes: (count) => `seen ${count} time${count === 1 ? "" : "s"}`,
+    averageTurns: (turns) => `avg ${turns.toFixed(1)} turns remaining`,
+  };
+}
+
+function parkSummaryRules(names: ReadonlyMap<string, string>, lang: GameLang): SceneRules {
+  return {
+    start(ext) {
+      const current = tuxemonExtensionState(ext);
+      const summary = parkSummary(current.parkSession ?? emptyParkSession(false));
+      const state: ParkSummarySceneState = {
+        kind: "parkSummary",
+        phase: "summary",
+        ...summary,
+        labels: parkLabels(lang),
+        sightings: summary.sightings.map((entry) => ({
+          ...entry,
+          name: names.get(entry.monster) ?? entry.monster,
+        })),
+        highlights: summary.highlights.map((entry) => ({
+          ...entry,
+          name: names.get(entry.monster) ?? entry.monster,
+        })),
+      };
+      return { ext, state: state as unknown as JsonValue };
+    },
+    step(rawState, input) {
+      const state = stateOf<ParkSummarySceneState>(rawState);
+      if (state.phase === "summary" && (input.confirmEdge || input.cancelEdge
+        || input.selectIndex === PARK_SUMMARY_TOUCH_CLOSE)) {
+        state.phase = "done";
+      }
+      return rawState;
+    },
+    done(rawState): SceneCompletion | null {
+      return stateOf<ParkSummarySceneState>(rawState).phase === "done" ? {} : null;
+    },
+  };
+}
+
 function eagerIndex(source: BattleDb): JournalMonsterIndexEntry[] {
   return Object.entries(source.monsters)
     .map(([id, monster]) => ({ id, entry: "", txmnId: monster.txmnId, name: monster.name }))
@@ -232,6 +323,7 @@ export function createTuxemonScenes(
       [NAME_INPUT_SCENE_ID]: nameInputRules,
       [TUXEMON_JOURNAL_SCENE_ID]: journalRules(index),
       [TUXEMON_MONSTER_PICKER_SCENE_ID]: pickerRules(index),
+      [TUXEMON_PARK_SUMMARY_SCENE_ID]: parkSummaryRules(names, lang),
       [TUXEMON_RADIO_SCENE_ID]: radioSceneRules,
       [TUXEMON_DAYCARE_SCENE_ID]: createDaycareSceneRules(source, (slug) => names.get(slug) ?? slug, lang),
       ...createStorageSceneRules(source, (slug) => names.get(slug) ?? slug, lang),

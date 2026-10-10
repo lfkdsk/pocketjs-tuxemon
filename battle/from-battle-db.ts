@@ -89,13 +89,21 @@ function toMonster(slug: string, monster: BattleDb["monsters"][string]): DbMonst
 }
 
 function toItem(slug: string, item: BattleDb["items"][string]): DbItem {
+  // ParkEffect's `park capture` uses the same status/device/shake formula as
+  // CaptureEffect upstream. The runtime keeps its MainParkMenuState gate, so
+  // normal battles still cannot use the Park Tuxeball.
+  const effects = toRules(item.effects).map((effect): DbRule =>
+    effect.type === "park" && effect.parameters[0] === "capture"
+      ? { type: "capture", parameters: [] }
+      : effect
+  );
   return {
     slug,
     sort: item.sort,
     category: item.category,
     usable_in: item.usableIn,
     consumable: item.consumable,
-    effects: toRules(item.effects),
+    effects,
     conditions: toRules(item.conditions),
     behaviors: item.behaviors,
     stat_modifiers: toStatModifiers(item.statModifiers),

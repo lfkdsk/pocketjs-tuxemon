@@ -5,33 +5,33 @@
  "counts": {
   "monsters": 269,
   "techniques": 245,
-  "items": 113,
+  "items": 114,
   "elements": 13,
   "tastes": 12,
   "statuses": 35,
-  "encounters": 21,
+  "encounters": 22,
   "npcs": 205,
-  "environments": 8,
+  "environments": 10,
   "trainerParties": 213,
   "trainerMonsterSlots": 611,
   "battleSlots": 283,
-  "randomEncounterUses": 261,
+  "randomEncounterUses": 286,
   "wildEncounterUses": 17
  },
  "art": {
-  "sourceFiles": 590,
-  "files": 590,
-  "sourceBytes": 1926596,
-  "pngBytes": 1210451,
-  "textureBytes": 25585776,
-  "encodedBytes": 2206076,
-  "residentBytes": 13394688,
-  "pakBytes": 3516816,
+  "sourceFiles": 595,
+  "files": 595,
+  "sourceBytes": 1953249,
+  "pngBytes": 1217063,
+  "textureBytes": 25743512,
+  "encodedBytes": 2218647,
+  "residentBytes": 13478656,
+  "pakBytes": 3536016,
   "maxWidth": 512,
   "maxHeight": 512,
   "quantization": {
-   "sourceColours": 10070,
-   "paletteColours": 10070,
+   "sourceColours": 10118,
+   "paletteColours": 10118,
    "quantizedFiles": 0,
    "quantizedColours": 0,
    "remappedPixels": 0,
@@ -41,18 +41,18 @@
   },
   "categories": {
    "backgrounds": {
-    "sourceFiles": 8,
-    "files": 8,
-    "sourceBytes": 157559,
-    "pngBytes": 171095,
-    "textureBytes": 524352
+    "sourceFiles": 10,
+    "files": 10,
+    "sourceBytes": 166376,
+    "pngBytes": 176789,
+    "textureBytes": 655440
    },
    "capture-devices": {
-    "sourceFiles": 27,
-    "files": 27,
-    "sourceBytes": 151592,
-    "pngBytes": 8039,
-    "textureBytes": 55512
+    "sourceFiles": 28,
+    "files": 28,
+    "sourceBytes": 157559,
+    "pngBytes": 8343,
+    "textureBytes": 57568
    },
    "element-icons": {
     "sourceFiles": 26,
@@ -62,11 +62,11 @@
     "textureBytes": 33488
    },
    "hud": {
-    "sourceFiles": 10,
-    "files": 10,
-    "sourceBytes": 9031,
-    "pngBytes": 1955,
-    "textureBytes": 45648
+    "sourceFiles": 12,
+    "files": 12,
+    "sourceBytes": 20900,
+    "pngBytes": 2569,
+    "textureBytes": 70240
    },
    "islands": {
     "sourceFiles": 6,
@@ -126,12 +126,12 @@
    }
   }
  },
- "battleDbBytes": 1263523,
- "runtimeDbBytes": 1115449,
+ "battleDbBytes": 1269772,
+ "runtimeDbBytes": 1121661,
  "pakKey": "game:battle-db",
  "battleRepository": {
-  "shellBytes": 208141,
-  "entries": 662,
-  "entryBytes": 848948
+  "shellBytes": 213024,
+  "entries": 663,
+  "entryBytes": 850191
  }
 }

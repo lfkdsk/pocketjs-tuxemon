@@ -36,6 +36,8 @@ export interface BattleSceneLabels {
   battleOver: string;
   battleEnded: string;
   whatWill: (name: string) => string;
+  parkPrompt: string;
+  parkMonsterFled: (name: string) => string;
   chooseTechnique: string;
   chooseTuxemon: string;
   chooseCapture: string;
@@ -78,6 +80,8 @@ const EN: BattleSceneLabels = {
   battleOver: "The battle is over.",
   battleEnded: "The battle ended.",
   whatWill: (name) => `What will ${name} do?`,
+  parkPrompt: "What will you do?",
+  parkMonsterFled: (name) => `${name} fled!`,
   chooseTechnique: "Choose a technique",
   chooseTuxemon: "Choose a Tuxemon",
   chooseCapture: "Choose a capture device",
@@ -94,6 +98,9 @@ const EN: BattleSceneLabels = {
       case "item": return "Item";
       case "forfeit": return "Forfeit";
       case "capture": return "Capture";
+      case "park_ball": return "Ball";
+      case "park_food": return "Food";
+      case "park_doll": return "Doll";
       case "run": return "Run";
       default: return titleCase(slug);
     }
@@ -129,6 +136,8 @@ const ZH: BattleSceneLabels = {
   battleOver: "战斗结束。",
   battleEnded: "战斗结束了。",
   whatWill: (name) => `${name} 要做什么？`,
+  parkPrompt: "你要做什么？",
+  parkMonsterFled: (name) => `${name} 逃走了！`,
   chooseTechnique: "选择招式",
   chooseTuxemon: "选择一只精灵",
   chooseCapture: "选择捕获道具",
@@ -145,6 +154,9 @@ const ZH: BattleSceneLabels = {
       case "item": return "道具";
       case "forfeit": return "认输";
       case "capture": return "捕获";
+      case "park_ball": return "公园球";
+      case "park_food": return "食物";
+      case "park_doll": return "玩偶";
       case "run": return "逃跑";
       default: return titleCase(slug);
     }

@@ -11,7 +11,7 @@ When conversion discards a whole event, every source rule in it is Dropped.
 
 | Kind | Kinds | Uses | Native | Degraded | Placeholder | Dropped | S1 T1 baseline |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Actions | 98 | 13617 | 13113 | 242 | 0 | 262 | 6425 / 6246 (47.18% / 45.9%) |
+| Actions | 98 | 13617 | 13121 | 242 | 0 | 254 | 6425 / 6246 (47.18% / 45.9%) |
 | Conditions | 64 | 8663 | 8423 | 21 | 0 | 219 | 4772 / 4591 (55.08% / 53.0%) |
 
 The S1 acceptance baselines are 6,246 action uses (45.9%) and 4,591
@@ -21,8 +21,8 @@ Degraded count toward them. This import records 6425
 (55.08%), respectively: 179 above
 for actions and 181 above for conditions. The old
 type-table Native figure was 5,448 / 13,617 (40.0%); conversion-path accounting
-supersedes it with 13113 / 13617
-(96.3%). “Executable”
+supersedes it with 13121 / 13617
+(96.4%). “Executable”
 (native + degraded + deliberate P1 placeholder) is
 98.1% for actions and
 97.5% for conditions.
@@ -104,8 +104,10 @@ box into a successor. That branch is unreachable in the authored campaign:
 both admissions share one one-shot guard and can move at most the six-member
 party into a hidden capacity-30 box. Release matches upstream, including a
 full-party release appending past the ordinary Kennel capacity),
-and `park_experience` with the unreachable
-Eclipse park session. Plague-state rows stay deterministic without being
+`park_experience` is Native for all eight Eclipse actions: it activates a
+saved Park session, switches wild encounters to the dedicated Ball/Food/Doll/Run
+profile, records captures and blocks each stop event on the bilingual summary
+scene. Plague-state rows stay deterministic without being
 claimed as full P2 behavior. The long-term target remains zero Placeholder
 uses.
 
@@ -283,9 +285,9 @@ repeats it at every mainline chapter.
 | Reject reason / 拒绝原因 | All / 全部 | Mainline / 主线 | Meaning / 含义 |
 |---|---:|---:|---|
 | `duplicate-id` | 0 | 0 | two events share one id / 两个事件同 id |
-| `entry-transfer` | 5 | 0 | the map's entry transfers away / 进图即传送走（整图） |
+| `entry-transfer` | 0 | 0 | the map's entry transfers away / 进图即传送走（整图） |
 | `entry-scene` | 0 | 0 | the map's entry starts a battle or scene / 进图即开战斗或场景（整图） |
-| `entry-error` | 0 | 0 | the map's entry raised an error / 进图报错（整图） |
+| `entry-error` | 5 | 0 | the map's entry raised an error / 进图报错（整图） |
 | `entry-runtime-branch` | 0 | 0 | an entry program branches on facing, timer or BGM / 入口程序按朝向、计时器或 BGM 分支（整图） |
 | `facing-condition` | 0 | 0 | a page condition reads the player's facing / 页条件读玩家朝向 |
 | `runtime-condition` | 0 | 0 | a page condition reads the timer or BGM / 页条件读计时器或 BGM |
@@ -331,9 +333,9 @@ Maps with a previewable or rejected event / 有可预览或被拒绝事件的地
 | `eclipse_lion_mountain_low` | 20 | 2 | 0 | 18 | 0 | — |
 | `eclipse_lion_mountain_middle` | 32 | 6 | 0 | 26 | 0 | — |
 | `eclipse_obsidian_center` | 21 | 1 | 0 | 20 | 0 | — |
-| `eclipse_park` | 41 | 0 | 0 | 37 | 4 | entry-transfer:4 |
+| `eclipse_park` | 41 | 0 | 0 | 37 | 4 | entry-error:4 |
 | `eclipse_park_cabin` | 7 | 1 | 0 | 6 | 0 | — |
-| `eclipse_park_cave` | 12 | 0 | 0 | 11 | 1 | entry-transfer:1 |
+| `eclipse_park_cave` | 12 | 0 | 0 | 11 | 1 | entry-error:1 |
 | `eclipse_park_entrance` | 15 | 2 | 0 | 13 | 0 | — |
 | `eclipse_route7` | 61 | 14 | 0 | 47 | 0 | — |
 | `healing_center` | 16 | 2 | 0 | 14 | 0 | — |
@@ -525,7 +527,7 @@ four-neighbour BFS with fixed tie-breaking selects the nearest walkable cell:
 | Action | `not` | 0 | 0 | 0 | 1 | 1 |
 | Action | `open_journal` | 0 | 14 | 0 | 0 | 14 |
 | Action | `open_shop` | 28 | 0 | 0 | 0 | 28 |
-| Action | `park_experience` | 0 | 0 | 0 | 8 | 8 |
+| Action | `park_experience` | 8 | 0 | 0 | 0 | 8 |
 | Action | `pathfind` | 336 | 0 | 0 | 0 | 336 |
 | Action | `pathfind_to_char` | 201 | 0 | 0 | 0 | 201 |
 | Action | `play_map_animation` | 276 | 0 | 0 | 0 | 276 |

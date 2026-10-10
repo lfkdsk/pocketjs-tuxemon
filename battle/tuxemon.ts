@@ -1411,10 +1411,11 @@ export function canUseBattleItem(
   itemSlug: string,
   targetUid: number,
   capture: boolean,
+  menuState: "MainCombatMenuState" | "MainParkMenuState" = "MainCombatMenuState",
 ): boolean {
   const item = db.item[itemSlug];
   if (!item || (state.inventory[itemSlug] ?? 0) <= 0 ||
-      !item.usable_in.includes("MainCombatMenuState") || captureItem(item) !== capture) {
+      !item.usable_in.includes(menuState) || captureItem(item) !== capture) {
     return false;
   }
   let target: BattleMonster;
@@ -1758,7 +1759,14 @@ export function reduceBattle(
       });
     }
     const capture = decision.type === "capture";
-    if (!canUseBattleItem(db, state, decision.item, decision.target, capture)) {
+    if (!canUseBattleItem(
+      db,
+      state,
+      decision.item,
+      decision.target,
+      capture,
+      decision.type === "capture" ? decision.menuState : undefined,
+    )) {
       throw new Error(`battle: item '${decision.item}' is unavailable for target ${decision.target}`);
     }
     return submitAction(state, rules, {

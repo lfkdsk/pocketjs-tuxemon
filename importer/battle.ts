@@ -391,6 +391,17 @@ function addLevel(levels: Map<string, number>, slug: string, level: number): voi
   levels.set(slug, Math.max(levels.get(slug) ?? 0, level));
 }
 
+/** The default package remains Spyder-scoped, but Eclipse Park is a reachable
+ * optional destination whose dedicated encounter/menu is part of the shipped
+ * game. Pull only these maps through the existing dependency closure instead
+ * of importing the complete 411-monster battle database. */
+const PARK_BATTLE_MAPS = new Set([
+  "eclipse_park_entrance",
+  "eclipse_park",
+  "eclipse_park_south",
+  "eclipse_park_cave",
+]);
+
 function memberFromAction(
   action: Rule,
   tables: Tables,
@@ -412,7 +423,10 @@ function memberFromAction(
 
 function buildSelection(scope: BattleScope, tables: Tables, allMaps: TuxMap[], sourceRoot: string): Selection {
   const maps = scope === "spyder"
-    ? allMaps.filter((map) => map.props.scenario === "spyder" && map.slug !== "spyder_test_map")
+    ? allMaps.filter((map) =>
+        map.props.scenario === "spyder" && map.slug !== "spyder_test_map"
+        || PARK_BATTLE_MAPS.has(map.slug)
+      )
     : allMaps;
   const events: LocatedEvent[] = maps.flatMap((map) => map.events.map((event) => ({ map: map.slug, event })));
   const variables = new Map<string, Set<string>>();
