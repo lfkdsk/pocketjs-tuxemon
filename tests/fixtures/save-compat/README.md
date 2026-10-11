@@ -25,6 +25,9 @@ not hand-authored envelopes or toy projects:
 - `main-c6d57a62/` is the immediate predecessor with polished weather, water
   and Zhu presentation. It carries the current mainline tape hash and
   continuation digest.
+- `main-f9db784a/` is the immediate predecessor before flat translated-choice
+  menus and next-update `load_yaml` visibility. It carries the current
+  mainline tape hash and continuation digest.
 
 To reproduce a fixture, make a detached checkout of the named game commit with
 recursive submodules, run `bun install --frozen-lockfile`, run the importer

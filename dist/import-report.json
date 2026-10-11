@@ -284,9 +284,9 @@
  "schemaErrors": [],
  "audioQoaPending": [],
  "byFate": {
-  "T1-lowered": 2002,
+  "T1-lowered": 1977,
   "T3-dropped": 2,
-  "T1": 37958,
+  "T1": 37983,
   "T4-dropped": 1419,
   "T2-dropped": 186,
   "structural": 793
@@ -296,7 +296,7 @@
    "key": "act:access_pc:T1-lowered",
    "fate": "T1-lowered",
    "count": 16,
-   "note": "tux.pc storage: monster pick up/drop off/move/release plus the item locker (deposit, withdraw with a quantity picker, disband); email and multiplayer entries are absent (no email-tagged PC in the campaign; multiplayer is unimplemented upstream)"
+   "note": "campaign storage and item-locker providers are complete; the upstream multiplayer placeholder row is absent"
   },
   {
    "key": "act:add_item(npc):T3-dropped",
@@ -338,7 +338,7 @@
    "key": "act:add_tracker:T1-lowered",
    "fate": "T1-lowered",
    "count": 24,
-   "note": "switch tracker.<map>"
+   "note": "persistent switch preserves authored visit guards, but the NuPhone GPS map is not imported"
   },
   {
    "key": "act:autosave:T1",
@@ -428,19 +428,19 @@
    "key": "act:char_face:T1-lowered",
    "fate": "T1-lowered",
    "count": 123,
-   "note": "moveRoute player face"
+   "note": "moveRoute player face applies on the next movement tick"
   },
   {
    "key": "act:char_move:T1",
    "fate": "T1",
    "count": 64,
-   "note": "moveRoute steps"
+   "note": "blocking skippable moveRoute targets an arbitrary event"
   },
   {
    "key": "act:char_move:T1-lowered",
    "fate": "T1-lowered",
    "count": 73,
-   "note": "moveRoute steps"
+   "note": "player/this moveRoute begins on the next movement tick"
   },
   {
    "key": "act:char_plague:T1",
@@ -593,10 +593,10 @@
    "note": "tux.info writes info_level from the selected monster"
   },
   {
-   "key": "act:load_yaml:T1-lowered",
-   "fate": "T1-lowered",
+   "key": "act:load_yaml:T1",
+   "fate": "T1",
    "count": 7,
-   "note": "import-time events gated until this action runs"
+   "note": "all authored loads append the same event-only YAML once; a one-tick delay preserves next-update visibility"
   },
   {
    "key": "act:lock_controls:T1",
@@ -677,10 +677,10 @@
    "note": "KA1 map animation at a fixed tile"
   },
   {
-   "key": "act:quarantine:T1-lowered",
-   "fate": "T1-lowered",
+   "key": "act:quarantine:T1",
+   "fate": "T1",
    "count": 8,
-   "note": "tux.quarantine transfers infected monsters to/from the hidden quarantine box and matches upstream Kennel overflow; the full preferred-box rename/merge differs only for authored-unreachable external state"
+   "note": "all authored one-shot player flows transfer and inoculate through the hidden quarantine box with exact party/Kennel overflow"
   },
   {
    "key": "act:random_encounter:T1",
@@ -929,16 +929,10 @@
    "note": "post-transfer faint notice runs on the destination map"
   },
   {
-   "key": "act:translated_dialog_choice(paginated):T1-lowered",
-   "fate": "T1-lowered",
-   "count": 10,
-   "note": "nested choice pages retain every option"
-  },
-  {
    "key": "act:translated_dialog_choice:T1",
    "fate": "T1",
-   "count": 174,
-   "note": "choices -> enum code"
+   "count": 184,
+   "note": "single scrollable choice list -> enum code; cancel leaves the variable untouched"
   },
   {
    "key": "act:tune_radio:T1",
@@ -5126,11 +5120,11 @@
    "summary": {
     "types": 98,
     "uses": 13617,
-    "native": 13121,
-    "degraded": 242,
+    "native": 13146,
+    "degraded": 217,
     "placeholder": 0,
     "dropped": 254,
-    "nativePercent": 96.4,
+    "nativePercent": 96.5,
     "executablePercent": 98.1,
     "tier1": {
      "uses": 6425,
@@ -5150,7 +5144,7 @@
      "dropped": 0,
      "reasons": {
       "degraded": [
-       "tux.pc storage: monster pick up/drop off/move/release plus the item locker (deposit, withdraw with a quantity picker, disband); email and multiplayer entries are absent (no email-tagged PC in the campaign; multiplayer is unimplemented upstream)"
+       "campaign storage and item-locker providers are complete; the upstream multiplayer placeholder row is absent"
       ]
      }
     },
@@ -5220,7 +5214,7 @@
      "dropped": 0,
      "reasons": {
       "degraded": [
-       "switch tracker.<map>"
+       "persistent switch preserves authored visit guards, but the NuPhone GPS map is not imported"
       ]
      }
     },
@@ -5330,8 +5324,8 @@
        "Tuxemon's integer tile boundary never contains a point for a zero-size TMX event"
       ],
       "degraded": [
-       "moveRoute player face",
-       "moveRoute this face",
+       "moveRoute player face applies on the next movement tick",
+       "moveRoute this face applies on the next movement tick",
        "pinned Route 3 source typo bottom repaired to down and folded into transfer direction"
       ]
      }
@@ -5345,11 +5339,11 @@
      "dropped": 0,
      "reasons": {
       "degraded": [
-       "moveRoute steps",
+       "player/this moveRoute begins on the next movement tick",
        "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
       ],
       "native": [
-       "moveRoute steps"
+       "blocking skippable moveRoute targets an arbitrary event"
       ]
      }
     },
@@ -5652,13 +5646,13 @@
     {
      "type": "load_yaml",
      "total": 7,
-     "native": 0,
-     "degraded": 7,
+     "native": 7,
+     "degraded": 0,
      "placeholder": 0,
      "dropped": 0,
      "reasons": {
-      "degraded": [
-       "import-time events gated until this action runs"
+      "native": [
+       "all authored loads append the same event-only YAML once; a one-tick delay preserves next-update visibility"
       ]
      }
     },
@@ -5880,13 +5874,13 @@
     {
      "type": "quarantine",
      "total": 8,
-     "native": 0,
-     "degraded": 8,
+     "native": 8,
+     "degraded": 0,
      "placeholder": 0,
      "dropped": 0,
      "reasons": {
-      "degraded": [
-       "tux.quarantine transfers infected monsters to/from the hidden quarantine box and matches upstream Kennel overflow; the full preferred-box rename/merge differs only for authored-unreachable external state"
+      "native": [
+       "all authored one-shot player flows transfer and inoculate through the hidden quarantine box with exact party/Kennel overflow"
       ]
      }
     },
@@ -6437,17 +6431,14 @@
     {
      "type": "translated_dialog_choice",
      "total": 149,
-     "native": 139,
-     "degraded": 10,
+     "native": 149,
+     "degraded": 0,
      "placeholder": 0,
      "dropped": 0,
      "reasons": {
       "native": [
-       "choices -> enum code",
+       "single scrollable choice list -> enum code; cancel leaves the variable untouched",
        "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
-      ],
-      "degraded": [
-       "nested choice pages retain every option"
       ]
      }
     },

@@ -86,6 +86,8 @@ definitions below are the report's own:
 | Tuxemon | Kit output |
 |---|---|
 | `translated_dialog` | `text` boxes, translated from the selected message catalog and word-wrapped. Authored `position`, `h_alignment` and `v_alignment` values become the kit's placement/alignment fields on every continued page; omitted or default values remain omitted, so ordinary dialogs keep their previous bytes. |
+| `translated_dialog_choice` | one native scrollable `choices` box containing all 2–8 authored rows. Each row writes its enum code; cancel closes the box without changing the variable, matching upstream's Escape path. |
+| `load_yaml` | the referenced event-only YAML is merged once at import time behind a persistent per-map gate. The action yields one reference tick before opening that gate, matching upstream's event-list snapshot: appended events first participate in the next world update. |
 | `autosave` | the native `autosave` command. After the fiber advances, the host receives that command-tick snapshot when it is recoverable (including text, choices and shop modals); otherwise publication waits for the first recoverable reference tick. Browser and desktop persist it in a separate read-only automatic slot. |
 | `set_variable` / `clear_variable` | `variable` commands; string values are enum-coded globally. Variables that scripts compute with or print (`variable_math`, `format_variable`, `${{var:name}}`, joined through `copy_variable`) instead hold the literal text via `tux.set_variable_text`; their `variable_set` checks become `tux.variable_text` (only "not set" stays a native `== 0`). |
 | `variable_math` / `format_variable` | `tux.variable_math` / `tux.format_variable` store Python's `str()` of the CPython result (float arithmetic, floor division to int, `int()`/`float()` with optional negation); the type is read back from that text. Upstream's error paths (missing or non-numeric operand) leave the variable unchanged. |
@@ -118,11 +120,12 @@ definitions below are the report's own:
 | `get_party_monster` (Nimrod `Zircon Back`, ApexPlayer cheat) | `tux.get_party_monsters` writes the selected trainer's or player's iids into `iid_slot_*`, which the following `remove_monster` consumes. |
 | `get_player_monster` | `extChoice` over the live party for the 15 general enum pickers, with the active language's prompt and monster display names (including nicknames). The two uses that feed an adjacent `rename_monster` open a saved, non-cancellable party-picker scene, retain the selected monster's stable iid, and skip name entry when the party is empty. A paid unfiltered picker exits before its follow-up choice and charge when the party is empty. |
 | `choice_monster` | an authored `choices` box whose rows show the monster's static menu-face icon beside its translated name; each row writes its positive enum code into the result variable. |
+| `choice_npc` | an authored choice box whose rows show each appearance's front walker frame and translated name. |
 | `open_shop` (item economy) | the kit `shop` command with imported goods, prices and stock. |
 | `open_shop …,buy_monster` | the `tux.monsterShop` scene with the economy's monster rows (price, level, stock); purchases are saved per stock label. |
-| `access_pc player` | the `tux.pc` storage scene: monster boxes plus the item locker (deposit, withdraw with a quantity picker, disband). |
 | `trading <variable>,<species>` | the `tux.trade` scene, which replaces the monster whose iid the variable holds. |
 | `create_kennel` / `set_kennel_visible`, `is kennel` / `is has_kennel` | `tux.create_kennel` / `tux.set_kennel_visible` commands and `tux.kennel` / `tux.has_kennel` conditions over the saved player boxes. |
+| `quarantine` (all 8 authored calls) | `tux.quarantine` transfers infected monsters through the hidden box and preserves the upstream full-party/full-Kennel overflow used by the Garvan flow. |
 | `play_music` | `playBgm`; each of the 21 valid content slugs resolves through the `Project.audio` table to a committed QOA pak entry. Six authored arguments (eight actions) are raw filenames, misspellings or absent DB slugs and stay silent, matching Tuxemon's exact DB lookup. |
 | `fadeout_music` | `fadeoutBgm` (ms → seconds); `0` becomes `stopBgm`. |
 | `pause_music` / `unpause_music` | `pauseBgm` / `resumeBgm`. |
@@ -142,11 +145,11 @@ definitions below are the report's own:
 | Tuxemon | Lowering |
 |---|---|
 | `char_face player,<dir>` | a `moveRoute` with the kit's native `faceUp`/`faceDown`/… step; the step applies on the next boundary tick (upstream faces immediately), so the turn lands one tick after the command. A `char_face` immediately after a `char_position` folds into the placement's `dir` instead, and a spawn-event `char_face npc,<dir>` becomes the NPC page's native initial `dir`. |
-| `add_tracker` | a boolean `switch`; this distinct tracker action has no numeric counter. Authored step countdowns use the native `add_step_tracker` mapping above. |
+| `char_move player/this,…` | a waited, skippable native route with the exact authored steps; it begins on the next movement tick rather than immediately. Four shared Surf actions are lowered with the complete shoreline geometry cluster. Arbitrary-NPC routes are Native. |
+| `add_tracker` | a persistent boolean switch exactly preserves authored story guards. The NuPhone GPS screen and upstream known/visited-location presentation are not imported. This distinct tracker action has no numeric counter; authored step countdowns use the native `add_step_tracker` mapping above. |
+| `access_pc player` | the `tux.pc` storage scene implements monster boxes and the item locker (deposit, withdraw with a quantity picker, disband), but omits upstream's always-visible Multiplayer-not-implemented row. |
+| `set_tuxepedia` | monotonic saved `seen`/`caught` state. Upstream also retains repeat appearance/caught counters and per-character journals, which are not represented. |
 | `transition_teleport` with an out-of-range landing | coordinates clamped into the target map; an isolated landing is repaired to the nearest walkable cell by deterministic four-neighbour BFS. |
-| `choice_npc` | static `extChoice` list; the shared label is extended with each option's translated name so the lines stay distinguishable (upstream tells options apart by per-option NPC portraits, which need kit option-image support). |
-| `get_party_monster` (dojo, gym) | `tux.get_party_monsters` dumps the party iids into `iid_slot_*`; NPC trainer parties are staged live (not folded) when an event inspects them, so the dojo and gym calls find a party. |
-| `load_yaml` | a gating variable; the referenced events are merged at import time and unlock when the action runs. |
 
 ### Degraded battle examples
 
@@ -211,8 +214,9 @@ compete for one arrival edge.
 | `add_step_tracker` and friends for a non-player character | the kit's step hook reports only the player's completed tiles (the pinned content tracks the player only). |
 | `copy_variable` between enum-coded variables | enum codes are numbered per variable, so only variables that hold text copy verbatim. |
 | `transition_teleport` targeting an NPC | only the player transfers. |
-| `create_npc`, `random_monster`, `not char_exists`, … in `test_spyder_cotton_*` / `battle_menu` scenario YAML | these files have no same-slug TMX and no `scenario=` reference, and no `load_yaml` pulls them in, so no map ever materializes them in the pinned source either. |
-| `translated_dialog` with a msgid absent from every catalog | five keys (three in `spyder_test_map`, `spyder_flower_sandy_willtrade`, `water_nice_mayor12`) exist in no `.po`; the fallback shows the raw key. |
+| `create_npc`, `not char_exists`, … in `test_spyder_cotton_*` | these two test YAML files have no same-slug TMX, scenario reference or `load_yaml` caller, so no upstream campaign map materializes them. |
+| `random_monster`, `quit_world`, `set_variable`, … in `battle_menu.yaml` | Tuxemon's title-screen Battle mode loads this YAML explicitly. The campaign-map importer does not import that separate world lifecycle, so these otherwise valid rules remain outside its scope. Nine campaign `random_monster` calls are Native and stage a deterministic qualified trainer monster. |
+| `translated_dialog` with a msgid absent from every catalog | the importer displays the raw key, matching gettext's upstream fallback; missing translation alone is not a drop. The remaining dropped dialogs are collateral to fixed-false or suspended Combat/Menu-state events. |
 | `set_party_status`, `get_pending_moves`/`remove_tech` in `is current_state Combat*`-guarded events | the kit does not run map fibers inside combat/menu states. The combat move-deletion choice is covered by the battle runtime's deterministic progression (auto-forget the first move). The separate shared `update_time` TeleporterState hooks are lowered at destination-map entry as described above. |
 | rules inside structurally discarded events | the event never starts (inert, zero-size, fixed-false guard, trigger area outside the map, or over the 64-cell area cap), or it is not materialized by any map. |
 
@@ -242,7 +246,7 @@ Current coverage (G6 profile):
 
 | Kind | Types | Uses | Native | Degraded | Placeholder | Dropped | Executable |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Actions | 98 | 13,617 | 13,108 | 242 | 0 | 267 | 98.0% |
+| Actions | 98 | 13,617 | 13,146 | 217 | 0 | 254 | 98.1% |
 | Conditions | 64 | 8,663 | 8,423 | 21 | 0 | 219 | 97.5% |
 
 ## Adding or changing a mapping
