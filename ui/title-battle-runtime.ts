@@ -21,8 +21,17 @@ import type {
   GameViewSessionHost,
 } from "../vendor/pocket-rpgkit/src/ui/demo-contract.ts";
 import { nextRandom, type RngState } from "../battle/core.ts";
+import type { TuxemonSceneCatalog } from "../battle/scenes.ts";
 import type { Lang } from "./language.ts";
-import type { TitleBattleData } from "./feature-modes-data.ts";
+import type { TitleBattleData, TitleMinigameData } from "./feature-modes-data.ts";
+import {
+  answerTitleMinigame,
+  dismissTitleMinigameWrong,
+  moveTitleMinigameSelection,
+  startTitleMinigame,
+  turnTitleMinigamePage,
+  type TitleMinigameState,
+} from "./title-minigame-runtime.ts";
 
 const TITLE_MARKER = "pocket-tuxemon/title-battle/v1";
 const TITLE_FIBER = "pocket-tuxemon:title-battle";
@@ -79,7 +88,15 @@ export function createTitleBattleRules(base: BattleRules): TitleBattleRules {
   };
 }
 
-export type TitleBattleScreen = "closed" | "title" | "difficulty" | "battle" | "result";
+export type TitleBattleScreen =
+  | "closed"
+  | "title"
+  | "difficulty"
+  | "battle"
+  | "result"
+  | "minigameDifficulty"
+  | "minigameQuestion"
+  | "minigameWrong";
 export type TitleBattleResult = "win" | "lose" | "escape" | "draw";
 
 export interface TitleBattleState {
@@ -88,12 +105,16 @@ export interface TitleBattleState {
   difficultyIndex: number;
   result: TitleBattleResult | null;
   battleCount: number;
+  minigameDifficultyIndex: number;
+  minigame: TitleMinigameState | null;
 }
 
-export type TitleBattleAction = "up" | "down" | "confirm" | "back";
+export type TitleBattleAction = "up" | "down" | "left" | "right" | "confirm" | "back";
 
 export interface TitleBattleOptions {
   data: TitleBattleData;
+  minigameData: TitleMinigameData;
+  catalog: Readonly<TuxemonSceneCatalog>;
   lang: Lang;
   rules: TitleBattleRules;
   extensions: Pick<ExtensionOptions, "initial" | "commands">;
@@ -109,7 +130,11 @@ export interface TitleBattleRuntime {
   applyAction(action: TitleBattleAction): void;
   selectTitle(index: number): void;
   selectDifficulty(index: number): void;
+  selectMinigameDifficulty(index: number): void;
+  selectMinigameAnswer(index: number): void;
   data: TitleBattleData;
+  minigameData: TitleMinigameData;
+  catalog: Readonly<TuxemonSceneCatalog>;
   lang: Lang;
 }
 
@@ -118,6 +143,8 @@ export interface PocketTitleBattleHook {
   act(action: TitleBattleAction): void;
   selectTitle(index: number): void;
   selectDifficulty(index: number): void;
+  selectMinigameDifficulty(index: number): void;
+  selectMinigameAnswer(index: number): void;
 }
 
 declare global {
@@ -195,6 +222,8 @@ export function createTitleBattleRuntime(
     difficultyIndex: 0,
     result: null,
     battleCount: 0,
+    minigameDifficultyIndex: 0,
+    minigame: null,
   });
   let campaign: SessionState | null = null;
 
@@ -231,10 +260,12 @@ export function createTitleBattleRuntime(
     if (current.screen === "closed" || current.screen === "battle") return;
     if (current.screen === "title") {
       if (action === "up" || action === "down") {
-        setState({ ...current, titleIndex: current.titleIndex === 0 ? 1 : 0 });
+        const delta = action === "up" ? -1 : 1;
+        setState({ ...current, titleIndex: (current.titleIndex + delta + 3) % 3 });
       } else if (action === "confirm") {
         if (current.titleIndex === 0) setState({ ...current, screen: "closed" });
-        else setState({ ...current, screen: "difficulty", difficultyIndex: 0 });
+        else if (current.titleIndex === 1) setState({ ...current, screen: "difficulty", difficultyIndex: 0 });
+        else setState({ ...current, screen: "minigameDifficulty", minigameDifficultyIndex: 0 });
       }
       return;
     }
@@ -257,6 +288,65 @@ export function createTitleBattleRuntime(
       }
       return;
     }
+    if (current.screen === "minigameDifficulty") {
+      if (action === "back") {
+        setState({ ...current, screen: "title", titleIndex: 2 });
+      } else if (action === "up" || action === "down") {
+        const delta = action === "up" ? -1 : 1;
+        const length = options.minigameData.difficulties.length;
+        setState({
+          ...current,
+          minigameDifficultyIndex: (current.minigameDifficultyIndex + delta + length) % length,
+        });
+      } else if (action === "confirm") {
+        setState({
+          ...current,
+          screen: "minigameQuestion",
+          minigame: startTitleMinigame(
+            options.minigameData,
+            options.catalog,
+            current.minigameDifficultyIndex,
+          ),
+        });
+      }
+      return;
+    }
+    if (current.screen === "minigameQuestion") {
+      const minigame = current.minigame;
+      if (!minigame) throw new Error("title minigame: question screen has no state");
+      if (action === "back") {
+        setState({ ...current, screen: "title", titleIndex: 2, minigame: null });
+      } else if (action === "up" || action === "down") {
+        setState({
+          ...current,
+          minigame: moveTitleMinigameSelection(minigame, action === "up" ? -1 : 1),
+        });
+      } else if (action === "left" || action === "right") {
+        setState({
+          ...current,
+          minigame: turnTitleMinigamePage(minigame, action === "left" ? -1 : 1),
+        });
+      } else if (action === "confirm") {
+        const next = answerTitleMinigame(
+          options.minigameData,
+          options.catalog,
+          minigame,
+          minigame.selectedIndex,
+        );
+        setState({ ...current, screen: next.wrong ? "minigameWrong" : "minigameQuestion", minigame: next });
+      }
+      return;
+    }
+    if (current.screen === "minigameWrong") {
+      const minigame = current.minigame;
+      if (!minigame) throw new Error("title minigame: wrong dialog has no state");
+      if (action === "back") {
+        setState({ ...current, screen: "title", titleIndex: 2, minigame: null });
+      } else if (action === "confirm") {
+        setState({ ...current, screen: "minigameQuestion", minigame: dismissTitleMinigameWrong(minigame) });
+      }
+      return;
+    }
     // Result acknowledgement always returns to the title menu. Both buttons
     // are accepted so controller, keyboard and touch share one path.
     if (action === "confirm" || action === "back") {
@@ -265,7 +355,7 @@ export function createTitleBattleRuntime(
   };
 
   const selectTitle = (index: number): void => {
-    if (state().screen !== "title" || (index !== 0 && index !== 1)) return;
+    if (state().screen !== "title" || index < 0 || index > 2) return;
     setState((current) => ({ ...current, titleIndex: index }));
     applyAction("confirm");
   };
@@ -273,6 +363,23 @@ export function createTitleBattleRuntime(
     if (state().screen !== "difficulty" || !options.data.difficulties[index]) return;
     setState((current) => ({ ...current, difficultyIndex: index }));
     begin();
+  };
+  const selectMinigameDifficulty = (index: number): void => {
+    const current = state();
+    if (current.screen !== "minigameDifficulty" || !options.minigameData.difficulties[index]) return;
+    setState({
+      ...current,
+      screen: "minigameQuestion",
+      minigameDifficultyIndex: index,
+      minigame: startTitleMinigame(options.minigameData, options.catalog, index),
+    });
+  };
+  const selectMinigameAnswer = (index: number): void => {
+    const current = state();
+    const minigame = current.minigame;
+    if (current.screen !== "minigameQuestion" || !minigame?.question.options[index]) return;
+    const next = answerTitleMinigame(options.minigameData, options.catalog, minigame, index);
+    setState({ ...current, screen: next.wrong ? "minigameWrong" : "minigameQuestion", minigame: next });
   };
 
   const step: GameViewDemoRuntime["step"] = (_buttons, pressed) => {
@@ -295,13 +402,22 @@ export function createTitleBattleRuntime(
     let action: TitleBattleAction | null = null;
     if (pressed & BTN.UP) action = "up";
     else if (pressed & BTN.DOWN) action = "down";
+    else if (pressed & BTN.LEFT) action = "left";
+    else if (pressed & BTN.RIGHT) action = "right";
     else if (pressed & BTN.CIRCLE) action = "confirm";
     else if (pressed & BTN.CROSS) action = "back";
     if (action !== null) applyAction(action);
     return { consumed: true };
   };
 
-  const hook: PocketTitleBattleHook = { state, act: applyAction, selectTitle, selectDifficulty };
+  const hook: PocketTitleBattleHook = {
+    state,
+    act: applyAction,
+    selectTitle,
+    selectDifficulty,
+    selectMinigameDifficulty,
+    selectMinigameAnswer,
+  };
   globalThis.__pocketTitleBattle = hook;
   onCleanup(() => {
     if (globalThis.__pocketTitleBattle === hook) delete globalThis.__pocketTitleBattle;
@@ -318,7 +434,11 @@ export function createTitleBattleRuntime(
     applyAction,
     selectTitle,
     selectDifficulty,
+    selectMinigameDifficulty,
+    selectMinigameAnswer,
     data: options.data,
+    minigameData: options.minigameData,
+    catalog: options.catalog,
     lang: options.lang,
   };
 }

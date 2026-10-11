@@ -11,6 +11,7 @@ import {
 import {
   TUXEMON_BATTLE_DB,
   TUXEMON_EXTENSIONS,
+  TUXEMON_SCENE_CATALOG,
   TUXEMON_VARIABLE_ENUMS,
 } from "../battle/game.ts";
 import { emptyParkSession } from "../battle/park.ts";
@@ -34,6 +35,7 @@ import {
 import type { Project } from "../vendor/pocket-rpgkit/src/engine/types.ts";
 
 const DATA = (featureModesJson as unknown as FeatureModesRuntimeData).titleBattle;
+const MINIGAME_DATA = (featureModesJson as unknown as FeatureModesRuntimeData).titleMinigame;
 const RULES_DB = battleDbToTuxemonBattleDb(TUXEMON_BATTLE_DB);
 const PASS_THROUGH_OVERLAY: GameViewOverlayConfig = {
   create: () => ({
@@ -80,6 +82,8 @@ function fixture(initiallyOpen = true) {
   };
   const runtime = createTitleBattleRuntime({
     data: DATA,
+    minigameData: MINIGAME_DATA,
+    catalog: TUXEMON_SCENE_CATALOG,
     lang: "en_US",
     rules,
     extensions: TUXEMON_EXTENSIONS,
@@ -292,6 +296,42 @@ describe("title Battle mode", () => {
         expect(f.runtime.isOpen()).toBeFalse();
         expect(f.runtime.step(0, 0)).toEqual({ consumed: false });
         expect(f.live()).toBe(f.campaign);
+      } finally {
+        dispose();
+      }
+    });
+  });
+
+  test("minigame input never reads or replaces the campaign and resets on re-entry", () => {
+    createRoot((dispose) => {
+      try {
+        const f = fixture();
+        const before = JSON.stringify(f.campaign);
+        const rng = f.campaign.sw.rng;
+        f.runtime.selectTitle(2);
+        expect(f.runtime.state().screen).toBe("minigameDifficulty");
+        f.runtime.step(BTN.DOWN, BTN.DOWN);
+        expect(f.runtime.state().minigameDifficultyIndex).toBe(1);
+        f.runtime.step(BTN.CIRCLE, BTN.CIRCLE);
+
+        const first = f.runtime.state().minigame!;
+        expect(f.runtime.state().screen).toBe("minigameQuestion");
+        const correct = first.question.options.indexOf(first.question.target);
+        f.runtime.selectMinigameAnswer(correct);
+        expect(f.runtime.state().minigame!.score).toBe(2);
+        expect(f.runtime.ownsSession()).toBeFalse();
+        expect(f.live()).toBe(f.campaign);
+        expect(f.live().sw.rng).toBe(rng);
+        expect(JSON.stringify(f.live())).toBe(before);
+
+        f.runtime.applyAction("back");
+        expect(f.runtime.state()).toMatchObject({ screen: "title", titleIndex: 2, minigame: null });
+        f.runtime.selectTitle(2);
+        f.runtime.selectMinigameDifficulty(1);
+        expect(f.runtime.state().minigame).toMatchObject({ score: 0, streak: 0, rounds: 0 });
+        expect(f.runtime.state().minigame!.question).toEqual(first.question);
+        expect(f.live()).toBe(f.campaign);
+        expect(JSON.stringify(f.live())).toBe(before);
       } finally {
         dispose();
       }

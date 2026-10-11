@@ -79,8 +79,39 @@ export interface TitleBattleData {
   authored: AuthoredScriptUsage;
 }
 
+export type TitleMinigameDifficultyId = "easy" | "normal" | "hard";
+
+export interface TitleMinigameDifficulty {
+  id: TitleMinigameDifficultyId;
+  label: LocalizedFeatureText;
+  choices: 3 | 5;
+  points: 1 | 2 | 3;
+  clue: "image" | "description";
+}
+
+/** Imported constants and text used by Tuxemon's title-screen guessing game.
+ * Monster details and art deliberately stay in the existing lazy battle
+ * repository; this small eager document carries only the exact eligible IDs. */
+export interface TitleMinigameData {
+  source: "tuxemon/states/minigame.py";
+  title: LocalizedFeatureText;
+  question: LocalizedFeatureText;
+  difficultyPrompt: LocalizedFeatureText;
+  scoreLabel: LocalizedFeatureText;
+  streakLabel: LocalizedFeatureText;
+  streakBonus: LocalizedFeatureText;
+  wrong: LocalizedFeatureText;
+  exit: LocalizedFeatureText;
+  difficulties: TitleMinigameDifficulty[];
+  /** MonsterModel cache parity: every upstream monster with txmn_id > 0. */
+  monsters: string[];
+  /** Content-derived FNV-1a seed; independent of campaign/save RNG state. */
+  seed: number;
+}
+
 export interface FeatureModesRuntimeData {
   format: "pocket-tuxemon/feature-modes/v1";
   nuPhoneMap: NuPhoneMapData;
   titleBattle: TitleBattleData;
+  titleMinigame: TitleMinigameData;
 }

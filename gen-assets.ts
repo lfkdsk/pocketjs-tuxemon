@@ -311,7 +311,10 @@ const titleBattleMonsters = [...new Set(featureModes.titleBattle.difficulties.fl
   difficulty.candidates
 ))].sort();
 const titleBattleSelection = {
-  monsters: titleBattleMonsters,
+  // minigame.py samples every positive-txmn_id species, including forms that
+  // random_monster deliberately excludes. All remain lazy battle shards and
+  // TILESET entries; adding them here does not decode or upload them at boot.
+  monsters: [...new Set([...titleBattleMonsters, ...featureModes.titleMinigame.monsters])].sort(),
   npcs: [featureModes.titleBattle.opponent],
   environments: [featureModes.titleBattle.environment],
 };

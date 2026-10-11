@@ -1,9 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 import {
   loadFeatureModes,
+  loadTitleMinigame,
   parseNuPhoneMap,
   parseTitleBattle,
   type FeatureLocale,
@@ -126,6 +127,75 @@ describe("G12 out-of-map feature importer", () => {
     expect([...candidates].filter((slug) => !(slug in battle.monsters))).toEqual([]);
     expect(feature.titleBattle.opponent in battle.npcs).toBeTrue();
     expect(feature.titleBattle.environment in battle.environments).toBeTrue();
+  });
+
+  test("imports the exact positive-id minigame cache with real bilingual PO text", () => {
+    const minigame = loadTitleMinigame(TUXEMON_SRC);
+    const monsterRoot = join(TUXEMON_SRC, "mods/tuxemon/db/monster");
+    const upstream = readdirSync(monsterRoot)
+      .filter((file) => /\.(?:yaml|json)$/.test(file))
+      .flatMap((file) => {
+        const value = Bun.YAML.parse(readFileSync(join(monsterRoot, file), "utf8")) as
+          | { slug: string; txmn_id: number }
+          | Array<{ slug: string; txmn_id: number }>;
+        return Array.isArray(value) ? value : [value];
+      });
+    const eligible = upstream.filter((monster) => monster.txmn_id > 0).map((monster) => monster.slug).sort();
+    const excluded = upstream.filter((monster) => monster.txmn_id === 0).map((monster) => monster.slug).sort();
+
+    expect(upstream).toHaveLength(411);
+    expect(eligible).toHaveLength(393);
+    expect(excluded).toHaveLength(18);
+    expect(minigame.monsters).toEqual(eligible);
+    expect(minigame.monsters).toContain("dankush");
+    expect(minigame.monsters).toContain("hotline");
+    expect(minigame.monsters).not.toContain("mk01_gamma");
+    expect(minigame).toMatchObject({
+      source: "tuxemon/states/minigame.py",
+      title: { en_US: "Minigame", zh_CN: "迷你游戏" },
+      question: { en_US: "Name That Tuxemon", zh_CN: "猜猜这只精灵" },
+      difficultyPrompt: { en_US: "Choose your difficulty level", zh_CN: "选择难度等级" },
+      scoreLabel: { en_US: "Score", zh_CN: "得分" },
+      streakLabel: { en_US: "Streak", zh_CN: "连击" },
+      streakBonus: {
+        en_US: "Streak Bonus! You're on fire!",
+        zh_CN: "连击加成！你势不可挡！",
+      },
+      wrong: { en_US: "Wrong!", zh_CN: "猜错了！" },
+      exit: { en_US: "Exit", zh_CN: "退出" },
+      difficulties: [
+        { id: "easy", choices: 3, points: 1, clue: "image", label: { en_US: "Easy", zh_CN: "简单" } },
+        { id: "normal", choices: 5, points: 2, clue: "image", label: { en_US: "Normal", zh_CN: "普通" } },
+        { id: "hard", choices: 5, points: 3, clue: "description", label: { en_US: "Hard", zh_CN: "困难" } },
+      ],
+    });
+
+    const text = catalogs();
+    for (const slug of minigame.monsters) {
+      expect(text.en_US.get(slug)).not.toBeEmpty();
+      expect(text.zh_CN.get(slug)).not.toBeEmpty();
+      expect(text.en_US.get(`${slug}_description`)).not.toBeEmpty();
+      expect(text.zh_CN.get(`${slug}_description`)).not.toBeEmpty();
+    }
+  });
+
+  test("packages every minigame species as one existing lazy battle-art reference", () => {
+    const feature = JSON.parse(readFileSync(join(import.meta.dir, "../data/feature-modes.json"), "utf8")) as
+      ReturnType<typeof loadFeatureModes>;
+    const battle = JSON.parse(readFileSync(join(import.meta.dir, "../data/battle-db.json"), "utf8")) as {
+      monsters: Record<string, {
+        txmnId: number;
+        art: { sheet: { key: string } };
+      }>;
+    };
+    const keys = feature.titleMinigame.monsters.map((slug) => {
+      const monster = battle.monsters[slug];
+      expect(monster, `missing packaged minigame monster ${slug}`).toBeDefined();
+      expect(monster!.txmnId).toBeGreaterThan(0);
+      expect(monster!.art.sheet.key).toStartWith("ui:tile.battle/gfx/sprites/battle/");
+      return monster!.art.sheet.key;
+    });
+    expect(new Set(keys).size).toBe(feature.titleMinigame.monsters.length);
   });
 
   test("accounts for the complete validated battle_menu program as Native", () => {

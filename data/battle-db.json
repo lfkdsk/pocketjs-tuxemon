@@ -5242,10 +5242,162 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 36,
+     "monster_slug": "banvengeance"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/bansaken-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
+  "banvengeance": {
+   "name": "Banvengeance",
+   "description": "BANVENGEANCE seeks to make its own night by growing new trees from running roots to drown out the light, smothering competing plant life.",
+   "species": "sepulchre",
+   "txmnId": 357,
+   "shape": "brute",
+   "stage": "stage2",
+   "randomly": true,
+   "evolvesFrom": [
+    "bansaken"
+   ],
+   "types": [
+    "wood",
+    "shadow"
+   ],
+   "tags": [
+    "plant",
+    "ghost",
+    "darkness"
+   ],
+   "terrains": [
+    "jungle",
+    "woodland"
+   ],
+   "height": 800,
+   "weight": 354,
+   "genderWeights": {
+    "neuter": 1
+   },
+   "catchRate": 35,
+   "catchResistance": [
+    0.9,
+    1.15
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "walls",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "splinter",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "shadow_boxing",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "leaf_stab",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "sylvan",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "pseudopod",
+     "level": 16,
+     "method": "level_up"
+    },
+    {
+     "technique": "solar_synthesis",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "blossom",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "cutting_leaves",
+     "level": 28,
+     "method": "level_up"
+    },
+    {
+     "technique": "overgrowth",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "fester",
+     "level": 37,
+     "method": "level_up"
+    },
+    {
+     "technique": "one_two",
+     "level": 40,
+     "method": "level_up"
+    },
+    {
+     "technique": "shadow_blast",
+     "level": 55,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/banvengeance-sheet#0",
      "width": 128,
      "height": 128,
      "rect": [
@@ -5672,6 +5824,152 @@
     ]
    }
   },
+  "bedoo": {
+   "name": "Bedoo",
+   "description": "It swallows its victims whole, forcing them into a deep sleep for a few hours whilst it feasts on their dreams. Often, it will accidentally put their victims into a permanent sleep.",
+   "species": "bed_trap",
+   "txmnId": 208,
+   "shape": "blob",
+   "stage": "stage1",
+   "randomly": true,
+   "evolvesFrom": [
+    "jelillow"
+   ],
+   "types": [
+    "water"
+   ],
+   "tags": [
+    "mental",
+    "megafauna"
+   ],
+   "terrains": [
+    "mountains",
+    "woodland"
+   ],
+   "height": 200,
+   "weight": 15,
+   "genderWeights": {
+    "male": 0.5,
+    "female": 0.5
+   },
+   "catchRate": 70,
+   "catchResistance": [
+    0.95,
+    1.05
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "water_bullet",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "hibernate",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "flood",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "ice_shield",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "chill_mist",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "water_blast",
+     "level": 16,
+     "method": "level_up"
+    },
+    {
+     "technique": "orbs",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "biting_winds",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "mobbing",
+     "level": 28,
+     "method": "level_up"
+    },
+    {
+     "technique": "shapechange",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "frostbite",
+     "level": 37,
+     "method": "level_up"
+    },
+    {
+     "technique": "breath",
+     "level": 40,
+     "method": "level_up"
+    },
+    {
+     "technique": "dreamwalk",
+     "level": 55,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/bedoo-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
   "beenstalker": {
    "name": "Beenstalker",
    "description": "What BEENSTALKER lacks in sense and grace, it makes up for in sheer enthusiasm and goodwill. It delights in scaring off vermin, but never harming them.",
@@ -5759,7 +6057,12 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 32,
+     "monster_slug": "wendigger"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/beenstalker-sheet#0",
@@ -7241,6 +7544,144 @@
     ]
    }
   },
+  "brachifor": {
+   "name": "Brachifor",
+   "description": "BRACHIFOR can go without eating if it stays perfectly still.",
+   "species": "petrified",
+   "txmnId": 213,
+   "shape": "landrace",
+   "stage": "stage2",
+   "randomly": true,
+   "evolvesFrom": [
+    "stegofor"
+   ],
+   "types": [
+    "wood"
+   ],
+   "tags": [
+    "plant",
+    "shielded",
+    "healing",
+    "megafauna"
+   ],
+   "terrains": [
+    "jungle",
+    "woodland"
+   ],
+   "height": 2000,
+   "weight": 40000,
+   "genderWeights": {
+    "male": 0.5,
+    "female": 0.5
+   },
+   "catchRate": 35,
+   "catchResistance": [
+    0.95,
+    1.05
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "spiky_strike",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "tip",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "needle",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "pseudopod",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "overgrowth",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "blossom",
+     "level": 16,
+     "method": "level_up"
+    },
+    {
+     "technique": "fester",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "sylvan",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "trample",
+     "level": 28,
+     "method": "level_up"
+    },
+    {
+     "technique": "woodsmash",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "cutting_leaves",
+     "level": 40,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/brachifor-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
   "breem": {
    "name": "Breem",
    "description": "It punctures fruit to place new DUGGOT in them by night. By day it pretends to be a normal bee.",
@@ -8316,7 +8757,12 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 32,
+     "monster_slug": "nimbulex"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/bumbulus-sheet#0",
@@ -11458,7 +11904,15 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 32,
+     "monster_slug": "regalance",
+     "tastes": {
+      "warm": "hearty"
+     }
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/claymorior-sheet#0",
@@ -11700,7 +12154,12 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 36,
+     "monster_slug": "pythonova"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/cobarett-sheet#0",
@@ -12248,6 +12707,151 @@
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/coleorus-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
+  "conglolem": {
+   "name": "Conglolem",
+   "description": "The gel has long ago dried out, but CONGLOLEM continues.",
+   "species": "golem",
+   "txmnId": 274,
+   "shape": "brute",
+   "stage": "stage2",
+   "randomly": true,
+   "evolvesFrom": [
+    "glombroc"
+   ],
+   "types": [
+    "earth"
+   ],
+   "tags": [
+    "plant",
+    "rock",
+    "ground",
+    "toxic",
+    "mental"
+   ],
+   "terrains": [],
+   "height": 245,
+   "weight": 197,
+   "genderWeights": {
+    "neuter": 1
+   },
+   "catchRate": 35,
+   "catchResistance": [
+    0.85,
+    1.1
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "solar_synthesis",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "slime",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "sylvan",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "stonehenge",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "clairaudience",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "negation",
+     "level": 16,
+     "method": "level_up"
+    },
+    {
+     "technique": "greenstone",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "breath",
+     "level": 28,
+     "method": "level_up"
+    },
+    {
+     "technique": "all_in",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "surge",
+     "level": 34,
+     "method": "level_up"
+    },
+    {
+     "technique": "mudslide",
+     "level": 37,
+     "method": "level_up"
+    },
+    {
+     "technique": "earthquake",
+     "level": 52,
+     "method": "level_up"
+    },
+    {
+     "technique": "thunderball",
+     "level": 55,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/conglolem-sheet#0",
      "width": 128,
      "height": 128,
      "rect": [
@@ -13377,6 +13981,150 @@
     ]
    }
   },
+  "crustagu": {
+   "name": "Crustagu",
+   "description": "It fires piercing, poisonous spines from its claws to frighten away those who threaten its underwater colonies.",
+   "species": "grandfather",
+   "txmnId": 279,
+   "shape": "leviathan",
+   "stage": "stage2",
+   "randomly": true,
+   "evolvesFrom": [
+    "shelagu"
+   ],
+   "types": [
+    "water",
+    "venom"
+   ],
+   "tags": [
+    "pseudopod",
+    "water",
+    "shielded",
+    "sharp"
+   ],
+   "terrains": [
+    "coastal",
+    "sea"
+   ],
+   "height": 90,
+   "weight": 45,
+   "genderWeights": {
+    "male": 0.5,
+    "female": 0.5
+   },
+   "catchRate": 35,
+   "catchResistance": [
+    0.95,
+    1.05
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "font",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "midnight_mantle",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "flow",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "flood",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "starfall",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "ice_claw",
+     "level": 16,
+     "method": "level_up"
+    },
+    {
+     "technique": "icicle_spear",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "snowstorm",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "mobbing",
+     "level": 28,
+     "method": "level_up"
+    },
+    {
+     "technique": "orbs",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "kraken",
+     "level": 37,
+     "method": "level_up"
+    },
+    {
+     "technique": "poison_courtship",
+     "level": 40,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/crustagu-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
   "dandicub": {
    "name": "Dandicub",
    "description": "After a litter is born, they float all over the world and never see their family again.",
@@ -13580,6 +14328,147 @@
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/dandylion-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
+  "dankush": {
+   "name": "Dankush",
+   "description": "A DANKUSH can stop itself from burning by holding its breath, causing plumes of smoke to billow forth from each leaf.",
+   "species": "zaza",
+   "txmnId": 247,
+   "shape": "sprite",
+   "stage": "standalone",
+   "randomly": false,
+   "evolvesFrom": [],
+   "types": [
+    "wood",
+    "fire"
+   ],
+   "tags": [
+    "plant",
+    "flame",
+    "mental",
+    "healing",
+    "summoner"
+   ],
+   "terrains": [
+    "grassland"
+   ],
+   "height": 40,
+   "weight": 0.5,
+   "genderWeights": {
+    "neuter": 1
+   },
+   "catchRate": 100,
+   "catchResistance": [
+    0.95,
+    1.05
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "solar_synthesis",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "muddle",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "sleep_bomb",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "sylvan",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "overgrowth",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "nest",
+     "level": 16,
+     "method": "level_up"
+    },
+    {
+     "technique": "stabilo",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "surge",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "chameleon",
+     "level": 28,
+     "method": "level_up"
+    },
+    {
+     "technique": "tinder",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "sleeping_powder",
+     "level": 37,
+     "method": "level_up"
+    },
+    {
+     "technique": "mind_explosion",
+     "level": 40,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/dankush-sheet#0",
      "width": 128,
      "height": 128,
      "rect": [
@@ -13985,7 +14874,12 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 32,
+     "monster_slug": "lucifice"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/demosnow-sheet#0",
@@ -14261,10 +15155,152 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 32,
+     "monster_slug": "deviraptor"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/devidra-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
+  "deviraptor": {
+   "name": "Deviraptor",
+   "description": "The single pair of feathers on its head are fakes, hinting at its devilish true identity.",
+   "species": "dog_toothed",
+   "txmnId": 294,
+   "shape": "dragon",
+   "stage": "stage2",
+   "randomly": true,
+   "evolvesFrom": [
+    "devidra"
+   ],
+   "types": [
+    "earth",
+    "fire"
+   ],
+   "tags": [
+    "ghost",
+    "rock",
+    "bite",
+    "shapeshifter",
+    "darkness",
+    "claws"
+   ],
+   "terrains": [
+    "grassland",
+    "jungle",
+    "underground"
+   ],
+   "height": 183,
+   "weight": 295,
+   "genderWeights": {
+    "male": 0.5,
+    "female": 0.5
+   },
+   "catchRate": 35,
+   "catchResistance": [
+    0.95,
+    1.05
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "invictus",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "mind_vise",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "stonehenge",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "breathe_fire",
+     "level": 10,
+     "method": "level_up"
+    },
+    {
+     "technique": "phantasmal_force",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "terror",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "earthquake",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "flamethrower",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "energy_beam",
+     "level": 40,
+     "method": "level_up"
+    },
+    {
+     "technique": "supernova",
+     "level": 55,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/deviraptor-sheet#0",
      "width": 128,
      "height": 128,
      "rect": [
@@ -16861,7 +17897,12 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 55,
+     "monster_slug": "hoarseshoo"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/equill-sheet#0",
@@ -19507,7 +20548,12 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 32,
+     "monster_slug": "stegofor"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/fordin-sheet#0",
@@ -19954,6 +21000,135 @@
     ]
    }
   },
+  "fribbit": {
+   "name": "Fribbit",
+   "description": "It is said that it was once a boy who licked a freezing lamp post.",
+   "species": "rueful",
+   "txmnId": 269,
+   "shape": "polliwog",
+   "stage": "stage1",
+   "randomly": true,
+   "evolvesFrom": [
+    "tadcool"
+   ],
+   "types": [
+    "water",
+    "frost"
+   ],
+   "tags": [
+    "ice",
+    "ghost"
+   ],
+   "terrains": [],
+   "height": 50,
+   "weight": 20,
+   "genderWeights": {
+    "male": 0.5,
+    "female": 0.5
+   },
+   "catchRate": 70,
+   "catchResistance": [
+    0.95,
+    1.05
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "goad",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "flood",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "geyser",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "grinding",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "flow",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "icicle_spear",
+     "level": 16,
+     "method": "level_up"
+    },
+    {
+     "technique": "font",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "starfall",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "tsunami",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "ice_storm",
+     "level": 37,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/fribbit-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
   "frondly": {
    "name": "Frondly",
    "description": "It can do anything with its prehensile tail, even shake hands and pick fruit.",
@@ -20057,6 +21232,137 @@
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/frondly-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
+  "frostuce": {
+   "name": "Frostuce",
+   "description": "One rarely expects to see green waltzing around in a snowstorm.",
+   "species": "freezerburn",
+   "txmnId": 384,
+   "shape": "humanoid",
+   "stage": "stage2",
+   "randomly": true,
+   "evolvesFrom": [
+    "lettice"
+   ],
+   "types": [
+    "wood",
+    "frost"
+   ],
+   "tags": [
+    "plant",
+    "ice"
+   ],
+   "terrains": [
+    "boreal_snow"
+   ],
+   "height": 100,
+   "weight": 18,
+   "genderWeights": {
+    "male": 0.5,
+    "female": 0.5
+   },
+   "catchRate": 35,
+   "catchResistance": [
+    0.9,
+    1.15
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "ice_shield",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "solar_synthesis",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "poison_courtship",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "stabilo",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "icicle_spear",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "fester",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "splinter",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "blossom",
+     "level": 28,
+     "method": "level_up"
+    },
+    {
+     "technique": "snowstorm",
+     "level": 40,
+     "method": "level_up"
+    },
+    {
+     "technique": "woodsmash",
+     "level": 55,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/frostuce-sheet#0",
      "width": 128,
      "height": 128,
      "rect": [
@@ -20707,7 +22013,12 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 32,
+     "monster_slug": "novaquarius"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/galasces-sheet#0",
@@ -21520,7 +22831,12 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 50,
+     "monster_slug": "conglolem"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/glombroc-sheet#0",
@@ -21670,6 +22986,152 @@
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/glomon-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
+  "golnagi": {
+   "name": "Golnagi",
+   "description": "GOLNAGI's scales glow, making it almost invisible in the water during dawn and dusk - its preferred times for hunting.",
+   "species": "boiling_goldfish",
+   "txmnId": 393,
+   "shape": "piscine",
+   "stage": "stage2",
+   "randomly": true,
+   "evolvesFrom": [
+    "gupphire"
+   ],
+   "types": [
+    "water",
+    "fire"
+   ],
+   "tags": [
+    "flame",
+    "water"
+   ],
+   "terrains": [
+    "sea"
+   ],
+   "height": 130,
+   "weight": 16,
+   "genderWeights": {
+    "male": 0.5,
+    "female": 0.5
+   },
+   "catchRate": 35,
+   "catchResistance": [
+    0.9,
+    1.15
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "take_cover",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "flood",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "mobbing",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "fire_shield",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "breathe_fire",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "water_blast",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "fiery",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "refresh",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "tsunami",
+     "level": 34,
+     "method": "level_up"
+    },
+    {
+     "technique": "supernova",
+     "level": 37,
+     "method": "level_up"
+    },
+    {
+     "technique": "kraken",
+     "level": 40,
+     "method": "level_up"
+    },
+    {
+     "technique": "energy_beam",
+     "level": 52,
+     "method": "level_up"
+    },
+    {
+     "technique": "firestorm",
+     "level": 55,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/golnagi-sheet#0",
      "width": 128,
      "height": 128,
      "rect": [
@@ -22819,7 +24281,12 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 38,
+     "monster_slug": "golnagi"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/gupphire-sheet#0",
@@ -24022,6 +25489,121 @@
     ]
    }
   },
+  "hoarseshoo": {
+   "name": "Hoarseshoo",
+   "description": "It is what is left when an EQUILL's shadow eats its body.",
+   "species": "attercob",
+   "txmnId": 311,
+   "shape": "blob",
+   "stage": "stage2",
+   "randomly": true,
+   "evolvesFrom": [
+    "equill"
+   ],
+   "types": [
+    "venom",
+    "shadow"
+   ],
+   "tags": [
+    "megafauna",
+    "darkness",
+    "toxic"
+   ],
+   "terrains": [],
+   "height": 300,
+   "weight": 1300,
+   "genderWeights": {
+    "male": 0.5,
+    "female": 0.5
+   },
+   "catchRate": 35,
+   "catchResistance": [
+    0.95,
+    1.05
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "stampede",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "wallow",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "hibernate",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "mudslide",
+     "level": 10,
+     "method": "level_up"
+    },
+    {
+     "technique": "earthquake",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "energy_beam",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "shadow_blast",
+     "level": 40,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/hoarseshoo-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
   "hoodoll": {
    "name": "Hoodoll",
    "description": "It sometimes sticks a pin in itself to curse its foes, but no one can tell the difference after.",
@@ -24125,6 +25707,146 @@
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/hoodoll-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
+  "hotline": {
+   "name": "Hotline",
+   "description": "These curious creatures can leap great distances, letting out a strange, tinny cry that cannot be escaped however far their prey runs.",
+   "species": "ma_bell",
+   "txmnId": 255,
+   "shape": "sprite",
+   "stage": "standalone",
+   "randomly": false,
+   "evolvesFrom": [],
+   "types": [
+    "metal",
+    "fire"
+   ],
+   "tags": [
+    "love",
+    "steel",
+    "machine",
+    "gadgets"
+   ],
+   "terrains": [
+    "urban"
+   ],
+   "height": 150,
+   "weight": 50,
+   "genderWeights": {
+    "neuter": 1
+   },
+   "catchRate": 100,
+   "catchResistance": [
+    0.95,
+    1.05
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "bullet",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "wall_of_steel",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "tinder",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "sleep_bomb",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "meltdown",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "shuriken",
+     "level": 16,
+     "method": "level_up"
+    },
+    {
+     "technique": "beam",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "electrical_storm",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "kiss",
+     "level": 28,
+     "method": "level_up"
+    },
+    {
+     "technique": "shrapnel",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "terror",
+     "level": 37,
+     "method": "level_up"
+    },
+    {
+     "technique": "sunburst",
+     "level": 40,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/hotline-sheet#0",
      "width": 128,
      "height": 128,
      "rect": [
@@ -25046,7 +26768,12 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 41,
+     "monster_slug": "bedoo"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/jelillow-sheet#0",
@@ -26920,7 +28647,12 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 35,
+     "monster_slug": "leviadile"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/krokivip-sheet#0",
@@ -27502,6 +29234,145 @@
     ]
    }
   },
+  "lendos": {
+   "name": "Lendos",
+   "description": "When two UNEYE become tangled, they form a single unified LENDOS.",
+   "species": "vision",
+   "txmnId": 241,
+   "shape": "blob",
+   "stage": "stage1",
+   "randomly": true,
+   "evolvesFrom": [
+    "uneye"
+   ],
+   "types": [
+    "shadow",
+    "cosmic"
+   ],
+   "tags": [
+    "gaze",
+    "darkness",
+    "mental"
+   ],
+   "terrains": [],
+   "height": 97,
+   "weight": 7,
+   "genderWeights": {
+    "neuter": 1
+   },
+   "catchRate": 70,
+   "catchResistance": [
+    0.9,
+    1.15
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "muddle",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "mind_vise",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "rust_bomb",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "radiance",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "meltdown",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "amnesia",
+     "level": 16,
+     "method": "level_up"
+    },
+    {
+     "technique": "lineage",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "whirlwind",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "acid",
+     "level": 28,
+     "method": "level_up"
+    },
+    {
+     "technique": "lightning_spheres",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "sleep_bomb",
+     "level": 37,
+     "method": "level_up"
+    },
+    {
+     "technique": "shadow_blast",
+     "level": 40,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/lendos-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
   "lesmagu": {
    "name": "Lesmagu",
    "description": "It oozes along the sea floor, looking for hard nooks and crannies to hide in until it develops its shell.",
@@ -27740,10 +29611,154 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 32,
+     "monster_slug": "frostuce"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/lettice-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
+  "leviadile": {
+   "name": "Leviadile",
+   "description": "With its immense size and powerful venomous jaws, LEVIADILE is a dominant predator of the deep sea.",
+   "species": "crocodile",
+   "txmnId": 371,
+   "shape": "leviathan",
+   "stage": "stage2",
+   "randomly": true,
+   "evolvesFrom": [
+    "krokivip"
+   ],
+   "types": [
+    "water",
+    "venom"
+   ],
+   "tags": [
+    "ice",
+    "water",
+    "bite",
+    "toxic",
+    "fury"
+   ],
+   "terrains": [
+    "sea"
+   ],
+   "height": 680,
+   "weight": 2500,
+   "genderWeights": {
+    "male": 0.5,
+    "female": 0.5
+   },
+   "catchRate": 35,
+   "catchResistance": [
+    0.9,
+    1.15
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "ice_shield",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "water_bullet",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "slice",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "geyser",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "water_blast",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "grinding",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "tsunami",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "kraken",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "frostbite",
+     "level": 37,
+     "method": "level_up"
+    },
+    {
+     "technique": "viper",
+     "level": 40,
+     "method": "level_up"
+    },
+    {
+     "technique": "energy_beam",
+     "level": 55,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/leviadile-sheet#0",
      "width": 128,
      "height": 128,
      "rect": [
@@ -28007,6 +30022,140 @@
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/loliferno-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
+  "lucifice": {
+   "name": "Lucifice",
+   "description": "Is it the wind howling through the trees, or LUCIFICE calling the dark spirits of the night to join its hunt?",
+   "species": "ninth_circle",
+   "txmnId": 265,
+   "shape": "sprite",
+   "stage": "stage2",
+   "randomly": true,
+   "evolvesFrom": [
+    "demosnow"
+   ],
+   "types": [
+    "frost",
+    "shadow"
+   ],
+   "tags": [
+    "ice",
+    "leadership",
+    "weather",
+    "darkness",
+    "flame",
+    "calamity"
+   ],
+   "terrains": [
+    "extraplanar"
+   ],
+   "height": 180,
+   "weight": 90,
+   "genderWeights": {
+    "neuter": 1
+   },
+   "catchRate": 35,
+   "catchResistance": [
+    0.85,
+    1.1
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "ice_claw",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "goad",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "torch",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "orbs",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "muck",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "chill_mist",
+     "level": 28,
+     "method": "level_up"
+    },
+    {
+     "technique": "grinding",
+     "level": 34,
+     "method": "level_up"
+    },
+    {
+     "technique": "tsunami",
+     "level": 43,
+     "method": "level_up"
+    },
+    {
+     "technique": "snowstorm",
+     "level": 46,
+     "method": "level_up"
+    },
+    {
+     "technique": "shadow_blast",
+     "level": 52,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/lucifice-sheet#0",
      "width": 128,
      "height": 128,
      "rect": [
@@ -29226,7 +31375,12 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 36,
+     "monster_slug": "spectera"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/megafruitera-sheet#0",
@@ -31821,6 +33975,147 @@
     ]
    }
   },
+  "nimbulex": {
+   "name": "Nimbulex",
+   "description": "NIMBULEX dresses itself in sparks and storm clouds to protect its delicate inner core.",
+   "species": "veiled",
+   "txmnId": 233,
+   "shape": "blob",
+   "stage": "stage1",
+   "randomly": true,
+   "evolvesFrom": [
+    "bumbulus"
+   ],
+   "types": [
+    "lightning",
+    "sky"
+   ],
+   "tags": [
+    "water",
+    "weather",
+    "light",
+    "electricity",
+    "calamity"
+   ],
+   "terrains": [],
+   "height": 141,
+   "weight": 1,
+   "genderWeights": {
+    "neuter": 1
+   },
+   "catchRate": 70,
+   "catchResistance": [
+    0.9,
+    1.15
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "flood",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "whirlwind",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "roll",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "midnight_mantle",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "muck",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "mobbing",
+     "level": 16,
+     "method": "level_up"
+    },
+    {
+     "technique": "kraken",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "poison_courtship",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "ice_shield",
+     "level": 28,
+     "method": "level_up"
+    },
+    {
+     "technique": "shapechange",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "chill_mist",
+     "level": 37,
+     "method": "level_up"
+    },
+    {
+     "technique": "tornado",
+     "level": 40,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/nimbulex-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
   "ninjasmine": {
    "name": "Ninjasmine",
    "description": "NINJASMINE poisons his opponents quickly using his two poison swords.",
@@ -32304,6 +34599,111 @@
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/nostray-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
+  "novaquarius": {
+   "name": "Novaquarius",
+   "description": "A NOVAQUARIUS sting sends the unwary to the hospital, but BUBBITOISE have developed immunity and will nibble on them.",
+   "species": "sea_angel",
+   "txmnId": 321,
+   "shape": "polliwog",
+   "stage": "stage2",
+   "randomly": true,
+   "evolvesFrom": [
+    "galasces"
+   ],
+   "types": [
+    "water",
+    "venom"
+   ],
+   "tags": [
+    "celestial",
+    "water",
+    "toxic",
+    "gemstone"
+   ],
+   "terrains": [],
+   "height": 100,
+   "weight": 100,
+   "genderWeights": {
+    "neuter": 1
+   },
+   "catchRate": 35,
+   "catchResistance": [
+    0.95,
+    1.05
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "flood",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "rot",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "crystal",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "venomous_tentacle",
+     "level": 10,
+     "method": "level_up"
+    },
+    {
+     "technique": "spit_poison",
+     "level": 19,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/novaquarius-sheet#0",
      "width": 128,
      "height": 128,
      "rect": [
@@ -36542,6 +38942,128 @@
     ]
    }
   },
+  "pythonova": {
+   "name": "Pythonova",
+   "description": "It is short tempered and when enraged, the flames on its back burn hotter and its smoke tail becomes thicker and longer. It uses its smoke tail to coil around and smother its target.",
+   "species": "nova_snake",
+   "txmnId": 324,
+   "shape": "serpent",
+   "stage": "stage2",
+   "randomly": true,
+   "evolvesFrom": [
+    "cobarett"
+   ],
+   "types": [
+    "fire"
+   ],
+   "tags": [
+    "flame",
+    "toxic",
+    "calamity"
+   ],
+   "terrains": [
+    "coastal",
+    "desert"
+   ],
+   "height": 600,
+   "weight": 120,
+   "genderWeights": {
+    "male": 0.5,
+    "female": 0.5
+   },
+   "catchRate": 35,
+   "catchResistance": [
+    0.95,
+    1.05
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "fire_claw",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "wall_fire",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "caustic_spray",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "spit_poison",
+     "level": 10,
+     "method": "level_up"
+    },
+    {
+     "technique": "fire_ball",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "flamethrower",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "strangulation",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "oven",
+     "level": 31,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/pythonova-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
   "pythwire": {
    "name": "Pythwire",
    "description": "Observations of wild PYTHWIRE inspired the inventor of the first electrical outlet.",
@@ -37158,6 +39680,156 @@
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/raptoucan-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
+  "regalance": {
+   "name": "Regalance",
+   "description": "It can summon a halberd whenever it needs.",
+   "species": "terracotta",
+   "txmnId": 318,
+   "shape": "humanoid",
+   "stage": "stage1",
+   "randomly": true,
+   "evolvesFrom": [
+    "claymorior"
+   ],
+   "types": [
+    "earth"
+   ],
+   "tags": [
+    "soldier",
+    "sharp",
+    "ground",
+    "rock",
+    "gadgets",
+    "leadership",
+    "gemstone"
+   ],
+   "terrains": [
+    "ruins",
+    "urban"
+   ],
+   "height": 182,
+   "weight": 137,
+   "genderWeights": {
+    "neuter": 1
+   },
+   "catchRate": 70,
+   "catchResistance": [
+    0.95,
+    1.05
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "rock",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "mending",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "strike",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "stampede",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "icicle_spear",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "muck",
+     "level": 16,
+     "method": "level_up"
+    },
+    {
+     "technique": "shadow_boxing",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "stonehenge",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "saber",
+     "level": 28,
+     "method": "level_up"
+    },
+    {
+     "technique": "undertaker",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "shuriken",
+     "level": 37,
+     "method": "level_up"
+    },
+    {
+     "technique": "earthquake",
+     "level": 43,
+     "method": "level_up"
+    },
+    {
+     "technique": "rocky_barrage",
+     "level": 55,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/regalance-sheet#0",
      "width": 128,
      "height": 128,
      "rect": [
@@ -39485,6 +42157,125 @@
     ]
    }
   },
+  "scarlant": {
+   "name": "Scarlant",
+   "description": "Its worst enemy is MARVILLAR, which pretends to be its kin.",
+   "species": "myrmidon",
+   "txmnId": 289,
+   "shape": "varmint",
+   "stage": "basic",
+   "randomly": true,
+   "evolvesFrom": [],
+   "types": [
+    "earth",
+    "heroic"
+   ],
+   "tags": [
+    "bug",
+    "bite"
+   ],
+   "terrains": [
+    "grassland",
+    "jungle",
+    "mountains",
+    "swamp",
+    "urban",
+    "woodland"
+   ],
+   "height": 30,
+   "weight": 2,
+   "genderWeights": {
+    "male": 0.5,
+    "female": 0.5
+   },
+   "catchRate": 100,
+   "catchResistance": [
+    0.95,
+    1.05
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "clamp_on",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "gnaw",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "ants",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "blood_nets",
+     "level": 10,
+     "method": "level_up"
+    },
+    {
+     "technique": "sting",
+     "level": 16,
+     "method": "level_up"
+    },
+    {
+     "technique": "energy_claws",
+     "level": 19,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [
+    {
+     "at_level": 8,
+     "monster_slug": "shull"
+    }
+   ],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/scarlant-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
   "sclairus": {
    "name": "Sclairus",
    "description": "When a crop is left unharvested - be it from laziness or disaster - its scarecrow becomes a dark and living creature.",
@@ -40512,7 +43303,12 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 36,
+     "monster_slug": "crustagu"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/shelagu-sheet#0",
@@ -42606,6 +45402,260 @@
     ]
    }
   },
+  "spectera": {
+   "name": "Spectera",
+   "description": "This leaf-winged bat is omnivorous, but prefers fruit. Both the male and female look after young.",
+   "species": "flying_fox_bat",
+   "txmnId": 171,
+   "shape": "flier",
+   "stage": "stage2",
+   "randomly": true,
+   "evolvesFrom": [
+    "megafruitera"
+   ],
+   "types": [
+    "wood",
+    "sky"
+   ],
+   "tags": [
+    "plant",
+    "food"
+   ],
+   "terrains": [
+    "jungle"
+   ],
+   "height": 140,
+   "weight": 20,
+   "genderWeights": {
+    "male": 0.5,
+    "female": 0.5
+   },
+   "catchRate": 35,
+   "catchResistance": [
+    0.95,
+    1.25
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "fluff_up",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "leaf_stab",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "splinter",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "spit_poison",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "invictus",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "solar_synthesis",
+     "level": 16,
+     "method": "level_up"
+    },
+    {
+     "technique": "fester",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "blossom",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "leaf_barrage",
+     "level": 28,
+     "method": "level_up"
+    },
+    {
+     "technique": "chameleon",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "whirlwind",
+     "level": 37,
+     "method": "level_up"
+    },
+    {
+     "technique": "clairaudience",
+     "level": 40,
+     "method": "level_up"
+    },
+    {
+     "technique": "tornado",
+     "level": 55,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/spectera-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
+  "sphake": {
+   "name": "Sphake",
+   "description": "SPHAKE is sometimes responsible for small earthquakes that inconveniently vibrate books and cups off your shelves; it eats whatever falls down.",
+   "species": "galvanised",
+   "txmnId": 304,
+   "shape": "sprite",
+   "stage": "stage1",
+   "randomly": true,
+   "evolvesFrom": [
+    "sprorm"
+   ],
+   "types": [
+    "metal"
+   ],
+   "tags": [
+    "steel",
+    "ground",
+    "calamity"
+   ],
+   "terrains": [],
+   "height": 600,
+   "weight": 2000,
+   "genderWeights": {
+    "neuter": 1
+   },
+   "catchRate": 70,
+   "catchResistance": [
+    0.95,
+    1.05
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "wall_of_steel",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "mudslide",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "take_cover",
+     "level": 10,
+     "method": "level_up"
+    },
+    {
+     "technique": "roll",
+     "level": 16,
+     "method": "level_up"
+    },
+    {
+     "technique": "rust_bomb",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "earthquake",
+     "level": 28,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/sphake-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
   "spighter": {
    "name": "Spighter",
    "description": "It's not fair that something so good at sneaking up on people, can't be snuck up on itself.",
@@ -43189,7 +46239,12 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 32,
+     "monster_slug": "sphake"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/sprorm-sheet#0",
@@ -43743,6 +46798,149 @@
     ]
    }
   },
+  "stegofor": {
+   "name": "Stegofor",
+   "description": "When it comes time to morph, STEGOFOR migrates in great herds along ancient paths, stripping all vegetation from plants growing along the way.",
+   "species": "petrified",
+   "txmnId": 212,
+   "shape": "landrace",
+   "stage": "stage1",
+   "randomly": true,
+   "evolvesFrom": [
+    "fordin"
+   ],
+   "types": [
+    "wood"
+   ],
+   "tags": [
+    "plant",
+    "shielded",
+    "healing",
+    "megafauna"
+   ],
+   "terrains": [
+    "jungle",
+    "woodland"
+   ],
+   "height": 650,
+   "weight": 2800,
+   "genderWeights": {
+    "male": 0.5,
+    "female": 0.5
+   },
+   "catchRate": 70,
+   "catchResistance": [
+    0.95,
+    1.05
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "spiky_strike",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "tip",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "needle",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "pseudopod",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "overgrowth",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "blossom",
+     "level": 16,
+     "method": "level_up"
+    },
+    {
+     "technique": "fester",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "sylvan",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "trample",
+     "level": 28,
+     "method": "level_up"
+    },
+    {
+     "technique": "woodsmash",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "cutting_leaves",
+     "level": 40,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [
+    {
+     "at_level": 32,
+     "monster_slug": "brachifor"
+    }
+   ],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/stegofor-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
   "stomic": {
    "name": "Stomic",
    "description": "STOMIC is radioactive, but radiation resistant bacteria like GLOMON still pose a threat to it.",
@@ -43838,6 +47036,127 @@
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/stomic-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
+  "stonifly": {
+   "name": "Stonifly",
+   "description": "STONIFLY's sturdy, rock-hard exoskeleton is a natural armor, while its translucent wings allow for swift flight.",
+   "species": "diptera",
+   "txmnId": 332,
+   "shape": "grub",
+   "stage": "basic",
+   "randomly": true,
+   "evolvesFrom": [],
+   "types": [
+    "earth"
+   ],
+   "tags": [
+    "rock",
+    "shielded",
+    "bug"
+   ],
+   "terrains": [],
+   "height": 30,
+   "weight": 16,
+   "genderWeights": {
+    "neuter": 1
+   },
+   "catchRate": 100,
+   "catchResistance": [
+    0.95,
+    1.05
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "boulder",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "buzz",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "petrify",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "rock",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "stonehenge",
+     "level": 10,
+     "method": "level_up"
+    },
+    {
+     "technique": "take_cover",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "electroplate",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "shadow_blast",
+     "level": 40,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [
+    {
+     "at_level": 9,
+     "monster_slug": "cocrune"
+    }
+   ],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/stonifly-sheet#0",
      "width": 128,
      "height": 128,
      "rect": [
@@ -44219,7 +47538,12 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 32,
+     "monster_slug": "fribbit"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/tadcool-sheet#0",
@@ -47836,7 +51160,12 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 38,
+     "monster_slug": "lendos"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/uneye-sheet#0",
@@ -50812,6 +54141,138 @@
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/weedsea-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
+  "wendigger": {
+   "name": "Wendigger",
+   "description": "It is said corpses given an improper burial can grow into WENDIGGER.",
+   "species": "scarytale",
+   "txmnId": 200,
+   "shape": "brute",
+   "stage": "stage2",
+   "randomly": true,
+   "evolvesFrom": [
+    "beenstalker"
+   ],
+   "types": [
+    "wood",
+    "shadow"
+   ],
+   "tags": [
+    "plant",
+    "ground",
+    "bite",
+    "ice",
+    "darkness",
+    "ghost"
+   ],
+   "terrains": [
+    "boreal_snow",
+    "underground",
+    "woodland"
+   ],
+   "height": 210,
+   "weight": 75,
+   "genderWeights": {
+    "male": 0.5,
+    "female": 0.5
+   },
+   "catchRate": 35,
+   "catchResistance": [
+    0.95,
+    1.05
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "solar_synthesis",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "leaf_stab",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "sylvan",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "pseudopod",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "invictus",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "fester",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "one_two",
+     "level": 28,
+     "method": "level_up"
+    },
+    {
+     "technique": "fluff_up",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "shadow_blast",
+     "level": 40,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/wendigger-sheet#0",
      "width": 128,
      "height": 128,
      "rect": [
@@ -59627,6 +63088,71 @@
       "firstFrame": 0,
       "frames": 8,
       "columns": 8,
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "contentWidth": 64,
+      "contentHeight": 64
+     }
+    ],
+    "durationMs": 100,
+    "flipAxes": "",
+    "loops": 0
+   }
+  },
+  "kiss": {
+   "id": 253,
+   "sort": "damage",
+   "category": "special",
+   "range": "touch",
+   "speed": "extremely_slow",
+   "accuracy": 1,
+   "potency": 0,
+   "power": 0,
+   "healingPower": 0,
+   "recharge": 2,
+   "types": [
+    "normal"
+   ],
+   "target": {
+    "enemy_monster": true,
+    "enemy_team": false,
+    "enemy_trainer": false,
+    "own_monster": false,
+    "own_team": false,
+    "own_trainer": false
+   },
+   "behaviors": {},
+   "effects": [
+    {
+     "type": "life_swap"
+    },
+    {
+     "type": "damage"
+    }
+   ],
+   "conditions": [],
+   "statModifiers": {},
+   "messages": {
+    "use": "combat_used_x",
+    "success": null,
+    "failure": "combat_miss"
+   },
+   "animation": {
+    "slug": "tonguelash",
+    "pages": [
+     {
+      "key": "ui:tile.battle/animations/technique/tonguelash.page-0#0",
+      "width": 256,
+      "height": 64,
+      "rect": [
+       0,
+       0,
+       256,
+       64
+      ],
+      "firstFrame": 0,
+      "frames": 4,
+      "columns": 4,
       "frameWidth": 64,
       "frameHeight": 64,
       "contentWidth": 64,

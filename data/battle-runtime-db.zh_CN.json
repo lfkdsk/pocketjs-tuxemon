@@ -4956,10 +4956,162 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 36,
+     "monster_slug": "banvengeance"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/bansaken-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
+  "banvengeance": {
+   "name": "香蕉复仇",
+   "description": "香蕉复仇试图用蔓延的根系长出新树来遮蔽光明，为自己制造黑夜，同时扼杀与之竞争的植物。",
+   "species": "sepulchre",
+   "txmnId": 357,
+   "shape": "brute",
+   "stage": "stage2",
+   "randomly": true,
+   "evolvesFrom": [
+    "bansaken"
+   ],
+   "types": [
+    "wood",
+    "shadow"
+   ],
+   "tags": [
+    "plant",
+    "ghost",
+    "darkness"
+   ],
+   "terrains": [
+    "jungle",
+    "woodland"
+   ],
+   "height": 800,
+   "weight": 354,
+   "genderWeights": {
+    "neuter": 1
+   },
+   "catchRate": 35,
+   "catchResistance": [
+    0.9,
+    1.15
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "walls",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "splinter",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "shadow_boxing",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "leaf_stab",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "sylvan",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "pseudopod",
+     "level": 16,
+     "method": "level_up"
+    },
+    {
+     "technique": "solar_synthesis",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "blossom",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "cutting_leaves",
+     "level": 28,
+     "method": "level_up"
+    },
+    {
+     "technique": "overgrowth",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "fester",
+     "level": 37,
+     "method": "level_up"
+    },
+    {
+     "technique": "one_two",
+     "level": 40,
+     "method": "level_up"
+    },
+    {
+     "technique": "shadow_blast",
+     "level": 55,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/banvengeance-sheet#0",
      "width": 128,
      "height": 128,
      "rect": [
@@ -5386,6 +5538,152 @@
     ]
    }
   },
+  "bedoo": {
+   "name": "贝多",
+   "description": "它将猎物整个吞下，让其陷入数小时的沉睡，自己则饱餐它们的梦境。它常常会不小心让猎物陷入永恒的长眠。",
+   "species": "bed_trap",
+   "txmnId": 208,
+   "shape": "blob",
+   "stage": "stage1",
+   "randomly": true,
+   "evolvesFrom": [
+    "jelillow"
+   ],
+   "types": [
+    "water"
+   ],
+   "tags": [
+    "mental",
+    "megafauna"
+   ],
+   "terrains": [
+    "mountains",
+    "woodland"
+   ],
+   "height": 200,
+   "weight": 15,
+   "genderWeights": {
+    "male": 0.5,
+    "female": 0.5
+   },
+   "catchRate": 70,
+   "catchResistance": [
+    0.95,
+    1.05
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "water_bullet",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "hibernate",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "flood",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "ice_shield",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "chill_mist",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "water_blast",
+     "level": 16,
+     "method": "level_up"
+    },
+    {
+     "technique": "orbs",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "biting_winds",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "mobbing",
+     "level": 28,
+     "method": "level_up"
+    },
+    {
+     "technique": "shapechange",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "frostbite",
+     "level": 37,
+     "method": "level_up"
+    },
+    {
+     "technique": "breath",
+     "level": 40,
+     "method": "level_up"
+    },
+    {
+     "technique": "dreamwalk",
+     "level": 55,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/bedoo-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
   "beenstalker": {
    "name": "跟踪豆茎",
    "description": "跟踪豆茎在理智和优雅方面有所欠缺，但它在纯粹的热情和善意方面得到了弥补。它以吓跑害虫为乐，但从不伤害它们。",
@@ -5473,7 +5771,12 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 32,
+     "monster_slug": "wendigger"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/beenstalker-sheet#0",
@@ -6955,6 +7258,144 @@
     ]
    }
   },
+  "brachifor": {
+   "name": "布拉奇",
+   "description": "布拉奇只要保持完全静止，就可以不吃东西。",
+   "species": "petrified",
+   "txmnId": 213,
+   "shape": "landrace",
+   "stage": "stage2",
+   "randomly": true,
+   "evolvesFrom": [
+    "stegofor"
+   ],
+   "types": [
+    "wood"
+   ],
+   "tags": [
+    "plant",
+    "shielded",
+    "healing",
+    "megafauna"
+   ],
+   "terrains": [
+    "jungle",
+    "woodland"
+   ],
+   "height": 2000,
+   "weight": 40000,
+   "genderWeights": {
+    "male": 0.5,
+    "female": 0.5
+   },
+   "catchRate": 35,
+   "catchResistance": [
+    0.95,
+    1.05
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "spiky_strike",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "tip",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "needle",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "pseudopod",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "overgrowth",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "blossom",
+     "level": 16,
+     "method": "level_up"
+    },
+    {
+     "technique": "fester",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "sylvan",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "trample",
+     "level": 28,
+     "method": "level_up"
+    },
+    {
+     "technique": "woodsmash",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "cutting_leaves",
+     "level": 40,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/brachifor-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
   "breem": {
    "name": "布林",
    "description": "夜里它刺破果实，把新生的达贡放进去。白天则假装成一只普通的蜜蜂。",
@@ -8030,7 +8471,12 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 32,
+     "monster_slug": "nimbulex"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/bumbulus-sheet#0",
@@ -11172,7 +11618,15 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 32,
+     "monster_slug": "regalance",
+     "tastes": {
+      "warm": "hearty"
+     }
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/claymorior-sheet#0",
@@ -11414,7 +11868,12 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 36,
+     "monster_slug": "pythonova"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/cobarett-sheet#0",
@@ -11962,6 +12421,151 @@
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/coleorus-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
+  "conglolem": {
+   "name": "砾魔像",
+   "description": "凝胶早已干涸，但砾魔像仍在继续前行。",
+   "species": "golem",
+   "txmnId": 274,
+   "shape": "brute",
+   "stage": "stage2",
+   "randomly": true,
+   "evolvesFrom": [
+    "glombroc"
+   ],
+   "types": [
+    "earth"
+   ],
+   "tags": [
+    "plant",
+    "rock",
+    "ground",
+    "toxic",
+    "mental"
+   ],
+   "terrains": [],
+   "height": 245,
+   "weight": 197,
+   "genderWeights": {
+    "neuter": 1
+   },
+   "catchRate": 35,
+   "catchResistance": [
+    0.85,
+    1.1
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "solar_synthesis",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "slime",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "sylvan",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "stonehenge",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "clairaudience",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "negation",
+     "level": 16,
+     "method": "level_up"
+    },
+    {
+     "technique": "greenstone",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "breath",
+     "level": 28,
+     "method": "level_up"
+    },
+    {
+     "technique": "all_in",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "surge",
+     "level": 34,
+     "method": "level_up"
+    },
+    {
+     "technique": "mudslide",
+     "level": 37,
+     "method": "level_up"
+    },
+    {
+     "technique": "earthquake",
+     "level": 52,
+     "method": "level_up"
+    },
+    {
+     "technique": "thunderball",
+     "level": 55,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/conglolem-sheet#0",
      "width": 128,
      "height": 128,
      "rect": [
@@ -13091,6 +13695,150 @@
     ]
    }
   },
+  "crustagu": {
+   "name": "甲壳古",
+   "description": "它从爪中射出锐利的毒刺，吓退那些威胁其水下群落的家伙。",
+   "species": "grandfather",
+   "txmnId": 279,
+   "shape": "leviathan",
+   "stage": "stage2",
+   "randomly": true,
+   "evolvesFrom": [
+    "shelagu"
+   ],
+   "types": [
+    "water",
+    "venom"
+   ],
+   "tags": [
+    "pseudopod",
+    "water",
+    "shielded",
+    "sharp"
+   ],
+   "terrains": [
+    "coastal",
+    "sea"
+   ],
+   "height": 90,
+   "weight": 45,
+   "genderWeights": {
+    "male": 0.5,
+    "female": 0.5
+   },
+   "catchRate": 35,
+   "catchResistance": [
+    0.95,
+    1.05
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "font",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "midnight_mantle",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "flow",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "flood",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "starfall",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "ice_claw",
+     "level": 16,
+     "method": "level_up"
+    },
+    {
+     "technique": "icicle_spear",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "snowstorm",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "mobbing",
+     "level": 28,
+     "method": "level_up"
+    },
+    {
+     "technique": "orbs",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "kraken",
+     "level": 37,
+     "method": "level_up"
+    },
+    {
+     "technique": "poison_courtship",
+     "level": 40,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/crustagu-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
   "dandicub": {
    "name": "蒲种子",
    "description": "出生后，它们漂流到世界各地，再也见不到它们的家人了。",
@@ -13294,6 +14042,147 @@
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/dandylion-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
+  "dankush": {
+   "name": "丹库什",
+   "description": "丹库什屏住呼吸就能阻止自己燃烧，这时每片叶子都会冒出滚滚浓烟。",
+   "species": "zaza",
+   "txmnId": 247,
+   "shape": "sprite",
+   "stage": "standalone",
+   "randomly": false,
+   "evolvesFrom": [],
+   "types": [
+    "wood",
+    "fire"
+   ],
+   "tags": [
+    "plant",
+    "flame",
+    "mental",
+    "healing",
+    "summoner"
+   ],
+   "terrains": [
+    "grassland"
+   ],
+   "height": 40,
+   "weight": 0.5,
+   "genderWeights": {
+    "neuter": 1
+   },
+   "catchRate": 100,
+   "catchResistance": [
+    0.95,
+    1.05
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "solar_synthesis",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "muddle",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "sleep_bomb",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "sylvan",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "overgrowth",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "nest",
+     "level": 16,
+     "method": "level_up"
+    },
+    {
+     "technique": "stabilo",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "surge",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "chameleon",
+     "level": 28,
+     "method": "level_up"
+    },
+    {
+     "technique": "tinder",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "sleeping_powder",
+     "level": 37,
+     "method": "level_up"
+    },
+    {
+     "technique": "mind_explosion",
+     "level": 40,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/dankush-sheet#0",
      "width": 128,
      "height": 128,
      "rect": [
@@ -13699,7 +14588,12 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 32,
+     "monster_slug": "lucifice"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/demosnow-sheet#0",
@@ -13975,10 +14869,152 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 32,
+     "monster_slug": "deviraptor"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/devidra-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
+  "deviraptor": {
+   "name": "恶魔迅猛龙",
+   "description": "它头上那唯一的一对羽毛是假的，暗示着它恶魔般的真实身份。",
+   "species": "dog_toothed",
+   "txmnId": 294,
+   "shape": "dragon",
+   "stage": "stage2",
+   "randomly": true,
+   "evolvesFrom": [
+    "devidra"
+   ],
+   "types": [
+    "earth",
+    "fire"
+   ],
+   "tags": [
+    "ghost",
+    "rock",
+    "bite",
+    "shapeshifter",
+    "darkness",
+    "claws"
+   ],
+   "terrains": [
+    "grassland",
+    "jungle",
+    "underground"
+   ],
+   "height": 183,
+   "weight": 295,
+   "genderWeights": {
+    "male": 0.5,
+    "female": 0.5
+   },
+   "catchRate": 35,
+   "catchResistance": [
+    0.95,
+    1.05
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "invictus",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "mind_vise",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "stonehenge",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "breathe_fire",
+     "level": 10,
+     "method": "level_up"
+    },
+    {
+     "technique": "phantasmal_force",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "terror",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "earthquake",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "flamethrower",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "energy_beam",
+     "level": 40,
+     "method": "level_up"
+    },
+    {
+     "technique": "supernova",
+     "level": 55,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/deviraptor-sheet#0",
      "width": 128,
      "height": 128,
      "rect": [
@@ -16575,7 +17611,12 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 55,
+     "monster_slug": "hoarseshoo"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/equill-sheet#0",
@@ -19221,7 +20262,12 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 32,
+     "monster_slug": "stegofor"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/fordin-sheet#0",
@@ -19668,6 +20714,135 @@
     ]
    }
   },
+  "fribbit": {
+   "name": "弗洛蛙",
+   "description": "据说它曾是一个男孩，因为舔了结冰的路灯柱而变成了这样。",
+   "species": "rueful",
+   "txmnId": 269,
+   "shape": "polliwog",
+   "stage": "stage1",
+   "randomly": true,
+   "evolvesFrom": [
+    "tadcool"
+   ],
+   "types": [
+    "water",
+    "frost"
+   ],
+   "tags": [
+    "ice",
+    "ghost"
+   ],
+   "terrains": [],
+   "height": 50,
+   "weight": 20,
+   "genderWeights": {
+    "male": 0.5,
+    "female": 0.5
+   },
+   "catchRate": 70,
+   "catchResistance": [
+    0.95,
+    1.05
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "goad",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "flood",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "geyser",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "grinding",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "flow",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "icicle_spear",
+     "level": 16,
+     "method": "level_up"
+    },
+    {
+     "technique": "font",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "starfall",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "tsunami",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "ice_storm",
+     "level": 37,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/fribbit-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
   "frondly": {
    "name": "叶狐猴",
    "description": "它能用灵活的卷握尾巴做任何事，甚至能握手和摘水果。",
@@ -19771,6 +20946,137 @@
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/frondly-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
+  "frostuce": {
+   "name": "冰生菜",
+   "description": "谁也想不到会在暴风雪中看到一棵绿色植物翩翩起舞。",
+   "species": "freezerburn",
+   "txmnId": 384,
+   "shape": "humanoid",
+   "stage": "stage2",
+   "randomly": true,
+   "evolvesFrom": [
+    "lettice"
+   ],
+   "types": [
+    "wood",
+    "frost"
+   ],
+   "tags": [
+    "plant",
+    "ice"
+   ],
+   "terrains": [
+    "boreal_snow"
+   ],
+   "height": 100,
+   "weight": 18,
+   "genderWeights": {
+    "male": 0.5,
+    "female": 0.5
+   },
+   "catchRate": 35,
+   "catchResistance": [
+    0.9,
+    1.15
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "ice_shield",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "solar_synthesis",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "poison_courtship",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "stabilo",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "icicle_spear",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "fester",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "splinter",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "blossom",
+     "level": 28,
+     "method": "level_up"
+    },
+    {
+     "technique": "snowstorm",
+     "level": 40,
+     "method": "level_up"
+    },
+    {
+     "technique": "woodsmash",
+     "level": 55,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/frostuce-sheet#0",
      "width": 128,
      "height": 128,
      "rect": [
@@ -20421,7 +21727,12 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 32,
+     "monster_slug": "novaquarius"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/galasces-sheet#0",
@@ -21234,7 +22545,12 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 50,
+     "monster_slug": "conglolem"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/glombroc-sheet#0",
@@ -21384,6 +22700,152 @@
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/glomon-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
+  "golnagi": {
+   "name": "戈尔纳吉",
+   "description": "戈尔纳吉的鳞片会发光，使它在黎明和黄昏的水中几乎隐形——这正是它偏爱的捕猎时间。",
+   "species": "boiling_goldfish",
+   "txmnId": 393,
+   "shape": "piscine",
+   "stage": "stage2",
+   "randomly": true,
+   "evolvesFrom": [
+    "gupphire"
+   ],
+   "types": [
+    "water",
+    "fire"
+   ],
+   "tags": [
+    "flame",
+    "water"
+   ],
+   "terrains": [
+    "sea"
+   ],
+   "height": 130,
+   "weight": 16,
+   "genderWeights": {
+    "male": 0.5,
+    "female": 0.5
+   },
+   "catchRate": 35,
+   "catchResistance": [
+    0.9,
+    1.15
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "take_cover",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "flood",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "mobbing",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "fire_shield",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "breathe_fire",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "water_blast",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "fiery",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "refresh",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "tsunami",
+     "level": 34,
+     "method": "level_up"
+    },
+    {
+     "technique": "supernova",
+     "level": 37,
+     "method": "level_up"
+    },
+    {
+     "technique": "kraken",
+     "level": 40,
+     "method": "level_up"
+    },
+    {
+     "technique": "energy_beam",
+     "level": 52,
+     "method": "level_up"
+    },
+    {
+     "technique": "firestorm",
+     "level": 55,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/golnagi-sheet#0",
      "width": 128,
      "height": 128,
      "rect": [
@@ -22533,7 +23995,12 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 38,
+     "monster_slug": "golnagi"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/gupphire-sheet#0",
@@ -23736,6 +25203,121 @@
     ]
    }
   },
+  "hoarseshoo": {
+   "name": "马蹄铁",
+   "description": "它是针鳗的影子吃掉自己身体后留下的东西。",
+   "species": "attercob",
+   "txmnId": 311,
+   "shape": "blob",
+   "stage": "stage2",
+   "randomly": true,
+   "evolvesFrom": [
+    "equill"
+   ],
+   "types": [
+    "venom",
+    "shadow"
+   ],
+   "tags": [
+    "megafauna",
+    "darkness",
+    "toxic"
+   ],
+   "terrains": [],
+   "height": 300,
+   "weight": 1300,
+   "genderWeights": {
+    "male": 0.5,
+    "female": 0.5
+   },
+   "catchRate": 35,
+   "catchResistance": [
+    0.95,
+    1.05
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "stampede",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "wallow",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "hibernate",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "mudslide",
+     "level": 10,
+     "method": "level_up"
+    },
+    {
+     "technique": "earthquake",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "energy_beam",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "shadow_blast",
+     "level": 40,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/hoarseshoo-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
   "hoodoll": {
    "name": "巫毒娃娃",
    "description": "它有时会把针扎进自己身体来诅咒敌人，但事后谁也看不出有什么区别。",
@@ -23839,6 +25421,146 @@
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/hoodoll-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
+  "hotline": {
+   "name": "热线",
+   "description": "这种好奇的生物能跳出很远的距离，发出一种奇怪的金属般叫声，无论猎物跑多远都无法摆脱。",
+   "species": "ma_bell",
+   "txmnId": 255,
+   "shape": "sprite",
+   "stage": "standalone",
+   "randomly": false,
+   "evolvesFrom": [],
+   "types": [
+    "metal",
+    "fire"
+   ],
+   "tags": [
+    "love",
+    "steel",
+    "machine",
+    "gadgets"
+   ],
+   "terrains": [
+    "urban"
+   ],
+   "height": 150,
+   "weight": 50,
+   "genderWeights": {
+    "neuter": 1
+   },
+   "catchRate": 100,
+   "catchResistance": [
+    0.95,
+    1.05
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "bullet",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "wall_of_steel",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "tinder",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "sleep_bomb",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "meltdown",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "shuriken",
+     "level": 16,
+     "method": "level_up"
+    },
+    {
+     "technique": "beam",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "electrical_storm",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "kiss",
+     "level": 28,
+     "method": "level_up"
+    },
+    {
+     "technique": "shrapnel",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "terror",
+     "level": 37,
+     "method": "level_up"
+    },
+    {
+     "technique": "sunburst",
+     "level": 40,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/hotline-sheet#0",
      "width": 128,
      "height": 128,
      "rect": [
@@ -24760,7 +26482,12 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 41,
+     "monster_slug": "bedoo"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/jelillow-sheet#0",
@@ -26634,7 +28361,12 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 35,
+     "monster_slug": "leviadile"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/krokivip-sheet#0",
@@ -27216,6 +28948,145 @@
     ]
    }
   },
+  "lendos": {
+   "name": "伦多斯",
+   "description": "当两只独眼缠在一起时，就会合体成一只伦多斯。",
+   "species": "vision",
+   "txmnId": 241,
+   "shape": "blob",
+   "stage": "stage1",
+   "randomly": true,
+   "evolvesFrom": [
+    "uneye"
+   ],
+   "types": [
+    "shadow",
+    "cosmic"
+   ],
+   "tags": [
+    "gaze",
+    "darkness",
+    "mental"
+   ],
+   "terrains": [],
+   "height": 97,
+   "weight": 7,
+   "genderWeights": {
+    "neuter": 1
+   },
+   "catchRate": 70,
+   "catchResistance": [
+    0.9,
+    1.15
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "muddle",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "mind_vise",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "rust_bomb",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "radiance",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "meltdown",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "amnesia",
+     "level": 16,
+     "method": "level_up"
+    },
+    {
+     "technique": "lineage",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "whirlwind",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "acid",
+     "level": 28,
+     "method": "level_up"
+    },
+    {
+     "technique": "lightning_spheres",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "sleep_bomb",
+     "level": 37,
+     "method": "level_up"
+    },
+    {
+     "technique": "shadow_blast",
+     "level": 40,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/lendos-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
   "lesmagu": {
    "name": "莱斯马古",
    "description": "它在海底缓缓蠕动，寻找坚硬的缝隙藏身，直到长出自己的壳。",
@@ -27454,10 +29325,154 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 32,
+     "monster_slug": "frostuce"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/lettice-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
+  "leviadile": {
+   "name": "海鳄",
+   "description": "凭借庞大的身躯与剧毒的巨颚，海鳄是深海中称霸一方的掠食者。",
+   "species": "crocodile",
+   "txmnId": 371,
+   "shape": "leviathan",
+   "stage": "stage2",
+   "randomly": true,
+   "evolvesFrom": [
+    "krokivip"
+   ],
+   "types": [
+    "water",
+    "venom"
+   ],
+   "tags": [
+    "ice",
+    "water",
+    "bite",
+    "toxic",
+    "fury"
+   ],
+   "terrains": [
+    "sea"
+   ],
+   "height": 680,
+   "weight": 2500,
+   "genderWeights": {
+    "male": 0.5,
+    "female": 0.5
+   },
+   "catchRate": 35,
+   "catchResistance": [
+    0.9,
+    1.15
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "ice_shield",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "water_bullet",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "slice",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "geyser",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "water_blast",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "grinding",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "tsunami",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "kraken",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "frostbite",
+     "level": 37,
+     "method": "level_up"
+    },
+    {
+     "technique": "viper",
+     "level": 40,
+     "method": "level_up"
+    },
+    {
+     "technique": "energy_beam",
+     "level": 55,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/leviadile-sheet#0",
      "width": 128,
      "height": 128,
      "rect": [
@@ -27721,6 +29736,140 @@
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/loliferno-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
+  "lucifice": {
+   "name": "冰魔",
+   "description": "那是穿过林间呼啸的风声，还是冰魔在召唤黑夜的暗影加入它的狩猎？",
+   "species": "ninth_circle",
+   "txmnId": 265,
+   "shape": "sprite",
+   "stage": "stage2",
+   "randomly": true,
+   "evolvesFrom": [
+    "demosnow"
+   ],
+   "types": [
+    "frost",
+    "shadow"
+   ],
+   "tags": [
+    "ice",
+    "leadership",
+    "weather",
+    "darkness",
+    "flame",
+    "calamity"
+   ],
+   "terrains": [
+    "extraplanar"
+   ],
+   "height": 180,
+   "weight": 90,
+   "genderWeights": {
+    "neuter": 1
+   },
+   "catchRate": 35,
+   "catchResistance": [
+    0.85,
+    1.1
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "ice_claw",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "goad",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "torch",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "orbs",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "muck",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "chill_mist",
+     "level": 28,
+     "method": "level_up"
+    },
+    {
+     "technique": "grinding",
+     "level": 34,
+     "method": "level_up"
+    },
+    {
+     "technique": "tsunami",
+     "level": 43,
+     "method": "level_up"
+    },
+    {
+     "technique": "snowstorm",
+     "level": 46,
+     "method": "level_up"
+    },
+    {
+     "technique": "shadow_blast",
+     "level": 52,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/lucifice-sheet#0",
      "width": 128,
      "height": 128,
      "rect": [
@@ -28940,7 +31089,12 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 36,
+     "monster_slug": "spectera"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/megafruitera-sheet#0",
@@ -31535,6 +33689,147 @@
     ]
    }
   },
+  "nimbulex": {
+   "name": "云布雷克斯",
+   "description": "云布雷克斯用火花与雷云包裹自己，以保护其脆弱的内在核心。",
+   "species": "veiled",
+   "txmnId": 233,
+   "shape": "blob",
+   "stage": "stage1",
+   "randomly": true,
+   "evolvesFrom": [
+    "bumbulus"
+   ],
+   "types": [
+    "lightning",
+    "sky"
+   ],
+   "tags": [
+    "water",
+    "weather",
+    "light",
+    "electricity",
+    "calamity"
+   ],
+   "terrains": [],
+   "height": 141,
+   "weight": 1,
+   "genderWeights": {
+    "neuter": 1
+   },
+   "catchRate": 70,
+   "catchResistance": [
+    0.9,
+    1.15
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "flood",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "whirlwind",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "roll",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "midnight_mantle",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "muck",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "mobbing",
+     "level": 16,
+     "method": "level_up"
+    },
+    {
+     "technique": "kraken",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "poison_courtship",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "ice_shield",
+     "level": 28,
+     "method": "level_up"
+    },
+    {
+     "technique": "shapechange",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "chill_mist",
+     "level": 37,
+     "method": "level_up"
+    },
+    {
+     "technique": "tornado",
+     "level": 40,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/nimbulex-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
   "ninjasmine": {
    "name": "忍茉莉",
    "description": "忍茉莉用他的两把毒剑迅速地让对手中毒。",
@@ -32018,6 +34313,111 @@
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/nostray-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
+  "novaquarius": {
+   "name": "新水瓶",
+   "description": "被新水瓶蜇到的粗心家伙得进医院，但巴布龟已经进化出了免疫力，还会啃上它们几口。",
+   "species": "sea_angel",
+   "txmnId": 321,
+   "shape": "polliwog",
+   "stage": "stage2",
+   "randomly": true,
+   "evolvesFrom": [
+    "galasces"
+   ],
+   "types": [
+    "water",
+    "venom"
+   ],
+   "tags": [
+    "celestial",
+    "water",
+    "toxic",
+    "gemstone"
+   ],
+   "terrains": [],
+   "height": 100,
+   "weight": 100,
+   "genderWeights": {
+    "neuter": 1
+   },
+   "catchRate": 35,
+   "catchResistance": [
+    0.95,
+    1.05
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "flood",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "rot",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "crystal",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "venomous_tentacle",
+     "level": 10,
+     "method": "level_up"
+    },
+    {
+     "technique": "spit_poison",
+     "level": 19,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/novaquarius-sheet#0",
      "width": 128,
      "height": 128,
      "rect": [
@@ -36256,6 +38656,128 @@
     ]
    }
   },
+  "pythonova": {
+   "name": "蟒蛇新星",
+   "description": "它脾气暴躁，发怒时背上的火焰烧得更旺，烟雾尾巴也变得又粗又长。它会用烟雾尾巴缠住目标，使其窒息。",
+   "species": "nova_snake",
+   "txmnId": 324,
+   "shape": "serpent",
+   "stage": "stage2",
+   "randomly": true,
+   "evolvesFrom": [
+    "cobarett"
+   ],
+   "types": [
+    "fire"
+   ],
+   "tags": [
+    "flame",
+    "toxic",
+    "calamity"
+   ],
+   "terrains": [
+    "coastal",
+    "desert"
+   ],
+   "height": 600,
+   "weight": 120,
+   "genderWeights": {
+    "male": 0.5,
+    "female": 0.5
+   },
+   "catchRate": 35,
+   "catchResistance": [
+    0.95,
+    1.05
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "fire_claw",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "wall_fire",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "caustic_spray",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "spit_poison",
+     "level": 10,
+     "method": "level_up"
+    },
+    {
+     "technique": "fire_ball",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "flamethrower",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "strangulation",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "oven",
+     "level": 31,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/pythonova-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
   "pythwire": {
    "name": "电线兽",
    "description": "对野生电线兽的观察启发了第一个电源插座的发明者。",
@@ -36872,6 +39394,156 @@
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/raptoucan-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
+  "regalance": {
+   "name": "王者天平",
+   "description": "它随时都能召唤出一柄戟。",
+   "species": "terracotta",
+   "txmnId": 318,
+   "shape": "humanoid",
+   "stage": "stage1",
+   "randomly": true,
+   "evolvesFrom": [
+    "claymorior"
+   ],
+   "types": [
+    "earth"
+   ],
+   "tags": [
+    "soldier",
+    "sharp",
+    "ground",
+    "rock",
+    "gadgets",
+    "leadership",
+    "gemstone"
+   ],
+   "terrains": [
+    "ruins",
+    "urban"
+   ],
+   "height": 182,
+   "weight": 137,
+   "genderWeights": {
+    "neuter": 1
+   },
+   "catchRate": 70,
+   "catchResistance": [
+    0.95,
+    1.05
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "rock",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "mending",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "strike",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "stampede",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "icicle_spear",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "muck",
+     "level": 16,
+     "method": "level_up"
+    },
+    {
+     "technique": "shadow_boxing",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "stonehenge",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "saber",
+     "level": 28,
+     "method": "level_up"
+    },
+    {
+     "technique": "undertaker",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "shuriken",
+     "level": 37,
+     "method": "level_up"
+    },
+    {
+     "technique": "earthquake",
+     "level": 43,
+     "method": "level_up"
+    },
+    {
+     "technique": "rocky_barrage",
+     "level": 55,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/regalance-sheet#0",
      "width": 128,
      "height": 128,
      "rect": [
@@ -39199,6 +41871,125 @@
     ]
    }
   },
+  "scarlant": {
+   "name": "绯红",
+   "description": "它最大的敌人是马维拉，后者会假扮成它的同类。",
+   "species": "myrmidon",
+   "txmnId": 289,
+   "shape": "varmint",
+   "stage": "basic",
+   "randomly": true,
+   "evolvesFrom": [],
+   "types": [
+    "earth",
+    "heroic"
+   ],
+   "tags": [
+    "bug",
+    "bite"
+   ],
+   "terrains": [
+    "grassland",
+    "jungle",
+    "mountains",
+    "swamp",
+    "urban",
+    "woodland"
+   ],
+   "height": 30,
+   "weight": 2,
+   "genderWeights": {
+    "male": 0.5,
+    "female": 0.5
+   },
+   "catchRate": 100,
+   "catchResistance": [
+    0.95,
+    1.05
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "clamp_on",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "gnaw",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "ants",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "blood_nets",
+     "level": 10,
+     "method": "level_up"
+    },
+    {
+     "technique": "sting",
+     "level": 16,
+     "method": "level_up"
+    },
+    {
+     "technique": "energy_claws",
+     "level": 19,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [
+    {
+     "at_level": 8,
+     "monster_slug": "shull"
+    }
+   ],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/scarlant-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
   "sclairus": {
    "name": "稻草兽",
    "description": "当庄稼没有收割时——不管是由于懒惰还是灾难——它的稻草人就会变成一个黑暗的活物。",
@@ -40226,7 +43017,12 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 36,
+     "monster_slug": "crustagu"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/shelagu-sheet#0",
@@ -42320,6 +45116,260 @@
     ]
    }
   },
+  "spectera": {
+   "name": "幽灵",
+   "description": "这种长着叶子翅膀的蝙蝠是杂食性的，但更爱吃水果。雄性和雌性都会照顾幼崽。",
+   "species": "flying_fox_bat",
+   "txmnId": 171,
+   "shape": "flier",
+   "stage": "stage2",
+   "randomly": true,
+   "evolvesFrom": [
+    "megafruitera"
+   ],
+   "types": [
+    "wood",
+    "sky"
+   ],
+   "tags": [
+    "plant",
+    "food"
+   ],
+   "terrains": [
+    "jungle"
+   ],
+   "height": 140,
+   "weight": 20,
+   "genderWeights": {
+    "male": 0.5,
+    "female": 0.5
+   },
+   "catchRate": 35,
+   "catchResistance": [
+    0.95,
+    1.25
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "fluff_up",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "leaf_stab",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "splinter",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "spit_poison",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "invictus",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "solar_synthesis",
+     "level": 16,
+     "method": "level_up"
+    },
+    {
+     "technique": "fester",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "blossom",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "leaf_barrage",
+     "level": 28,
+     "method": "level_up"
+    },
+    {
+     "technique": "chameleon",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "whirlwind",
+     "level": 37,
+     "method": "level_up"
+    },
+    {
+     "technique": "clairaudience",
+     "level": 40,
+     "method": "level_up"
+    },
+    {
+     "technique": "tornado",
+     "level": 55,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/spectera-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
+  "sphake": {
+   "name": "斯芬克",
+   "description": "斯芬克有时会制造小型地震，把书架上的书和杯子震落下来，给人添麻烦；掉下来的东西都归它吃。",
+   "species": "galvanised",
+   "txmnId": 304,
+   "shape": "sprite",
+   "stage": "stage1",
+   "randomly": true,
+   "evolvesFrom": [
+    "sprorm"
+   ],
+   "types": [
+    "metal"
+   ],
+   "tags": [
+    "steel",
+    "ground",
+    "calamity"
+   ],
+   "terrains": [],
+   "height": 600,
+   "weight": 2000,
+   "genderWeights": {
+    "neuter": 1
+   },
+   "catchRate": 70,
+   "catchResistance": [
+    0.95,
+    1.05
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "wall_of_steel",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "mudslide",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "take_cover",
+     "level": 10,
+     "method": "level_up"
+    },
+    {
+     "technique": "roll",
+     "level": 16,
+     "method": "level_up"
+    },
+    {
+     "technique": "rust_bomb",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "earthquake",
+     "level": 28,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/sphake-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
   "spighter": {
    "name": "战斗蜘蛛",
    "description": "这么擅长偷袭别人的家伙，自己却从来不会被偷袭，真不公平。",
@@ -42903,7 +45953,12 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 32,
+     "monster_slug": "sphake"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/sprorm-sheet#0",
@@ -43457,6 +46512,149 @@
     ]
    }
   },
+  "stegofor": {
+   "name": "剑龙",
+   "description": "到了变身的时节，剑龙会成群结队地沿着古老的路径迁徙，沿途把植物的叶子啃个精光。",
+   "species": "petrified",
+   "txmnId": 212,
+   "shape": "landrace",
+   "stage": "stage1",
+   "randomly": true,
+   "evolvesFrom": [
+    "fordin"
+   ],
+   "types": [
+    "wood"
+   ],
+   "tags": [
+    "plant",
+    "shielded",
+    "healing",
+    "megafauna"
+   ],
+   "terrains": [
+    "jungle",
+    "woodland"
+   ],
+   "height": 650,
+   "weight": 2800,
+   "genderWeights": {
+    "male": 0.5,
+    "female": 0.5
+   },
+   "catchRate": 70,
+   "catchResistance": [
+    0.95,
+    1.05
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "spiky_strike",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "tip",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "needle",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "pseudopod",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "overgrowth",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "blossom",
+     "level": 16,
+     "method": "level_up"
+    },
+    {
+     "technique": "fester",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "sylvan",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "trample",
+     "level": 28,
+     "method": "level_up"
+    },
+    {
+     "technique": "woodsmash",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "cutting_leaves",
+     "level": 40,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [
+    {
+     "at_level": 32,
+     "monster_slug": "brachifor"
+    }
+   ],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/stegofor-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
   "stomic": {
    "name": "斯托米克",
    "description": "斯托米克具有放射性，但像格洛蒙这样的抗辐射细菌仍能对它造成威胁。",
@@ -43552,6 +46750,127 @@
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/stomic-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
+  "stonifly": {
+   "name": "石蝇",
+   "description": "石蝇坚硬如石的外骨骼是天然的铠甲，半透明的翅膀则让它能够敏捷地飞行。",
+   "species": "diptera",
+   "txmnId": 332,
+   "shape": "grub",
+   "stage": "basic",
+   "randomly": true,
+   "evolvesFrom": [],
+   "types": [
+    "earth"
+   ],
+   "tags": [
+    "rock",
+    "shielded",
+    "bug"
+   ],
+   "terrains": [],
+   "height": 30,
+   "weight": 16,
+   "genderWeights": {
+    "neuter": 1
+   },
+   "catchRate": 100,
+   "catchResistance": [
+    0.95,
+    1.05
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "boulder",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "buzz",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "petrify",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "rock",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "stonehenge",
+     "level": 10,
+     "method": "level_up"
+    },
+    {
+     "technique": "take_cover",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "electroplate",
+     "level": 19,
+     "method": "level_up"
+    },
+    {
+     "technique": "shadow_blast",
+     "level": 40,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [
+    {
+     "at_level": 9,
+     "monster_slug": "cocrune"
+    }
+   ],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/stonifly-sheet#0",
      "width": 128,
      "height": 128,
      "rect": [
@@ -43933,7 +47252,12 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 32,
+     "monster_slug": "fribbit"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/tadcool-sheet#0",
@@ -47550,7 +50874,12 @@
      "method": "level_up"
     }
    ],
-   "evolutions": [],
+   "evolutions": [
+    {
+     "at_level": 38,
+     "monster_slug": "lendos"
+    }
+   ],
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/uneye-sheet#0",
@@ -50526,6 +53855,138 @@
    "art": {
     "sheet": {
      "key": "ui:tile.battle/gfx/sprites/battle/weedsea-sheet#0",
+     "width": 128,
+     "height": 128,
+     "rect": [
+      0,
+      0,
+      128,
+      88
+     ]
+    },
+    "front": [
+     0,
+     0,
+     64,
+     64
+    ],
+    "back": [
+     64,
+     0,
+     64,
+     64
+    ],
+    "menu": [
+     [
+      0,
+      64,
+      24,
+      24
+     ],
+     [
+      24,
+      64,
+      24,
+      24
+     ]
+    ]
+   }
+  },
+  "wendigger": {
+   "name": "温迪戈挖",
+   "description": "据说未能妥善安葬的尸体会长成温迪戈挖。",
+   "species": "scarytale",
+   "txmnId": 200,
+   "shape": "brute",
+   "stage": "stage2",
+   "randomly": true,
+   "evolvesFrom": [
+    "beenstalker"
+   ],
+   "types": [
+    "wood",
+    "shadow"
+   ],
+   "tags": [
+    "plant",
+    "ground",
+    "bite",
+    "ice",
+    "darkness",
+    "ghost"
+   ],
+   "terrains": [
+    "boreal_snow",
+    "underground",
+    "woodland"
+   ],
+   "height": 210,
+   "weight": 75,
+   "genderWeights": {
+    "male": 0.5,
+    "female": 0.5
+   },
+   "catchRate": 35,
+   "catchResistance": [
+    0.95,
+    1.05
+   ],
+   "moveset": [
+    {
+     "technique": "struggle",
+     "level": 1,
+     "method": "fallback"
+    },
+    {
+     "technique": "solar_synthesis",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "leaf_stab",
+     "level": 1,
+     "method": "level_up"
+    },
+    {
+     "technique": "sylvan",
+     "level": 4,
+     "method": "level_up"
+    },
+    {
+     "technique": "pseudopod",
+     "level": 7,
+     "method": "level_up"
+    },
+    {
+     "technique": "invictus",
+     "level": 13,
+     "method": "level_up"
+    },
+    {
+     "technique": "fester",
+     "level": 25,
+     "method": "level_up"
+    },
+    {
+     "technique": "one_two",
+     "level": 28,
+     "method": "level_up"
+    },
+    {
+     "technique": "fluff_up",
+     "level": 31,
+     "method": "level_up"
+    },
+    {
+     "technique": "shadow_blast",
+     "level": 40,
+     "method": "level_up"
+    }
+   ],
+   "evolutions": [],
+   "art": {
+    "sheet": {
+     "key": "ui:tile.battle/gfx/sprites/battle/wendigger-sheet#0",
      "width": 128,
      "height": 128,
      "rect": [
@@ -59008,6 +62469,68 @@
       "firstFrame": 0,
       "frames": 8,
       "columns": 8,
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "contentWidth": 64,
+      "contentHeight": 64
+     }
+    ],
+    "durationMs": 100,
+    "flipAxes": "",
+    "loops": 0
+   }
+  },
+  "kiss": {
+   "sort": "damage",
+   "range": "touch",
+   "speed": "extremely_slow",
+   "accuracy": 1,
+   "potency": 0,
+   "power": 0,
+   "healingPower": 0,
+   "recharge": 2,
+   "types": [
+    "normal"
+   ],
+   "target": {
+    "enemy_monster": true,
+    "enemy_team": false,
+    "enemy_trainer": false,
+    "own_monster": false,
+    "own_team": false,
+    "own_trainer": false
+   },
+   "effects": [
+    {
+     "type": "life_swap"
+    },
+    {
+     "type": "damage"
+    }
+   ],
+   "conditions": [],
+   "statModifiers": {},
+   "messages": {
+    "use": "combat_used_x",
+    "success": null,
+    "failure": "combat_miss"
+   },
+   "animation": {
+    "slug": "tonguelash",
+    "pages": [
+     {
+      "key": "ui:tile.battle/animations/technique/tonguelash.page-0#0",
+      "width": 256,
+      "height": 64,
+      "rect": [
+       0,
+       0,
+       256,
+       64
+      ],
+      "firstFrame": 0,
+      "frames": 4,
+      "columns": 4,
       "frameWidth": 64,
       "frameHeight": 64,
       "contentWidth": 64,

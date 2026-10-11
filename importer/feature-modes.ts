@@ -3,7 +3,7 @@
 // The runtime consumes only this validated, deterministic document; authored
 // locations and difficulty recipes never have a second hand-maintained copy.
 
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { createTextCatalog, type TextCatalog } from "./l10n.ts";
 import { decodePng } from "./png.ts";
@@ -20,6 +20,8 @@ import type {
   NuPhoneMapPoint,
   TitleBattleData,
   TitleBattleDifficulty,
+  TitleMinigameData,
+  TitleMinigameDifficulty,
 } from "../ui/feature-modes-data.ts";
 
 export type { FeatureLocale } from "../ui/feature-modes-data.ts";
@@ -45,10 +47,16 @@ export interface FeatureModesImport {
   format: "pocket-tuxemon/feature-modes/v1";
   nuPhoneMap: NuPhoneMapImport;
   titleBattle: TitleBattleImport;
+  titleMinigame: TitleMinigameData;
 }
 
 const DIRECTIONS: readonly NuPhoneDirection[] = ["up", "right", "down", "left"];
 const DIFFICULTIES = ["beginner", "easy", "normal", "hard", "expert"] as const;
+const MINIGAME_DIFFICULTIES = [
+  { id: "easy", choices: 3, points: 1, clue: "image" },
+  { id: "normal", choices: 5, points: 2, clue: "image" },
+  { id: "hard", choices: 5, points: 3, clue: "description" },
+] as const satisfies readonly Omit<TitleMinigameDifficulty, "label">[];
 
 function featureCatalogs(): Record<FeatureLocale, TextCatalog> {
   return {
@@ -98,6 +106,77 @@ function translate(catalogs: Readonly<Record<FeatureLocale, TextCatalog>>, key: 
   const zh_CN = catalogs.zh_CN.get(key);
   if (!en_US || !zh_CN) throw new Error(`feature modes: missing bilingual text '${key}'`);
   return { en_US, zh_CN };
+}
+
+function fnv1a32(parts: readonly string[]): number {
+  let hash = 0x811c9dc5;
+  for (const part of parts) {
+    for (let index = 0; index < part.length; index++) {
+      hash ^= part.charCodeAt(index);
+      hash = Math.imul(hash, 0x01000193);
+    }
+    hash ^= 0xff;
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return hash >>> 0;
+}
+
+/** Import the exact `MonsterModel.load_cache()` pool used by minigame.py.
+ * The upstream cache excludes only txmn_id 0; `randomly`, evolution stage,
+ * discovery status and form level do not participate. */
+export function loadTitleMinigame(
+  sourceRoot: string,
+  catalogs: Readonly<Record<FeatureLocale, TextCatalog>> = featureCatalogs(),
+): TitleMinigameData {
+  const monsterRoot = join(sourceRoot, "mods/tuxemon/db/monster");
+  const monsters = readdirSync(monsterRoot)
+    .filter((file) => /\.(?:yaml|json)$/.test(file))
+    .sort()
+    .flatMap((file) => {
+      const parsed = Bun.YAML.parse(readFileSync(join(monsterRoot, file), "utf8")) as unknown;
+      const rows = Array.isArray(parsed) ? parsed : [parsed];
+      return rows.map((value, index) => {
+        const row = record(value, `db/monster/${file}[${index}]`);
+        return {
+          slug: nonEmptyString(row.slug, `db/monster/${file}[${index}].slug`),
+          txmnId: integer(row.txmn_id, `db/monster/${file}[${index}].txmn_id`),
+        };
+      });
+    })
+    .filter((monster) => monster.txmnId > 0)
+    .map((monster) => monster.slug)
+    .sort();
+  if (new Set(monsters).size !== monsters.length) {
+    throw new Error("title minigame: positive-id monster slugs must be unique");
+  }
+  for (const slug of monsters) {
+    const sheet = join(sourceRoot, "mods/tuxemon/gfx/sprites/battle", `${slug}-sheet.png`);
+    if (!existsSync(sheet)) throw new Error(`title minigame: missing front sprite sheet for '${slug}'`);
+    if (!catalogs.en_US.get(slug) || !catalogs.zh_CN.get(slug)) {
+      throw new Error(`title minigame: missing bilingual monster name '${slug}'`);
+    }
+    if (!catalogs.en_US.get(`${slug}_description`) || !catalogs.zh_CN.get(`${slug}_description`)) {
+      throw new Error(`title minigame: missing bilingual description '${slug}_description'`);
+    }
+  }
+  const difficulties = MINIGAME_DIFFICULTIES.map((difficulty) => ({
+    ...difficulty,
+    label: translate(catalogs, `level_${difficulty.id}`),
+  }));
+  return {
+    source: "tuxemon/states/minigame.py",
+    title: translate(catalogs, "menu_minigame"),
+    question: translate(catalogs, "who_is_that"),
+    difficultyPrompt: translate(catalogs, "choose_difficulty"),
+    scoreLabel: translate(catalogs, "score_label"),
+    streakLabel: translate(catalogs, "streak_label"),
+    streakBonus: translate(catalogs, "streak_bonus"),
+    wrong: translate(catalogs, "generic_wrong"),
+    exit: translate(catalogs, "exit"),
+    difficulties,
+    monsters,
+    seed: fnv1a32(["pocket-tuxemon/title-minigame/v1", ...monsters]),
+  };
 }
 
 function imageSource(sourceRoot: string, source: string, texture: string): FeatureImageSource {
@@ -396,6 +475,7 @@ export function loadFeatureModes(sourceRoot: string): FeatureModesImport {
       },
     },
     titleBattle: loadTitleBattle(sourceRoot, catalogs),
+    titleMinigame: loadTitleMinigame(sourceRoot, catalogs),
   };
 }
 
@@ -411,5 +491,6 @@ export function featureModesRuntimeData(imported: FeatureModesImport): FeatureMo
     format: imported.format,
     nuPhoneMap: { ...imported.nuPhoneMap, art },
     titleBattle: imported.titleBattle,
+    titleMinigame: imported.titleMinigame,
   };
 }

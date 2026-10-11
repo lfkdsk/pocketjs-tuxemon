@@ -312,6 +312,8 @@ const rules = titleRules ?? campaignBattleRules;
 const titleBattleConfig = titleRules
   ? createTitleBattleOverlay({
       data: featureModes.titleBattle,
+      minigameData: featureModes.titleMinigame,
+      catalog,
       lang,
       rules: titleRules,
       extensions,

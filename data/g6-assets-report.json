@@ -88,8 +88,8 @@
   "sourceRevision": "9e6258ff726b786040a267e8bdbbf037b560285e",
   "scope": "spyder",
   "counts": {
-   "monsters": 382,
-   "techniques": 258,
+   "monsters": 407,
+   "techniques": 259,
    "items": 114,
    "elements": 13,
    "tastes": 12,
@@ -104,19 +104,19 @@
    "wildEncounterUses": 17
   },
   "art": {
-   "sourceFiles": 714,
-   "files": 714,
-   "sourceBytes": 2300416,
-   "pngBytes": 1431252,
-   "textureBytes": 30102608,
-   "encodedBytes": 2671209,
-   "residentBytes": 15779584,
-   "pakBytes": 4250640,
+   "sourceFiles": 739,
+   "files": 739,
+   "sourceBytes": 2397304,
+   "pngBytes": 1486344,
+   "textureBytes": 30922008,
+   "encodedBytes": 2780624,
+   "residentBytes": 16214784,
+   "pakBytes": 4417424,
    "maxWidth": 512,
    "maxHeight": 512,
    "quantization": {
-    "sourceColours": 12590,
-    "paletteColours": 12590,
+    "sourceColours": 13351,
+    "paletteColours": 13351,
     "quantizedFiles": 0,
     "quantizedColours": 0,
     "remappedPixels": 0,
@@ -168,11 +168,11 @@
      "textureBytes": 196632
     },
     "monster-sheets": {
-     "sourceFiles": 382,
-     "files": 382,
-     "sourceBytes": 1125653,
-     "pngBytes": 685538,
-     "textureBytes": 12520432
+     "sourceFiles": 407,
+     "files": 407,
+     "sourceBytes": 1222541,
+     "pngBytes": 740630,
+     "textureBytes": 13339832
     },
     "range-speed-icons": {
      "sourceFiles": 13,
@@ -211,13 +211,13 @@
     }
    }
   },
-  "battleDbBytes": 1522353,
-  "runtimeDbBytes": 1373416,
+  "battleDbBytes": 1577736,
+  "runtimeDbBytes": 1428739,
   "pakKey": "game:battle-db",
   "battleRepository": {
-   "shellBytes": 230081,
-   "entries": 789,
-   "entryBytes": 1068419
+   "shellBytes": 233042,
+   "entries": 815,
+   "entryBytes": 1116356
   }
  },
  "itemIcons": {
