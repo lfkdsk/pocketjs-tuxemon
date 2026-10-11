@@ -8,7 +8,7 @@ describe("J4 QuickJS continuation tape", () => {
     const tape = buildJ4QuickjsTape();
     expect(tape.format).toBe("pocket-tuxemon/j4-quickjs/v1");
     expect(tape.worldTraversal).toBe("seamless-v1");
-    expect(tape.frames).toBe(13_622);
+    expect(tape.frames).toBe(13_618);
     expect(tape.frames).toBe(tape.masks.length);
     expect(tape.tapeSha256)
       .toBe(createHash("sha256").update(JSON.stringify(tape.masks)).digest("hex"));
@@ -25,6 +25,6 @@ describe("J4 QuickJS continuation tape", () => {
     // Terminal includes the deterministic player identity selected in G6 and
     // the calendar variables refreshed on map entry.
     expect(tape.terminalStateSha256)
-      .toBe("3fedbe7d848623d3f80b687f087a30f0e647ff4aa064cf0986ede38629719232");
+      .toBe("5d22fc6decde61c569d60d3fd26ef4985e9c8bfc2973c383192185c4147cc85e");
   });
 });

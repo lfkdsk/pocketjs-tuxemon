@@ -3,17 +3,17 @@
   "worldTraversal": "seamless-v1",
   "hz": 60,
   "frames": 13102,
-  "combinedFrames": 193231,
+  "combinedFrames": 193227,
   "durationSeconds": 218.367,
   "base": {
     "format": "pocket-tuxemon/j2-hospitalcure/v1",
     "worldTraversal": "seamless-v1",
-    "frames": 180129,
-    "tapeSha256": "ad405ed234e79314642e6434f566c6acbd8cecf350e38b1f14a641ef3e7a63e1",
-    "terminalStateSha256": "fd8b882da71fcd5c9202458037cc1e90e5886e185613d5d0d3573d6bffc9245f",
-    "terminalSnapshotSha256": "d98d6a95b78668272558228d9ecb8729e943ce66451858fa50a811246b4712aa",
+    "frames": 180125,
+    "tapeSha256": "ad94283035d0cefa9f3c2c325055cfe9bc569e5ae4ad44d629a0743ec791c958",
+    "terminalStateSha256": "f0b63d5e627b4661eb8c2ecc936bc55a7fad5e3d046bb87dfe52c4c6ecacf1e4",
+    "terminalSnapshotSha256": "fdad4a10a448f9db24ae020b4c8f959bd1400046bb0bb29060067fd467e0086c",
     "heldMask": 0,
-    "timelineFrame": 180129,
+    "timelineFrame": 180125,
     "map": "spyder_candy_hospital3",
     "position": [
       5,
@@ -14684,8 +14684,8 @@
       "maxHp": 161
     }
   ],
-  "initialStateSha256": "fd8b882da71fcd5c9202458037cc1e90e5886e185613d5d0d3573d6bffc9245f",
-  "terminalStateSha256": "590452dceb93dfe0a2a88016610e602a6bc6f5334da6fa7b35c550f1f1f2548d",
+  "initialStateSha256": "f0b63d5e627b4661eb8c2ecc936bc55a7fad5e3d046bb87dfe52c4c6ecacf1e4",
+  "terminalStateSha256": "1a99a07129efa089906723f60921daeb02faaa75b2069d7ea91bf7c7ddbe4d17",
   "tapeSha256": "24818f3678fffa2eb65c870e930a1becfc4dd73bdee1d4cd3e4e0ee0cfe6fd58",
-  "combinedTapeSha256": "1ba56e34f02a9435b7f9a235bf2a6557ad42c7d3f2ccd75020441ece1ecd5356"
+  "combinedTapeSha256": "0f9a9482207dbf5bd3fdcb0bce2d5ede04519fbea2bc09e5eaba94966b617258"
 }

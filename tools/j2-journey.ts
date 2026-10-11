@@ -372,7 +372,7 @@ export function runJ2Journey(): J2JourneyResult {
   driver.markMap("aardant-acquired");
 
   // Return to the hospital's shared ground floor and use the elevator. The
-  // imported paginated choices preserve the upstream Blue / 10 password.
+  // imported scrollable choices preserve the upstream Blue / 10 password.
   enterFromEdge(driver, 5, 31, BTN_BITS.DOWN, "spyder_candy_town");
   driver.goTo(14, 34);
   driver.settle();
@@ -380,7 +380,7 @@ export function runJ2Journey(): J2JourneyResult {
   healAtCenter(driver, "Candy Center");
   driver.goTo(13, 5);
   driver.pulse(BTN_BITS.UP | BTN_CONFIRM);
-  driver.settle(["2° Floor", "Next >", "Blue", "Next >", "10"]);
+  driver.settle(["2° Floor", "Blue", "10"]);
   driver.expect("Blue / 10 opened Hospital 2", driver.state.mapId === "spyder_candy_hospital2");
   driver.expect("accepted password was reset",
     numeric(driver.state, "v.passcode_color") === 0 && numeric(driver.state, "v.passcode_number") === 0);

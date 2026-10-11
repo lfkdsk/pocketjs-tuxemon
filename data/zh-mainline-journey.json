@@ -4,7 +4,7 @@
   "hz": 60,
   "worldTraversal": "seamless-v1",
   "source": {
-    "chaptersSha256": "8a2a3077744e6d2f2737c9e0ea94c62db5646beeb9865353f7588426498247b1",
+    "chaptersSha256": "4e11174cbc6828b595b66800e2ce9d3a1728f4bf6ec60cc65c204a3def7606b4",
     "tape": {
       "gb6": {
         "file": "data/gb6-mainline-journey.json",
@@ -20,8 +20,8 @@
       },
       "j2": {
         "file": "data/j2-hospitalcure-journey.json",
-        "frames": 51411,
-        "tapeSha256": "6e29d35fedc7d443648a6847fd2395441cab27d9c1a0afaa606ad621455755d3",
+        "frames": 51407,
+        "tapeSha256": "0d672b532b8d0aba7cd7d1edc413f4e3c48fbb0f4254d3b4c4865317a81a4afd",
         "worldTraversal": "seamless-v1"
       },
       "j3": {
@@ -32,12 +32,12 @@
       },
       "j4": {
         "file": "data/j4-kernelquestdone-journey.json",
-        "frames": 13599,
-        "tapeSha256": "78de1c0c67a260bb4b5e97999900bbff629ce8a64de39d362f66889f0b046a61",
+        "frames": 13595,
+        "tapeSha256": "30196f252c542b9ec2d20c66e1da982a7c81fa756cd3d790402d6d2bc3711e3f",
         "worldTraversal": "seamless-v1"
       },
-      "frames": 206830,
-      "sha256": "a7951a364b92cd16d458d87206dd73004fb59c9812463dade0fc675a18cdd3ca"
+      "frames": 206822,
+      "sha256": "fa161dc5df33fe08a9c31f7ed2a8495121058d2331550c65e65da2585e48c15f"
     }
   },
   "paginator": {
@@ -50,8 +50,8 @@
     "fontSha256": "ae47e6abb9cbef58c4d764516e7fe6402b7bb958e51aca52ab1be98029b459a0",
     "charsetSha256": "f87d62b1dbfd82ddc08e27bdc7363005ff558b06bfd9ae35deba1b3afdaf3064"
   },
-  "frames": 206830,
-  "tapeSha256": "c61d3ada22ecb2a36eba2d61823b95bb6219f1f6d02a340c5bbc1d5ed384f340",
+  "frames": 206822,
+  "tapeSha256": "c0a1b09c31651faa7e2774dd011baedd719318cf0435f8a2f16883776883ce00",
   "edits": [
     {
       "frame": 116016,
@@ -95,7 +95,7 @@
         4
       ],
       "facing": 3,
-      "frame": 206830,
+      "frame": 206822,
       "gold": 67773,
       "items": {
         "aardant": 1,
@@ -125,6 +125,6 @@
       ],
       "storySha256": "076586407513305744e782c68db73004805e1055779abfb44a91bf0ee8d2e1f1"
     },
-    "neutralSha256": "76b3409ce21bedb4f180f5f067655ed86251dcb5e10724cd5dea85a9140eac5a"
+    "neutralSha256": "eb79732abc7e4fedcc518620eeab25ef9c9639fad1759cf46aab8810ae22645c"
   }
 }

@@ -2,18 +2,18 @@
   "format": "pocket-tuxemon/j4-kernelquestdone/v1",
   "worldTraversal": "seamless-v1",
   "hz": 60,
-  "frames": 13599,
-  "combinedFrames": 206830,
-  "durationSeconds": 226.65,
+  "frames": 13595,
+  "combinedFrames": 206822,
+  "durationSeconds": 226.583,
   "base": {
     "format": "pocket-tuxemon/j3-omnichannelradioannounce/v1",
     "worldTraversal": "seamless-v1",
-    "frames": 193231,
-    "tapeSha256": "1ba56e34f02a9435b7f9a235bf2a6557ad42c7d3f2ccd75020441ece1ecd5356",
-    "terminalStateSha256": "590452dceb93dfe0a2a88016610e602a6bc6f5334da6fa7b35c550f1f1f2548d",
-    "terminalSnapshotSha256": "e2aba128c8dbcb837eb0e25d7fc42358cbe1bd392a1fd12e3314a4304fb210f8",
+    "frames": 193227,
+    "tapeSha256": "0f9a9482207dbf5bd3fdcb0bce2d5ede04519fbea2bc09e5eaba94966b617258",
+    "terminalStateSha256": "1a99a07129efa089906723f60921daeb02faaa75b2069d7ea91bf7c7ddbe4d17",
+    "terminalSnapshotSha256": "a4fbdb0a8600de9d33ca3e1ae48b7153800f9894c147ddcbc3162f3cd48fb1f0",
     "heldMask": 0,
-    "timelineFrame": 193231,
+    "timelineFrame": 193227,
     "map": "spyder_radiotower",
     "position": [
       9,
@@ -2601,8 +2601,6 @@
     0,
     64,
     0,
-    8192,
-    0,
     64,
     0,
     8192,
@@ -3299,8 +3297,6 @@
     64,
     0,
     64,
-    0,
-    8192,
     0,
     8192,
     0,
@@ -13737,7 +13733,7 @@
     },
     {
       "name": "candy_port",
-      "frame": 2589,
+      "frame": 2587,
       "map": "spyder_candy_port",
       "position": [
         37,
@@ -13746,7 +13742,7 @@
     },
     {
       "name": "candy_town",
-      "frame": 2714,
+      "frame": 2712,
       "map": "spyder_candy_town",
       "position": [
         37,
@@ -13755,7 +13751,7 @@
     },
     {
       "name": "surfboard-collected",
-      "frame": 2976,
+      "frame": 2974,
       "map": "spyder_candy_town",
       "position": [
         28,
@@ -13764,7 +13760,7 @@
     },
     {
       "name": "candy_port",
-      "frame": 3128,
+      "frame": 3126,
       "map": "spyder_candy_port",
       "position": [
         37,
@@ -13773,7 +13769,7 @@
     },
     {
       "name": "timber_town",
-      "frame": 3286,
+      "frame": 3282,
       "map": "spyder_timber_town",
       "position": [
         8,
@@ -13782,7 +13778,7 @@
     },
     {
       "name": "routee",
-      "frame": 3693,
+      "frame": 3689,
       "map": "spyder_routee",
       "position": [
         13,
@@ -13791,7 +13787,7 @@
     },
     {
       "name": "routeb",
-      "frame": 5112,
+      "frame": 5108,
       "map": "spyder_routeb",
       "position": [
         0,
@@ -13800,7 +13796,7 @@
     },
     {
       "name": "route-b-entry",
-      "frame": 5123,
+      "frame": 5119,
       "map": "spyder_routeb",
       "position": [
         0,
@@ -13809,7 +13805,7 @@
     },
     {
       "name": "datacenter",
-      "frame": 8595,
+      "frame": 8591,
       "map": "spyder_datacenter",
       "position": [
         2,
@@ -13818,7 +13814,7 @@
     },
     {
       "name": "datacenter-entry",
-      "frame": 8615,
+      "frame": 8611,
       "map": "spyder_datacenter",
       "position": [
         2,
@@ -13827,7 +13823,7 @@
     },
     {
       "name": "datacenter-lower-screens",
-      "frame": 8785,
+      "frame": 8781,
       "map": "spyder_datacenter",
       "position": [
         17,
@@ -13836,7 +13832,7 @@
     },
     {
       "name": "datacenter-middle-screens",
-      "frame": 10976,
+      "frame": 10972,
       "map": "spyder_datacenter",
       "position": [
         14,
@@ -13845,7 +13841,7 @@
     },
     {
       "name": "datacenter-upper-screens",
-      "frame": 12676,
+      "frame": 12672,
       "map": "spyder_datacenter",
       "position": [
         14,
@@ -13854,7 +13850,7 @@
     },
     {
       "name": "kernel-defeated",
-      "frame": 13598,
+      "frame": 13594,
       "map": "spyder_datacenter",
       "position": [
         7,
@@ -13866,7 +13862,7 @@
     {
       "opponent": "spyder_routee_calliope",
       "kind": "trainer",
-      "startFrame": 4064,
+      "startFrame": 4060,
       "before": [
         {
           "slug": "arthrobolt",
@@ -13915,7 +13911,7 @@
           "level": 35
         }
       ],
-      "endFrame": 4478,
+      "endFrame": 4474,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -13960,7 +13956,7 @@
     {
       "opponent": "spyder_routee_aiolos",
       "kind": "trainer",
-      "startFrame": 4530,
+      "startFrame": 4526,
       "before": [
         {
           "slug": "arthrobolt",
@@ -14009,7 +14005,7 @@
           "level": 40
         }
       ],
-      "endFrame": 4976,
+      "endFrame": 4972,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -14054,7 +14050,7 @@
     {
       "opponent": "spyder_routeb_electra",
       "kind": "trainer",
-      "startFrame": 5429,
+      "startFrame": 5425,
       "before": [
         {
           "slug": "arthrobolt",
@@ -14107,7 +14103,7 @@
           "level": 40
         }
       ],
-      "endFrame": 6037,
+      "endFrame": 6033,
       "turns": 3,
       "outcome": "won",
       "after": [
@@ -14152,7 +14148,7 @@
     {
       "opponent": "spyder_routeb_cytherea",
       "kind": "trainer",
-      "startFrame": 6161,
+      "startFrame": 6157,
       "before": [
         {
           "slug": "arthrobolt",
@@ -14205,7 +14201,7 @@
           "level": 40
         }
       ],
-      "endFrame": 6789,
+      "endFrame": 6785,
       "turns": 3,
       "outcome": "won",
       "after": [
@@ -14250,7 +14246,7 @@
     {
       "opponent": "spyder_routeb_nephthys",
       "kind": "trainer",
-      "startFrame": 6905,
+      "startFrame": 6901,
       "before": [
         {
           "slug": "arthrobolt",
@@ -14299,7 +14295,7 @@
           "level": 45
         }
       ],
-      "endFrame": 7319,
+      "endFrame": 7315,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -14344,7 +14340,7 @@
     {
       "opponent": "spyder_routeb_sedna",
       "kind": "trainer",
-      "startFrame": 7491,
+      "startFrame": 7487,
       "before": [
         {
           "slug": "arthrobolt",
@@ -14389,7 +14385,7 @@
           "level": 40
         }
       ],
-      "endFrame": 7743,
+      "endFrame": 7739,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -14434,7 +14430,7 @@
     {
       "opponent": "spyder_routeb_calypso",
       "kind": "trainer",
-      "startFrame": 7962,
+      "startFrame": 7958,
       "before": [
         {
           "slug": "arthrobolt",
@@ -14487,7 +14483,7 @@
           "level": 40
         }
       ],
-      "endFrame": 8538,
+      "endFrame": 8534,
       "turns": 3,
       "outcome": "won",
       "after": [
@@ -14532,7 +14528,7 @@
     {
       "opponent": "spyder_datacenter_fermi",
       "kind": "trainer",
-      "startFrame": 8901,
+      "startFrame": 8897,
       "before": [
         {
           "slug": "arthrobolt",
@@ -14593,7 +14589,7 @@
           "level": 35
         }
       ],
-      "endFrame": 9805,
+      "endFrame": 9801,
       "turns": 5,
       "outcome": "won",
       "after": [
@@ -14638,7 +14634,7 @@
     {
       "opponent": "wild:pythwire",
       "kind": "wild",
-      "startFrame": 9895,
+      "startFrame": 9891,
       "before": [
         {
           "slug": "arthrobolt",
@@ -14683,7 +14679,7 @@
           "level": 48
         }
       ],
-      "endFrame": 10148,
+      "endFrame": 10144,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -14728,7 +14724,7 @@
     {
       "opponent": "wild:sockeserp",
       "kind": "wild",
-      "startFrame": 10221,
+      "startFrame": 10217,
       "before": [
         {
           "slug": "arthrobolt",
@@ -14773,7 +14769,7 @@
           "level": 41
         }
       ],
-      "endFrame": 10474,
+      "endFrame": 10470,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -14818,7 +14814,7 @@
     {
       "opponent": "spyder_datacenter_onnes",
       "kind": "trainer",
-      "startFrame": 10522,
+      "startFrame": 10518,
       "before": [
         {
           "slug": "arthrobolt",
@@ -14867,7 +14863,7 @@
           "level": 40
         }
       ],
-      "endFrame": 10936,
+      "endFrame": 10932,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -14912,7 +14908,7 @@
     {
       "opponent": "spyder_datacenter_lagrange",
       "kind": "trainer",
-      "startFrame": 11260,
+      "startFrame": 11256,
       "before": [
         {
           "slug": "arthrobolt",
@@ -14961,7 +14957,7 @@
           "level": 45
         }
       ],
-      "endFrame": 11674,
+      "endFrame": 11670,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -15006,7 +15002,7 @@
     {
       "opponent": "spyder_datacenter_bayliss",
       "kind": "trainer",
-      "startFrame": 12234,
+      "startFrame": 12230,
       "before": [
         {
           "slug": "arthrobolt",
@@ -15055,7 +15051,7 @@
           "level": 40
         }
       ],
-      "endFrame": 12648,
+      "endFrame": 12644,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -15100,7 +15096,7 @@
     {
       "opponent": "spyder_datacenter_chomsky",
       "kind": "trainer",
-      "startFrame": 12808,
+      "startFrame": 12804,
       "before": [
         {
           "slug": "arthrobolt",
@@ -15149,7 +15145,7 @@
           "level": 40
         }
       ],
-      "endFrame": 13222,
+      "endFrame": 13218,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -15194,7 +15190,7 @@
     {
       "opponent": "wild:kernel",
       "kind": "wild",
-      "startFrame": 13263,
+      "startFrame": 13259,
       "before": [
         {
           "slug": "arthrobolt",
@@ -15239,7 +15235,7 @@
           "level": 50
         }
       ],
-      "endFrame": 13515,
+      "endFrame": 13511,
       "turns": 1,
       "outcome": "won",
       "after": [
@@ -15369,7 +15365,7 @@
     },
     {
       "name": "surfboard-collected",
-      "frame": 2976,
+      "frame": 2974,
       "map": "spyder_candy_town",
       "position": [
         28,
@@ -15397,7 +15393,7 @@
     },
     {
       "name": "route-b-entry",
-      "frame": 5123,
+      "frame": 5119,
       "map": "spyder_routeb",
       "position": [
         0,
@@ -15425,7 +15421,7 @@
     },
     {
       "name": "datacenter-entry",
-      "frame": 8615,
+      "frame": 8611,
       "map": "spyder_datacenter",
       "position": [
         2,
@@ -15453,7 +15449,7 @@
     },
     {
       "name": "datacenter-lower-screens",
-      "frame": 8785,
+      "frame": 8781,
       "map": "spyder_datacenter",
       "position": [
         17,
@@ -15481,7 +15477,7 @@
     },
     {
       "name": "datacenter-middle-screens",
-      "frame": 10976,
+      "frame": 10972,
       "map": "spyder_datacenter",
       "position": [
         14,
@@ -15509,7 +15505,7 @@
     },
     {
       "name": "datacenter-upper-screens",
-      "frame": 12676,
+      "frame": 12672,
       "map": "spyder_datacenter",
       "position": [
         14,
@@ -15537,7 +15533,7 @@
     },
     {
       "name": "kernel-defeated",
-      "frame": 13598,
+      "frame": 13594,
       "map": "spyder_datacenter",
       "position": [
         7,
@@ -15624,8 +15620,8 @@
       "maxHp": 161
     }
   ],
-  "initialStateSha256": "590452dceb93dfe0a2a88016610e602a6bc6f5334da6fa7b35c550f1f1f2548d",
-  "terminalStateSha256": "3fedbe7d848623d3f80b687f087a30f0e647ff4aa064cf0986ede38629719232",
-  "tapeSha256": "78de1c0c67a260bb4b5e97999900bbff629ce8a64de39d362f66889f0b046a61",
-  "combinedTapeSha256": "a7951a364b92cd16d458d87206dd73004fb59c9812463dade0fc675a18cdd3ca"
+  "initialStateSha256": "1a99a07129efa089906723f60921daeb02faaa75b2069d7ea91bf7c7ddbe4d17",
+  "terminalStateSha256": "5d22fc6decde61c569d60d3fd26ef4985e9c8bfc2973c383192185c4147cc85e",
+  "tapeSha256": "30196f252c542b9ec2d20c66e1da982a7c81fa756cd3d790402d6d2bc3711e3f",
+  "combinedTapeSha256": "fa161dc5df33fe08a9c31f7ed2a8495121058d2331550c65e65da2585e48c15f"
 }

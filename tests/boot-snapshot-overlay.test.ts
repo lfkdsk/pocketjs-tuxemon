@@ -136,7 +136,7 @@ describe("boot-snapshot overlay", () => {
     const runtime = createBootSnapshotOverlay().create(host);
     runtime.step(0, 0);
 
-    const spec = resolveSegment(ROOT, "radio-broadcast", 193231);
+    const spec = resolveSegment(ROOT, "radio-broadcast", 193227);
     let state = getState();
     let previous = radio.held >>> 0;
     for (const mask of spec.suffix) {
@@ -147,7 +147,7 @@ describe("boot-snapshot overlay", () => {
     // the cathedral bill metadata, live-movement encounter state, and the
     // calendar variables refreshed on map entry.
     expect(sha256(canonicalJson(state)))
-      .toBe("590452dceb93dfe0a2a88016610e602a6bc6f5334da6fa7b35c550f1f1f2548d");
-    expect(state.frame).toBe(193231);
+      .toBe("1a99a07129efa089906723f60921daeb02faaa75b2069d7ea91bf7c7ddbe4d17");
+    expect(state.frame).toBe(193227);
   });
 });

@@ -319,7 +319,7 @@ export function runJ4Journey(): J4JourneyResult {
   // Route B leads north to the GoodChat data center.
   enterFromEdge(driver, 22, 39, BTN_BITS.DOWN, "spyder_route1");
   enterFromEdge(driver, 14, 19, BTN_BITS.DOWN, "spyder_paper_town");
-  driver.interactNpc("npc_spyder_captain", ["Next >", "Candy Port"]);
+  driver.interactNpc("npc_spyder_captain", ["Candy Port"]);
   driver.expect("riverboat reached Candy Port", driver.state.mapId === "spyder_candy_port");
   enterFromEdge(driver, 37, 0, BTN_BITS.UP, "spyder_candy_town");
   driver.interactNpc("npc_spyder_papertown_mom");
@@ -327,7 +327,7 @@ export function runJ4Journey(): J4JourneyResult {
     numeric(driver.state, "v.timbermom") === 1 && (driver.state.sw.items.surfboard ?? 0) === 1);
   markStory(driver, steps, "surfboard-collected");
   enterFromEdge(driver, 37, 39, BTN_BITS.DOWN, "spyder_candy_port");
-  driver.interactNpc("npc_spyder_captain", ["Next >", "Timber Town"]);
+  driver.interactNpc("npc_spyder_captain", ["Timber Town"]);
   driver.expect("riverboat reached Timber Town", driver.state.mapId === "spyder_timber_town");
   driver.expect("Surfboard remains present", (driver.state.sw.items.surfboard ?? 0) === 1);
   driver.goTo(32, 38);

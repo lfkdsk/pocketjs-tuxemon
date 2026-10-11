@@ -489,7 +489,7 @@ finish (no terminal marker and/or no bench); it is fail-closed: an empty
 id, an id outside the plan, a flagged segment that actually completed, or
 any other bench/retention problem still fails.
 The plan itself is guarded by independent invariants (28 segments, a fixed
-id/chapter/start/end identity table, continuous coverage `[0, 206830)`, no
+id/chapter/start/end identity table, continuous coverage `[0, 206822)`, no
 gap or overlap) enforced before plan/build/run/verify.
 
 ### PSP GC pauses

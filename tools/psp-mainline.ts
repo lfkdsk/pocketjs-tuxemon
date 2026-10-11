@@ -62,12 +62,12 @@ export const SPLIT_ENVELOPES = [
 ];
 
 // The pinned full-mainline extent this plan must cover: the J4 quest ends the
-// Spyder campaign at frame 206,830, split into 28 bounded segments. These are
+// Spyder campaign at frame 206,822, split into 28 bounded segments. These are
 // independent of the plan's own self-report (the plan is hand-written), so a
 // deleted or reordered segment is caught even though `verify` only walks the
 // plan as given.
 export const EXPECTED_SEGMENTS = 28;
-export const EXPECTED_END_FRAME = 206830;
+export const EXPECTED_END_FRAME = 206822;
 
 /** The fixed 28-segment identity table: every plan entry's id, chapter and
  *  [start, end) window, in order. This is independent of the plan's own
@@ -96,15 +96,15 @@ export const EXPECTED_PLAN_IDENTITIES: ReadonlyArray<{ id: string; chapter: stri
   { id: "17-dojo", chapter: "seg-136615", start: 137416, end: 151011 },
   { id: "18-route5", chapter: "seg-150832", start: 151011, end: 172078 },
   { id: "19-candy-town", chapter: "candy-town", start: 172078, end: 178679 },
-  { id: "20-greenwash", chapter: "greenwash-aardant", start: 178679, end: 180118 },
-  { id: "21-hospital-cure", chapter: "hospital-cure", start: 180118, end: 187596 },
-  { id: "22-omnichannel", chapter: "omnichannel-open", start: 187596, end: 193208 },
-  { id: "23-radio-broadcast", chapter: "radio-broadcast", start: 193208, end: 195079 },
-  { id: "24-kernel-briefing", chapter: "kernel-briefing", start: 195079, end: 196197 },
-  { id: "25-surfboard", chapter: "surfboard", start: 196197, end: 198344 },
-  { id: "26-route-b", chapter: "route-b", start: 198344, end: 201836 },
-  { id: "27-data-center", chapter: "data-center", start: 201836, end: 206819 },
-  { id: "28-kernel-defeated", chapter: "kernel-defeated", start: 206819, end: 206830 },
+  { id: "20-greenwash", chapter: "greenwash-aardant", start: 178679, end: 180114 },
+  { id: "21-hospital-cure", chapter: "hospital-cure", start: 180114, end: 187592 },
+  { id: "22-omnichannel", chapter: "omnichannel-open", start: 187592, end: 193204 },
+  { id: "23-radio-broadcast", chapter: "radio-broadcast", start: 193204, end: 195075 },
+  { id: "24-kernel-briefing", chapter: "kernel-briefing", start: 195075, end: 196191 },
+  { id: "25-surfboard", chapter: "surfboard", start: 196191, end: 198336 },
+  { id: "26-route-b", chapter: "route-b", start: 198336, end: 201828 },
+  { id: "27-data-center", chapter: "data-center", start: 201828, end: 206811 },
+  { id: "28-kernel-defeated", chapter: "kernel-defeated", start: 206811, end: 206822 },
 ];
 
 /** The 28-segment plan (exported so the coverage invariants are testable
