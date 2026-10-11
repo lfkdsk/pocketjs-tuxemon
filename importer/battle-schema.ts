@@ -329,6 +329,10 @@ export interface BattleRuntimeShell {
   npcs: BattleDb["npcs"];
   ui: BattleDb["ui"];
   monstersIndex: JournalMonsterIndexEntry[];
+  /** Campaign-visible subset of monstersIndex. Optional so a shell produced
+   * before title-mode catalog isolation still behaves as an all-monster
+   * journal rather than failing to boot. */
+  journalMonsterIds?: string[];
   techniquesIndex: BattleRuntimeIndexEntry[];
   itemsIndex: BattleRuntimeIndexEntry[];
   statusesIndex: BattleRuntimeStatusIndexEntry[];

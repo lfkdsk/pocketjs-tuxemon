@@ -6,6 +6,7 @@ import { $ } from "bun";
 import { desktopHostFeatures } from "../vendor/pocket-rpgkit/tools/lib/desktop.ts";
 import { validateAndResolveBuildPlan } from "../vendor/pocket-rpgkit/vendor/pocketjs/framework/src/manifest/resolve.ts";
 import { externalizeDesktopAudio } from "./desktop-audio.ts";
+import { minifyRuntimeBundle } from "./runtime-bundle.ts";
 
 const root = resolve(import.meta.dir, "..");
 const pocketjs = join(root, "vendor", "pocket-rpgkit", "vendor", "pocketjs");
@@ -115,6 +116,8 @@ const planPath = join(root, ".pocket", target, `${plan.app.output}.plan.json`);
 mkdirSync(resolve(planPath, ".."), { recursive: true });
 await Bun.write(planPath, JSON.stringify(plan, null, 2) + "\n");
 await $`bun ${join(pocketjs, "tools", "build.ts")} --plan=${planPath} --project-root=${root} --outdir=${outdir}`.cwd(root);
+const bundle = minifyRuntimeBundle(join(outdir, `${plan.app.output}.js`));
+console.log(`runtime bundle: ${bundle.before} -> ${bundle.after} bytes`);
 const desktopPak = join(outdir, `${plan.app.output}.pak`);
 const audioSidecar = externalizeDesktopAudio(
   desktopPak,

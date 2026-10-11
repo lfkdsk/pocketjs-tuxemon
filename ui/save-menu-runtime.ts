@@ -71,8 +71,10 @@ export interface SaveMenuOptions {
    * refused with a clear message instead of silently mixing content. */
   lang?: Lang;
   /** Game-defined rows appended after the kit's own root rows. Their labels
-   *  are already localized; CONFIRM on one calls `onExtra` with its id. */
-  extraRows?: readonly ExtraRootRow[];
+   *  are already localized; CONFIRM on one calls `onExtra` with its id.
+   *  A resolver may inspect the live session when the menu opens (for
+   *  inventory-gated world-menu entries such as NuPhone). */
+  extraRows?: readonly ExtraRootRow[] | ((state: ReturnType<GameViewSessionHost["getState"]>) => readonly ExtraRootRow[]);
   /** Called when the player confirms an `extraRows` row. */
   onExtra?: (id: string) => void;
 }
@@ -164,6 +166,8 @@ export interface SaveMenuRuntime {
   saveCode: Accessor<string>;
   toast: Accessor<string | null>;
   legend: Accessor<string>;
+  /** Resolved game-owned rows for the current live session. */
+  extraRows: Accessor<readonly ExtraRootRow[]>;
   osk: OskController;
   hasSlots: boolean;
   title: string;
@@ -193,8 +197,11 @@ export function createSaveMenuRuntime(
   const [saveCode, setSaveCode] = createSignal("");
   const [typed, setTyped] = createSignal("");
   const [toast, setToast] = createSignal<string | null>(null);
+  const extraRows = (): readonly ExtraRootRow[] => typeof options.extraRows === "function"
+    ? options.extraRows(host.getState())
+    : (options.extraRows ?? []);
   const rootIndex = (id: string): number => Math.max(0,
-    saveMenuRootRows(hasSlots, autosaveInfo() !== null, options.extraRows).findIndex((row) => row.id === id));
+    saveMenuRootRows(hasSlots, autosaveInfo() !== null, extraRows()).findIndex((row) => row.id === id));
   let toastFrames = 0;
   // After the menu closes, hold the world until every button is released so
   // the closing press never reaches the reducer as a fresh edge.
@@ -479,7 +486,7 @@ export function createSaveMenuRuntime(
         slotNonEmpty: slotInfo().map((slot) => slot !== null),
         codePages: Math.max(1, Math.ceil(saveCode().length / CODE_PAGE_CHARS)),
         text: uiText(),
-        extra: options.extraRows,
+        extra: extraRows(),
       });
       if (result.state.kind === "closed") {
         close();
@@ -506,6 +513,7 @@ export function createSaveMenuRuntime(
       }
       return zh ? "o: 选择   x: 返回   START: 关闭" : "o: select   x: back   START: close";
     },
+    extraRows,
     osk,
     hasSlots,
     title: channelTitle(slots),

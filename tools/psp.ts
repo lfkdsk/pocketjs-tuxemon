@@ -22,6 +22,7 @@ import {
 } from "../vendor/pocket-rpgkit/vendor/pocketjs/framework/compiler/pak.ts";
 import { checkExternalPak } from "./psp-external-check.ts";
 import { bakeSegmentBundle, resolveSegment, replaySuffixTerminal } from "./psp-segment.ts";
+import { minifyRuntimeBundle } from "./runtime-bundle.ts";
 
 const sha256 = (bytes: Uint8Array | string): string =>
   createHash("sha256").update(bytes).digest("hex");
@@ -166,6 +167,8 @@ try {
     writeFileSync(zhDataPath, savedZhData);
   }
 }
+const runtimeBundle = minifyRuntimeBundle(join(out, "pocket-tuxemon.js"));
+console.log(`runtime bundle: ${runtimeBundle.before} -> ${runtimeBundle.after} bytes`);
 
 const pakPath = join(out, "pocket-tuxemon.pak");
 const fullPak = readFileSync(pakPath);

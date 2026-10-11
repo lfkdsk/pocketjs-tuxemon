@@ -60,8 +60,9 @@ const SAVE_FIXTURES = [
   "main-c38f8e72",
   "main-c6d57a62",
   "main-f9db784a",
+  "main-08efc758",
 ] as const;
-const IMMEDIATE_PREDECESSOR_FIXTURE = "main-f9db784a" as const;
+const IMMEDIATE_PREDECESSOR_FIXTURE = "main-08efc758" as const;
 
 interface PublishedSaveMetadata {
   content: { manifest: string; schema: string };
@@ -383,23 +384,33 @@ test("published predecessor slots load exactly and only resave under the current
     };
     refuse({ ...metadata.content, manifest: "f".repeat(64) });
     refuse({ ...metadata.content, schema: "e".repeat(64) });
-    const mismatchedSchema = TUXEMON_COMPATIBLE_SAVE_CONTENT.find((candidate) =>
-      candidate.schema !== metadata.content.schema
-      && !TUXEMON_COMPATIBLE_SAVE_CONTENT.some((accepted) =>
-        accepted.manifest === metadata.content.manifest
-        && accepted.schema === candidate.schema
-      )
-    )?.schema;
-    expect(mismatchedSchema).toBeDefined();
-    refuse({
-      manifest: metadata.content.manifest,
-      schema: mismatchedSchema!,
-    });
+    // A current-manifest save may pair with any schema that the engine's
+    // additive schema chain accepts. Mixed-pair rejection is specific to
+    // predecessor manifests, whose schema must match their reviewed pair.
+    if (metadata.content.manifest !== session.content?.manifest) {
+      const mismatchedSchema = TUXEMON_COMPATIBLE_SAVE_CONTENT.find((candidate) =>
+        candidate.schema !== metadata.content.schema
+        && !TUXEMON_COMPATIBLE_SAVE_CONTENT.some((accepted) =>
+          accepted.manifest === metadata.content.manifest
+          && accepted.schema === candidate.schema
+        )
+      )?.schema;
+      expect(mismatchedSchema).toBeDefined();
+      refuse({
+        manifest: metadata.content.manifest,
+        schema: mismatchedSchema!,
+      });
+    }
   }
 });
 
 /** Slots recorded on the still-current mainline tape continue on it. */
-const CONTINUING_FIXTURES = ["main-78493afa", "main-3a9e95b2", IMMEDIATE_PREDECESSOR_FIXTURE] as const;
+const CONTINUING_FIXTURES = [
+  "main-78493afa",
+  "main-3a9e95b2",
+  "main-f9db784a",
+  IMMEDIATE_PREDECESSOR_FIXTURE,
+] as const;
 
 for (const name of CONTINUING_FIXTURES) test(`the ${name} main slot continues on the current tape`, () => {
   const { envelope, metadata } = loadPublishedSave(name);

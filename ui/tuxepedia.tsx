@@ -214,6 +214,7 @@ const TuxepediaView: Component<{
     }
   });
   const canvas = createMemo(() => tuxepediaCanvas(viewport()));
+  const disabledRect = { x: -1, y: -1, w: 0, h: 0 } as const;
 
   const imageCache = createBattleImageCache(() => open());
   const activeImageSource = (ref: BattleImageRef): TileImageSource => {
@@ -303,7 +304,7 @@ const TuxepediaView: Component<{
   // before the row index is computed, so both viewport scales hit the
   // drawn row.
   createGesture({
-    region: { rect: () => tuxepediaViewRect(canvas(), LIST_PANEL) },
+    region: { rect: () => open() ? tuxepediaViewRect(canvas(), LIST_PANEL) : disabledRect },
     tapSlop: 10,
     panSlop: 14,
     axis: "y",
@@ -322,12 +323,12 @@ const TuxepediaView: Component<{
   });
   // Touch: the filter button.
   createGesture({
-    region: { rect: () => tuxepediaViewRect(canvas(), FILTER_RECT) },
+    region: { rect: () => open() ? tuxepediaViewRect(canvas(), FILTER_RECT) : disabledRect },
     onTap: () => { if (open()) toggleFilter(); },
   });
   // Touch: the close button.
   createGesture({
-    region: { rect: () => tuxepediaViewRect(canvas(), CLOSE_RECT) },
+    region: { rect: () => open() ? tuxepediaViewRect(canvas(), CLOSE_RECT) : disabledRect },
     onTap: () => { if (open()) runtime.close(); },
   });
 

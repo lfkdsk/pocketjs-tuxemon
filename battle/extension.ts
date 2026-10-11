@@ -220,6 +220,11 @@ export interface TuxemonExtensionRuntimeOptions {
   /** Localized display names for headless zh_CN sessions; the live game
    *  reads the boot-loaded table instead. */
   battleNames?: BattleNames;
+  /** Species reachable by the campaign. The package may additionally carry
+   * title-match-only species; default random_monster and Dojo menus must not
+   * leak those into persistent campaign state. Explicit candidate pools
+   * (the imported title script) still use the complete battle repository. */
+  campaignMonsterIds?: readonly string[];
 }
 
 /** The game's content languages. Kept in the battle layer so the save codec
@@ -1527,13 +1532,17 @@ function replacePartyMonster(
   return { ...state, party: state.party.map((member) => member.iid === iid ? monster : member) };
 }
 
-function dojoConditions(source: BattleDbSource): Record<string, (context: ExtensionReadContext, value: JsonValue) => boolean> {
+function dojoConditions(
+  source: BattleDbSource,
+  campaignMonsters?: ReadonlySet<string>,
+): Record<string, (context: ExtensionReadContext, value: JsonValue) => boolean> {
   return {
     "tux.dojo_monster": (context, value) =>
       dojoTarget(context, argsRecord(value, "tux.dojo_monster"), "tux.dojo_monster") !== null,
     "tux.dojo_devolvable": (context, value) => {
       const target = dojoTarget(context, argsRecord(value, "tux.dojo_devolvable"), "tux.dojo_devolvable");
-      return target !== null && dojoDevolutionTargets(resolveBattleDb(source), target.monster).length > 0;
+      return target !== null
+        && dojoDevolutionTargets(resolveBattleDb(source), target.monster, campaignMonsters).length > 0;
     },
     "tux.dojo_learnable": (context, value) => {
       const args = argsRecord(value, "tux.dojo_learnable");
@@ -1595,6 +1604,7 @@ function dojoNames(source: BattleDbSource, lang: GameLang, names: BattleNames | 
 function dojoChoices(
   source: BattleDbSource,
   names: DojoNames,
+  campaignMonsters?: ReadonlySet<string>,
 ): Record<string, NonNullable<ExtensionOptions["choices"]>[string]> {
   return {
     // devolve(): the menu lists the qualifying history forms. Cancelling
@@ -1604,7 +1614,7 @@ function dojoChoices(
       options(context, value) {
         const target = dojoTarget(context, argsRecord(value, "tux.dojo_devolve"), "tux.dojo_devolve");
         if (!target) return [];
-        return dojoDevolutionTargets(resolveBattleDb(source), target.monster)
+        return dojoDevolutionTargets(resolveBattleDb(source), target.monster, campaignMonsters)
           .map((slug) => ({ key: slug, label: names.species(slug) }));
       },
       resolve(context, value, result) {
@@ -1617,7 +1627,7 @@ function dojoChoices(
         const target = dojoTarget(context, args, call);
         if (!target) return;
         const db = resolveBattleDb(source);
-        if (!dojoDevolutionTargets(db, target.monster).includes(result.key)) {
+        if (!dojoDevolutionTargets(db, target.monster, campaignMonsters).includes(result.key)) {
           throw new Error(`${call}: '${result.key}' is not a devolution of '${target.monster.slug}'`);
         }
         const devolved = devolveMonsterSnapshot(
@@ -2586,7 +2596,7 @@ function npcBattleCommand(source: BattleDbSource) {
  *  it to the player's party or an NPC's staged team. The pool excludes
  *  txmn_id<=0, randomly=false, monsters that evolve at or before the level,
  *  and underleveled forms. The single choice draw precedes the spawn draws. */
-function randomMonsterCommand(source: BattleDbSource) {
+function randomMonsterCommand(source: BattleDbSource, campaignMonsters?: ReadonlySet<string>) {
   return (context: ExtensionCommandContext, value: JsonValue) => {
     const db = resolveBattleDb(source);
     const rulesDb = battleDbToTuxemonBattleDb(db);
@@ -2602,7 +2612,28 @@ function randomMonsterCommand(source: BattleDbSource) {
     if (!finite(experienceModifier) || !finite(moneyModifier)) {
       throw new Error("tux.random_monster: modifiers must be finite");
     }
-    const pool = randomMonsterPool(db, level);
+    let pool: readonly string[];
+    if (args.candidates === undefined) {
+      const imported = randomMonsterPool(db, level);
+      pool = campaignMonsters === undefined
+        ? imported
+        : imported.filter((slug) => campaignMonsters.has(slug));
+    } else {
+      if (!Array.isArray(args.candidates) || args.candidates.length === 0) {
+        throw new Error("tux.random_monster: candidates must be a non-empty array");
+      }
+      const seen = new Set<string>();
+      pool = args.candidates.map((candidate, index) => {
+        if (!nonEmptyString(candidate) || !(candidate in db.monsters)) {
+          throw new Error(`tux.random_monster: candidates[${index}] must be an imported monster slug`);
+        }
+        if (seen.has(candidate)) {
+          throw new Error(`tux.random_monster: duplicate candidate '${candidate}'`);
+        }
+        seen.add(candidate);
+        return candidate;
+      });
+    }
     if (pool.length === 0) return; // upstream logs an error and stops
     const slug = pool[Math.floor(context.random() * pool.length)]!;
     const current = currentExtensionState(context.ext);
@@ -3098,6 +3129,9 @@ export function createTuxemonExtensions(
       : { maxDurationMinutes: options.weatherSchedule.maxDurationMinutes }),
   };
   const weatherSlugs = new Set(weatherSchedule.slugs);
+  const campaignMonsters = options.campaignMonsterIds === undefined
+    ? undefined
+    : new Set(options.campaignMonsterIds);
   const names = dojoNames(source, options.lang ?? "en_US", options.battleNames);
   const hemisphere = options.hemisphere ?? "northern";
   if (hemisphere !== "northern" && hemisphere !== "southern") {
@@ -3211,7 +3245,7 @@ export function createTuxemonExtensions(
       "tux.char_plague": charPlagueCommand(),
       "tux.quarantine": quarantineCommand(),
       "tux.npc_battle": npcBattleCommand(source),
-      "tux.random_monster": randomMonsterCommand(source),
+      "tux.random_monster": randomMonsterCommand(source, campaignMonsters),
       "tux.set_bill": setBillCommand(),
       "tux.modify_bill": modifyBillCommand(),
       "tux.adjust_bill_penalty": adjustBillPenaltyCommand(),
@@ -3413,7 +3447,7 @@ export function createTuxemonExtensions(
         return negate(count >= args.count, args);
       },
       "tux.party_match": partyMatchCondition(source),
-      ...dojoConditions(source),
+      ...dojoConditions(source, campaignMonsters),
       "tux.check_party_parameter": checkPartyParameterCondition(source),
       "tux.check_max_tech": checkMaxTechCondition(source),
       "tux.party_infected": partyInfectedCondition(),
@@ -3452,7 +3486,7 @@ export function createTuxemonExtensions(
     choices: {
       "tux.party_monsters": partyMonstersChoice(source, names),
       "tux.enum_choice": enumChoiceHandler(),
-      ...dojoChoices(source, names),
+      ...dojoChoices(source, names, campaignMonsters),
     },
     codec: {
       encode: (value) => ({

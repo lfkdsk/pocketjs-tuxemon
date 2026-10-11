@@ -76,9 +76,9 @@ the tape legs):
 |---|---|---|
 | Route 3 battle journey at 60 Hz | `verify:gb6:mainline` | the 115,842-frame mainline tape replays to the frozen terminal state with every map and battle checkpoint intact. |
 | Captain-return journey from frame zero at 60 Hz | `verify:j1:mainline` | the J1 continuation, concatenated with the GB6 tape and replayed from frame zero, ends at the Captain's return. |
-| Hospital-cure journey from frame zero at 60 Hz | `verify:j2:mainline` | the J2 continuation, concatenated with GB6 and J1 and replayed from frame zero (180,129 frames), ends with the hospital cure. |
-| Radio-broadcast journey from frame zero at 60 Hz | `verify:j3:mainline` | the J3 continuation, concatenated with GB6, J1 and J2 and replayed from frame zero (193,231 frames), ends after 13 trainer wins, one wild win and the Omnichannel Radio Tower broadcast. |
-| Kernel-quest journey from J3 save and frame zero | `verify:j4:mainline` | the J4 continuation replays twice from its J3 production-save boundary, then all five segments replay from frame zero (206,830 frames) through 15 new wins, the seven correct terminal answers, Kernel and Billie's epilogue. |
+| Hospital-cure journey from frame zero at 60 Hz | `verify:j2:mainline` | the J2 continuation, concatenated with GB6 and J1 and replayed from frame zero (180,125 frames), ends with the hospital cure. |
+| Radio-broadcast journey from frame zero at 60 Hz | `verify:j3:mainline` | the J3 continuation, concatenated with GB6, J1 and J2 and replayed from frame zero (193,227 frames), ends after 13 trainer wins, one wild win and the Omnichannel Radio Tower broadcast. |
+| Kernel-quest journey from J3 save and frame zero | `verify:j4:mainline` | the J4 continuation replays twice from its J3 production-save boundary, then all five segments replay from frame zero (206,822 frames) through 15 new wins, the seven correct terminal answers, Kernel and Billie's epilogue. |
 | Golden screenshot checkpoints match their tapes | `verify:goldens:sync` | every maintained screenshot checkpoint still names the exact reducer map, tile and frame from its authoritative tape. |
 | Battle defeat and recovery journeys | `verify:gb6:failures` | both committed defeat tapes replay with their visible recovery order. |
 | Every imported input lock is executed to its unlock | `verify:g6:locks` | every `lockInput` page releases its lock. |

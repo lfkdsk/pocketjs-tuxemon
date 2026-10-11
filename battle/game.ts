@@ -1,13 +1,14 @@
 import battleDbJson from "../data/battle-db.json";
+import battleShellJson from "../dist/battle-runtime-shell.json";
 import variableEnumsJson from "../dist/variable-enums.json";
 import mapDescriptionsJson from "../dist/map-descriptions.json";
 import monthNamesJson from "../data/month-names.json";
 import { TUXEMON_COMPATIBLE_SAVE_CONTENT } from "../data/save-compat.ts";
 
-import { validateBattleDb } from "../importer/battle-schema.ts";
+import { validateBattleDb, type BattleRuntimeShell } from "../importer/battle-schema.ts";
 import { createTuxemonExtensions } from "./extension.ts";
 import { createTuxemonBattleRules, type VariableEnums } from "./runtime.ts";
-import { createTuxemonScenes } from "./scenes.ts";
+import { createTuxemonScenes, runtimeJournalIndex } from "./scenes.ts";
 import { createTuxemonTextTokens } from "./text-tokens.ts";
 import { TUXEMON_HANDOFF_CAPABILITY } from "./handoff.ts";
 import type { SessionOptions } from "../vendor/pocket-rpgkit/src/engine/session.ts";
@@ -16,13 +17,20 @@ import { createWorldHandoffResolver } from "../vendor/pocket-rpgkit/src/engine/w
 
 /** Shared production registration used by GameView and headless journeys. */
 export const TUXEMON_BATTLE_DB = validateBattleDb(battleDbJson);
+const TUXEMON_JOURNAL_INDEX = runtimeJournalIndex(battleShellJson as unknown as BattleRuntimeShell);
+export const TUXEMON_CAMPAIGN_MONSTER_IDS = TUXEMON_JOURNAL_INDEX.map((entry) => entry.id);
 export const TUXEMON_VARIABLE_ENUMS = variableEnumsJson as VariableEnums;
-export const TUXEMON_EXTENSIONS = createTuxemonExtensions(TUXEMON_BATTLE_DB);
+export const TUXEMON_EXTENSIONS = createTuxemonExtensions(TUXEMON_BATTLE_DB, {
+  campaignMonsterIds: TUXEMON_CAMPAIGN_MONSTER_IDS,
+});
 export const TUXEMON_BATTLE_RULES = createTuxemonBattleRules(
   TUXEMON_BATTLE_DB,
   TUXEMON_VARIABLE_ENUMS,
 );
-const TUXEMON_SCENE_BUNDLE = createTuxemonScenes(TUXEMON_BATTLE_DB);
+const TUXEMON_SCENE_BUNDLE = createTuxemonScenes(
+  TUXEMON_BATTLE_DB,
+  TUXEMON_JOURNAL_INDEX,
+);
 export const TUXEMON_SCENES = TUXEMON_SCENE_BUNDLE.rules;
 export const TUXEMON_SCENE_CATALOG = TUXEMON_SCENE_BUNDLE.catalog;
 /** The {x:} text-token resolver for the English build. Headless recorders

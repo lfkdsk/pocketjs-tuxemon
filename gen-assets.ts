@@ -27,6 +27,7 @@ import { buildWarpIndex } from "./importer/warp.ts";
 import { buildDemoData, buildEnDemoData, buildZhDemoData, demoIndexSource } from "./importer/demo-data.ts";
 import { splitGameProjectMaps } from "./importer/map-shards.ts";
 import { buildPreviewCoverage, tuxemonPreviewSessionOptions } from "./importer/preview-coverage.ts";
+import { featureModesRuntimeData, loadFeatureModes } from "./importer/feature-modes.ts";
 import monthNames from "./data/month-names.json";
 
 // Tests and determinism checks can cook into a disposable root without
@@ -34,7 +35,9 @@ import monthNames from "./data/month-names.json";
 // checkout; only generated outputs are redirected.
 const ROOT = resolve(process.env.G6_OUTPUT_ROOT ?? import.meta.dir);
 const DIST = join(ROOT, "dist");
+const sourceRoot = process.env.TUXEMON_SRC ?? DEFAULT_TUXEMON_SRC;
 mkdirSync(DIST, { recursive: true });
+mkdirSync(join(ROOT, "data"), { recursive: true });
 mkdirSync(join(ROOT, "reports"), { recursive: true });
 
 const terrain = writeTerrain({ outputRoot: ROOT });
@@ -119,6 +122,28 @@ function portableStaticPng(image: {
   return { png: encodePNG(rgba, width, height), width, height, rgba };
 }
 
+// G12 menu features are authored outside the normal TMX graph. Import their
+// source YAML, item-menu metadata and bilingual labels into one small runtime
+// document, then cook the five referenced upstream images like every other
+// static PocketJS texture. Explicit logical dimensions let the UI undo the
+// required power-of-two texture resampling.
+const featureModes = loadFeatureModes(sourceRoot);
+const featureModeImages: Record<string, { psm: number }> = {};
+for (const image of Object.values(featureModes.nuPhoneMap.art)) {
+  const decoded = decodePng(
+    new Uint8Array(readFileSync(join(sourceRoot, "mods/tuxemon", image.source))),
+    image.source,
+  );
+  if (decoded.width !== image.width || decoded.height !== image.height) {
+    throw new Error(`${image.source}: dimensions changed during feature import`);
+  }
+  const { png } = portableStaticPng(decoded);
+  mkdirSync(dirname(join(ROOT, image.texture)), { recursive: true });
+  writeFileSync(join(ROOT, image.texture), png);
+  featureModeImages[image.texture] = { psm: 3 };
+}
+writeFileSync(join(ROOT, "data/feature-modes.json"), jsonBytes(featureModesRuntimeData(featureModes)));
+
 // KA1 reducer-driven map animations use static per-frame images rather than
 // the host-clock sprite atlases used by terrain animation. Cook only the
 // definitions collected from source actions into a deterministic manifest.
@@ -160,8 +185,6 @@ mkdirSync(screenLayerDir, { recursive: true });
 const screenLayerImages: Record<string, { psm: number }> = {};
 const backdropVariants: Record<string, { color?: string; image?: string }> = {};
 let screenLayerBytes = 0;
-const sourceRoot = process.env.TUXEMON_SRC ?? DEFAULT_TUXEMON_SRC;
-
 function compositeBackdrop(
   backgroundPath: string,
   foregroundPath?: string,
@@ -284,10 +307,27 @@ const screenLayers: Record<string, GameScreenLayerAssets> = {
   } : {}),
 };
 const battleScope = process.env.BATTLE_DB_SCOPE === "full" ? "full" : "spyder";
-const battle = writeBattleArtifacts({ outputRoot: ROOT, scope: battleScope });
+const titleBattleMonsters = [...new Set(featureModes.titleBattle.difficulties.flatMap((difficulty) =>
+  difficulty.candidates
+))].sort();
+const titleBattleSelection = {
+  monsters: titleBattleMonsters,
+  npcs: [featureModes.titleBattle.opponent],
+  environments: [featureModes.titleBattle.environment],
+};
+const battle = writeBattleArtifacts({
+  outputRoot: ROOT,
+  scope: battleScope,
+  extraSelection: titleBattleSelection,
+});
 // zh_CN battle data: names and descriptions from the merged Chinese catalog.
 // Art cooking is language-neutral and shared (rewritten byte-identically).
-const battleZh = writeBattleArtifacts({ outputRoot: ROOT, scope: battleScope, lang: "zh_CN" });
+const battleZh = writeBattleArtifacts({
+  outputRoot: ROOT,
+  scope: battleScope,
+  lang: "zh_CN",
+  extraSelection: titleBattleSelection,
+});
 
 // WX1: procedural weather particle textures. Deterministic by construction;
 // committed under assets/weather/ like the other baked art. The path literals
@@ -647,6 +687,7 @@ const pakEntries = [
 writeFileSync(join(ROOT, "sprites.json"), jsonBytes(cooked.spritesJson));
 const allImages = {
   ...characters.imagesJson,
+  ...featureModeImages,
   ...mapAnimationImages,
   ...screenLayerImages,
   ...battle.imagesJson,

@@ -792,6 +792,14 @@
     "file": "dist/battle-zh/monsters/allagon.json"
   },
   {
+    "key": "battle-zh/monsters/altie.json",
+    "file": "dist/battle-zh/monsters/altie.json"
+  },
+  {
+    "key": "battle-zh/monsters/ambuwl.json",
+    "file": "dist/battle-zh/monsters/ambuwl.json"
+  },
+  {
     "key": "battle-zh/monsters/ampystoma.json",
     "file": "dist/battle-zh/monsters/ampystoma.json"
   },
@@ -824,6 +832,14 @@
     "file": "dist/battle-zh/monsters/arthrobolt.json"
   },
   {
+    "key": "battle-zh/monsters/askylpaws.json",
+    "file": "dist/battle-zh/monsters/askylpaws.json"
+  },
+  {
+    "key": "battle-zh/monsters/asudopt.json",
+    "file": "dist/battle-zh/monsters/asudopt.json"
+  },
+  {
     "key": "battle-zh/monsters/av8r.json",
     "file": "dist/battle-zh/monsters/av8r.json"
   },
@@ -836,8 +852,24 @@
     "file": "dist/battle-zh/monsters/b_ver_1.json"
   },
   {
+    "key": "battle-zh/monsters/babysnitch.json",
+    "file": "dist/battle-zh/monsters/babysnitch.json"
+  },
+  {
+    "key": "battle-zh/monsters/baddrscratch.json",
+    "file": "dist/battle-zh/monsters/baddrscratch.json"
+  },
+  {
     "key": "battle-zh/monsters/bamboon.json",
     "file": "dist/battle-zh/monsters/bamboon.json"
+  },
+  {
+    "key": "battle-zh/monsters/banling.json",
+    "file": "dist/battle-zh/monsters/banling.json"
+  },
+  {
+    "key": "battle-zh/monsters/bansaken.json",
+    "file": "dist/battle-zh/monsters/bansaken.json"
   },
   {
     "key": "battle-zh/monsters/baobaraffe.json",
@@ -852,8 +884,20 @@
     "file": "dist/battle-zh/monsters/bearloch.json"
   },
   {
+    "key": "battle-zh/monsters/beenstalker.json",
+    "file": "dist/battle-zh/monsters/beenstalker.json"
+  },
+  {
+    "key": "battle-zh/monsters/bewhich.json",
+    "file": "dist/battle-zh/monsters/bewhich.json"
+  },
+  {
     "key": "battle-zh/monsters/bigfin.json",
     "file": "dist/battle-zh/monsters/bigfin.json"
+  },
+  {
+    "key": "battle-zh/monsters/birdee.json",
+    "file": "dist/battle-zh/monsters/birdee.json"
   },
   {
     "key": "battle-zh/monsters/birdling.json",
@@ -884,6 +928,10 @@
     "file": "dist/battle-zh/monsters/boxali.json"
   },
   {
+    "key": "battle-zh/monsters/boxorox.json",
+    "file": "dist/battle-zh/monsters/boxorox.json"
+  },
+  {
     "key": "battle-zh/monsters/breem.json",
     "file": "dist/battle-zh/monsters/breem.json"
   },
@@ -900,6 +948,10 @@
     "file": "dist/battle-zh/monsters/brickhemoth.json"
   },
   {
+    "key": "battle-zh/monsters/brumi.json",
+    "file": "dist/battle-zh/monsters/brumi.json"
+  },
+  {
     "key": "battle-zh/monsters/budaye.json",
     "file": "dist/battle-zh/monsters/budaye.json"
   },
@@ -908,8 +960,24 @@
     "file": "dist/battle-zh/monsters/bugnin.json"
   },
   {
+    "key": "battle-zh/monsters/bumbulus.json",
+    "file": "dist/battle-zh/monsters/bumbulus.json"
+  },
+  {
+    "key": "battle-zh/monsters/burrlock.json",
+    "file": "dist/battle-zh/monsters/burrlock.json"
+  },
+  {
     "key": "battle-zh/monsters/bursa.json",
     "file": "dist/battle-zh/monsters/bursa.json"
+  },
+  {
+    "key": "battle-zh/monsters/cacaburr.json",
+    "file": "dist/battle-zh/monsters/cacaburr.json"
+  },
+  {
+    "key": "battle-zh/monsters/cackleen.json",
+    "file": "dist/battle-zh/monsters/cackleen.json"
   },
   {
     "key": "battle-zh/monsters/cairfrey.json",
@@ -926,6 +994,10 @@
   {
     "key": "battle-zh/monsters/capiti.json",
     "file": "dist/battle-zh/monsters/capiti.json"
+  },
+  {
+    "key": "battle-zh/monsters/carcharock.json",
+    "file": "dist/battle-zh/monsters/carcharock.json"
   },
   {
     "key": "battle-zh/monsters/cardiling.json",
@@ -948,6 +1020,30 @@
     "file": "dist/battle-zh/monsters/cateye.json"
   },
   {
+    "key": "battle-zh/monsters/chenipode.json",
+    "file": "dist/battle-zh/monsters/chenipode.json"
+  },
+  {
+    "key": "battle-zh/monsters/cherubat.json",
+    "file": "dist/battle-zh/monsters/cherubat.json"
+  },
+  {
+    "key": "battle-zh/monsters/chibiro.json",
+    "file": "dist/battle-zh/monsters/chibiro.json"
+  },
+  {
+    "key": "battle-zh/monsters/chickadee.json",
+    "file": "dist/battle-zh/monsters/chickadee.json"
+  },
+  {
+    "key": "battle-zh/monsters/chillimp.json",
+    "file": "dist/battle-zh/monsters/chillimp.json"
+  },
+  {
+    "key": "battle-zh/monsters/chloragon.json",
+    "file": "dist/battle-zh/monsters/chloragon.json"
+  },
+  {
     "key": "battle-zh/monsters/chrome_robo.json",
     "file": "dist/battle-zh/monsters/chrome_robo.json"
   },
@@ -956,8 +1052,16 @@
     "file": "dist/battle-zh/monsters/chromeye.json"
   },
   {
+    "key": "battle-zh/monsters/claymorior.json",
+    "file": "dist/battle-zh/monsters/claymorior.json"
+  },
+  {
     "key": "battle-zh/monsters/coaldiak.json",
     "file": "dist/battle-zh/monsters/coaldiak.json"
+  },
+  {
+    "key": "battle-zh/monsters/cobarett.json",
+    "file": "dist/battle-zh/monsters/cobarett.json"
   },
   {
     "key": "battle-zh/monsters/cochini.json",
@@ -966,6 +1070,10 @@
   {
     "key": "battle-zh/monsters/cocrune.json",
     "file": "dist/battle-zh/monsters/cocrune.json"
+  },
+  {
+    "key": "battle-zh/monsters/cohldrabi.json",
+    "file": "dist/battle-zh/monsters/cohldrabi.json"
   },
   {
     "key": "battle-zh/monsters/coleorus.json",
@@ -1020,12 +1128,28 @@
     "file": "dist/battle-zh/monsters/delfeco.json"
   },
   {
+    "key": "battle-zh/monsters/demosnow.json",
+    "file": "dist/battle-zh/monsters/demosnow.json"
+  },
+  {
+    "key": "battle-zh/monsters/devidin.json",
+    "file": "dist/battle-zh/monsters/devidin.json"
+  },
+  {
+    "key": "battle-zh/monsters/devidra.json",
+    "file": "dist/battle-zh/monsters/devidra.json"
+  },
+  {
     "key": "battle-zh/monsters/dinoflop.json",
     "file": "dist/battle-zh/monsters/dinoflop.json"
   },
   {
     "key": "battle-zh/monsters/djinnbo.json",
     "file": "dist/battle-zh/monsters/djinnbo.json"
+  },
+  {
+    "key": "battle-zh/monsters/doctsky.json",
+    "file": "dist/battle-zh/monsters/doctsky.json"
   },
   {
     "key": "battle-zh/monsters/dollfin.json",
@@ -1088,8 +1212,20 @@
     "file": "dist/battle-zh/monsters/enduros.json"
   },
   {
+    "key": "battle-zh/monsters/equill.json",
+    "file": "dist/battle-zh/monsters/equill.json"
+  },
+  {
     "key": "battle-zh/monsters/eruptibus.json",
     "file": "dist/battle-zh/monsters/eruptibus.json"
+  },
+  {
+    "key": "battle-zh/monsters/erythroskyte.json",
+    "file": "dist/battle-zh/monsters/erythroskyte.json"
+  },
+  {
+    "key": "battle-zh/monsters/eskipup.json",
+    "file": "dist/battle-zh/monsters/eskipup.json"
   },
   {
     "key": "battle-zh/monsters/exapode.json",
@@ -1156,6 +1292,10 @@
     "file": "dist/battle-zh/monsters/foofle.json"
   },
   {
+    "key": "battle-zh/monsters/fordin.json",
+    "file": "dist/battle-zh/monsters/fordin.json"
+  },
+  {
     "key": "battle-zh/monsters/forturtle.json",
     "file": "dist/battle-zh/monsters/forturtle.json"
   },
@@ -1172,6 +1312,10 @@
     "file": "dist/battle-zh/monsters/frondly.json"
   },
   {
+    "key": "battle-zh/monsters/fruitera.json",
+    "file": "dist/battle-zh/monsters/fruitera.json"
+  },
+  {
     "key": "battle-zh/monsters/furnursus.json",
     "file": "dist/battle-zh/monsters/furnursus.json"
   },
@@ -1184,8 +1328,16 @@
     "file": "dist/battle-zh/monsters/fuzzlet.json"
   },
   {
+    "key": "battle-zh/monsters/galasces.json",
+    "file": "dist/battle-zh/monsters/galasces.json"
+  },
+  {
     "key": "battle-zh/monsters/galnec.json",
     "file": "dist/battle-zh/monsters/galnec.json"
+  },
+  {
+    "key": "battle-zh/monsters/gastronium.json",
+    "file": "dist/battle-zh/monsters/gastronium.json"
   },
   {
     "key": "battle-zh/monsters/gectile.json",
@@ -1194,6 +1346,22 @@
   {
     "key": "battle-zh/monsters/ghosteeth.json",
     "file": "dist/battle-zh/monsters/ghosteeth.json"
+  },
+  {
+    "key": "battle-zh/monsters/gliffary.json",
+    "file": "dist/battle-zh/monsters/gliffary.json"
+  },
+  {
+    "key": "battle-zh/monsters/glombroc.json",
+    "file": "dist/battle-zh/monsters/glombroc.json"
+  },
+  {
+    "key": "battle-zh/monsters/glomon.json",
+    "file": "dist/battle-zh/monsters/glomon.json"
+  },
+  {
+    "key": "battle-zh/monsters/gourda.json",
+    "file": "dist/battle-zh/monsters/gourda.json"
   },
   {
     "key": "battle-zh/monsters/graffiki.json",
@@ -1216,8 +1384,20 @@
     "file": "dist/battle-zh/monsters/grintrock.json"
   },
   {
+    "key": "battle-zh/monsters/grumpi.json",
+    "file": "dist/battle-zh/monsters/grumpi.json"
+  },
+  {
     "key": "battle-zh/monsters/gryfix.json",
     "file": "dist/battle-zh/monsters/gryfix.json"
+  },
+  {
+    "key": "battle-zh/monsters/gupphire.json",
+    "file": "dist/battle-zh/monsters/gupphire.json"
+  },
+  {
+    "key": "battle-zh/monsters/gupphish.json",
+    "file": "dist/battle-zh/monsters/gupphish.json"
   },
   {
     "key": "battle-zh/monsters/hampotamos.json",
@@ -1236,8 +1416,32 @@
     "file": "dist/battle-zh/monsters/hectapod.json"
   },
   {
+    "key": "battle-zh/monsters/helipi.json",
+    "file": "dist/battle-zh/monsters/helipi.json"
+  },
+  {
     "key": "battle-zh/monsters/heronquak.json",
     "file": "dist/battle-zh/monsters/heronquak.json"
+  },
+  {
+    "key": "battle-zh/monsters/hissiorite.json",
+    "file": "dist/battle-zh/monsters/hissiorite.json"
+  },
+  {
+    "key": "battle-zh/monsters/hoarse.json",
+    "file": "dist/battle-zh/monsters/hoarse.json"
+  },
+  {
+    "key": "battle-zh/monsters/hoodoll.json",
+    "file": "dist/battle-zh/monsters/hoodoll.json"
+  },
+  {
+    "key": "battle-zh/monsters/houndice.json",
+    "file": "dist/battle-zh/monsters/houndice.json"
+  },
+  {
+    "key": "battle-zh/monsters/howl.json",
+    "file": "dist/battle-zh/monsters/howl.json"
   },
   {
     "key": "battle-zh/monsters/hydrone.json",
@@ -1256,8 +1460,20 @@
     "file": "dist/battle-zh/monsters/incandesfin.json"
   },
   {
+    "key": "battle-zh/monsters/jelillow.json",
+    "file": "dist/battle-zh/monsters/jelillow.json"
+  },
+  {
+    "key": "battle-zh/monsters/jeluna.json",
+    "file": "dist/battle-zh/monsters/jeluna.json"
+  },
+  {
     "key": "battle-zh/monsters/jemuar.json",
     "file": "dist/battle-zh/monsters/jemuar.json"
+  },
+  {
+    "key": "battle-zh/monsters/joulraton.json",
+    "file": "dist/battle-zh/monsters/joulraton.json"
   },
   {
     "key": "battle-zh/monsters/k9.json",
@@ -1292,6 +1508,18 @@
     "file": "dist/battle-zh/monsters/komoduel.json"
   },
   {
+    "key": "battle-zh/monsters/konuit.json",
+    "file": "dist/battle-zh/monsters/konuit.json"
+  },
+  {
+    "key": "battle-zh/monsters/kroki.json",
+    "file": "dist/battle-zh/monsters/kroki.json"
+  },
+  {
+    "key": "battle-zh/monsters/krokivip.json",
+    "file": "dist/battle-zh/monsters/krokivip.json"
+  },
+  {
     "key": "battle-zh/monsters/lambert.json",
     "file": "dist/battle-zh/monsters/lambert.json"
   },
@@ -1304,6 +1532,18 @@
     "file": "dist/battle-zh/monsters/legko.json"
   },
   {
+    "key": "battle-zh/monsters/legoplaste.json",
+    "file": "dist/battle-zh/monsters/legoplaste.json"
+  },
+  {
+    "key": "battle-zh/monsters/lesmagu.json",
+    "file": "dist/battle-zh/monsters/lesmagu.json"
+  },
+  {
+    "key": "battle-zh/monsters/lettice.json",
+    "file": "dist/battle-zh/monsters/lettice.json"
+  },
+  {
     "key": "battle-zh/monsters/lightmare.json",
     "file": "dist/battle-zh/monsters/lightmare.json"
   },
@@ -1312,8 +1552,20 @@
     "file": "dist/battle-zh/monsters/loliferno.json"
   },
   {
+    "key": "battle-zh/monsters/lunight.json",
+    "file": "dist/battle-zh/monsters/lunight.json"
+  },
+  {
     "key": "battle-zh/monsters/manosting.json",
     "file": "dist/battle-zh/monsters/manosting.json"
+  },
+  {
+    "key": "battle-zh/monsters/marvantis.json",
+    "file": "dist/battle-zh/monsters/marvantis.json"
+  },
+  {
+    "key": "battle-zh/monsters/marvillar.json",
+    "file": "dist/battle-zh/monsters/marvillar.json"
   },
   {
     "key": "battle-zh/monsters/masknake.json",
@@ -1324,16 +1576,32 @@
     "file": "dist/battle-zh/monsters/mauai.json"
   },
   {
+    "key": "battle-zh/monsters/medipup.json",
+    "file": "dist/battle-zh/monsters/medipup.json"
+  },
+  {
     "key": "battle-zh/monsters/medushock.json",
     "file": "dist/battle-zh/monsters/medushock.json"
+  },
+  {
+    "key": "battle-zh/monsters/megafruitera.json",
+    "file": "dist/battle-zh/monsters/megafruitera.json"
   },
   {
     "key": "battle-zh/monsters/memnomnom.json",
     "file": "dist/battle-zh/monsters/memnomnom.json"
   },
   {
+    "key": "battle-zh/monsters/merlicun.json",
+    "file": "dist/battle-zh/monsters/merlicun.json"
+  },
+  {
     "key": "battle-zh/monsters/metesaur.json",
     "file": "dist/battle-zh/monsters/metesaur.json"
+  },
+  {
+    "key": "battle-zh/monsters/metoxic.json",
+    "file": "dist/battle-zh/monsters/metoxic.json"
   },
   {
     "key": "battle-zh/monsters/miaownolith.json",
@@ -1376,12 +1644,24 @@
     "file": "dist/battle-zh/monsters/mrmoswitch.json"
   },
   {
+    "key": "battle-zh/monsters/myrmison.json",
+    "file": "dist/battle-zh/monsters/myrmison.json"
+  },
+  {
     "key": "battle-zh/monsters/mystikapi.json",
     "file": "dist/battle-zh/monsters/mystikapi.json"
   },
   {
     "key": "battle-zh/monsters/narcileaf.json",
     "file": "dist/battle-zh/monsters/narcileaf.json"
+  },
+  {
+    "key": "battle-zh/monsters/nebufin.json",
+    "file": "dist/battle-zh/monsters/nebufin.json"
+  },
+  {
+    "key": "battle-zh/monsters/ned.json",
+    "file": "dist/battle-zh/monsters/ned.json"
   },
   {
     "key": "battle-zh/monsters/neutrito.json",
@@ -1420,6 +1700,10 @@
     "file": "dist/battle-zh/monsters/nudimind.json"
   },
   {
+    "key": "battle-zh/monsters/nuenflu.json",
+    "file": "dist/battle-zh/monsters/nuenflu.json"
+  },
+  {
     "key": "battle-zh/monsters/nut.json",
     "file": "dist/battle-zh/monsters/nut.json"
   },
@@ -1452,6 +1736,10 @@
     "file": "dist/battle-zh/monsters/pawsand.json"
   },
   {
+    "key": "battle-zh/monsters/pearamanca.json",
+    "file": "dist/battle-zh/monsters/pearamanca.json"
+  },
+  {
     "key": "battle-zh/monsters/pharavion.json",
     "file": "dist/battle-zh/monsters/pharavion.json"
   },
@@ -1464,12 +1752,24 @@
     "file": "dist/battle-zh/monsters/picc.json"
   },
   {
+    "key": "battle-zh/monsters/pickoon.json",
+    "file": "dist/battle-zh/monsters/pickoon.json"
+  },
+  {
     "key": "battle-zh/monsters/pigabyte.json",
     "file": "dist/battle-zh/monsters/pigabyte.json"
   },
   {
+    "key": "battle-zh/monsters/pilthropus.json",
+    "file": "dist/battle-zh/monsters/pilthropus.json"
+  },
+  {
     "key": "battle-zh/monsters/pipis.json",
     "file": "dist/battle-zh/monsters/pipis.json"
+  },
+  {
+    "key": "battle-zh/monsters/poinchin.json",
+    "file": "dist/battle-zh/monsters/poinchin.json"
   },
   {
     "key": "battle-zh/monsters/polyrock.json",
@@ -1488,6 +1788,10 @@
     "file": "dist/battle-zh/monsters/potturney.json"
   },
   {
+    "key": "battle-zh/monsters/primordia.json",
+    "file": "dist/battle-zh/monsters/primordia.json"
+  },
+  {
     "key": "battle-zh/monsters/propellercat.json",
     "file": "dist/battle-zh/monsters/propellercat.json"
   },
@@ -1504,6 +1808,10 @@
     "file": "dist/battle-zh/monsters/pyraminx.json"
   },
   {
+    "key": "battle-zh/monsters/pythock.json",
+    "file": "dist/battle-zh/monsters/pythock.json"
+  },
+  {
     "key": "battle-zh/monsters/pythwire.json",
     "file": "dist/battle-zh/monsters/pythwire.json"
   },
@@ -1516,12 +1824,24 @@
     "file": "dist/battle-zh/monsters/rabbitosaur.json"
   },
   {
+    "key": "battle-zh/monsters/raccscal.json",
+    "file": "dist/battle-zh/monsters/raccscal.json"
+  },
+  {
+    "key": "battle-zh/monsters/raptoucan.json",
+    "file": "dist/battle-zh/monsters/raptoucan.json"
+  },
+  {
     "key": "battle-zh/monsters/rhincus.json",
     "file": "dist/battle-zh/monsters/rhincus.json"
   },
   {
     "key": "battle-zh/monsters/rhinocarpe.json",
     "file": "dist/battle-zh/monsters/rhinocarpe.json"
+  },
+  {
+    "key": "battle-zh/monsters/rinocereed.json",
+    "file": "dist/battle-zh/monsters/rinocereed.json"
   },
   {
     "key": "battle-zh/monsters/rockat.json",
@@ -1542,6 +1862,10 @@
   {
     "key": "battle-zh/monsters/rosarin.json",
     "file": "dist/battle-zh/monsters/rosarin.json"
+  },
+  {
+    "key": "battle-zh/monsters/ruffalo.json",
+    "file": "dist/battle-zh/monsters/ruffalo.json"
   },
   {
     "key": "battle-zh/monsters/runesquito.json",
@@ -1572,6 +1896,10 @@
     "file": "dist/battle-zh/monsters/sapsnap.json"
   },
   {
+    "key": "battle-zh/monsters/saurchin.json",
+    "file": "dist/battle-zh/monsters/saurchin.json"
+  },
+  {
     "key": "battle-zh/monsters/sclairus.json",
     "file": "dist/battle-zh/monsters/sclairus.json"
   },
@@ -1600,8 +1928,16 @@
     "file": "dist/battle-zh/monsters/sharpfin.json"
   },
   {
+    "key": "battle-zh/monsters/shelagu.json",
+    "file": "dist/battle-zh/monsters/shelagu.json"
+  },
+  {
     "key": "battle-zh/monsters/sheye.json",
     "file": "dist/battle-zh/monsters/sheye.json"
+  },
+  {
+    "key": "battle-zh/monsters/shimmerain.json",
+    "file": "dist/battle-zh/monsters/shimmerain.json"
   },
   {
     "key": "battle-zh/monsters/shnark.json",
@@ -1612,12 +1948,20 @@
     "file": "dist/battle-zh/monsters/shrab.json"
   },
   {
+    "key": "battle-zh/monsters/shull.json",
+    "file": "dist/battle-zh/monsters/shull.json"
+  },
+  {
     "key": "battle-zh/monsters/shybulb.json",
     "file": "dist/battle-zh/monsters/shybulb.json"
   },
   {
     "key": "battle-zh/monsters/skwib.json",
     "file": "dist/battle-zh/monsters/skwib.json"
+  },
+  {
+    "key": "battle-zh/monsters/slichen.json",
+    "file": "dist/battle-zh/monsters/slichen.json"
   },
   {
     "key": "battle-zh/monsters/sludgehog.json",
@@ -1628,12 +1972,28 @@
     "file": "dist/battle-zh/monsters/snaki.json"
   },
   {
+    "key": "battle-zh/monsters/snarlon.json",
+    "file": "dist/battle-zh/monsters/snarlon.json"
+  },
+  {
+    "key": "battle-zh/monsters/snock.json",
+    "file": "dist/battle-zh/monsters/snock.json"
+  },
+  {
     "key": "battle-zh/monsters/snokari.json",
     "file": "dist/battle-zh/monsters/snokari.json"
   },
   {
+    "key": "battle-zh/monsters/snowrilla.json",
+    "file": "dist/battle-zh/monsters/snowrilla.json"
+  },
+  {
     "key": "battle-zh/monsters/sockeserp.json",
     "file": "dist/battle-zh/monsters/sockeserp.json"
+  },
+  {
+    "key": "battle-zh/monsters/solight.json",
+    "file": "dist/battle-zh/monsters/solight.json"
   },
   {
     "key": "battle-zh/monsters/spighter.json",
@@ -1642,6 +2002,18 @@
   {
     "key": "battle-zh/monsters/spirain.json",
     "file": "dist/battle-zh/monsters/spirain.json"
+  },
+  {
+    "key": "battle-zh/monsters/spoilurm.json",
+    "file": "dist/battle-zh/monsters/spoilurm.json"
+  },
+  {
+    "key": "battle-zh/monsters/sprightly.json",
+    "file": "dist/battle-zh/monsters/sprightly.json"
+  },
+  {
+    "key": "battle-zh/monsters/sprorm.json",
+    "file": "dist/battle-zh/monsters/sprorm.json"
   },
   {
     "key": "battle-zh/monsters/spycozeus.json",
@@ -1660,12 +2032,20 @@
     "file": "dist/battle-zh/monsters/statursus.json"
   },
   {
+    "key": "battle-zh/monsters/stomic.json",
+    "file": "dist/battle-zh/monsters/stomic.json"
+  },
+  {
     "key": "battle-zh/monsters/strella.json",
     "file": "dist/battle-zh/monsters/strella.json"
   },
   {
     "key": "battle-zh/monsters/sumchon.json",
     "file": "dist/battle-zh/monsters/sumchon.json"
+  },
+  {
+    "key": "battle-zh/monsters/tadcool.json",
+    "file": "dist/battle-zh/monsters/tadcool.json"
   },
   {
     "key": "battle-zh/monsters/tarpeur.json",
@@ -1676,8 +2056,16 @@
     "file": "dist/battle-zh/monsters/taupypus.json"
   },
   {
+    "key": "battle-zh/monsters/teddisun.json",
+    "file": "dist/battle-zh/monsters/teddisun.json"
+  },
+  {
     "key": "battle-zh/monsters/tetrchimp.json",
     "file": "dist/battle-zh/monsters/tetrchimp.json"
+  },
+  {
+    "key": "battle-zh/monsters/thumpurn.json",
+    "file": "dist/battle-zh/monsters/thumpurn.json"
   },
   {
     "key": "battle-zh/monsters/tigrock.json",
@@ -1700,6 +2088,10 @@
     "file": "dist/battle-zh/monsters/tornicane.json"
   },
   {
+    "key": "battle-zh/monsters/toucanary.json",
+    "file": "dist/battle-zh/monsters/toucanary.json"
+  },
+  {
     "key": "battle-zh/monsters/toufigel.json",
     "file": "dist/battle-zh/monsters/toufigel.json"
   },
@@ -1714,6 +2106,10 @@
   {
     "key": "battle-zh/monsters/trapsnap.json",
     "file": "dist/battle-zh/monsters/trapsnap.json"
+  },
+  {
+    "key": "battle-zh/monsters/trojerror.json",
+    "file": "dist/battle-zh/monsters/trojerror.json"
   },
   {
     "key": "battle-zh/monsters/tsushimi.json",
@@ -1736,8 +2132,32 @@
     "file": "dist/battle-zh/monsters/tumbleworm.json"
   },
   {
+    "key": "battle-zh/monsters/turnipper.json",
+    "file": "dist/battle-zh/monsters/turnipper.json"
+  },
+  {
+    "key": "battle-zh/monsters/tux.json",
+    "file": "dist/battle-zh/monsters/tux.json"
+  },
+  {
     "key": "battle-zh/monsters/tweesher.json",
     "file": "dist/battle-zh/monsters/tweesher.json"
+  },
+  {
+    "key": "battle-zh/monsters/uf0.json",
+    "file": "dist/battle-zh/monsters/uf0.json"
+  },
+  {
+    "key": "battle-zh/monsters/uglip.json",
+    "file": "dist/battle-zh/monsters/uglip.json"
+  },
+  {
+    "key": "battle-zh/monsters/uneye.json",
+    "file": "dist/battle-zh/monsters/uneye.json"
+  },
+  {
+    "key": "battle-zh/monsters/uprout.json",
+    "file": "dist/battle-zh/monsters/uprout.json"
   },
   {
     "key": "battle-zh/monsters/urcheedle.json",
@@ -1758,6 +2178,10 @@
   {
     "key": "battle-zh/monsters/vigueur.json",
     "file": "dist/battle-zh/monsters/vigueur.json"
+  },
+  {
+    "key": "battle-zh/monsters/virware.json",
+    "file": "dist/battle-zh/monsters/virware.json"
   },
   {
     "key": "battle-zh/monsters/vivicinder.json",
@@ -1804,8 +2228,20 @@
     "file": "dist/battle-zh/monsters/vulpyre.json"
   },
   {
+    "key": "battle-zh/monsters/waysprite.json",
+    "file": "dist/battle-zh/monsters/waysprite.json"
+  },
+  {
     "key": "battle-zh/monsters/weavifly.json",
     "file": "dist/battle-zh/monsters/weavifly.json"
+  },
+  {
+    "key": "battle-zh/monsters/weedlantis.json",
+    "file": "dist/battle-zh/monsters/weedlantis.json"
+  },
+  {
+    "key": "battle-zh/monsters/weedsea.json",
+    "file": "dist/battle-zh/monsters/weedsea.json"
   },
   {
     "key": "battle-zh/monsters/windeye.json",
@@ -1816,8 +2252,16 @@
     "file": "dist/battle-zh/monsters/wolffsky.json"
   },
   {
+    "key": "battle-zh/monsters/wolololl.json",
+    "file": "dist/battle-zh/monsters/wolololl.json"
+  },
+  {
     "key": "battle-zh/monsters/woodoor.json",
     "file": "dist/battle-zh/monsters/woodoor.json"
+  },
+  {
+    "key": "battle-zh/monsters/wrougon.json",
+    "file": "dist/battle-zh/monsters/wrougon.json"
   },
   {
     "key": "battle-zh/monsters/xeon.json",
@@ -1826,6 +2270,14 @@
   {
     "key": "battle-zh/monsters/xeon_2.json",
     "file": "dist/battle-zh/monsters/xeon_2.json"
+  },
+  {
+    "key": "battle-zh/monsters/yamada.json",
+    "file": "dist/battle-zh/monsters/yamada.json"
+  },
+  {
+    "key": "battle-zh/monsters/yiinaang.json",
+    "file": "dist/battle-zh/monsters/yiinaang.json"
   },
   {
     "key": "battle-zh/monsters/ziggurat.json",
@@ -2072,6 +2524,10 @@
     "file": "dist/battle-zh/techniques/bubble_trap.json"
   },
   {
+    "key": "battle-zh/techniques/bubbles.json",
+    "file": "dist/battle-zh/techniques/bubbles.json"
+  },
+  {
     "key": "battle-zh/techniques/bullet.json",
     "file": "dist/battle-zh/techniques/bullet.json"
   },
@@ -2096,6 +2552,10 @@
     "file": "dist/battle-zh/techniques/caustic_spray.json"
   },
   {
+    "key": "battle-zh/techniques/cavity.json",
+    "file": "dist/battle-zh/techniques/cavity.json"
+  },
+  {
     "key": "battle-zh/techniques/chameleon.json",
     "file": "dist/battle-zh/techniques/chameleon.json"
   },
@@ -2114,6 +2574,10 @@
   {
     "key": "battle-zh/techniques/clamp_on.json",
     "file": "dist/battle-zh/techniques/clamp_on.json"
+  },
+  {
+    "key": "battle-zh/techniques/clock.json",
+    "file": "dist/battle-zh/techniques/clock.json"
   },
   {
     "key": "battle-zh/techniques/cloud_aether.json",
@@ -2210,6 +2674,10 @@
   {
     "key": "battle-zh/techniques/evasion.json",
     "file": "dist/battle-zh/techniques/evasion.json"
+  },
+  {
+    "key": "battle-zh/techniques/external_power.json",
+    "file": "dist/battle-zh/techniques/external_power.json"
   },
   {
     "key": "battle-zh/techniques/eyebite.json",
@@ -2384,6 +2852,10 @@
     "file": "dist/battle-zh/techniques/infectious_bite.json"
   },
   {
+    "key": "battle-zh/techniques/inner_power.json",
+    "file": "dist/battle-zh/techniques/inner_power.json"
+  },
+  {
     "key": "battle-zh/techniques/insanity.json",
     "file": "dist/battle-zh/techniques/insanity.json"
   },
@@ -2450,6 +2922,10 @@
   {
     "key": "battle-zh/techniques/lust.json",
     "file": "dist/battle-zh/techniques/lust.json"
+  },
+  {
+    "key": "battle-zh/techniques/magic_spell.json",
+    "file": "dist/battle-zh/techniques/magic_spell.json"
   },
   {
     "key": "battle-zh/techniques/magma.json",
@@ -2596,6 +3072,10 @@
     "file": "dist/battle-zh/techniques/pouch.json"
   },
   {
+    "key": "battle-zh/techniques/power_theft.json",
+    "file": "dist/battle-zh/techniques/power_theft.json"
+  },
+  {
     "key": "battle-zh/techniques/proboscis.json",
     "file": "dist/battle-zh/techniques/proboscis.json"
   },
@@ -2700,6 +3180,10 @@
     "file": "dist/battle-zh/techniques/shapechange.json"
   },
   {
+    "key": "battle-zh/techniques/shooting_star.json",
+    "file": "dist/battle-zh/techniques/shooting_star.json"
+  },
+  {
     "key": "battle-zh/techniques/shrapnel.json",
     "file": "dist/battle-zh/techniques/shrapnel.json"
   },
@@ -2730,6 +3214,10 @@
   {
     "key": "battle-zh/techniques/snowstorm.json",
     "file": "dist/battle-zh/techniques/snowstorm.json"
+  },
+  {
+    "key": "battle-zh/techniques/sockpuppet.json",
+    "file": "dist/battle-zh/techniques/sockpuppet.json"
   },
   {
     "key": "battle-zh/techniques/solar_synthesis.json",
@@ -2820,6 +3308,10 @@
     "file": "dist/battle-zh/techniques/suplex.json"
   },
   {
+    "key": "battle-zh/techniques/surf.json",
+    "file": "dist/battle-zh/techniques/surf.json"
+  },
+  {
     "key": "battle-zh/techniques/surge.json",
     "file": "dist/battle-zh/techniques/surge.json"
   },
@@ -2834,6 +3326,10 @@
   {
     "key": "battle-zh/techniques/take_cover.json",
     "file": "dist/battle-zh/techniques/take_cover.json"
+  },
+  {
+    "key": "battle-zh/techniques/taunt.json",
+    "file": "dist/battle-zh/techniques/taunt.json"
   },
   {
     "key": "battle-zh/techniques/ten_thousand_feathers.json",
@@ -2892,6 +3388,10 @@
     "file": "dist/battle-zh/techniques/tsunami.json"
   },
   {
+    "key": "battle-zh/techniques/tux_attack.json",
+    "file": "dist/battle-zh/techniques/tux_attack.json"
+  },
+  {
     "key": "battle-zh/techniques/ubuntu.json",
     "file": "dist/battle-zh/techniques/ubuntu.json"
   },
@@ -2946,6 +3446,10 @@
   {
     "key": "battle-zh/techniques/whirlwind.json",
     "file": "dist/battle-zh/techniques/whirlwind.json"
+  },
+  {
+    "key": "battle-zh/techniques/wicked_wind.json",
+    "file": "dist/battle-zh/techniques/wicked_wind.json"
   },
   {
     "key": "battle-zh/techniques/wing_tip.json",
@@ -3444,6 +3948,14 @@
     "file": "dist/battle/monsters/allagon.json"
   },
   {
+    "key": "battle/monsters/altie.json",
+    "file": "dist/battle/monsters/altie.json"
+  },
+  {
+    "key": "battle/monsters/ambuwl.json",
+    "file": "dist/battle/monsters/ambuwl.json"
+  },
+  {
     "key": "battle/monsters/ampystoma.json",
     "file": "dist/battle/monsters/ampystoma.json"
   },
@@ -3476,6 +3988,14 @@
     "file": "dist/battle/monsters/arthrobolt.json"
   },
   {
+    "key": "battle/monsters/askylpaws.json",
+    "file": "dist/battle/monsters/askylpaws.json"
+  },
+  {
+    "key": "battle/monsters/asudopt.json",
+    "file": "dist/battle/monsters/asudopt.json"
+  },
+  {
     "key": "battle/monsters/av8r.json",
     "file": "dist/battle/monsters/av8r.json"
   },
@@ -3488,8 +4008,24 @@
     "file": "dist/battle/monsters/b_ver_1.json"
   },
   {
+    "key": "battle/monsters/babysnitch.json",
+    "file": "dist/battle/monsters/babysnitch.json"
+  },
+  {
+    "key": "battle/monsters/baddrscratch.json",
+    "file": "dist/battle/monsters/baddrscratch.json"
+  },
+  {
     "key": "battle/monsters/bamboon.json",
     "file": "dist/battle/monsters/bamboon.json"
+  },
+  {
+    "key": "battle/monsters/banling.json",
+    "file": "dist/battle/monsters/banling.json"
+  },
+  {
+    "key": "battle/monsters/bansaken.json",
+    "file": "dist/battle/monsters/bansaken.json"
   },
   {
     "key": "battle/monsters/baobaraffe.json",
@@ -3504,8 +4040,20 @@
     "file": "dist/battle/monsters/bearloch.json"
   },
   {
+    "key": "battle/monsters/beenstalker.json",
+    "file": "dist/battle/monsters/beenstalker.json"
+  },
+  {
+    "key": "battle/monsters/bewhich.json",
+    "file": "dist/battle/monsters/bewhich.json"
+  },
+  {
     "key": "battle/monsters/bigfin.json",
     "file": "dist/battle/monsters/bigfin.json"
+  },
+  {
+    "key": "battle/monsters/birdee.json",
+    "file": "dist/battle/monsters/birdee.json"
   },
   {
     "key": "battle/monsters/birdling.json",
@@ -3536,6 +4084,10 @@
     "file": "dist/battle/monsters/boxali.json"
   },
   {
+    "key": "battle/monsters/boxorox.json",
+    "file": "dist/battle/monsters/boxorox.json"
+  },
+  {
     "key": "battle/monsters/breem.json",
     "file": "dist/battle/monsters/breem.json"
   },
@@ -3552,6 +4104,10 @@
     "file": "dist/battle/monsters/brickhemoth.json"
   },
   {
+    "key": "battle/monsters/brumi.json",
+    "file": "dist/battle/monsters/brumi.json"
+  },
+  {
     "key": "battle/monsters/budaye.json",
     "file": "dist/battle/monsters/budaye.json"
   },
@@ -3560,8 +4116,24 @@
     "file": "dist/battle/monsters/bugnin.json"
   },
   {
+    "key": "battle/monsters/bumbulus.json",
+    "file": "dist/battle/monsters/bumbulus.json"
+  },
+  {
+    "key": "battle/monsters/burrlock.json",
+    "file": "dist/battle/monsters/burrlock.json"
+  },
+  {
     "key": "battle/monsters/bursa.json",
     "file": "dist/battle/monsters/bursa.json"
+  },
+  {
+    "key": "battle/monsters/cacaburr.json",
+    "file": "dist/battle/monsters/cacaburr.json"
+  },
+  {
+    "key": "battle/monsters/cackleen.json",
+    "file": "dist/battle/monsters/cackleen.json"
   },
   {
     "key": "battle/monsters/cairfrey.json",
@@ -3578,6 +4150,10 @@
   {
     "key": "battle/monsters/capiti.json",
     "file": "dist/battle/monsters/capiti.json"
+  },
+  {
+    "key": "battle/monsters/carcharock.json",
+    "file": "dist/battle/monsters/carcharock.json"
   },
   {
     "key": "battle/monsters/cardiling.json",
@@ -3600,6 +4176,30 @@
     "file": "dist/battle/monsters/cateye.json"
   },
   {
+    "key": "battle/monsters/chenipode.json",
+    "file": "dist/battle/monsters/chenipode.json"
+  },
+  {
+    "key": "battle/monsters/cherubat.json",
+    "file": "dist/battle/monsters/cherubat.json"
+  },
+  {
+    "key": "battle/monsters/chibiro.json",
+    "file": "dist/battle/monsters/chibiro.json"
+  },
+  {
+    "key": "battle/monsters/chickadee.json",
+    "file": "dist/battle/monsters/chickadee.json"
+  },
+  {
+    "key": "battle/monsters/chillimp.json",
+    "file": "dist/battle/monsters/chillimp.json"
+  },
+  {
+    "key": "battle/monsters/chloragon.json",
+    "file": "dist/battle/monsters/chloragon.json"
+  },
+  {
     "key": "battle/monsters/chrome_robo.json",
     "file": "dist/battle/monsters/chrome_robo.json"
   },
@@ -3608,8 +4208,16 @@
     "file": "dist/battle/monsters/chromeye.json"
   },
   {
+    "key": "battle/monsters/claymorior.json",
+    "file": "dist/battle/monsters/claymorior.json"
+  },
+  {
     "key": "battle/monsters/coaldiak.json",
     "file": "dist/battle/monsters/coaldiak.json"
+  },
+  {
+    "key": "battle/monsters/cobarett.json",
+    "file": "dist/battle/monsters/cobarett.json"
   },
   {
     "key": "battle/monsters/cochini.json",
@@ -3618,6 +4226,10 @@
   {
     "key": "battle/monsters/cocrune.json",
     "file": "dist/battle/monsters/cocrune.json"
+  },
+  {
+    "key": "battle/monsters/cohldrabi.json",
+    "file": "dist/battle/monsters/cohldrabi.json"
   },
   {
     "key": "battle/monsters/coleorus.json",
@@ -3672,12 +4284,28 @@
     "file": "dist/battle/monsters/delfeco.json"
   },
   {
+    "key": "battle/monsters/demosnow.json",
+    "file": "dist/battle/monsters/demosnow.json"
+  },
+  {
+    "key": "battle/monsters/devidin.json",
+    "file": "dist/battle/monsters/devidin.json"
+  },
+  {
+    "key": "battle/monsters/devidra.json",
+    "file": "dist/battle/monsters/devidra.json"
+  },
+  {
     "key": "battle/monsters/dinoflop.json",
     "file": "dist/battle/monsters/dinoflop.json"
   },
   {
     "key": "battle/monsters/djinnbo.json",
     "file": "dist/battle/monsters/djinnbo.json"
+  },
+  {
+    "key": "battle/monsters/doctsky.json",
+    "file": "dist/battle/monsters/doctsky.json"
   },
   {
     "key": "battle/monsters/dollfin.json",
@@ -3740,8 +4368,20 @@
     "file": "dist/battle/monsters/enduros.json"
   },
   {
+    "key": "battle/monsters/equill.json",
+    "file": "dist/battle/monsters/equill.json"
+  },
+  {
     "key": "battle/monsters/eruptibus.json",
     "file": "dist/battle/monsters/eruptibus.json"
+  },
+  {
+    "key": "battle/monsters/erythroskyte.json",
+    "file": "dist/battle/monsters/erythroskyte.json"
+  },
+  {
+    "key": "battle/monsters/eskipup.json",
+    "file": "dist/battle/monsters/eskipup.json"
   },
   {
     "key": "battle/monsters/exapode.json",
@@ -3808,6 +4448,10 @@
     "file": "dist/battle/monsters/foofle.json"
   },
   {
+    "key": "battle/monsters/fordin.json",
+    "file": "dist/battle/monsters/fordin.json"
+  },
+  {
     "key": "battle/monsters/forturtle.json",
     "file": "dist/battle/monsters/forturtle.json"
   },
@@ -3824,6 +4468,10 @@
     "file": "dist/battle/monsters/frondly.json"
   },
   {
+    "key": "battle/monsters/fruitera.json",
+    "file": "dist/battle/monsters/fruitera.json"
+  },
+  {
     "key": "battle/monsters/furnursus.json",
     "file": "dist/battle/monsters/furnursus.json"
   },
@@ -3836,8 +4484,16 @@
     "file": "dist/battle/monsters/fuzzlet.json"
   },
   {
+    "key": "battle/monsters/galasces.json",
+    "file": "dist/battle/monsters/galasces.json"
+  },
+  {
     "key": "battle/monsters/galnec.json",
     "file": "dist/battle/monsters/galnec.json"
+  },
+  {
+    "key": "battle/monsters/gastronium.json",
+    "file": "dist/battle/monsters/gastronium.json"
   },
   {
     "key": "battle/monsters/gectile.json",
@@ -3846,6 +4502,22 @@
   {
     "key": "battle/monsters/ghosteeth.json",
     "file": "dist/battle/monsters/ghosteeth.json"
+  },
+  {
+    "key": "battle/monsters/gliffary.json",
+    "file": "dist/battle/monsters/gliffary.json"
+  },
+  {
+    "key": "battle/monsters/glombroc.json",
+    "file": "dist/battle/monsters/glombroc.json"
+  },
+  {
+    "key": "battle/monsters/glomon.json",
+    "file": "dist/battle/monsters/glomon.json"
+  },
+  {
+    "key": "battle/monsters/gourda.json",
+    "file": "dist/battle/monsters/gourda.json"
   },
   {
     "key": "battle/monsters/graffiki.json",
@@ -3868,8 +4540,20 @@
     "file": "dist/battle/monsters/grintrock.json"
   },
   {
+    "key": "battle/monsters/grumpi.json",
+    "file": "dist/battle/monsters/grumpi.json"
+  },
+  {
     "key": "battle/monsters/gryfix.json",
     "file": "dist/battle/monsters/gryfix.json"
+  },
+  {
+    "key": "battle/monsters/gupphire.json",
+    "file": "dist/battle/monsters/gupphire.json"
+  },
+  {
+    "key": "battle/monsters/gupphish.json",
+    "file": "dist/battle/monsters/gupphish.json"
   },
   {
     "key": "battle/monsters/hampotamos.json",
@@ -3888,8 +4572,32 @@
     "file": "dist/battle/monsters/hectapod.json"
   },
   {
+    "key": "battle/monsters/helipi.json",
+    "file": "dist/battle/monsters/helipi.json"
+  },
+  {
     "key": "battle/monsters/heronquak.json",
     "file": "dist/battle/monsters/heronquak.json"
+  },
+  {
+    "key": "battle/monsters/hissiorite.json",
+    "file": "dist/battle/monsters/hissiorite.json"
+  },
+  {
+    "key": "battle/monsters/hoarse.json",
+    "file": "dist/battle/monsters/hoarse.json"
+  },
+  {
+    "key": "battle/monsters/hoodoll.json",
+    "file": "dist/battle/monsters/hoodoll.json"
+  },
+  {
+    "key": "battle/monsters/houndice.json",
+    "file": "dist/battle/monsters/houndice.json"
+  },
+  {
+    "key": "battle/monsters/howl.json",
+    "file": "dist/battle/monsters/howl.json"
   },
   {
     "key": "battle/monsters/hydrone.json",
@@ -3908,8 +4616,20 @@
     "file": "dist/battle/monsters/incandesfin.json"
   },
   {
+    "key": "battle/monsters/jelillow.json",
+    "file": "dist/battle/monsters/jelillow.json"
+  },
+  {
+    "key": "battle/monsters/jeluna.json",
+    "file": "dist/battle/monsters/jeluna.json"
+  },
+  {
     "key": "battle/monsters/jemuar.json",
     "file": "dist/battle/monsters/jemuar.json"
+  },
+  {
+    "key": "battle/monsters/joulraton.json",
+    "file": "dist/battle/monsters/joulraton.json"
   },
   {
     "key": "battle/monsters/k9.json",
@@ -3944,6 +4664,18 @@
     "file": "dist/battle/monsters/komoduel.json"
   },
   {
+    "key": "battle/monsters/konuit.json",
+    "file": "dist/battle/monsters/konuit.json"
+  },
+  {
+    "key": "battle/monsters/kroki.json",
+    "file": "dist/battle/monsters/kroki.json"
+  },
+  {
+    "key": "battle/monsters/krokivip.json",
+    "file": "dist/battle/monsters/krokivip.json"
+  },
+  {
     "key": "battle/monsters/lambert.json",
     "file": "dist/battle/monsters/lambert.json"
   },
@@ -3956,6 +4688,18 @@
     "file": "dist/battle/monsters/legko.json"
   },
   {
+    "key": "battle/monsters/legoplaste.json",
+    "file": "dist/battle/monsters/legoplaste.json"
+  },
+  {
+    "key": "battle/monsters/lesmagu.json",
+    "file": "dist/battle/monsters/lesmagu.json"
+  },
+  {
+    "key": "battle/monsters/lettice.json",
+    "file": "dist/battle/monsters/lettice.json"
+  },
+  {
     "key": "battle/monsters/lightmare.json",
     "file": "dist/battle/monsters/lightmare.json"
   },
@@ -3964,8 +4708,20 @@
     "file": "dist/battle/monsters/loliferno.json"
   },
   {
+    "key": "battle/monsters/lunight.json",
+    "file": "dist/battle/monsters/lunight.json"
+  },
+  {
     "key": "battle/monsters/manosting.json",
     "file": "dist/battle/monsters/manosting.json"
+  },
+  {
+    "key": "battle/monsters/marvantis.json",
+    "file": "dist/battle/monsters/marvantis.json"
+  },
+  {
+    "key": "battle/monsters/marvillar.json",
+    "file": "dist/battle/monsters/marvillar.json"
   },
   {
     "key": "battle/monsters/masknake.json",
@@ -3976,16 +4732,32 @@
     "file": "dist/battle/monsters/mauai.json"
   },
   {
+    "key": "battle/monsters/medipup.json",
+    "file": "dist/battle/monsters/medipup.json"
+  },
+  {
     "key": "battle/monsters/medushock.json",
     "file": "dist/battle/monsters/medushock.json"
+  },
+  {
+    "key": "battle/monsters/megafruitera.json",
+    "file": "dist/battle/monsters/megafruitera.json"
   },
   {
     "key": "battle/monsters/memnomnom.json",
     "file": "dist/battle/monsters/memnomnom.json"
   },
   {
+    "key": "battle/monsters/merlicun.json",
+    "file": "dist/battle/monsters/merlicun.json"
+  },
+  {
     "key": "battle/monsters/metesaur.json",
     "file": "dist/battle/monsters/metesaur.json"
+  },
+  {
+    "key": "battle/monsters/metoxic.json",
+    "file": "dist/battle/monsters/metoxic.json"
   },
   {
     "key": "battle/monsters/miaownolith.json",
@@ -4028,12 +4800,24 @@
     "file": "dist/battle/monsters/mrmoswitch.json"
   },
   {
+    "key": "battle/monsters/myrmison.json",
+    "file": "dist/battle/monsters/myrmison.json"
+  },
+  {
     "key": "battle/monsters/mystikapi.json",
     "file": "dist/battle/monsters/mystikapi.json"
   },
   {
     "key": "battle/monsters/narcileaf.json",
     "file": "dist/battle/monsters/narcileaf.json"
+  },
+  {
+    "key": "battle/monsters/nebufin.json",
+    "file": "dist/battle/monsters/nebufin.json"
+  },
+  {
+    "key": "battle/monsters/ned.json",
+    "file": "dist/battle/monsters/ned.json"
   },
   {
     "key": "battle/monsters/neutrito.json",
@@ -4072,6 +4856,10 @@
     "file": "dist/battle/monsters/nudimind.json"
   },
   {
+    "key": "battle/monsters/nuenflu.json",
+    "file": "dist/battle/monsters/nuenflu.json"
+  },
+  {
     "key": "battle/monsters/nut.json",
     "file": "dist/battle/monsters/nut.json"
   },
@@ -4104,6 +4892,10 @@
     "file": "dist/battle/monsters/pawsand.json"
   },
   {
+    "key": "battle/monsters/pearamanca.json",
+    "file": "dist/battle/monsters/pearamanca.json"
+  },
+  {
     "key": "battle/monsters/pharavion.json",
     "file": "dist/battle/monsters/pharavion.json"
   },
@@ -4116,12 +4908,24 @@
     "file": "dist/battle/monsters/picc.json"
   },
   {
+    "key": "battle/monsters/pickoon.json",
+    "file": "dist/battle/monsters/pickoon.json"
+  },
+  {
     "key": "battle/monsters/pigabyte.json",
     "file": "dist/battle/monsters/pigabyte.json"
   },
   {
+    "key": "battle/monsters/pilthropus.json",
+    "file": "dist/battle/monsters/pilthropus.json"
+  },
+  {
     "key": "battle/monsters/pipis.json",
     "file": "dist/battle/monsters/pipis.json"
+  },
+  {
+    "key": "battle/monsters/poinchin.json",
+    "file": "dist/battle/monsters/poinchin.json"
   },
   {
     "key": "battle/monsters/polyrock.json",
@@ -4140,6 +4944,10 @@
     "file": "dist/battle/monsters/potturney.json"
   },
   {
+    "key": "battle/monsters/primordia.json",
+    "file": "dist/battle/monsters/primordia.json"
+  },
+  {
     "key": "battle/monsters/propellercat.json",
     "file": "dist/battle/monsters/propellercat.json"
   },
@@ -4156,6 +4964,10 @@
     "file": "dist/battle/monsters/pyraminx.json"
   },
   {
+    "key": "battle/monsters/pythock.json",
+    "file": "dist/battle/monsters/pythock.json"
+  },
+  {
     "key": "battle/monsters/pythwire.json",
     "file": "dist/battle/monsters/pythwire.json"
   },
@@ -4168,12 +4980,24 @@
     "file": "dist/battle/monsters/rabbitosaur.json"
   },
   {
+    "key": "battle/monsters/raccscal.json",
+    "file": "dist/battle/monsters/raccscal.json"
+  },
+  {
+    "key": "battle/monsters/raptoucan.json",
+    "file": "dist/battle/monsters/raptoucan.json"
+  },
+  {
     "key": "battle/monsters/rhincus.json",
     "file": "dist/battle/monsters/rhincus.json"
   },
   {
     "key": "battle/monsters/rhinocarpe.json",
     "file": "dist/battle/monsters/rhinocarpe.json"
+  },
+  {
+    "key": "battle/monsters/rinocereed.json",
+    "file": "dist/battle/monsters/rinocereed.json"
   },
   {
     "key": "battle/monsters/rockat.json",
@@ -4194,6 +5018,10 @@
   {
     "key": "battle/monsters/rosarin.json",
     "file": "dist/battle/monsters/rosarin.json"
+  },
+  {
+    "key": "battle/monsters/ruffalo.json",
+    "file": "dist/battle/monsters/ruffalo.json"
   },
   {
     "key": "battle/monsters/runesquito.json",
@@ -4224,6 +5052,10 @@
     "file": "dist/battle/monsters/sapsnap.json"
   },
   {
+    "key": "battle/monsters/saurchin.json",
+    "file": "dist/battle/monsters/saurchin.json"
+  },
+  {
     "key": "battle/monsters/sclairus.json",
     "file": "dist/battle/monsters/sclairus.json"
   },
@@ -4252,8 +5084,16 @@
     "file": "dist/battle/monsters/sharpfin.json"
   },
   {
+    "key": "battle/monsters/shelagu.json",
+    "file": "dist/battle/monsters/shelagu.json"
+  },
+  {
     "key": "battle/monsters/sheye.json",
     "file": "dist/battle/monsters/sheye.json"
+  },
+  {
+    "key": "battle/monsters/shimmerain.json",
+    "file": "dist/battle/monsters/shimmerain.json"
   },
   {
     "key": "battle/monsters/shnark.json",
@@ -4264,12 +5104,20 @@
     "file": "dist/battle/monsters/shrab.json"
   },
   {
+    "key": "battle/monsters/shull.json",
+    "file": "dist/battle/monsters/shull.json"
+  },
+  {
     "key": "battle/monsters/shybulb.json",
     "file": "dist/battle/monsters/shybulb.json"
   },
   {
     "key": "battle/monsters/skwib.json",
     "file": "dist/battle/monsters/skwib.json"
+  },
+  {
+    "key": "battle/monsters/slichen.json",
+    "file": "dist/battle/monsters/slichen.json"
   },
   {
     "key": "battle/monsters/sludgehog.json",
@@ -4280,12 +5128,28 @@
     "file": "dist/battle/monsters/snaki.json"
   },
   {
+    "key": "battle/monsters/snarlon.json",
+    "file": "dist/battle/monsters/snarlon.json"
+  },
+  {
+    "key": "battle/monsters/snock.json",
+    "file": "dist/battle/monsters/snock.json"
+  },
+  {
     "key": "battle/monsters/snokari.json",
     "file": "dist/battle/monsters/snokari.json"
   },
   {
+    "key": "battle/monsters/snowrilla.json",
+    "file": "dist/battle/monsters/snowrilla.json"
+  },
+  {
     "key": "battle/monsters/sockeserp.json",
     "file": "dist/battle/monsters/sockeserp.json"
+  },
+  {
+    "key": "battle/monsters/solight.json",
+    "file": "dist/battle/monsters/solight.json"
   },
   {
     "key": "battle/monsters/spighter.json",
@@ -4294,6 +5158,18 @@
   {
     "key": "battle/monsters/spirain.json",
     "file": "dist/battle/monsters/spirain.json"
+  },
+  {
+    "key": "battle/monsters/spoilurm.json",
+    "file": "dist/battle/monsters/spoilurm.json"
+  },
+  {
+    "key": "battle/monsters/sprightly.json",
+    "file": "dist/battle/monsters/sprightly.json"
+  },
+  {
+    "key": "battle/monsters/sprorm.json",
+    "file": "dist/battle/monsters/sprorm.json"
   },
   {
     "key": "battle/monsters/spycozeus.json",
@@ -4312,12 +5188,20 @@
     "file": "dist/battle/monsters/statursus.json"
   },
   {
+    "key": "battle/monsters/stomic.json",
+    "file": "dist/battle/monsters/stomic.json"
+  },
+  {
     "key": "battle/monsters/strella.json",
     "file": "dist/battle/monsters/strella.json"
   },
   {
     "key": "battle/monsters/sumchon.json",
     "file": "dist/battle/monsters/sumchon.json"
+  },
+  {
+    "key": "battle/monsters/tadcool.json",
+    "file": "dist/battle/monsters/tadcool.json"
   },
   {
     "key": "battle/monsters/tarpeur.json",
@@ -4328,8 +5212,16 @@
     "file": "dist/battle/monsters/taupypus.json"
   },
   {
+    "key": "battle/monsters/teddisun.json",
+    "file": "dist/battle/monsters/teddisun.json"
+  },
+  {
     "key": "battle/monsters/tetrchimp.json",
     "file": "dist/battle/monsters/tetrchimp.json"
+  },
+  {
+    "key": "battle/monsters/thumpurn.json",
+    "file": "dist/battle/monsters/thumpurn.json"
   },
   {
     "key": "battle/monsters/tigrock.json",
@@ -4352,6 +5244,10 @@
     "file": "dist/battle/monsters/tornicane.json"
   },
   {
+    "key": "battle/monsters/toucanary.json",
+    "file": "dist/battle/monsters/toucanary.json"
+  },
+  {
     "key": "battle/monsters/toufigel.json",
     "file": "dist/battle/monsters/toufigel.json"
   },
@@ -4366,6 +5262,10 @@
   {
     "key": "battle/monsters/trapsnap.json",
     "file": "dist/battle/monsters/trapsnap.json"
+  },
+  {
+    "key": "battle/monsters/trojerror.json",
+    "file": "dist/battle/monsters/trojerror.json"
   },
   {
     "key": "battle/monsters/tsushimi.json",
@@ -4388,8 +5288,32 @@
     "file": "dist/battle/monsters/tumbleworm.json"
   },
   {
+    "key": "battle/monsters/turnipper.json",
+    "file": "dist/battle/monsters/turnipper.json"
+  },
+  {
+    "key": "battle/monsters/tux.json",
+    "file": "dist/battle/monsters/tux.json"
+  },
+  {
     "key": "battle/monsters/tweesher.json",
     "file": "dist/battle/monsters/tweesher.json"
+  },
+  {
+    "key": "battle/monsters/uf0.json",
+    "file": "dist/battle/monsters/uf0.json"
+  },
+  {
+    "key": "battle/monsters/uglip.json",
+    "file": "dist/battle/monsters/uglip.json"
+  },
+  {
+    "key": "battle/monsters/uneye.json",
+    "file": "dist/battle/monsters/uneye.json"
+  },
+  {
+    "key": "battle/monsters/uprout.json",
+    "file": "dist/battle/monsters/uprout.json"
   },
   {
     "key": "battle/monsters/urcheedle.json",
@@ -4410,6 +5334,10 @@
   {
     "key": "battle/monsters/vigueur.json",
     "file": "dist/battle/monsters/vigueur.json"
+  },
+  {
+    "key": "battle/monsters/virware.json",
+    "file": "dist/battle/monsters/virware.json"
   },
   {
     "key": "battle/monsters/vivicinder.json",
@@ -4456,8 +5384,20 @@
     "file": "dist/battle/monsters/vulpyre.json"
   },
   {
+    "key": "battle/monsters/waysprite.json",
+    "file": "dist/battle/monsters/waysprite.json"
+  },
+  {
     "key": "battle/monsters/weavifly.json",
     "file": "dist/battle/monsters/weavifly.json"
+  },
+  {
+    "key": "battle/monsters/weedlantis.json",
+    "file": "dist/battle/monsters/weedlantis.json"
+  },
+  {
+    "key": "battle/monsters/weedsea.json",
+    "file": "dist/battle/monsters/weedsea.json"
   },
   {
     "key": "battle/monsters/windeye.json",
@@ -4468,8 +5408,16 @@
     "file": "dist/battle/monsters/wolffsky.json"
   },
   {
+    "key": "battle/monsters/wolololl.json",
+    "file": "dist/battle/monsters/wolololl.json"
+  },
+  {
     "key": "battle/monsters/woodoor.json",
     "file": "dist/battle/monsters/woodoor.json"
+  },
+  {
+    "key": "battle/monsters/wrougon.json",
+    "file": "dist/battle/monsters/wrougon.json"
   },
   {
     "key": "battle/monsters/xeon.json",
@@ -4478,6 +5426,14 @@
   {
     "key": "battle/monsters/xeon_2.json",
     "file": "dist/battle/monsters/xeon_2.json"
+  },
+  {
+    "key": "battle/monsters/yamada.json",
+    "file": "dist/battle/monsters/yamada.json"
+  },
+  {
+    "key": "battle/monsters/yiinaang.json",
+    "file": "dist/battle/monsters/yiinaang.json"
   },
   {
     "key": "battle/monsters/ziggurat.json",
@@ -4724,6 +5680,10 @@
     "file": "dist/battle/techniques/bubble_trap.json"
   },
   {
+    "key": "battle/techniques/bubbles.json",
+    "file": "dist/battle/techniques/bubbles.json"
+  },
+  {
     "key": "battle/techniques/bullet.json",
     "file": "dist/battle/techniques/bullet.json"
   },
@@ -4748,6 +5708,10 @@
     "file": "dist/battle/techniques/caustic_spray.json"
   },
   {
+    "key": "battle/techniques/cavity.json",
+    "file": "dist/battle/techniques/cavity.json"
+  },
+  {
     "key": "battle/techniques/chameleon.json",
     "file": "dist/battle/techniques/chameleon.json"
   },
@@ -4766,6 +5730,10 @@
   {
     "key": "battle/techniques/clamp_on.json",
     "file": "dist/battle/techniques/clamp_on.json"
+  },
+  {
+    "key": "battle/techniques/clock.json",
+    "file": "dist/battle/techniques/clock.json"
   },
   {
     "key": "battle/techniques/cloud_aether.json",
@@ -4862,6 +5830,10 @@
   {
     "key": "battle/techniques/evasion.json",
     "file": "dist/battle/techniques/evasion.json"
+  },
+  {
+    "key": "battle/techniques/external_power.json",
+    "file": "dist/battle/techniques/external_power.json"
   },
   {
     "key": "battle/techniques/eyebite.json",
@@ -5036,6 +6008,10 @@
     "file": "dist/battle/techniques/infectious_bite.json"
   },
   {
+    "key": "battle/techniques/inner_power.json",
+    "file": "dist/battle/techniques/inner_power.json"
+  },
+  {
     "key": "battle/techniques/insanity.json",
     "file": "dist/battle/techniques/insanity.json"
   },
@@ -5102,6 +6078,10 @@
   {
     "key": "battle/techniques/lust.json",
     "file": "dist/battle/techniques/lust.json"
+  },
+  {
+    "key": "battle/techniques/magic_spell.json",
+    "file": "dist/battle/techniques/magic_spell.json"
   },
   {
     "key": "battle/techniques/magma.json",
@@ -5248,6 +6228,10 @@
     "file": "dist/battle/techniques/pouch.json"
   },
   {
+    "key": "battle/techniques/power_theft.json",
+    "file": "dist/battle/techniques/power_theft.json"
+  },
+  {
     "key": "battle/techniques/proboscis.json",
     "file": "dist/battle/techniques/proboscis.json"
   },
@@ -5352,6 +6336,10 @@
     "file": "dist/battle/techniques/shapechange.json"
   },
   {
+    "key": "battle/techniques/shooting_star.json",
+    "file": "dist/battle/techniques/shooting_star.json"
+  },
+  {
     "key": "battle/techniques/shrapnel.json",
     "file": "dist/battle/techniques/shrapnel.json"
   },
@@ -5382,6 +6370,10 @@
   {
     "key": "battle/techniques/snowstorm.json",
     "file": "dist/battle/techniques/snowstorm.json"
+  },
+  {
+    "key": "battle/techniques/sockpuppet.json",
+    "file": "dist/battle/techniques/sockpuppet.json"
   },
   {
     "key": "battle/techniques/solar_synthesis.json",
@@ -5472,6 +6464,10 @@
     "file": "dist/battle/techniques/suplex.json"
   },
   {
+    "key": "battle/techniques/surf.json",
+    "file": "dist/battle/techniques/surf.json"
+  },
+  {
     "key": "battle/techniques/surge.json",
     "file": "dist/battle/techniques/surge.json"
   },
@@ -5486,6 +6482,10 @@
   {
     "key": "battle/techniques/take_cover.json",
     "file": "dist/battle/techniques/take_cover.json"
+  },
+  {
+    "key": "battle/techniques/taunt.json",
+    "file": "dist/battle/techniques/taunt.json"
   },
   {
     "key": "battle/techniques/ten_thousand_feathers.json",
@@ -5544,6 +6544,10 @@
     "file": "dist/battle/techniques/tsunami.json"
   },
   {
+    "key": "battle/techniques/tux_attack.json",
+    "file": "dist/battle/techniques/tux_attack.json"
+  },
+  {
     "key": "battle/techniques/ubuntu.json",
     "file": "dist/battle/techniques/ubuntu.json"
   },
@@ -5598,6 +6602,10 @@
   {
     "key": "battle/techniques/whirlwind.json",
     "file": "dist/battle/techniques/whirlwind.json"
+  },
+  {
+    "key": "battle/techniques/wicked_wind.json",
+    "file": "dist/battle/techniques/wicked_wind.json"
   },
   {
     "key": "battle/techniques/wing_tip.json",
@@ -10700,6 +11708,10 @@
     "file": "dist/battle-art/animations/technique/amethyst_radiate.page-0.pkts"
   },
   {
+    "key": "ui:tile.battle/animations/technique/appearance.page-0",
+    "file": "dist/battle-art/animations/technique/appearance.page-0.pkts"
+  },
+  {
     "key": "ui:tile.battle/animations/technique/beam.page-0",
     "file": "dist/battle-art/animations/technique/beam.page-0.pkts"
   },
@@ -10722,6 +11734,14 @@
   {
     "key": "ui:tile.battle/animations/technique/bomb_bright.page-0",
     "file": "dist/battle-art/animations/technique/bomb_bright.page-0.pkts"
+  },
+  {
+    "key": "ui:tile.battle/animations/technique/breath_blue.page-0",
+    "file": "dist/battle-art/animations/technique/breath_blue.page-0.pkts"
+  },
+  {
+    "key": "ui:tile.battle/animations/technique/bubbleattack.page-0",
+    "file": "dist/battle-art/animations/technique/bubbleattack.page-0.pkts"
   },
   {
     "key": "ui:tile.battle/animations/technique/buff_rage.page-0",
@@ -11060,6 +12080,10 @@
     "file": "dist/battle-art/animations/technique/slash_power.page-0.pkts"
   },
   {
+    "key": "ui:tile.battle/animations/technique/smellysock.page-0",
+    "file": "dist/battle-art/animations/technique/smellysock.page-0.pkts"
+  },
+  {
     "key": "ui:tile.battle/animations/technique/smokebomb.page-0",
     "file": "dist/battle-art/animations/technique/smokebomb.page-0.pkts"
   },
@@ -11140,6 +12164,10 @@
     "file": "dist/battle-art/animations/technique/tonguelash.page-0.pkts"
   },
   {
+    "key": "ui:tile.battle/animations/technique/tornado_basic.page-0",
+    "file": "dist/battle-art/animations/technique/tornado_basic.page-0.pkts"
+  },
+  {
     "key": "ui:tile.battle/animations/technique/tornado_bulk.page-0",
     "file": "dist/battle-art/animations/technique/tornado_bulk.page-0.pkts"
   },
@@ -11158,6 +12186,10 @@
   {
     "key": "ui:tile.battle/animations/technique/turquoise_circle.page-0",
     "file": "dist/battle-art/animations/technique/turquoise_circle.page-0.pkts"
+  },
+  {
+    "key": "ui:tile.battle/animations/technique/tux_attack.page-0",
+    "file": "dist/battle-art/animations/technique/tux_attack.page-0.pkts"
   },
   {
     "key": "ui:tile.battle/animations/technique/ubuntu.page-0",
@@ -11352,6 +12384,14 @@
     "file": "dist/battle-art/gfx/sprites/battle/allagon-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/altie-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/altie-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/ambuwl-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/ambuwl-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/ampystoma-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/ampystoma-sheet.pkts"
   },
@@ -11384,6 +12424,14 @@
     "file": "dist/battle-art/gfx/sprites/battle/arthrobolt-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/askylpaws-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/askylpaws-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/asudopt-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/asudopt-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/av8r-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/av8r-sheet.pkts"
   },
@@ -11396,8 +12444,24 @@
     "file": "dist/battle-art/gfx/sprites/battle/b_ver_1-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/babysnitch-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/babysnitch-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/baddrscratch-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/baddrscratch-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/bamboon-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/bamboon-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/banling-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/banling-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/bansaken-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/bansaken-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/baobaraffe-sheet",
@@ -11412,8 +12476,20 @@
     "file": "dist/battle-art/gfx/sprites/battle/bearloch-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/beenstalker-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/beenstalker-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/bewhich-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/bewhich-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/bigfin-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/bigfin-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/birdee-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/birdee-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/birdling-sheet",
@@ -11444,6 +12520,10 @@
     "file": "dist/battle-art/gfx/sprites/battle/boxali-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/boxorox-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/boxorox-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/breem-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/breem-sheet.pkts"
   },
@@ -11460,6 +12540,10 @@
     "file": "dist/battle-art/gfx/sprites/battle/brickhemoth-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/brumi-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/brumi-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/budaye-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/budaye-sheet.pkts"
   },
@@ -11468,8 +12552,24 @@
     "file": "dist/battle-art/gfx/sprites/battle/bugnin-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/bumbulus-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/bumbulus-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/burrlock-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/burrlock-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/bursa-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/bursa-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/cacaburr-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/cacaburr-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/cackleen-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/cackleen-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/cairfrey-sheet",
@@ -11486,6 +12586,10 @@
   {
     "key": "ui:tile.battle/gfx/sprites/battle/capiti-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/capiti-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/carcharock-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/carcharock-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/cardiling-sheet",
@@ -11508,6 +12612,30 @@
     "file": "dist/battle-art/gfx/sprites/battle/cateye-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/chenipode-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/chenipode-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/cherubat-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/cherubat-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/chibiro-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/chibiro-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/chickadee-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/chickadee-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/chillimp-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/chillimp-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/chloragon-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/chloragon-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/chrome_robo-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/chrome_robo-sheet.pkts"
   },
@@ -11516,8 +12644,16 @@
     "file": "dist/battle-art/gfx/sprites/battle/chromeye-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/claymorior-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/claymorior-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/coaldiak-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/coaldiak-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/cobarett-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/cobarett-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/cochini-sheet",
@@ -11526,6 +12662,10 @@
   {
     "key": "ui:tile.battle/gfx/sprites/battle/cocrune-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/cocrune-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/cohldrabi-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/cohldrabi-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/coleorus-sheet",
@@ -11580,12 +12720,28 @@
     "file": "dist/battle-art/gfx/sprites/battle/delfeco-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/demosnow-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/demosnow-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/devidin-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/devidin-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/devidra-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/devidra-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/dinoflop-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/dinoflop-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/djinnbo-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/djinnbo-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/doctsky-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/doctsky-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/dollfin-sheet",
@@ -11648,8 +12804,20 @@
     "file": "dist/battle-art/gfx/sprites/battle/enduros-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/equill-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/equill-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/eruptibus-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/eruptibus-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/erythroskyte-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/erythroskyte-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/eskipup-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/eskipup-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/exapode-sheet",
@@ -11716,6 +12884,10 @@
     "file": "dist/battle-art/gfx/sprites/battle/foofle-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/fordin-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/fordin-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/forturtle-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/forturtle-sheet.pkts"
   },
@@ -11732,6 +12904,10 @@
     "file": "dist/battle-art/gfx/sprites/battle/frondly-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/fruitera-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/fruitera-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/furnursus-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/furnursus-sheet.pkts"
   },
@@ -11744,8 +12920,16 @@
     "file": "dist/battle-art/gfx/sprites/battle/fuzzlet-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/galasces-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/galasces-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/galnec-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/galnec-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/gastronium-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/gastronium-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/gectile-sheet",
@@ -11754,6 +12938,22 @@
   {
     "key": "ui:tile.battle/gfx/sprites/battle/ghosteeth-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/ghosteeth-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/gliffary-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/gliffary-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/glombroc-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/glombroc-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/glomon-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/glomon-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/gourda-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/gourda-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/graffiki-sheet",
@@ -11776,8 +12976,20 @@
     "file": "dist/battle-art/gfx/sprites/battle/grintrock-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/grumpi-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/grumpi-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/gryfix-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/gryfix-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/gupphire-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/gupphire-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/gupphish-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/gupphish-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/hampotamos-sheet",
@@ -11796,8 +13008,32 @@
     "file": "dist/battle-art/gfx/sprites/battle/hectapod-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/helipi-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/helipi-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/heronquak-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/heronquak-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/hissiorite-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/hissiorite-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/hoarse-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/hoarse-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/hoodoll-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/hoodoll-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/houndice-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/houndice-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/howl-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/howl-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/hydrone-sheet",
@@ -11816,8 +13052,20 @@
     "file": "dist/battle-art/gfx/sprites/battle/incandesfin-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/jelillow-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/jelillow-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/jeluna-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/jeluna-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/jemuar-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/jemuar-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/joulraton-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/joulraton-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/k9-sheet",
@@ -11852,6 +13100,18 @@
     "file": "dist/battle-art/gfx/sprites/battle/komoduel-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/konuit-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/konuit-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/kroki-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/kroki-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/krokivip-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/krokivip-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/lambert-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/lambert-sheet.pkts"
   },
@@ -11864,6 +13124,18 @@
     "file": "dist/battle-art/gfx/sprites/battle/legko-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/legoplaste-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/legoplaste-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/lesmagu-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/lesmagu-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/lettice-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/lettice-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/lightmare-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/lightmare-sheet.pkts"
   },
@@ -11872,8 +13144,20 @@
     "file": "dist/battle-art/gfx/sprites/battle/loliferno-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/lunight-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/lunight-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/manosting-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/manosting-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/marvantis-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/marvantis-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/marvillar-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/marvillar-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/masknake-sheet",
@@ -11884,16 +13168,32 @@
     "file": "dist/battle-art/gfx/sprites/battle/mauai-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/medipup-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/medipup-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/medushock-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/medushock-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/megafruitera-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/megafruitera-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/memnomnom-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/memnomnom-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/merlicun-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/merlicun-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/metesaur-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/metesaur-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/metoxic-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/metoxic-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/miaownolith-sheet",
@@ -11940,12 +13240,24 @@
     "file": "dist/battle-art/gfx/sprites/battle/mrmoswitch-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/myrmison-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/myrmison-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/mystikapi-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/mystikapi-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/narcileaf-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/narcileaf-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/nebufin-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/nebufin-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/ned-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/ned-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/neutrito-sheet",
@@ -11984,6 +13296,10 @@
     "file": "dist/battle-art/gfx/sprites/battle/nudimind-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/nuenflu-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/nuenflu-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/nut-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/nut-sheet.pkts"
   },
@@ -12016,6 +13332,10 @@
     "file": "dist/battle-art/gfx/sprites/battle/pawsand-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/pearamanca-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/pearamanca-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/pharavion-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/pharavion-sheet.pkts"
   },
@@ -12028,12 +13348,24 @@
     "file": "dist/battle-art/gfx/sprites/battle/picc-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/pickoon-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/pickoon-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/pigabyte-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/pigabyte-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/pilthropus-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/pilthropus-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/pipis-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/pipis-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/poinchin-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/poinchin-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/polyrock-sheet",
@@ -12052,6 +13384,10 @@
     "file": "dist/battle-art/gfx/sprites/battle/potturney-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/primordia-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/primordia-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/propellercat-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/propellercat-sheet.pkts"
   },
@@ -12068,6 +13404,10 @@
     "file": "dist/battle-art/gfx/sprites/battle/pyraminx-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/pythock-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/pythock-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/pythwire-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/pythwire-sheet.pkts"
   },
@@ -12080,12 +13420,24 @@
     "file": "dist/battle-art/gfx/sprites/battle/rabbitosaur-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/raccscal-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/raccscal-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/raptoucan-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/raptoucan-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/rhincus-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/rhincus-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/rhinocarpe-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/rhinocarpe-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/rinocereed-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/rinocereed-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/rockat-sheet",
@@ -12106,6 +13458,10 @@
   {
     "key": "ui:tile.battle/gfx/sprites/battle/rosarin-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/rosarin-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/ruffalo-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/ruffalo-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/runesquito-sheet",
@@ -12136,6 +13492,10 @@
     "file": "dist/battle-art/gfx/sprites/battle/sapsnap-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/saurchin-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/saurchin-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/sclairus-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/sclairus-sheet.pkts"
   },
@@ -12164,8 +13524,16 @@
     "file": "dist/battle-art/gfx/sprites/battle/sharpfin-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/shelagu-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/shelagu-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/sheye-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/sheye-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/shimmerain-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/shimmerain-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/shnark-sheet",
@@ -12176,12 +13544,20 @@
     "file": "dist/battle-art/gfx/sprites/battle/shrab-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/shull-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/shull-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/shybulb-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/shybulb-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/skwib-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/skwib-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/slichen-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/slichen-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/sludgehog-sheet",
@@ -12192,12 +13568,28 @@
     "file": "dist/battle-art/gfx/sprites/battle/snaki-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/snarlon-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/snarlon-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/snock-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/snock-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/snokari-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/snokari-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/snowrilla-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/snowrilla-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/sockeserp-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/sockeserp-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/solight-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/solight-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/spighter-sheet",
@@ -12206,6 +13598,18 @@
   {
     "key": "ui:tile.battle/gfx/sprites/battle/spirain-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/spirain-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/spoilurm-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/spoilurm-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/sprightly-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/sprightly-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/sprorm-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/sprorm-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/spycozeus-sheet",
@@ -12224,12 +13628,20 @@
     "file": "dist/battle-art/gfx/sprites/battle/statursus-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/stomic-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/stomic-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/strella-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/strella-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/sumchon-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/sumchon-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/tadcool-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/tadcool-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/tarpeur-sheet",
@@ -12240,8 +13652,16 @@
     "file": "dist/battle-art/gfx/sprites/battle/taupypus-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/teddisun-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/teddisun-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/tetrchimp-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/tetrchimp-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/thumpurn-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/thumpurn-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/tigrock-sheet",
@@ -12264,6 +13684,10 @@
     "file": "dist/battle-art/gfx/sprites/battle/tornicane-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/toucanary-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/toucanary-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/toufigel-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/toufigel-sheet.pkts"
   },
@@ -12278,6 +13702,10 @@
   {
     "key": "ui:tile.battle/gfx/sprites/battle/trapsnap-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/trapsnap-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/trojerror-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/trojerror-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/tsushimi-sheet",
@@ -12300,8 +13728,32 @@
     "file": "dist/battle-art/gfx/sprites/battle/tumbleworm-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/turnipper-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/turnipper-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/tux-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/tux-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/tweesher-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/tweesher-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/uf0-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/uf0-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/uglip-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/uglip-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/uneye-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/uneye-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/uprout-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/uprout-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/urcheedle-sheet",
@@ -12322,6 +13774,10 @@
   {
     "key": "ui:tile.battle/gfx/sprites/battle/vigueur-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/vigueur-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/virware-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/virware-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/vivicinder-sheet",
@@ -12368,8 +13824,20 @@
     "file": "dist/battle-art/gfx/sprites/battle/vulpyre-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/waysprite-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/waysprite-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/weavifly-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/weavifly-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/weedlantis-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/weedlantis-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/weedsea-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/weedsea-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/windeye-sheet",
@@ -12380,8 +13848,16 @@
     "file": "dist/battle-art/gfx/sprites/battle/wolffsky-sheet.pkts"
   },
   {
+    "key": "ui:tile.battle/gfx/sprites/battle/wolololl-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/wolololl-sheet.pkts"
+  },
+  {
     "key": "ui:tile.battle/gfx/sprites/battle/woodoor-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/woodoor-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/wrougon-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/wrougon-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/xeon-sheet",
@@ -12390,6 +13866,14 @@
   {
     "key": "ui:tile.battle/gfx/sprites/battle/xeon_2-sheet",
     "file": "dist/battle-art/gfx/sprites/battle/xeon_2-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/yamada-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/yamada-sheet.pkts"
+  },
+  {
+    "key": "ui:tile.battle/gfx/sprites/battle/yiinaang-sheet",
+    "file": "dist/battle-art/gfx/sprites/battle/yiinaang-sheet.pkts"
   },
   {
     "key": "ui:tile.battle/gfx/sprites/battle/ziggurat-sheet",

@@ -28,6 +28,9 @@ not hand-authored envelopes or toy projects:
 - `main-f9db784a/` is the immediate predecessor before flat translated-choice
   menus and next-update `load_yaml` visibility. It carries the current
   mainline tape hash and continuation digest.
+- `main-08efc758/` is the current published main before the NuPhone map and
+  title Battle mode. It carries the current mainline tape hash and
+  continuation digest.
 
 To reproduce a fixture, make a detached checkout of the named game commit with
 recursive submodules, run `bun install --frozen-lockfile`, run the importer

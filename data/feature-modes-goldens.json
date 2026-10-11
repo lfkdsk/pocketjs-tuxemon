@@ -1,0 +1,185 @@
+{
+  "format": "pocket-tuxemon/feature-modes-goldens/v1",
+  "frames": [
+    {
+      "case": "title",
+      "lang": "en_US",
+      "width": 480,
+      "height": 272,
+      "file": "feature-title-en_US-480x272.png",
+      "rgbaFnv1a": "a96ca27b",
+      "pngSha256": "8dcd7458cc7cea0ae6f5bb0425f45d821f811c736c2d816395487cffc9215da6"
+    },
+    {
+      "case": "difficulty",
+      "lang": "en_US",
+      "width": 480,
+      "height": 272,
+      "file": "feature-difficulty-en_US-480x272.png",
+      "rgbaFnv1a": "9c669961",
+      "pngSha256": "aa740b6067511934b4f45c890a0d69d72ea8b9ebe66532fb78e8b798489bd642"
+    },
+    {
+      "case": "battle",
+      "lang": "en_US",
+      "width": 480,
+      "height": 272,
+      "file": "feature-battle-en_US-480x272.png",
+      "rgbaFnv1a": "93b6daed",
+      "pngSha256": "fdccc5830155cf64b16a00a20df0362ae256c6d35c2a48f7326096ba396084d0"
+    },
+    {
+      "case": "phone",
+      "lang": "en_US",
+      "width": 480,
+      "height": 272,
+      "file": "feature-phone-en_US-480x272.png",
+      "rgbaFnv1a": "acb063da",
+      "pngSha256": "c224c60e7c66abe59c95984f38a18fd364356b8c8c4f90cf18ae4a85a5ae5d8c"
+    },
+    {
+      "case": "map",
+      "lang": "en_US",
+      "width": 480,
+      "height": 272,
+      "file": "feature-map-en_US-480x272.png",
+      "rgbaFnv1a": "aa2c47b0",
+      "pngSha256": "f4295fa185e8656ca76e83ff28a4916b6c25d6e943a75621ab2661ce80f7719e"
+    },
+    {
+      "case": "title",
+      "lang": "en_US",
+      "width": 960,
+      "height": 544,
+      "file": "feature-title-en_US-960x544.png",
+      "rgbaFnv1a": "65c531a9",
+      "pngSha256": "30560a9f74c03ccd5eda8e0813527d533348ab851b01c84c6b73a6f50889d728"
+    },
+    {
+      "case": "difficulty",
+      "lang": "en_US",
+      "width": 960,
+      "height": 544,
+      "file": "feature-difficulty-en_US-960x544.png",
+      "rgbaFnv1a": "f0d023fb",
+      "pngSha256": "b18152835d9e7deacdcd3b33a1f8ce34b81acb392f0cc44ee7374565a5ee2013"
+    },
+    {
+      "case": "battle",
+      "lang": "en_US",
+      "width": 960,
+      "height": 544,
+      "file": "feature-battle-en_US-960x544.png",
+      "rgbaFnv1a": "33ce7132",
+      "pngSha256": "511c0a327aca9c1ee61ace6299121b1f0145a273b07bc830f1743922f403a661"
+    },
+    {
+      "case": "phone",
+      "lang": "en_US",
+      "width": 960,
+      "height": 544,
+      "file": "feature-phone-en_US-960x544.png",
+      "rgbaFnv1a": "61d41343",
+      "pngSha256": "b6ef9d4a91aec026df5c4b4d52f6a62135aca7ce8c46d642659aa56a72864f86"
+    },
+    {
+      "case": "map",
+      "lang": "en_US",
+      "width": 960,
+      "height": 544,
+      "file": "feature-map-en_US-960x544.png",
+      "rgbaFnv1a": "25b33b33",
+      "pngSha256": "50a04a35999bad94274db5e5c776fdd454e5ff00f5505fab5f51128c689c8f7f"
+    },
+    {
+      "case": "title",
+      "lang": "zh_CN",
+      "width": 480,
+      "height": 272,
+      "file": "feature-title-zh_CN-480x272.png",
+      "rgbaFnv1a": "a12550c6",
+      "pngSha256": "e05f6618ca6a832d210a1ea3e29b4025c388fe498959e36eb81e816d3ea0a75d"
+    },
+    {
+      "case": "difficulty",
+      "lang": "zh_CN",
+      "width": 480,
+      "height": 272,
+      "file": "feature-difficulty-zh_CN-480x272.png",
+      "rgbaFnv1a": "32d44eba",
+      "pngSha256": "e503138bd661eaaf60519066f8e067459dd17f0fd0ae73e770afd81d1584e0f2"
+    },
+    {
+      "case": "battle",
+      "lang": "zh_CN",
+      "width": 480,
+      "height": 272,
+      "file": "feature-battle-zh_CN-480x272.png",
+      "rgbaFnv1a": "c0c36705",
+      "pngSha256": "08ed85fcf6993c9eb59150a7199a8fba1406980dd505ec284ff8303240bcdc1f"
+    },
+    {
+      "case": "phone",
+      "lang": "zh_CN",
+      "width": 480,
+      "height": 272,
+      "file": "feature-phone-zh_CN-480x272.png",
+      "rgbaFnv1a": "e368edc1",
+      "pngSha256": "8fd3b9d9343967ed79a11cb67028883dea1c73a50bd729a96617c4ff87573a34"
+    },
+    {
+      "case": "map",
+      "lang": "zh_CN",
+      "width": 480,
+      "height": 272,
+      "file": "feature-map-zh_CN-480x272.png",
+      "rgbaFnv1a": "6078dd2a",
+      "pngSha256": "7d326fe2c2a19afcf05714794a24e1a85fc103e633cc351aafe3dd59c6a202bb"
+    },
+    {
+      "case": "title",
+      "lang": "zh_CN",
+      "width": 960,
+      "height": 544,
+      "file": "feature-title-zh_CN-960x544.png",
+      "rgbaFnv1a": "191cb918",
+      "pngSha256": "e0e409be0e0068657363bed0cf7b4375dff8804c50f4ff87d7499fc725155ddc"
+    },
+    {
+      "case": "difficulty",
+      "lang": "zh_CN",
+      "width": 960,
+      "height": 544,
+      "file": "feature-difficulty-zh_CN-960x544.png",
+      "rgbaFnv1a": "c065e9c0",
+      "pngSha256": "9cb667e3c2e763a707ba1884325162bbdfdbd1c9bd6b1b60af7925326b949961"
+    },
+    {
+      "case": "battle",
+      "lang": "zh_CN",
+      "width": 960,
+      "height": 544,
+      "file": "feature-battle-zh_CN-960x544.png",
+      "rgbaFnv1a": "d1f7401c",
+      "pngSha256": "222a12d2beff982072cb85912cbd4c6d5e2141cc074b1c181bd4323503323932"
+    },
+    {
+      "case": "phone",
+      "lang": "zh_CN",
+      "width": 960,
+      "height": 544,
+      "file": "feature-phone-zh_CN-960x544.png",
+      "rgbaFnv1a": "1a651d23",
+      "pngSha256": "828bf0ca782c8a5574a2b70e2cff32aaeb91d4c12ff5ee75d6d13d19ed2cbeaf"
+    },
+    {
+      "case": "map",
+      "lang": "zh_CN",
+      "width": 960,
+      "height": 544,
+      "file": "feature-map-zh_CN-960x544.png",
+      "rgbaFnv1a": "eb3b7f07",
+      "pngSha256": "ae8b5160b5631db7f934c916f62e520754fea9d31080aaaf6206be1ba8685a65"
+    }
+  ]
+}

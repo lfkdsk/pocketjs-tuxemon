@@ -2,6 +2,7 @@
 
 import { copyFileSync, mkdirSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { minifyRuntimeBundle } from "./runtime-bundle.ts";
 
 const root = resolve(import.meta.dir, "..");
 mkdirSync(join(root, "dist"), { recursive: true });
@@ -21,6 +22,10 @@ const build = Bun.spawn({
 });
 const exitCode = await build.exited;
 if (exitCode === 0) {
+  // The entrypoint build derives its output name from main.tsx. Targeted
+  // desktop/web/PSP builds use their manifest's pocket-tuxemon name instead.
+  const bundle = minifyRuntimeBundle(join(root, "dist", "main.js"));
+  console.log(`runtime bundle: ${bundle.before} -> ${bundle.after} bytes`);
   copyFileSync(
     join(root, "licenses", "AUDIO-ATTRIBUTIONS.md"),
     join(root, "dist", "AUDIO-ATTRIBUTIONS.md"),

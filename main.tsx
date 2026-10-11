@@ -56,6 +56,11 @@ import { pspAutosaveBridge } from "./ui/save-psp.ts";
 import { createLangMenu } from "./ui/lang-menu.tsx";
 import { createCompositeOverlay } from "./ui/game-overlay.tsx";
 import { createTuxepediaOverlay } from "./ui/tuxepedia.tsx";
+import { createNuPhoneOverlay } from "./ui/nuphone.tsx";
+import { createTitleBattleOverlay } from "./ui/title-battle.tsx";
+import { createTitleBattleRules } from "./ui/title-battle-runtime.ts";
+import featureModesJson from "./data/feature-modes.json";
+import type { FeatureModesRuntimeData } from "./ui/feature-modes-data.ts";
 import { createBootSnapshotOverlay } from "./ui/boot-snapshot-overlay.tsx";
 import { createNpcSrcProvider } from "./ui/npc-src-repository.ts";
 import { createChoiceIconNpcSrc } from "./ui/choice-icon-provider.ts";
@@ -157,7 +162,7 @@ const initialTimeWeather = initialCivilTime === undefined
     DEFAULT_TICKS_PER_GAME_MINUTE,
     initialWeather?.slug ?? "sunny",
   );
-const { extensions, rules, scenes, catalog } = createProductionTuxemonBattle(
+const { extensions, rules: campaignBattleRules, scenes, catalog } = createProductionTuxemonBattle(
   { read: readEntry },
   { initialTimeWeather },
   lang,
@@ -280,17 +285,63 @@ const demo: GameViewDemoConfig | undefined = hasDemoChapters(lang) ? (() => {
 // persist a choice (PSP: no localStorage, no data.fs — the language is a
 // build-time choice there).
 const langSwitchable = canSwitchLang();
+const featureModes = featureModesJson as unknown as FeatureModesRuntimeData;
 // The Tuxepedia (START menu row): an overlay that reads the live seen/caught
 // state. Its runtime is captured here so the save menu's onExtra can open it.
 const tuxepediaConfig = createTuxepediaOverlay({ catalog, lang });
 const tuxepediaRowLabel = lang === "zh_CN" ? "图鉴" : "Tuxepedia";
+// Tuxemon exposes NuPhone as a hidden-inventory world-menu item. The save
+// overlay is this port's world menu, so its row resolves against the live
+// inventory and the phone itself opens the imported Map App.
+const nuPhoneConfig = createNuPhoneOverlay({ data: featureModes.nuPhoneMap, lang });
+const nuPhoneRowLabel = featureModes.nuPhoneMap.entry.phoneLabel[lang];
+const titleGlobals = globalThis as typeof globalThis & {
+  __pocketTuxemonShowTitle?: boolean;
+  __pocketTuxemonSkipTitle?: boolean;
+};
+// Deterministic automation already injects the fixed civil-time override and
+// starts at frame zero of a maintained tape. Production desktop/web boots do
+// not; PSP release bundles explicitly force the title back on.
+const titleInitiallyOpen = titleGlobals.__pocketTuxemonShowTitle === true
+  || (titleGlobals.__pocketTuxemonSkipTitle !== true && initialCivilTime === undefined);
+// A deterministic tape explicitly bypasses the title for campaign replay.
+// In that path, retain the exact campaign rules and do not instantiate the
+// disposable title runtime at all; release boots create both here.
+const titleRules = titleInitiallyOpen ? createTitleBattleRules(campaignBattleRules) : null;
+const rules = titleRules ?? campaignBattleRules;
+const titleBattleConfig = titleRules
+  ? createTitleBattleOverlay({
+      data: featureModes.titleBattle,
+      lang,
+      rules: titleRules,
+      extensions,
+      initiallyOpen: true,
+    })
+  : undefined;
+// feature-modes.json supplies these names dynamically, so keep one literal
+// reachability list for PocketJS's static image scan. gen-assets.ts owns the
+// files and validates their upstream dimensions before every build.
+const FEATURE_MODE_IMAGE_ASSETS = [
+  "assets/nuphone/map.png",
+  "assets/nuphone/cursor.png",
+  "assets/nuphone/player.png",
+  "assets/nuphone/phone.png",
+  "assets/nuphone/app-map.png",
+] as const;
+void FEATURE_MODE_IMAGE_ASSETS;
 let saveMenuRuntime: GameViewDemoRuntime | null = null;
 const saveMenuConfig = createSaveMenu({
   suspended: () => demoMenu?.isOpen() ?? false,
   lang,
-  extraRows: [{ id: "tuxepedia", label: tuxepediaRowLabel }],
+  extraRows: (state) => [
+    { id: "tuxepedia", label: tuxepediaRowLabel },
+    ...((state.sw.items[featureModes.nuPhoneMap.entry.phoneItem] ?? 0) > 0
+      ? [{ id: "nuphone", label: nuPhoneRowLabel }]
+      : []),
+  ],
   onExtra: (id) => {
     if (id === "tuxepedia") tuxepediaConfig.runtimeRef.current?.open();
+    else if (id === "nuphone") nuPhoneConfig.runtimeRef.current?.open();
   },
 });
 const baseSaveMenu: GameViewOverlayConfig = {
@@ -310,7 +361,13 @@ const langMenu: GameViewOverlayConfig = {
     return langMenuRuntime;
   },
 };
-const overlay = createCompositeOverlay(saveMenu, langSwitchable ? langMenu : undefined, tuxepediaConfig);
+const overlay = createCompositeOverlay(
+  saveMenu,
+  langSwitchable ? langMenu : undefined,
+  tuxepediaConfig,
+  nuPhoneConfig,
+  titleBattleConfig,
+);
 // The boot-snapshot overlay runs first so a PSP segment build can restore a
 // chapter save before the tape replay starts. Production builds leave its
 // global unset and it is inert after the first frame.
@@ -344,6 +401,8 @@ function TuxemonWeatherOverlay(_props: GameWorldOverlayProps) {
       bridge={weatherBridge}
       suspended={() =>
         weatherOverlaySuspended(demoMenu, saveMenuRuntime, tuxepediaConfig.runtimeRef.current)
+        || (nuPhoneConfig.runtimeRef.current?.isOpen() ?? false)
+        || (titleBattleConfig?.runtimeRef.current?.isOpen() ?? false)
         || (langMenuRuntime?.isOpen() ?? false)}
     />
   );

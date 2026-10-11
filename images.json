@@ -5864,6 +5864,21 @@
  "assets/characters/player-adventurer-walk-r-3.png": {
   "psm": 3
  },
+ "assets/nuphone/map.png": {
+  "psm": 3
+ },
+ "assets/nuphone/cursor.png": {
+  "psm": 3
+ },
+ "assets/nuphone/player.png": {
+  "psm": 3
+ },
+ "assets/nuphone/phone.png": {
+  "psm": 3
+ },
+ "assets/nuphone/app-map.png": {
+  "psm": 3
+ },
  "assets/map-animations/tux_bubble_exclamation-0.png": {
   "psm": 3
  },

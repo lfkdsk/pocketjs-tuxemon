@@ -300,7 +300,7 @@ describe("G6 production map repository", () => {
       .toBe(journey.terminalStateSha256);
   }, 60_000);
 
-  test("a cross-map save restores an evicted map and rejects another content build", () => {
+  test("a cross-map save restores an evicted map and rejects an unreviewed content build", () => {
     const inlineProject = readInlineProject(ROOT);
     const sharded = readShardedProject(ROOT);
     const inlineSession = createSession(inlineProject, 60,
@@ -386,7 +386,16 @@ describe("G6 production map repository", () => {
     const mismatchedSession = createSession(mismatched, 60,
       createTuxemonSessionOptions(mismatched, worldTraversal, { maps: repository, ...GAME_OPTIONS }));
     expect(reads).toBe(1);
-    expect(() => restoreSessionEnvelope(mismatchedSession, shardedEnvelope)).toThrow(/manifest hash/);
+    // The published build that created shardedEnvelope is now an explicitly
+    // reviewed predecessor, so it is intentionally loadable by newer content.
+    // Stamp the same valid snapshot with an unreviewed pair to keep this guard
+    // sensitive to arbitrary manifests without depending on the allowlist's
+    // current members.
+    const unreviewedEnvelope = encodeEnvelope(decodeEnvelopeText(shardedEnvelope), {
+      manifest: "f".repeat(64),
+      schema: shardedSession.content!.schema,
+    });
+    expect(() => restoreSessionEnvelope(mismatchedSession, unreviewedEnvelope)).toThrow(/manifest hash/);
     expect(reads).toBe(1);
   });
 

@@ -49,6 +49,7 @@ export function dojoLearnableMoves(
 export function dojoDevolutionTargets(
   db: BattleDb,
   monster: Pick<SpawnedMonsterSnapshot, "slug" | "stage">,
+  available?: ReadonlySet<string>,
 ): string[] {
   const species = db.monsters[monster.slug];
   if (!species) return [];
@@ -58,6 +59,7 @@ export function dojoDevolutionTargets(
       ? ["stage1", "basic"]
       : [];
   return species.evolvesFrom.filter((parent) => {
+    if (available !== undefined && !available.has(parent)) return false;
     const stage = db.monsters[parent]?.stage;
     return stage !== undefined && allowed.includes(stage);
   });

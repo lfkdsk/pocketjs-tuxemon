@@ -9,7 +9,10 @@ import {
   packTuxemonExtensionState,
   tuxemonExtensionState,
 } from "../battle/extension.ts";
-import { TUXEMON_VARIABLE_ENUMS } from "../battle/game.ts";
+import {
+  TUXEMON_CAMPAIGN_MONSTER_IDS,
+  TUXEMON_VARIABLE_ENUMS,
+} from "../battle/game.ts";
 import {
   createTuxemonBattleRules,
   tuxemonRuntimeBattleState,
@@ -652,6 +655,56 @@ describe("COV-B random_monster", () => {
     expect(second.state.sw.rng).toBe(result.state.sw.rng);
   });
 
+  test("an imported title pool constrains independent draws and rejects malformed candidates", () => {
+    const extensions = createTuxemonExtensions(DB);
+    const randomMonster = extensions.commands!["tux.random_monster"]!;
+    let ext = extensions.initial!;
+    let cursor = 0x12345678;
+    const context = () => ({
+      ext,
+      variables: {},
+      switches: {},
+      items: {},
+      gold: 0,
+      playerName: "",
+      random: () => {
+        cursor = (cursor + 1) >>> 0;
+        return 0.75;
+      },
+    });
+    const first = randomMonster(context(), { level: 10, candidates: ["rockitten"] });
+    ext = first!.ext!;
+    const second = randomMonster(context(), { level: 10, candidates: ["rockitten"] });
+    ext = second!.ext!;
+    expect(tuxemonExtensionState(ext, DB).party.map((monster) => monster.slug)).toEqual(["rockitten", "rockitten"]);
+    expect(() => randomMonster(context(), { level: 10, candidates: ["missing"] })).toThrow("imported monster slug");
+    expect(() => randomMonster(context(), { level: 10, candidates: ["rockitten", "rockitten"] })).toThrow("duplicate candidate");
+  });
+
+  test("the default pool stays campaign-scoped while an explicit title pool can opt in", () => {
+    const extensions = createTuxemonExtensions(DB, { campaignMonsterIds: ["rockitten"] });
+    const randomMonster = extensions.commands!["tux.random_monster"]!;
+    let ext = extensions.initial!;
+    const context = () => ({
+      ext,
+      variables: {},
+      switches: {},
+      items: {},
+      gold: 0,
+      playerName: "",
+      random: () => 0.75,
+    });
+    ext = randomMonster(context(), { level: 10, character: "campaign" })!.ext!;
+    ext = randomMonster(context(), {
+      level: 10,
+      character: "title",
+      candidates: ["altie"],
+    })!.ext!;
+    const state = tuxemonExtensionState(ext, DB);
+    expect(state.npcParties.campaign?.[0]?.slug).toBe("rockitten");
+    expect(state.npcParties.title?.[0]?.slug).toBe("altie");
+  });
+
   test("the real Eclipse Bank trainer trigger stages one deterministic level-40 opponent", () => {
     const built = buildProject(["eclipse_crystal_bank1"], G6_IMPORT_OPTIONS);
     const randomCoverage = built.report.coverage.actions.rows.find((row) => row.type === "random_monster")!;
@@ -669,7 +722,9 @@ describe("COV-B random_monster", () => {
       party: [spawnMonster(DB, rulesDb, rng, "rockitten", 40, { iid: "bank-player" })],
     });
     const session = createSession(built.project, 60, {
-      extensions: createTuxemonExtensions(DB),
+      extensions: createTuxemonExtensions(DB, {
+        campaignMonsterIds: TUXEMON_CAMPAIGN_MONSTER_IDS,
+      }),
       battle: createTuxemonBattleRules(DB, TUXEMON_VARIABLE_ENUMS),
     });
     let state = startSession(built.project, session, undefined, initial);
@@ -689,6 +744,7 @@ describe("COV-B random_monster", () => {
 
     const opponent = tuxemonExtensionState(state.ext, DB).npcParties.eclipse_bank_may;
     expect(opponent).toHaveLength(1);
+    expect(TUXEMON_CAMPAIGN_MONSTER_IDS).toContain(opponent![0]!.slug);
     expect(opponent![0]).toMatchObject({
       level: 40,
       experienceModifier: 5,

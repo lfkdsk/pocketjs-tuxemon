@@ -25,7 +25,11 @@ const db = JSON.parse(readFileSync(join(ROOT, "data/battle-db.json"), "utf8")) a
 const runtimeDb = JSON.parse(readFileSync(join(ROOT, "data/battle-runtime-db.json"), "utf8")) as unknown;
 const runtimeShell = JSON.parse(readFileSync(join(ROOT, "dist/battle-runtime-shell.json"), "utf8")) as {
   monstersIndex: Array<{ id: string; entry: string; txmnId: number; name: string }>;
+  journalMonsterIds: string[];
   statusesIndex: BattleRuntimeStatusIndexEntry[];
+};
+const featureModes = JSON.parse(readFileSync(join(ROOT, "data/feature-modes.json"), "utf8")) as {
+  titleBattle: { difficulties: Array<{ candidates: string[] }> };
 };
 const report = JSON.parse(readFileSync(join(ROOT, "data/battle-assets-report.json"), "utf8"));
 const images = JSON.parse(readFileSync(join(ROOT, "images.json"), "utf8")) as Record<string, { psm: number }>;
@@ -84,18 +88,18 @@ describe("GB1 battle database", () => {
     expect(report.runtimeDbBytes).toBe(readFileSync(join(ROOT, "data/battle-runtime-db.json")).byteLength);
   });
 
-  test("matches the generated Spyder and Eclipse Park runtime slice", () => {
+  test("matches the generated campaign plus title-mode runtime slice", () => {
     expect(report.scope).toBe("spyder");
     expect(report.sourceRevision).toBe("9e6258ff726b786040a267e8bdbbf037b560285e");
     expect(report.counts).toEqual({
-      monsters: 269,
-      techniques: 245,
+      monsters: 382,
+      techniques: 258,
       items: 114,
       elements: 13,
       tastes: 12,
       statuses: 35,
       encounters: 22,
-      npcs: 205,
+      npcs: 206,
       environments: 10,
       trainerParties: 213,
       trainerMonsterSlots: 611,
@@ -103,13 +107,24 @@ describe("GB1 battle database", () => {
       randomEncounterUses: 286,
       wildEncounterUses: 17,
     });
-    expect(report.art.categories["monster-sheets"].sourceFiles).toBe(269);
-    expect(report.art.categories["technique-animations"].sourceFiles).toBe(130);
+    expect(report.art.categories["monster-sheets"].sourceFiles).toBe(382);
+    expect(report.art.categories["technique-animations"].sourceFiles).toBe(136);
     expect(report.art.categories["capture-devices"].sourceFiles).toBe(28);
     expect(report.art.categories.backgrounds.sourceFiles).toBe(10);
     expect(report.art.categories.islands.sourceFiles).toBe(6);
     expect(report.art.categories["trainer-sheets"].sourceFiles).toBe(61);
-    expect(report.art.sourceBytes).toBe(1_953_249);
+    expect(report.art.sourceBytes).toBe(2_300_416);
+  });
+
+  test("keeps title candidates resolvable without revealing them in the campaign journal", () => {
+    const packaged = new Set(runtimeShell.monstersIndex.map((entry) => entry.id));
+    const journal = new Set(runtimeShell.journalMonsterIds);
+    const titleCandidates = new Set(featureModes.titleBattle.difficulties.flatMap((row) => row.candidates));
+    expect(packaged.size).toBe(382);
+    expect(journal.size).toBe(269);
+    expect([...titleCandidates].every((slug) => packaged.has(slug))).toBeTrue();
+    expect([...titleCandidates].filter((slug) => !journal.has(slug))).toHaveLength(113);
+    expect(journal.has("altie")).toBeFalse();
   });
 
   test("retains the stat, move, capture, status, and encounter rule inputs", () => {

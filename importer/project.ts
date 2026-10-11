@@ -21,6 +21,7 @@ import {
   type CoverageEntry,
   type CoverageReport,
   type Disposition,
+  type ExternalCoverageMaterialization,
 } from "./coverage.ts";
 import {
   buildOutdoorWorldIndex,
@@ -60,6 +61,7 @@ import {
   type WeatherEntry,
 } from "./time-weather.ts";
 import { audioAssetIds, audioId, audioTable } from "./audio.ts";
+import { loadTitleBattle } from "./feature-modes.ts";
 import {
   loadRadioSource,
   type RadioScalar,
@@ -899,6 +901,7 @@ class ConversionCoverage {
   private readonly canonical: TuxEvent[];
   private readonly canonicalKeys: Set<string>;
   private selected = new Map<string, EventCoverage>();
+  private externalMaterializations: ExternalCoverageMaterialization[] = [];
 
   constructor(events: TuxEvent[]) {
     this.canonical = events;
@@ -910,6 +913,57 @@ class ConversionCoverage {
 
   reset(): void {
     this.selected.clear();
+    this.externalMaterializations.length = 0;
+  }
+
+  /** Account for an authored event file implemented outside the map reducer.
+   * The expectation comes from that feature's strict source validator; all
+   * names and use counts must still match the canonical source-file census so
+   * a drifted or partially materialized program fails closed. */
+  materializeNativeExternal(
+    source: string,
+    expected: {
+      eventCount: number;
+      eventNames: readonly string[];
+      actionCount: number;
+      conditionCount: number;
+    },
+    reason: string,
+  ): void {
+    const events = this.canonical.filter((event) => event.source === source);
+    const eventNames = events.map((event) => event.name);
+    const actionCount = events.reduce(
+      (sum, event) => sum + event.acts.filter((rule) => !rule.synthetic).length,
+      0,
+    );
+    const conditionCount = events.reduce(
+      (sum, event) => sum + event.conds.filter((rule) => !rule.synthetic).length,
+      0,
+    );
+    if (events.length !== expected.eventCount ||
+        eventNames.join("\0") !== expected.eventNames.join("\0") ||
+        actionCount !== expected.actionCount ||
+        conditionCount !== expected.conditionCount) {
+      throw new Error(
+        `external coverage source ${source} differs from its validated materialization ` +
+        `(events ${events.length}/${expected.eventCount}, actions ${actionCount}/${expected.actionCount}, ` +
+        `conditions ${conditionCount}/${expected.conditionCount})`,
+      );
+    }
+    for (const event of events) {
+      const coverage = new EventCoverage(event);
+      for (const action of event.acts) coverage.action(action, "T1", reason);
+      for (const condition of event.conds) coverage.condition(condition, "T1", reason);
+      this.commit(coverage);
+    }
+    this.externalMaterializations.push({
+      source,
+      disposition: "native",
+      events: events.length,
+      actions: actionCount,
+      conditions: conditionCount,
+      reason,
+    });
   }
 
   /** Scenario YAML is materialized on many maps. Source-file coverage must
@@ -961,7 +1015,7 @@ class ConversionCoverage {
         entries.push(...absent.entries());
       }
     }
-    return buildCoverageReport(this.canonical.length, entries);
+    return buildCoverageReport(this.canonical.length, entries, this.externalMaterializations);
   }
 
   /** Parameter-level audit over the same canonical event materialization as
@@ -1016,7 +1070,11 @@ class ConversionCoverage {
   }
 }
 
-const conversionCoverage = new ConversionCoverage(loadAllFileEvents());
+const canonicalFileEvents = loadAllFileEvents();
+const conversionCoverage = new ConversionCoverage(canonicalFileEvents);
+const titleBattleCoverageSource = canonicalFileEvents.some((event) => event.source === "battle_menu.yaml")
+  ? loadTitleBattle(TUXEMON_SRC)
+  : undefined;
 let activeCoverage: EventCoverage | undefined;
 
 function noteAction(rule: Rule, type: string, fate: Fate, why: string, coverageType?: string): void {
@@ -3036,7 +3094,15 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         }
         break;
       case "add_tracker":
-        noteAction(a, a.type, "T1-lowered", "persistent switch preserves authored visit guards, but the NuPhone GPS map is not imported");
+        noteAction(
+          a,
+          a.type,
+          g[0] === "player" && g[1] ? "T1" : "T2-dropped",
+          g[0] === "player" && g[1]
+            ? "persistent tracker.<location> switch consumed by tracker conditions and the NuPhone GPS map"
+            : "only player tracker locations are exposed by the NuPhone GPS map",
+        );
+        if (g[0] !== "player" || !g[1]) break;
         out.push({ op: "switch", id: `tracker.${g[1]}`, value: true });
         break;
       case "create_npc":
@@ -6105,6 +6171,13 @@ export function buildProject(
   for (const id of [...itemDb.keys()].sort()) ensureItem(id);
   transferRepairs.length = 0;
   conversionCoverage.reset();
+  if (titleBattleCoverageSource) {
+    conversionCoverage.materializeNativeExternal(
+      "battle_menu.yaml",
+      titleBattleCoverageSource.authored,
+      "validated title Battle mode executes this out-of-map authored program",
+    );
+  }
   const world = buildOutdoorWorldIndex([...allMaps.values()]);
   const selectedMaps = new Set(want);
   const sourceWorldLayout = projectOutdoorWorldLayout(world.index, selectedMaps);

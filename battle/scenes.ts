@@ -342,5 +342,7 @@ export function createTuxemonScenes(
 }
 
 export function runtimeJournalIndex(shell: BattleRuntimeShell): readonly JournalMonsterIndexEntry[] {
-  return shell.monstersIndex;
+  if (shell.journalMonsterIds === undefined) return shell.monstersIndex;
+  const visible = new Set(shell.journalMonsterIds);
+  return shell.monstersIndex.filter((entry) => visible.has(entry.id));
 }

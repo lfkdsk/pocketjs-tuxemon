@@ -284,9 +284,9 @@
  "schemaErrors": [],
  "audioQoaPending": [],
  "byFate": {
-  "T1-lowered": 1977,
+  "T1-lowered": 1953,
   "T3-dropped": 2,
-  "T1": 37983,
+  "T1": 38007,
   "T4-dropped": 1419,
   "T2-dropped": 186,
   "structural": 793
@@ -335,10 +335,10 @@
    "note": "tux.add_tech teaches the iid-named monster a technique (deduped, no cap)"
   },
   {
-   "key": "act:add_tracker:T1-lowered",
-   "fate": "T1-lowered",
+   "key": "act:add_tracker:T1",
+   "fate": "T1",
    "count": 24,
-   "note": "persistent switch preserves authored visit guards, but the NuPhone GPS map is not imported"
+   "note": "persistent tracker.<location> switch consumed by tracker conditions and the NuPhone GPS map"
   },
   {
    "key": "act:autosave:T1",
@@ -5116,19 +5116,29 @@
   "view": "source-file",
   "accounting": "conversion-path",
   "sourceEvents": 4578,
+  "externalMaterializations": [
+   {
+    "source": "battle_menu.yaml",
+    "disposition": "native",
+    "events": 12,
+    "actions": 42,
+    "conditions": 29,
+    "reason": "validated title Battle mode executes this out-of-map authored program"
+   }
+  ],
   "actions": {
    "summary": {
     "types": 98,
     "uses": 13617,
-    "native": 13146,
-    "degraded": 217,
+    "native": 13212,
+    "degraded": 193,
     "placeholder": 0,
-    "dropped": 254,
-    "nativePercent": 96.5,
-    "executablePercent": 98.1,
+    "dropped": 212,
+    "nativePercent": 97,
+    "executablePercent": 98.4,
     "tier1": {
-     "uses": 6425,
-     "percent": 47.18,
+     "uses": 6430,
+     "percent": 47.22,
      "requiredUses": 6246,
      "requiredPercent": 45.9,
      "meetsBaseline": true
@@ -5208,13 +5218,13 @@
     {
      "type": "add_tracker",
      "total": 24,
-     "native": 0,
-     "degraded": 24,
+     "native": 24,
+     "degraded": 0,
      "placeholder": 0,
      "dropped": 0,
      "reasons": {
-      "degraded": [
-       "persistent switch preserves authored visit guards, but the NuPhone GPS map is not imported"
+      "native": [
+       "persistent tracker.<location> switch consumed by tracker conditions and the NuPhone GPS map"
       ]
      }
     },
@@ -5510,13 +5520,14 @@
     {
      "type": "create_npc",
      "total": 1503,
-     "native": 1328,
+     "native": 1329,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 175,
+     "dropped": 174,
      "reasons": {
       "native": [
-       "local.npc.<slug> = 1 plus K1 place"
+       "local.npc.<slug> = 1 plus K1 place",
+       "validated title Battle mode executes this out-of-map authored program"
       ],
       "dropped": [
        "source event is not materialized by any map"
@@ -5887,13 +5898,13 @@
     {
      "type": "quit_world",
      "total": 3,
-     "native": 0,
+     "native": 3,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 3,
+     "dropped": 0,
      "reasons": {
-      "dropped": [
-       "source event is not materialized by any map"
+      "native": [
+       "validated title Battle mode executes this out-of-map authored program"
       ]
      }
     },
@@ -5926,15 +5937,13 @@
     {
      "type": "random_monster",
      "total": 39,
-     "native": 9,
+     "native": 39,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 30,
+     "dropped": 0,
      "reasons": {
-      "dropped": [
-       "source event is not materialized by any map"
-      ],
       "native": [
+       "validated title Battle mode executes this out-of-map authored program",
        "tux.random_monster draws a qualified species and stages it for the NPC team"
       ]
      }
@@ -6100,16 +6109,14 @@
     {
      "type": "set_environment",
      "total": 174,
-     "native": 173,
+     "native": 174,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 1,
+     "dropped": 0,
      "reasons": {
       "native": [
-       "tux.set_environment updates the active battle backdrop"
-      ],
-      "dropped": [
-       "source event is not materialized by any map"
+       "tux.set_environment updates the active battle backdrop",
+       "validated title Battle mode executes this out-of-map authored program"
       ]
      }
     },
@@ -6307,28 +6314,28 @@
     {
      "type": "set_variable",
      "total": 715,
-     "native": 709,
+     "native": 714,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 6,
+     "dropped": 1,
      "reasons": {
       "native": [
        "variable set enum code (text variables: the literal string)",
+       "validated title Battle mode executes this out-of-map authored program",
        "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
       ],
       "dropped": [
-       "fixed-false guard (is button_pressed: source button 'K_RETURN' is not a supported Tuxemon intention) prevents the source event from starting",
-       "source event is not materialized by any map"
+       "fixed-false guard (is button_pressed: source button 'K_RETURN' is not a supported Tuxemon intention) prevents the source event from starting"
       ]
      }
     },
     {
      "type": "start_battle",
      "total": 331,
-     "native": 330,
+     "native": 331,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 1,
+     "dropped": 0,
      "reasons": {
       "native": [
        "Battle Processing with extension-staged trainer party",
@@ -6338,10 +6345,8 @@
        "Battle Processing with 5 folded trainer monsters",
        "Battle Processing with 6 folded trainer monsters",
        "Battle Processing with 3 folded trainer monsters",
-       "NPC-versus-NPC battle played in the battle scene (spectator, AI vs AI, same RNG as headless)"
-      ],
-      "dropped": [
-       "source event is not materialized by any map"
+       "NPC-versus-NPC battle played in the battle scene (spectator, AI vs AI, same RNG as headless)",
+       "validated title Battle mode executes this out-of-map authored program"
       ]
      }
     },
@@ -6484,15 +6489,13 @@
     {
      "type": "update_time",
      "total": 3,
-     "native": 2,
+     "native": 3,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 1,
+     "dropped": 0,
      "reasons": {
-      "dropped": [
-       "source event is not materialized by any map"
-      ],
       "native": [
+       "validated title Battle mode executes this out-of-map authored program",
        "TeleporterState update lowered to the destination map's once-per-entry page; tux.update_time reads the saved deterministic calendar"
       ]
      }
@@ -6549,15 +6552,15 @@
    "summary": {
     "types": 64,
     "uses": 8663,
-    "native": 8423,
+    "native": 8452,
     "degraded": 21,
     "placeholder": 0,
-    "dropped": 219,
-    "nativePercent": 97.2,
-    "executablePercent": 97.5,
+    "dropped": 190,
+    "nativePercent": 97.6,
+    "executablePercent": 97.8,
     "tier1": {
-     "uses": 4772,
-     "percent": 55.08,
+     "uses": 4782,
+     "percent": 55.2,
      "requiredUses": 4591,
      "requiredPercent": 53,
      "meetsBaseline": true
@@ -6567,16 +6570,14 @@
     {
      "type": "is battle_outcome",
      "total": 230,
-     "native": 227,
+     "native": 230,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 3,
+     "dropped": 0,
      "reasons": {
       "native": [
-       "tux.battle_outcome extension condition"
-      ],
-      "dropped": [
-       "source event is not materialized by any map"
+       "tux.battle_outcome extension condition",
+       "validated title Battle mode executes this out-of-map authored program"
       ]
      }
     },
@@ -6657,16 +6658,14 @@
     {
      "type": "is char_exists",
      "total": 9,
-     "native": 3,
+     "native": 9,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 6,
+     "dropped": 0,
      "reasons": {
       "native": [
-       "local.npc.<slug> presence resets on map entry"
-      ],
-      "dropped": [
-       "source event is not materialized by any map"
+       "local.npc.<slug> presence resets on map entry",
+       "validated title Battle mode executes this out-of-map authored program"
       ]
      }
     },
@@ -6859,18 +6858,18 @@
     {
      "type": "is current_state",
      "total": 78,
-     "native": 72,
+     "native": 76,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 6,
+     "dropped": 2,
      "reasons": {
       "native": [
        "WorldState arm -> derived worldIdle condition; scene/menu alternatives freeze map fibers",
+       "validated title Battle mode executes this out-of-map authored program",
        "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow",
        "TeleporterState update lowered to the destination map's once-per-entry page"
       ],
       "dropped": [
-       "source event is not materialized by any map",
        "fixed-false guard (is current_state: combat/menu/teleporter states do not run map fibers in the kit) prevents the source event from starting"
       ]
      }
@@ -7023,16 +7022,16 @@
     {
      "type": "is party_size",
      "total": 50,
-     "native": 47,
+     "native": 49,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 3,
+     "dropped": 1,
      "reasons": {
       "native": [
-       "tux.party_size reads the persistent party"
+       "tux.party_size reads the persistent party",
+       "validated title Battle mode executes this out-of-map authored program"
       ],
       "dropped": [
-       "source event is not materialized by any map",
        "fixed-false guard (is current_state: combat/menu/teleporter states do not run map fibers in the kit) prevents the source event from starting"
       ]
      }
@@ -7092,17 +7091,15 @@
     {
      "type": "is variable_set",
      "total": 730,
-     "native": 725,
+     "native": 730,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 5,
+     "dropped": 0,
      "reasons": {
       "native": [
        "page/if variable compare on the enum code",
+       "validated title Battle mode executes this out-of-map authored program",
        "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
-      ],
-      "dropped": [
-       "source event is not materialized by any map"
       ]
      }
     },
@@ -7148,29 +7145,28 @@
     {
      "type": "not char_defeated",
      "total": 181,
-     "native": 179,
+     "native": 181,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 2,
+     "dropped": 0,
      "reasons": {
       "native": [
-       "tux.char_defeated reads live party HP"
-      ],
-      "dropped": [
-       "source event is not materialized by any map"
+       "tux.char_defeated reads live party HP",
+       "validated title Battle mode executes this out-of-map authored program"
       ]
      }
     },
     {
      "type": "not char_exists",
      "total": 1400,
-     "native": 1225,
+     "native": 1226,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 175,
+     "dropped": 174,
      "reasons": {
       "native": [
-       "local.npc.<slug> presence resets on map entry"
+       "local.npc.<slug> presence resets on map entry",
+       "validated title Battle mode executes this out-of-map authored program"
       ],
       "dropped": [
        "source event is not materialized by any map"
@@ -7272,16 +7268,14 @@
     {
      "type": "not environment_is",
      "total": 172,
-     "native": 171,
+     "native": 172,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 1,
+     "dropped": 0,
      "reasons": {
       "native": [
-       "tux.environment_is reads the active battle backdrop"
-      ],
-      "dropped": [
-       "source event is not materialized by any map"
+       "tux.environment_is reads the active battle backdrop",
+       "validated title Battle mode executes this out-of-map authored program"
       ]
      }
     },
@@ -7445,17 +7439,17 @@
     {
      "type": "not variable_set",
      "total": 671,
-     "native": 665,
+     "native": 670,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 6,
+     "dropped": 1,
      "reasons": {
       "native": [
-       "page/if variable compare on the enum code"
+       "page/if variable compare on the enum code",
+       "validated title Battle mode executes this out-of-map authored program"
       ],
       "dropped": [
-       "fixed-false guard (is button_pressed: source button 'K_RETURN' is not a supported Tuxemon intention) prevents the source event from starting",
-       "source event is not materialized by any map"
+       "fixed-false guard (is button_pressed: source button 'K_RETURN' is not a supported Tuxemon intention) prevents the source event from starting"
       ]
      }
     }

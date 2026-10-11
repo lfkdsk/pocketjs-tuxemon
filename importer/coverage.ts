@@ -38,10 +38,20 @@ export interface CoverageSummary {
   };
 }
 
+export interface ExternalCoverageMaterialization {
+  source: string;
+  disposition: "native";
+  events: number;
+  actions: number;
+  conditions: number;
+  reason: string;
+}
+
 export interface CoverageReport {
   view: "source-file";
   accounting: "conversion-path";
   sourceEvents: number;
+  externalMaterializations: ExternalCoverageMaterialization[];
   actions: { summary: CoverageSummary; rows: CoverageRow[] };
   conditions: { summary: CoverageSummary; rows: CoverageRow[] };
 }
@@ -158,6 +168,7 @@ function aggregate(
 export function buildCoverageReport(
   sourceEvents: number,
   entries: readonly CoverageEntry[],
+  externalMaterializations: readonly ExternalCoverageMaterialization[] = [],
 ): CoverageReport {
   const actions = entries.filter((entry) => entry.kind === "action");
   const conditions = entries.filter((entry) => entry.kind === "condition");
@@ -165,6 +176,7 @@ export function buildCoverageReport(
     view: "source-file",
     accounting: "conversion-path",
     sourceEvents,
+    externalMaterializations: externalMaterializations.map((entry) => ({ ...entry })),
     actions: aggregate(actions, T1_ACTIONS, { uses: 6_246, percent: 45.9 }),
     conditions: aggregate(conditions, T1_CONDITIONS, { uses: 4_591, percent: 53.0 }),
   };

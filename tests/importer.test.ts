@@ -132,14 +132,14 @@ test("all maps pass schema and reference valid transfer destinations", () => {
     // load_yaml yields one reference tick before publishing appended events.
     types: 98,
     uses: 13_617,
-    native: 6_879,
-    degraded: 2_821,
+    native: 6_945,
+    degraded: 2_797,
     placeholder: 708,
-    dropped: 3_209,
-    nativePercent: 50.5,
+    dropped: 3_167,
+    nativePercent: 51,
     tier1: {
-      uses: 6_325,
-      percent: 46.45,
+      uses: 6_330,
+      percent: 46.49,
       requiredUses: 6_246,
       meetsBaseline: true,
     },
@@ -147,14 +147,14 @@ test("all maps pass schema and reference valid transfer destinations", () => {
   expect(result.report.coverage.conditions.summary).toMatchObject({
     types: 64,
     uses: 8_663,
-    native: 4_382,
+    native: 4_411,
     degraded: 1_243,
     placeholder: 859,
-    dropped: 2_179,
-    nativePercent: 50.6,
+    dropped: 2_150,
+    nativePercent: 50.9,
     tier1: {
-      uses: 4_315,
-      percent: 49.81,
+      uses: 4_325,
+      percent: 49.92,
       requiredUses: 4_591,
       meetsBaseline: false,
     },
@@ -699,7 +699,7 @@ test("default import output remains byte-pinned", () => {
   // G-PC-LOCKER fix-2 lockerOverflow wording (the locker is implemented)
   // moves this hash.
   expect(createHash("sha256").update(bytes).digest("hex")).toBe(
-    "33477b7e586f60ba8e2f72500715249b9bd3f22b88b696a89d2ad0352b0338b0",
+    "8dd4f345fd1fd644c2ff9531f5a517889506d42793673a0ee0ef502f65e88b1a",
   );
 });
 

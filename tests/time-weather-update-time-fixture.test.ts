@@ -1,11 +1,11 @@
 // R2 positive fixture: a materializable `update_time player` event in an
 // ISOLATED source tree, run through the real buildProject/convertActions.
 //
-// The real source's three `update_time player` events never materialize
-// (two sit behind a folded `current_state TeleporterState` guard, the third
-// is in battle_menu which has no .tmx), so the imported tux.update_time
-// ext command shape is pinned here instead. The real-source Dropped
-// statistics stay covered in time-weather-import.test.ts.
+// The real source's two map-bound `update_time player` events sit behind a
+// folded `current_state TeleporterState` guard and are lowered to destination
+// entry hooks; the third now runs in the validated out-of-map title Battle
+// mode. This isolated fixture continues to pin the ordinary imported
+// tux.update_time ext command shape.
 //
 // The importer reads TUXEMON_SRC at module load (importer/source.ts), so the
 // fixture build runs in a subprocess with its own TUXEMON_SRC. bun test shares

@@ -3,6 +3,7 @@
 
 import { copyFileSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { minifyRuntimeBundle } from "./runtime-bundle.ts";
 
 const root = resolve(import.meta.dir, "..");
 
@@ -22,6 +23,10 @@ await run([
   "--project-root=.",
   "pocket-tuxemon",
 ]);
+const bundle = minifyRuntimeBundle(
+  join(root, "dist", "web", "pocket-tuxemon", "pocket-tuxemon.js"),
+);
+console.log(`runtime bundle: ${bundle.before} -> ${bundle.after} bytes`);
 copyFileSync(
   join(root, "licenses", "AUDIO-ATTRIBUTIONS.md"),
   join(root, "dist", "web", "pocket-tuxemon", "AUDIO-ATTRIBUTIONS.md"),

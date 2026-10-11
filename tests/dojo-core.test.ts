@@ -12,13 +12,17 @@ import {
   tasteChangeAvailable,
 } from "../battle/dojo.ts";
 import { battleDbToTuxemonBattleDb } from "../battle/from-battle-db.ts";
-import { TUXEMON_BATTLE_DB } from "../battle/game.ts";
+import {
+  TUXEMON_BATTLE_DB,
+  TUXEMON_CAMPAIGN_MONSTER_IDS,
+} from "../battle/game.ts";
 import { spawnMonster, spawnMonsterWithRandom } from "../battle/spawn.ts";
 import { calculateBaseStats, zeroStats } from "../battle/stats.ts";
 import { TUXEMON_SRC } from "../importer/source.ts";
 
 const DB = TUXEMON_BATTLE_DB;
 const RULES = battleDbToTuxemonBattleDb(DB);
+const CAMPAIGN_MONSTERS = new Set(TUXEMON_CAMPAIGN_MONSTER_IDS);
 
 interface SourceMonster {
   stage: string;
@@ -36,14 +40,22 @@ describe("Dojo rules against the pinned upstream data", () => {
     // tuxemon/event/actions/dojo_method.py: history entries that evolve into
     // the monster, basic for stage1 and stage1/basic for stage2.
     let offered = 0;
-    for (const slug of Object.keys(DB.monsters).sort()) {
+    // The package also carries title-mode-only candidates in the lazy battle
+    // repository. Dojo is a campaign service, so its corpus follows the same
+    // campaign-visible index as Journal/Tuxepedia rather than revealing those
+    // disposable-match species.
+    for (const slug of [...CAMPAIGN_MONSTERS].sort()) {
       const source = sourceMonster(slug);
       const wanted = (source.history ?? []).filter((entry) =>
         (entry.evolves_into ?? []).includes(slug)
         && ((source.stage === "stage1" && entry.stage === "basic")
           || (source.stage === "stage2" && ["stage1", "basic"].includes(entry.stage)))
-        && entry.slug in DB.monsters).map((entry) => entry.slug).sort();
-      const actual = dojoDevolutionTargets(DB, { slug, stage: DB.monsters[slug]!.stage });
+        && CAMPAIGN_MONSTERS.has(entry.slug)).map((entry) => entry.slug).sort();
+      const actual = dojoDevolutionTargets(
+        DB,
+        { slug, stage: DB.monsters[slug]!.stage },
+        CAMPAIGN_MONSTERS,
+      );
       expect([...actual].sort()).toEqual(wanted);
       offered += actual.length;
     }

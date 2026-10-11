@@ -1,0 +1,415 @@
+// Build-time import for the two menu features that live outside Tuxemon's
+// normal TMX map graph: the NuPhone GPS application and title-screen Battle.
+// The runtime consumes only this validated, deterministic document; authored
+// locations and difficulty recipes never have a second hand-maintained copy.
+
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { createTextCatalog, type TextCatalog } from "./l10n.ts";
+import { decodePng } from "./png.ts";
+import { readYamlEvents, type Cond, type Rule, type TuxEvent } from "./source.ts";
+import { randomMonsterCandidatePools } from "./random-monster.ts";
+import type {
+  AuthoredScriptUsage,
+  FeatureImage,
+  FeatureLocale,
+  FeatureModesRuntimeData,
+  LocalizedFeatureText,
+  NuPhoneDirection,
+  NuPhoneMapData,
+  NuPhoneMapPoint,
+  TitleBattleData,
+  TitleBattleDifficulty,
+} from "../ui/feature-modes-data.ts";
+
+export type { FeatureLocale } from "../ui/feature-modes-data.ts";
+
+export interface FeatureImageSource extends FeatureImage {
+  /** Build-only path relative to mods/tuxemon in the pinned source checkout. */
+  source: string;
+}
+
+export type NuPhoneMapImport = Omit<NuPhoneMapData, "art"> & {
+  art: {
+    map: FeatureImageSource;
+    cursor: FeatureImageSource;
+    player: FeatureImageSource;
+    phoneIcon: FeatureImageSource;
+    appIcon: FeatureImageSource;
+  };
+};
+
+export type TitleBattleImport = TitleBattleData;
+
+export interface FeatureModesImport {
+  format: "pocket-tuxemon/feature-modes/v1";
+  nuPhoneMap: NuPhoneMapImport;
+  titleBattle: TitleBattleImport;
+}
+
+const DIRECTIONS: readonly NuPhoneDirection[] = ["up", "right", "down", "left"];
+const DIFFICULTIES = ["beginner", "easy", "normal", "hard", "expert"] as const;
+
+function featureCatalogs(): Record<FeatureLocale, TextCatalog> {
+  return {
+    en_US: createTextCatalog("en_US"),
+    zh_CN: createTextCatalog("zh_CN"),
+  };
+}
+
+function record(value: unknown, at: string): Record<string, unknown> {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error(`${at} must be an object`);
+  }
+  return value as Record<string, unknown>;
+}
+
+function nonEmptyString(value: unknown, at: string): string {
+  if (typeof value !== "string" || value.length === 0) {
+    throw new Error(`${at} must be a non-empty string`);
+  }
+  return value;
+}
+
+function integer(value: unknown, at: string): number {
+  if (typeof value !== "number" || !Number.isInteger(value)) {
+    throw new Error(`${at} must be an integer`);
+  }
+  return value;
+}
+
+function stringList(value: unknown, at: string): string[] {
+  if (!Array.isArray(value) || value.some((entry) => typeof entry !== "string" || entry.length === 0)) {
+    throw new Error(`${at} must be an array of non-empty strings`);
+  }
+  return [...value] as string[];
+}
+
+function sameMembers(actual: readonly string[], expected: readonly string[], at: string): void {
+  const a = [...actual].sort();
+  const e = [...expected].sort();
+  if (a.length !== e.length || a.some((value, index) => value !== e[index])) {
+    throw new Error(`${at} must contain exactly ${expected.join(", ")}`);
+  }
+}
+
+function translate(catalogs: Readonly<Record<FeatureLocale, TextCatalog>>, key: string): LocalizedFeatureText {
+  const en_US = catalogs.en_US.get(key);
+  const zh_CN = catalogs.zh_CN.get(key);
+  if (!en_US || !zh_CN) throw new Error(`feature modes: missing bilingual text '${key}'`);
+  return { en_US, zh_CN };
+}
+
+function imageSource(sourceRoot: string, source: string, texture: string): FeatureImageSource {
+  const path = join(sourceRoot, "mods/tuxemon", source);
+  if (!existsSync(path)) throw new Error(`feature modes: missing image ${source}`);
+  const image = decodePng(new Uint8Array(readFileSync(path)), source);
+  return { source, texture, width: image.width, height: image.height };
+}
+
+function itemMenu(value: unknown, slug: string, expected: {
+  menuType: "world" | "phone";
+  state: "NuPhone" | "NuPhoneMap";
+}): { labelKey: string; sprite: string } {
+  const row = record(value, `db/item/${slug}.yaml`);
+  if (row.slug !== slug) throw new Error(`db/item/${slug}.yaml must declare slug '${slug}'`);
+  const menu = record(row.dynamic_menu, `db/item/${slug}.yaml.dynamic_menu`);
+  if (menu.menu_type !== expected.menuType || menu.state !== expected.state) {
+    throw new Error(
+      `db/item/${slug}.yaml must open ${expected.state} from the ${expected.menuType} menu`,
+    );
+  }
+  return {
+    labelKey: nonEmptyString(menu.label_key, `db/item/${slug}.yaml.dynamic_menu.label_key`),
+    sprite: nonEmptyString(row.sprite, `db/item/${slug}.yaml.sprite`),
+  };
+}
+
+/** Validate and normalize mods/nu_phone_map.yaml without depending on object
+ * key iteration at runtime. Exported so tests can mutate the real parsed
+ * document in memory and prove that malformed authored data fails closed. */
+export function parseNuPhoneMap(
+  value: unknown,
+  catalogs: Readonly<Record<FeatureLocale, TextCatalog>>,
+): Omit<NuPhoneMapImport, "entry" | "art"> {
+  const doc = record(value, "nu_phone_map.yaml");
+  nonEmptyString(doc.map_path, "nu_phone_map.yaml.map_path");
+  if (!Array.isArray(doc.map_data) || doc.map_data.length === 0) {
+    throw new Error("nu_phone_map.yaml.map_data must be a non-empty array");
+  }
+
+  const rawGroups = record(doc.map_groups, "nu_phone_map.yaml.map_groups");
+  const rawNav = record(doc.nav, "nu_phone_map.yaml.nav");
+  const core = new Set(stringList(doc.core, "nu_phone_map.yaml.core"));
+  const seenKeys = new Set<string>();
+  const points = doc.map_data.map((raw, index) => {
+    if (!Array.isArray(raw) || raw.length !== 3) {
+      throw new Error(`nu_phone_map.yaml.map_data[${index}] must be [x, y, key]`);
+    }
+    const x = integer(raw[0], `nu_phone_map.yaml.map_data[${index}][0]`);
+    const y = integer(raw[1], `nu_phone_map.yaml.map_data[${index}][1]`);
+    const key = nonEmptyString(raw[2], `nu_phone_map.yaml.map_data[${index}][2]`);
+    if (x < 0 || x >= 256 || y < 0 || y >= 144) {
+      throw new Error(`nu_phone_map.yaml.map_data[${index}] lies outside the 256x144 nominal canvas`);
+    }
+    if (seenKeys.has(key)) throw new Error(`nu_phone_map.yaml.map_data repeats '${key}'`);
+    seenKeys.add(key);
+    const mapSlugs = stringList(rawGroups[key], `nu_phone_map.yaml.map_groups.${key}`);
+    const navRow = record(rawNav[key], `nu_phone_map.yaml.nav.${key}`);
+    sameMembers(Object.keys(navRow), DIRECTIONS, `nu_phone_map.yaml.nav.${key}`);
+    const nav = Object.fromEntries(DIRECTIONS.map((direction) => {
+      const target = navRow[direction];
+      if (target !== null && (typeof target !== "string" || target.length === 0)) {
+        throw new Error(`nu_phone_map.yaml.nav.${key}.${direction} must be a location key or null`);
+      }
+      return [direction, target as string | null];
+    })) as Record<NuPhoneDirection, string | null>;
+    return {
+      key,
+      x,
+      y,
+      label: translate(catalogs, key),
+      mapSlugs,
+      core: core.has(key),
+      nav,
+    } satisfies NuPhoneMapPoint;
+  });
+
+  sameMembers(Object.keys(rawGroups), [...seenKeys], "nu_phone_map.yaml.map_groups");
+  sameMembers(Object.keys(rawNav), [...seenKeys], "nu_phone_map.yaml.nav");
+  for (const key of core) {
+    if (!seenKeys.has(key)) throw new Error(`nu_phone_map.yaml.core references unknown location '${key}'`);
+  }
+
+  const mapToLocation: Record<string, string> = {};
+  for (const point of points) {
+    for (const slug of point.mapSlugs) {
+      if (mapToLocation[slug]) {
+        throw new Error(`nu_phone_map.yaml map slug '${slug}' belongs to more than one location`);
+      }
+      mapToLocation[slug] = point.key;
+    }
+    for (const direction of DIRECTIONS) {
+      const target = point.nav[direction];
+      if (target !== null && !seenKeys.has(target)) {
+        throw new Error(`nu_phone_map.yaml.nav.${point.key}.${direction} references unknown '${target}'`);
+      }
+    }
+  }
+
+  return {
+    source: "mods/nu_phone_map.yaml",
+    nominalWidth: 256,
+    nominalHeight: 144,
+    points,
+    mapToLocation: Object.fromEntries(Object.entries(mapToLocation).sort(([a], [b]) =>
+      a < b ? -1 : a > b ? 1 : 0
+    )),
+  };
+}
+
+function exactlyOne<T>(values: readonly T[], at: string): T {
+  if (values.length !== 1) throw new Error(`${at} must occur exactly once (found ${values.length})`);
+  return values[0]!;
+}
+
+function rulesEqual(actual: readonly Rule[], expected: readonly string[], at: string): void {
+  const raw = actual.map((rule) => rule.raw);
+  if (raw.length !== expected.length || raw.some((value, index) => value !== expected[index])) {
+    throw new Error(`${at} differs from the supported authored script`);
+  }
+}
+
+function conditionsEqual(actual: readonly Cond[], expected: readonly string[], at: string): void {
+  rulesEqual(actual, expected, at);
+}
+
+function usage(events: readonly TuxEvent[]): AuthoredScriptUsage {
+  const actions = new Map<string, number>();
+  const conditions = new Map<string, number>();
+  for (const event of events) {
+    for (const action of event.acts) actions.set(action.type, (actions.get(action.type) ?? 0) + 1);
+    for (const condition of event.conds) {
+      const key = `${condition.op} ${condition.type}`;
+      conditions.set(key, (conditions.get(key) ?? 0) + 1);
+    }
+  }
+  return {
+    eventCount: events.length,
+    actionCount: [...actions.values()].reduce((sum, count) => sum + count, 0),
+    conditionCount: [...conditions.values()].reduce((sum, count) => sum + count, 0),
+    eventNames: events.map((event) => event.name),
+    actions: Object.fromEntries([...actions].sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)),
+    conditions: Object.fromEntries([...conditions].sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)),
+  };
+}
+
+/** Validate the actual battle_menu event program and derive the five party
+ * recipes from its random_monster commands. */
+export function parseTitleBattle(
+  events: readonly TuxEvent[],
+  catalogs: Readonly<Record<FeatureLocale, TextCatalog>>,
+  sourceRoot: string,
+): TitleBattleImport {
+  if (events.some((event) => event.source !== "battle_menu.yaml" || event.kind !== "event")) {
+    throw new Error("battle_menu.yaml must contain only event entries from that source file");
+  }
+  const byName = new Map(events.map((event) => [event.name, event]));
+  if (byName.size !== events.length) throw new Error("battle_menu.yaml event names must be unique");
+  sameMembers([...byName.keys()], [
+    "Environment",
+    "Update Time Variables",
+    "Create Maple",
+    "Start Maple",
+    "Post Win",
+    "Post Lose",
+    "Post Draw",
+    ...DIFFICULTIES.map((id) => `Difficulty ${id}`),
+  ], "battle_menu.yaml events");
+
+  const environment = byName.get("Environment")!;
+  rulesEqual(environment.acts, ["set_environment interior"], "battle_menu.yaml Environment actions");
+  conditionsEqual(environment.conds, ["not environment_is interior"], "battle_menu.yaml Environment conditions");
+  const updateTime = byName.get("Update Time Variables")!;
+  rulesEqual(updateTime.acts, ["update_time player"], "battle_menu.yaml Update Time Variables actions");
+  conditionsEqual(updateTime.conds, ["is current_state WorldState"], "battle_menu.yaml Update Time Variables conditions");
+  const create = byName.get("Create Maple")!;
+  rulesEqual(create.acts, ["create_npc professor,1,1"], "battle_menu.yaml Create Maple actions");
+  conditionsEqual(create.conds, ["not char_exists professor"], "battle_menu.yaml Create Maple conditions");
+  const start = byName.get("Start Maple")!;
+  rulesEqual(start.acts, ["start_battle player,professor"], "battle_menu.yaml Start Maple actions");
+  conditionsEqual(start.conds, [
+    "is char_exists professor",
+    "is party_size player,greater_than,0",
+    "is party_size professor,greater_than,0",
+    "not char_defeated player",
+    "not char_defeated professor",
+  ], "battle_menu.yaml Start Maple conditions");
+
+  for (const [name, result] of [["Post Win", "won"], ["Post Lose", "lost"], ["Post Draw", "draw"]] as const) {
+    const event = byName.get(name)!;
+    rulesEqual(event.acts, ["quit_world"], `battle_menu.yaml ${name} actions`);
+    conditionsEqual(event.conds, [
+      `is battle_outcome player,${result},professor`,
+      "is current_state WorldState",
+    ], `battle_menu.yaml ${name} conditions`);
+  }
+
+  const recipes = DIFFICULTIES.map((id) => {
+    const event = byName.get(`Difficulty ${id}`)!;
+    conditionsEqual(event.conds, [
+      `is variable_set difficulty:${id}`,
+      "is char_exists professor",
+      "not variable_set monsters:full",
+    ], `battle_menu.yaml Difficulty ${id} conditions`);
+    const complete = exactlyOne(
+      event.acts.filter((action) => action.raw === "set_variable monsters:full"),
+      `battle_menu.yaml Difficulty ${id} completion marker`,
+    );
+    const random = event.acts.filter((action) => action.type === "random_monster");
+    if (event.acts[event.acts.length - 1] !== complete || random.length + 1 !== event.acts.length) {
+      throw new Error(`battle_menu.yaml Difficulty ${id} must end after only its random_monster recipe`);
+    }
+    const player = random.filter((action) => action.args.length === 1);
+    const opponent = random.filter((action) => action.args[1] === "professor" && action.args.length === 2);
+    if (player.length === 0 || player.length !== opponent.length || player.length + opponent.length !== random.length) {
+      throw new Error(`battle_menu.yaml Difficulty ${id} must generate equal non-empty parties`);
+    }
+    const levels = new Set(random.map((action) => Number(action.args[0])));
+    const level = exactlyOne([...levels], `battle_menu.yaml Difficulty ${id} monster level`);
+    if (!Number.isInteger(level) || level <= 0) {
+      throw new Error(`battle_menu.yaml Difficulty ${id} monster level must be a positive integer`);
+    }
+    return {
+      id,
+      label: translate(catalogs, `level_${id}`),
+      level,
+      partySize: player.length,
+    };
+  });
+  const pools = randomMonsterCandidatePools(sourceRoot, recipes.map((recipe) => recipe.level));
+  const difficulties = recipes.map((recipe) => ({
+    ...recipe,
+    candidates: pools.get(recipe.level)!,
+  } satisfies TitleBattleDifficulty));
+
+  return {
+    source: "mods/tuxemon/maps/battle_menu.yaml",
+    title: translate(catalogs, "menu_battle"),
+    difficultyPrompt: translate(catalogs, "choose_difficulty"),
+    player: "player",
+    opponent: "professor",
+    environment: "interior",
+    difficulties,
+    authored: usage(events),
+  };
+}
+
+/** Load and validate the out-of-map title Battle program without also
+ * decoding the NuPhone artwork. Coverage accounting uses this narrow entry
+ * point so it can prove that the exact authored program has a native runtime
+ * materialization. */
+export function loadTitleBattle(
+  sourceRoot: string,
+  catalogs: Readonly<Record<FeatureLocale, TextCatalog>> = featureCatalogs(),
+): TitleBattleImport {
+  const battlePath = join(sourceRoot, "mods/tuxemon/maps/battle_menu.yaml");
+  return parseTitleBattle(readYamlEvents(battlePath, "loaded"), catalogs, sourceRoot);
+}
+
+/** Read both out-of-map feature sources and their item/menu metadata. */
+export function loadFeatureModes(sourceRoot: string): FeatureModesImport {
+  const catalogs = featureCatalogs();
+  const mapPath = join(sourceRoot, "mods/nu_phone_map.yaml");
+  const rawMap = Bun.YAML.parse(readFileSync(mapPath, "utf8")) as unknown;
+  const rawMapRecord = record(rawMap, "nu_phone_map.yaml");
+  const mapSource = nonEmptyString(rawMapRecord.map_path, "nu_phone_map.yaml.map_path");
+  const phoneItemPath = join(sourceRoot, "mods/tuxemon/db/item/nu_phone.yaml");
+  const appItemPath = join(sourceRoot, "mods/tuxemon/db/item/app_map.yaml");
+  const phone = itemMenu(Bun.YAML.parse(readFileSync(phoneItemPath, "utf8")), "nu_phone", {
+    menuType: "world",
+    state: "NuPhone",
+  });
+  const app = itemMenu(Bun.YAML.parse(readFileSync(appItemPath, "utf8")), "app_map", {
+    menuType: "phone",
+    state: "NuPhoneMap",
+  });
+  const nuPhoneMap = parseNuPhoneMap(rawMap, catalogs);
+
+  return {
+    format: "pocket-tuxemon/feature-modes/v1",
+    nuPhoneMap: {
+      ...nuPhoneMap,
+      entry: {
+        phoneItem: "nu_phone",
+        appItem: "app_map",
+        phoneLabel: translate(catalogs, phone.labelKey),
+        appLabel: translate(catalogs, app.labelKey),
+        noTrackers: translate(catalogs, "nu_map_missing"),
+      },
+      art: {
+        map: imageSource(sourceRoot, mapSource, "assets/nuphone/map.png"),
+        cursor: imageSource(sourceRoot, "gfx/ui/menu/map_cross.png", "assets/nuphone/cursor.png"),
+        player: imageSource(sourceRoot, "gfx/ui/menu/map_player.png", "assets/nuphone/player.png"),
+        phoneIcon: imageSource(sourceRoot, phone.sprite, "assets/nuphone/phone.png"),
+        appIcon: imageSource(sourceRoot, app.sprite, "assets/nuphone/app-map.png"),
+      },
+    },
+    titleBattle: loadTitleBattle(sourceRoot, catalogs),
+  };
+}
+
+/** Remove build-only upstream image paths before this document enters the JS
+ * bundle. PocketJS scans literal `.png` strings as application textures; only
+ * the generated texture names belong in runtime data. */
+export function featureModesRuntimeData(imported: FeatureModesImport): FeatureModesRuntimeData {
+  const art = Object.fromEntries(Object.entries(imported.nuPhoneMap.art).map(([key, image]) => [
+    key,
+    { texture: image.texture, width: image.width, height: image.height },
+  ])) as NuPhoneMapData["art"];
+  return {
+    format: imported.format,
+    nuPhoneMap: { ...imported.nuPhoneMap, art },
+    titleBattle: imported.titleBattle,
+  };
+}

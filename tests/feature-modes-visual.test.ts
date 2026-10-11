@@ -1,0 +1,220 @@
+// Production-bundle visual gate for title Battle and NuPhone/GPS: exact
+// bilingual goldens at both supported resolutions, semantic tree/pixel
+// assertions, touch interaction and the expected 2x composition.
+
+import { createHash } from "node:crypto";
+import { existsSync, readFileSync } from "node:fs";
+import { join, resolve } from "node:path";
+import { describe, expect, test } from "bun:test";
+
+import { decodePng } from "../importer/png.ts";
+import {
+  captureFeatureModes,
+  FEATURE_MODES_CASES,
+  FEATURE_MODES_VIEWPORTS,
+  type FeatureModesCase,
+} from "../tools/feature-modes-visual-fixture.ts";
+import { TUXEMON_UI_THEME } from "../ui/tuxemon-theme.ts";
+import { fnv1a, treeHasText } from "../vendor/pocket-rpgkit/vendor/pocketjs/hosts/sim/sim.ts";
+
+const ROOT = resolve(import.meta.dir, "..");
+const BUNDLE = join(ROOT, "dist/main");
+const WASM = join(ROOT, "vendor/pocket-rpgkit/vendor/pocketjs/hosts/web/pocketjs.wasm");
+const MANIFEST = join(ROOT, "data/feature-modes-goldens.json");
+const canBoot = existsSync(BUNDLE + ".js") && existsSync(BUNDLE + ".pak")
+  && existsSync(WASM) && existsSync(MANIFEST);
+if (!canBoot) {
+  console.warn("Feature mode visuals skipped; run `bun run build && bun run build:wasm && bun tools/update-feature-modes-goldens.ts`");
+}
+const simTest = canBoot ? test : test.skip;
+const LANGS = ["en_US", "zh_CN"] as const;
+type Lang = typeof LANGS[number];
+
+interface GoldenEntry {
+  case: FeatureModesCase;
+  lang: Lang;
+  width: number;
+  height: number;
+  file: string;
+  rgbaFnv1a: string;
+  pngSha256: string;
+}
+
+interface TreeNode {
+  n?: string;
+  x?: string;
+  k?: TreeNode[];
+}
+
+function namedNode(value: unknown, name: string): TreeNode | undefined {
+  const node = value as TreeNode;
+  if (node?.n === name) return node;
+  for (const child of node?.k ?? []) {
+    const found = namedNode(child, name);
+    if (found) return found;
+  }
+  return undefined;
+}
+
+function nodeText(node: TreeNode | undefined): string {
+  return node ? `${node.x ?? ""}${(node.k ?? []).map(nodeText).join("")}` : "";
+}
+
+function rgb(hex: string): readonly [number, number, number] {
+  return [
+    Number.parseInt(hex.slice(1, 3), 16),
+    Number.parseInt(hex.slice(3, 5), 16),
+    Number.parseInt(hex.slice(5, 7), 16),
+  ];
+}
+
+function countColour(
+  rgba: Uint8Array,
+  width: number,
+  rect: { x: number; y: number; width: number; height: number },
+  colour: readonly [number, number, number],
+): number {
+  let count = 0;
+  for (let y = rect.y; y < rect.y + rect.height; y++) {
+    for (let x = rect.x; x < rect.x + rect.width; x++) {
+      const offset = (y * width + x) * 4;
+      if (rgba[offset] === colour[0] && rgba[offset + 1] === colour[1]
+          && rgba[offset + 2] === colour[2]) count++;
+    }
+  }
+  return count;
+}
+
+const manifest = canBoot
+  ? JSON.parse(readFileSync(MANIFEST, "utf8")) as { format: string; frames: GoldenEntry[] }
+  : { format: "", frames: [] };
+type Capture = Awaited<ReturnType<typeof captureFeatureModes>>;
+const captures = new Map<string, Promise<Capture>>();
+function captured(viewportIndex: number, lang: Lang): Promise<Capture> {
+  const key = `${viewportIndex}:${lang}`;
+  let pending = captures.get(key);
+  if (!pending) {
+    pending = captureFeatureModes(FEATURE_MODES_VIEWPORTS[viewportIndex]!, lang);
+    captures.set(key, pending);
+  }
+  return pending;
+}
+
+describe("NuPhone and title Battle production visuals", () => {
+  simTest("match every committed bilingual golden at both resolutions", async () => {
+    expect(manifest.format).toBe("pocket-tuxemon/feature-modes-goldens/v1");
+    expect(manifest.frames).toHaveLength(FEATURE_MODES_CASES.length * LANGS.length * FEATURE_MODES_VIEWPORTS.length);
+    for (let viewportIndex = 0; viewportIndex < FEATURE_MODES_VIEWPORTS.length; viewportIndex++) {
+      for (const lang of LANGS) {
+        const capture = await captured(viewportIndex, lang);
+        const viewport = FEATURE_MODES_VIEWPORTS[viewportIndex]!;
+        for (const visualCase of FEATURE_MODES_CASES) {
+          const entry = manifest.frames.find((candidate) => candidate.case === visualCase
+            && candidate.lang === lang && candidate.width === viewport.width
+            && candidate.height === viewport.height);
+          if (!entry) throw new Error(`missing ${visualCase} ${lang} ${viewport.width}x${viewport.height} golden`);
+          const path = join(ROOT, "tests/goldens", entry.file);
+          const png = new Uint8Array(readFileSync(path));
+          const expected = decodePng(png, path);
+          const actual = capture.cases[visualCase].rgba;
+          expect([expected.width, expected.height]).toEqual([viewport.width, viewport.height]);
+          expect(actual).toEqual(expected.rgba);
+          expect(fnv1a(actual)).toBe(entry.rgbaFnv1a);
+          expect(createHash("sha256").update(png).digest("hex")).toBe(entry.pngSha256);
+        }
+      }
+    }
+  }, 180_000);
+
+  simTest("shows complete localized title, difficulty, phone and map text", async () => {
+    for (let viewportIndex = 0; viewportIndex < FEATURE_MODES_VIEWPORTS.length; viewportIndex++) {
+      const en = await captured(viewportIndex, "en_US");
+      const zh = await captured(viewportIndex, "zh_CN");
+      expect(nodeText(namedNode(en.cases.title.tree, "tux-title-name"))).toBe("POCKET TUXEMON");
+      expect(treeHasText(en.cases.title.tree, "Adventure")).toBeTrue();
+      expect(treeHasText(en.cases.title.tree, "Battle")).toBeTrue();
+      expect(treeHasText(zh.cases.title.tree, "冒险模式")).toBeTrue();
+      expect(treeHasText(zh.cases.title.tree, "对战")).toBeTrue();
+      expect(nodeText(namedNode(en.cases.difficulty.tree, "tux-title-difficulty-prompt")))
+        .toBe("Choose your difficulty level");
+      expect(nodeText(namedNode(zh.cases.difficulty.tree, "tux-title-difficulty-prompt")))
+        .toBe("选择难度等级");
+      expect(namedNode(en.cases.difficulty.tree, "tux-title-name")).toBeUndefined();
+      expect(namedNode(en.cases.difficulty.tree, "tux-title-legend")).toBeUndefined();
+      for (const label of ["Beginner", "Easy", "Normal", "Hard", "Expert"] as const) {
+        expect(treeHasText(en.cases.difficulty.tree, label)).toBeTrue();
+      }
+      for (const label of ["入门", "简单", "普通", "困难", "专家"] as const) {
+        expect(treeHasText(zh.cases.difficulty.tree, label)).toBeTrue();
+      }
+      expect(nodeText(namedNode(en.cases.phone.tree, "tux-nuphone-title"))).toBe("Nu Phone");
+      expect(treeHasText(en.cases.phone.tree, "Map App")).toBeTrue();
+      expect(nodeText(namedNode(zh.cases.phone.tree, "tux-nuphone-title"))).toBe("Nu 手机");
+      expect(treeHasText(zh.cases.phone.tree, "手机地图")).toBeTrue();
+      expect(nodeText(namedNode(en.cases.map.tree, "tux-nuphone-location-label"))).toBe("Paper Town");
+      expect(nodeText(namedNode(zh.cases.map.tree, "tux-nuphone-location-label"))).toBe("方絮镇");
+      expect(treeHasText(en.cases.map.tree, "YOU ARE HERE")).toBeTrue();
+      expect(treeHasText(zh.cases.map.tree, "当前位置")).toBeTrue();
+    }
+  }, 180_000);
+
+  simTest("renders a real battle and non-empty semantic panels", async () => {
+    const capture = await captured(0, "en_US");
+    expect(namedNode(capture.cases.battle.tree, "tux-battle-scene")).toBeDefined();
+    expect(namedNode(capture.cases.battle.tree, "player-party-tray")).toBeDefined();
+    expect(namedNode(capture.cases.battle.tree, "enemy-party-tray")).toBeDefined();
+    const accent = rgb(TUXEMON_UI_THEME.accent);
+    expect(countColour(capture.cases.title.rgba, 480, { x: 270, y: 140, width: 188, height: 98 }, accent))
+      .toBeGreaterThan(500);
+    expect(countColour(capture.cases.difficulty.rgba, 480, { x: 120, y: 80, width: 240, height: 170 }, accent))
+      .toBeGreaterThan(500);
+    const green: readonly [number, number, number] = [0x7c, 0xf2, 0x9a];
+    expect(countColour(capture.cases.map.rgba, 480, { x: 120, y: 40, width: 220, height: 190 }, green))
+      .toBeGreaterThan(1);
+  }, 120_000);
+
+  simTest("touch opens Battle, starts the match, opens GPS and selects a pin", async () => {
+    for (let viewportIndex = 0; viewportIndex < FEATURE_MODES_VIEWPORTS.length; viewportIndex++) {
+      for (const lang of LANGS) {
+        expect((await captured(viewportIndex, lang)).touch).toEqual({
+          titleBattle: true,
+          difficultyBattle: true,
+          titleBattleDemoBlocked: true,
+          phoneMap: true,
+          mapPoint: true,
+        });
+      }
+    }
+  }, 180_000);
+
+  simTest("the large frames retain the fixed 2x composition", async () => {
+    for (const lang of LANGS) {
+      const small = await captured(0, lang);
+      const large = await captured(1, lang);
+      for (const visualCase of FEATURE_MODES_CASES) {
+        let exactBlocks = 0;
+        let channelError = 0;
+        for (let y = 0; y < 272; y++) {
+          for (let x = 0; x < 480; x++) {
+            const source = (y * 480 + x) * 4;
+            let exact = true;
+            for (let oy = 0; oy < 2; oy++) {
+              for (let ox = 0; ox < 2; ox++) {
+                const target = ((y * 2 + oy) * 960 + x * 2 + ox) * 4;
+                for (let channel = 0; channel < 4; channel++) {
+                  const difference = Math.abs(large.cases[visualCase].rgba[target + channel]!
+                    - small.cases[visualCase].rgba[source + channel]!);
+                  channelError += difference;
+                  if (difference !== 0) exact = false;
+                }
+              }
+            }
+            if (exact) exactBlocks++;
+          }
+        }
+        expect(exactBlocks / (480 * 272), `${visualCase} exact ${lang}`).toBeGreaterThan(0.75);
+        expect(channelError / (480 * 272 * 4 * 4), `${visualCase} mean ${lang}`).toBeLessThan(6);
+      }
+    }
+  }, 180_000);
+});

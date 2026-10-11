@@ -366,6 +366,17 @@ mod g6_quickjs_bench {
     /// duplicate, not a vendor/ change; if `Runtime::boot` changes shape,
     /// this needs re-syncing by hand.
     fn boot_staged(args: Args) -> Result<(Runtime, StageTimes)> {
+        boot_staged_with_prelude(args, None)
+    }
+
+    /// Benchmark-only variant used by focused production-bundle probes that
+    /// need to select a release UI before the application is evaluated. The
+    /// ordinary journey path passes no prelude and remains byte-for-byte the
+    /// same JavaScript environment as Runtime::boot plus the fixed clock.
+    fn boot_staged_with_prelude(
+        args: Args,
+        benchmark_prelude: Option<&str>,
+    ) -> Result<(Runtime, StageTimes)> {
         if args.native_text {
             return Err(anyhow!(
                 "text.layout.native is unavailable; use the portable text offload capability"
@@ -426,6 +437,9 @@ mod g6_quickjs_bench {
             "g6-fixed-clock",
             "globalThis.__pocketTuxemonInitialCivilTime={year:2024,month:6,day:15,hour:9,minute:0};",
         )?;
+        if let Some(source) = benchmark_prelude {
+            guest.eval("g6-benchmark-prelude", source)?;
+        }
         // The world-cache stress test opts into the game's default-off
         // production diagnostics hook before bundle evaluation. Ordinary
         // journey and release launches do not create the object or callbacks.
@@ -1894,6 +1908,207 @@ mod g6_quickjs_bench {
             std::fs::copy(source.join(name), destination.join(name))
                 .unwrap_or_else(|error| panic!("copy demo entry {name}: {error}"));
         }
+    }
+
+    fn feature_bench(runtime: Runtime) -> Bench {
+        Bench {
+            rt: runtime,
+            gc_mode: GcMode::from_env(),
+            sample_structural: false,
+            hash_every: 1,
+            battle_buckets: false,
+            handoff_buckets: false,
+            profile_frames: HashSet::new(),
+            profile_marks: Arc::new(Mutex::new(Vec::new())),
+            profile_capture: Arc::new(AtomicBool::new(false)),
+        }
+    }
+
+    fn feature_frames(bench: &mut Bench, next_frame: &mut usize, count: usize) -> Vec<Sample> {
+        (0..count)
+            .map(|_| {
+                let frame = *next_frame;
+                *next_frame += 1;
+                bench.frame(frame, 0, None, true)
+            })
+            .collect()
+    }
+
+    fn report_feature_case(viewport: &str, label: &str, samples: &[Sample]) {
+        report(viewport, label, samples);
+        assert_frame_budget(label, samples, 50.0);
+    }
+
+    fn report_feature_heap(viewport: &str, label: &str, bench: &Bench) {
+        let (used, malloc, objects) = qjs_memory(&bench.rt.guest);
+        println!(
+            "FEATURE_HEAP viewport={viewport} kind={label} qjs_used={:.2}MiB qjs_malloc={:.2}MiB objects={objects}",
+            used as f64 / 1_048_576.0,
+            malloc as f64 / 1_048_576.0,
+        );
+    }
+
+    fn seed_feature_data(data: &Path) {
+        seed_maps(Path::new(&std::env::var("G6_MAPS").expect("G6_MAPS")), data);
+        seed_battle(Path::new(&std::env::var("G6_BATTLE").expect("G6_BATTLE")), data);
+        seed_img_entries(
+            Path::new(&std::env::var("G6_PORTRAITS").expect("G6_PORTRAITS")),
+            "portraits",
+            data,
+        );
+        seed_img_entries(
+            Path::new(&std::env::var("G6_CHOICE_ICONS").expect("G6_CHOICE_ICONS")),
+            "choice-icons",
+            data,
+        );
+        seed_animated(
+            Path::new(&std::env::var("G6_ANIMATED").expect("G6_ANIMATED")),
+            data,
+        );
+        seed_npc_src(
+            Path::new(&std::env::var("G6_NPC_SRC").expect("G6_NPC_SRC")),
+            data,
+        );
+        seed_terrain_stream(
+            Path::new(&std::env::var("G6_TERRAIN_STREAM").expect("G6_TERRAIN_STREAM")),
+            data,
+        );
+        seed_audio(data);
+    }
+
+    /// Focused real-QuickJS acceptance for the release title Battle mode and
+    /// the NuPhone Map App. It uses the production bundle, UiSurface and
+    /// framebuffer hashing path at both supported viewports; only scene
+    /// selection is benchmark-owned.
+    #[test]
+    #[ignore]
+    fn feature_modes() {
+        let dist = PathBuf::from(std::env::var("G6_DIST").expect("G6_DIST"));
+        let width: u32 = std::env::var("G6_BENCH_W").unwrap().parse().unwrap();
+        let height: u32 = std::env::var("G6_BENCH_H").unwrap().parse().unwrap();
+        let viewport = format!("{width}x{height}");
+        let bench_root = PathBuf::from(std::env::var("G6_BENCH_ROOT").expect("G6_BENCH_ROOT"));
+        let data = bench_root.join(format!(
+            "feature-data-{}-{width}x{height}",
+            std::process::id()
+        ));
+        seed_feature_data(&data);
+
+        let title_boot = Instant::now();
+        let (runtime, title_stages) = boot_staged_with_prelude(
+            args(&dist, "pocket-tuxemon", data.clone(), width, height),
+            Some("globalThis.__pocketTuxemonShowTitle=true;"),
+        )
+        .unwrap();
+        let title_boot_ms = title_boot.elapsed().as_secs_f64() * 1_000.0;
+        let mut title = feature_bench(runtime);
+        report_startup_stages(&viewport, &title, title_boot_ms, &title_stages);
+        let mut frame = 0usize;
+        let title_entry = feature_frames(&mut title, &mut frame, 1);
+        let title_first_paint_ms = title_boot.elapsed().as_secs_f64() * 1_000.0;
+        assert!(
+            title_first_paint_ms <= 250.0,
+            "feature title startup viewport={viewport} exceeded 250 ms: {title_first_paint_ms:.3} ms",
+        );
+        assert!(
+            title.boolean("globalThis.__pocketTitleBattle?.state().screen==='title'"),
+            "release title did not mount",
+        );
+        println!(
+            "FEATURE_BOOT viewport={viewport} kind=title boot={title_boot_ms:.3}ms startup_to_first={title_first_paint_ms:.3}ms"
+        );
+        report_feature_case(&viewport, "feature-title-entry", &title_entry);
+        let _ = feature_frames(&mut title, &mut frame, 11);
+        let title_steady = feature_frames(&mut title, &mut frame, 120);
+        report_feature_case(&viewport, "feature-title-steady", &title_steady);
+        report_feature_heap(&viewport, "feature-title", &title);
+
+        title.unit("globalThis.__pocketTitleBattle.selectTitle(1)");
+        assert!(
+            title.boolean("globalThis.__pocketTitleBattle.state().screen==='difficulty'"),
+            "Battle row did not open the difficulty picker",
+        );
+        let difficulty_entry = feature_frames(&mut title, &mut frame, 1);
+        report_feature_case(&viewport, "feature-difficulty-entry", &difficulty_entry);
+        let _ = feature_frames(&mut title, &mut frame, 11);
+        let difficulty_steady = feature_frames(&mut title, &mut frame, 120);
+        report_feature_case(&viewport, "feature-difficulty-steady", &difficulty_steady);
+        report_feature_heap(&viewport, "feature-difficulty", &title);
+
+        title.unit("globalThis.__pocketTitleBattle.selectDifficulty(0)");
+        assert!(
+            title.boolean("globalThis.__pocketTitleBattle.state().screen==='battle'"),
+            "Beginner did not enter title battle ownership",
+        );
+        let battle_entry = feature_frames(&mut title, &mut frame, 24);
+        assert!(
+            title.boolean("globalThis.__rpgSessionState.scene?.kind==='battle'"),
+            "Beginner did not publish the production battle scene",
+        );
+        report_feature_case(&viewport, "feature-battle-entry", &battle_entry);
+        let battle_steady = feature_frames(&mut title, &mut frame, 120);
+        report_feature_case(&viewport, "feature-battle-steady", &battle_steady);
+        report_feature_heap(&viewport, "feature-battle", &title);
+        println!(
+            "FEATURE_STATE viewport={viewport} title={} scene={}",
+            title.string("globalThis.__pocketTitleBattle.state().screen"),
+            title.string("globalThis.__rpgSessionState.scene?.kind??'world'"),
+        );
+        drop(title);
+
+        let phone_boot = Instant::now();
+        let (runtime, phone_stages) = boot_staged_with_prelude(
+            args(&dist, "pocket-tuxemon", data, width, height),
+            Some("globalThis.__pocketTuxemonSkipTitle=true;"),
+        )
+        .unwrap();
+        let phone_boot_ms = phone_boot.elapsed().as_secs_f64() * 1_000.0;
+        let mut phone = feature_bench(runtime);
+        report_startup_stages(&viewport, &phone, phone_boot_ms, &phone_stages);
+        let mut frame = 0usize;
+        let _ = feature_frames(&mut phone, &mut frame, 1);
+        let phone_first_paint_ms = phone_boot.elapsed().as_secs_f64() * 1_000.0;
+        assert!(
+            phone_first_paint_ms <= 250.0,
+            "feature phone startup viewport={viewport} exceeded 250 ms: {phone_first_paint_ms:.3} ms",
+        );
+        let _ = feature_frames(&mut phone, &mut frame, 11);
+        phone.unit(
+            r#"(()=>{const s=globalThis.__rpgSessionState;s.sw.items.nu_phone=1;s.sw.items.app_map=1;s.sw.switches['tracker.paper_town']=true;s.sw.switches['tracker.route1']=true;globalThis.__pocketNuPhone.open()})()"#,
+        );
+        assert!(
+            phone.boolean(
+                "globalThis.__pocketNuPhone.state().screen==='phone'&&globalThis.__pocketNuPhone.state().hasMapApp&&globalThis.__pocketNuPhone.state().known.length>=2",
+            ),
+            "NuPhone did not read the imported app and tracker state",
+        );
+        println!(
+            "FEATURE_BOOT viewport={viewport} kind=phone boot={phone_boot_ms:.3}ms startup_to_first={phone_first_paint_ms:.3}ms"
+        );
+        let phone_entry = feature_frames(&mut phone, &mut frame, 1);
+        report_feature_case(&viewport, "feature-phone-entry", &phone_entry);
+        let _ = feature_frames(&mut phone, &mut frame, 7);
+        let phone_steady = feature_frames(&mut phone, &mut frame, 120);
+        report_feature_case(&viewport, "feature-phone-steady", &phone_steady);
+        report_feature_heap(&viewport, "feature-phone", &phone);
+
+        phone.unit("globalThis.__pocketNuPhone.act('confirm')");
+        assert!(
+            phone.boolean("globalThis.__pocketNuPhone.state().screen==='map'"),
+            "installed Map App did not open the GPS map",
+        );
+        let map_entry = feature_frames(&mut phone, &mut frame, 1);
+        report_feature_case(&viewport, "feature-map-entry", &map_entry);
+        let _ = feature_frames(&mut phone, &mut frame, 7);
+        let map_steady = feature_frames(&mut phone, &mut frame, 120);
+        report_feature_case(&viewport, "feature-map-steady", &map_steady);
+        report_feature_heap(&viewport, "feature-map", &phone);
+        println!(
+            "FEATURE_STATE viewport={viewport} phone={} known={} current={}",
+            phone.string("globalThis.__pocketNuPhone.state().screen"),
+            phone.string("String(globalThis.__pocketNuPhone.state().known.length)"),
+            phone.string("globalThis.__pocketNuPhone.state().currentLocation??'none'"),
+        );
     }
 
     #[test]

@@ -82,7 +82,7 @@ else
   sed -i '$a include!("g6-quickjs-bench.rs");' "$scratch/src/main.rs"
 fi
 
-if [[ ${G6_SKIP_MAP_BENCH:-0} != 1 ]]; then
+if [[ ${G6_SKIP_MAP_BENCH:-0} != 1 && ${G6_FEATURE_MODES_ONLY:-0} != 1 ]]; then
   rm -rf "$map_bundle"
   mkdir -p "$map_bundle"
   bun "$pocketjs/tools/build.ts" "$root/tools/map-benchmark-entry.tsx" \
@@ -104,6 +104,22 @@ if [[ -n ${G6_BENCH_VIEWPORT:-} ]]; then
 else
   viewports=("480 272" "960 544")
 fi
+
+if [[ ${G6_FEATURE_MODES_ONLY:-0} == 1 ]]; then
+  for viewport in "${viewports[@]}"; do
+    read -r width height <<<"$viewport"
+    G6_DIST="$app_dist" \
+      G6_MAPS="$root/dist/maps" G6_BATTLE="$root/dist/battle" \
+      G6_PORTRAITS="$root/dist/portraits" G6_CHOICE_ICONS="$root/dist/choice-icons" \
+      G6_AUDIO_ROOT="$root/assets/audio" G6_AUDIO_MANIFEST="$root/assets/audio/manifest.json" \
+      G6_ANIMATED="$root/dist/animated" G6_NPC_SRC="$root/dist/npc-src" \
+      G6_TERRAIN_STREAM="$root/dist/terrain-stream" \
+      G6_BENCH_ROOT="$bench_root" G6_BENCH_W="$width" G6_BENCH_H="$height" \
+      "$binary" g6_quickjs_bench::feature_modes --ignored --exact --nocapture
+  done
+  exit 0
+fi
+
 cold_runs=${G6_COLD_RUNS:-1}
 if [[ ! $cold_runs =~ ^[1-9][0-9]*$ ]]; then
   echo "bench-g6-quickjs: G6_COLD_RUNS must be a positive integer" >&2

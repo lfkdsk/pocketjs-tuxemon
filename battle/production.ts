@@ -39,9 +39,14 @@ export function createProductionTuxemonBattle(
 } {
   const RUNTIME_SHELL = battleRuntimeShell(lang);
   const provider = createTuxemonBattleDbProvider(RUNTIME_SHELL, source);
-  const sceneBundle = createTuxemonScenes(provider, runtimeJournalIndex(RUNTIME_SHELL), lang);
+  const journalIndex = runtimeJournalIndex(RUNTIME_SHELL);
+  const sceneBundle = createTuxemonScenes(provider, journalIndex, lang);
   return {
-    extensions: createTuxemonExtensions(provider, { ...extensionOptions, lang }),
+    extensions: createTuxemonExtensions(provider, {
+      ...extensionOptions,
+      lang,
+      campaignMonsterIds: journalIndex.map((entry) => entry.id),
+    }),
     rules: createTuxemonBattleRules(provider, variableEnumsJson as VariableEnums),
     scenes: sceneBundle.rules,
     catalog: sceneBundle.catalog,

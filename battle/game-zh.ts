@@ -3,29 +3,36 @@
 // shards). Mirrors battle/game.ts over the imported zh_CN database.
 
 import battleDbJson from "../data/battle-db.zh_CN.json";
+import battleShellJson from "../dist/battle-runtime-shell.zh_CN.json";
 import variableEnumsJson from "../dist/variable-enums.json";
 import mapDescriptionsJson from "../dist/map-descriptions.zh_CN.json";
 import monthNamesJson from "../data/month-names.zh_CN.json";
 import battleNamesJson from "../data/battle-names.zh_CN.json";
 
-import { validateBattleDb } from "../importer/battle-schema.ts";
+import { validateBattleDb, type BattleRuntimeShell } from "../importer/battle-schema.ts";
 import { createTuxemonExtensions } from "./extension.ts";
 import { createTuxemonBattleRules, type VariableEnums } from "./runtime.ts";
-import { createTuxemonScenes } from "./scenes.ts";
+import { createTuxemonScenes, runtimeJournalIndex } from "./scenes.ts";
 import { createTuxemonTextTokens } from "./text-tokens.ts";
 
 /** Shared zh_CN registration used by headless journeys and their tests. */
 export const TUXEMON_BATTLE_DB_ZH = validateBattleDb(battleDbJson);
+const TUXEMON_JOURNAL_INDEX_ZH = runtimeJournalIndex(battleShellJson as unknown as BattleRuntimeShell);
 export const TUXEMON_VARIABLE_ENUMS_ZH = variableEnumsJson as VariableEnums;
 export const TUXEMON_EXTENSIONS_ZH = createTuxemonExtensions(TUXEMON_BATTLE_DB_ZH, {
   lang: "zh_CN",
   battleNames: battleNamesJson,
+  campaignMonsterIds: TUXEMON_JOURNAL_INDEX_ZH.map((entry) => entry.id),
 });
 export const TUXEMON_BATTLE_RULES_ZH = createTuxemonBattleRules(
   TUXEMON_BATTLE_DB_ZH,
   TUXEMON_VARIABLE_ENUMS_ZH,
 );
-const TUXEMON_SCENE_BUNDLE_ZH = createTuxemonScenes(TUXEMON_BATTLE_DB_ZH, undefined, "zh_CN");
+const TUXEMON_SCENE_BUNDLE_ZH = createTuxemonScenes(
+  TUXEMON_BATTLE_DB_ZH,
+  TUXEMON_JOURNAL_INDEX_ZH,
+  "zh_CN",
+);
 export const TUXEMON_SCENES_ZH = TUXEMON_SCENE_BUNDLE_ZH.rules;
 export const TUXEMON_SCENE_CATALOG_ZH = TUXEMON_SCENE_BUNDLE_ZH.catalog;
 /** The {x:} text-token resolver for the zh_CN build. Headless zh_CN drivers

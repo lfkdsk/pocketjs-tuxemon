@@ -204,21 +204,22 @@ describe("time/weather coverage dispositions (all maps, G6)", () => {
     expect(setLayer.reasons.native?.[0]).toContain("KV1");
   });
 
-  test("update_time lowers both transfer hooks and leaves only the absent battle menu dropped", () => {
+  test("update_time lowers both transfer hooks and accounts for the title Battle runtime", () => {
     // Spyder and Xero share an `is current_state TeleporterState` event. The
     // kit runs no map fiber during transfer, so each is emitted at the
-    // equivalent destination-map entry point. battle_menu has no .tmx and is
-    // outside the imported title-screen Battle mode.
+    // equivalent destination-map entry point. battle_menu has no .tmx, but
+    // its validated title-screen Battle runtime executes the third use.
     const updateTime = row("update_time")!;
     expect(updateTime.total).toBe(3);
-    expect(updateTime.native).toBe(2);
+    expect(updateTime.native).toBe(3);
     expect(updateTime.placeholder).toBe(0);
-    expect(updateTime.dropped).toBe(1);
+    expect(updateTime.dropped).toBe(0);
     expect(updateTime.reasons.native).toContain(
       "TeleporterState update lowered to the destination map's once-per-entry page; tux.update_time reads the saved deterministic calendar",
     );
-    const reasons = updateTime.reasons.dropped ?? [];
-    expect(reasons).toContain("source event is not materialized by any map");
+    expect(updateTime.reasons.native).toContain(
+      "validated title Battle mode executes this out-of-map authored program",
+    );
   });
 
   test("the weather table is exported with 10 entries", () => {

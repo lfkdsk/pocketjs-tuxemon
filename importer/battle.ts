@@ -133,6 +133,10 @@ interface PartyDraft {
 
 interface Selection {
   monsters: Set<string>;
+  /** Campaign-visible species before disposable title-match candidates are
+   * added. The lazy repository still carries every selected monster, while
+   * Journal/Tuxepedia presentation remains scoped to reachable content. */
+  journalMonsters: Set<string>;
   techniques: Set<string>;
   items: Set<string>;
   encounters: Set<string>;
@@ -255,6 +259,13 @@ export interface BattleImportOptions {
    *  battle-runtime-shell.zh_CN.json, names/descriptions from the merged
    *  zh catalog. Art cooking is language-neutral and shared. */
   lang?: ImportLang;
+  /** Additional out-of-map content whose runtime recipes are imported by a
+   * sibling build step (for example title-screen Battle mode). */
+  extraSelection?: {
+    monsters?: readonly string[];
+    npcs?: readonly string[];
+    environments?: readonly string[];
+  };
 }
 
 function object(value: unknown): Raw {
@@ -421,7 +432,13 @@ function memberFromAction(
   };
 }
 
-function buildSelection(scope: BattleScope, tables: Tables, allMaps: TuxMap[], sourceRoot: string): Selection {
+function buildSelection(
+  scope: BattleScope,
+  tables: Tables,
+  allMaps: TuxMap[],
+  sourceRoot: string,
+  extra: NonNullable<BattleImportOptions["extraSelection"]> = {},
+): Selection {
   const maps = scope === "spyder"
     ? allMaps.filter((map) =>
         map.props.scenario === "spyder" && map.slug !== "spyder_test_map"
@@ -592,6 +609,16 @@ function buildSelection(scope: BattleScope, tables: Tables, allMaps: TuxMap[], s
     if (list<unknown>(item.usable_in).map(String).includes("MainCombatMenuState")) items.add(slug);
   }
 
+  const addExtra = (values: readonly string[] | undefined, table: Record<string, Raw>, target: Set<string>, kind: string) => {
+    for (const slug of values ?? []) {
+      if (!(slug in table)) throw new Error(`battle importer: unknown extra ${kind} '${slug}'`);
+      target.add(slug);
+    }
+  };
+  addExtra(extra.npcs, tables.npc, npcs, "npc");
+  addExtra(extra.environments, tables.environment, environments, "environment");
+
+  let journalMonsters: Set<string>;
   if (scope === "full") {
     for (const slug of sortedKeys(tables.monster)) monsters.add(slug);
     for (const slug of sortedKeys(tables.technique)) techniques.add(slug);
@@ -599,6 +626,8 @@ function buildSelection(scope: BattleScope, tables: Tables, allMaps: TuxMap[], s
     for (const slug of sortedKeys(tables.encounter)) encounters.add(slug);
     for (const slug of sortedKeys(tables.npc)) npcs.add(slug);
     for (const slug of sortedKeys(tables.environment)) environments.add(slug);
+    addExtra(extra.monsters, tables.monster, monsters, "monster");
+    journalMonsters = new Set(monsters);
   } else {
     // A campaign-visible monster can evolve into a form that never appears in
     // a map event or encounter table. Keep the complete reachable evolution
@@ -615,6 +644,18 @@ function buildSelection(scope: BattleScope, tables: Tables, allMaps: TuxMap[], s
         }
       }
     }
+
+    // Preserve the campaign's presentation index before adding title-only
+    // candidates. Those candidates must remain resolvable by the shared lazy
+    // battle repository, but a disposable title match must not reveal new
+    // pages in the campaign Journal/Tuxepedia.
+    journalMonsters = new Set(monsters);
+
+    // Out-of-map title battles are disposable fixed-level matches: their
+    // random candidates cannot level or evolve into campaign state. Add them
+    // only after closing the campaign evolution graph, while still including
+    // every move their imported forms can use below.
+    addExtra(extra.monsters, tables.monster, monsters, "monster");
 
     // Selected monsters remain able to level all the way to the configured
     // cap, so importing only moves near their map-spawn level truncates the
@@ -681,6 +722,7 @@ function buildSelection(scope: BattleScope, tables: Tables, allMaps: TuxMap[], s
   for (const party of parties) party.sources.sort((a, b) => a.map.localeCompare(b.map) || a.event.localeCompare(b.event));
   return {
     monsters,
+    journalMonsters,
     techniques,
     items,
     encounters,
@@ -1110,7 +1152,11 @@ export interface SplitBattleRuntimeDb {
  * shell.json`) and resolves each shard entry from the pak/data.fs on first
  * use, so a played battle parses only the species/techniques it touches
  * instead of the whole database. */
-export function splitBattleRuntimeDb(db: BattleDb, entryPrefix = "battle"): SplitBattleRuntimeDb {
+export function splitBattleRuntimeDb(
+  db: BattleDb,
+  entryPrefix = "battle",
+  journalMonsters?: ReadonlySet<string>,
+): SplitBattleRuntimeDb {
   const tableEntries = <T>(
     table: Record<string, T>,
     prefix: string,
@@ -1160,6 +1206,9 @@ export function splitBattleRuntimeDb(db: BattleDb, entryPrefix = "battle"): Spli
     npcs: db.npcs,
     ui: db.ui,
     monstersIndex: monsters.index,
+    journalMonsterIds: monsters.index
+      .filter((entry) => journalMonsters?.has(entry.id) ?? true)
+      .map((entry) => entry.id),
     techniquesIndex: techniques.index,
     itemsIndex: items.index,
     statusesIndex: statuses.index,
@@ -1182,7 +1231,7 @@ export function writeBattleArtifacts(options: BattleImportOptions): BattleBuild 
   const tables = loadTables(sourceRoot);
   const lang: ImportLang = options.lang ?? "en_US";
   const po: TextCatalog = createTextCatalog(lang);
-  const selection = buildSelection(scope, tables, loadAllMaps(), sourceRoot);
+  const selection = buildSelection(scope, tables, loadAllMaps(), sourceRoot, options.extraSelection);
   const battleDir = join(outputRoot, "assets/battle");
   const battlePakDir = join(outputRoot, "dist/battle-art");
   rmSync(battleDir, { recursive: true, force: true });
@@ -1257,7 +1306,12 @@ export function writeBattleArtifacts(options: BattleImportOptions): BattleBuild 
           method: string(move.learning_method, "level_up"),
           ...(optionalString(move.evolution_stage_learned) ? { evolutionStage: string(move.evolution_stage_learned) } : {}),
         })),
-      evolutions: list<Raw>(raw.evolutions),
+      // Campaign selections close the full reachable evolution graph above.
+      // Disposable title-battle candidates are deliberately added after that
+      // closure, because their parties are never saved or levelled; omit any
+      // target that is not otherwise packaged instead of pulling in its art.
+      evolutions: list<Raw>(raw.evolutions)
+        .filter((evolution) => selection.monsters.has(string(evolution.monster_slug))),
       art: {
         sheet,
         front: [0, 0, 64, 64],
@@ -1535,7 +1589,11 @@ export function writeBattleArtifacts(options: BattleImportOptions): BattleBuild 
   const runtimeDb = runtimeBattleDb(db);
   const runtimeDbData = jsonBytes(runtimeDb);
   const zh = lang === "zh_CN";
-  const split = splitBattleRuntimeDb(runtimeDb, zh ? "battle-zh" : "battle");
+  const split = splitBattleRuntimeDb(
+    runtimeDb,
+    zh ? "battle-zh" : "battle",
+    selection.journalMonsters,
+  );
   const blobs: PakBlob[] = cookedAssets.map((asset) => ({
     key: asset.pakKey,
     dtype: PAK_DTYPE.u8,

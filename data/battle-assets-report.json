@@ -3,14 +3,14 @@
  "sourceRevision": "9e6258ff726b786040a267e8bdbbf037b560285e",
  "scope": "spyder",
  "counts": {
-  "monsters": 269,
-  "techniques": 245,
+  "monsters": 382,
+  "techniques": 258,
   "items": 114,
   "elements": 13,
   "tastes": 12,
   "statuses": 35,
   "encounters": 22,
-  "npcs": 205,
+  "npcs": 206,
   "environments": 10,
   "trainerParties": 213,
   "trainerMonsterSlots": 611,
@@ -19,19 +19,19 @@
   "wildEncounterUses": 17
  },
  "art": {
-  "sourceFiles": 595,
-  "files": 595,
-  "sourceBytes": 1953249,
-  "pngBytes": 1217063,
-  "textureBytes": 25743512,
-  "encodedBytes": 2218647,
-  "residentBytes": 13478656,
-  "pakBytes": 3536160,
+  "sourceFiles": 714,
+  "files": 714,
+  "sourceBytes": 2300416,
+  "pngBytes": 1431252,
+  "textureBytes": 30102608,
+  "encodedBytes": 2671209,
+  "residentBytes": 15779584,
+  "pakBytes": 4250640,
   "maxWidth": 512,
   "maxHeight": 512,
   "quantization": {
-   "sourceColours": 10118,
-   "paletteColours": 10118,
+   "sourceColours": 12590,
+   "paletteColours": 12590,
    "quantizedFiles": 0,
    "quantizedColours": 0,
    "remappedPixels": 0,
@@ -83,11 +83,11 @@
     "textureBytes": 196632
    },
    "monster-sheets": {
-    "sourceFiles": 269,
-    "files": 269,
-    "sourceBytes": 802103,
-    "pngBytes": 489036,
-    "textureBytes": 8816744
+    "sourceFiles": 382,
+    "files": 382,
+    "sourceBytes": 1125653,
+    "pngBytes": 685538,
+    "textureBytes": 12520432
    },
    "range-speed-icons": {
     "sourceFiles": 13,
@@ -104,11 +104,11 @@
     "textureBytes": 17680
    },
    "technique-animations": {
-    "sourceFiles": 130,
-    "files": 130,
-    "sourceBytes": 541177,
-    "pngBytes": 443435,
-    "textureBytes": 14631952
+    "sourceFiles": 136,
+    "files": 136,
+    "sourceBytes": 564794,
+    "pngBytes": 461122,
+    "textureBytes": 15287360
    },
    "trainer-sheets": {
     "sourceFiles": 61,
@@ -126,12 +126,12 @@
    }
   }
  },
- "battleDbBytes": 1269919,
- "runtimeDbBytes": 1121808,
+ "battleDbBytes": 1522353,
+ "runtimeDbBytes": 1373416,
  "pakKey": "game:battle-db",
  "battleRepository": {
-  "shellBytes": 212233,
-  "entries": 663,
-  "entryBytes": 850338
+  "shellBytes": 230081,
+  "entries": 789,
+  "entryBytes": 1068419
  }
 }
