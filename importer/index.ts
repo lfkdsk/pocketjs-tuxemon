@@ -233,14 +233,15 @@ monster at the same level and records it as caught. \`access_pc\` opens the
 \`tux.pc\` storage scene (monster boxes plus the item locker: deposit,
 withdraw with a quantity picker, and disband); \`create_kennel\`,
 \`set_kennel_visible\`, \`kennel\` and
-\`has_kennel\` read and write the same saved boxes. \`quarantine\` is Degraded
-(it moves infected monsters between the party and the hidden \`boxes.quarantine\`
-box, honouring the box's own capacity; unlike upstream it keeps an
-over-capacity monster inoculated in the party instead of renaming the full
-box into a successor. That branch is unreachable in the authored campaign:
-both admissions share one one-shot guard and can move at most the six-member
-party into a hidden capacity-30 box. Release matches upstream, including a
-full-party release appending past the ordinary Kennel capacity),
+\`has_kennel\` read and write the same saved boxes. All eight authored
+\`quarantine\` calls are Native: they move infected monsters between the party
+and the hidden \`boxes.quarantine\` box, and release matches upstream even when
+a full party appends past the ordinary Kennel capacity. The generic runtime
+still has one deliberate safety difference for external state that the
+authored campaign cannot reach: admission to an already-full preferred box
+keeps the inoculated monster in the party instead of renaming the full box
+into a successor. Both campaign admissions share one one-shot guard and can
+move at most the six-member party into a hidden capacity-30 box.
 \`park_experience\` is Native for all eight Eclipse actions: it activates a
 saved Park session, switches wild encounters to the dedicated Ball/Food/Doll/Run
 profile, records captures and blocks each stop event on the bilingual summary

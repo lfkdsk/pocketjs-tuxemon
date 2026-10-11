@@ -128,13 +128,15 @@ test("all maps pass schema and reference valid transfer destinations", () => {
     // their matching combat sheet, moving those set_template uses from
     // degraded to native. Exact scripted level boosts and the non-cancellable
     // adjacent rename picker now preserve their pinned state changes too.
+    // All translated choice menus use the kit's flat scrollable list and
+    // load_yaml yields one reference tick before publishing appended events.
     types: 98,
     uses: 13_617,
-    native: 6_862,
-    degraded: 2_838,
+    native: 6_879,
+    degraded: 2_821,
     placeholder: 708,
     dropped: 3_209,
-    nativePercent: 50.4,
+    nativePercent: 50.5,
     tier1: {
       uses: 6_325,
       percent: 46.45,
@@ -697,7 +699,7 @@ test("default import output remains byte-pinned", () => {
   // G-PC-LOCKER fix-2 lockerOverflow wording (the locker is implemented)
   // moves this hash.
   expect(createHash("sha256").update(bytes).digest("hex")).toBe(
-    "a1047ff491cc6dcae79af4f3cf5b84fab2d4aa7e7d7d81f162e622fb49f61dce",
+    "33477b7e586f60ba8e2f72500715249b9bd3f22b88b696a89d2ad0352b0338b0",
   );
 });
 

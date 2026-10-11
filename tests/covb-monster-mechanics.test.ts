@@ -399,7 +399,11 @@ describe("COV-B plague system", () => {
   });
 
   test("real Garvan dialogue releases into a full Kennel and survives save/load", () => {
-    const imported = buildProject(["spyder_candy_hospital1"], G6_IMPORT_OPTIONS).project;
+    const built = buildProject(["spyder_candy_hospital1"], G6_IMPORT_OPTIONS);
+    const quarantineCoverage = built.report.coverage.actions.rows.find((row) => row.type === "quarantine")!;
+    expect(quarantineCoverage.native).toBeGreaterThan(0);
+    expect(quarantineCoverage.degraded).toBe(0);
+    const imported = built.project;
     imported.start = { map: "spyder_candy_hospital1", x: 1, y: 10, dir: "down" };
     imported.maps[0]!.events = imported.maps[0]!.events?.filter((event) =>
       event.id === "e024_create_garvan" || event.id === "npc_spyder_hospital1_smith");
@@ -646,6 +650,51 @@ describe("COV-B random_monster", () => {
       { op: "ext", call: "tux.random_monster", args: { level: 40, character: "eclipse_bank_ethan" } },
     ]);
     expect(second.state.sw.rng).toBe(result.state.sw.rng);
+  });
+
+  test("the real Eclipse Bank trainer trigger stages one deterministic level-40 opponent", () => {
+    const built = buildProject(["eclipse_crystal_bank1"], G6_IMPORT_OPTIONS);
+    const randomCoverage = built.report.coverage.actions.rows.find((row) => row.type === "random_monster")!;
+    expect(randomCoverage.native).toBeGreaterThan(0);
+    expect(randomCoverage.degraded).toBe(0);
+
+    const map = built.project.maps[0]!;
+    map.events = map.events?.filter((event) =>
+      event.id === "e007_create_may" || event.id === "npc_eclipse_bank_may");
+    built.project.start = { map: map.id, x: 5, y: 7, dir: "up" };
+
+    const rng = { rng: 0x2468ace0, rngDraws: 0 };
+    const initial = packTuxemonExtensionState({
+      ...initialTuxemonExtensionState(),
+      party: [spawnMonster(DB, rulesDb, rng, "rockitten", 40, { iid: "bank-player" })],
+    });
+    const session = createSession(built.project, 60, {
+      extensions: createTuxemonExtensions(DB),
+      battle: createTuxemonBattleRules(DB, TUXEMON_VARIABLE_ENUMS),
+    });
+    let state = startSession(built.project, session, undefined, initial);
+    for (let frame = 0; frame < 4; frame++) state = stepSession(session, state, { buttons: 0 });
+    expect(state.chars.chars.npc_eclipse_bank_may).toBeDefined();
+
+    state = stepSession(session, state, { buttons: 0, confirmEdge: true });
+    for (let frame = 0; frame < 240; frame++) {
+      const party = tuxemonExtensionState(state.ext, DB).npcParties.eclipse_bank_may;
+      if (party?.length === 1) break;
+      const modal = state.interp.modal;
+      state = stepSession(session, state, {
+        buttons: 0,
+        confirmEdge: modal?.kind === "text" && modal.complete,
+      });
+    }
+
+    const opponent = tuxemonExtensionState(state.ext, DB).npcParties.eclipse_bank_may;
+    expect(opponent).toHaveLength(1);
+    expect(opponent![0]).toMatchObject({
+      level: 40,
+      experienceModifier: 5,
+      moneyModifier: 10,
+    });
+    expect(state.sw.rng).not.toBe(0x12345678);
   });
 });
 

@@ -1951,22 +1951,21 @@ function dojoReport(key: string, fields: Readonly<Record<string, string>> = {}):
 }
 
 function enumChoice(options: readonly string[], variable: string): Command {
-  const make = (remaining: readonly string[]): Command => {
-    const take = remaining.length <= 4 ? remaining.length : 3;
-    const page: { text: string; commands: Command[] }[] = remaining.slice(0, take).map((option) => ({
-      text: (choiceLookupKeys.add(option), po.get(option) ?? option).slice(0, 24) || option.slice(0, 24),
+  return {
+    op: "choices",
+    prompt: "",
+    options: options.map((option) => ({
+      text: (choiceLookupKeys.add(option), po.get(option) ?? option).slice(0, 64) || option.slice(0, 64),
       commands: [{
         op: "variable" as const,
         id: varId(variable),
         set: { op: "set" as const, value: code(variable, option) },
       }],
-    }));
-    if (take < remaining.length) {
-      page.push({ text: IMPORT_UI[activeLang].nextPage, commands: [make(remaining.slice(take))] });
-    }
-    return { op: "choices", prompt: "", options: page };
+    })),
+    // Upstream opens ChoiceState with escape_key_exits=True: cancel closes
+    // the menu without changing the destination variable.
+    cancel: { commands: [] },
   };
-  return make(options);
 }
 
 const npcName = (slug: string) => (po.get(slug) ?? slug).slice(0, 40);
@@ -2682,14 +2681,12 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
           }));
           break;
         }
-        const fate: Fate = a.type === "translated_dialog_choice"
-          ? (opts.length > 4 ? "T1-lowered" : "T1")
-          : "T3-placeholder";
+        const fate: Fate = a.type === "translated_dialog_choice" ? "T1" : "T3-placeholder";
         noteAction(
           a,
-          a.type + (opts.length > 4 ? "(paginated)" : ""),
+          a.type,
           fate,
-          opts.length > 4 ? "nested choice pages retain every option" : "choices -> enum code",
+          "single scrollable choice list -> enum code; cancel leaves the variable untouched",
         );
         out.push(enumChoice(opts, g[1]!));
         break;
@@ -3039,7 +3036,7 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         }
         break;
       case "add_tracker":
-        noteAction(a, a.type, "T1-lowered", "switch tracker.<map>");
+        noteAction(a, a.type, "T1-lowered", "persistent switch preserves authored visit guards, but the NuPhone GPS map is not imported");
         out.push({ op: "switch", id: `tracker.${g[1]}`, value: true });
         break;
       case "create_npc":
@@ -3115,7 +3112,7 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
             a.type,
             "T1-lowered",
             dir === repairedDirection
-              ? `moveRoute ${who === "player" ? "player" : "this"} face`
+              ? `moveRoute ${who === "player" ? "player" : "this"} face applies on the next movement tick`
               : "pinned Route 3 source typo bottom repaired to down and folded into facing",
           );
           out.push({ op: "moveRoute", target: who === "player" ? "player" : "this", wait: false, route: { steps: [FACE[repairedDirection]!], repeat: false, skippable: true } });
@@ -3136,7 +3133,15 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
           const [d, n] = mv.trim().split(/\s+/);
           for (let k = 0; k < Number(n ?? 1); k++) steps.push(MOVE[d!]!);
         }
-        noteAction(a, a.type, ctx.options.routes && who !== "player" && !isSelf(who) ? "T1" : "T1-lowered", "moveRoute steps");
+        const arbitraryTarget = ctx.options.routes && who !== "player" && !isSelf(who);
+        noteAction(
+          a,
+          a.type,
+          arbitraryTarget ? "T1" : "T1-lowered",
+          arbitraryTarget
+            ? "blocking skippable moveRoute targets an arbitrary event"
+            : "player/this moveRoute begins on the next movement tick",
+        );
         const target = who === "player" ? "player" as const
           : isSelf(who) ? "this" as const : { event: `npc_${slug(who)}` };
         // Tuxemon's char_move stops the route when a step is obstructed, then
@@ -3216,7 +3221,19 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         return out;
       }
       case "load_yaml":
-        noteAction(a, a.type, "T1-lowered", "import-time events gated until this action runs");
+        noteAction(
+          a,
+          a.type,
+          "T1",
+          "all authored loads append the same event-only YAML once; a one-tick delay preserves next-update visibility",
+        );
+        // Tuxemon's event manager snapshots the active event list before
+        // actions run, so events appended by load_yaml cannot start until the
+        // following world update. Loaded blocking pages keep their synthetic
+        // gate inside the fiber; without this yield an earlier Create Nurse
+        // fiber could open that gate before a later loaded fiber samples it
+        // in the same interpreter fold.
+        out.push({ op: "wait", seconds: 1 / 60 });
         out.push({
           op: "variable",
           id: varId(`__loaded_yaml.${ctx.m.slug}.${g[0]}`),
@@ -4081,7 +4098,7 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         break;
       case "access_pc":
         if (ctx.options.battle && g[0] === "player") {
-          noteAction(a, a.type, "T1-lowered", "tux.pc storage: monster pick up/drop off/move/release plus the item locker (deposit, withdraw with a quantity picker, disband); email and multiplayer entries are absent (no email-tagged PC in the campaign; multiplayer is unimplemented upstream)");
+          noteAction(a, a.type, "T1-lowered", "campaign storage and item-locker providers are complete; the upstream multiplayer placeholder row is absent");
           out.push(pcScene());
         } else noteAction(a, a.type, "T3-dropped", ctx.options.battle ? "PC storage is modelled for the player only" : "monster/combat subsystem (P2)");
         break;
@@ -4184,7 +4201,7 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         }
         const args: Record<string, JsonValue> = { character, plague, action };
         if (g[3] !== undefined && g[3] !== "") args.amount = Number(g[3]);
-        noteAction(a, a.type, "T1-lowered", "tux.quarantine transfers infected monsters to/from the hidden quarantine box and matches upstream Kennel overflow; the full preferred-box rename/merge differs only for authored-unreachable external state");
+        noteAction(a, a.type, "T1", "all authored one-shot player flows transfer and inoculate through the hidden quarantine box with exact party/Kennel overflow");
         out.push({ op: "ext", call: "tux.quarantine", args });
         break;
       }
