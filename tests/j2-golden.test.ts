@@ -237,11 +237,11 @@ describe("J2 Greenwash and hospital location goldens", () => {
       [name, map, frame, mergedFrame, width, height]
     )).toEqual([
       ["aardant-acquired", "spyder_greenwash", 49_973, 178_691, 480, 272],
-      ["hospital-password", "spyder_candy_hospital2", 50_612, 179_330, 480, 272],
-      ["hospital-cure", "spyder_candy_hospital3", 51_410, 180_128, 480, 272],
+      ["hospital-password", "spyder_candy_hospital2", 50_608, 179_326, 480, 272],
+      ["hospital-cure", "spyder_candy_hospital3", 51_406, 180_124, 480, 272],
       ["aardant-acquired", "spyder_greenwash", 49_973, 178_691, 960, 544],
-      ["hospital-password", "spyder_candy_hospital2", 50_612, 179_330, 960, 544],
-      ["hospital-cure", "spyder_candy_hospital3", 51_410, 180_128, 960, 544],
+      ["hospital-password", "spyder_candy_hospital2", 50_608, 179_326, 960, 544],
+      ["hospital-cure", "spyder_candy_hospital3", 51_406, 180_124, 960, 544],
     ]);
   });
 

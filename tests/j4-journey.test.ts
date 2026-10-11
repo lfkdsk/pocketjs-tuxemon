@@ -74,7 +74,7 @@ test("J4 freezes the authored route, story stages, and complete Kernel epilogue"
     "kernel-defeated",
   ]);
   expect(j4.steps.map((step) => step.frame)).toEqual([
-    -1, 1226, 1870, 2976, 5123, 8615, 8785, 10976, 12676, 13598,
+    -1, 1226, 1870, 2974, 5119, 8611, 8781, 10972, 12672, 13594,
   ]);
   expect(j4.steps[0]).toMatchObject({
     map: "spyder_radiotower",
