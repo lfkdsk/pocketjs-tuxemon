@@ -347,7 +347,7 @@ Known limitations:
 - **PSP ships in English and Chinese.** `bun run build:psp:zh` (see the
   [PSP](#psp) section below) builds the Chinese package: it keeps the zh_CN
   shards and the five Chinese startup documents and emits `font-archive.bin`,
-  a 2bpp CJK glyph archive (~1.1 MiB, 2,567 chars × 6 strikes) the PSP reads
+  a 2bpp CJK glyph archive (~1.1 MiB, 2,581 chars × 6 strikes) the PSP reads
   on demand from the memory stick, capped at 256 resident glyphs per slot
   across six slots (~67 KiB). Without the archive installed on the memory
   stick every CJK glyph renders as tofu (the PSP section gives the path).
