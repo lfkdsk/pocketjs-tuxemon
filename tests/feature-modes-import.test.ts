@@ -4,6 +4,7 @@ import { join } from "node:path";
 
 import {
   loadFeatureModes,
+  loadStartMenu,
   loadTitleMinigame,
   parseNuPhoneMap,
   parseTitleBattle,
@@ -21,6 +22,29 @@ function catalogs(): Record<FeatureLocale, TextCatalog> {
 }
 
 describe("G12 out-of-map feature importer", () => {
+  test("imports START and title copy from the real bilingual catalogs", () => {
+    const menu = loadStartMenu();
+    expect(menu.source).toBe("tuxemon/states/start.py");
+    expect(menu.root).toMatchObject({
+      party: { en_US: "Tuxemon", zh_CN: "精灵" },
+      bag: { en_US: "Bag", zh_CN: "背包" },
+      player: { en_US: "Player", zh_CN: "玩家" },
+      save: { en_US: "Save", zh_CN: "保存" },
+      load: { en_US: "Load", zh_CN: "加载" },
+      exit: { en_US: "Exit", zh_CN: "退出" },
+    });
+    expect(menu.party).toMatchObject({
+      techniques: { en_US: "Techniques", zh_CN: "技能" },
+      release: { en_US: "Release", zh_CN: "放生" },
+      sortByHp: { en_US: "Sort by HP", zh_CN: "按HP排序" },
+    });
+    expect(menu.bag).toMatchObject({
+      use: { en_US: "Use", zh_CN: "使用" },
+      cannotUseHere: { en_US: "{name} cannot be used here!" },
+    });
+    expect(menu.title.newGame).toEqual({ en_US: "New Game", zh_CN: "新游戏" });
+  });
+
   test("imports the real NuPhone graph, menu items, bilingual labels, and art", () => {
     const imported = loadFeatureModes(TUXEMON_SRC);
     const map = imported.nuPhoneMap;

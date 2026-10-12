@@ -18,6 +18,7 @@ import type {
   NuPhoneDirection,
   NuPhoneMapData,
   NuPhoneMapPoint,
+  StartMenuData,
   TitleBattleData,
   TitleBattleDifficulty,
   TitleMinigameData,
@@ -48,6 +49,7 @@ export interface FeatureModesImport {
   nuPhoneMap: NuPhoneMapImport;
   titleBattle: TitleBattleImport;
   titleMinigame: TitleMinigameData;
+  startMenu: StartMenuData;
 }
 
 const DIRECTIONS: readonly NuPhoneDirection[] = ["up", "right", "down", "left"];
@@ -106,6 +108,81 @@ function translate(catalogs: Readonly<Record<FeatureLocale, TextCatalog>>, key: 
   const zh_CN = catalogs.zh_CN.get(key);
   if (!en_US || !zh_CN) throw new Error(`feature modes: missing bilingual text '${key}'`);
   return { en_US, zh_CN };
+}
+
+/** Import all copy used by the game-owned START and expanded title menus
+ * from Tuxemon's catalogs. The UI owns layout and state, never translations. */
+export function loadStartMenu(
+  catalogs: Readonly<Record<FeatureLocale, TextCatalog>> = featureCatalogs(),
+): StartMenuData {
+  const t = (key: string) => translate(catalogs, key);
+  return {
+    source: "tuxemon/states/start.py",
+    root: {
+      party: t("menu_monster"),
+      bag: t("menu_bag"),
+      player: t("menu_player"),
+      missions: t("menu_missions"),
+      save: t("menu_save"),
+      load: t("menu_load"),
+      options: t("menu_options"),
+      tuxepedia: t("menu_tuxepedia"),
+      exit: t("exit"),
+    },
+    title: {
+      newGame: t("menu_new_game"),
+      load: t("menu_load"),
+      autosave: t("menu_autosave"),
+      battle: t("menu_battle"),
+      minigame: t("menu_minigame"),
+      options: t("menu_options"),
+      exit: t("exit"),
+    },
+    party: {
+      info: t("monster_menu_info"),
+      techniques: t("monster_menu_tech"),
+      move: t("monster_menu_move"),
+      sort: t("menu_sort"),
+      release: t("monster_menu_release"),
+      sortByLevel: t("sort_by_level"),
+      sortByHp: t("sort_by_hp"),
+      sortByName: t("sort_by_name"),
+      sortById: t("sort_by_id"),
+      releaseConfirmation: t("release_confirmation"),
+      released: t("tuxemon_released"),
+    },
+    bag: {
+      use: t("item_confirm_use"),
+      cancel: t("item_confirm_cancel"),
+      cannotUseHere: t("item_cannot_use_here"),
+      noTarget: t("item_no_available_target"),
+    },
+    player: {
+      wallet: t("player_wallet"),
+      playtime: t("player_total_playtime"),
+      battles: t("player_battles"),
+      seen: t("tuxepedia_data_seen"),
+      caught: t("tuxepedia_data_caught"),
+    },
+    common: {
+      yes: t("yes"),
+      no: t("no"),
+      back: t("menu_back"),
+      empty: t("empty"),
+      hp: t("hp"),
+      armour: t("armour"),
+      dodge: t("dodge"),
+      melee: t("melee"),
+      ranged: t("ranged"),
+      speed: t("speed"),
+      height: t("height"),
+      weight: t("weight"),
+      taste: t("taste"),
+      accuracy: t("technique_accuracy"),
+      potency: t("technique_potency"),
+      power: t("technique_power"),
+    },
+  };
 }
 
 function fnv1a32(parts: readonly string[]): number {
@@ -476,6 +553,7 @@ export function loadFeatureModes(sourceRoot: string): FeatureModesImport {
     },
     titleBattle: loadTitleBattle(sourceRoot, catalogs),
     titleMinigame: loadTitleMinigame(sourceRoot, catalogs),
+    startMenu: loadStartMenu(catalogs),
   };
 }
 
@@ -492,5 +570,6 @@ export function featureModesRuntimeData(imported: FeatureModesImport): FeatureMo
     nuPhoneMap: { ...imported.nuPhoneMap, art },
     titleBattle: imported.titleBattle,
     titleMinigame: imported.titleMinigame,
+    startMenu: imported.startMenu,
   };
 }

@@ -2397,5 +2397,228 @@
    "zunna"
   ],
   "seed": 176815842
+ },
+ "startMenu": {
+  "source": "tuxemon/states/start.py",
+  "root": {
+   "party": {
+    "en_US": "Tuxemon",
+    "zh_CN": "精灵"
+   },
+   "bag": {
+    "en_US": "Bag",
+    "zh_CN": "背包"
+   },
+   "player": {
+    "en_US": "Player",
+    "zh_CN": "玩家"
+   },
+   "missions": {
+    "en_US": "Missions",
+    "zh_CN": "任务"
+   },
+   "save": {
+    "en_US": "Save",
+    "zh_CN": "保存"
+   },
+   "load": {
+    "en_US": "Load",
+    "zh_CN": "加载"
+   },
+   "options": {
+    "en_US": "Options",
+    "zh_CN": "设置"
+   },
+   "tuxepedia": {
+    "en_US": "Tuxepedia",
+    "zh_CN": "精灵百科"
+   },
+   "exit": {
+    "en_US": "Exit",
+    "zh_CN": "退出"
+   }
+  },
+  "title": {
+   "newGame": {
+    "en_US": "New Game",
+    "zh_CN": "新游戏"
+   },
+   "load": {
+    "en_US": "Load",
+    "zh_CN": "加载"
+   },
+   "autosave": {
+    "en_US": "Autosave",
+    "zh_CN": "自动保存"
+   },
+   "battle": {
+    "en_US": "Battle",
+    "zh_CN": "对战"
+   },
+   "minigame": {
+    "en_US": "Minigame",
+    "zh_CN": "迷你游戏"
+   },
+   "options": {
+    "en_US": "Options",
+    "zh_CN": "设置"
+   },
+   "exit": {
+    "en_US": "Exit",
+    "zh_CN": "退出"
+   }
+  },
+  "party": {
+   "info": {
+    "en_US": "Info",
+    "zh_CN": "信息"
+   },
+   "techniques": {
+    "en_US": "Techniques",
+    "zh_CN": "技能"
+   },
+   "move": {
+    "en_US": "Move",
+    "zh_CN": "移动"
+   },
+   "sort": {
+    "en_US": "Sort",
+    "zh_CN": "排序"
+   },
+   "release": {
+    "en_US": "Release",
+    "zh_CN": "放生"
+   },
+   "sortByLevel": {
+    "en_US": "Sort by Level",
+    "zh_CN": "按等级排序"
+   },
+   "sortByHp": {
+    "en_US": "Sort by HP",
+    "zh_CN": "按HP排序"
+   },
+   "sortByName": {
+    "en_US": "Sort by Name",
+    "zh_CN": "按名称排序"
+   },
+   "sortById": {
+    "en_US": "Sort by ID",
+    "zh_CN": "按ID排序"
+   },
+   "releaseConfirmation": {
+    "en_US": "Are you sure you would like to release {name}?",
+    "zh_CN": "确定要放生{name}吗？"
+   },
+   "released": {
+    "en_US": "{name} has been released.",
+    "zh_CN": "已放生{name}。"
+   }
+  },
+  "bag": {
+   "use": {
+    "en_US": "Use",
+    "zh_CN": "使用"
+   },
+   "cancel": {
+    "en_US": "Cancel",
+    "zh_CN": "取消"
+   },
+   "cannotUseHere": {
+    "en_US": "{name} cannot be used here!",
+    "zh_CN": "{name}不能在这里使用！"
+   },
+   "noTarget": {
+    "en_US": "{name} cannot be used on any of your Tuxemon right now.",
+    "zh_CN": "{name}现在不能用在你的任何精灵上。"
+   }
+  },
+  "player": {
+   "wallet": {
+    "en_US": "${{name}}'s wallet: ${{money_formatted}}",
+    "zh_CN": "${{name}}的钱包： ${{money_formatted}}"
+   },
+   "playtime": {
+    "en_US": "Total Playtime",
+    "zh_CN": "总游戏时长"
+   },
+   "battles": {
+    "en_US": "Battles: {tot} (W{won} D{draw} L{lost})",
+    "zh_CN": "战斗： {tot} （胜利{won} 平局{draw} 失败{lost})"
+   },
+   "seen": {
+    "en_US": "Seen {param} out of {all}",
+    "zh_CN": "看到了{param}只精灵，共有{all}"
+   },
+   "caught": {
+    "en_US": "Caught {param} out of {all}",
+    "zh_CN": "捉住了{param}只精灵，共有{all}"
+   }
+  },
+  "common": {
+   "yes": {
+    "en_US": "Yes",
+    "zh_CN": "是"
+   },
+   "no": {
+    "en_US": "No",
+    "zh_CN": "否"
+   },
+   "back": {
+    "en_US": "Back",
+    "zh_CN": "返回"
+   },
+   "empty": {
+    "en_US": "Empty",
+    "zh_CN": "空无"
+   },
+   "hp": {
+    "en_US": "Hit Points",
+    "zh_CN": "生命值"
+   },
+   "armour": {
+    "en_US": "Armor",
+    "zh_CN": "防御"
+   },
+   "dodge": {
+    "en_US": "Dodge",
+    "zh_CN": "闪避"
+   },
+   "melee": {
+    "en_US": "Melee",
+    "zh_CN": "近战"
+   },
+   "ranged": {
+    "en_US": "Ranged",
+    "zh_CN": "远程"
+   },
+   "speed": {
+    "en_US": "Speed",
+    "zh_CN": "速度"
+   },
+   "height": {
+    "en_US": "Height",
+    "zh_CN": "身高"
+   },
+   "weight": {
+    "en_US": "Weight",
+    "zh_CN": "体重"
+   },
+   "taste": {
+    "en_US": "Taste",
+    "zh_CN": "口味"
+   },
+   "accuracy": {
+    "en_US": "Accuracy",
+    "zh_CN": "命中率"
+   },
+   "potency": {
+    "en_US": "Potency",
+    "zh_CN": "效能"
+   },
+   "power": {
+    "en_US": "Power",
+    "zh_CN": "威力"
+   }
+  }
  }
 }

@@ -109,9 +109,81 @@ export interface TitleMinigameData {
   seed: number;
 }
 
+/** Imported START/title menu copy. Keeping these strings in the generated
+ * feature document makes the UI consume the same .po catalogs as Tuxemon
+ * instead of maintaining a second English/Chinese translation table. */
+export interface StartMenuData {
+  source: "tuxemon/states/start.py";
+  root: {
+    party: LocalizedFeatureText;
+    bag: LocalizedFeatureText;
+    player: LocalizedFeatureText;
+    missions: LocalizedFeatureText;
+    save: LocalizedFeatureText;
+    load: LocalizedFeatureText;
+    options: LocalizedFeatureText;
+    tuxepedia: LocalizedFeatureText;
+    exit: LocalizedFeatureText;
+  };
+  title: {
+    newGame: LocalizedFeatureText;
+    load: LocalizedFeatureText;
+    autosave: LocalizedFeatureText;
+    battle: LocalizedFeatureText;
+    minigame: LocalizedFeatureText;
+    options: LocalizedFeatureText;
+    exit: LocalizedFeatureText;
+  };
+  party: {
+    info: LocalizedFeatureText;
+    techniques: LocalizedFeatureText;
+    move: LocalizedFeatureText;
+    sort: LocalizedFeatureText;
+    release: LocalizedFeatureText;
+    sortByLevel: LocalizedFeatureText;
+    sortByHp: LocalizedFeatureText;
+    sortByName: LocalizedFeatureText;
+    sortById: LocalizedFeatureText;
+    releaseConfirmation: LocalizedFeatureText;
+    released: LocalizedFeatureText;
+  };
+  bag: {
+    use: LocalizedFeatureText;
+    cancel: LocalizedFeatureText;
+    cannotUseHere: LocalizedFeatureText;
+    noTarget: LocalizedFeatureText;
+  };
+  player: {
+    wallet: LocalizedFeatureText;
+    playtime: LocalizedFeatureText;
+    battles: LocalizedFeatureText;
+    seen: LocalizedFeatureText;
+    caught: LocalizedFeatureText;
+  };
+  common: {
+    yes: LocalizedFeatureText;
+    no: LocalizedFeatureText;
+    back: LocalizedFeatureText;
+    empty: LocalizedFeatureText;
+    hp: LocalizedFeatureText;
+    armour: LocalizedFeatureText;
+    dodge: LocalizedFeatureText;
+    melee: LocalizedFeatureText;
+    ranged: LocalizedFeatureText;
+    speed: LocalizedFeatureText;
+    height: LocalizedFeatureText;
+    weight: LocalizedFeatureText;
+    taste: LocalizedFeatureText;
+    accuracy: LocalizedFeatureText;
+    potency: LocalizedFeatureText;
+    power: LocalizedFeatureText;
+  };
+}
+
 export interface FeatureModesRuntimeData {
   format: "pocket-tuxemon/feature-modes/v1";
   nuPhoneMap: NuPhoneMapData;
   titleBattle: TitleBattleData;
   titleMinigame: TitleMinigameData;
+  startMenu: StartMenuData;
 }
