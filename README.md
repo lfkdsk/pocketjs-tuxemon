@@ -407,6 +407,95 @@ including a 600-frame autoplay that must reach a state byte-identical to a
 reducer-level suffix replay, and checks that each chapter click repaints the
 canvas with the new scene.
 
+## Headless Arena and battle replays
+
+`battle/arena.ts` exposes the production battle reducer as a deterministic,
+JSON-only match API. A match uses a 64-character hexadecimal seed, supports
+single or double battles, and can put an external agent or a built-in seeded
+AI on either side. The AI side uses the same five title-battle team recipes,
+from `beginner` through `expert`.
+
+```ts
+import {
+  createArenaBattle,
+  defaultAction,
+  observe,
+  replay,
+  stateHash,
+  submit,
+  tape,
+} from "./battle/arena.ts";
+
+let battle = createArenaBattle({
+  seed: "0123456789abcdef".repeat(4),
+  format: "single",
+  sides: [{ kind: "agent" }, { kind: "agent" }],
+});
+
+const first = submit(battle, 0, defaultAction(battle, 0));
+if (!first.ok) throw new Error(first.error);
+// The authoritative reducer has not advanced: side 1 has not submitted.
+const second = submit(first.battle, 1, defaultAction(first.battle, 1));
+if (!second.ok) throw new Error(second.error);
+battle = second.battle;
+
+const recording = tape(battle);
+const verified = replay(JSON.parse(JSON.stringify(recording)));
+console.log(observe(verified, 0), stateHash(verified));
+```
+
+`observe(battle, side)` is the only player-facing projection. It includes the
+side's complete party, the opponent's active monsters and revealed moves, and
+the exact `legalActions` for the next decision. It never includes the seed,
+RNG cursors, pending actions, or the opponent's reserve party. `submit`
+accepts only a value-equal member of `legalActions`; malformed, duplicate,
+late, or out-of-range submissions return a stable error without changing the
+input state. For two agent sides, one submission stays private until the
+other arrives. The current trainer Arena has no inventory and does not permit
+escape, so item and run actions are accepted only if a future configuration
+actually advertises them as legal.
+
+Matches stop after at most 2,048 paired decisions. Observations publish a
+1,800-tick service deadline, and `defaultAction` provides the deterministic
+timeout choice. `tape` records only complete action pairs and refuses an
+unpaired agent submission. Version-1 tapes contain the normalized seed,
+configuration, optional team rules, and action pairs; `replay` validates the
+entire schema and reproduces the canonical state and SHA-256 state hash. A
+future battle-data or rules change that alters replay semantics must advance
+the tape version.
+
+An agent side may carry persistent `team` records. `validateTeam` and battle
+creation replay each acquisition, level, move, TM and training-item event,
+then recompute stats and enforce the supplied level, size and ban rules;
+claimed derived values are never trusted. Ownership is a caller boundary:
+services must load these records from authenticated storage for that player,
+not accept an agent's inline provenance as proof of ownership.
+
+The deterministic CLI example plays a random legal-action agent against the
+normal AI and prints one JSON object containing `tape`, `result`, and
+`stateHash`:
+
+```sh
+bun run arena:demo
+bun run arena:demo -- --seed=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+```
+
+The Web build adds `replay.html`, whose battle code and pak are separate from
+the ordinary game startup. Give it a tape through `battleReplay`:
+
+```text
+replay.html?battleReplay=matches/example.json
+replay.html?lang=zh&battleReplay=matches/example.json
+replay.html?battleReplay=https%3A%2F%2Fexample.org%2Fmatch.json&battleReplayExternal=1
+```
+
+The page accepts a bounded `data:application/json` value, a same-origin
+relative HTTP(S) path, or an explicitly enabled cross-origin HTTPS URL.
+External requests omit credentials; redirects, MIME type, UTF-8, the 4 MiB
+limit, and the tape schema are checked before playback. Tape fields are data,
+never HTML or script. The English/Chinese page uses the production battle
+scene and provides pause, one-pair step, and 1×/2×/4× playback controls.
+
 ## Running
 
 ```sh
@@ -419,6 +508,8 @@ bun run build:wasm      # the wasm core (needs the Rust wasm32 target)
 bun tools/desktop.ts --build-only  # prepare the desktop bundle, runtime-data sidecars and host
 bun run desktop         # play on the desktop host
 bun run web             # build the web version into dist/web
+bun run arena:demo      # play a deterministic random agent vs normal AI match
+bun run verify:web:arena # replay a tape and check controls, privacy and pixels in Chrome
 bun run verify:web:audio # stream three imported tracks in headless Chrome
 bunx tsc --noEmit       # typecheck
 bun run test            # the test suite (build first for the pixel replays)

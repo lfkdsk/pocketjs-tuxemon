@@ -104,8 +104,11 @@ the first battle to Route 1) in headless Chrome against the built site,
 comparing checkpoint states and framebuffer hashes against the committed
 goldens; `bun tools/verify-web-zh.ts` plays the Chinese opening,
 `bun tools/verify-web-demo.ts` exercises chapter selection, deep links and
-autoplay through the complete Kernel endpoint, and `bun run verify:web:audio`
-plays three imported tracks. Any console error fails the run. The site is uploaded as the
+autoplay through the complete Kernel endpoint, `bun run verify:web:arena`
+loads same-origin and inline battle tapes, exercises bilingual replay controls,
+checks both supported raster sizes and proves the normal page never requests
+the lazy replay assets, and `bun run verify:web:audio` plays three imported
+tracks. Any console error fails the run. The site is uploaded as the
 `web-site` artifact (14-day retention), and the journey screenshots as
 `web-journey`. On pushes to `main` the site is also staged as the Pages
 artifact.
@@ -198,6 +201,7 @@ bun run web
 bun tools/verify-web-journey.ts
 bun tools/verify-web-zh.ts
 bun tools/verify-web-demo.ts
+bun run verify:web:arena
 bun run verify:web:audio
 
 # psp job (downloads the pinned toolchain on first use)
