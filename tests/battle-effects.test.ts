@@ -107,6 +107,68 @@ describe("main-line technique effects outside the trainer corpus", () => {
     expect(getMonster(state, 2).types).toEqual(["metal"]);
   });
 
+  test("move_type uses the selected monster's elements for one invocation only", () => {
+    const state = createBattle(DB, start(
+      snapshot("rockitten", ["external_power"], ["earth"]),
+      snapshot("nut", ["beam"], ["fire"]),
+    ));
+
+    makeRules(DB).perform(state, {
+      kind: "technique",
+      user: 1,
+      target: 2,
+      ref: "external_power",
+      moveIndex: 0,
+      subPriority: 0,
+    });
+
+    expect(getMonster(state, 2).currentHp).toBe(52);
+    expect(DB.technique.external_power!.types).toEqual(["normal"]);
+  });
+
+  test("life_swap exchanges current HP and respects each recipient's maximum", () => {
+    const state = createBattle(DB, start(
+      snapshot("rockitten", ["kiss"], ["earth"]),
+      snapshot("nut", ["beam"], ["metal"]),
+    ));
+    getMonster(state, 1).currentHp = 25;
+    getMonster(state, 2).currentHp = 80;
+
+    makeRules(DB).perform(state, {
+      kind: "technique",
+      user: 1,
+      target: 2,
+      ref: "kiss",
+      moveIndex: 0,
+      subPriority: 0,
+    });
+
+    expect(getMonster(state, 1).currentHp).toBe(80);
+    expect(getMonster(state, 2).currentHp).toBe(25);
+  });
+
+  test("foresight schedules a delayed copy with its turn-derived power", () => {
+    const state = createBattle(DB, start(
+      snapshot("rockitten", ["combat_clone"], ["earth"]),
+      snapshot("nut", ["beam"], ["metal"]),
+    ));
+
+    makeRules(DB).perform(state, {
+      kind: "technique",
+      user: 1,
+      target: 2,
+      ref: "combat_clone",
+      moveIndex: 0,
+      subPriority: 0,
+    });
+
+    expect(state.pending).toHaveLength(1);
+    expect(state.pending[0]).toMatchObject({
+      turn: state.turn + 3,
+      action: { kind: "technique", user: 1, target: 2, ref: "combat_clone", techniquePower: 3 },
+    });
+  });
+
   type ScopeEvent = {
     type: string;
     success: boolean;

@@ -55,6 +55,9 @@ export interface BattleAction {
   target: number;
   ref: string;
   moveIndex?: number;
+  /** Per-use Technique.power override carried by delayed effects such as
+   * foresight. Ordinary learned and fallback techniques omit it. */
+  techniquePower?: number;
   /** Dedicated Park capture marker. Failed captures rewrite the wild
    * monster's queued action to the empty flavour technique. */
   parkCapture?: true;

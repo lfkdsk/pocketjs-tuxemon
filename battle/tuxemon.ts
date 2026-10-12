@@ -986,15 +986,19 @@ function performTechnique(
 ): void {
   const user = getMonster(state, action.user!);
   const target = getMonster(state, action.target);
-  const technique = db.technique[action.ref];
-  if (!technique) throw new Error(`battle: unknown technique '${action.ref}'`);
+  const model = db.technique[action.ref];
+  if (!model) throw new Error(`battle: unknown technique '${action.ref}'`);
+  // Some effects change only this technique use. Keep the imported database
+  // immutable so one battle (or one Arena side) cannot leak types into the
+  // next invocation.
+  const technique: DbTechnique = { ...model, types: [...model.types] };
   const liveMove = action.moveIndex === undefined ? undefined : user.moves[action.moveIndex];
   const move = liveMove && liveMove.slug === action.ref
-    ? liveMove
+    ? action.techniquePower === undefined ? liveMove : { ...liveMove, power: action.techniquePower }
     : {
         slug: action.ref,
         cooldown: 0,
-        power: technique.power,
+        power: action.techniquePower ?? technique.power,
         potency: technique.potency,
         hit: user.fallbackHit,
       };
@@ -1158,10 +1162,43 @@ function performTechnique(
         result.success = true;
         break;
       }
+      case "foresight": {
+        const delay = Number(parameters[0]);
+        if (!Number.isInteger(delay) || delay <= 0) {
+          throw new Error(`battle: invalid foresight delay '${parameters[0]}' on '${technique.slug}'`);
+        }
+        const scheduled = makePendingAction(state, {
+          kind: "technique",
+          user: user.uid,
+          target: target.uid,
+          ref: technique.slug,
+          techniquePower: delay,
+        });
+        state.pending.push({ turn: state.turn + delay, action: scheduled });
+        result.success = true;
+        break;
+      }
       case "appear": {
         user.outOfRange = false;
         result.success ||= !target.outOfRange;
         result.shouldTackle ||= !target.outOfRange;
+        break;
+      }
+      case "move_type": {
+        if (parameters[0] === "own_monster") technique.types = [...user.types];
+        else if (parameters[0] === "enemy_monster") technique.types = [...target.types];
+        else throw new Error(`battle: invalid move_type direction '${parameters[0]}' on '${technique.slug}'`);
+        result.success = true;
+        break;
+      }
+      case "life_swap": {
+        setHit(technique.accuracy >= hitRoll);
+        if (!result.hit || user.currentHp <= 0 || target.currentHp <= 0) break;
+        const userHp = user.currentHp;
+        const targetHp = target.currentHp;
+        user.currentHp = Math.min(user.base.hp, targetHp);
+        target.currentHp = Math.min(target.base.hp, userHp);
+        result.success = true;
         break;
       }
       case "prop_healing": {
@@ -1978,6 +2015,14 @@ export function reduceBattleSimultaneous(
       enqueueAction(state, decisionAction(db, state, rules, uid, decisions[side]));
     }
     state.decisionQueue = state.decisionQueue.filter((uid) => !selected.has(uid));
+    const remainingSides = new Set(state.decisionQueue.map((uid) => getSide(state, uid)));
+    // A double can become 2-v-1 after one party runs out of replacements. The
+    // protocol still has one submission per side, so any unpaired extra actor
+    // follows the reducer's existing seeded AI policy before the round drains.
+    if (remainingSides.size === 1) {
+      for (const uid of state.decisionQueue) enqueueAction(state, rules.decideAi(state, uid));
+      state.decisionQueue = [];
+    }
     const next = state.decisionQueue[0];
     if (next !== undefined) {
       state.awaiting = { side: getSide(state, next), uid: next, kind: "technique" };
@@ -1985,7 +2030,27 @@ export function reduceBattleSimultaneous(
     }
     state.awaiting = null;
     state.phase = "action";
-    return advanceBattle(state, rules);
+    advanceBattle(state, rules);
+    // Delayed techniques can make every active monster on one side skip its
+    // next decision while the other side still needs input. The Arena wire
+    // protocol has paired submissions only, so resolve such one-sided windows
+    // with the same seeded policy as the ordinary reducer until another
+    // paired boundary (or the terminal state) is reached.
+    for (let guard = 0; state.phase !== "ended" && guard < 100_000; guard++) {
+      if (state.phase !== "decision") return state;
+      const sides = new Set(state.decisionQueue.map((uid) => getSide(state, uid)));
+      if (sides.size > 1) return state;
+      for (const uid of state.decisionQueue) enqueueAction(state, rules.decideAi(state, uid));
+      state.decisionQueue = [];
+      state.awaiting = null;
+      state.phase = "action";
+      advanceBattle(state, rules);
+    }
+    if (state.phase === "decision" &&
+        new Set(state.decisionQueue.map((uid) => getSide(state, uid))).size <= 1) {
+      throw new Error("battle: simultaneous auto-decision limit exceeded");
+    }
+    return state;
   } finally {
     draftIndexes.delete(state);
   }
