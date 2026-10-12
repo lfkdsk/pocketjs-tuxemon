@@ -43,12 +43,15 @@ export function createCompositeOverlay(
   /** A child opened programmatically by the game-owned world/title menu.
    * It is never stepped while closed, so its legacy START watcher cannot
    * compete with the parent world menu. */
-  childMenu?: GameViewOverlayConfig,
+  childMenu?: GameViewOverlayConfig | readonly GameViewOverlayConfig[],
 ): GameViewOverlayConfig {
+  const childMenus = childMenu === undefined
+    ? []
+    : Array.isArray(childMenu) ? childMenu : [childMenu];
   return {
     create(host: GameViewSessionHost): GameViewDemoRuntime {
       const world = worldMenu.create(host);
-      const child = childMenu?.create(host);
+      const children = childMenus.map((config) => config.create(host));
       const lang = langMenu?.create(host);
       const tux = tuxepedia?.create(host);
       const phone = nuPhone?.create(host);
@@ -66,21 +69,25 @@ export function createCompositeOverlay(
           }
           if (phone?.isOpen()) return phone.step(buttons, pressed);
           if (tux?.isOpen()) return tux.step(buttons, pressed);
-          if (child?.isOpen()) return child.step(buttons, pressed);
-          if (world.isOpen()) return world.step(buttons, pressed);
+          const child = children.find((runtime) => runtime.isOpen());
+          if (child) return child.step(buttons, pressed);
+          // Options is also a programmatic child of START/title. Give an
+          // already-open language screen priority over the still-mounted
+          // START root so dismissing it returns to the parent menu.
           if (lang?.isOpen()) return lang.step(buttons, pressed);
+          if (world.isOpen()) return world.step(buttons, pressed);
           // All closed: the game-owned world menu watches START, the
           // language menu R. Child menus only open through parent callbacks.
           const worldResult = world.step(buttons, pressed);
           if (world.isOpen() || worldResult.consumed) return worldResult;
           return lang ? lang.step(buttons, pressed) : worldResult;
         },
-        isOpen: () => world.isOpen() || (child?.isOpen() ?? false) || (lang?.isOpen() ?? false)
+        isOpen: () => world.isOpen() || children.some((runtime) => runtime.isOpen()) || (lang?.isOpen() ?? false)
           || (tux?.isOpen() ?? false) || (phone?.isOpen() ?? false) || (title?.isOpen() ?? false),
         render(theme?: Partial<UiTheme>, uiText?: UiTextOverrides): JSX.Element {
           return [
             world.render(theme, uiText),
-            child?.render(theme, uiText),
+            ...children.map((runtime) => runtime.render(theme, uiText)),
             lang?.render(theme, uiText),
             tux?.render(theme, uiText),
             phone?.render(theme, uiText),

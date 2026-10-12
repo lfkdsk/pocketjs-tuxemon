@@ -315,6 +315,50 @@ describe("title Battle mode", () => {
     });
   });
 
+  test("composite routes every programmatic child and Options before the mounted START root", () => {
+    const f = fixture(false);
+    const calls: string[] = [];
+    let childOneOpen = false;
+    let childTwoOpen = true;
+    let languageOpen = true;
+    const config = (name: string, open: () => boolean): GameViewOverlayConfig => ({
+      create: () => ({
+        step: () => {
+          calls.push(name);
+          return { consumed: true };
+        },
+        isOpen: open,
+        render: () => undefined,
+      }),
+    });
+    const composite = createCompositeOverlay(
+      config("world", () => true),
+      config("language", () => languageOpen),
+      undefined,
+      undefined,
+      undefined,
+      [
+        config("child-one", () => childOneOpen),
+        config("child-two", () => childTwoOpen),
+      ],
+    ).create(f.host);
+
+    composite.step(0, 0);
+    expect(calls).toEqual(["child-two"]);
+
+    childTwoOpen = false;
+    composite.step(0, 0);
+    expect(calls).toEqual(["child-two", "language"]);
+
+    languageOpen = false;
+    composite.step(0, 0);
+    expect(calls).toEqual(["child-two", "language", "world"]);
+
+    childOneOpen = true;
+    composite.step(0, 0);
+    expect(calls.at(-1)).toBe("child-one");
+  });
+
   test("back returns from the real five-row difficulty picker without touching the world", () => {
     createRoot((dispose) => {
       try {
