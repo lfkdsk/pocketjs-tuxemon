@@ -3,17 +3,17 @@
   "worldTraversal": "seamless-v1",
   "hz": 60,
   "frames": 51407,
-  "combinedFrames": 180125,
+  "combinedFrames": 180238,
   "durationSeconds": 856.783,
   "base": {
     "format": "pocket-tuxemon/j1-captainreturns/v1",
     "worldTraversal": "seamless-v1",
-    "frames": 128718,
-    "tapeSha256": "e428449c118d24296f139a759f61b03bfae04b5eae7a1089d7fba87d7eb082c2",
-    "terminalStateSha256": "680f442326ce22732443e8a71c346ad47a11b0a7cf0e3d24464c13d45e83a40e",
-    "terminalSnapshotSha256": "e05ac715a62e44781ffe50fcd0313e22a411da6c83e462869a0a2dcca567fd20",
+    "frames": 128831,
+    "tapeSha256": "83355151b8b62b61e54f3563cf5faa2c79a9743a47fcc5112d12702d8ddb49f7",
+    "terminalStateSha256": "1f6030dd501960edf7b217578e721e15392b7d474f4dbe623e7773b641164ad7",
+    "terminalSnapshotSha256": "e28a9327aa1128efbe81d9f202fcbbc035914fc93e959a25e1be785317539e47",
     "heldMask": 0,
-    "timelineFrame": 128718,
+    "timelineFrame": 128831,
     "map": "spyder_mansion",
     "position": [
       1,
@@ -57346,8 +57346,8 @@
       "maxHp": 161
     }
   ],
-  "initialStateSha256": "680f442326ce22732443e8a71c346ad47a11b0a7cf0e3d24464c13d45e83a40e",
-  "terminalStateSha256": "8628713acbb6f503a40f8763314bfbda1944a2f3da9d16d91de79708348c935b",
+  "initialStateSha256": "1f6030dd501960edf7b217578e721e15392b7d474f4dbe623e7773b641164ad7",
+  "terminalStateSha256": "368b5bf99a8c9ee16fc171d57253b4423c6588a3972d12fbfee5d78dab68a485",
   "tapeSha256": "0d672b532b8d0aba7cd7d1edc413f4e3c48fbb0f4254d3b4c4865317a81a4afd",
-  "combinedTapeSha256": "ad94283035d0cefa9f3c2c325055cfe9bc569e5ae4ad44d629a0743ec791c958"
+  "combinedTapeSha256": "d30f201a7f0236368eb2ee36860b1f75c0d95c99e58191c7ecf79d7651f69442"
 }

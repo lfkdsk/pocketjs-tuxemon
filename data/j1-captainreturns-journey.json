@@ -3,17 +3,17 @@
   "worldTraversal": "seamless-v1",
   "hz": 60,
   "frames": 12876,
-  "combinedFrames": 128718,
+  "combinedFrames": 128831,
   "durationSeconds": 214.6,
   "base": {
     "format": "pocket-tuxemon/gb6-mainline/v1",
     "worldTraversal": "seamless-v1",
-    "frames": 115842,
-    "tapeSha256": "c6d889b63d82518662978fe49dcb958e15f34b8d13ab8e822fc4eb5d99ddfb12",
-    "terminalStateSha256": "b67a786bcc27243881dbe885ddb375633d26011ababdde52904b7bd8e218f786",
-    "terminalSnapshotSha256": "ff46bab6f4b0f5b220522f33a916dd82cc287bdfd0dc103974a2335dca8e08df",
+    "frames": 115955,
+    "tapeSha256": "0bc1a177e95bab4f1bd88596689b833940c28e3a48556088142c1151232becf7",
+    "terminalStateSha256": "d798436d562b725318008097901a65adfec8816db3a7582cca0c583d0f430290",
+    "terminalSnapshotSha256": "c6eabad8057fd2f27587ac44b71cedb0d2899bca8e3c84f10ccb67648deb1a1d",
     "heldMask": 0,
-    "timelineFrame": 115842,
+    "timelineFrame": 115955,
     "map": "spyder_route3",
     "position": [
       4,
@@ -14598,8 +14598,8 @@
       "maxHp": 161
     }
   ],
-  "initialStateSha256": "b67a786bcc27243881dbe885ddb375633d26011ababdde52904b7bd8e218f786",
-  "terminalStateSha256": "680f442326ce22732443e8a71c346ad47a11b0a7cf0e3d24464c13d45e83a40e",
+  "initialStateSha256": "d798436d562b725318008097901a65adfec8816db3a7582cca0c583d0f430290",
+  "terminalStateSha256": "1f6030dd501960edf7b217578e721e15392b7d474f4dbe623e7773b641164ad7",
   "tapeSha256": "1641dae719a5444de89543c2ea2783cca6992fd684a794b06bf5063c3479f676",
-  "combinedTapeSha256": "e428449c118d24296f139a759f61b03bfae04b5eae7a1089d7fba87d7eb082c2"
+  "combinedTapeSha256": "83355151b8b62b61e54f3563cf5faa2c79a9743a47fcc5112d12702d8ddb49f7"
 }

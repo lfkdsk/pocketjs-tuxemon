@@ -11,7 +11,7 @@ When conversion discards a whole event, every source rule in it is Dropped.
 
 | Kind | Kinds | Uses | Native | Degraded | Placeholder | Dropped | S1 T1 baseline |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Actions | 98 | 13617 | 13222 | 183 | 0 | 212 | 6430 / 6246 (47.22% / 45.9%) |
+| Actions | 98 | 13617 | 13369 | 35 | 0 | 213 | 6430 / 6246 (47.22% / 45.9%) |
 | Conditions | 64 | 8663 | 8452 | 21 | 0 | 190 | 4782 / 4591 (55.20% / 53.0%) |
 
 The S1 acceptance baselines are 6,246 action uses (45.9%) and 4,591
@@ -21,8 +21,8 @@ Degraded count toward them. This import records 6430
 (55.20%), respectively: 184 above
 for actions and 191 above for conditions. The old
 type-table Native figure was 5,448 / 13,617 (40.0%); conversion-path accounting
-supersedes it with 13222 / 13617
-(97.1%). “Executable”
+supersedes it with 13369 / 13617
+(98.2%). “Executable”
 (native + degraded + deliberate P1 placeholder) is
 98.4% for actions and
 97.8% for conditions.
@@ -526,12 +526,12 @@ four-neighbour BFS with fixed tie-breaking selects the nearest walkable cell:
 | Action | `add_tracker` | 24 | 0 | 0 | 0 | 24 |
 | Action | `autosave` | 6 | 0 | 0 | 0 | 6 |
 | Action | `camera_position` | 6 | 0 | 0 | 0 | 6 |
-| Action | `change_bg` | 6 | 9 | 0 | 0 | 15 |
-| Action | `change_bg_char` | 0 | 4 | 0 | 0 | 4 |
-| Action | `change_bg_monster` | 0 | 7 | 0 | 0 | 7 |
+| Action | `change_bg` | 15 | 0 | 0 | 0 | 15 |
+| Action | `change_bg_char` | 4 | 0 | 0 | 0 | 4 |
+| Action | `change_bg_monster` | 7 | 0 | 0 | 0 | 7 |
 | Action | `change_taste` | 2 | 0 | 0 | 0 | 2 |
-| Action | `char_face` | 1889 | 124 | 0 | 14 | 2027 |
-| Action | `char_move` | 64 | 13 | 0 | 0 | 77 |
+| Action | `char_face` | 2007 | 5 | 0 | 15 | 2027 |
+| Action | `char_move` | 73 | 4 | 0 | 0 | 77 |
 | Action | `char_plague` | 13 | 0 | 0 | 0 | 13 |
 | Action | `char_position` | 1 | 0 | 0 | 0 | 1 |
 | Action | `char_run` | 2 | 0 | 0 | 0 | 2 |

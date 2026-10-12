@@ -67,6 +67,8 @@ const SAVE_FIXTURES = [
   "main-4520e7f8",
 ] as const;
 const IMMEDIATE_PREDECESSOR_FIXTURE = "main-4520e7f8" as const;
+const PRE_FIDELITY_FRAME_283_STATE = "5c40d03f6bd42b6278914cf9874a8074a8e3c07cde04910cd0c1ae4b30bfc0fd";
+const POST_FIDELITY_FRAME_283_STATE = "0bd096975c8ece86ac3ce5e16fd741ca476056b23b917b28f5ca8aaed8b60cfe";
 
 interface PublishedSaveMetadata {
   content: { manifest: string; schema: string };
@@ -442,7 +444,10 @@ test("published predecessor slots load exactly and only resave under the current
   }
 });
 
-/** Slots recorded on the still-current mainline tape continue on it. */
+/** Published slots continue on the current tape. Their old frame-283 pin is
+ * intentionally superseded: immediate NPC talk-facing has already completed
+ * Dante's turn/move phase there. A fresh current replay is the continuation
+ * oracle, while both hashes stay pinned so the migration cannot hide drift. */
 const CONTINUING_FIXTURES = [
   "main-78493afa",
   "main-3a9e95b2",
@@ -464,6 +469,8 @@ for (const name of CONTINUING_FIXTURES) test(`the ${name} main slot continues on
     .toBe(metadata.tape.continuationPrefix!.sha256);
   expect(metadata.continuation.targetFrame - metadata.save.frame)
     .toBe(metadata.continuation.frames);
+  expect(metadata.continuation.targetFrame).toBe(283);
+  expect(metadata.continuation.stateSha256).toBe(PRE_FIDELITY_FRAME_283_STATE);
 
   const { project, repository } = readShardedProject(ROOT);
   const session = createSession(project, 60, createTuxemonSessionOptions(
@@ -481,12 +488,21 @@ for (const name of CONTINUING_FIXTURES) test(`the ${name} main slot continues on
     state = stepSession(session, state, sessionInput(mask, previous));
     previous = mask;
   }
+  let current = startSession(project, session);
+  previous = 0;
+  for (let frame = 0; frame < metadata.continuation.targetFrame; frame++) {
+    const mask = tape.masks[frame]!;
+    current = stepSession(session, current, sessionInput(mask, previous));
+    previous = mask;
+  }
   expect([state.mapId, state.move.tx, state.move.ty]).toEqual([
     metadata.continuation.map,
     ...metadata.continuation.position,
   ]);
-  expect(sha256(canonicalJson({ ...state, frame: state.frame + frameOffset })))
-    .toBe(metadata.continuation.stateSha256);
+  const continuedHash = sha256(canonicalJson({ ...state, frame: state.frame + frameOffset }));
+  const currentHash = sha256(canonicalJson(current));
+  expect(currentHash).toBe(POST_FIDELITY_FRAME_283_STATE);
+  expect(continuedHash).toBe(currentHash);
 });
 
 test("the immediate predecessor slot continues through every battle music transition", () => {
