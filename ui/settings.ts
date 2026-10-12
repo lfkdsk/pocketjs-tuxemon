@@ -321,6 +321,28 @@ export function bindControl(
   };
 }
 
+/** Accept a detected conflict as an explicit swap. Every one of the seven
+ * physical slots remains reachable, unlike upstream's last-key-wins map. */
+export function swapControl(
+  settings: Readonly<GameSettings>,
+  action: ControlAction,
+  button: PhysicalButton,
+): GameSettings {
+  const conflict = CONTROL_ACTIONS.find(
+    (candidate) => candidate !== action && settings.controls[candidate] === button,
+  );
+  if (!conflict) return { ...settings, controls: { ...settings.controls, [action]: button } };
+  const previous = settings.controls[action];
+  return {
+    ...settings,
+    controls: {
+      ...settings.controls,
+      [action]: button,
+      [conflict]: previous,
+    },
+  };
+}
+
 export const PHYSICAL_BUTTON_MASK: Readonly<Record<PhysicalButton, number>> = Object.freeze({
   up: BTN.UP,
   left: BTN.LEFT,
