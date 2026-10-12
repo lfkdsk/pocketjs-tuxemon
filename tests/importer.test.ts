@@ -1245,6 +1245,22 @@ test("choice_npc shows each appearance with its walker icon", () => {
   expect(nodes.some((node) => node.op === "extChoice" && (node as { args?: { variable?: string } }).args?.variable === "v.race_choice")).toBeFalse();
 });
 
+test("start_tuxemon gives each duplicated blocking screen transition one live modal owner", () => {
+  const { project } = buildProject(["start_tuxemon"], G6_IMPORT_OPTIONS);
+  const map = project.maps.find((candidate) => candidate.id === "start_tuxemon")!;
+  for (const name of ["Scenario", "Appearance", "Pronouns", "Spyder", "Xero", "Water"]) {
+    const copies = map.events?.filter((event) => event.name === name) ?? [];
+    expect(copies, name).toHaveLength(2);
+    expect(copies[0]!.pages[0]!.condition, name).toEqual({
+      switch: "sys.start_tuxemon.shadow_copy_enabled",
+    });
+    expect(copies[1]!.pages[0]!.condition, name).toBeUndefined();
+    expect(objectNodes(copies[1]).some((node) =>
+      node.op === "screenBackdrop" && node.whenModalOpen === "push"
+    ), name).toBeTrue();
+  }
+});
+
 test("remove_monster becomes a tux.remove_monster ext command", () => {
   const nodes = objectNodes(buildProject(["spyder_dryadsgrove"], { extChoice: true, battle: true }).project);
   expect(nodes.some((node) =>

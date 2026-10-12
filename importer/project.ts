@@ -2261,6 +2261,42 @@ interface Ctx {
 const SERIAL_START_BACKDROP_EVENTS = new Set([
   "Scenario", "Appearance", "Pronouns", "Spyder", "Xero", "Water",
 ]);
+const START_BACKDROP_SHADOW_SWITCH = "sys.start_tuxemon.shadow_copy_enabled";
+
+/** start_tuxemon.tmx names start_tuxemon as both its own YAML and its
+ * scenario YAML, so upstream materializes the same six blocking screen
+ * transitions twice. The second copy replaces the first copy's state and is
+ * the sole visible modal owner. Keep the first event/page/program for save
+ * ancestry, but gate fresh starts behind an intentionally unset switch; the
+ * later scenario copy remains the one live owner. Fail closed unless the two
+ * source events are still byte-for-byte equivalent at the rule level. */
+function isStartBackdropShadowCopy(m: TuxMap, event: TuxEvent): boolean {
+  if (
+    m.slug !== "start_tuxemon" ||
+    m.props.scenario !== m.slug ||
+    event.origin !== "yaml" ||
+    event.source !== "start_tuxemon.yaml" ||
+    !SERIAL_START_BACKDROP_EVENTS.has(event.name)
+  ) return false;
+  const sameRules = (left: readonly Rule[], right: readonly Rule[]): boolean =>
+    left.length === right.length && left.every((rule, index) => rule.raw === right[index]?.raw);
+  const duplicate = m.events.find((candidate) =>
+    candidate !== event &&
+    candidate.origin === "scenario" &&
+    candidate.source === event.source &&
+    candidate.kind === event.kind &&
+    candidate.name === event.name &&
+    candidate.x === event.x && candidate.y === event.y &&
+    candidate.w === event.w && candidate.h === event.h &&
+    sameRules(candidate.conds, event.conds) &&
+    sameRules(candidate.acts, event.acts) &&
+    sameRules(candidate.behavs, event.behavs)
+  );
+  if (!duplicate) {
+    throw new Error(`start backdrop shadow ${event.name} no longer has an identical scenario copy`);
+  }
+  return true;
+}
 function ordinaryBackdropFlowIsExact(ctx: Ctx): boolean {
   const source = ctx.sourceEvent;
   if (!source) return false;
@@ -4907,7 +4943,33 @@ function convertMap(
       // grunt departure routes are the canonical case).
       const blocking = hasBlocking(cmds);
       const body = e.kind === "init" ? [...cmds, { op: "erase" } as Command] : cmds;
-      if (!live.length) {
+      if (isStartBackdropShadowCopy(m, e)) {
+        if (!blocking) {
+          throw new Error(`start backdrop shadow ${e.name} is no longer blocking`);
+        }
+        // The command program intentionally stays identical to the old
+        // parallel page so a predecessor save can reconstruct and then
+        // cancel its now-shadowed first-copy fiber. Fresh sessions leave the
+        // compatibility switch false and start only the later scenario copy.
+        events.push({
+          id: nextId(e.name),
+          name: e.name,
+          x: e.x,
+          y: e.y,
+          pages: [{
+            trigger: "parallel",
+            condition: { switch: START_BACKDROP_SHADOW_SWITCH },
+            sprite: null,
+            commands: guard(live, body),
+          }],
+        });
+        note(
+          "trigger",
+          "start screen duplicate shadow",
+          "T1-lowered",
+          "the later identical scenario materialization is the sole visible modal owner; the first page remains dormant for save ancestry",
+        );
+      } else if (!live.length) {
         events.push({ id: nextId(e.name), name: e.name, x: e.x, y: e.y, pages: [{ trigger: "parallel", sprite: null, commands: body }] });
       } else if (blocking) {
         // Once an automatic action has started, Tuxemon lets it finish even
