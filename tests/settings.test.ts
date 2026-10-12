@@ -359,6 +359,7 @@ describe("measurement preferences", () => {
     expect(entries).toHaveLength(411);
     for (const [slug, row] of entries) {
       expect(row, `${slug}: numeric oracle columns`).toHaveLength(6);
+      expect(row.every(Number.isFinite), `${slug}: finite numeric oracle columns`).toBeTrue();
       const [height, weight, metricHeight, imperialHeight, metricWeight, imperialWeight] = row;
       const metricHeightText = height >= 100 ? `${metricHeight.toFixed(1)} m` : `${metricHeight} cm`;
       const metricWeightText = weight >= 1_000 ? `${metricWeight.toFixed(1)} t` : `${metricWeight} kg`;
