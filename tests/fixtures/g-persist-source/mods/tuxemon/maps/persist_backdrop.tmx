@@ -16,6 +16,15 @@
         <property name="act1" value="wait 0.1"/>
         <property name="act2" value="change_bg_char gradient_red,aeble"/>
         <property name="act3" value="set_variable g_persist_replaced:yes"/>
+        <property name="act4" value="translated_dialog g_persist_backdrop"/>
+      </properties>
+    </object>
+    <object id="3" name="Second replacement while dialog is open" type="event" x="0" y="0" width="16" height="16">
+      <properties>
+        <property name="cond1" value="not variable_set g_persist_replaced_again:yes"/>
+        <property name="act1" value="wait 0.15"/>
+        <property name="act2" value="change_bg_char gradient_green,aeble"/>
+        <property name="act3" value="set_variable g_persist_replaced_again:yes"/>
       </properties>
     </object>
   </objectgroup>

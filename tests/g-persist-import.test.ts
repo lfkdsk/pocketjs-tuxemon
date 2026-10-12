@@ -315,9 +315,15 @@ describe("imported Tuxemon presentation state survives map transfer", () => {
         variant: "bg_gradient_red_aeble_character",
         whenModalOpen: "push",
       },
+      {
+        op: "screenBackdrop",
+        layer: "tux_backdrop",
+        variant: "bg_gradient_green_aeble_character",
+        whenModalOpen: "push",
+      },
       { op: "screenBackdrop", layer: "tux_backdrop", variant: null },
     ]);
-    expectNative(build, "change_bg_char", 2);
+    expectNative(build, "change_bg_char", 3);
     expectNative(build, "change_bg", 1);
     const probeSession = createSession(build.project, 60, SESSION_OPTIONS);
     let probe = startSession(build.project, probeSession);
@@ -332,9 +338,29 @@ describe("imported Tuxemon presentation state survives map transfer", () => {
       if (probe.mapId === TARGET && saveBlockReason(probe) === null) break;
     }
     expect(probe.sw.variables["v.g_persist_replaced"]).toBe(1);
+    expect(probe.sw.variables["v.g_persist_replaced_again"]).toBe(1);
     expect(probe.mapId).toBe(TARGET);
     expect(saveBlockReason(probe)).toBeNull();
     expect(probe.interp.modal).toBeNull();
+    expect(probe.interp.screen?.backdrop).toEqual({
+      layer: "tux_backdrop",
+      variant: "bg_gradient_green_aeble_character",
+    });
+    expect(probe.interp.screen?.backdropStack).toEqual([
+      { layer: "tux_backdrop", variant: "bg_gradient_blue_aeble_character" },
+      { layer: "tux_backdrop", variant: "bg_gradient_red_aeble_character" },
+    ]);
+    const restored = roundTrip(probeSession, probe);
+    expect(restored.interp.screen).toEqual(probe.interp.screen);
+    expect(restored.interp.screen?.backdropStack).not.toBe(probe.interp.screen?.backdropStack);
+
+    probe = restored;
+    probe.sw.variables["v.g_persist_close"] = 1;
+    probe.interp.sw.variables["v.g_persist_close"] = 1;
+    for (let frame = 0; frame < 10 && probe.sw.variables["v.g_persist_closed"] !== 1; frame++) {
+      probe = stepSession(probeSession, probe, { buttons: 0 });
+    }
+    expect(probe.sw.variables["v.g_persist_closed"]).toBe(1);
     expect(probe.interp.screen?.backdrop).toEqual({
       layer: "tux_backdrop",
       variant: "bg_gradient_red_aeble_character",
@@ -343,13 +369,10 @@ describe("imported Tuxemon presentation state survives map transfer", () => {
       layer: "tux_backdrop",
       variant: "bg_gradient_blue_aeble_character",
     }]);
-    const restored = roundTrip(probeSession, probe);
-    expect(restored.interp.screen).toEqual(probe.interp.screen);
-    expect(restored.interp.screen?.backdropStack).not.toBe(probe.interp.screen?.backdropStack);
-
-    probe = restored;
-    probe.sw.variables["v.g_persist_close"] = 1;
-    probe.interp.sw.variables["v.g_persist_close"] = 1;
+    // Re-arm the real imported close page. A second close must expose the
+    // oldest frame rather than clearing or selecting it on the first pop.
+    probe.sw.variables["v.g_persist_closed"] = 0;
+    probe.interp.sw.variables["v.g_persist_closed"] = 0;
     for (let frame = 0; frame < 10 && probe.sw.variables["v.g_persist_closed"] !== 1; frame++) {
       probe = stepSession(probeSession, probe, { buttons: 0 });
     }
@@ -364,12 +387,12 @@ describe("imported Tuxemon presentation state survives map transfer", () => {
     expect(backdrops).toEqual([backdrops[0], backdrops[0], backdrops[0]]);
     expect(backdrops[0]).toEqual({
       layer: "tux_backdrop",
-      variant: "bg_gradient_red_aeble_character",
+      variant: "bg_gradient_green_aeble_character",
     });
-    expect(outcomes[0]!.state.interp.screen?.backdropStack).toEqual([{
-      layer: "tux_backdrop",
-      variant: "bg_gradient_blue_aeble_character",
-    }]);
+    expect(outcomes[0]!.state.interp.screen?.backdropStack).toEqual([
+      { layer: "tux_backdrop", variant: "bg_gradient_blue_aeble_character" },
+      { layer: "tux_backdrop", variant: "bg_gradient_red_aeble_character" },
+    ]);
     expect(roundTrip(outcomes[0]!.session, outcomes[0]!.state).interp.screen)
       .toEqual(outcomes[0]!.state.interp.screen);
     rewindAcrossTransfer(build.project);

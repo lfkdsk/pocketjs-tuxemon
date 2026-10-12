@@ -27,6 +27,7 @@ const COPIED_UPSTREAM_FILES = [
   "mods/tuxemon/animations/tileset/grass.png",
   "mods/tuxemon/gfx/bubbles/exclamation.png",
   "mods/tuxemon/gfx/ui/background/gradient_blue.png",
+  "mods/tuxemon/gfx/ui/background/gradient_green.png",
   "mods/tuxemon/gfx/ui/background/gradient_red.png",
   "mods/tuxemon/db/npc/aeble.yaml",
   "mods/tuxemon/gfx/sprites/player/adventurer.png",
