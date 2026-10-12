@@ -1,5 +1,5 @@
-// Build-time import for the two menu features that live outside Tuxemon's
-// normal TMX map graph: the NuPhone GPS application and title-screen Battle.
+// Build-time import for the menu features that live outside Tuxemon's normal
+// TMX map graph: NuPhone GPS, title-screen Battle, and the title Minigame.
 // The runtime consumes only this validated, deterministic document; authored
 // locations and difficulty recipes never have a second hand-maintained copy.
 
@@ -436,7 +436,7 @@ export function loadTitleBattle(
   return parseTitleBattle(readYamlEvents(battlePath, "loaded"), catalogs, sourceRoot);
 }
 
-/** Read both out-of-map feature sources and their item/menu metadata. */
+/** Read all out-of-map feature sources and their item/menu metadata. */
 export function loadFeatureModes(sourceRoot: string): FeatureModesImport {
   const catalogs = featureCatalogs();
   const mapPath = join(sourceRoot, "mods/nu_phone_map.yaml");

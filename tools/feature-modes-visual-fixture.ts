@@ -1,7 +1,7 @@
-// Production-bundle visual fixture for the two out-of-map feature programs.
-// One boot captures the title, difficulty picker and a real imported title
-// battle; a second automation-compatible boot captures NuPhone and its GPS
-// map. Both paths use the public touch regions at the requested viewport.
+// Production-bundle visual fixture for the out-of-map feature programs. One
+// boot captures title Battle and Minigame paths; a second automation-
+// compatible boot captures NuPhone and its GPS map. Both paths use the public
+// touch regions at the requested viewport.
 
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";

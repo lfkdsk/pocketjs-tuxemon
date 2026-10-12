@@ -1,6 +1,7 @@
-// Production-bundle visual gate for title Battle and NuPhone/GPS: exact
-// bilingual goldens at both supported resolutions, semantic tree/pixel
-// assertions, touch interaction and the expected 2x composition.
+// Production-bundle visual gate for title Battle, title Minigame, and
+// NuPhone/GPS: exact bilingual goldens at both supported resolutions,
+// semantic tree/pixel assertions, touch interaction, lazy-art behavior, and
+// the expected 2x composition.
 
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
@@ -109,7 +110,7 @@ function captured(viewportIndex: number, lang: Lang): Promise<Capture> {
   return pending;
 }
 
-describe("NuPhone and title Battle production visuals", () => {
+describe("NuPhone, title Battle, and title Minigame production visuals", () => {
   simTest("match every committed bilingual golden at both resolutions", async () => {
     expect(manifest.format).toBe("pocket-tuxemon/feature-modes-goldens/v2");
     expect(manifest.frames).toHaveLength(FEATURE_MODES_CASES.length * LANGS.length * FEATURE_MODES_VIEWPORTS.length);
