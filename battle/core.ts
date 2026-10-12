@@ -70,7 +70,7 @@ export interface PendingBattleAction {
 }
 
 export interface BattleDecision {
-  side: 0;
+  side: 0 | 1;
   uid: number;
   kind: "technique" | "replacement";
 }
@@ -95,6 +95,11 @@ export interface BattleCoreState<Monster> extends RngState {
   awaiting: BattleDecision | null;
   outcome: BattleOutcome | null;
   events: BattleEvent[];
+  /** Sides whose decisions are supplied outside the ordinary player-vs-AI
+   * flow. Absent preserves the campaign contract: side 0 is manual and side
+   * 1 uses the seeded AI policy. Arena sessions set both sides manual and
+   * commit one decision for each side at the same boundary. */
+  manualSides?: Array<0 | 1>;
 }
 
 export interface BattleCoreRules<Monster, State extends BattleCoreState<Monster>> {
@@ -237,7 +242,9 @@ export function advanceBattle<Monster, State extends BattleCoreState<Monster>>(
         for (const uid of state.field) {
           rules.onDecisionStart(state, uid);
           if (rules.skipsDecision(state, uid)) continue;
-          if (rules.side(state, uid) === 1) {
+          const side = rules.side(state, uid);
+          const manual = state.manualSides?.includes(side) ?? side === 0;
+          if (!manual) {
             enqueueAction(state, rules.decideAi(state, uid));
           } else {
             state.decisionQueue.push(uid);
@@ -246,7 +253,7 @@ export function advanceBattle<Monster, State extends BattleCoreState<Monster>>(
         state.phase = "decision";
         const uid = state.decisionQueue[0];
         if (uid !== undefined) {
-          state.awaiting = { side: 0, uid, kind: "technique" };
+          state.awaiting = { side: rules.side(state, uid), uid, kind: "technique" };
           return state;
         }
         state.phase = "action";
@@ -297,7 +304,7 @@ export function submitAction<Monster, State extends BattleCoreState<Monster>>(
   state.awaiting = null;
   const uid = state.decisionQueue[0];
   if (uid !== undefined) {
-    state.awaiting = { side: 0, uid, kind: "technique" };
+    state.awaiting = { side: rules.side(state, uid), uid, kind: "technique" };
     return state;
   }
   state.phase = "action";

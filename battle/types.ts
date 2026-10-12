@@ -415,6 +415,9 @@ export interface BattleStart {
   runAttempts?: number;
   inventory?: Record<string, number>;
   variables?: Record<string, string | number | boolean>;
+  /** Arena-only controller override. Ordinary campaign starts omit this and
+   * retain the established side-0 player / side-1 AI behavior. */
+  manualSides?: Array<0 | 1>;
 }
 
 export interface TechniqueDecision {

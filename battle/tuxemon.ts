@@ -94,6 +94,7 @@ function battleDraft(state: TuxemonBattleState): TuxemonBattleState {
   });
   return {
     ...state,
+    ...(state.manualSides === undefined ? {} : { manualSides: [...state.manualSides] }),
     parties: [state.parties[0].map(monster), state.parties[1].map(monster)],
     field: [...state.field],
     queue: state.queue.map((action) => ({ ...action })),
@@ -1566,6 +1567,7 @@ export function canUseBattleItem(
   targetUid: number,
   capture: boolean,
   menuState: "MainCombatMenuState" | "MainParkMenuState" = "MainCombatMenuState",
+  actingSide: 0 | 1 = 0,
 ): boolean {
   const item = db.item[itemSlug];
   if (!item || (state.inventory[itemSlug] ?? 0) <= 0 ||
@@ -1579,21 +1581,22 @@ export function canUseBattleItem(
     return false;
   }
   if (capture) {
-    if (state.kind !== "wild" || getSide(state, target.uid) !== 1 || !state.field.includes(target.uid)) {
+    if (state.kind !== "wild" || getSide(state, target.uid) === actingSide || !state.field.includes(target.uid)) {
       return false;
     }
-  } else if (getSide(state, target.uid) !== 0) {
+  } else if (getSide(state, target.uid) !== actingSide) {
     return false;
   }
   return !itemBlockedByStatus(db, target) && itemConditionsPass(db, state, item, target);
 }
 
 export function canRun(state: TuxemonBattleState, userUid: number): boolean {
-  if (state.kind !== "wild" || !state.field.includes(userUid) || getSide(state, userUid) !== 0) {
+  if (state.kind !== "wild" || !state.field.includes(userUid)) {
     return false;
   }
+  const side = getSide(state, userUid);
   const status = getMonster(state, userUid).status?.slug;
-  return status !== "grabbed" && status !== "stuck" && activeOnSide(state, 1).length > 0;
+  return status !== "grabbed" && status !== "stuck" && activeOnSide(state, side === 0 ? 1 : 0).length > 0;
 }
 
 export function canSwap(state: TuxemonBattleState, userUid: number, targetUid: number): boolean {
@@ -1605,8 +1608,9 @@ export function canSwap(state: TuxemonBattleState, userUid: number, targetUid: n
   } catch {
     return false;
   }
+  const side = getSide(state, user.uid);
   if (!state.field.includes(user.uid) || state.field.includes(target.uid) ||
-      getSide(state, user.uid) !== 0 || getSide(state, target.uid) !== 0 || target.currentHp <= 0) {
+      getSide(state, target.uid) !== side || target.currentHp <= 0) {
     return false;
   }
   const status = user.status?.slug;
@@ -1755,7 +1759,7 @@ function makeRules(db: TuxemonBattleDb): BattleCoreRules<BattleMonster, TuxemonB
         state.events.push({
           type: "swap",
           turn: state.turn,
-          side: 0,
+          side: getSide(state, user.uid),
           user: user.uid,
           target: target.uid,
         });
@@ -1866,6 +1870,7 @@ export function createBattle(db: TuxemonBattleDb, start: BattleStart): TuxemonBa
     inventory: { ...(start.inventory ?? {}) },
     variables: { ...(start.variables ?? {}) },
     capturedUid: null,
+    ...(start.manualSides === undefined ? {} : { manualSides: [...start.manualSides] }),
   };
   return advanceBattle(state, makeRules(db));
 }
@@ -1886,50 +1891,101 @@ export function reduceBattle(
   draftIndexes.set(state, index);
   try {
     const rules = makeRules(db);
-    if (decision.type === "technique") {
-      return submitDecision(state, rules, decision.choice);
-    }
     const user = state.awaiting?.uid;
     if (user === undefined) throw new Error("battle: no action decision is pending");
-    if (decision.type === "replacement") {
-      if (!canSwap(state, user, decision.uid)) {
-        throw new Error(`battle: replacement ${decision.uid} is unavailable`);
-      }
-      return submitAction(state, rules, {
-        kind: "swap",
-        user,
-        target: decision.uid,
-        ref: "swap",
-      });
+    if (decision.type === "technique") return submitDecision(state, rules, decision.choice);
+    return submitAction(state, rules, decisionAction(db, state, rules, user, decision));
+  } finally {
+    draftIndexes.delete(state);
+  }
+}
+
+function decisionAction(
+  db: TuxemonBattleDb,
+  state: TuxemonBattleState,
+  rules: BattleCoreRules<BattleMonster, TuxemonBattleState>,
+  user: number,
+  decision: TuxemonBattleDecision,
+): Omit<BattleAction, "subPriority"> {
+  if (decision.type === "technique") return rules.playerAction(state, user, decision.choice);
+  const side = getSide(state, user);
+  if (decision.type === "replacement") {
+    if (!canSwap(state, user, decision.uid)) {
+      throw new Error(`battle: replacement ${decision.uid} is unavailable`);
     }
-    if (decision.type === "run") {
-      if (!canRun(state, user)) throw new Error("battle: escape is unavailable");
-      const target = activeOnSide(state, 1)[0]!;
-      return submitAction(state, rules, {
-        kind: "run",
-        user,
-        target: target.uid,
-        ref: "menu_run",
-      });
+    return { kind: "swap", user, target: decision.uid, ref: "swap" };
+  }
+  if (decision.type === "run") {
+    if (!canRun(state, user)) throw new Error("battle: escape is unavailable");
+    const target = activeOnSide(state, side === 0 ? 1 : 0)[0]!;
+    return { kind: "run", user, target: target.uid, ref: "menu_run" };
+  }
+  const capture = decision.type === "capture";
+  if (!canUseBattleItem(
+    db,
+    state,
+    decision.item,
+    decision.target,
+    capture,
+    decision.type === "capture" ? decision.menuState : undefined,
+    side,
+  )) {
+    throw new Error(`battle: item '${decision.item}' is unavailable for target ${decision.target}`);
+  }
+  return {
+    kind: capture ? "capture" : "item",
+    user,
+    target: decision.target,
+    ref: decision.item,
+    ...(capture && decision.menuState === "MainParkMenuState" ? { parkCapture: true } : {}),
+  };
+}
+
+/** Commit one externally chosen decision for each side without letting network
+ * submission order affect the battle RNG or queue. In a double battle this
+ * consumes the next active slot on each side; the core executes the round only
+ * after every active slot has received a paired decision. */
+export function reduceBattleSimultaneous(
+  db: TuxemonBattleDb,
+  previous: TuxemonBattleState,
+  decisions: readonly [TuxemonBattleDecision, TuxemonBattleDecision],
+): TuxemonBattleState {
+  const state = battleDraft(previous);
+  const index = new Map<number, { monster: BattleMonster; side: 0 | 1 }>();
+  for (let side = 0; side < 2; side++) {
+    for (const monster of state.parties[side]!) {
+      if (!index.has(monster.uid)) index.set(monster.uid, { monster, side: side as 0 | 1 });
     }
-    const capture = decision.type === "capture";
-    if (!canUseBattleItem(
-      db,
-      state,
-      decision.item,
-      decision.target,
-      capture,
-      decision.type === "capture" ? decision.menuState : undefined,
-    )) {
-      throw new Error(`battle: item '${decision.item}' is unavailable for target ${decision.target}`);
+  }
+  draftIndexes.set(state, index);
+  try {
+    if (state.phase !== "decision" || state.decisionQueue.length === 0) {
+      throw new Error("battle: no simultaneous decision is pending");
     }
-    return submitAction(state, rules, {
-      kind: capture ? "capture" : "item",
-      user,
-      target: decision.target,
-      ref: decision.item,
-      ...(capture && decision.menuState === "MainParkMenuState" ? { parkCapture: true } : {}),
-    });
+    const actors = ([0, 1] as const).map((side) =>
+      state.decisionQueue.find((uid) => getSide(state, uid) === side)
+    ) as [number | undefined, number | undefined];
+    if (actors[0] === undefined || actors[1] === undefined) {
+      throw new Error("battle: simultaneous decisions require one active actor per side");
+    }
+    const selected = new Set<number>(actors as [number, number]);
+    const rules = makeRules(db);
+    // Field/decision order is canonical (AI side first in the imported engine),
+    // independent of which HTTP client submitted first.
+    for (const uid of state.decisionQueue) {
+      if (!selected.has(uid)) continue;
+      const side = getSide(state, uid);
+      enqueueAction(state, decisionAction(db, state, rules, uid, decisions[side]));
+    }
+    state.decisionQueue = state.decisionQueue.filter((uid) => !selected.has(uid));
+    const next = state.decisionQueue[0];
+    if (next !== undefined) {
+      state.awaiting = { side: getSide(state, next), uid: next, kind: "technique" };
+      return state;
+    }
+    state.awaiting = null;
+    state.phase = "action";
+    return advanceBattle(state, rules);
   } finally {
     draftIndexes.delete(state);
   }
