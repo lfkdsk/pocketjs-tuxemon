@@ -11,7 +11,12 @@ import { Panel } from "../vendor/pocket-rpgkit/src/ui/Panel.tsx";
 import { SaveMenu } from "../vendor/pocket-rpgkit/src/ui/SaveMenu.tsx";
 import type { UiTextOverrides } from "../vendor/pocket-rpgkit/src/engine/ui-text.ts";
 import { resolveUiTheme, type UiTheme } from "../vendor/pocket-rpgkit/src/ui/theme.ts";
-import { createSaveMenuRuntime, validateOpenButton, type SaveMenuOptions } from "./save-menu-runtime.ts";
+import {
+  createSaveMenuRuntime,
+  validateOpenButton,
+  type SaveMenuOptions,
+  type SaveMenuRuntime,
+} from "./save-menu-runtime.ts";
 
 export function SaveToast(props: { text: () => string | null; theme?: Partial<UiTheme> }) {
   const theme = () => resolveUiTheme(props.theme);
@@ -33,12 +38,17 @@ export function SaveToast(props: { text: () => string | null; theme?: Partial<Ui
 }
 
 /** GameView overlay config for the save/load menu. */
-export function createSaveMenu(options: SaveMenuOptions = {}): GameViewOverlayConfig {
+export function createSaveMenu(options: SaveMenuOptions = {}): GameViewOverlayConfig & {
+  runtimeRef: { current: SaveMenuRuntime | null };
+} {
   validateOpenButton(options.openButton ?? BTN.START);
+  const runtimeRef: { current: SaveMenuRuntime | null } = { current: null };
   return {
+    runtimeRef,
     create(host) {
       let activeUiText: UiTextOverrides | undefined;
       const menu = createSaveMenuRuntime(options, host, createOsk, () => activeUiText);
+      runtimeRef.current = menu;
       return {
         step: menu.step,
         isOpen: menu.isOpen,

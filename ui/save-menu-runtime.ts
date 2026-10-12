@@ -89,6 +89,8 @@ export type SaveMenuCompletion =
 
 /** Test and tooling handle: the live menu publishes itself here. */
 export interface PocketTuxemonSaveHook {
+  /** Re-read manual and automatic save summaries without opening a page. */
+  refresh(): void;
   /** Open the traditional root, the load-slot page, or the code importer. */
   open(target?: SaveMenuOpenTarget): void;
   /** Close the menu and return control to its game-owned parent. */
@@ -186,6 +188,7 @@ export interface SaveMenuRuntime {
   /** Resolved game-owned rows for the current live session. */
   extraRows: Accessor<readonly ExtraRootRow[]>;
   /** Programmatic handoff used by a game-owned START/title root. */
+  refresh(): void;
   open(target?: SaveMenuOpenTarget): void;
   close(): void;
   loadSlot(slot: number): boolean;
@@ -583,6 +586,7 @@ export function createSaveMenuRuntime(
       return zh ? "o: 选择   x: 返回   START: 关闭" : "o: select   x: back   START: close";
     },
     extraRows,
+    refresh: refreshSlots,
     open: publicOpen,
     close,
     loadSlot: loadManualSlot,
@@ -594,6 +598,7 @@ export function createSaveMenuRuntime(
   };
 
   const hook: PocketTuxemonSaveHook = {
+    refresh: refreshSlots,
     open: publicOpen,
     close,
     loadSlot: loadManualSlot,

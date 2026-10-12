@@ -130,6 +130,8 @@ describe("save menu public handoff", () => {
     const mounted = mount();
     try {
       saveSlot(mounted.slots, 2, mounted.snapshot(), mounted.content);
+      mounted.hook.refresh();
+      expect(mounted.runtime.slots()[1]).toMatchObject({ slot: 2, map: "test" });
       expect(mounted.hook.loadSlot(2)).toBe(true);
       expect(mounted.replacements()).toBe(1);
       expect(mounted.runtime.menu()).toEqual({ kind: "closed" });
