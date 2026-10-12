@@ -1,4 +1,4 @@
-// Title-screen Adventure/Battle state machine. A title match runs through
+// Title-menu and disposable Battle state machine. A title match runs through
 // the production Tuxemon battle reducer, but owns a fresh extension state and
 // restores the exact campaign snapshot before any completion can commit.
 
@@ -24,7 +24,7 @@ import type {
 import { nextRandom, type RngState } from "../battle/core.ts";
 import type { TuxemonSceneCatalog } from "../battle/scenes.ts";
 import type { Lang } from "./language.ts";
-import type { TitleBattleData, TitleMinigameData } from "./feature-modes-data.ts";
+import type { StartMenuData, TitleBattleData, TitleMinigameData } from "./feature-modes-data.ts";
 import {
   answerTitleMinigame,
   dismissTitleMinigameWrong,
@@ -93,6 +93,7 @@ export function createTitleBattleRules(base: BattleRules): TitleBattleRules {
 export type TitleBattleScreen =
   | "closed"
   | "title"
+  | "quit"
   | "difficulty"
   | "battle"
   | "result"
@@ -113,14 +114,39 @@ export interface TitleBattleState {
 
 export type TitleBattleAction = "up" | "down" | "left" | "right" | "confirm" | "back";
 
+export type TitleMenuRowId =
+  | "load"
+  | "autosave"
+  | "newGame"
+  | "battle"
+  | "minigame"
+  | "options"
+  | "exit";
+
+export interface TitleMenuAvailability {
+  manualSave: boolean;
+  autosave: boolean;
+}
+
+export type TitleMenuHandler = (host: GameViewSessionHost) => void;
+
 export interface TitleBattleOptions {
   data: TitleBattleData;
   minigameData: TitleMinigameData;
+  menuText: StartMenuData["title"];
   catalog: Readonly<TuxemonSceneCatalog>;
   lang: Lang;
   rules: TitleBattleRules;
   extensions: Pick<ExtensionOptions, "initial" | "commands">;
   initiallyOpen: boolean;
+  /** Initial synchronous storage snapshot. Async stores can publish their
+   * result later through `refreshAvailability`. */
+  availability?: TitleMenuAvailability;
+  onLoad?: TitleMenuHandler;
+  onAutosave?: TitleMenuHandler;
+  onNewGame?: TitleMenuHandler;
+  onOptions?: TitleMenuHandler;
+  onExit?: TitleMenuHandler;
 }
 
 export interface TitleBattleRuntime {
@@ -129,6 +155,14 @@ export interface TitleBattleRuntime {
   /** True only while the production battle scene owns reducer input. */
   ownsSession(): boolean;
   state: Accessor<TitleBattleState>;
+  titleRows: Accessor<readonly TitleMenuRowId[]>;
+  /** Publish one deterministic storage snapshot without querying storage from
+   * the reducer/input path. Selection follows its semantic row when possible. */
+  refreshAvailability(availability: TitleMenuAvailability): void;
+  /** Reopen at the title root while retaining the retry counter. */
+  openTitle(): void;
+  /** Reopen a completely fresh title flow. Availability is retained. */
+  resetTitle(): void;
   applyAction(action: TitleBattleAction): void;
   selectTitle(index: number): void;
   selectDifficulty(index: number): void;
@@ -136,12 +170,17 @@ export interface TitleBattleRuntime {
   selectMinigameAnswer(index: number): void;
   data: TitleBattleData;
   minigameData: TitleMinigameData;
+  menuText: StartMenuData["title"];
   catalog: Readonly<TuxemonSceneCatalog>;
   lang: Lang;
 }
 
 export interface PocketTitleBattleHook {
   state(): TitleBattleState;
+  titleRows(): readonly TitleMenuRowId[];
+  refreshAvailability(availability: TitleMenuAvailability): void;
+  openTitle(): void;
+  resetTitle(): void;
   act(action: TitleBattleAction): void;
   selectTitle(index: number): void;
   selectDifficulty(index: number): void;
@@ -257,8 +296,26 @@ export function createTitleBattleRuntime(
   options: TitleBattleOptions,
   host: GameViewSessionHost,
 ): TitleBattleRuntime {
-  const [state, setState] = createSignal<TitleBattleState>({
-    screen: options.initiallyOpen ? "title" : "closed",
+  const initialAvailability = options.availability ?? { manualSave: false, autosave: false };
+  const [availability, setAvailability] = createSignal<TitleMenuAvailability>({
+    manualSave: initialAvailability.manualSave,
+    autosave: initialAvailability.manualSave && initialAvailability.autosave,
+  });
+  const titleRows = (): readonly TitleMenuRowId[] => {
+    const available = availability();
+    return [
+      ...(available.manualSave ? ["load" as const] : []),
+      ...(available.manualSave && available.autosave ? ["autosave" as const] : []),
+      "newGame",
+      "battle",
+      "minigame",
+      "options",
+      "exit",
+    ];
+  };
+  const titleIndex = (id: TitleMenuRowId): number => Math.max(0, titleRows().indexOf(id));
+  const freshState = (screen: "closed" | "title"): TitleBattleState => ({
+    screen,
     titleIndex: 0,
     difficultyIndex: 0,
     result: null,
@@ -266,7 +323,46 @@ export function createTitleBattleRuntime(
     minigameDifficultyIndex: 0,
     minigame: null,
   });
+  const [state, setState] = createSignal<TitleBattleState>(
+    freshState(options.initiallyOpen ? "title" : "closed"),
+  );
   let campaign: SessionState | null = null;
+
+  const refreshAvailability = (next: TitleMenuAvailability): void => {
+    const current = state();
+    const selected = titleRows()[current.titleIndex];
+    setAvailability({
+      manualSave: next.manualSave,
+      autosave: next.manualSave && next.autosave,
+    });
+    const rows = titleRows();
+    const nextIndex = selected === undefined ? titleIndex("newGame") : rows.indexOf(selected);
+    setState({
+      ...current,
+      titleIndex: nextIndex >= 0 ? nextIndex : titleIndex("newGame"),
+    });
+  };
+
+  const openTitle = (): void => {
+    const current = state();
+    if (current.screen === "battle") return;
+    campaign = null;
+    setState({
+      ...current,
+      screen: "title",
+      titleIndex: 0,
+      difficultyIndex: 0,
+      result: null,
+      minigameDifficultyIndex: 0,
+      minigame: null,
+    });
+  };
+
+  const resetTitle = (): void => {
+    if (state().screen === "battle") return;
+    campaign = null;
+    setState(freshState("title"));
+  };
 
   const begin = (): void => {
     const current = state();
@@ -298,21 +394,40 @@ export function createTitleBattleRuntime(
 
   const applyAction = (action: TitleBattleAction): void => {
     const current = state();
-    if (current.screen === "closed" || current.screen === "battle") return;
+    if (current.screen === "closed" || current.screen === "battle" || current.screen === "quit") return;
     if (current.screen === "title") {
+      const rows = titleRows();
       if (action === "up" || action === "down") {
         const delta = action === "up" ? -1 : 1;
-        setState({ ...current, titleIndex: (current.titleIndex + delta + 3) % 3 });
+        setState({ ...current, titleIndex: (current.titleIndex + delta + rows.length) % rows.length });
       } else if (action === "confirm") {
-        if (current.titleIndex === 0) setState({ ...current, screen: "closed" });
-        else if (current.titleIndex === 1) setState({ ...current, screen: "difficulty", difficultyIndex: 0 });
-        else setState({ ...current, screen: "minigameDifficulty", minigameDifficultyIndex: 0 });
+        const row = rows[current.titleIndex];
+        if (row === "battle") {
+          setState({ ...current, screen: "difficulty", difficultyIndex: 0 });
+        } else if (row === "minigame") {
+          setState({ ...current, screen: "minigameDifficulty", minigameDifficultyIndex: 0 });
+        } else if (row === "exit") {
+          options.onExit?.(host);
+          setState({ ...current, screen: "quit" });
+        } else {
+          const handler = row === "load" ? options.onLoad
+            : row === "autosave" ? options.onAutosave
+              : row === "newGame" ? options.onNewGame
+                : row === "options" ? options.onOptions
+                  : undefined;
+          // New Game preserves Adventure's prior close-and-enter behavior.
+          // Other host-owned rows remain visible when no handler was wired.
+          if (row === "newGame" || handler) {
+            setState({ ...current, screen: "closed" });
+            handler?.(host);
+          }
+        }
       }
       return;
     }
     if (current.screen === "difficulty") {
       if (action === "back") {
-        setState({ ...current, screen: "title", titleIndex: 1 });
+        setState({ ...current, screen: "title", titleIndex: titleIndex("battle") });
       } else if (action === "up") {
         setState({
           ...current,
@@ -331,7 +446,7 @@ export function createTitleBattleRuntime(
     }
     if (current.screen === "minigameDifficulty") {
       if (action === "back") {
-        setState({ ...current, screen: "title", titleIndex: 2 });
+        setState({ ...current, screen: "title", titleIndex: titleIndex("minigame") });
       } else if (action === "up" || action === "down") {
         const delta = action === "up" ? -1 : 1;
         const length = options.minigameData.difficulties.length;
@@ -356,7 +471,7 @@ export function createTitleBattleRuntime(
       const minigame = current.minigame;
       if (!minigame) throw new Error("title minigame: question screen has no state");
       if (action === "back") {
-        setState({ ...current, screen: "title", titleIndex: 2, minigame: null });
+        setState({ ...current, screen: "title", titleIndex: titleIndex("minigame"), minigame: null });
       } else if (action === "up" || action === "down") {
         setState({
           ...current,
@@ -382,7 +497,7 @@ export function createTitleBattleRuntime(
       const minigame = current.minigame;
       if (!minigame) throw new Error("title minigame: wrong dialog has no state");
       if (action === "back") {
-        setState({ ...current, screen: "title", titleIndex: 2, minigame: null });
+        setState({ ...current, screen: "title", titleIndex: titleIndex("minigame"), minigame: null });
       } else if (action === "confirm") {
         setState({ ...current, screen: "minigameQuestion", minigame: dismissTitleMinigameWrong(minigame) });
       }
@@ -391,12 +506,12 @@ export function createTitleBattleRuntime(
     // Result acknowledgement always returns to the title menu. Both buttons
     // are accepted so controller, keyboard and touch share one path.
     if (action === "confirm" || action === "back") {
-      setState({ ...current, screen: "title", titleIndex: 1 });
+      setState({ ...current, screen: "title", titleIndex: titleIndex("battle") });
     }
   };
 
   const selectTitle = (index: number): void => {
-    if (state().screen !== "title" || index < 0 || index > 2) return;
+    if (state().screen !== "title" || index < 0 || index >= titleRows().length) return;
     setState((current) => ({ ...current, titleIndex: index }));
     applyAction("confirm");
   };
@@ -453,6 +568,10 @@ export function createTitleBattleRuntime(
 
   const hook: PocketTitleBattleHook = {
     state,
+    titleRows,
+    refreshAvailability,
+    openTitle,
+    resetTitle,
     act: applyAction,
     selectTitle,
     selectDifficulty,
@@ -472,6 +591,10 @@ export function createTitleBattleRuntime(
     },
     ownsSession: () => state().screen === "battle",
     state,
+    titleRows,
+    refreshAvailability,
+    openTitle,
+    resetTitle,
     applyAction,
     selectTitle,
     selectDifficulty,
@@ -479,6 +602,7 @@ export function createTitleBattleRuntime(
     selectMinigameAnswer,
     data: options.data,
     minigameData: options.minigameData,
+    menuText: options.menuText,
     catalog: options.catalog,
     lang: options.lang,
   };

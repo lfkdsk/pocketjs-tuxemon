@@ -22,6 +22,8 @@ import { createCompositeOverlay } from "../ui/game-overlay.tsx";
 import {
   createTitleBattleRules,
   createTitleBattleRuntime,
+  type TitleBattleOptions,
+  type TitleMenuRowId,
 } from "../ui/title-battle-runtime.ts";
 import type {
   GameViewOverlayConfig,
@@ -37,6 +39,7 @@ import type { Project } from "../vendor/pocket-rpgkit/src/engine/types.ts";
 
 const DATA = (featureModesJson as unknown as FeatureModesRuntimeData).titleBattle;
 const MINIGAME_DATA = (featureModesJson as unknown as FeatureModesRuntimeData).titleMinigame;
+const MENU_TEXT = (featureModesJson as unknown as FeatureModesRuntimeData).startMenu.title;
 const RULES_DB = battleDbToTuxemonBattleDb(TUXEMON_BATTLE_DB);
 const PASS_THROUGH_OVERLAY: GameViewOverlayConfig = {
   create: () => ({
@@ -62,7 +65,16 @@ const PROJECT: Project = {
   }],
 };
 
-function fixture(initiallyOpen = true) {
+type TitleMenuOverrides = Partial<Pick<TitleBattleOptions,
+  | "availability"
+  | "onLoad"
+  | "onAutosave"
+  | "onNewGame"
+  | "onOptions"
+  | "onExit"
+>>;
+
+function fixture(initiallyOpen = true, menu: TitleMenuOverrides = {}) {
   const base = createTuxemonBattleRules(TUXEMON_BATTLE_DB, TUXEMON_VARIABLE_ENUMS);
   const rules = createTitleBattleRules(base);
   const session = createSession(PROJECT, 60, {
@@ -98,11 +110,13 @@ function fixture(initiallyOpen = true) {
   const runtime = createTitleBattleRuntime({
     data: DATA,
     minigameData: MINIGAME_DATA,
+    menuText: MENU_TEXT,
     catalog: TUXEMON_SCENE_CATALOG,
     lang: "en_US",
     rules,
     extensions: TUXEMON_EXTENSIONS,
     initiallyOpen,
+    ...menu,
   }, host);
   return {
     runtime,
@@ -368,5 +382,132 @@ describe("title Battle mode", () => {
       }
     });
   });
+});
 
+describe("title root menu", () => {
+  test("publishes upstream rows from deterministic save availability", () => {
+    createRoot((dispose) => {
+      try {
+        const f = fixture();
+        expect(f.runtime.menuText).toBe(MENU_TEXT);
+        expect(f.runtime.titleRows()).toEqual([
+          "newGame", "battle", "minigame", "options", "exit",
+        ]);
+
+        // Autosave never appears without a manual save, matching upstream.
+        f.runtime.refreshAvailability({ manualSave: false, autosave: true });
+        expect(f.runtime.titleRows()).toEqual([
+          "newGame", "battle", "minigame", "options", "exit",
+        ]);
+
+        // The selected semantic row follows New Game as rows are inserted.
+        f.runtime.refreshAvailability({ manualSave: true, autosave: false });
+        expect(f.runtime.titleRows()).toEqual([
+          "load", "newGame", "battle", "minigame", "options", "exit",
+        ]);
+        expect(f.runtime.state().titleIndex).toBe(1);
+        f.runtime.refreshAvailability({ manualSave: true, autosave: true });
+        expect(f.runtime.titleRows()).toEqual([
+          "load", "autosave", "newGame", "battle", "minigame", "options", "exit",
+        ]);
+        expect(f.runtime.state().titleIndex).toBe(2);
+      } finally {
+        dispose();
+      }
+    });
+  });
+
+  test("wraps over the live row count and preserves Battle and Minigame subflows", () => {
+    createRoot((dispose) => {
+      try {
+        const f = fixture();
+        f.runtime.applyAction("up");
+        expect(f.runtime.titleRows()[f.runtime.state().titleIndex]).toBe("exit");
+        f.runtime.applyAction("down");
+        expect(f.runtime.titleRows()[f.runtime.state().titleIndex]).toBe("newGame");
+
+        f.runtime.refreshAvailability({ manualSave: true, autosave: true });
+        for (let index = 0; index < f.runtime.titleRows().length; index++) {
+          f.runtime.applyAction("down");
+        }
+        expect(f.runtime.titleRows()[f.runtime.state().titleIndex]).toBe("newGame");
+
+        f.runtime.selectTitle(f.runtime.titleRows().indexOf("battle"));
+        expect(f.runtime.state().screen).toBe("difficulty");
+        f.runtime.applyAction("back");
+        expect(f.runtime.titleRows()[f.runtime.state().titleIndex]).toBe("battle");
+
+        f.runtime.selectTitle(f.runtime.titleRows().indexOf("minigame"));
+        expect(f.runtime.state().screen).toBe("minigameDifficulty");
+        f.runtime.applyAction("back");
+        expect(f.runtime.titleRows()[f.runtime.state().titleIndex]).toBe("minigame");
+      } finally {
+        dispose();
+      }
+    });
+  });
+
+  test("dispatches host rows and can reopen or reset the title flow", () => {
+    createRoot((dispose) => {
+      try {
+        const dispatched: Array<{ id: TitleMenuRowId; host: GameViewSessionHost }> = [];
+        const f = fixture(true, {
+          availability: { manualSave: true, autosave: true },
+          onLoad: (host) => dispatched.push({ id: "load", host }),
+          onAutosave: (host) => dispatched.push({ id: "autosave", host }),
+          onNewGame: (host) => dispatched.push({ id: "newGame", host }),
+          onOptions: (host) => dispatched.push({ id: "options", host }),
+          onExit: (host) => dispatched.push({ id: "exit", host }),
+        });
+
+        for (const id of ["load", "autosave", "newGame", "options"] as const) {
+          f.runtime.selectTitle(f.runtime.titleRows().indexOf(id));
+          expect(dispatched.at(-1)).toEqual({ id, host: f.host });
+          expect(f.runtime.state().screen).toBe("closed");
+          expect(f.runtime.isOpen()).toBeFalse();
+          f.runtime.openTitle();
+          expect(f.runtime.state().screen).toBe("title");
+        }
+
+        f.runtime.selectTitle(f.runtime.titleRows().indexOf("exit"));
+        expect(dispatched.at(-1)).toEqual({ id: "exit", host: f.host });
+        expect(f.runtime.state().screen).toBe("quit");
+        expect(f.runtime.isOpen()).toBeTrue();
+        expect(f.runtime.step(BTN.CROSS, BTN.CROSS)).toEqual({ consumed: true });
+        expect(f.runtime.state().screen).toBe("quit");
+        f.runtime.openTitle();
+        expect(f.runtime.state().screen).toBe("title");
+
+        f.runtime.selectTitle(f.runtime.titleRows().indexOf("exit"));
+        expect(f.runtime.state().screen).toBe("quit");
+        f.runtime.resetTitle();
+        expect(f.runtime.state()).toMatchObject({
+          screen: "title",
+          battleCount: 0,
+          result: null,
+          minigame: null,
+        });
+        expect(f.runtime.titleRows()).toHaveLength(7);
+      } finally {
+        dispose();
+      }
+    });
+  });
+
+  test("keeps placeholder rows open without handlers", () => {
+    createRoot((dispose) => {
+      try {
+        const f = fixture(true, { availability: { manualSave: true, autosave: true } });
+        for (const id of ["load", "autosave", "options"] as const) {
+          f.runtime.selectTitle(f.runtime.titleRows().indexOf(id));
+          expect(f.runtime.state().screen).toBe("title");
+        }
+        f.runtime.selectTitle(f.runtime.titleRows().indexOf("exit"));
+        expect(f.runtime.state().screen).toBe("quit");
+        expect(f.runtime.isOpen()).toBeTrue();
+      } finally {
+        dispose();
+      }
+    });
+  });
 });

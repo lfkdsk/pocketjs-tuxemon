@@ -1,4 +1,4 @@
-// Title-screen Adventure/Battle/Minigame overlay. The composition is authored
+// Title-menu/Battle/Minigame overlay. The composition is authored
 // once at 480x272 and uniformly scaled/letterboxed for desktop, web and PSP.
 
 import { For, Show, createMemo, createSignal, type Component } from "solid-js";
@@ -19,15 +19,28 @@ import {
   type TitleBattleOptions,
   type TitleBattleRuntime,
   type TitleBattleScreen,
+  type TitleMenuRowId,
 } from "./title-battle-runtime.ts";
 
 export const TITLE_BATTLE_BASE_W = 480;
 export const TITLE_BATTLE_BASE_H = 272;
-const TITLE_ROWS = [
-  { x: 278, y: 126, w: 170, h: 31 },
-  { x: 278, y: 164, w: 170, h: 31 },
-  { x: 278, y: 202, w: 170, h: 31 },
-] as const;
+const TITLE_MENU_MAX_ROWS = 7;
+const TITLE_MENU_AREA = { x: 267, y: 38, w: 188, h: 200 } as const;
+const TITLE_MENU_ROW_H = 25;
+const TITLE_MENU_ROW_GAP = 4;
+export function titleMenuRowRects(count: number): readonly { x: number; y: number; w: number; h: number }[] {
+  if (!Number.isInteger(count) || count < 1 || count > TITLE_MENU_MAX_ROWS) {
+    throw new RangeError(`title menu: row count must be 1..${TITLE_MENU_MAX_ROWS}`);
+  }
+  const height = count * TITLE_MENU_ROW_H + (count - 1) * TITLE_MENU_ROW_GAP;
+  const top = TITLE_MENU_AREA.y + Math.floor((TITLE_MENU_AREA.h - height) / 2);
+  return Array.from({ length: count }, (_, index) => ({
+    x: TITLE_MENU_AREA.x,
+    y: top + index * (TITLE_MENU_ROW_H + TITLE_MENU_ROW_GAP),
+    w: TITLE_MENU_AREA.w,
+    h: TITLE_MENU_ROW_H,
+  }));
+}
 const DIFFICULTY_ROWS = [0, 1, 2, 3, 4].map((index) => ({
   x: 130,
   y: 88 + index * 31,
@@ -58,7 +71,6 @@ const TITLE_BACKGROUND = "assets/battle/gfx/ui/combat/grass_background.png";
 const STRINGS = {
   en_US: {
     subtitle: "SPYDER ADVENTURES",
-    adventure: "Adventure",
     back: "Back",
     legend: "d-pad: choose   o: confirm   x: back",
     win: "Victory!",
@@ -66,10 +78,10 @@ const STRINGS = {
     escape: "Battle ended",
     draw: "Draw",
     resultHelp: "Return to title",
+    quitMessage: "You can close this tab.",
   },
   zh_CN: {
     subtitle: "斯派德冒险",
-    adventure: "冒险模式",
     back: "返回",
     legend: "方向键：选择  ○：确认  ×：返回",
     win: "胜利！",
@@ -77,6 +89,7 @@ const STRINGS = {
     escape: "对战结束",
     draw: "平局",
     resultHelp: "返回标题菜单",
+    quitMessage: "现在可以关闭此标签页。",
   },
 } as const;
 
@@ -144,6 +157,9 @@ const TitleBattleView: Component<{ runtime: TitleBattleRuntime }> = (props) => {
   const runtime = props.runtime;
   const t = () => STRINGS[runtime.lang];
   const state = () => runtime.state();
+  const titleRows = () => runtime.titleRows();
+  const titleRects = createMemo(() => titleMenuRowRects(titleRows().length));
+  const titleRowLabel = (id: TitleMenuRowId): string => runtime.menuText[id][runtime.lang];
   const minigame = () => state().minigame;
   const minigameDifficulty = () => {
     const current = minigame();
@@ -176,8 +192,10 @@ const TitleBattleView: Component<{ runtime: TitleBattleRuntime }> = (props) => {
   const canvas = createMemo(() => titleBattleCanvas(viewport()));
   const disabledRect = { x: -1, y: -1, w: 0, h: 0 } as const;
 
-  TITLE_ROWS.forEach((rect, index) => createGesture({
-    region: { rect: () => state().screen === "title" ? viewRect(canvas(), rect) : disabledRect },
+  Array.from({ length: TITLE_MENU_MAX_ROWS }).forEach((_, index) => createGesture({
+    region: { rect: () => state().screen === "title" && titleRows()[index] !== undefined
+      ? viewRect(canvas(), titleRects()[index]!)
+      : disabledRect },
     onTap: () => {
       if (state().screen === "title") runtime.selectTitle(index);
     },
@@ -277,37 +295,47 @@ const TitleBattleView: Component<{ runtime: TitleBattleRuntime }> = (props) => {
 
           <Show when={state().screen === "title"}>
             <View class="absolute" style={{ posType: 1, insetL: 18, insetT: 17, width: 6, height: 91, bgColor: TUXEMON_UI_THEME.accent }} />
-            <Text class="text-lg" style={{ posType: 1, insetL: 34, insetT: 21, width: 300, height: 32, lineHeight: 25, textColor: "#f3fbff" }} debugName="tux-title-name">
+            <Text class="text-lg" style={{ posType: 1, insetL: 34, insetT: 21, width: 210, height: 32, lineHeight: 25, textColor: "#f3fbff" }} debugName="tux-title-name">
               POCKET TUXEMON
             </Text>
-            <Text class="text-sm" style={{ posType: 1, insetL: 36, insetT: 58, width: 240, height: 23, lineHeight: 18, textColor: TUXEMON_UI_THEME.accent }} debugName="tux-title-subtitle">
+            <Text class="text-sm" style={{ posType: 1, insetL: 36, insetT: 58, width: 205, height: 23, lineHeight: 18, textColor: TUXEMON_UI_THEME.accent }} debugName="tux-title-subtitle">
               {t().subtitle}
             </Text>
-            <View class="absolute" style={{ posType: 1, insetL: 261, insetT: 116, width: 204, height: 130, borderWidth: 2, borderColor: TUXEMON_UI_THEME.rim, bgColor: "#071923e8" }} />
-            <For each={[t().adventure, runtime.data.title[runtime.lang], runtime.minigameData.title[runtime.lang]]}>{(label, index) => {
-              const rect = TITLE_ROWS[index()]!;
+            <View class="absolute" style={{ posType: 1, insetL: 253, insetT: 28, width: 215, height: 220, borderWidth: 2, borderColor: TUXEMON_UI_THEME.rim, bgColor: "#071923e8" }} />
+            <For each={titleRows()}>{(row, index) => {
+              const rect = () => titleRects()[index()]!;
               const selected = () => state().titleIndex === index();
               return (
                 <View
                   class="absolute flex-row items-center"
                   style={{
                     posType: 1,
-                    insetL: rect.x,
-                    insetT: rect.y,
-                    width: rect.w,
-                    height: rect.h,
+                    insetL: rect().x,
+                    insetT: rect().y,
+                    width: rect().w,
+                    height: rect().h,
                     borderWidth: selected() ? 2 : 1,
                     borderColor: selected() ? TUXEMON_UI_THEME.accent : TUXEMON_UI_THEME.border,
                     bgColor: selected() ? "#145064" : "#0a2633",
                   }}
-                  debugName={`tux-title-row-${index()}`}
+                  debugName={`tux-title-row-${row}`}
                 >
-                  <Text class="text-sm" style={{ marginL: 15, width: 138, height: 20, lineHeight: 18, textColor: selected() ? "#ffffff" : TUXEMON_UI_THEME.ink }}>
-                    {label}
+                  <Text class="text-sm" style={{ marginL: 13, width: 160, height: 19, lineHeight: 17, textColor: selected() ? "#ffffff" : TUXEMON_UI_THEME.ink }}>
+                    {titleRowLabel(row)}
                   </Text>
                 </View>
               );
             }}</For>
+          </Show>
+
+          <Show when={state().screen === "quit"}>
+            <View class="absolute" style={{ posType: 1, insetL: 87, insetT: 73, width: 306, height: 126, borderWidth: 2, borderColor: TUXEMON_UI_THEME.rim, bgColor: "#071923ed" }} />
+            <Text class="text-lg" style={{ posType: 1, insetL: 105, insetT: 95, width: 270, height: 31, lineHeight: 25, textAlign: 1, textColor: TUXEMON_UI_THEME.accent }} debugName="tux-title-quit-heading">
+              {runtime.menuText.exit[runtime.lang]}
+            </Text>
+            <Text class="text-sm" style={{ posType: 1, insetL: 105, insetT: 143, width: 270, height: 25, lineHeight: 18, textAlign: 1, textColor: TUXEMON_UI_THEME.ink }} debugName="tux-title-quit-message">
+              {t().quitMessage}
+            </Text>
           </Show>
 
           <Show when={state().screen === "difficulty"}>
