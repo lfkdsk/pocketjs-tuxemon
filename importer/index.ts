@@ -313,9 +313,11 @@ ${report.economy.conditionedGoods} variable-conditioned goods.
 The project item catalog contains ${report.economy.itemCatalog.uniqueItems}
 unique slugs from ${report.economy.itemCatalog.sourceRows} source rows, with
 translated names, intrinsic prices, and \`behaviors.resellable\` mapped to
-\`Item.sellable\`. All translated descriptions are retained in the machine
-report; the v1 project Item schema has no description field, so displaying them
-is currently degraded.
+\`Item.sellable\`. All translated descriptions are retained in both the machine
+report and the localized runtime item catalog. The game-owned START Bag reads
+that catalog and displays each item's imported name, category and description.
+The v1 project Item schema still has no description field, so generic kit item
+consumers cannot read the same copy directly from \`Project.items\`.
 
 Item sprites point at the declared \`${report.itemIcons.sheet.id}\` sheet
 (${report.itemIcons.sheet.cols}x${report.itemIcons.sheet.rows} cells, pak
@@ -329,7 +331,7 @@ share the placeholder cell ${report.itemIcons.placeholderCell}:${
 }.
 
 - **Degraded — full bag:** ${report.economy.limitations.lockerOverflow.reason}
-- **Degraded — item descriptions:** ${report.economy.limitations.itemDescription.reason}
+- **Degraded — generic item descriptions:** ${report.economy.limitations.itemDescription.reason}
 
 ## Outdoor world index
 

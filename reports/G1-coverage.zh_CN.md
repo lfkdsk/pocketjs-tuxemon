@@ -158,9 +158,11 @@ item rows include 6 finite-stock goods and
 The project item catalog contains 224
 unique slugs from 230 source rows, with
 translated names, intrinsic prices, and `behaviors.resellable` mapped to
-`Item.sellable`. All translated descriptions are retained in the machine
-report; the v1 project Item schema has no description field, so displaying them
-is currently degraded.
+`Item.sellable`. All translated descriptions are retained in both the machine
+report and the localized runtime item catalog. The game-owned START Bag reads
+that catalog and displays each item's imported name, category and description.
+The v1 project Item schema still has no description field, so generic kit item
+consumers cannot read the same copy directly from `Project.items`.
 
 Item sprites point at the declared `items` sheet
 (16x9 cells, pak
@@ -170,7 +172,7 @@ item without upstream art
 share the placeholder cell 143: `elianeoutput`.
 
 - **Degraded — full bag:** A purchase that would introduce item kind 100 is refused (the shop row shows at-cap); the PC item locker is implemented, but shop overflow does not route to it yet.
-- **Degraded — item descriptions:** Descriptions are retained in this import report because rpgkit-project/v1 Item has no description field.
+- **Degraded — generic item descriptions:** START Bag displays descriptions from the localized runtime item catalog, but rpgkit-project/v1 Item still has no description field for generic kit consumers.
 
 ## Outdoor world index
 

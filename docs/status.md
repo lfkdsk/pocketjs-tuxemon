@@ -28,27 +28,27 @@ upstream menu row is still Partial or Planned.
 
 | Upstream entry | Status | Pocket Tuxemon mapping |
 | --- | --- | --- |
-| Load | Partial | Loading is fully supported after choosing **Adventure** and pressing START, but the upstream save-dependent title row is not exposed yet. See [saving and loading](../README.md#saving-and-loading) |
-| Autosave | Partial | Imported automatic saves are readable from the START menu after choosing **Adventure**; the upstream conditional title row is not exposed yet |
+| Load | Done | A healthy manual save adds **Load** ahead of **Adventure** on the title screen and opens the existing slot/code loader directly. Empty, damaged and foreign slots do not create the shortcut. See [saving and loading](../README.md#saving-and-loading) |
+| Autosave | Done | A healthy automatic save adds **Autosave** immediately after title **Load**, matching upstream's requirement that a manual save also exists; it restores the read-only automatic slot directly |
 | New Game | Done | **Adventure** enters the one bundled campaign from a fresh boot. The upstream multi-mod campaign picker is unnecessary because this build contains one campaign |
 | Battle | Done | **Battle** opens all five imported difficulty recipes and a disposable production battle; see [Title-screen Battle mode](#battles) |
 | Title-screen Minigame | Done | **Minigame** opens Easy, Normal or Hard **Name That Tuxemon**. It uses the complete 393-species positive-ID upstream pool, 3/5/5 distinct answers, +1/+2/+3 scoring, a streak notice from 10, image clues for Easy/Normal and losslessly paginated descriptions for Hard. Its content-derived deterministic RNG, score and streak are session-local: play never reads or changes campaign saves, RNG, party or Tuxepedia discovery. English and Chinese controller, keyboard and scaled-touch flows are tested at 480×272 and 960×544 ([runtime tests](../tests/title-minigame.test.ts), [visual tests](../tests/feature-modes-visual.test.ts)) |
 | Options | Partial | The **R** language switcher covers language selection. The upstream title control-options screen and remapping rows are not implemented |
-| Exit | Planned | There is no title Exit row. Closing a desktop window or browser tab remains platform-owned |
+| Exit | Done | **Exit** sends PocketJS's `quit` service intent on desktop. Hosts without process-close authority, including the web build, enter a terminal localized screen that tells the player the tab may be closed; game input cannot reopen the old session ([runtime tests](../tests/title-battle.test.ts)) |
 
 ### In-world START menu
 
 | Upstream entry | Status | Pocket Tuxemon mapping |
 | --- | --- | --- |
-| Tuxemon / party | Planned | Scripted party and monster pickers work where story actions require them, but START has no general party browser |
-| Bag | Planned | Story, shops and battles use the live inventory, but START has no general bag browser or out-of-battle item-use screen |
-| Player | Planned | Player identity and progress are saved, but START has no general player-status screen |
+| Tuxemon / party | Done | START shows every party member's imported portrait, name, level, HP and status. The detail and move pages expose species/element, experience, taste, gender, bond, stats and localized techniques. Move and four upstream sort orders persist the live party order (and therefore the next battle lead); release has an explicit confirmation and cannot remove the last member ([runtime tests](../tests/start-menu-runtime.test.ts), [visual tests](../tests/start-menu-visual.test.ts)) |
+| Bag | Done | START pages the live bag by upstream sort/category and shows imported localized names, descriptions and icons. Out-of-battle use covers healing/status items, XP/level/evolution/TP items, TMs with move replacement, repellents, escape/fishing and facing-world tools; target/location guards, full-HP refusal, post-effect failure consumption and battle-only rejection follow the imported rules. Keyboard/controller and scaled taps/swipes share one flow ([rules tests](../tests/world-items.test.ts), [menu tests](../tests/bag-menu-runtime.test.ts)) |
+| Player | Done | START shows the live player name, money, saved 60 Hz playtime, Tuxepedia seen/caught totals and player battle win/loss/draw history ([runtime tests](../tests/start-menu-runtime.test.ts)) |
 | Missions | Planned | START has no mission-list screen. The pinned campaign's `set_mission` actions are upstream no-ops, so it currently has no populated mission list to show |
 | Save | Done | START opens three manual save slots plus save-code export; unsafe story, scene and transition points are refused with a reason |
 | Load | Done | The same START overlay loads three slots, a save code and the read-only Automatic Save row, including published older compatible formats |
 | Options | Partial | **R** opens the bilingual language switcher. The upstream control-options screen and remapping rows are not implemented |
-| Exit | Planned | START has no upstream-style **Exit** action that clears the current world session and returns to the title screen |
-| Tuxepedia (item-driven) | Partial | START opens the full journal browser, but the row is always present rather than gated by ownership of `app_tuxepedia`; see [Tuxepedia and journal](#monsters-and-party) |
+| Exit | Done | START **Exit** follows upstream without a save prompt: it discards the current world object, creates a fresh session and returns to title. Tests retain the old object and prove that no map, party, item, variable or extension state survives ([integration tests](../tests/start-menu-integration.test.ts)) |
+| Tuxepedia (item-driven) | Done | The full journal browser appears in START only while `app_tuxepedia` is owned, using the same imported item-driven insertion order as Nu Phone; see [Tuxepedia and journal](#monsters-and-party) |
 | Nu Phone (item-driven) | Done | START exposes Nu Phone only while `nu_phone` is owned, and its Map App uses the imported locations and item-gated entry; see [NuPhone GPS](#events-and-story) |
 
 ## Events and story

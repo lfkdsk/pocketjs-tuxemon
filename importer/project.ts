@@ -6443,7 +6443,7 @@ export function buildProject(
           },
           itemDescription: {
             disposition: "degraded",
-            reason: "Descriptions are retained in this import report because rpgkit-project/v1 Item has no description field.",
+            reason: "START Bag displays descriptions from the localized runtime item catalog, but rpgkit-project/v1 Item still has no description field for generic kit consumers.",
           },
         },
       },

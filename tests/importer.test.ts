@@ -696,10 +696,10 @@ test("default import output remains byte-pinned", () => {
   // tokens), the system.textVariables/textTokens declarations and the
   // slug->description table for the {x:map_desc} resolver are all in this
   // combined pin. The economy limitations summary also lives here, so the
-  // G-PC-LOCKER fix-2 lockerOverflow wording (the locker is implemented)
-  // moves this hash.
+  // G-PC-LOCKER fix-2 lockerOverflow wording (the locker is implemented) and
+  // the START Bag's localized-runtime description disposition move this hash.
   expect(createHash("sha256").update(bytes).digest("hex")).toBe(
-    "8dd4f345fd1fd644c2ff9531f5a517889506d42793673a0ee0ef502f65e88b1a",
+    "926d5df05760fa9e9838e0f45d5dea9d14fe2d313e0634354bc36ee569d91a30",
   );
 });
 
