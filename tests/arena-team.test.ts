@@ -1,10 +1,15 @@
 import { describe, expect, test } from "bun:test";
 
 import {
+  DEFAULT_ARENA_TEAM_RULES,
   createArenaBattle,
+  defaultAction,
+  isOver,
   replay,
   stateHash,
+  submit,
   tape,
+  validateBattleTape,
   validateTeam,
   type ArenaTeamRecord,
 } from "../battle/arena.ts";
@@ -60,13 +65,13 @@ describe("Arena persistent team validation", () => {
     const learned: ArenaTeamRecord = {
       species: "rockitten",
       level: 4,
-      moves: ["ram", "mudslide", "acid"],
+      moves: ["ram", "boulder", "mudslide", "acid"],
       provenance: [
         { seq: 10, type: "acquire", seed: ACQUIRE_SEED, species: "rockitten", level: 1 },
         { seq: 11, type: "level", level: 2 },
         { seq: 12, type: "level", level: 3 },
         { seq: 13, type: "level", level: 4 },
-        { seq: 14, type: "learn", move: "mudslide", forget: "boulder" },
+        { seq: 14, type: "learn", move: "mudslide" },
         { seq: 15, type: "item", item: "tm_acid" },
         { seq: 16, type: "item", item: "raise_melee" },
       ],
@@ -78,7 +83,7 @@ describe("Arena persistent team validation", () => {
     const untrained = buildValidatedArenaTeam([untrainedRecord])[0]!;
     expect(trained.trainingPoints!.melee).toBe(50);
     expect(trained.base.melee).toBeGreaterThan(untrained.base.melee);
-    expect(trained.moves).toEqual(["ram", "mudslide", "acid"]);
+    expect(trained.moves).toEqual(["ram", "boulder", "mudslide", "acid"]);
   });
 
   test("applies match limits and deterministic uniform-level reconstruction", () => {
@@ -93,6 +98,37 @@ describe("Arena persistent team validation", () => {
     expect(scaled.level).toBe(20);
     expect(scaled.moves).toEqual(record.moves);
     expect(scaled.base.hp).toBeGreaterThan(buildValidatedArenaTeam([record])[0]!.base.hp);
+
+    const battle = createArenaBattle({
+      seed: BATTLE_SEED,
+      format: "single",
+      sides: [{ kind: "agent", team: [record] }, { kind: "ai", difficulty: "normal" }],
+      teamRules: { uniformLevel: 20 },
+    });
+    expect(battle.core.parties[0][0]!.level).toBe(20);
+    expect(tape(battle).config.teamRules).toEqual({ uniformLevel: 20 });
+    expect(stateHash(replay(tape(battle)))).toBe(stateHash(battle));
+  });
+
+  test("enforces TM target conditions and real four-move replacement rules", () => {
+    const restricted = rockitten();
+    restricted.moves = ["boulder", "mudslide", "assault", "altitude"];
+    restricted.provenance.push({ seq: 2, type: "item", item: "tm_altitude", forget: "ram" });
+    expect(validateTeam([restricted]).ok).toBe(false);
+
+    const early: ArenaTeamRecord = {
+      species: "rockitten",
+      level: 4,
+      moves: ["ram", "mudslide"],
+      provenance: [
+        { seq: 20, type: "acquire", seed: ACQUIRE_SEED, species: "rockitten", level: 1 },
+        { seq: 21, type: "level", level: 2 },
+        { seq: 22, type: "level", level: 3 },
+        { seq: 23, type: "level", level: 4 },
+        { seq: 24, type: "learn", move: "mudslide", forget: "boulder" },
+      ],
+    };
+    expect(validateTeam([early]).ok).toBe(false);
   });
 
   test("rejects claimed stats and every tampered progression surface", () => {
@@ -148,5 +184,61 @@ describe("Arena persistent team validation", () => {
     const checked = validateTeam(duplicate);
     expect(checked.ok).toBe(false);
     if (!checked.ok) expect(checked.errors.some((error) => error.includes("unique"))).toBe(true);
+  });
+
+  test("returns errors for prototype-name slugs and bounded oversized JSON", () => {
+    for (const species of ["toString", "__proto__"]) {
+      const record = rockitten() as unknown as Record<string, unknown>;
+      record.species = species;
+      (record.provenance as Array<Record<string, unknown>>)[0]!.species = species;
+      let checked: ReturnType<typeof validateTeam> | undefined;
+      expect(() => { checked = validateTeam([record]); }).not.toThrow();
+      expect(checked?.ok).toBe(false);
+    }
+
+    const item = rockitten();
+    item.provenance.push({ seq: 2, type: "item", item: "toString" });
+    expect(() => validateTeam([item])).not.toThrow();
+    expect(validateTeam([item]).ok).toBe(false);
+
+    expect(validateTeam(Array.from({ length: 6 }, () => rockitten())).ok).toBe(false);
+    const moves = rockitten() as unknown as Record<string, unknown>;
+    moves.moves = Array.from({ length: 100_000 }, () => "ram");
+    expect(validateTeam([moves]).ok).toBe(false);
+    const provenance = rockitten() as unknown as Record<string, unknown>;
+    provenance.provenance = Array.from({ length: 1_025 }, (_, seq) => ({ seq: seq + 1, type: "level", level: 11 }));
+    expect(validateTeam([provenance]).ok).toBe(false);
+  });
+
+  test("freezes exported defaults and replays a terminal custom-team tape", () => {
+    expect(Object.isFrozen(DEFAULT_ARENA_TEAM_RULES)).toBe(true);
+    expect(Object.isFrozen(DEFAULT_ARENA_TEAM_RULES.bannedSpecies)).toBe(true);
+    expect(Object.isFrozen(DEFAULT_ARENA_TEAM_RULES.bannedMoves)).toBe(true);
+    expect(Object.isFrozen(DEFAULT_ARENA_TEAM_RULES.bannedItems)).toBe(true);
+
+    let battle = createArenaBattle({
+      seed: BATTLE_SEED,
+      format: "single",
+      sides: [
+        { kind: "agent", team: [rockitten(101)] },
+        { kind: "agent", team: [rockitten(202)] },
+      ],
+    });
+    while (!isOver(battle)) {
+      const first = submit(battle, 0, defaultAction(battle, 0));
+      if (!first.ok) throw new Error(first.error);
+      const second = submit(first.battle, 1, defaultAction(first.battle, 1));
+      if (!second.ok) throw new Error(second.error);
+      battle = second.battle;
+    }
+    const recording = tape(battle);
+    expect(recording.actions.length).toBeGreaterThan(0);
+    expect(stateHash(replay(JSON.parse(JSON.stringify(recording))))).toBe(stateHash(battle));
+
+    const tampered = clone(recording);
+    const side = tampered.config.sides[0];
+    if (side.kind !== "agent" || !("team" in side)) throw new Error("custom team tape missing");
+    side.team[0]!.moves[0] = "power_theft";
+    expect(validateBattleTape(tampered).ok).toBe(false);
   });
 });

@@ -7,9 +7,11 @@
 
 import battleDbJson from "../data/battle-db.json";
 import { validateBattleDb } from "../importer/battle-schema.ts";
+import { createSwitchState } from "../vendor/pocket-rpgkit/src/engine/interpreter.ts";
 import { sha256Bytes } from "../vendor/pocket-rpgkit/src/engine/map-repository.ts";
 import { utf8Encode } from "../vendor/pocket-rpgkit/src/engine/save.ts";
 import type { RngState } from "./core.ts";
+import { initialTuxemonExtensionState } from "./extension.ts";
 import { battleDbToTuxemonBattleDb } from "./from-battle-db.ts";
 import { spawnMonster } from "./spawn.ts";
 import { calculateBaseStats } from "./stats.ts";
@@ -18,6 +20,7 @@ import {
   type SpawnedMonsterSnapshot,
   type StatName,
 } from "./types.ts";
+import { worldItemTargetEligibility } from "./world-items.ts";
 
 export interface ArenaAcquireEvent {
   seq: number;
@@ -93,15 +96,15 @@ const RULES_DB = battleDbToTuxemonBattleDb(SOURCE_DB);
 const HEX_SEED = /^[0-9a-fA-F]{64}$/;
 const MAX_PROVENANCE_EVENTS = 1_024;
 
-export const DEFAULT_ARENA_TEAM_RULES: Readonly<Required<ArenaTeamRules>> = {
+export const DEFAULT_ARENA_TEAM_RULES: Readonly<Required<ArenaTeamRules>> = Object.freeze({
   minSize: 1,
   maxSize: 5,
   levelCap: SOURCE_DB.rules.levelRange[1],
   uniformLevel: null,
-  bannedSpecies: [],
-  bannedMoves: [],
-  bannedItems: [],
-};
+  bannedSpecies: Object.freeze([] as string[]),
+  bannedMoves: Object.freeze([] as string[]),
+  bannedItems: Object.freeze([] as string[]),
+});
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === "object" && !Array.isArray(value);
@@ -130,7 +133,7 @@ function stringSet(
   known: (slug: string) => boolean,
   errors: string[],
 ): Set<string> {
-  if (!Array.isArray(value) || value.some((entry) => typeof entry !== "string")) {
+  if (!Array.isArray(value) || value.length > 1_024 || value.some((entry) => typeof entry !== "string")) {
     errors.push(`${label} must be an array of slugs`);
     return new Set();
   }
@@ -177,19 +180,19 @@ function normalizeRules(value: unknown, errors: string[]): NormalizedTeamRules {
     bannedSpecies: stringSet(
       source.bannedSpecies ?? DEFAULT_ARENA_TEAM_RULES.bannedSpecies,
       "team rules bannedSpecies",
-      (slug) => SOURCE_DB.monsters[slug] !== undefined,
+      (slug) => Object.hasOwn(SOURCE_DB.monsters, slug),
       errors,
     ),
     bannedMoves: stringSet(
       source.bannedMoves ?? DEFAULT_ARENA_TEAM_RULES.bannedMoves,
       "team rules bannedMoves",
-      (slug) => SOURCE_DB.techniques[slug] !== undefined,
+      (slug) => Object.hasOwn(SOURCE_DB.techniques, slug),
       errors,
     ),
     bannedItems: stringSet(
       source.bannedItems ?? DEFAULT_ARENA_TEAM_RULES.bannedItems,
       "team rules bannedItems",
-      (slug) => SOURCE_DB.items[slug] !== undefined,
+      (slug) => Object.hasOwn(SOURCE_DB.items, slug),
       errors,
     ),
   };
@@ -220,7 +223,7 @@ function learnMove(
   label: string,
   errors: string[],
 ): boolean {
-  if (typeof move !== "string" || SOURCE_DB.techniques[move] === undefined) {
+  if (typeof move !== "string" || !Object.hasOwn(SOURCE_DB.techniques, move)) {
     errors.push(`${label} names an unknown move`);
     return false;
   }
@@ -234,6 +237,10 @@ function learnMove(
   }
   if (snapshot.moves.length >= SOURCE_DB.rules.maxMoves && forget === undefined) {
     errors.push(`${label} must forget a move at the ${SOURCE_DB.rules.maxMoves}-move limit`);
+    return false;
+  }
+  if (snapshot.moves.length < SOURCE_DB.rules.maxMoves && forget !== undefined) {
+    errors.push(`${label} cannot forget a move below the ${SOURCE_DB.rules.maxMoves}-move limit`);
     return false;
   }
   if (forget !== undefined) snapshot.moves.splice(snapshot.moves.indexOf(forget as string), 1);
@@ -257,8 +264,24 @@ function applyItem(
   label: string,
   errors: string[],
 ): void {
-  if (typeof itemSlug !== "string" || RULES_DB.item[itemSlug] === undefined) {
+  if (
+    typeof itemSlug !== "string" ||
+    !Object.hasOwn(SOURCE_DB.items, itemSlug) ||
+    !Object.hasOwn(RULES_DB.item, itemSlug)
+  ) {
     errors.push(`${label} names an unknown item`);
+    return;
+  }
+  const extension = { ...initialTuxemonExtensionState(), party: [clone(snapshot)] };
+  const eligibility = worldItemTargetEligibility(
+    SOURCE_DB,
+    extension,
+    createSwitchState({ items: { [itemSlug]: 1 } }),
+    itemSlug,
+    0,
+  );
+  if (!eligibility.eligible) {
+    errors.push(`${label} cannot apply item '${itemSlug}' to this monster`);
     return;
   }
   if (rules.bannedItems.has(itemSlug)) {
@@ -317,6 +340,7 @@ function rebuildTeam(records: unknown, rulesValue: unknown): RebuiltTeam {
   }
   if (records.length < rules.minSize || records.length > rules.maxSize) {
     errors.push(`team size must be ${rules.minSize}..${rules.maxSize}`);
+    return { errors, snapshots: [] };
   }
   const sequences = new Set<number>();
   const snapshots: SpawnedMonsterSnapshot[] = [];
@@ -328,7 +352,7 @@ function rebuildTeam(records: unknown, rulesValue: unknown): RebuiltTeam {
       errors.push(`${prefix} must contain only species, level, moves, and provenance`);
       continue;
     }
-    if (typeof rawRecord.species !== "string" || SOURCE_DB.monsters[rawRecord.species] === undefined) {
+    if (typeof rawRecord.species !== "string" || !Object.hasOwn(SOURCE_DB.monsters, rawRecord.species)) {
       errors.push(`${prefix}.species is unknown`);
       continue;
     }
@@ -336,8 +360,8 @@ function rebuildTeam(records: unknown, rulesValue: unknown): RebuiltTeam {
       errors.push(`${prefix}.level must be a positive safe integer`);
       continue;
     }
-    if (!Array.isArray(rawRecord.moves) || rawRecord.moves.some((move) => typeof move !== "string") ||
-        rawRecord.moves.length > SOURCE_DB.rules.maxMoves) {
+    if (!Array.isArray(rawRecord.moves) || rawRecord.moves.length > SOURCE_DB.rules.maxMoves ||
+        rawRecord.moves.some((move) => typeof move !== "string")) {
       errors.push(`${prefix}.moves must be at most ${SOURCE_DB.rules.maxMoves} move slugs`);
       continue;
     }
@@ -428,6 +452,13 @@ export function validateTeam(records: unknown, rules: ArenaTeamRules = {}): Aren
   return rebuilt.errors.length === 0
     ? { ok: true, errors: [] }
     : { ok: false, errors: rebuilt.errors };
+}
+
+/** Validate the match rule object independently before accepting a config. */
+export function validateTeamRules(rules: unknown): ArenaTeamValidation {
+  const errors: string[] = [];
+  normalizeRules(rules, errors);
+  return errors.length === 0 ? { ok: true, errors: [] } : { ok: false, errors };
 }
 
 /** Internal construction seam used by createArenaBattle after the same full

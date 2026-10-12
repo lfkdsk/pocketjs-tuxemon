@@ -19,6 +19,7 @@ import {
   buildValidatedArenaTeam,
   DEFAULT_ARENA_TEAM_RULES,
   validateTeam,
+  validateTeamRules,
   type ArenaProvenanceEvent,
   type ArenaTeamRecord,
   type ArenaTeamRules,
@@ -66,6 +67,7 @@ export type ArenaSideConfig =
 export {
   DEFAULT_ARENA_TEAM_RULES,
   validateTeam,
+  validateTeamRules,
 };
 export type {
   ArenaProvenanceEvent,
@@ -78,6 +80,9 @@ export interface ArenaConfig {
   seed: string;
   format: ArenaFormat;
   sides: [ArenaSideConfig, ArenaSideConfig];
+  /** Optional match-wide limits are recorded into the tape and applied to
+   * every persistent team during reconstruction. */
+  teamRules?: ArenaTeamRules;
 }
 
 export type ArenaAction =
@@ -177,6 +182,7 @@ export type ArenaSubmitResult =
 export interface ArenaTapeConfig {
   format: ArenaFormat;
   sides: [ArenaSideConfig, ArenaSideConfig];
+  teamRules?: ArenaTeamRules;
 }
 
 export interface BattleTape {
@@ -207,17 +213,25 @@ const DIFFICULTIES = new Set<string>(ARENA_DIFFICULTIES);
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === "object" && !Array.isArray(value);
 
-function exactKeys(value: Record<string, unknown>, allowed: readonly string[]): boolean {
+function exactKeys(
+  value: Record<string, unknown>,
+  allowed: readonly string[],
+  optional: readonly string[] = [],
+): boolean {
   const expected = new Set(allowed);
   return Object.keys(value).every((key) => expected.has(key)) &&
-    allowed.filter((key) => key !== "difficulty" && key !== "target").every((key) => key in value);
+    allowed.filter((key) => !optional.includes(key)).every((key) => key in value);
 }
 
 function clone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
 }
 
-function normalizeSideConfig(value: unknown, label: string): ArenaSideConfig {
+function normalizeSideConfig(
+  value: unknown,
+  label: string,
+  teamRules: ArenaTeamRules | undefined,
+): ArenaSideConfig {
   if (!isRecord(value) || (value.kind !== "agent" && value.kind !== "ai")) {
     throw new Error(`${label}: side must be an agent or ai object`);
   }
@@ -234,11 +248,11 @@ function normalizeSideConfig(value: unknown, label: string): ArenaSideConfig {
     if (!exactKeys(value, ["kind", "team"])) {
       throw new Error(`${label}: team agent has unknown or missing fields`);
     }
-    const checked = validateTeam(value.team, DEFAULT_ARENA_TEAM_RULES);
+    const checked = validateTeam(value.team, teamRules ?? DEFAULT_ARENA_TEAM_RULES);
     if (!checked.ok) throw new Error(`${label}: ${checked.errors.join("; ")}`);
     return { kind: "agent", team: clone(value.team as ArenaTeamRecord[]) };
   }
-  if (!exactKeys(value, ["kind", "difficulty"])) {
+  if (!exactKeys(value, ["kind", "difficulty"], ["difficulty"])) {
     throw new Error(`${label}: agent side has unknown or missing fields`);
   }
   if (value.difficulty !== undefined &&
@@ -251,8 +265,8 @@ function normalizeSideConfig(value: unknown, label: string): ArenaSideConfig {
 }
 
 function normalizeConfig(value: unknown): ArenaConfig {
-  if (!isRecord(value) || !exactKeys(value, ["seed", "format", "sides"])) {
-    throw new Error("arena config must contain only seed, format, and sides");
+  if (!isRecord(value) || !exactKeys(value, ["seed", "format", "sides", "teamRules"], ["teamRules"])) {
+    throw new Error("arena config must contain only seed, format, sides, and optional teamRules");
   }
   if (typeof value.seed !== "string" || !HEX_SEED.test(value.seed)) {
     throw new Error("arena seed must be exactly 64 hexadecimal characters");
@@ -263,13 +277,19 @@ function normalizeConfig(value: unknown): ArenaConfig {
   if (!Array.isArray(value.sides) || value.sides.length !== 2) {
     throw new Error("arena config requires exactly two sides");
   }
+  const teamRules = value.teamRules === undefined ? undefined : clone(value.teamRules as ArenaTeamRules);
+  if (teamRules !== undefined) {
+    const checked = validateTeamRules(teamRules);
+    if (!checked.ok) throw new Error(`arena config teamRules: ${checked.errors.join("; ")}`);
+  }
   return {
     seed: value.seed.toLowerCase(),
     format: value.format,
     sides: [
-      normalizeSideConfig(value.sides[0], "arena config sides[0]"),
-      normalizeSideConfig(value.sides[1], "arena config sides[1]"),
+      normalizeSideConfig(value.sides[0], "arena config sides[0]", teamRules),
+      normalizeSideConfig(value.sides[1], "arena config sides[1]", teamRules),
     ],
+    ...(teamRules === undefined ? {} : { teamRules }),
   };
 }
 
@@ -287,9 +307,14 @@ function recipe(config: ArenaSideConfig) {
   return found;
 }
 
-function team(seed: string, side: ArenaSide, config: ArenaSideConfig) {
+function team(
+  seed: string,
+  side: ArenaSide,
+  config: ArenaSideConfig,
+  teamRules: ArenaTeamRules | undefined,
+) {
   if (config.kind === "agent" && "team" in config) {
-    return buildValidatedArenaTeam(config.team, DEFAULT_ARENA_TEAM_RULES);
+    return buildValidatedArenaTeam(config.team, teamRules ?? DEFAULT_ARENA_TEAM_RULES);
   }
   const selected = recipe(config);
   const rng: RngState = { rng: domainSeed(seed, `team:${side}`), rngDraws: 0 };
@@ -388,7 +413,7 @@ function validActionShape(value: unknown): value is ArenaAction {
   const targetOk = value.target === undefined ||
     (Number.isSafeInteger(value.target) && (value.target as number) >= 0);
   if (value.type === "move") {
-    return exactKeys(value, ["type", "slot", "target"]) && Number.isSafeInteger(value.slot) &&
+    return exactKeys(value, ["type", "slot", "target"], ["target"]) && Number.isSafeInteger(value.slot) &&
       (value.slot as number) >= 0 && (value.slot as number) <= 3 && targetOk;
   }
   if (value.type === "swap") {
@@ -396,7 +421,7 @@ function validActionShape(value: unknown): value is ArenaAction {
       (value.party as number) >= 0;
   }
   if (value.type === "item") {
-    return exactKeys(value, ["type", "item", "target"]) && typeof value.item === "string" &&
+    return exactKeys(value, ["type", "item", "target"], ["target"]) && typeof value.item === "string" &&
       value.item.length > 0 && targetOk;
   }
   return value.type === "run" && exactKeys(value, ["type"]);
@@ -528,8 +553,8 @@ function runAiOnly(battle: ArenaBattle): ArenaBattle {
 
 export function createArenaBattle(value: ArenaConfig): ArenaBattle {
   const config = normalizeConfig(value);
-  const player = team(config.seed, 0, config.sides[0]);
-  const enemy = team(config.seed, 1, config.sides[1]);
+  const player = team(config.seed, 0, config.sides[0], config.teamRules);
+  const enemy = team(config.seed, 1, config.sides[1], config.teamRules);
   const core = createBattle(RULES_DB, {
     seed: domainSeed(config.seed, "battle"),
     kind: "trainer",
@@ -661,6 +686,7 @@ export function tape(battle: ArenaBattle): BattleTape {
     config: {
       format: battle.config.format,
       sides: clone(battle.config.sides),
+      ...(battle.config.teamRules === undefined ? {} : { teamRules: clone(battle.config.teamRules) }),
     },
     actions: clone(battle.actions),
   };
@@ -677,10 +703,15 @@ export function validateBattleTape(value: unknown): ArenaTapeValidation {
       throw new ArenaTapeError("battle tape must contain only v, seed, config, and actions");
     }
     if (value.v !== ARENA_VERSION) throw new ArenaTapeError(`battle tape version must be ${ARENA_VERSION}`);
-    if (!isRecord(value.config) || !exactKeys(value.config, ["format", "sides"])) {
-      throw new ArenaTapeError("battle tape config must contain only format and sides");
+    if (!isRecord(value.config) || !exactKeys(value.config, ["format", "sides", "teamRules"], ["teamRules"])) {
+      throw new ArenaTapeError("battle tape config must contain only format, sides, and optional teamRules");
     }
-    const config = normalizeConfig({ seed: value.seed, format: value.config.format, sides: value.config.sides });
+    const config = normalizeConfig({
+      seed: value.seed,
+      format: value.config.format,
+      sides: value.config.sides,
+      ...(value.config.teamRules === undefined ? {} : { teamRules: value.config.teamRules }),
+    });
     if (!Array.isArray(value.actions) || value.actions.length > ARENA_MAX_TURNS) {
       throw new ArenaTapeError(`battle tape actions must be an array of at most ${ARENA_MAX_TURNS} pairs`);
     }
@@ -698,7 +729,11 @@ export function validateBattleTape(value: unknown): ArenaTapeValidation {
       tape: {
         v: ARENA_VERSION,
         seed: config.seed,
-        config: { format: config.format, sides: config.sides },
+        config: {
+          format: config.format,
+          sides: config.sides,
+          ...(config.teamRules === undefined ? {} : { teamRules: config.teamRules }),
+        },
         actions,
       },
     };
