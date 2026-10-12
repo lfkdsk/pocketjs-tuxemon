@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.0" orientation="orthogonal" renderorder="right-down" width="10" height="10" tilewidth="16" tileheight="16" infinite="0">
-  <objectgroup id="1" name="events"/>
+  <objectgroup id="1" name="events">
+    <object id="1" name="Expose previous backdrop" type="event" x="0" y="0" width="16" height="16">
+      <properties>
+        <property name="cond1" value="is variable_set g_persist_close:yes"/>
+        <property name="cond2" value="not variable_set g_persist_closed:yes"/>
+        <property name="act1" value="change_bg"/>
+        <property name="act2" value="set_variable g_persist_closed:yes"/>
+      </properties>
+    </object>
+  </objectgroup>
 </map>

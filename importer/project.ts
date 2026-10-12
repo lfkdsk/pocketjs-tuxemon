@@ -198,7 +198,7 @@ type FutureCommand = Command
   | { op: "lockInput" }
   | { op: "unlockInput" }
   | { op: "place"; target: "this" | { event: string }; x: number; y: number; dir?: Dir }
-  | { op: "moveRoute"; target: "player" | "this" | { event: string }; wait?: boolean; route: { steps: FutureMoveStep[]; repeat: boolean; skippable: boolean } }
+  | { op: "moveRoute"; target: "player" | "this" | { event: string }; start?: "immediate"; wait?: boolean; route: { steps: FutureMoveStep[]; repeat: boolean; skippable: boolean } }
   | { op: "changeName"; target?: "player" | "this" | { event: string }; name: string | { variable: string } };
 type FutureGameEvent = GameEvent & { w?: number; h?: number };
 
@@ -2250,6 +2250,30 @@ interface Ctx {
   self?: string;
 }
 
+/** Pinned ordinary-background opens whose authored control flow reaches the
+ * action with no covering modal: the start screen's mutually-exclusive
+ * choice/transfer pages, and the single sequential Spyder intro fiber after
+ * each blocking dialog has closed. In that state upstream pops/reopens its
+ * sole ImageState and the kit's no-modal `push` policy replaces the visible
+ * top exactly. Unknown/future ordinary opens keep the conservative `ignore`
+ * degradation because upstream treats an ImageState below a concurrent modal
+ * differently from every policy the current kit exposes. */
+const SERIAL_START_BACKDROP_EVENTS = new Set([
+  "Scenario", "Appearance", "Pronouns", "Spyder", "Xero", "Water",
+]);
+function ordinaryBackdropFlowIsExact(ctx: Ctx): boolean {
+  const source = ctx.sourceEvent;
+  if (!source) return false;
+  if (
+    ctx.m.slug === "start_tuxemon"
+    && source.source === "start_tuxemon.yaml"
+    && SERIAL_START_BACKDROP_EVENTS.has(source.name)
+  ) return true;
+  return ctx.m.slug === "spyder_bedroom"
+    && source.source === "spyder_bedroom.yaml"
+    && source.name === "Spyder Intro";
+}
+
 /** End a source event without leaving its positive variable gates latched.
  * Paid multi-event services use those gates to advance to their charge and
  * result page; clearing them first makes a failed selection safely retryable. */
@@ -2956,12 +2980,20 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
           noteAction(a, a.type, "T4-dropped", "background or optional foreground image is unavailable");
           break;
         }
-        noteAction(a, a.type, "T1-lowered", "KS1 blocking screen backdrop; a covering modal is retained instead of being popped");
+        const exactFlow = ordinaryBackdropFlowIsExact(ctx);
+        noteAction(
+          a,
+          a.type,
+          exactFlow ? "T1" : "T1-lowered",
+          exactFlow
+            ? "K-TUX pinned serial backdrop replace; modal-aware push if covered"
+            : "covering an ordinary ImageState cannot be represented exactly; preserve its visible top",
+        );
         out.push({
           op: "screenBackdrop",
           layer: SCREEN_BACKDROP_LAYER,
           variant,
-          whenModalOpen: "ignore",
+          whenModalOpen: exactFlow ? "push" : "ignore",
         });
         break;
       }
@@ -2974,12 +3006,12 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
           noteAction(a, a.type, "T4-dropped", "background, NPC template, or combat-sheet front art is unavailable");
           break;
         }
-        noteAction(a, a.type, "T1-lowered", "KV1 combat-sheet front art on a blocking screen backdrop; a covering modal is retained instead of being popped");
+        noteAction(a, a.type, "T1", "K-TUX modal-aware NPC portrait push/replace");
         out.push({
           op: "screenBackdrop",
           layer: SCREEN_BACKDROP_LAYER,
           variant,
-          whenModalOpen: "ignore",
+          whenModalOpen: "push",
         });
         break;
       }
@@ -3161,33 +3193,45 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         const target = who === "player"
           ? "player" as const
           : isSelf(who) ? "this" as const : { event: `npc_${slug(who)}` };
+        const knownCharacter = (name: string): boolean => name === "player"
+          || isSelf(name)
+          || ctx.m.events.some((event) => event.acts.some((candidate) =>
+            candidate.type === "create_npc" && candidate.args[0] === name
+          ));
+        if (!who || !knownCharacter(who)) {
+          noteAction(a, "char_face(missing character)", "T2-dropped", "source character is not present on this map");
+          break;
+        }
         const repairedDirection = sourceDirection(ctx.m.slug, dir);
         if (!repairedDirection) {
-          if (ctx.options.routes) {
+          if (!dir || !knownCharacter(dir)) {
+            noteAction(a, "char_face(invalid direction)", "T2-dropped", "direction is neither cardinal nor a present character");
+          } else if (ctx.options.routes) {
             noteAction(a, "char_face(toward char)", "T1", "K2 arbitrary-target turn-toward route");
             const step: FutureMoveStep = dir === "player"
               ? "turnTowardPlayer"
               : { turnToward: { event: `npc_${slug(dir)}` } };
-            out.push(command({ op: "moveRoute", target, wait: false, route: { steps: [step], repeat: false, skippable: true } }));
+            out.push(command({
+              op: "moveRoute",
+              target,
+              start: "immediate",
+              wait: false,
+              route: { steps: [step], repeat: false, skippable: true },
+            }));
           } else {
             noteAction(a, "char_face(toward char)", "T2-dropped", "needs turnToward step");
           }
           break;
         }
-        if (who === "player" || isSelf(who)) {
-          noteAction(
-            a,
-            a.type,
-            "T1-lowered",
-            dir === repairedDirection
-              ? `moveRoute ${who === "player" ? "player" : "this"} face applies on the next movement tick`
-              : "pinned Route 3 source typo bottom repaired to down and folded into facing",
-          );
-          out.push({ op: "moveRoute", target: who === "player" ? "player" : "this", wait: false, route: { steps: [FACE[repairedDirection]!], repeat: false, skippable: true } });
-        } else if (ctx.options.routes) {
-          noteAction(a, a.type, "T1", "K2 moveRoute targets an arbitrary event");
-          out.push(command({ op: "moveRoute", target, wait: false, route: { steps: [FACE[repairedDirection]!], repeat: false, skippable: true } }));
-        } else noteAction(a, "char_face(other npc)", "T2-dropped", "moveRoute target must be an event id");
+        noteAction(
+          a,
+          a.type,
+          dir === repairedDirection ? "T1" : "T1-lowered",
+          dir === repairedDirection
+            ? "K-TUX immediate cardinal face"
+            : "pinned Route 3 source typo bottom repaired to down and folded into facing",
+        );
+        out.push({ op: "face", target, dir: repairedDirection });
         break;
       }
       case "char_move": {
@@ -3205,17 +3249,23 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         noteAction(
           a,
           a.type,
-          arbitraryTarget ? "T1" : "T1-lowered",
+          "T1",
           arbitraryTarget
-            ? "blocking skippable moveRoute targets an arbitrary event"
-            : "player/this moveRoute begins on the next movement tick",
+            ? "K-TUX immediate blocking skippable route targets an arbitrary event"
+            : "K-TUX immediate blocking skippable player/issuing-event route",
         );
         const target = who === "player" ? "player" as const
           : isSelf(who) ? "this" as const : { event: `npc_${slug(who)}` };
         // Tuxemon's char_move stops the route when a step is obstructed, then
         // lets the event continue. A skippable kit route has that same
         // contract; a non-skippable waiter would hold the cutscene forever.
-        out.push(command({ op: "moveRoute", target, wait: true, route: { steps, repeat: false, skippable: true } }));
+        out.push(command({
+          op: "moveRoute",
+          target,
+          start: "immediate",
+          wait: true,
+          route: { steps, repeat: false, skippable: true },
+        }));
         break;
       }
       case "transition_teleport": {
@@ -4285,12 +4335,12 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
           noteAction(a, a.type, "T4-dropped", "background or monster front sprite is unavailable");
           break;
         }
-        noteAction(a, a.type, "T1-lowered", "monster front battle sprite centered on the blocking screen backdrop; a covering modal is retained instead of being popped");
+        noteAction(a, a.type, "T1", "K-TUX modal-aware monster portrait push/replace");
         out.push({
           op: "screenBackdrop",
           layer: SCREEN_BACKDROP_LAYER,
           variant,
-          whenModalOpen: "ignore",
+          whenModalOpen: "push",
         });
         break;
       }
@@ -5313,6 +5363,7 @@ function convertMap(
         chain.unshift(command({
           op: "moveRoute",
           target: "this",
+          start: "immediate",
           wait: false,
           route: { steps: ["turnTowardPlayer"], repeat: false, skippable: true },
         }));

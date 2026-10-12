@@ -32,6 +32,7 @@ import {
   browserSaveStore,
   loadSlot,
   restoreSave,
+  saveBlockReason,
   saveSlot,
   takeSaveSnapshot,
   type SlotStore,
@@ -297,44 +298,78 @@ describe("imported Tuxemon presentation state survives map transfer", () => {
     rewindAcrossTransfer(build.project);
   });
 
-  test("an open backdrop ignores replacement and survives at 60/30/20 Hz, save and rewind", () => {
+  test("a covered portrait pushes, saves, pops LIFO, and survives transfer and rewind", () => {
     const build = builds.backdrop;
     expect(commandTree(build.project).filter((command) => command.op === "screenBackdrop")).toEqual([
       {
         op: "screenBackdrop",
         layer: "tux_backdrop",
-        variant: "bg_gradient_blue",
-        whenModalOpen: "ignore",
+        variant: "bg_gradient_blue_aeble_character",
+        whenModalOpen: "push",
       },
       {
         op: "screenBackdrop",
         layer: "tux_backdrop",
-        variant: "bg_gradient_red",
-        whenModalOpen: "ignore",
+        variant: "bg_gradient_red_aeble_character",
+        whenModalOpen: "push",
       },
+      { op: "screenBackdrop", layer: "tux_backdrop", variant: null },
     ]);
-    const coverage = build.coverage.actions.rows.find((candidate) => candidate.type === "change_bg");
-    expect(coverage).toMatchObject({ total: 2, native: 0, degraded: 2, placeholder: 0, dropped: 0 });
+    expectNative(build, "change_bg_char", 2);
+    expectNative(build, "change_bg", 1);
     const probeSession = createSession(build.project, 60, SESSION_OPTIONS);
     let probe = startSession(build.project, probeSession);
     let previous = 0;
-    for (let frame = 0; frame < 20 && probe.sw.variables["v.g_persist_replaced"] !== 1; frame++) {
+    for (let frame = 0; frame < 90; frame++) {
       const buttons = inputMask(build.project.start.map, frame, 60);
       probe = stepSession(probeSession, probe, {
         buttons,
         confirmEdge: (buttons & BTN.CIRCLE) !== 0 && (previous & BTN.CIRCLE) === 0,
       });
       previous = buttons;
+      if (probe.mapId === TARGET && saveBlockReason(probe) === null) break;
     }
     expect(probe.sw.variables["v.g_persist_replaced"]).toBe(1);
-    expect(probe.interp.modal?.kind).toBe("text");
-    expect(probe.interp.screen?.backdrop).toEqual({ layer: "tux_backdrop", variant: "bg_gradient_blue" });
+    expect(probe.mapId).toBe(TARGET);
+    expect(saveBlockReason(probe)).toBeNull();
+    expect(probe.interp.modal).toBeNull();
+    expect(probe.interp.screen?.backdrop).toEqual({
+      layer: "tux_backdrop",
+      variant: "bg_gradient_red_aeble_character",
+    });
+    expect(probe.interp.screen?.backdropStack).toEqual([{
+      layer: "tux_backdrop",
+      variant: "bg_gradient_blue_aeble_character",
+    }]);
+    const restored = roundTrip(probeSession, probe);
+    expect(restored.interp.screen).toEqual(probe.interp.screen);
+    expect(restored.interp.screen?.backdropStack).not.toBe(probe.interp.screen?.backdropStack);
+
+    probe = restored;
+    probe.sw.variables["v.g_persist_close"] = 1;
+    probe.interp.sw.variables["v.g_persist_close"] = 1;
+    for (let frame = 0; frame < 10 && probe.sw.variables["v.g_persist_closed"] !== 1; frame++) {
+      probe = stepSession(probeSession, probe, { buttons: 0 });
+    }
+    expect(probe.sw.variables["v.g_persist_closed"]).toBe(1);
+    expect(probe.interp.screen?.backdrop).toEqual({
+      layer: "tux_backdrop",
+      variant: "bg_gradient_blue_aeble_character",
+    });
+    expect(probe.interp.screen?.backdropStack).toBeUndefined();
     const outcomes = ([60, 30, 20] as const).map((hz) => runOneSecond(build, hz));
     const backdrops = outcomes.map(({ state }) => state.interp.screen?.backdrop);
     expect(backdrops).toEqual([backdrops[0], backdrops[0], backdrops[0]]);
-    expect(backdrops[0]).toEqual({ layer: "tux_backdrop", variant: "bg_gradient_blue" });
-    expect(roundTrip(outcomes[0]!.session, outcomes[0]!.state).interp.screen?.backdrop)
-      .toEqual(backdrops[0]);
+    expect(backdrops[0]).toEqual({
+      layer: "tux_backdrop",
+      variant: "bg_gradient_red_aeble_character",
+    });
+    expect(outcomes[0]!.state.interp.screen?.backdropStack).toEqual([{
+      layer: "tux_backdrop",
+      variant: "bg_gradient_blue_aeble_character",
+    }]);
+    expect(roundTrip(outcomes[0]!.session, outcomes[0]!.state).interp.screen)
+      .toEqual(outcomes[0]!.state.interp.screen);
     rewindAcrossTransfer(build.project);
   });
 

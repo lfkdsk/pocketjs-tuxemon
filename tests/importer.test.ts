@@ -133,11 +133,11 @@ test("all maps pass schema and reference valid transfer destinations", () => {
     // load_yaml yields one reference tick before publishing appended events.
     types: 98,
     uses: 13_617,
-    native: 6_945,
-    degraded: 2_797,
+    native: 7_610,
+    degraded: 2_650,
     placeholder: 708,
-    dropped: 3_167,
-    nativePercent: 51,
+    dropped: 2_649,
+    nativePercent: 55.9,
     tier1: {
       uses: 6_330,
       percent: 46.49,
@@ -148,14 +148,14 @@ test("all maps pass schema and reference valid transfer destinations", () => {
   expect(result.report.coverage.conditions.summary).toMatchObject({
     types: 64,
     uses: 8_663,
-    native: 4_411,
+    native: 4_413,
     degraded: 1_243,
     placeholder: 859,
-    dropped: 2_150,
+    dropped: 2_148,
     nativePercent: 50.9,
     tier1: {
-      uses: 4_325,
-      percent: 49.92,
+      uses: 4_327,
+      percent: 49.95,
       requiredUses: 4_591,
       meetsBaseline: false,
     },
@@ -167,12 +167,13 @@ test("all maps pass schema and reference valid transfer destinations", () => {
     ...result.report.coverage.conditions.rows,
   ];
   expect(coverageRows.find((row) => row.type === "char_face")).toMatchObject({
-    native: 868,
-    degraded: 447,
-    dropped: 712,
+    native: 1_504,
+    degraded: 329,
+    dropped: 194,
   });
   expect(coverageRows.find((row) => row.type === "char_move")).toMatchObject({
-    degraded: 13,
+    native: 9,
+    degraded: 4,
     dropped: 64,
   });
   expect(coverageRows.find((row) => row.type === "is char_facing")).toMatchObject({
@@ -229,9 +230,9 @@ test("all maps pass schema and reference valid transfer destinations", () => {
     });
   }
   for (const [type, total, native, degraded] of [
-    ["change_bg", 15, 6, 9],
-    ["change_bg_char", 4, 0, 4],
-    ["change_bg_monster", 7, 0, 7],
+    ["change_bg", 15, 15, 0],
+    ["change_bg_char", 4, 4, 0],
+    ["change_bg_monster", 7, 7, 0],
   ] as const) {
     expect(coverageRows.find((row) => row.type === type)).toMatchObject({
       total,
@@ -452,13 +453,13 @@ test("KS1 imports fades, scripted camera, balloons, and blocking backdrops", () 
     op: "screenBackdrop",
     layer: "tux_backdrop",
     variant: "bg_gradient_blue_spyder_tumble_image",
-    whenModalOpen: "ignore",
+    whenModalOpen: "push",
   });
   expect(commands).toContainEqual({
     op: "screenBackdrop",
     layer: "tux_backdrop",
     variant: "bg_gradient_blue_spyder_omnichannel_beaverbrook_character",
-    whenModalOpen: "ignore",
+    whenModalOpen: "push",
   });
 });
 
@@ -702,7 +703,7 @@ test("default import output remains byte-pinned", () => {
   // The save-owned global step counter is enabled so the imported upstream
   // Player page can report walked distance across maps and hosts.
   expect(createHash("sha256").update(bytes).digest("hex")).toBe(
-    "7196fb7fd35f224964abdac8e813ba234558f0ae3c8464c4b0a99e98e4fc58e3",
+    "282b47b8377441fdacee098584a30fc3d5f6595f57e1f85cb52cf3d63b4b8c5c",
   );
 });
 
@@ -925,6 +926,26 @@ test("ImportOptions.routes emits K2 arbitrary targets and path steps", () => {
   expect(nodes.some((node) => node.pathTo !== undefined)).toBeTrue();
   expect(nodes.some((node) => node.approach !== undefined)).toBeTrue();
   expect(nodes.some((node) => node.turnToward !== undefined)).toBeTrue();
+  const relativeFaces = nodes.filter((node) =>
+    node.op === "moveRoute"
+    && typeof node.route === "object"
+    && node.route !== null
+    && Array.isArray((node.route as { steps?: unknown }).steps)
+    && (node.route as { steps: unknown[] }).steps.some((step) =>
+      step === "turnTowardPlayer" || (typeof step === "object" && step !== null && "turnToward" in step)
+    )
+  );
+  expect(relativeFaces.length).toBeGreaterThan(0);
+  expect(relativeFaces.every((node) => node.start === "immediate")).toBeTrue();
+
+  // Real Battle Arena choreography contains both player and NPC cardinal
+  // faces. The additive face command is available even when K2 routes are
+  // disabled, and therefore cannot regress to a next-tick route silently.
+  const cardinalFaces = objectNodes(buildProject(["taba_ba_br_2"]).project)
+    .filter((node) => node.op === "face");
+  expect(cardinalFaces).toContainEqual({ op: "face", target: "player", dir: "down" });
+  expect(cardinalFaces).toContainEqual({ op: "face", target: { event: "npc_garth" }, dir: "up" });
+
   const routeNodes = objectNodes(buildProject(["route1"], { routes: true }).project);
   const charMoves = routeNodes.filter((node) =>
     node.op === "moveRoute" && node.wait === true &&
@@ -936,7 +957,8 @@ test("ImportOptions.routes emits K2 arbitrary targets and path steps", () => {
   );
   expect(charMoves.length).toBeGreaterThan(0);
   expect(charMoves.every((node) =>
-    (node.route as { skippable?: boolean }).skippable === true
+    node.start === "immediate"
+    && (node.route as { skippable?: boolean }).skippable === true
   )).toBeTrue();
   expect(result.report.options?.routes).toBeTrue();
 });
@@ -1156,8 +1178,23 @@ test("change_bg_monster shows the front battle sprite on the story backdrop", ()
   ]);
   for (const backdrop of backdrops) {
     expect(backdrop.layer).toBe("tux_backdrop");
-    expect(backdrop.whenModalOpen).toBe("ignore");
+    expect(backdrop.whenModalOpen).toBe("push");
   }
+  const spyderBackdropOrder = objectNodes(
+    result.project.maps.find((map) => map.id === "spyder_bedroom")!,
+  ).filter((node) => node.op === "screenBackdrop" && typeof node.variant === "string")
+    .map((node) => [node.variant, node.whenModalOpen]);
+  expect(spyderBackdropOrder).toEqual([
+    ["bg_gradient_blue_spyder_omnichannel_beaverbrook_character", "push"],
+    ["bg_gradient_blue_spyder_tumble_image", "push"],
+    ["bg_gradient_blue_dollfin_monster", "push"],
+    ["bg_gradient_blue_ignibus_monster", "push"],
+    ["bg_gradient_blue_memnomnom_monster", "push"],
+    ["bg_gradient_blue_budaye_monster", "push"],
+    ["bg_gradient_blue_grintot_monster", "push"],
+    ["bg_gradient_blue_spyder_monsters_image", "push"],
+    ["bg_gradient_blue_spyder_morph_image", "push"],
+  ]);
   // The old name card is gone. player_house_bedroom has no
   // `translated_dialog rockitten`, so any "Rockitten" text there would be
   // the removed name card; spyder_bedroom keeps the five `translated_dialog
