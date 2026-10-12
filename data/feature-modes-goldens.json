@@ -1,5 +1,5 @@
 {
-  "format": "pocket-tuxemon/feature-modes-goldens/v2",
+  "format": "pocket-tuxemon/feature-modes-goldens/v3",
   "frames": [
     {
       "case": "title",
@@ -7,8 +7,8 @@
       "width": 480,
       "height": 272,
       "file": "feature-title-en_US-480x272.png",
-      "rgbaFnv1a": "92a53caf",
-      "pngSha256": "05304db5a14a980a9110e8b0a001591d387ca37ed56089d450f768fcd81334b8"
+      "rgbaFnv1a": "fafa655a",
+      "pngSha256": "459cc4122891d4195d997c9ebb167ee63d6ca359f0af9e20e74f8c161610f1eb"
     },
     {
       "case": "difficulty",
@@ -74,13 +74,49 @@
       "pngSha256": "f4295fa185e8656ca76e83ff28a4916b6c25d6e943a75621ab2661ce80f7719e"
     },
     {
+      "case": "start",
+      "lang": "en_US",
+      "width": 480,
+      "height": 272,
+      "file": "feature-start-en_US-480x272.png",
+      "rgbaFnv1a": "ecd3b6f1",
+      "pngSha256": "7f977922d053506acf19ec996c5d957eb7c84a9184c6cc2c0b7f5542c9fd25a1"
+    },
+    {
+      "case": "party",
+      "lang": "en_US",
+      "width": 480,
+      "height": 272,
+      "file": "feature-party-en_US-480x272.png",
+      "rgbaFnv1a": "5cea3415",
+      "pngSha256": "2dec10373d043d0e125f8c7670160c354292dab2bfa0f20a8f4f9bda4371c5f0"
+    },
+    {
+      "case": "player",
+      "lang": "en_US",
+      "width": 480,
+      "height": 272,
+      "file": "feature-player-en_US-480x272.png",
+      "rgbaFnv1a": "a0fdf0dd",
+      "pngSha256": "c14269637a19af95c74f003bc2d86171639adcea9e699f5954566dd0fa2bf640"
+    },
+    {
+      "case": "bag",
+      "lang": "en_US",
+      "width": 480,
+      "height": 272,
+      "file": "feature-bag-en_US-480x272.png",
+      "rgbaFnv1a": "d5c62b74",
+      "pngSha256": "abe3a23c83827e5ccd6322e12f7bbe32c8251b07f15b805c11c7775b85ccc807"
+    },
+    {
       "case": "title",
       "lang": "en_US",
       "width": 960,
       "height": 544,
       "file": "feature-title-en_US-960x544.png",
-      "rgbaFnv1a": "eddc4242",
-      "pngSha256": "1fa858513d0d7ecb5a00d4d0e0af42877972d4ec29c8536e5c2b970fbfedbb85"
+      "rgbaFnv1a": "7a122ada",
+      "pngSha256": "6cac56ac841f531945616e289ef592cf5ba44db2e837c7d0f08d7befffa89fe7"
     },
     {
       "case": "difficulty",
@@ -146,13 +182,49 @@
       "pngSha256": "50a04a35999bad94274db5e5c776fdd454e5ff00f5505fab5f51128c689c8f7f"
     },
     {
+      "case": "start",
+      "lang": "en_US",
+      "width": 960,
+      "height": 544,
+      "file": "feature-start-en_US-960x544.png",
+      "rgbaFnv1a": "0deeda11",
+      "pngSha256": "cb68e4b3fdfb67e77c091ac14f462e5a7efc43ab74e99e8f3c90302d60e7a2f8"
+    },
+    {
+      "case": "party",
+      "lang": "en_US",
+      "width": 960,
+      "height": 544,
+      "file": "feature-party-en_US-960x544.png",
+      "rgbaFnv1a": "5413ac8c",
+      "pngSha256": "ab40a955be54ae2e49c621ab8fbae65aef4a34143b7e65f266d978b6e26904d5"
+    },
+    {
+      "case": "player",
+      "lang": "en_US",
+      "width": 960,
+      "height": 544,
+      "file": "feature-player-en_US-960x544.png",
+      "rgbaFnv1a": "6b00f07c",
+      "pngSha256": "26914d7fa90c23957b68cc6d1ed3ea70388cb99d9b6f4c0f713389f70f8534bf"
+    },
+    {
+      "case": "bag",
+      "lang": "en_US",
+      "width": 960,
+      "height": 544,
+      "file": "feature-bag-en_US-960x544.png",
+      "rgbaFnv1a": "d7df53a4",
+      "pngSha256": "01dbe2307f592d947ccd2cb5a2dc3145075f912c2e79362c4cbf55c45448fe60"
+    },
+    {
       "case": "title",
       "lang": "zh_CN",
       "width": 480,
       "height": 272,
       "file": "feature-title-zh_CN-480x272.png",
-      "rgbaFnv1a": "5fc9ac99",
-      "pngSha256": "46cdcca6870823b90e7578b407640cc6bf443a2b8b263ab8cdb48f22601767c7"
+      "rgbaFnv1a": "689352d3",
+      "pngSha256": "35c212d5b54ebe03f0062ad63d1855cd2498f812946b54f6fb5b75cc7bfec850"
     },
     {
       "case": "difficulty",
@@ -218,13 +290,49 @@
       "pngSha256": "7d326fe2c2a19afcf05714794a24e1a85fc103e633cc351aafe3dd59c6a202bb"
     },
     {
+      "case": "start",
+      "lang": "zh_CN",
+      "width": 480,
+      "height": 272,
+      "file": "feature-start-zh_CN-480x272.png",
+      "rgbaFnv1a": "63626638",
+      "pngSha256": "a614ba3153f2272dae319e32449025c2dfd3a711da9e9711c77c2446033a38ce"
+    },
+    {
+      "case": "party",
+      "lang": "zh_CN",
+      "width": 480,
+      "height": 272,
+      "file": "feature-party-zh_CN-480x272.png",
+      "rgbaFnv1a": "5ff3fd10",
+      "pngSha256": "dcf083ca1dc312d165a123342c8f2c2f1290c7d3593ef95097cf804892593563"
+    },
+    {
+      "case": "player",
+      "lang": "zh_CN",
+      "width": 480,
+      "height": 272,
+      "file": "feature-player-zh_CN-480x272.png",
+      "rgbaFnv1a": "9c63f8bb",
+      "pngSha256": "30ab28c88b050afb81a51901b8c2c37f6e6520006d62921293fbfda4bd806053"
+    },
+    {
+      "case": "bag",
+      "lang": "zh_CN",
+      "width": 480,
+      "height": 272,
+      "file": "feature-bag-zh_CN-480x272.png",
+      "rgbaFnv1a": "fa90e968",
+      "pngSha256": "1f3bd193ed0074396428fcd6c12bc2ba5e37ac8fc6daf5347a33d5ff79b4924f"
+    },
+    {
       "case": "title",
       "lang": "zh_CN",
       "width": 960,
       "height": 544,
       "file": "feature-title-zh_CN-960x544.png",
-      "rgbaFnv1a": "b713d34e",
-      "pngSha256": "3d8808e4087b095777cc91b28d2993797dd85f84c1597a873681727020ad092b"
+      "rgbaFnv1a": "3a1ea40f",
+      "pngSha256": "0ba06277ef98ce1be655a3486a7f6c22e86ff9a44fbea568b160e065c9741a24"
     },
     {
       "case": "difficulty",
@@ -288,6 +396,42 @@
       "file": "feature-map-zh_CN-960x544.png",
       "rgbaFnv1a": "eb3b7f07",
       "pngSha256": "ae8b5160b5631db7f934c916f62e520754fea9d31080aaaf6206be1ba8685a65"
+    },
+    {
+      "case": "start",
+      "lang": "zh_CN",
+      "width": 960,
+      "height": 544,
+      "file": "feature-start-zh_CN-960x544.png",
+      "rgbaFnv1a": "24124dd6",
+      "pngSha256": "001cfb493d1acd218cd710c25d724c54ef2aa67db1d10bf8b34db659583ca906"
+    },
+    {
+      "case": "party",
+      "lang": "zh_CN",
+      "width": 960,
+      "height": 544,
+      "file": "feature-party-zh_CN-960x544.png",
+      "rgbaFnv1a": "20cb2ed4",
+      "pngSha256": "7391eee9ac8f102f4eb73b56b6c3d88d8b148241adb62e7763808e8be75b51f1"
+    },
+    {
+      "case": "player",
+      "lang": "zh_CN",
+      "width": 960,
+      "height": 544,
+      "file": "feature-player-zh_CN-960x544.png",
+      "rgbaFnv1a": "b69c9386",
+      "pngSha256": "877f6f3e9216df7fe038e3e07771bdfb6a380f8b6178d57a673f258d9f627949"
+    },
+    {
+      "case": "bag",
+      "lang": "zh_CN",
+      "width": 960,
+      "height": 544,
+      "file": "feature-bag-zh_CN-960x544.png",
+      "rgbaFnv1a": "d05dfc6d",
+      "pngSha256": "1e3e723a65afa3e5c1fca8bad4420724681acf85806689f9480706bdec768304"
     }
   ]
 }

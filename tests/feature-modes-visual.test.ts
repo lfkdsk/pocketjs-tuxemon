@@ -1,7 +1,6 @@
-// Production-bundle visual gate for title Battle, title Minigame, and
-// NuPhone/GPS: exact bilingual goldens at both supported resolutions,
-// semantic tree/pixel assertions, touch interaction, lazy-art behavior, and
-// the expected 2x composition.
+// Production-bundle visual gate for title modes, NuPhone/GPS, and START menu
+// children: exact bilingual goldens at both supported resolutions, semantic
+// tree/pixel assertions, touch interaction, lazy art, and 2x composition.
 
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
@@ -37,8 +36,12 @@ const BATTLE_DB = Object.fromEntries(LANGS.map((lang) => [
   lang,
   JSON.parse(readFileSync(join(ROOT, `data/battle-db${lang === "zh_CN" ? ".zh_CN" : ""}.json`), "utf8")) as {
     monsters: Record<string, { name: string; description: string }>;
+    items: Record<string, { name: string; description: string }>;
   },
-])) as Record<Lang, { monsters: Record<string, { name: string; description: string }> }>;
+])) as Record<Lang, {
+  monsters: Record<string, { name: string; description: string }>;
+  items: Record<string, { name: string; description: string }>;
+}>;
 
 interface GoldenEntry {
   case: FeatureModesCase;
@@ -110,9 +113,9 @@ function captured(viewportIndex: number, lang: Lang): Promise<Capture> {
   return pending;
 }
 
-describe("NuPhone, title Battle, and title Minigame production visuals", () => {
+describe("Feature-mode and START production visuals", () => {
   simTest("match every committed bilingual golden at both resolutions", async () => {
-    expect(manifest.format).toBe("pocket-tuxemon/feature-modes-goldens/v2");
+    expect(manifest.format).toBe("pocket-tuxemon/feature-modes-goldens/v3");
     expect(manifest.frames).toHaveLength(FEATURE_MODES_CASES.length * LANGS.length * FEATURE_MODES_VIEWPORTS.length);
     for (let viewportIndex = 0; viewportIndex < FEATURE_MODES_VIEWPORTS.length; viewportIndex++) {
       for (const lang of LANGS) {
@@ -136,17 +139,15 @@ describe("NuPhone, title Battle, and title Minigame production visuals", () => {
     }
   }, 180_000);
 
-  simTest("shows complete localized title, difficulty, phone and map text", async () => {
+  simTest("shows complete localized title, phone, START, party, player and Bag text", async () => {
     for (let viewportIndex = 0; viewportIndex < FEATURE_MODES_VIEWPORTS.length; viewportIndex++) {
       const en = await captured(viewportIndex, "en_US");
       const zh = await captured(viewportIndex, "zh_CN");
       expect(nodeText(namedNode(en.cases.title.tree, "tux-title-name"))).toBe("POCKET TUXEMON");
-      expect(treeHasText(en.cases.title.tree, "Adventure")).toBeTrue();
-      expect(treeHasText(en.cases.title.tree, "Battle")).toBeTrue();
-      expect(treeHasText(en.cases.title.tree, "Minigame")).toBeTrue();
-      expect(treeHasText(zh.cases.title.tree, "冒险模式")).toBeTrue();
-      expect(treeHasText(zh.cases.title.tree, "对战")).toBeTrue();
-      expect(treeHasText(zh.cases.title.tree, "迷你游戏")).toBeTrue();
+      for (const id of ["newGame", "battle", "minigame", "options", "exit"] as const) {
+        expect(treeHasText(en.cases.title.tree, DATA.startMenu.title[id].en_US)).toBeTrue();
+        expect(treeHasText(zh.cases.title.tree, DATA.startMenu.title[id].zh_CN)).toBeTrue();
+      }
       expect(nodeText(namedNode(en.cases.difficulty.tree, "tux-title-difficulty-prompt")))
         .toBe("Choose your difficulty level");
       expect(nodeText(namedNode(zh.cases.difficulty.tree, "tux-title-difficulty-prompt")))
@@ -186,6 +187,27 @@ describe("NuPhone, title Battle, and title Minigame production visuals", () => {
       expect(nodeText(namedNode(zh.cases.map.tree, "tux-nuphone-location-label"))).toBe("方絮镇");
       expect(treeHasText(en.cases.map.tree, "YOU ARE HERE")).toBeTrue();
       expect(treeHasText(zh.cases.map.tree, "当前位置")).toBeTrue();
+      for (const [capture, lang] of [[en, "en_US"], [zh, "zh_CN"]] as const) {
+        expect(nodeText(namedNode(capture.cases.start.tree, "start-menu-root-title")))
+          .toBe(lang === "zh_CN" ? "开始菜单" : "START MENU");
+        expect(nodeText(namedNode(capture.cases.start.tree, "start-menu-root-label-party")))
+          .toBe(DATA.startMenu.root.party[lang]);
+        expect(nodeText(namedNode(capture.cases.start.tree, "start-menu-root-label-bag")))
+          .toBe(DATA.startMenu.root.bag[lang]);
+        expect(nodeText(namedNode(capture.cases.start.tree, "start-menu-root-label-player")))
+          .toBe(DATA.startMenu.root.player[lang]);
+        expect(namedNode(capture.cases.start.tree, "start-menu-root-label-tuxepedia")).toBeDefined();
+        expect(nodeText(namedNode(capture.cases.party.tree, "start-menu-party-name-0")))
+          .toBe(BATTLE_DB[lang].monsters.rockitten!.name);
+        expect(nodeText(namedNode(capture.cases.player.tree, "start-menu-player-name")))
+          .toBe(lang === "zh_CN" ? "小红" : "Red");
+        expect(nodeText(namedNode(capture.cases.bag.tree, "tux-bag-title")))
+          .toBe(DATA.startMenu.root.bag[lang]);
+        expect(nodeText(namedNode(capture.cases.bag.tree, "tux-bag-item-name")))
+          .toBe(BATTLE_DB[lang].items.potion!.name);
+        expect(nodeText(namedNode(capture.cases.bag.tree, "tux-bag-item-description")))
+          .toBe(BATTLE_DB[lang].items.potion!.description);
+      }
     }
   }, 180_000);
 
@@ -195,13 +217,18 @@ describe("NuPhone, title Battle, and title Minigame production visuals", () => {
     expect(namedNode(capture.cases.battle.tree, "player-party-tray")).toBeDefined();
     expect(namedNode(capture.cases.battle.tree, "enemy-party-tray")).toBeDefined();
     const accent = rgb(TUXEMON_UI_THEME.accent);
-    expect(countColour(capture.cases.title.rgba, 480, { x: 270, y: 140, width: 188, height: 98 }, accent))
+    expect(countColour(capture.cases.title.rgba, 480, { x: 250, y: 30, width: 220, height: 220 }, accent))
       .toBeGreaterThan(300);
     expect(countColour(capture.cases.difficulty.rgba, 480, { x: 120, y: 80, width: 240, height: 170 }, accent))
       .toBeGreaterThan(500);
     const green: readonly [number, number, number] = [0x7c, 0xf2, 0x9a];
     expect(countColour(capture.cases.map.rgba, 480, { x: 120, y: 40, width: 220, height: 190 }, green))
       .toBeGreaterThan(1);
+    const selected = rgb("#145064");
+    expect(countColour(capture.cases.party.rgba, 480, { x: 13, y: 36, width: 270, height: 32 }, selected))
+      .toBeGreaterThan(2_500);
+    expect(countColour(capture.cases.bag.rgba, 480, { x: 13, y: 41, width: 270, height: 185 }, accent))
+      .toBeGreaterThan(2_000);
   }, 120_000);
 
   simTest("hard minigame shows description without monster art", async () => {
@@ -248,6 +275,9 @@ describe("NuPhone, title Battle, and title Minigame production visuals", () => {
           minigameExit: true,
           phoneMap: true,
           mapPoint: true,
+          startParty: true,
+          startPlayer: true,
+          startBag: true,
         });
       }
     }
