@@ -49,8 +49,7 @@ function playAgentVsAi(seed: string, difficulty: ArenaDifficulty, format: "singl
     { kind: "ai", difficulty },
   ], format, seed));
   while (!isOver(battle)) {
-    const moves = observe(battle, 0).legalActions.filter((action) => action.type === "move");
-    const choices = moves.length > 0 ? moves : observe(battle, 0).legalActions;
+    const choices = observe(battle, 0).legalActions;
     const action = choices[Math.floor(random() * choices.length)]!;
     const submitted = submit(battle, 0, action);
     if (!submitted.ok) throw new Error(submitted.error);
@@ -108,6 +107,7 @@ describe("headless Arena battle API", () => {
     expect(first.battle.actions).toEqual([]);
     expect(canonicalJson(first.battle.core)).toBe(beforeCore);
     expect(canonicalJson(observe(first.battle, 1))).toBe(beforeOpponent);
+    expect(() => tape(first.battle)).toThrow("unpaired submission");
 
     const duplicate = submit(first.battle, 0, action0);
     expect(duplicate).toEqual({ ok: false, battle: first.battle, error: "ALREADY_SUBMITTED" });
@@ -137,8 +137,14 @@ describe("headless Arena battle API", () => {
           "own", "result", "round", "side", "turn", "v",
         ]);
         expect(view.own.party).toHaveLength(5);
+        expect(Object.keys(view.opponent)).toEqual(["active"]);
         expect(view.opponent.active.length).toBeLessThanOrEqual(2);
         expect(view.opponent.active.length).toBeLessThan(battle.core.parties[side === 0 ? 1 : 0].length);
+        for (const active of view.opponent.active) {
+          expect(Object.keys(active).sort()).toEqual([
+            "hpPercent", "level", "position", "revealedMoves", "species", "status",
+          ]);
+        }
         const keys = collectKeys(view);
         for (const key of forbidden) expect(keys.has(key), `${key} leaked`).toBe(false);
       }
@@ -194,6 +200,21 @@ describe("headless Arena battle API", () => {
       expect(answer && !answer.ok ? answer.battle : null).toBe(battle);
       expect(stateHash(battle)).toBe(hash);
     }
+    const legal = new Set(observe(battle, 0).legalActions.map(canonicalJson));
+    let fuzzState = 0xa11ce5ed;
+    const random = () => {
+      fuzzState = (Math.imul(fuzzState, 1_664_525) + 1_013_904_223) >>> 0;
+      return fuzzState / 4_294_967_296;
+    };
+    for (let index = 0; index < 1_000; index++) {
+      let value = randomJson(random, 3);
+      if (legal.has(canonicalJson(value))) value = { value, fuzz: index };
+      let answer: ReturnType<typeof submit> | undefined;
+      expect(() => { answer = submit(battle, 0, value); }).not.toThrow();
+      expect(answer?.ok, `random JSON sample ${index} was accepted`).toBe(false);
+      expect(answer && !answer.ok ? answer.battle : null).toBe(battle);
+      expect(stateHash(battle)).toBe(hash);
+    }
     expect(submit(battle, 9, { type: "run" })).toEqual({
       ok: false,
       battle,
@@ -206,6 +227,23 @@ describe("headless Arena battle API", () => {
     });
     const ai = createArenaBattle(config([{ kind: "agent" }, { kind: "ai", difficulty: "normal" }]));
     expect(submit(ai, 1, defaultAction(ai, 1))).toEqual({ ok: false, battle: ai, error: "SIDE_NOT_AGENT" });
+  });
+
+  test("accepts a value-equal legal swap and records it only after the pair settles", () => {
+    const battle = createArenaBattle(config([
+      { kind: "agent", difficulty: "expert" },
+      { kind: "agent", difficulty: "expert" },
+    ]));
+    const swap = observe(battle, 0).legalActions.find((action) => action.type === "swap");
+    expect(swap).toBeDefined();
+    const first = submit(battle, 0, JSON.parse(JSON.stringify(swap)));
+    expect(first.ok).toBe(true);
+    if (!first.ok || !swap) return;
+    expect(first.resolved).toBe(false);
+    const second = submit(first.battle, 1, defaultAction(first.battle, 1));
+    expect(second.ok).toBe(true);
+    if (!second.ok) return;
+    expect(second.battle.actions[0]?.[0]).toEqual(swap);
   });
 
   test("the explicit turn cap ends deterministically and rejects post-terminal submissions", () => {
@@ -280,6 +318,34 @@ function cloneMalformed(value: unknown, index: number): unknown {
     return { ...(value as Record<string, unknown>), fuzz: index };
   }
   return value;
+}
+
+function randomJson(random: () => number, depth: number): unknown {
+  const scalar = (): unknown => {
+    switch (Math.floor(random() * 7)) {
+      case 0: return null;
+      case 1: return random() < 0.5;
+      case 2: return Math.floor(random() * 2_000_001) - 1_000_000;
+      case 3: return (random() - 0.5) * Number.MAX_SAFE_INTEGER;
+      case 4: return ["", "move", "swap", "item", "run", "__proto__", "toString"][Math.floor(random() * 7)]!;
+      case 5: return `fuzz-${Math.floor(random() * 1_000_000).toString(36)}`;
+      default: return random() < 0.5 ? Number.MAX_SAFE_INTEGER : Number.MIN_SAFE_INTEGER;
+    }
+  };
+  if (depth <= 0 || random() < 0.45) return scalar();
+  const length = Math.floor(random() * 5);
+  if (random() < 0.4) {
+    return Array.from({ length }, () => randomJson(random, depth - 1));
+  }
+  const keys = ["type", "slot", "target", "party", "item", "extra", "constructor", "__proto__"];
+  const entries: Array<[string, unknown]> = [];
+  for (let index = 0; index < length; index++) {
+    const key = random() < 0.8
+      ? keys[Math.floor(random() * keys.length)]!
+      : `key-${Math.floor(random() * 1_000).toString(36)}`;
+    entries.push([key, randomJson(random, depth - 1)]);
+  }
+  return JSON.parse(JSON.stringify(Object.fromEntries(entries)));
 }
 
 function cloneTape(value: ReturnType<typeof tape>): ReturnType<typeof tape> {

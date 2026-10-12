@@ -11,6 +11,7 @@ import {
 } from "../battle/arena.ts";
 import {
   advanceArenaReplay,
+  ARENA_REPLAY_MAX_BYTES,
   arenaReplayRuntimeState,
   loadArenaReplayTape,
   parseArenaReplayTape,
@@ -43,7 +44,7 @@ function response(
     status: 200,
     url: "https://game.example/pocket-tuxemon/tape.json",
     headers: { get: (name) => name.toLowerCase() === "content-type" ? "application/json" : null },
-    text: async () => body,
+    body: new Blob([body]).stream(),
     ...overrides,
   };
 }
@@ -109,6 +110,20 @@ describe("Arena web replay input", () => {
     }))).rejects.toThrow("must be JSON");
   });
 
+  test("bounds a chunked response before allocating or parsing the complete body", async () => {
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new Uint8Array(ARENA_REPLAY_MAX_BYTES));
+        controller.enqueue(new Uint8Array([0x20]));
+        controller.close();
+      },
+    });
+    await expect(loadArenaReplayTape("?battleReplay=tape.json", BASE, async () => response("", {
+      headers: { get: (name) => name.toLowerCase() === "content-type" ? "application/json" : null },
+      body,
+    }))).rejects.toThrow(`exceeds ${ARENA_REPLAY_MAX_BYTES}`);
+  });
+
   test("validates before playback and advances one simultaneous pair at a time", () => {
     const recording = oneTurnTape();
     const prepared = prepareArenaReplay(recording);
@@ -123,6 +138,28 @@ describe("Arena web replay input", () => {
     expect(runtime.battle.awaiting).toBeNull();
     expect(runtime.visuals.environment).toHaveProperty("background");
     expect(Object.keys(runtime.visuals.monsters).length).toBeGreaterThanOrEqual(2);
+  });
+
+  test("steps an AI-only tape from turn zero and reproduces its terminal hash", () => {
+    const finished = createArenaBattle({
+      seed: SEED,
+      format: "single",
+      sides: [
+        { kind: "ai", difficulty: "beginner" },
+        { kind: "ai", difficulty: "beginner" },
+      ],
+    });
+    const recording = tape(finished);
+    const prepared = prepareArenaReplay(recording);
+    expect(recording.actions.length).toBeGreaterThan(0);
+    expect(prepared.initial.turn).toBe(0);
+    expect(prepared.initial.terminal).toBeNull();
+    let stepped = prepared.initial;
+    for (const index of recording.actions.keys()) {
+      stepped = advanceArenaReplay(stepped, recording, index);
+    }
+    expect(stateHash(stepped)).toBe(stateHash(finished));
+    expect(stateHash(stepped)).toBe(prepared.terminalHash);
   });
 
   test("never treats tape fields as code or markup", () => {

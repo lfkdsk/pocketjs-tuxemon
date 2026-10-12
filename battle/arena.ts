@@ -551,7 +551,7 @@ function runAiOnly(battle: ArenaBattle): ArenaBattle {
   return next;
 }
 
-export function createArenaBattle(value: ArenaConfig): ArenaBattle {
+function createArenaBattleStart(value: ArenaConfig): ArenaBattle {
   const config = normalizeConfig(value);
   const player = team(config.seed, 0, config.sides[0], config.teamRules);
   const enemy = team(config.seed, 1, config.sides[1], config.teamRules);
@@ -580,7 +580,17 @@ export function createArenaBattle(value: ArenaConfig): ArenaBattle {
     policyRng: [domainSeed(config.seed, "policy:0"), domainSeed(config.seed, "policy:1")],
     terminal: null,
   };
-  return runAiOnly(primeAi(battle));
+  return primeAi(battle);
+}
+
+export function createArenaBattle(value: ArenaConfig): ArenaBattle {
+  return runAiOnly(createArenaBattleStart(value));
+}
+
+/** Initial paired-decision boundary used by validated tape playback. Unlike
+ * createArenaBattle, this does not eagerly finish an AI-versus-AI match. */
+export function createArenaReplayStart(value: ArenaConfig): ArenaBattle {
+  return createArenaBattleStart(value);
 }
 
 export function observe(battle: ArenaBattle, side: ArenaSide): ArenaObservation {
@@ -680,6 +690,11 @@ export function result(battle: ArenaBattle): ArenaResult | null {
 }
 
 export function tape(battle: ArenaBattle): BattleTape {
+  for (const side of [0, 1] as const) {
+    if (battle.config.sides[side].kind === "agent" && battle.pending[side] !== null) {
+      throw new ArenaTapeError(`cannot record battle while agent side ${side} has an unpaired submission`);
+    }
+  }
   return {
     v: ARENA_VERSION,
     seed: battle.seed,
@@ -742,7 +757,12 @@ export function validateBattleTape(value: unknown): ArenaTapeValidation {
   }
 }
 
-function replayAgentPair(battle: ArenaBattle, pair: [ArenaAction, ArenaAction], turn: number): ArenaBattle {
+/** Apply one validated tape pair, including an AI-versus-AI boundary. */
+export function replayArenaPair(
+  battle: ArenaBattle,
+  pair: [ArenaAction, ArenaAction],
+  turn: number,
+): ArenaBattle {
   if (battle.terminal) throw new ArenaTapeError(`battle tape has action pair ${turn} after the battle ended`);
   for (const side of [0, 1] as const) {
     if (battle.config.sides[side].kind === "ai") {
@@ -761,6 +781,13 @@ function replayAgentPair(battle: ArenaBattle, pair: [ArenaAction, ArenaAction], 
     }
     next = submitted.battle;
   }
+  if (next.config.sides.every((side) => side.kind === "ai")) {
+    if (!next.pending[0] || !next.pending[1]) {
+      throw new ArenaTapeError(`battle tape actions[${turn}] found a stalled AI-only boundary`);
+    }
+    next = settlePair(next);
+    if (!next.terminal) next = primeAi(next);
+  }
   const recorded = next.actions[turn];
   if (!recorded || !actionEqual(recorded[0], pair[0]) || !actionEqual(recorded[1], pair[1])) {
     throw new ArenaTapeError(`battle tape actions[${turn}] did not settle as one simultaneous pair`);
@@ -772,15 +799,8 @@ export function replay(value: unknown): ArenaBattle {
   const checked = validateBattleTape(value);
   if (!checked.ok) throw new ArenaTapeError(checked.error);
   const source = checked.tape;
-  const battle = createArenaBattle({ seed: source.seed, ...source.config });
-  if (battle.config.sides.every((side) => side.kind === "ai")) {
-    if (canonicalJson(battle.actions) !== canonicalJson(source.actions)) {
-      throw new ArenaTapeError("battle tape actions do not match the seeded AI-only battle");
-    }
-    return battle;
-  }
-  let next = battle;
-  for (const [turn, pair] of source.actions.entries()) next = replayAgentPair(next, pair, turn);
+  let next = createArenaReplayStart({ seed: source.seed, ...source.config });
+  for (const [turn, pair] of source.actions.entries()) next = replayArenaPair(next, pair, turn);
   return next;
 }
 

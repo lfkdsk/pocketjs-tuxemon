@@ -12,10 +12,10 @@ import { base64ToBytes } from "../vendor/pocket-rpgkit/vendor/pocketjs/framework
 import { utf8Encode } from "../vendor/pocket-rpgkit/src/engine/save.ts";
 import {
   ArenaTapeError,
-  createArenaBattle,
+  createArenaReplayStart,
   replay,
+  replayArenaPair,
   stateHash,
-  submit,
   validateBattleTape,
   type ArenaBattle,
   type ArenaTapeValidation,
@@ -38,7 +38,7 @@ export interface ArenaReplayResponse {
   status: number;
   url: string;
   headers: { get(name: string): string | null };
-  text(): Promise<string>;
+  body: ReadableStream<Uint8Array> | null;
 }
 
 export type ArenaReplayFetch = (
@@ -64,6 +64,39 @@ function checkedJson(text: string): string {
     replayError(`tape exceeds ${ARENA_REPLAY_MAX_BYTES} decoded bytes`);
   }
   return text;
+}
+
+async function readResponseJson(body: ReadableStream<Uint8Array> | null): Promise<string> {
+  if (!body) replayError("source response has no body");
+  const reader = body.getReader();
+  const chunks: Uint8Array[] = [];
+  let length = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (!value) continue;
+      length += value.byteLength;
+      if (length > ARENA_REPLAY_MAX_BYTES) {
+        await reader.cancel();
+        replayError(`tape exceeds ${ARENA_REPLAY_MAX_BYTES} decoded bytes`);
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  const bytes = new Uint8Array(length);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  } catch {
+    replayError("source is not valid UTF-8 JSON");
+  }
 }
 
 function decodeDataUrl(value: string): string {
@@ -173,7 +206,7 @@ export async function loadArenaReplayTape(
   if (Number.isFinite(declared) && declared > ARENA_REPLAY_MAX_BYTES) {
     replayError(`tape exceeds ${ARENA_REPLAY_MAX_BYTES} decoded bytes`);
   }
-  return parseArenaReplayTape(await response.text());
+  return parseArenaReplayTape(await readResponseJson(response.body));
 }
 
 /** Validate the complete semantic replay before the first frame is shown.
@@ -184,7 +217,7 @@ export function prepareArenaReplay(value: unknown): PreparedArenaReplay {
   const terminal = replay(checked.tape);
   return {
     tape: checked.tape,
-    initial: createArenaBattle({ seed: checked.tape.seed, ...checked.tape.config }),
+    initial: createArenaReplayStart({ seed: checked.tape.seed, ...checked.tape.config }),
     terminalHash: stateHash(terminal),
   };
 }
@@ -198,16 +231,7 @@ export function advanceArenaReplay(
   const pair = tape.actions[index];
   if (!pair) replayError(`turn ${index} is outside the tape`);
   if (battle.turn !== index) replayError(`playback cursor ${battle.turn} does not match turn ${index}`);
-  let next = battle;
-  for (const side of [0, 1] as const) {
-    if (next.config.sides[side].kind !== "agent") continue;
-    const submitted = submit(next, side, pair[side]);
-    if (!submitted.ok) replayError(`turn ${index} side ${side} was rejected: ${submitted.error}`);
-    next = submitted.battle;
-  }
-  const committed = next.actions[index];
-  if (!committed) replayError(`turn ${index} did not settle simultaneously`);
-  return next;
+  return replayArenaPair(battle, pair, index);
 }
 
 /** Project an authoritative Arena boundary into the production battle scene.
