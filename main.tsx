@@ -72,8 +72,11 @@ import {
   liveWorldItemContext,
 } from "./ui/world-item-shell.ts";
 import type { BattleDb } from "./importer/battle-schema.ts";
-import featureModesJson from "./data/feature-modes.json";
-import type { FeatureModesRuntimeData } from "./ui/feature-modes-data.ts";
+import featureModesJson from "./data/feature-modes-shell.json";
+import type {
+  FeatureModesShellData,
+  WorldItemMapData,
+} from "./ui/feature-modes-data.ts";
 import { createBootSnapshotOverlay } from "./ui/boot-snapshot-overlay.tsx";
 import { createNpcSrcProvider } from "./ui/npc-src-repository.ts";
 import { createChoiceIconNpcSrc } from "./ui/choice-icon-provider.ts";
@@ -90,6 +93,7 @@ import { createDemo } from "./vendor/pocket-rpgkit/src/ui/demo/index.ts";
 import { frameProfileMark } from "./vendor/pocket-rpgkit/src/frame-profile.ts";
 import { createGameWorldCacheDriver } from "./ui/game-world-cache-driver.ts";
 import type { WorldStreamedTerrainStats } from "./vendor/pocket-rpgkit/src/ui/WorldStreamedTerrain.tsx";
+import { decodeMapEntryBytes } from "./vendor/pocket-rpgkit/src/engine/map-repository.ts";
 import type { GameWorldOverlayProps } from "./vendor/pocket-rpgkit/src/ui/GameView.tsx";
 import { createDemoOptions, hasDemoChapters } from "./ui/demo-tape.ts";
 import type {
@@ -297,7 +301,16 @@ const demo: GameViewDemoConfig | undefined = hasDemoChapters(lang) ? (() => {
 // switcher is hidden on targets that cannot persist a choice (PSP: language
 // is a build-time choice there).
 const langSwitchable = canSwitchLang();
-const featureModes = featureModesJson as unknown as FeatureModesRuntimeData;
+const featureModes = featureModesJson as unknown as FeatureModesShellData;
+let featureWorldItems: WorldItemMapData | null = null;
+const worldItemData = (): WorldItemMapData => {
+  if (featureWorldItems === null) {
+    featureWorldItems = JSON.parse(
+      decodeMapEntryBytes(readEntry("feature/world-items.json")),
+    ) as WorldItemMapData;
+  }
+  return featureWorldItems;
+};
 const tuxepediaConfig = createTuxepediaOverlay({ catalog, lang });
 const nuPhoneConfig = createNuPhoneOverlay({ data: featureModes.nuPhoneMap, lang });
 const titleGlobals = globalThis as typeof globalThis & {
@@ -389,7 +402,7 @@ const bagMenuConfig = createBagMenu({
   db: bagDb,
   data: featureModes.startMenu,
   lang,
-  context: (sessionHost) => liveWorldItemContext(sessionHost, featureModes.worldItems, lang),
+  context: (sessionHost) => liveWorldItemContext(sessionHost, worldItemData(), lang),
   onDirectives: (directives, _result, sessionHost) => {
     applyWorldItemDirectives(sessionHost, directives);
   },

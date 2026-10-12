@@ -6872,6 +6872,10 @@
     "file": "dist/demo/tape.zh_CN.bin"
   },
   {
+    "key": "feature/world-items.json",
+    "file": "dist/feature-world-items.json"
+  },
+  {
     "key": "game:battle-db",
     "file": "data/battle-db.json"
   },

@@ -212,3 +212,7 @@ export interface FeatureModesRuntimeData {
   startMenu: StartMenuData;
   worldItems: WorldItemMapData;
 }
+
+/** Boot document embedded in the application bundle. The larger map/item
+ * rules are a raw pak entry and are decoded only when Bag first needs them. */
+export type FeatureModesShellData = Omit<FeatureModesRuntimeData, "worldItems">;

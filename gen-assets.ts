@@ -145,7 +145,11 @@ for (const image of Object.values(featureModes.nuPhoneMap.art)) {
   writeFileSync(join(ROOT, image.texture), png);
   featureModeImages[image.texture] = { psm: 3 };
 }
-writeFileSync(join(ROOT, "data/feature-modes.json"), jsonBytes(featureModesRuntimeData(featureModes)));
+const featureModesData = featureModesRuntimeData(featureModes);
+const { worldItems: featureWorldItems, ...featureModesShell } = featureModesData;
+writeFileSync(join(ROOT, "data/feature-modes.json"), jsonBytes(featureModesData));
+writeFileSync(join(ROOT, "data/feature-modes-shell.json"), jsonBytes(featureModesShell));
+writeFileSync(join(DIST, "feature-world-items.json"), jsonBytes(featureWorldItems));
 
 // KA1 reducer-driven map animations use static per-frame images rather than
 // the host-clock sprite atlases used by terrain animation. Cook only the
@@ -685,6 +689,7 @@ const pakEntries = [
   ...audioPakEntries,
   audioAttributionPakEntry,
   itemIconPakEntry,
+  { key: "feature/world-items.json", file: "dist/feature-world-items.json" },
   { key: "world-index.json", file: "dist/world-index.json" },
   ...(demoData?.pakEntries ?? []),
   ...(zhDemo.data?.pakEntries ?? []),
