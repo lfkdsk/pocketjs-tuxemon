@@ -1,4 +1,5 @@
 {
+  "format": "pocket-tuxemon/g6-journey/v1",
   "worldTraversal": "seamless-v1",
   "hz": 60,
   "frames": 3629,
@@ -3693,5 +3694,5 @@
     "billie_lost": false
   },
   "terminalStateSha256": "2ae4650cc8be15cd1f794b9440f79903220bd745f3725af020619490dbd1eba9",
-  "sha256": "1d45d2d202fd64ae41be8b3e1f0b117de754dd9cf99e8a43c62f2a5bac7290f5"
+  "sha256": "02a3a50b2232a08d26dd6e375981a39fb6e66780d99dd318a9b5214c09178bc1"
 }

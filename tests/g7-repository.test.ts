@@ -58,10 +58,10 @@ const GAME_OPTIONS = { extensions: TUXEMON_EXTENSIONS, battle: TUXEMON_BATTLE_RU
 // identity, the eight map-entry calendar variables, the persistent step
 // total, and the map BGM clock; the story terminal — spyder_route1@14,19 —
 // is unchanged.
-const LEGACY_TERMINAL_STATE_SHA256 = "213786c6500e2617ba2b213a3045146fd3f201c6eaaca10251e376878acdb0b9";
-const BEFORE_HANDOFF_FRAME = 3_482;
-const MID_HANDOFF_FRAME = 3_496;
-const AFTER_HANDOFF_FRAME = 3_500;
+const LEGACY_TERMINAL_STATE_SHA256 = "349f4884364be2c1781100f227d3773228d19204a26e0df47fab682b61de09b5";
+const BEFORE_HANDOFF_FRAME = 3_611;
+const MID_HANDOFF_FRAME = 3_625;
+const AFTER_HANDOFF_FRAME = 3_629;
 const BTN_LTRIGGER = 0x0100;
 const VIEWPORT = { w: 480, h: 272 } as const;
 
