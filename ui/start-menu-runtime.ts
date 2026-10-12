@@ -16,6 +16,7 @@ import type {
   GameViewSessionHost,
 } from "../vendor/pocket-rpgkit/src/ui/demo-contract.ts";
 import type { SessionState } from "../vendor/pocket-rpgkit/src/engine/session.ts";
+import { roundHalfEven } from "./settings.ts";
 
 export type StartMenuBaseRowId =
   | "party"
@@ -43,7 +44,7 @@ export interface StartMenuRootLabels {
   nuphone: string;
 }
 
-export type PartyActionId = "info" | "moves" | "move" | "sort" | "release";
+export type PartyActionId = "info" | "moves" | "unequip" | "equip" | "swapItem" | "move" | "sort" | "release";
 export type PartySortId = "level" | "hp" | "name" | "id";
 
 export interface StartMenuLabels {
@@ -134,6 +135,8 @@ export interface PartyMonsterView {
   hpRatio: number;
   status: string | null;
   types: string[];
+  heldItemSlug: string | null;
+  heldItemName: string | null;
 }
 
 export interface PartyMoveView {
@@ -147,7 +150,7 @@ export interface PartyMoveView {
   recharge: number | null;
 }
 
-export type StartMenuCatalog = Pick<BattleDb, "monsters" | "techniques" | "statuses">;
+export type StartMenuCatalog = Pick<BattleDb, "monsters" | "techniques" | "items" | "statuses">;
 
 export function partyMonsterView(
   monster: Readonly<SpawnedMonsterSnapshot>,
@@ -168,6 +171,8 @@ export function partyMonsterView(
     hpRatio: maxHp > 0 ? hp / maxHp : 0,
     status: monster.status ? catalog.statuses[monster.status]?.name ?? monster.status : null,
     types: [...(monster.types ?? species?.types ?? [])],
+    heldItemSlug: monster.heldItem ?? null,
+    heldItemName: monster.heldItem ? catalog.items[monster.heldItem]?.name ?? monster.heldItem : null,
   };
 }
 
@@ -197,10 +202,65 @@ export function partyMoveViews(
   return rows;
 }
 
-export function partyActions(monster: Readonly<SpawnedMonsterSnapshot>, partySize: number): PartyActionId[] {
+export interface PartyHeldItemView {
+  slug: string;
+  name: string;
+  quantity: number;
+}
+
+export interface PartyHeldItemSwapView {
+  partyIndex: number;
+  monsterName: string;
+  itemSlug: string;
+  itemName: string;
+}
+
+export function holdableItemViews(
+  items: Readonly<Record<string, number>>,
+  catalog: StartMenuCatalog,
+): PartyHeldItemView[] {
+  const rows: PartyHeldItemView[] = [];
+  for (const [slug, rawQuantity] of Object.entries(items)) {
+    const quantity = Math.max(0, Math.trunc(rawQuantity));
+    const item = catalog.items[slug];
+    if (quantity === 0 || item?.behaviors.holdable !== true) continue;
+    rows.push({ slug, name: item.name, quantity });
+  }
+  return rows;
+}
+
+export function heldItemSwapViews(
+  selectedIndex: number,
+  party: readonly SpawnedMonsterSnapshot[],
+  catalog: StartMenuCatalog,
+): PartyHeldItemSwapView[] {
+  const rows: PartyHeldItemSwapView[] = [];
+  for (let partyIndex = 0; partyIndex < party.length; partyIndex++) {
+    const monster = party[partyIndex]!;
+    if (partyIndex === selectedIndex || !monster.heldItem) continue;
+    rows.push({
+      partyIndex,
+      monsterName: partyMonsterView(monster, catalog).name,
+      itemSlug: monster.heldItem,
+      itemName: catalog.items[monster.heldItem]?.name ?? monster.heldItem,
+    });
+  }
+  return rows;
+}
+
+export function partyActions(
+  monster: Readonly<SpawnedMonsterSnapshot>,
+  selectedIndex: number,
+  party: readonly SpawnedMonsterSnapshot[],
+  items: Readonly<Record<string, number>>,
+  catalog: StartMenuCatalog,
+): PartyActionId[] {
   const actions: PartyActionId[] = ["info"];
   if (monster.moves.length > 0) actions.push("moves");
-  if (partySize > 1) actions.push("move", "sort", "release");
+  if (monster.heldItem) actions.push("unequip");
+  if (holdableItemViews(items, catalog).length > 0) actions.push("equip");
+  if (heldItemSwapViews(selectedIndex, party, catalog).length > 0) actions.push("swapItem");
+  if (party.length > 1) actions.push("move", "sort", "release");
   return actions;
 }
 
@@ -250,6 +310,9 @@ export interface PlayerSummary {
   playtime: string;
   seen: number;
   caught: number;
+  steps: number;
+  tuxepediaTotal: number;
+  tuxepediaProgress: number;
   history: BattleHistoryEntry[];
   battles: PlayerBattleSummary;
 }
@@ -262,6 +325,7 @@ export function formatStartMenuPlaytime(seconds: number): string {
 
 export function playerSummary(
   session: Pick<SessionState, "sw" | "ext">,
+  tuxepediaTotal = 0,
 ): PlayerSummary {
   const ext = tuxemonExtensionState(session.ext);
   const history = ext.history
@@ -282,6 +346,11 @@ export function playerSummary(
     playtime: formatStartMenuPlaytime(playtimeSeconds),
     seen,
     caught,
+    steps: Math.max(0, session.sw.steps ?? 0),
+    tuxepediaTotal,
+    tuxepediaProgress: tuxepediaTotal > 0
+      ? roundHalfEven(seen / tuxepediaTotal * 100, 1)
+      : 0,
     history,
     battles: {
       total: history.length,
@@ -292,7 +361,37 @@ export function playerSummary(
   };
 }
 
-export type PartyPhase = "list" | "action" | "detail" | "moves" | "move" | "sort" | "releaseConfirm";
+export interface MonsterExperienceProgress {
+  earned: number;
+  required: number;
+}
+
+/** Upstream MonsterInfo shows XP earned within the current level over the
+ * complete interval to the next level, not the lifetime total. */
+export function monsterExperienceProgress(
+  monster: Pick<SpawnedMonsterSnapshot, "level" | "totalExperience">,
+  rules: Pick<BattleDb["rules"], "levelRange" | "experience">,
+): MonsterExperienceProgress {
+  const [minimum, maximum] = rules.levelRange;
+  const group = rules.experience.groups.default;
+  if (!group) throw new Error("start menu: default experience group is missing");
+  const threshold = (level: number): number => {
+    const bounded = Math.max(minimum, Math.min(maximum, level));
+    return Math.trunc(group.multiplier * bounded ** group.experienceCoefficient);
+  };
+  const total = Math.max(0, monster.totalExperience ?? 0);
+  const earned = monster.level <= 1 ? total : Math.max(0, total - threshold(monster.level));
+  const required = monster.level >= maximum
+    ? 0
+    : Math.max(0, threshold(monster.level + 1) - threshold(monster.level));
+  return { earned, required };
+}
+
+export function formatMonsterExperience(progress: Readonly<MonsterExperienceProgress>): string {
+  return `${progress.earned.toLocaleString("en-US")}/${progress.required.toLocaleString("en-US")}`;
+}
+
+export type PartyPhase = "list" | "action" | "detail" | "moves" | "equip" | "swapItem" | "move" | "sort" | "releaseConfirm" | "releaseResult";
 export type StartMenuScreen = "root" | "party" | "player";
 
 export interface PartyMenuState {
@@ -300,9 +399,12 @@ export interface PartyMenuState {
   cursor: number;
   actionCursor: number;
   moveCursor: number;
+  itemCursor: number;
   sortCursor: number;
-  /** 0 = Yes, 1 = No. Confirmation deliberately opens on No. */
+  /** Upstream order: 0 = No, 1 = Yes. Confirmation opens on No. */
   releaseCursor: 0 | 1;
+  /** Upper-cased display name retained after the released party row is gone. */
+  releasedName: string | null;
 }
 
 export interface StartMenuState {
@@ -310,6 +412,7 @@ export interface StartMenuState {
   rootCursor: number;
   partyMenu: PartyMenuState;
   party: SpawnedMonsterSnapshot[];
+  items: Record<string, number>;
   player: PlayerSummary;
 }
 
@@ -331,6 +434,7 @@ export interface StartMenuReduceContext {
 }
 
 const PARTY_SORTS: readonly PartySortId[] = ["level", "hp", "name", "id"];
+export const PARTY_ACTION_ROW_HEIGHT = 21;
 
 function wrap(index: number, length: number): number {
   return length > 0 ? (index + length) % length : 0;
@@ -346,13 +450,35 @@ function listPartyState(cursor = 0): PartyMenuState {
     cursor,
     actionCursor: 0,
     moveCursor: 0,
+    itemCursor: 0,
     sortCursor: 0,
-    releaseCursor: 1,
+    releaseCursor: 0,
+    releasedName: null,
   };
 }
 
 function updatePartyMenu(state: Readonly<StartMenuState>, partyMenu: PartyMenuState): StartMenuState {
   return { ...state, partyMenu };
+}
+
+function withHeldItem(
+  monster: Readonly<SpawnedMonsterSnapshot>,
+  heldItem: string | undefined,
+): SpawnedMonsterSnapshot {
+  const { heldItem: _previous, ...rest } = monster;
+  return heldItem === undefined ? rest : { ...rest, heldItem };
+}
+
+function changeInventory(
+  current: Readonly<Record<string, number>>,
+  slug: string,
+  amount: number,
+): Record<string, number> {
+  const items = { ...current };
+  const quantity = Math.max(0, Math.trunc(items[slug] ?? 0) + amount);
+  if (quantity === 0) delete items[slug];
+  else items[slug] = quantity;
+  return items;
 }
 
 function partyTransition(
@@ -388,7 +514,7 @@ function partyTransition(
   }
 
   if (current.phase === "action") {
-    const actions = partyActions(selected, party.length);
+    const actions = partyActions(selected, current.cursor, party, state.items, catalog);
     if (action === "back") {
       return { state: updatePartyMenu(state, listPartyState(current.cursor)), effects: [] };
     }
@@ -408,16 +534,83 @@ function partyTransition(
         return { state: updatePartyMenu(state, { ...current, phase: "detail" }), effects: [] };
       case "moves":
         return { state: updatePartyMenu(state, { ...current, phase: "moves", moveCursor: 0 }), effects: [] };
+      case "unequip": {
+        if (!selected.heldItem) return { state: { ...state }, effects: [] };
+        const nextParty = [...party];
+        nextParty[current.cursor] = withHeldItem(selected, undefined);
+        return {
+          state: {
+            ...state,
+            party: nextParty,
+            items: changeInventory(state.items, selected.heldItem, 1),
+            partyMenu: listPartyState(current.cursor),
+          },
+          effects: [{ type: "persistParty" }],
+        };
+      }
+      case "equip":
+        return { state: updatePartyMenu(state, { ...current, phase: "equip", itemCursor: 0 }), effects: [] };
+      case "swapItem":
+        return { state: updatePartyMenu(state, { ...current, phase: "swapItem", itemCursor: 0 }), effects: [] };
       case "move":
         return { state: updatePartyMenu(state, { ...current, phase: "move" }), effects: [] };
       case "sort":
         return { state: updatePartyMenu(state, { ...current, phase: "sort", sortCursor: 0 }), effects: [] };
       case "release":
         return {
-          state: updatePartyMenu(state, { ...current, phase: "releaseConfirm", releaseCursor: 1 }),
+          state: updatePartyMenu(state, { ...current, phase: "releaseConfirm", releaseCursor: 0 }),
           effects: [],
         };
     }
+  }
+
+  if (current.phase === "equip") {
+    const rows = holdableItemViews(state.items, catalog);
+    if (action === "back" || rows.length === 0) {
+      return { state: updatePartyMenu(state, { ...current, phase: "action" }), effects: [] };
+    }
+    if (action === "up" || action === "down") {
+      const delta = action === "up" ? -1 : 1;
+      return {
+        state: updatePartyMenu(state, { ...current, itemCursor: wrap(current.itemCursor + delta, rows.length) }),
+        effects: [],
+      };
+    }
+    if (action !== "confirm") return { state: { ...state }, effects: [] };
+    const chosen = rows[clamp(current.itemCursor, rows.length)]!;
+    let items = state.items;
+    if (selected.heldItem) items = changeInventory(items, selected.heldItem, 1);
+    items = changeInventory(items, chosen.slug, -1);
+    const nextParty = [...party];
+    nextParty[current.cursor] = withHeldItem(selected, chosen.slug);
+    return {
+      state: { ...state, party: nextParty, items, partyMenu: listPartyState(current.cursor) },
+      effects: [{ type: "persistParty" }],
+    };
+  }
+
+  if (current.phase === "swapItem") {
+    const rows = heldItemSwapViews(current.cursor, party, catalog);
+    if (action === "back" || rows.length === 0) {
+      return { state: updatePartyMenu(state, { ...current, phase: "action" }), effects: [] };
+    }
+    if (action === "up" || action === "down") {
+      const delta = action === "up" ? -1 : 1;
+      return {
+        state: updatePartyMenu(state, { ...current, itemCursor: wrap(current.itemCursor + delta, rows.length) }),
+        effects: [],
+      };
+    }
+    if (action !== "confirm") return { state: { ...state }, effects: [] };
+    const chosen = rows[clamp(current.itemCursor, rows.length)]!;
+    const other = party[chosen.partyIndex]!;
+    const nextParty = [...party];
+    nextParty[current.cursor] = withHeldItem(selected, other.heldItem);
+    nextParty[chosen.partyIndex] = withHeldItem(other, selected.heldItem);
+    return {
+      state: { ...state, party: nextParty, partyMenu: listPartyState(current.cursor) },
+      effects: [{ type: "persistParty" }],
+    };
   }
 
   if (current.phase === "detail" || current.phase === "moves") {
@@ -500,10 +693,15 @@ function partyTransition(
     return { state: { ...state }, effects: [] };
   }
 
-  // releaseConfirm
-  if (action === "back") {
-    return { state: updatePartyMenu(state, listPartyState(current.cursor)), effects: [] };
+  if (current.phase === "releaseResult") {
+    if (action === "confirm" || action === "back") {
+      return { state: updatePartyMenu(state, listPartyState(current.cursor)), effects: [] };
+    }
+    return { state: { ...state }, effects: [] };
   }
+
+  // releaseConfirm: upstream sets escape_key_exits=False, so Back is inert.
+  if (action === "back") return { state: { ...state }, effects: [] };
   if (action === "up" || action === "down" || action === "left" || action === "right") {
     return {
       state: updatePartyMenu(state, {
@@ -514,15 +712,20 @@ function partyTransition(
     };
   }
   if (action !== "confirm") return { state: { ...state }, effects: [] };
-  if (current.releaseCursor === 1 || party.length <= 1) {
+  if (current.releaseCursor === 0 || party.length <= 1) {
     return { state: updatePartyMenu(state, listPartyState(current.cursor)), effects: [] };
   }
   const nextParty = party.filter((_, index) => index !== current.cursor);
+  const nextCursor = clamp(current.cursor, nextParty.length);
   return {
     state: {
       ...state,
       party: nextParty,
-      partyMenu: listPartyState(clamp(current.cursor, nextParty.length)),
+      partyMenu: {
+        ...listPartyState(nextCursor),
+        phase: "releaseResult",
+        releasedName: partyMonsterView(selected, catalog).name.toUpperCase(),
+      },
     },
     effects: [{ type: "persistParty" }],
   };
@@ -599,7 +802,31 @@ export function startMenuSelectIndex(
     return {
       state: updatePartyMenu(state, {
         ...menu,
-        actionCursor: clamp(index, partyActions(selected, state.party.length).length),
+        actionCursor: clamp(index, partyActions(
+          selected,
+          menu.cursor,
+          state.party,
+          state.items,
+          context.catalog,
+        ).length),
+      }),
+      effects: [],
+    };
+  }
+  if (menu.phase === "equip") {
+    return {
+      state: updatePartyMenu(state, {
+        ...menu,
+        itemCursor: clamp(index, holdableItemViews(state.items, context.catalog).length),
+      }),
+      effects: [],
+    };
+  }
+  if (menu.phase === "swapItem") {
+    return {
+      state: updatePartyMenu(state, {
+        ...menu,
+        itemCursor: clamp(index, heldItemSwapViews(menu.cursor, state.party, context.catalog).length),
       }),
       effects: [],
     };
@@ -655,6 +882,8 @@ export interface StartMenuOptions {
   /** External root rows (bag/missions/save/load/options/apps/exit) dispatch here. */
   onDispatch?: (id: StartMenuRowId, host: GameViewSessionHost) => void;
   callbacks?: Partial<Record<StartMenuRowId, (host: GameViewSessionHost) => void>>;
+  /** Numbered entries exposed by this port's Tuxepedia catalog. */
+  tuxepediaTotal?: number;
 }
 
 export interface StartMenuRuntime {
@@ -673,6 +902,8 @@ export interface StartMenuRuntime {
   selectedMonster: Accessor<PartyMonsterView | null>;
   moves: Accessor<readonly PartyMoveView[]>;
   actionRows: Accessor<readonly PartyActionId[]>;
+  itemRows: Accessor<readonly PartyHeldItemView[]>;
+  swapRows: Accessor<readonly PartyHeldItemSwapView[]>;
   sortRows: readonly PartySortId[];
   labels: StartMenuLabels;
 }
@@ -683,6 +914,7 @@ export interface PocketStartMenuHook {
   isOpen(): boolean;
   state(): StartMenuState;
   rows(): readonly StartMenuRow[];
+  actionRows(): readonly PartyActionId[];
   act(action: StartMenuAction): void;
   selectIndex(index: number): void;
   activateIndex(index: number): void;
@@ -729,9 +961,16 @@ function defaultApps(session: SessionState, labels: StartMenuRootLabels): StartM
   ];
 }
 
-function readStartSnapshot(session: SessionState): { party: SpawnedMonsterSnapshot[]; player: PlayerSummary } {
+function readStartSnapshot(
+  session: SessionState,
+  tuxepediaTotal: number,
+): { party: SpawnedMonsterSnapshot[]; items: Record<string, number>; player: PlayerSummary } {
   const ext = tuxemonExtensionState(session.ext);
-  return { party: [...ext.party], player: playerSummary(session) };
+  return {
+    party: [...ext.party],
+    items: { ...session.sw.items },
+    player: playerSummary(session, tuxepediaTotal),
+  };
 }
 
 export function createStartMenuRuntime(
@@ -741,7 +980,8 @@ export function createStartMenuRuntime(
   const openButton = options.openButton ?? BTN.START;
   validateOpenButton(openButton);
   const firstSession = host.getState();
-  const firstSnapshot = readStartSnapshot(firstSession);
+  const tuxepediaTotal = Math.max(0, Math.trunc(options.tuxepediaTotal ?? 0));
+  const firstSnapshot = readStartSnapshot(firstSession, tuxepediaTotal);
   const [openSignal, setOpen] = createSignal(false);
   const [rows, setRows] = createSignal<readonly StartMenuRow[]>([]);
   const [state, setState] = createSignal<StartMenuState>({
@@ -749,6 +989,7 @@ export function createStartMenuRuntime(
     rootCursor: 0,
     partyMenu: listPartyState(),
     party: firstSnapshot.party,
+    items: firstSnapshot.items,
     player: firstSnapshot.player,
   });
 
@@ -766,7 +1007,18 @@ export function createStartMenuRuntime(
   const actionRows: Accessor<readonly PartyActionId[]> = () => {
     const current = state();
     const monster = current.party[clamp(current.partyMenu.cursor, current.party.length)];
-    return monster ? partyActions(monster, current.party.length) : [];
+    return monster ? partyActions(
+      monster,
+      current.partyMenu.cursor,
+      current.party,
+      current.items,
+      options.catalog,
+    ) : [];
+  };
+  const itemRows: Accessor<readonly PartyHeldItemView[]> = () => holdableItemViews(state().items, options.catalog);
+  const swapRows: Accessor<readonly PartyHeldItemSwapView[]> = () => {
+    const current = state();
+    return heldItemSwapViews(current.partyMenu.cursor, current.party, options.catalog);
   };
 
   const close = (): void => {
@@ -774,7 +1026,7 @@ export function createStartMenuRuntime(
   };
   const open = (): void => {
     const session = host.getState();
-    const snapshot = readStartSnapshot(session);
+    const snapshot = readStartSnapshot(session, tuxepediaTotal);
     const defaults = defaultAvailability(session, snapshot.party);
     const overrides = typeof options.availability === "function"
       ? options.availability(session)
@@ -790,16 +1042,21 @@ export function createStartMenuRuntime(
       rootCursor: firstEnabled >= 0 ? firstEnabled : 0,
       partyMenu: listPartyState(),
       party: snapshot.party,
+      items: snapshot.items,
       player: snapshot.player,
     });
     setOpen(true);
   };
 
-  const persistParty = (party: readonly SpawnedMonsterSnapshot[]): void => {
+  const persistParty = (
+    party: readonly SpawnedMonsterSnapshot[],
+    items: Readonly<Record<string, number>>,
+  ): void => {
     const session = host.getState();
     const ext = tuxemonExtensionState(session.ext);
     host.replaceState({
       ...session,
+      sw: { ...session.sw, items: { ...items } },
       ext: packTuxemonExtensionState({ ...ext, party: [...party] }),
     }, host.heldButtons());
   };
@@ -809,7 +1066,7 @@ export function createStartMenuRuntime(
     let stateChanged = false;
     for (const effect of transition.effects) {
       if (effect.type === "persistParty") {
-        persistParty(transition.state.party);
+        persistParty(transition.state.party, transition.state.items);
         stateChanged = true;
       } else if (effect.type === "close") {
         close();
@@ -872,6 +1129,7 @@ export function createStartMenuRuntime(
     isOpen: openSignal,
     state,
     rows,
+    actionRows,
     act: applyAction,
     selectIndex,
     activateIndex,
@@ -896,6 +1154,8 @@ export function createStartMenuRuntime(
     selectedMonster,
     moves,
     actionRows,
+    itemRows,
+    swapRows,
     sortRows: PARTY_SORTS,
     labels: options.labels,
   };

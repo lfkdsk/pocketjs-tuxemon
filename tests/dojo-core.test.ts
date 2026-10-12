@@ -130,6 +130,7 @@ describe("Dojo rules against the pinned upstream data", () => {
       base: trainedBase,
       currentHp: trainedBase.hp - 9,
       status: "poison",
+      heldItem: "xp_feeder",
     };
 
     // transfer_properties_from calls set_stats before copying the old IVs
@@ -170,6 +171,7 @@ describe("Dojo rules against the pinned upstream data", () => {
       status: "poison",
       moves: monster.moves,
       waitingToEvolve: false,
+      heldItem: "xp_feeder",
     });
     expect(devolved.base).toEqual(expectedBase);
     expect(devolved.base).not.toEqual(calculateBaseStats(

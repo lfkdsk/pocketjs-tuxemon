@@ -187,7 +187,13 @@ const initialTimeWeather = initialCivilTime === undefined
     DEFAULT_TICKS_PER_GAME_MINUTE,
     initialWeather?.slug ?? "sunny",
   );
-const { extensions, rules: campaignBattleRules, scenes, catalog } = createProductionTuxemonBattle(
+const {
+  extensions,
+  rules: campaignBattleRules,
+  scenes,
+  catalog,
+  monsterTotal,
+} = createProductionTuxemonBattle(
   { read: readEntry },
   {
     initialTimeWeather,
@@ -323,7 +329,11 @@ const worldItemData = (): WorldItemMapData => {
   }
   return featureWorldItems;
 };
-const tuxepediaConfig = createTuxepediaOverlay({ catalog, lang });
+const tuxepediaConfig = createTuxepediaOverlay({
+  catalog,
+  lang,
+  units: () => settingsController.get().units,
+});
 const nuPhoneConfig = createNuPhoneOverlay({ data: featureModes.nuPhoneMap, lang });
 const titleGlobals = globalThis as typeof globalThis & {
   __pocketTuxemonShowTitle?: boolean;
@@ -457,6 +467,7 @@ const startMenuConfig = createStartMenuOverlay({
   data: featureModes.startMenu,
   lang,
   catalog,
+  tuxepediaTotal: monsterTotal,
   nuPhoneLabel: featureModes.nuPhoneMap.entry.phoneLabel,
   units: () => settingsController.get().units,
   suspended: () => demoMenu?.isOpen() ?? false,

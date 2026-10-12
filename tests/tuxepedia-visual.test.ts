@@ -162,9 +162,7 @@ describe("Tuxepedia overlay visuals", () => {
     expect(nodeText(namedNode(frame.tree, "tux-tuxepedia-counts"))).toBe("SEEN 4  CAUGHT 2/255");
     expect(nodeText(namedNode(frame.tree, "tux-tuxepedia-name"))).toBe("Nut");
     expect(nodeText(namedNode(frame.tree, "tux-tuxepedia-status"))).toBe("CAUGHT");
-    expect(treeHasText(frame.tree, "Metal")).toBeTrue();
-    expect(JSON.stringify(frame.tree)).toContain("45 cm");
-    expect(JSON.stringify(frame.tree)).toContain("4 kg");
+    expect(nodeText(namedNode(frame.tree, "tux-tuxepedia-facts"))).toBe("Metal   45 cm   4 kg");
     expect(JSON.stringify(frame.tree)).toContain("NUT and BOLT");
     expect(treeHasText(frame.tree, "square: filter")).toBeTrue();
     // The selected row's marker and the seen rows' markers.
@@ -179,6 +177,15 @@ describe("Tuxepedia overlay visuals", () => {
     expect(frame.counts.seen).toBe(cRows + sRows);
     expect(frame.counts.seen).toBeGreaterThanOrEqual(frame.counts.caught);
   }, 60_000);
+
+  simTest("the live units preference formats Tuxepedia facts in both languages", async () => {
+    for (let v = 0; v < TUXEPEDIA_VIEWPORTS.length; v++) {
+      const en = (await captured(v, "en_US")).cases.imperial;
+      const zh = (await captured(v, "zh_CN")).cases.imperial;
+      expect(nodeText(namedNode(en.tree, "tux-tuxepedia-facts"))).toBe("Metal   1 ft   9 lb");
+      expect(nodeText(namedNode(zh.tree, "tux-tuxepedia-facts"))).toBe("金属   1 ft   9 lb");
+    }
+  }, 120_000);
 
   simTest("unknown case hides the monster behind a placeholder", async () => {
     const capture = await captured(0, "en_US");
@@ -243,8 +250,8 @@ describe("Tuxepedia overlay visuals", () => {
 
   simTest("the 960x544 capture is the 2x composition of 480x272", async () => {
     for (const lang of LANGS) {
-      const small = (await captured(0, lang)).cases.populated;
-      const large = (await captured(1, lang)).cases.populated;
+      const small = (await captured(0, lang)).cases.imperial;
+      const large = (await captured(1, lang)).cases.imperial;
       let exactBlocks = 0;
       let channelError = 0;
       for (let y = 0; y < 272; y++) {

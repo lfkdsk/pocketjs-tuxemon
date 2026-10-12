@@ -78,6 +78,7 @@ function progressedSnapshot(
     ...source,
     slug: monster.slug,
     ...(monster.nickname === undefined ? {} : { nickname: monster.nickname }),
+    ...(monster.heldItem === undefined ? { heldItem: undefined } : { heldItem: monster.heldItem }),
     level: boundedInteger(monster.level, "level"),
     stage: monster.stage,
     gender: monster.gender,

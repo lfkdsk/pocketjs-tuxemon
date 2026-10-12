@@ -6316,6 +6316,9 @@ export function buildProject(
     system: {
       messageBlocksPlayer: true,
       transferPresentation: "retain",
+      // CharacterState reports walked distance from the save-owned global
+      // step count. Count committed player tile landings in every host.
+      stepCounter: true,
       inventory: { maxKinds: 99 },
       ...(options.battle ? {
         textVariables: true,

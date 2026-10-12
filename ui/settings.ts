@@ -76,20 +76,44 @@ export function defaultSettings(): GameSettings {
   return { ...DEFAULT_SETTINGS, controls: { ...DEFAULT_CONTROLS } };
 }
 
-/** Match Tuxemon monster_info.py/formula.py unit formatting. */
-export function formatMonsterHeight(centimeters: number, units: UnitMeasure): string {
-  if (units === "imperial") return `${Math.round(centimeters * 0.032808399)} ft`;
-  return centimeters >= 100
-    ? `${(centimeters / 100).toFixed(1)} m`
-    : `${Math.round(centimeters)} cm`;
+/** Python's round()/fixed-point formatting uses round-half-to-even, while
+ * JavaScript's Math.round()/toFixed() do not. Measurements are non-negative,
+ * so this small helper is enough to reproduce the upstream journal exactly. */
+export function roundHalfEven(value: number, digits = 0): number {
+  const scale = 10 ** digits;
+  const scaled = value * scale;
+  const lower = Math.floor(scaled);
+  const fraction = scaled - lower;
+  const tieTolerance = Number.EPSILON * Math.max(1, Math.abs(scaled)) * 2;
+  if (Math.abs(fraction - 0.5) <= tieTolerance) {
+    return (lower % 2 === 0 ? lower : lower + 1) / scale;
+  }
+  return Math.round(scaled) / scale;
 }
 
-/** Match Tuxemon monster_info.py/formula.py unit formatting. */
+/** Match Tuxemon journal_info.py/formula.py unit formatting. */
+export function formatMonsterHeight(centimeters: number, units: UnitMeasure): string {
+  if (units === "imperial") return `${roundHalfEven(centimeters * 0.032808399)} ft`;
+  return centimeters >= 100
+    ? `${roundHalfEven(centimeters / 100, 1).toFixed(1)} m`
+    : `${roundHalfEven(centimeters)} cm`;
+}
+
+/** Match Tuxemon journal_info.py/formula.py unit formatting. */
 export function formatMonsterWeight(kilograms: number, units: UnitMeasure): string {
-  if (units === "imperial") return `${Math.round(kilograms * 2.2046)} lb`;
+  if (units === "imperial") return `${roundHalfEven(kilograms * 2.2046)} lb`;
   return kilograms >= 1_000
-    ? `${(kilograms / 1_000).toFixed(1)} t`
-    : `${Math.round(kilograms)} kg`;
+    ? `${roundHalfEven(kilograms / 1_000, 1).toFixed(1)} t`
+    : `${roundHalfEven(kilograms)} kg`;
+}
+
+/** Match character.py's two-stage steps -> km -> mi conversion. */
+export function formatWalkedDistance(steps: number, units: UnitMeasure): string {
+  const kilometers = roundHalfEven(Math.max(0, steps) / 1_000, 2);
+  if (units === "imperial") {
+    return `${roundHalfEven(kilometers * 0.6213711922, 2)} mi`;
+  }
+  return `${kilometers} km`;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -424,6 +448,11 @@ type PocketFrame = (
   motion?: unknown,
 ) => void;
 
+type RemappedPocketFrame = PocketFrame & {
+  /** Reducer-semantic ingress used by deterministic tape playback. */
+  __pocketSemanticFrame?: PocketFrame;
+};
+
 /** Install after PocketJS mount(), which owns globalThis.frame. The wrapper
  * changes only the normalized PSP button mask and forwards every optional
  * host input argument byte-for-byte. Keyboard and controller therefore share
@@ -432,7 +461,12 @@ export function installButtonRemapFrame(input: ButtonRemapper): () => void {
   const globals = globalThis as typeof globalThis & { frame?: PocketFrame };
   const previous = globals.frame;
   if (!previous) return () => undefined;
-  const wrapped: PocketFrame = (buttons, ...rest) => previous(input.map(buttons), ...rest);
+  const wrapped: RemappedPocketFrame = (buttons, ...rest) => previous(input.map(buttons), ...rest);
+  // Journey/chapter tapes already contain semantic masks. Keep an explicit
+  // route around the physical-input adapter so deterministic playback does
+  // not translate those masks a second time after controls are remapped.
+  wrapped.__pocketSemanticFrame =
+    (previous as RemappedPocketFrame).__pocketSemanticFrame ?? previous;
   globals.frame = wrapped;
   return () => {
     if (globals.frame === wrapped) globals.frame = previous;
@@ -447,6 +481,8 @@ export function createButtonRemapper(
   let physical = 0;
   let newlyPressed = 0;
   let observedRevision = settings.revision();
+  let controls = settings.get().controls;
+  let identity = CONTROL_ACTIONS.every((action) => controls[action] === action);
   let suppressUntilRelease = false;
   return {
     map(buttons) {
@@ -456,13 +492,17 @@ export function createButtonRemapper(
       const revision = settings.revision();
       if (revision !== observedRevision) {
         observedRevision = revision;
+        controls = settings.get().controls;
+        identity = CONTROL_ACTIONS.every((action) => controls[action] === action);
         suppressUntilRelease = true;
       }
       if (suppressUntilRelease) {
         if (nextPhysical === 0) suppressUntilRelease = false;
         return (buttons & ~REMAPPABLE_BUTTON_MASK) >>> 0;
       }
-      return remapButtons(buttons, settings.get().controls);
+      // Most installations keep the defaults. Avoid seven table lookups on
+      // every gameplay frame; a changed revision refreshes this fast path.
+      return identity ? buttons >>> 0 : remapButtons(buttons, controls);
     },
     physicalButtons: () => physical,
     physicalPressed: () => newlyPressed,
@@ -518,15 +558,29 @@ export function createAudioSettingsAdapter(
   settings: Pick<SettingsController, "get" | "revision">,
 ): AudioSettingsAdapter {
   let previousInput: AudioDriverState | undefined;
-  let previousRevision = -1;
+  let previousMusicMuted: boolean | undefined;
+  let previousMusicVolume: number | undefined;
+  let previousSoundVolume: number | undefined;
   let previousOutput: AudioDriverState | undefined;
   return {
     apply(state) {
-      const revision = settings.revision();
-      if (state === previousInput && revision === previousRevision) return previousOutput!;
+      // Read the revision so the adapter remains compatible with controllers
+      // whose get() accessor is otherwise non-reactive, but compare only the
+      // three audio fields. Controls, units and hemisphere must not create a
+      // new audio projection on a frozen Options frame.
+      settings.revision();
+      const current = settings.get();
+      if (
+        state === previousInput
+        && current.musicMuted === previousMusicMuted
+        && current.musicVolume === previousMusicVolume
+        && current.soundVolume === previousSoundVolume
+      ) return previousOutput!;
       previousInput = state;
-      previousRevision = revision;
-      previousOutput = applyAudioSettings(state, settings.get());
+      previousMusicMuted = current.musicMuted;
+      previousMusicVolume = current.musicVolume;
+      previousSoundVolume = current.soundVolume;
+      previousOutput = applyAudioSettings(state, current);
       return previousOutput;
     },
   };

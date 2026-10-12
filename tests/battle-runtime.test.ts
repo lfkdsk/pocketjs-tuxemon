@@ -776,6 +776,7 @@ describe("Tuxemon BattleRules adapter", () => {
 
   test("writes all evolved monster fields and a successful run back to extension state", () => {
     const ext = extensionWith(monster("nut", 5, "txmn-player", 81));
+    ext.party[0] = { ...ext.party[0]!, heldItem: "xp_feeder" };
     ext.runAttempts = 7;
     const rules = createTuxemonBattleRules(DB, ENUMS);
     const started = startBattle(rules, ext, json({
@@ -814,6 +815,7 @@ describe("Tuxemon BattleRules adapter", () => {
       acquisition: "gift",
       captureDevice: "tuxeball_grand",
       waitingToEvolve: true,
+      heldItem: "xp_feeder",
     });
   });
 

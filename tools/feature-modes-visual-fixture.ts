@@ -19,7 +19,10 @@ import type { PocketBagMenuHook } from "../ui/bag-menu-runtime.ts";
 import type { FeatureModesRuntimeData } from "../ui/feature-modes-data.ts";
 import type { PocketNuPhoneHook } from "../ui/nuphone-runtime.ts";
 import type { PocketOptionsHook } from "../ui/options-runtime.ts";
-import type { PocketStartMenuHook } from "../ui/start-menu-runtime.ts";
+import {
+  PARTY_ACTION_ROW_HEIGHT,
+  type PocketStartMenuHook,
+} from "../ui/start-menu-runtime.ts";
 import type { PocketTitleBattleHook, TitleMenuRowId } from "../ui/title-battle-runtime.ts";
 import type { SessionState } from "../vendor/pocket-rpgkit/src/engine/session.ts";
 import {
@@ -53,6 +56,8 @@ export const FEATURE_MODES_CASES = [
   "map",
   "start",
   "party",
+  "release-confirm",
+  "release-result",
   "player",
   "bag",
   "options-title",
@@ -82,6 +87,8 @@ export interface FeatureModesTouchProbe {
   phoneMap: boolean;
   mapPoint: boolean;
   startParty: boolean;
+  startRelease: boolean;
+  startReleaseResult: boolean;
   startPlayer: boolean;
   startBag: boolean;
   titleOptions: boolean;
@@ -308,8 +315,11 @@ async function startCases(
   viewport: { width: number; height: number },
   lang: "en_US" | "zh_CN",
 ): Promise<{
-  frames: Pick<Record<FeatureModesCase, FeatureModesFrame>, "start" | "party" | "player" | "bag">;
+  frames: Pick<Record<FeatureModesCase, FeatureModesFrame>,
+    "start" | "party" | "release-confirm" | "release-result" | "player" | "bag">;
   startParty: boolean;
+  startRelease: boolean;
+  startReleaseResult: boolean;
   startPlayer: boolean;
   startBag: boolean;
 }> {
@@ -349,6 +359,7 @@ async function startCases(
   });
   session.sw.playerName = lang === "zh_CN" ? "小红" : "Red";
   session.sw.gold = 4_321;
+  session.sw.steps = 1_234;
 
   const runtime = startHook();
   runtime.open();
@@ -363,6 +374,18 @@ async function startCases(
   tap(world, viewport, rowPoint("party"));
   const startParty = runtime.state().screen === "party";
   const partyFrame = capture(world);
+
+  tap(world, viewport, { x: 80, y: 52 });
+  const partyState = runtime.state();
+  const releaseIndex = runtime.actionRows().indexOf("release");
+  if (releaseIndex < 0) throw new Error("feature modes fixture: START Release action is absent");
+  tap(world, viewport, { x: 350, y: 29 + 48 + releaseIndex * PARTY_ACTION_ROW_HEIGHT + 9 });
+  const startRelease = runtime.state().partyMenu.phase === "releaseConfirm";
+  const releaseConfirm = capture(world);
+  tap(world, viewport, { x: 330, y: 160 });
+  const startReleaseResult = runtime.state().partyMenu.phase === "releaseResult";
+  const releaseResult = capture(world);
+  tap(world, viewport, { x: 200, y: 130 });
   tap(world, viewport, { x: 430, y: 15 });
 
   tap(world, viewport, rowPoint("player"));
@@ -378,8 +401,17 @@ async function startCases(
   pump(world, 4);
   const bag = capture(world);
   return {
-    frames: { start, party: partyFrame, player, bag },
+    frames: {
+      start,
+      party: partyFrame,
+      "release-confirm": releaseConfirm,
+      "release-result": releaseResult,
+      player,
+      bag,
+    },
     startParty,
+    startRelease,
+    startReleaseResult,
     startPlayer,
     startBag,
   };
@@ -571,6 +603,8 @@ export async function captureFeatureModes(
         phoneMap: phone.phoneMap,
         mapPoint: phone.mapPoint,
         startParty: start.startParty,
+        startRelease: start.startRelease,
+        startReleaseResult: start.startReleaseResult,
         startPlayer: start.startPlayer,
         startBag: start.startBag,
         titleOptions: options.titleOptions,

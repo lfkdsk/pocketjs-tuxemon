@@ -24,10 +24,14 @@ import type { Lang } from "./language.ts";
 import {
   formatMonsterHeight,
   formatMonsterWeight,
+  formatWalkedDistance,
   type UnitMeasure,
 } from "./settings.ts";
 import {
   createStartMenuRuntime,
+  formatMonsterExperience,
+  monsterExperienceProgress,
+  PARTY_ACTION_ROW_HEIGHT,
   partyMonsterView,
   type PartyActionId,
   type PartySortId,
@@ -91,7 +95,7 @@ const PARTY_SIDE: StartMenuRect = { x: 298, y: 29, w: 174, h: 216 };
 const PARTY_ROW_TOP = 7;
 const PARTY_ROW_H = 34;
 const ACTION_TOP = 48;
-const ACTION_ROW_H = 27;
+const ACTION_ROW_H = PARTY_ACTION_ROW_HEIGHT;
 const DETAIL_RECT: StartMenuRect = { x: 8, y: 29, w: 464, h: 216 };
 const RELEASE_RECT: StartMenuRect = { x: 70, y: 78, w: 340, h: 120 };
 const BACK_RECT: StartMenuRect = { x: 394, y: 5, w: 76, h: 20 };
@@ -123,6 +127,9 @@ export function startMenuLabels(
     partyActions: {
       info: pick(data.party.info, lang),
       moves: pick(data.party.techniques, lang),
+      unequip: pick(data.party.unequip, lang),
+      equip: pick(data.party.equip, lang),
+      swapItem: pick(data.party.swapItem, lang),
       move: pick(data.party.move, lang),
       sort: pick(data.party.sort, lang),
       release: pick(data.party.release, lang),
@@ -153,6 +160,7 @@ export function lazyStartMenuCatalog(catalog: Readonly<TuxemonSceneCatalog>): St
   return {
     monsters: lazyRecord((slug) => catalog.monster(slug)) as BattleDb["monsters"],
     techniques: lazyRecord((slug) => catalog.technique(slug)) as BattleDb["techniques"],
+    items: lazyRecord((slug) => catalog.item(slug)) as BattleDb["items"],
     statuses: lazyRecord((slug) => catalog.status(slug)) as BattleDb["statuses"],
   };
 }
@@ -174,10 +182,13 @@ export function createStartMenuOverlay(options: StartMenuOverlayOptions): GameVi
   return {
     runtimeRef,
     create(host) {
+      const tuxepediaTotal = options.tuxepediaTotal
+        ?? options.catalog.index.filter((entry) => entry.txmnId > 0).length;
       const runtime = createStartMenuRuntime({
         ...options,
         catalog: lazyStartMenuCatalog(options.catalog),
         labels: startMenuLabels(options.data, options.lang, options.nuPhoneLabel),
+        tuxepediaTotal,
       }, host);
       runtimeRef.current = runtime;
       return {
@@ -238,6 +249,7 @@ const EXTRA = {
     moves: "TECHNIQUES",
     controls: "○ select   × back   ←/→ change Tuxemon",
     moveHint: "Move mode: choose a new position",
+    heldItem: "Held",
   },
   zh_CN: {
     menu: "开始菜单",
@@ -255,6 +267,7 @@ const EXTRA = {
     moves: "技能",
     controls: "○ 选择   × 返回   ←/→ 切换精灵",
     moveHint: "移动模式：选择新的队伍位置",
+    heldItem: "持有",
   },
 } as const;
 
@@ -434,6 +447,9 @@ function PartyList(props: {
               <Text class="text-xs" style={{ posType: 1, insetL: 157, insetT: 3, width: 50, height: 15, lineHeight: 14, textColor: selected() ? "#ffffff" : THEME.dim }} debugName={`start-menu-party-level-${index()}`}>
                 {`${t().level}${monster.level}`}
               </Text>
+              <Show when={view().heldItemSlug}>
+                <Text class="text-xs" style={{ posType: 1, insetR: 7, insetT: 3, width: 34, height: 14, lineHeight: 13, textAlign: 2, textColor: selected() ? "#ffffff" : THEME.accent }} debugName={`start-menu-party-held-icon-${index()}`}>◆</Text>
+              </Show>
               <View class="absolute" style={{ posType: 1, insetL: 38, insetT: 21, width: 62, height: 7 }} debugName={`start-menu-party-hpbar-${index()}`}>
                 <HpBar hp={view().hp} maxHp={view().maxHp} selected={selected()} />
               </View>
@@ -452,8 +468,8 @@ function PartyList(props: {
           <Text class="text-sm" style={{ posType: 1, insetL: 9, insetT: 12, width: 150, height: 40, lineHeight: 18, textColor: THEME.accent }} debugName="start-menu-party-selected-name">
             {props.runtime.selectedMonster()?.name ?? ""}
           </Text>
-          <Text class="text-xs" style={{ posType: 1, insetL: 9, insetT: 58, width: 150, height: 80, lineHeight: 15, textColor: THEME.ink }} debugName="start-menu-party-summary">
-            {selectedMonster() ? `${pick(props.data.common.hp, props.lang)}  ${props.runtime.selectedMonster()!.hp}/${props.runtime.selectedMonster()!.maxHp}\n${pick(props.data.common.armour, props.lang)}  ${selectedMonster()!.base.armour}\n${pick(props.data.common.dodge, props.lang)}  ${selectedMonster()!.base.dodge}\n${pick(props.data.common.speed, props.lang)}  ${selectedMonster()!.base.speed}` : ""}
+          <Text class="text-xs" style={{ posType: 1, insetL: 9, insetT: 58, width: 150, height: 96, lineHeight: 15, textColor: THEME.ink }} debugName="start-menu-party-summary">
+            {selectedMonster() ? `${pick(props.data.common.hp, props.lang)}  ${props.runtime.selectedMonster()!.hp}/${props.runtime.selectedMonster()!.maxHp}\n${pick(props.data.common.armour, props.lang)}  ${selectedMonster()!.base.armour}\n${pick(props.data.common.dodge, props.lang)}  ${selectedMonster()!.base.dodge}\n${pick(props.data.common.speed, props.lang)}  ${selectedMonster()!.base.speed}\n${t().heldItem}  ${displayValue(props.runtime.selectedMonster()!.heldItemName)}` : ""}
           </Text>
           <Show when={menu().phase === "move"}>
             <Text class="text-xs" style={{ posType: 1, insetL: 9, insetT: 158, width: 150, height: 42, lineHeight: 15, textColor: THEME.accent }} debugName="start-menu-party-move-hint">
@@ -468,8 +484,30 @@ function PartyList(props: {
           <For each={props.runtime.actionRows()}>{(action, index) => {
             const selected = () => index() === menu().actionCursor;
             return (
-              <View class="absolute flex-row items-center" style={{ posType: 1, insetL: 7, insetT: ACTION_TOP + index() * ACTION_ROW_H, width: 152, height: 24, bgColor: selected() ? SELECTED_BG : THEME.paper }} debugName={`start-menu-party-action-${action}`}>
+              <View class="absolute flex-row items-center" style={{ posType: 1, insetL: 7, insetT: ACTION_TOP + index() * ACTION_ROW_H, width: 152, height: ACTION_ROW_H - 2, bgColor: selected() ? SELECTED_BG : THEME.paper }} debugName={`start-menu-party-action-${action}`}>
                 <Text class="text-xs" style={{ marginL: 7, width: 136, height: 17, lineHeight: 15, textColor: selected() ? "#ffffff" : THEME.ink }} debugName={`start-menu-party-action-label-${action}`}>{actionLabel(action)}</Text>
+              </View>
+            );
+          }}</For>
+        </Show>
+        <Show when={menu().phase === "equip"}>
+          <Text class="text-sm" style={{ posType: 1, insetL: 9, insetT: 10, width: 150, height: 25, lineHeight: 18, textColor: THEME.accent }}>{props.runtime.labels.partyActions.equip}</Text>
+          <For each={props.runtime.itemRows()}>{(item, index) => {
+            const selected = () => index() === menu().itemCursor;
+            return (
+              <View class="absolute flex-row items-center" style={{ posType: 1, insetL: 7, insetT: ACTION_TOP + index() * ACTION_ROW_H, width: 152, height: ACTION_ROW_H - 2, bgColor: selected() ? SELECTED_BG : THEME.paper }} debugName={`start-menu-party-equip-${item.slug}`}>
+                <Text class="text-xs" style={{ marginL: 7, width: 136, height: 17, lineHeight: 15, textColor: selected() ? "#ffffff" : THEME.ink }} debugName={`start-menu-party-equip-label-${item.slug}`}>{`${item.name} ×${item.quantity}`}</Text>
+              </View>
+            );
+          }}</For>
+        </Show>
+        <Show when={menu().phase === "swapItem"}>
+          <Text class="text-sm" style={{ posType: 1, insetL: 9, insetT: 10, width: 150, height: 25, lineHeight: 18, textColor: THEME.accent }}>{props.runtime.labels.partyActions.swapItem}</Text>
+          <For each={props.runtime.swapRows()}>{(row, index) => {
+            const selected = () => index() === menu().itemCursor;
+            return (
+              <View class="absolute flex-row items-center" style={{ posType: 1, insetL: 7, insetT: ACTION_TOP + index() * ACTION_ROW_H, width: 152, height: ACTION_ROW_H - 2, bgColor: selected() ? SELECTED_BG : THEME.paper }} debugName={`start-menu-party-swap-${row.partyIndex}`}>
+                <Text class="text-xs" style={{ marginL: 7, width: 136, height: 17, lineHeight: 15, textColor: selected() ? "#ffffff" : THEME.ink }} debugName={`start-menu-party-swap-label-${row.partyIndex}`}>{`${row.monsterName} · ${row.itemName}`}</Text>
               </View>
             );
           }}</For>
@@ -507,6 +545,9 @@ function DetailPage(props: {
   const t = () => EXTRA[props.lang];
   const label = (value: LocalizedFeatureText) => pick(value, props.lang);
   const types = () => (monster()?.types ?? db()?.types ?? []).map(title).join(" / ");
+  const experience = () => monster()
+    ? formatMonsterExperience(monsterExperienceProgress(monster()!, props.catalog.database().rules))
+    : "0/0";
   return (
     <>
       <Panel theme={THEME} style={{ posType: 1, insetL: DETAIL_RECT.x, insetT: DETAIL_RECT.y, width: DETAIL_RECT.w, height: DETAIL_RECT.h }} debugName="start-menu-detail-panel">
@@ -519,7 +560,7 @@ function DetailPage(props: {
           <Text class="text-xs" style={{ posType: 1, insetL: 12, insetT: 184, width: 150, height: 20, lineHeight: 14, textAlign: 1, textColor: THEME.dim }} debugName="start-menu-detail-species">{db()?.species ?? monster()!.slug}</Text>
 
           <Text class="text-xs" style={{ posType: 1, insetL: 172, insetT: 38, width: 137, height: 164, lineHeight: 15, textColor: THEME.ink }} debugName="start-menu-detail-primary">
-            {`${label(props.data.common.hp)}  ${view()!.hp}/${view()!.maxHp}\n${t().experience}  ${monster()!.totalExperience ?? 0}\n${t().type}  ${types() || "—"}\n${t().gender}  ${displayValue(monster()!.gender)}\n${t().stage}  ${displayValue(monster()!.stage)}\n${t().status}  ${displayValue(view()!.status)}\n${t().bond}  ${monster()!.bond ?? 0}\n${t().acquisition}  ${displayValue(monster()!.acquisition)}\n${label(props.data.common.taste)}  ${displayValue(monster()!.tasteCold)} / ${displayValue(monster()!.tasteWarm)}\n${label(props.data.common.height)}  ${formatMonsterHeight(monster()!.height, props.units())}\n${label(props.data.common.weight)}  ${formatMonsterWeight(monster()!.weight, props.units())}`}
+            {`${label(props.data.common.hp)}  ${view()!.hp}/${view()!.maxHp}\n${t().experience}  ${experience()}\n${t().type}  ${types() || "—"}\n${t().gender}  ${displayValue(monster()!.gender)}\n${t().stage}  ${displayValue(monster()!.stage)}\n${t().status}  ${displayValue(view()!.status)}\n${t().bond}  ${monster()!.bond ?? 0}\n${t().acquisition}  ${displayValue(monster()!.acquisition)}\n${label(props.data.common.taste)}  ${displayValue(monster()!.tasteCold)} / ${displayValue(monster()!.tasteWarm)}\n${label(props.data.common.height)}  ${formatMonsterHeight(monster()!.height, props.units())}\n${label(props.data.common.weight)}  ${formatMonsterWeight(monster()!.weight, props.units())}`}
           </Text>
           <Text class="text-xs" style={{ posType: 1, insetL: 316, insetT: 38, width: 134, height: 102, lineHeight: 15, textColor: THEME.ink }} debugName="start-menu-detail-stats">
             {`${label(props.data.common.armour)}  ${monster()!.base.armour}\n${label(props.data.common.dodge)}  ${monster()!.base.dodge}\n${label(props.data.common.melee)}  ${monster()!.base.melee}\n${label(props.data.common.ranged)}  ${monster()!.base.ranged}\n${label(props.data.common.speed)}  ${monster()!.base.speed}`}
@@ -571,15 +612,31 @@ function MovesPage(props: {
   );
 }
 
-function PlayerPage(props: { runtime: StartMenuRuntime; data: StartMenuData; lang: Lang; total: number }) {
+function PlayerPage(props: {
+  runtime: StartMenuRuntime;
+  data: StartMenuData;
+  lang: Lang;
+  units: () => UnitMeasure;
+}) {
   const summary = () => props.runtime.state().player;
   const p = props.data.player;
   const wallet = () => fillTemplate(pick(p.wallet, props.lang), {
     name: summary().name,
     money_formatted: summary().gold.toLocaleString("en-US"),
   });
-  const seen = () => fillTemplate(pick(p.seen, props.lang), { param: summary().seen, all: props.total });
-  const caught = () => fillTemplate(pick(p.caught, props.lang), { param: summary().caught, all: props.total });
+  const seen = () => fillTemplate(pick(p.seen, props.lang), {
+    param: summary().seen,
+    all: summary().tuxepediaTotal,
+  });
+  const caught = () => fillTemplate(pick(p.caught, props.lang), {
+    param: summary().caught,
+    all: summary().tuxepediaTotal,
+  });
+  const progress = () => fillTemplate(pick(p.progress, props.lang), { value: summary().tuxepediaProgress });
+  const walked = () => fillTemplate(pick(p.walked, props.lang), {
+    distance: formatWalkedDistance(summary().steps, props.units()).split(" ")[0]!,
+    unit: props.units() === "metric" ? "km" : "mi",
+  });
   const battles = () => fillTemplate(pick(p.battles, props.lang), {
     tot: summary().battles.total,
     won: summary().battles.won,
@@ -589,11 +646,15 @@ function PlayerPage(props: { runtime: StartMenuRuntime; data: StartMenuData; lan
   return (
     <Panel theme={THEME} style={{ posType: 1, insetL: 35, insetT: 32, width: 410, height: 210 }} debugName="start-menu-player-panel">
       <Text class="text-lg" style={{ posType: 1, insetL: 18, insetT: 14, width: 374, height: 29, lineHeight: 24, textAlign: 1, textColor: THEME.accent }} debugName="start-menu-player-name">{summary().name}</Text>
-      <Text class="text-sm" style={{ posType: 1, insetL: 26, insetT: 57, width: 358, height: 22, lineHeight: 18, textColor: THEME.ink }} debugName="start-menu-player-wallet">{wallet()}</Text>
-      <Text class="text-sm" style={{ posType: 1, insetL: 26, insetT: 87, width: 358, height: 22, lineHeight: 18, textColor: THEME.ink }} debugName="start-menu-player-seen">{seen()}</Text>
-      <Text class="text-sm" style={{ posType: 1, insetL: 26, insetT: 117, width: 358, height: 22, lineHeight: 18, textColor: THEME.ink }} debugName="start-menu-player-caught">{caught()}</Text>
-      <Text class="text-sm" style={{ posType: 1, insetL: 26, insetT: 147, width: 358, height: 22, lineHeight: 18, textColor: THEME.ink }} debugName="start-menu-player-playtime">{`${pick(p.playtime, props.lang)}: ${summary().playtime}`}</Text>
-      <Text class="text-sm" style={{ posType: 1, insetL: 26, insetT: 177, width: 358, height: 22, lineHeight: 18, textColor: THEME.ink }} debugName="start-menu-player-battles">{battles()}</Text>
+      <Text class="text-xs" style={{ posType: 1, insetL: 26, insetT: 46, width: 358, height: 17, lineHeight: 15, textColor: THEME.ink }} debugName="start-menu-player-wallet">{wallet()}</Text>
+      <Text class="text-xs" style={{ posType: 1, insetL: 26, insetT: 69, width: 358, height: 17, lineHeight: 15, textColor: THEME.ink }} debugName="start-menu-player-progress">{progress()}</Text>
+      <Text class="text-xs" style={{ posType: 1, insetL: 26, insetT: 92, width: 358, height: 17, lineHeight: 15, textColor: THEME.ink }} debugName="start-menu-player-seen">{seen()}</Text>
+      <Text class="text-xs" style={{ posType: 1, insetL: 26, insetT: 115, width: 358, height: 17, lineHeight: 15, textColor: THEME.ink }} debugName="start-menu-player-caught">{caught()}</Text>
+      <Text class="text-xs" style={{ posType: 1, insetL: 26, insetT: 138, width: 358, height: 17, lineHeight: 15, textColor: THEME.ink }} debugName="start-menu-player-playtime">{`${pick(p.playtime, props.lang)}: ${summary().playtime}`}</Text>
+      <Show when={summary().steps > 0}>
+        <Text class="text-xs" style={{ posType: 1, insetL: 26, insetT: 161, width: 358, height: 17, lineHeight: 15, textColor: THEME.ink }} debugName="start-menu-player-walked">{walked()}</Text>
+      </Show>
+      <Text class="text-xs" style={{ posType: 1, insetL: 26, insetT: 184, width: 358, height: 17, lineHeight: 15, textColor: THEME.ink }} debugName="start-menu-player-battles">{battles()}</Text>
     </Panel>
   );
 }
@@ -601,11 +662,11 @@ function PlayerPage(props: { runtime: StartMenuRuntime; data: StartMenuData; lan
 function ReleaseDialog(props: { runtime: StartMenuRuntime; data: StartMenuData; lang: Lang }) {
   const menu = () => props.runtime.state().partyMenu;
   const name = () => props.runtime.selectedMonster()?.name ?? "";
-  const question = () => fillTemplate(pick(props.data.party.releaseConfirmation, props.lang), { name: name() });
+  const question = () => fillTemplate(pick(props.data.party.releaseConfirmation, props.lang), { name: name().toUpperCase() });
   return (
     <View class="absolute" style={{ posType: 1, insetL: RELEASE_RECT.x, insetT: RELEASE_RECT.y, width: RELEASE_RECT.w, height: RELEASE_RECT.h, bgColor: PANEL_BG, borderWidth: 2, borderColor: THEME.rim }} debugName="start-menu-release-dialog">
       <Text class="text-sm" style={{ posType: 1, insetL: 18, insetT: 17, width: 304, height: 44, lineHeight: 19, textAlign: 1, textColor: THEME.ink }} debugName="start-menu-release-question">{question()}</Text>
-      <For each={[props.runtime.labels.yes, props.runtime.labels.no]}>{(answer, index) => {
+      <For each={[props.runtime.labels.no, props.runtime.labels.yes]}>{(answer, index) => {
         const selected = () => index() === menu().releaseCursor;
         return (
           <View class="absolute flex-row justify-center items-center" style={{ posType: 1, insetL: 44 + index() * 132, insetT: 75, width: 120, height: 28, bgColor: selected() ? SELECTED_BG : THEME.paper, borderWidth: 1, borderColor: selected() ? THEME.accent : THEME.border }} debugName={`start-menu-release-answer-${index()}`}>
@@ -613,6 +674,17 @@ function ReleaseDialog(props: { runtime: StartMenuRuntime; data: StartMenuData; 
           </View>
         );
       }}</For>
+    </View>
+  );
+}
+
+function ReleaseResultDialog(props: { runtime: StartMenuRuntime; data: StartMenuData; lang: Lang }) {
+  const message = () => fillTemplate(pick(props.data.party.released, props.lang), {
+    name: props.runtime.state().partyMenu.releasedName ?? "",
+  });
+  return (
+    <View class="absolute flex-row justify-center items-center" style={{ posType: 1, insetL: RELEASE_RECT.x, insetT: RELEASE_RECT.y, width: RELEASE_RECT.w, height: RELEASE_RECT.h, bgColor: PANEL_BG, borderWidth: 2, borderColor: THEME.rim }} debugName="start-menu-release-result">
+      <Text class="text-sm" style={{ width: 304, height: 48, lineHeight: 19, textAlign: 1, textColor: THEME.ink }} debugName="start-menu-release-result-text">{message()}</Text>
     </View>
   );
 }
@@ -648,6 +720,10 @@ export const StartMenuView: Component<{
     },
   });
   createGesture({
+    region: { rect: () => open() && state().screen === "party" && state().partyMenu.phase === "releaseResult" ? startMenuViewRect(canvas(), RELEASE_RECT) : disabledRect },
+    onTap: () => props.runtime.applyAction("confirm"),
+  });
+  createGesture({
     region: { rect: () => open() && state().screen === "party" && (state().partyMenu.phase === "list" || state().partyMenu.phase === "move") ? startMenuViewRect(canvas(), PARTY_PANEL) : disabledRect },
     onTap: (contact) => {
       const point = basePoint(contact.x, contact.y);
@@ -655,7 +731,9 @@ export const StartMenuView: Component<{
     },
   });
   createGesture({
-    region: { rect: () => open() && state().screen === "party" && state().partyMenu.phase === "action" ? startMenuViewRect(canvas(), PARTY_SIDE) : disabledRect },
+    region: { rect: () => open() && state().screen === "party"
+      && (state().partyMenu.phase === "action" || state().partyMenu.phase === "equip" || state().partyMenu.phase === "swapItem")
+      ? startMenuViewRect(canvas(), PARTY_SIDE) : disabledRect },
     onTap: (contact) => {
       const point = basePoint(contact.x, contact.y);
       props.runtime.activateIndex(Math.floor((point.y - PARTY_SIDE.y - ACTION_TOP) / ACTION_ROW_H));
@@ -686,11 +764,13 @@ export const StartMenuView: Component<{
     },
   });
   createGesture({
-    region: { rect: () => open() && state().screen !== "root" ? startMenuViewRect(canvas(), BACK_RECT) : disabledRect },
+    region: { rect: () => open() && state().screen !== "root"
+      && state().partyMenu.phase !== "releaseConfirm"
+      && state().partyMenu.phase !== "releaseResult"
+      ? startMenuViewRect(canvas(), BACK_RECT) : disabledRect },
     onTap: () => props.runtime.applyAction("back"),
   });
 
-  const total = () => props.catalog.index.filter((entry) => entry.txmnId > 0).length;
   const detailPhase = () => state().screen === "party" && state().partyMenu.phase === "detail";
   const movesPhase = () => state().screen === "party" && state().partyMenu.phase === "moves";
   return (
@@ -725,9 +805,11 @@ export const StartMenuView: Component<{
             <MovesPage runtime={props.runtime} catalog={props.catalog} cache={imageCache} active={open()} data={props.data} lang={props.lang} />
           </Show>
           <Show when={state().screen === "player"}>
-            <PlayerPage runtime={props.runtime} data={props.data} lang={props.lang} total={total()} />
+            <PlayerPage runtime={props.runtime} data={props.data} lang={props.lang} units={props.units} />
           </Show>
-          <Show when={state().screen !== "root"}>
+          <Show when={state().screen !== "root"
+            && state().partyMenu.phase !== "releaseConfirm"
+            && state().partyMenu.phase !== "releaseResult"}>
             <View class="absolute flex-row justify-center items-center" style={{ posType: 1, insetL: BACK_RECT.x, insetT: BACK_RECT.y, width: BACK_RECT.w, height: BACK_RECT.h, borderWidth: 1, borderColor: THEME.border, bgColor: SELECTED_BG }} debugName="start-menu-back">
               <Text class="text-xs" style={{ width: 66, height: 16, lineHeight: 14, textAlign: 1, textColor: "#ffffff" }}>{`× ${pick(props.data.common.back, props.lang)}`}</Text>
             </View>
@@ -737,6 +819,9 @@ export const StartMenuView: Component<{
           </Show>
           <Show when={state().screen === "party" && state().partyMenu.phase === "releaseConfirm"}>
             <ReleaseDialog runtime={props.runtime} data={props.data} lang={props.lang} />
+          </Show>
+          <Show when={state().screen === "party" && state().partyMenu.phase === "releaseResult"}>
+            <ReleaseResultDialog runtime={props.runtime} data={props.data} lang={props.lang} />
           </Show>
         </View>
       </View>

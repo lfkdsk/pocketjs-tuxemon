@@ -115,7 +115,7 @@ function captured(viewportIndex: number, lang: Lang): Promise<Capture> {
 
 describe("Feature-mode and START production visuals", () => {
   simTest("match every committed bilingual golden at both resolutions", async () => {
-    expect(manifest.format).toBe("pocket-tuxemon/feature-modes-goldens/v4");
+    expect(manifest.format).toBe("pocket-tuxemon/feature-modes-goldens/v5");
     expect(manifest.frames).toHaveLength(FEATURE_MODES_CASES.length * LANGS.length * FEATURE_MODES_VIEWPORTS.length);
     for (let viewportIndex = 0; viewportIndex < FEATURE_MODES_VIEWPORTS.length; viewportIndex++) {
       for (const lang of LANGS) {
@@ -227,8 +227,27 @@ describe("Feature-mode and START production visuals", () => {
         expect(namedNode(capture.cases.start.tree, "start-menu-root-label-tuxepedia")).toBeDefined();
         expect(nodeText(namedNode(capture.cases.party.tree, "start-menu-party-name-0")))
           .toBe(BATTLE_DB[lang].monsters.rockitten!.name);
+        const releasedName = BATTLE_DB[lang].monsters.rockitten!.name.toUpperCase();
+        expect(nodeText(namedNode(capture.cases["release-confirm"].tree, "start-menu-release-question")))
+          .toBe(lang === "zh_CN"
+            ? `确定要放生${releasedName}吗？`
+            : `Are you sure you would like to release ${releasedName}?`);
+        expect(nodeText(namedNode(capture.cases["release-confirm"].tree, "start-menu-release-answer-0")))
+          .toBe(lang === "zh_CN" ? "否" : "No");
+        expect(nodeText(namedNode(capture.cases["release-confirm"].tree, "start-menu-release-answer-1")))
+          .toBe(lang === "zh_CN" ? "是" : "Yes");
+        expect(nodeText(namedNode(capture.cases["release-result"].tree, "start-menu-release-result-text")))
+          .toBe(lang === "zh_CN" ? `已放生${releasedName}。` : `${releasedName} has been released.`);
         expect(nodeText(namedNode(capture.cases.player.tree, "start-menu-player-name")))
           .toBe(lang === "zh_CN" ? "小红" : "Red");
+        expect(nodeText(namedNode(capture.cases.player.tree, "start-menu-player-progress")))
+          .toBe(lang === "zh_CN" ? "精灵百科完成度： 0.8%!" : "Tuxepedia: 0.8%!");
+        expect(nodeText(namedNode(capture.cases.player.tree, "start-menu-player-seen")))
+          .toBe(lang === "zh_CN" ? "看到了3只精灵，共有393" : "Seen 3 out of 393");
+        expect(nodeText(namedNode(capture.cases.player.tree, "start-menu-player-caught")))
+          .toBe(lang === "zh_CN" ? "捉住了2只精灵，共有393" : "Caught 2 out of 393");
+        expect(nodeText(namedNode(capture.cases.player.tree, "start-menu-player-walked")))
+          .toBe(lang === "zh_CN" ? "行走的路程 1.23 km" : "Walked 1.23 km");
         expect(nodeText(namedNode(capture.cases.bag.tree, "tux-bag-title")))
           .toBe(DATA.startMenu.root.bag[lang]);
         expect(nodeText(namedNode(capture.cases.bag.tree, "tux-bag-item-name")))
@@ -308,6 +327,8 @@ describe("Feature-mode and START production visuals", () => {
           phoneMap: true,
           mapPoint: true,
           startParty: true,
+          startRelease: true,
+          startReleaseResult: true,
           startPlayer: true,
           startBag: true,
           titleOptions: true,

@@ -52,6 +52,7 @@ test("Tuxemon dialog boxes hold movement and consume action input", () => {
     characterNames: true,
     inventory: { maxKinds: 99 },
     messageBlocksPlayer: true,
+    stepCounter: true,
     transferPresentation: "retain",
     // ${{var:name}} dialogue prints stored text variables through {v:id}.
     textVariables: true,

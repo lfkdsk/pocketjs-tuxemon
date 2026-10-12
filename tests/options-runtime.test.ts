@@ -103,6 +103,26 @@ describe("Options runtime behavior", () => {
     expect(h.runtime.persistFailed()).toBe(false);
   });
 
+  test("touch volume cycles normalize hand-edited values and legends follow remapped slots", () => {
+    const h = harness();
+    h.settings.replace({
+      ...h.settings.get(),
+      musicVolume: 95,
+      soundVolume: 95,
+      controls: { ...h.settings.get().controls, primary: "back", back: "primary" },
+    });
+    h.runtime.open("start");
+    const index = (id: string) => h.runtime.rows().findIndex((row) => row.id === id);
+    expect(h.runtime.controlGlyph("primary")).toBe("×");
+    expect(h.runtime.controlGlyph("back")).toBe("○");
+    h.runtime.activateIndex(index("music"));
+    h.runtime.activateIndex(index("sound"));
+    expect(h.settings.get()).toMatchObject({ musicVolume: 100, soundVolume: 100 });
+    expect(h.runtime.persistFailed()).toBe(false);
+    h.runtime.activateIndex(index("music"));
+    expect(h.settings.get().musicVolume).toBe(0);
+  });
+
   test("binding capture detects a conflict, confirms an explicit swap, and reset restores defaults", () => {
     const h = harness();
     h.runtime.open("title");

@@ -347,10 +347,11 @@ export function createTitleBattleRuntime(
     const current = state();
     if (current.screen === "battle") return;
     campaign = null;
+    const rows = titleRows();
     setState({
       ...current,
       screen: "title",
-      titleIndex: 0,
+      titleIndex: Math.max(0, Math.min(current.titleIndex, rows.length - 1)),
       difficultyIndex: 0,
       result: null,
       minigameDifficultyIndex: 0,

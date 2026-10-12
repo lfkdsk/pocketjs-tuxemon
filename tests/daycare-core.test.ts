@@ -83,7 +83,7 @@ describe("daycare sparse state and compatibility", () => {
 
 describe("daycare per-step reducer", () => {
   test("settles one EXP after four steps and charges only at settlement", () => {
-    const parent = monster("rockitten", "trainer-1");
+    const parent = monster("rockitten", "trainer-1", { heldItem: "xp_feeder" });
     const startExperience = parent.totalExperience!;
     let state = daycare([parent]);
     let gold = 10;
@@ -95,6 +95,7 @@ describe("daycare per-step reducer", () => {
     ({ daycare: state, gold } = advanceDaycareStep(state, gold, DB));
     expect(state.pendingExperience).toBe(0);
     expect(state.parents[0]!.totalExperience).toBe(startExperience + 1);
+    expect(state.parents[0]!.heldItem).toBe("xp_feeder");
     expect(state.lastTrainingExp).toBe(1);
     expect(state.lastTrainingCost).toBe(1);
     expect(gold).toBe(9);

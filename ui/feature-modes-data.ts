@@ -137,6 +137,9 @@ export interface StartMenuData {
   party: {
     info: LocalizedFeatureText;
     techniques: LocalizedFeatureText;
+    unequip: LocalizedFeatureText;
+    equip: LocalizedFeatureText;
+    swapItem: LocalizedFeatureText;
     move: LocalizedFeatureText;
     sort: LocalizedFeatureText;
     release: LocalizedFeatureText;
@@ -157,6 +160,8 @@ export interface StartMenuData {
     wallet: LocalizedFeatureText;
     playtime: LocalizedFeatureText;
     battles: LocalizedFeatureText;
+    progress: LocalizedFeatureText;
+    walked: LocalizedFeatureText;
     seen: LocalizedFeatureText;
     caught: LocalizedFeatureText;
   };

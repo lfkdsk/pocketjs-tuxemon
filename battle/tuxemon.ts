@@ -1341,6 +1341,109 @@ function pruneMonsterActions(state: TuxemonBattleState, uid: number): void {
   state.pending = state.pending.filter(({ action }) => action.user !== uid && action.target !== uid);
 }
 
+type PartyExperienceMethod = "default" | "xp_feeder" | "xp_transmitter";
+
+function heldRewardMethod(db: TuxemonBattleDb, monster: Readonly<BattleMonster>): string {
+  return monster.heldItem ? db.item[monster.heldItem]?.reward_method ?? "default" : "default";
+}
+
+function partyExperienceMethod(
+  db: TuxemonBattleDb,
+  allies: readonly BattleMonster[],
+): PartyExperienceMethod {
+  // Upstream's fixed tie-break preserves the only method that pays the bench.
+  if (allies.some((monster) => heldRewardMethod(db, monster) === "xp_transmitter")) return "xp_transmitter";
+  if (allies.some((monster) => heldRewardMethod(db, monster) === "xp_feeder")) return "xp_feeder";
+  return "default";
+}
+
+/** Exact party-scoped Feeder/Transmitter split used for one defeated monster.
+ * The map contains living participants and any living bench recipients; TP,
+ * bond, and presentation messages remain participant-only in awardDefeat. */
+export function defeatExperienceAwards(
+  db: TuxemonBattleDb,
+  state: TuxemonBattleState,
+  loser: BattleMonster,
+): Map<number, number> {
+  const participants = (state.damageByDefender[String(loser.uid)] ?? [])
+    .map((uid) => getMonster(state, uid))
+    .filter((monster) => getSide(state, monster.uid) === 0);
+  if (participants.length === 0) return new Map();
+  const participantIds = new Set(participants.map(({ uid }) => uid));
+  const aliveParty = state.parties[0].filter((monster) => monster.currentHp > 0);
+  const allies = [...aliveParty];
+  for (const participant of participants) {
+    if (!allies.some(({ uid }) => uid === participant.uid)) allies.push(participant);
+  }
+  const method = partyExperienceMethod(db, allies);
+  const holders = new Set(
+    allies
+      .filter((monster) => heldRewardMethod(db, monster) === method && method !== "default")
+      .map(({ uid }) => uid),
+  );
+  const otherParticipants = participants.filter(({ uid }) => !holders.has(uid));
+  const bench = aliveParty.filter(({ uid }) => !participantIds.has(uid));
+  const result = new Map<number, number>();
+
+  const split = (winner: BattleMonster): { participant: number; nonParticipant: number; holder: number } => {
+    const total = calculateDefeatExperience(db, loser, winner, 1);
+    if (method === "xp_transmitter") {
+      if (bench.length === 0) {
+        return { participant: Math.floor(total / Math.max(1, participants.length)), nonParticipant: 0, holder: 0 };
+      }
+      const participantPool = Math.floor(total / 2);
+      return {
+        participant: Math.floor(participantPool / Math.max(1, participants.length)),
+        nonParticipant: Math.floor((total - participantPool) / bench.length),
+        holder: 0,
+      };
+    }
+    if (method === "xp_feeder" && holders.size > 0) {
+      if (otherParticipants.length === 0) {
+        return { participant: 0, nonParticipant: 0, holder: Math.floor(total / holders.size) };
+      }
+      const holderPool = Math.floor(total / 2);
+      return {
+        participant: Math.floor((total - holderPool) / otherParticipants.length),
+        nonParticipant: 0,
+        holder: Math.floor(holderPool / holders.size),
+      };
+    }
+    return {
+      participant: Math.floor(total / Math.max(1, participants.length)),
+      nonParticipant: 0,
+      holder: 0,
+    };
+  };
+
+  for (const participant of participants) {
+    if (participant.currentHp <= 0) continue;
+    const award = split(participant);
+    result.set(
+      participant.uid,
+      method === "xp_feeder" && holders.has(participant.uid) ? award.holder : award.participant,
+    );
+  }
+
+  // RewardSystem chooses the best non-participant/holder tuple produced by
+  // any winner before paying the owner's bench exactly once.
+  let best = { nonParticipant: 0, holder: 0 };
+  for (const participant of participants) {
+    const award = split(participant);
+    if (award.nonParticipant > best.nonParticipant
+      || (award.nonParticipant === best.nonParticipant && award.holder > best.holder)) {
+      best = { nonParticipant: award.nonParticipant, holder: award.holder };
+    }
+  }
+  for (const monster of bench) {
+    const award = method === "xp_feeder" && holders.has(monster.uid)
+      ? best.holder
+      : best.nonParticipant;
+    if (award > 0) result.set(monster.uid, award);
+  }
+  return result;
+}
+
 function awardDefeat(db: TuxemonBattleDb, state: TuxemonBattleState, loser: BattleMonster): void {
   const participants = (state.damageByDefender[String(loser.uid)] ?? [])
     .map((uid) => getMonster(state, uid));
@@ -1352,8 +1455,21 @@ function awardDefeat(db: TuxemonBattleDb, state: TuxemonBattleState, loser: Batt
     winners: [] as TuxemonBattleState["rewards"][number]["winners"],
     prize: 0,
   };
+  const experienceAwards = defeatExperienceAwards(db, state, loser);
+  const participantIds = new Set(playerParticipants.map(({ uid }) => uid));
+  for (const monster of state.parties[0]) {
+    if (participantIds.has(monster.uid)) continue;
+    const awarded = experienceAwards.get(monster.uid) ?? 0;
+    if (awarded <= 0) continue;
+    giveExperience(db, monster, awarded, {
+      owned: true,
+      party: state.parties[0],
+      variables: state.variables,
+      inside: state.inside,
+    });
+  }
   for (const winner of playerParticipants) {
-    const awarded = calculateDefeatExperience(db, loser, winner, participants.length);
+    const awarded = experienceAwards.get(winner.uid) ?? 0;
     const gained: StatName[] = [];
     for (const stat of STAT_NAMES) {
       if (loser.base[stat] > winner.base[stat]) {
@@ -1407,10 +1523,24 @@ function awardDefeat(db: TuxemonBattleDb, state: TuxemonBattleState, loser: Batt
     });
   }
   if (state.kind === "trainer" && participants.some((monster) => getSide(state, monster.uid) === 0)) {
-    if (state.moneyMethod === "conserved") reward.prize = Math.trunc(loser.level * loser.moneyModifier);
-    else reward.prize = participants.filter((monster) =>
-      getSide(state, monster.uid) === 0 && monster.currentHp > 0,
-    ).length * Math.trunc(loser.level * loser.moneyModifier);
+    const basePrize = Math.trunc(loser.level * loser.moneyModifier);
+    const loserMultiplier = loser.heldItem
+      ? (db.item[loser.heldItem]?.money_multiplier || 1)
+      : 1;
+    const playerAttackers = participants.filter((monster) => getSide(state, monster.uid) === 0);
+    if (state.moneyMethod === "conserved") {
+      const best = Math.max(...playerAttackers.map((monster) =>
+        monster.heldItem ? db.item[monster.heldItem]?.money_multiplier ?? 1 : 1));
+      reward.prize = Math.trunc(basePrize * best);
+    } else {
+      reward.prize = playerAttackers
+        .filter((monster) => monster.currentHp > 0)
+        .reduce((sum, monster) => sum + Math.trunc(
+          basePrize
+          * (monster.heldItem ? db.item[monster.heldItem]?.money_multiplier || 1 : 1)
+          * loserMultiplier,
+        ), 0);
+    }
     state.prize += reward.prize;
   }
   state.rewards.push(reward);

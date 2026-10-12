@@ -36,6 +36,9 @@ describe("G12 out-of-map feature importer", () => {
     });
     expect(menu.party).toMatchObject({
       techniques: { en_US: "Techniques", zh_CN: "技能" },
+      unequip: { en_US: "Unequip", zh_CN: "卸下" },
+      equip: { en_US: "Equip", zh_CN: "装备" },
+      swapItem: { en_US: "Swap Item", zh_CN: "交换道具" },
       release: { en_US: "Release", zh_CN: "放生" },
       sortByHp: { en_US: "Sort by HP", zh_CN: "按HP排序" },
     });

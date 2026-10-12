@@ -153,6 +153,7 @@ export function monsterFromSnapshot(
     ...(snapshot.iid === undefined ? {} : { iid: snapshot.iid }),
     slug: snapshot.slug,
     ...(snapshot.nickname === undefined ? {} : { nickname: snapshot.nickname }),
+    ...(snapshot.heldItem === undefined ? {} : { heldItem: snapshot.heldItem }),
     level: snapshot.level,
     stage: snapshot.stage ?? species.stage ?? "basic",
     gender: snapshot.gender ?? "neuter",

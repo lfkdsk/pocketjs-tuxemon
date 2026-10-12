@@ -18,6 +18,22 @@
       }
     },
     {
+      "case": "imperial",
+      "lang": "en_US",
+      "width": 480,
+      "height": 272,
+      "file": "tuxepedia-imperial-en_US-480x272.png",
+      "rgbaFnv1a": "cc9f07e9",
+      "pngSha256": "fdf60a032726d2babd2f63b4b889be143d69db7f82445c9502fb78ca02641a06",
+      "cursor": 3,
+      "filter": "all",
+      "counts": {
+        "seen": 4,
+        "caught": 2,
+        "total": 255
+      }
+    },
+    {
       "case": "unknown",
       "lang": "en_US",
       "width": 480,
@@ -57,6 +73,22 @@
       "file": "tuxepedia-populated-en_US-960x544.png",
       "rgbaFnv1a": "4f6fccd7",
       "pngSha256": "f28d899980e0c50478056e653cd6afb3fc41edc5ace9367fa06188b24a7954ce",
+      "cursor": 3,
+      "filter": "all",
+      "counts": {
+        "seen": 4,
+        "caught": 2,
+        "total": 255
+      }
+    },
+    {
+      "case": "imperial",
+      "lang": "en_US",
+      "width": 960,
+      "height": 544,
+      "file": "tuxepedia-imperial-en_US-960x544.png",
+      "rgbaFnv1a": "27b5e34b",
+      "pngSha256": "2ca7910db1b4abd9f3bf3c631a965a553e3b2c880ef88e4710a1a33c2c8df24b",
       "cursor": 3,
       "filter": "all",
       "counts": {
@@ -114,6 +146,22 @@
       }
     },
     {
+      "case": "imperial",
+      "lang": "zh_CN",
+      "width": 480,
+      "height": 272,
+      "file": "tuxepedia-imperial-zh_CN-480x272.png",
+      "rgbaFnv1a": "2636338f",
+      "pngSha256": "3b5684ef58c41d0bbee4ec18ee507d198c6f5f39594384dcd9cfc1019eeb47d2",
+      "cursor": 3,
+      "filter": "all",
+      "counts": {
+        "seen": 4,
+        "caught": 2,
+        "total": 255
+      }
+    },
+    {
       "case": "unknown",
       "lang": "zh_CN",
       "width": 480,
@@ -153,6 +201,22 @@
       "file": "tuxepedia-populated-zh_CN-960x544.png",
       "rgbaFnv1a": "19c31a9e",
       "pngSha256": "207e541dda1670aead4d349973ef280f1ab7e06a1d27edab40f76e0bad02fe3d",
+      "cursor": 3,
+      "filter": "all",
+      "counts": {
+        "seen": 4,
+        "caught": 2,
+        "total": 255
+      }
+    },
+    {
+      "case": "imperial",
+      "lang": "zh_CN",
+      "width": 960,
+      "height": 544,
+      "file": "tuxepedia-imperial-zh_CN-960x544.png",
+      "rgbaFnv1a": "4d189b8e",
+      "pngSha256": "7e77611c7888a55431413e7d27acda7a9cffd56038cdb99b06762ad49b77989a",
       "cursor": 3,
       "filter": "all",
       "counts": {

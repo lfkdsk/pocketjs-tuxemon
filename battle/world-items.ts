@@ -576,6 +576,7 @@ function writeBackMonster(snapshot: SpawnedMonsterSnapshot, monster: BattleMonst
   return {
     ...snapshot,
     slug: monster.slug,
+    ...(monster.heldItem === undefined ? { heldItem: undefined } : { heldItem: monster.heldItem }),
     level: Math.trunc(monster.level),
     stage: monster.stage,
     gender: monster.gender,

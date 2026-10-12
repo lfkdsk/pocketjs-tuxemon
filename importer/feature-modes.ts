@@ -160,6 +160,9 @@ export function loadStartMenu(
     party: {
       info: t("monster_menu_info"),
       techniques: t("monster_menu_tech"),
+      unequip: t("unequip_item"),
+      equip: t("equip_item"),
+      swapItem: t("swap_item"),
       move: t("monster_menu_move"),
       sort: t("menu_sort"),
       release: t("monster_menu_release"),
@@ -180,6 +183,8 @@ export function loadStartMenu(
       wallet: t("player_wallet"),
       playtime: t("player_total_playtime"),
       battles: t("player_battles"),
+      progress: t("tuxepedia_progress"),
+      walked: t("player_walked"),
       seen: t("tuxepedia_data_seen"),
       caught: t("tuxepedia_data_caught"),
     },

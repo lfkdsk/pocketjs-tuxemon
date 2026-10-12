@@ -30,12 +30,12 @@
    "compact": 260,
    "json": 3
   },
-  "shellBytes": 202842,
+  "shellBytes": 202861,
   "entryBytes": 5829793,
   "canonicalJsonBytes": 10812831,
   "entries": 263,
-  "manifestHash": "bc6fa75f6c7fa6cfba43af8e2a4121d313df4bee0e428833e347a85b8d998dc0",
-  "schemaHash": "c394541ca7c28bd85899f944e3d57e506a66cd3d221d14cb5d3d56b4a21cdc13"
+  "manifestHash": "888b97bbdfe8134fd24823568c43b56e84c1b50351e63c941aca232b79687fad",
+  "schemaHash": "a59ec3e0a1ee74fe08fb75dff938e56b01b8b6b66ccfd102cb9dbb2866d23444"
  },
  "terrain": {
   "entries": 430,
@@ -111,7 +111,7 @@
    "textureBytes": 30922008,
    "encodedBytes": 2780624,
    "residentBytes": 16214784,
-   "pakBytes": 4483392,
+   "pakBytes": 4489680,
    "maxWidth": 512,
    "maxHeight": 512,
    "quantization": {
@@ -211,8 +211,8 @@
     }
    }
   },
-  "battleDbBytes": 1643708,
-  "runtimeDbBytes": 1505197,
+  "battleDbBytes": 1649987,
+  "runtimeDbBytes": 1511476,
   "pakKey": "game:battle-db",
   "battleMusic": {
    "environmentSets": 40,
@@ -229,7 +229,7 @@
   "battleRepository": {
    "shellBytes": 238263,
    "entries": 815,
-   "entryBytes": 1183627
+   "entryBytes": 1189450
   }
  },
  "itemIcons": {

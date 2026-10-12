@@ -314,6 +314,13 @@ function monsterProblem(value: unknown, label: string, db?: BattleDb): string | 
     && (!nonEmptyString(monster.nickname) || monster.nickname.length > 15)) {
     return `${label}.nickname must contain 1..15 characters`;
   }
+  if (monster.heldItem !== undefined) {
+    if (!nonEmptyString(monster.heldItem)) return `${label}.heldItem must be a non-empty string when present`;
+    const item = db?.items[monster.heldItem];
+    if (db && (!item || item.behaviors.holdable !== true)) {
+      return `${label}.heldItem must name an imported holdable item`;
+    }
+  }
   if (!safeInteger(monster.level) || monster.level < 1) return `${label}.level must be a positive safe integer`;
   for (const field of ["stage", "gender", "tasteCold", "tasteWarm"] as const) {
     if (!nonEmptyString(monster[field])) return `${label}.${field} must be a non-empty string`;

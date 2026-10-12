@@ -4,7 +4,7 @@
   "hz": 60,
   "worldTraversal": "seamless-v1",
   "source": {
-    "chaptersSha256": "bc883a5b0bd927a5608f81c2baabcb9381009c586905568136608db9ab27473d",
+    "chaptersSha256": "f436b7a97163120b453574ffe9b860b186d8cb63f2c7f4cf64ccb13514a3c5b3",
     "tape": {
       "gb6": {
         "file": "data/gb6-mainline-journey.json",
@@ -98,6 +98,6 @@
       ],
       "storySha256": "076586407513305744e782c68db73004805e1055779abfb44a91bf0ee8d2e1f1"
     },
-    "neutralSha256": "461b0f431795e18c352a3d4118721dfdafd4bd47163e24f263f439144ecfb04a"
+    "neutralSha256": "6b2b977969b029c6cb81cc56e5e6d02cf0694cf08104532ad5a0230c35de5489"
   }
 }

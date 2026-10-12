@@ -21,8 +21,9 @@ describe("J3 QuickJS continuation tape", () => {
       outcome: "won",
     });
     // Terminal includes the deterministic player identity selected in G6,
-    // the calendar variables refreshed on map entry, and the map BGM clock.
+    // the calendar variables refreshed on map entry, the persisted step total,
+    // and the map BGM clock.
     expect(tape.terminalStateSha256)
-      .toBe("1bd475f12f455ca6ad2a2bf645b9694c2e234343edb8c5200c2a51f6dea75055");
+      .toBe("04926ffae78129da1b51185f609b18aa81fa5ec81aa6ff734b715f660a725f8b");
   });
 });

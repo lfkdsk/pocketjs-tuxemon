@@ -297,6 +297,40 @@ test("handoff of a repeated reducer state does not replay its one-frame cue", ()
   expect(synced).toEqual([["click-once"], []]);
 });
 
+test("every desktop coordinator branch preserves the raw timeline identity", () => {
+  const key = "audio:qoa.music/a.qoa";
+  let pending = true;
+  const staged: StagedDesktopAudioReader = {
+    read: () => new Uint8Array([1]),
+    hasPending: () => pending,
+    pump: () => {
+      pending = false;
+      return { kind: "ready", key };
+    },
+    releaseReady() {},
+  };
+  const pairs: Array<[number, number | undefined]> = [];
+  const driver = {
+    sync(state: StagedAudioFrameState, timeline?: StagedAudioFrameState) {
+      pairs.push([state.frame, timeline?.frame]);
+    },
+    retryResource() {},
+    dispose() {},
+  };
+  const coordinator = createStagedDesktopAudioCoordinator(
+    { song: key }, staged, driver, "map-a",
+  );
+  const raw1 = audioState(1, "map-a", "song", "first");
+  const raw2 = audioState(2, "map-a", "song", "waiting");
+  const raw3 = audioState(3, "map-a", "song", "handoff");
+
+  coordinator.sync({ ...raw1, interp: { ...raw1.interp } }, true, raw1);
+  coordinator.sync({ ...raw2, interp: { ...raw2.interp } }, false, raw2);
+  coordinator.sync({ ...raw3, interp: { ...raw3.interp } }, true, raw3);
+
+  expect(pairs).toEqual([[1, 1], [2, 2], [3, 3]]);
+});
+
 test("scene boundaries sync immediately but defer desktop sidecar I/O one frame", () => {
   let pumps = 0;
   const staged: StagedDesktopAudioReader = {

@@ -2477,6 +2477,18 @@
     "en_US": "Techniques",
     "zh_CN": "技能"
    },
+   "unequip": {
+    "en_US": "Unequip",
+    "zh_CN": "卸下"
+   },
+   "equip": {
+    "en_US": "Equip",
+    "zh_CN": "装备"
+   },
+   "swapItem": {
+    "en_US": "Swap Item",
+    "zh_CN": "交换道具"
+   },
    "move": {
     "en_US": "Move",
     "zh_CN": "移动"
@@ -2544,6 +2556,14 @@
    "battles": {
     "en_US": "Battles: {tot} (W{won} D{draw} L{lost})",
     "zh_CN": "战斗： {tot} （胜利{won} 平局{draw} 失败{lost})"
+   },
+   "progress": {
+    "en_US": "Tuxepedia: {value}%!",
+    "zh_CN": "精灵百科完成度： {value}%!"
+   },
+   "walked": {
+    "en_US": "Walked {distance} {unit}",
+    "zh_CN": "行走的路程 {distance} {unit}"
    },
    "seen": {
     "en_US": "Seen {param} out of {all}",

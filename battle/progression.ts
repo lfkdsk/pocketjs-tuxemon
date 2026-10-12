@@ -298,6 +298,7 @@ export function transferToSpecies(
     ...spawned,
     ...(monster.iid === undefined ? {} : { iid: monster.iid }),
     ...(monster.nickname === undefined ? {} : { nickname: monster.nickname }),
+    ...(monster.heldItem === undefined ? {} : { heldItem: monster.heldItem }),
     level: monster.level,
     gender: evolvedGender(sourceDb, target, monster.gender, random),
     tasteCold: monster.tasteCold,

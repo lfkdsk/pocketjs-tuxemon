@@ -8,6 +8,7 @@ import {
   battleDbToTuxemonBattleDb,
   calculateBaseStats,
   calculateDefeatExperience,
+  defeatExperienceAwards,
   evolveMonsterSnapshot,
   evolutionConditionsPass,
   giveExperience,
@@ -16,6 +17,7 @@ import {
   makeRules,
   monsterFromSnapshot,
   nextRandom,
+  spawnMonster,
   type BattleMonster,
   type DbEvolution,
   type MonsterSnapshot,
@@ -200,6 +202,28 @@ function techniqueHolder(slug: string): BattleMonster {
   return { moves: [{ slug }] } as BattleMonster;
 }
 
+function rewardMonster(
+  iid: string,
+  seed: number,
+  options: { heldItem?: string; acquisition?: string } = {},
+): SpawnedMonsterSnapshot {
+  return {
+    ...spawnMonster(SOURCE_DB, DB, { rng: seed, rngDraws: 0 }, "nut", 12, { iid }),
+    ...options,
+  };
+}
+
+function rewardBattle(
+  player: SpawnedMonsterSnapshot[],
+  participantIndexes: number[],
+) {
+  const enemy = rewardMonster("enemy", 0x9182);
+  const state = createBattle(DB, { seed: 3, player, enemy: [enemy] });
+  const loser = state.parties[1][0]!;
+  state.damageByDefender[String(loser.uid)] = participantIndexes.map((index) => state.parties[0][index]!.uid);
+  return { state, loser };
+}
+
 function evolutionMonster(entry: EvolutionCase, satisfied: boolean): {
   monster: BattleMonster;
   party: BattleMonster[];
@@ -261,6 +285,123 @@ function evolutionMonster(entry: EvolutionCase, satisfied: boolean): {
 }
 
 describe("GB3 progression reducer differential", () => {
+  test("imports held reward methods and preserves Transmitter-over-Feeder party splits", () => {
+    expect(SOURCE_DB.items.xp_feeder).toMatchObject({ rewardMethod: "xp_feeder", moneyMultiplier: 1 });
+    expect(SOURCE_DB.items.xp_transmitter).toMatchObject({ rewardMethod: "xp_transmitter", moneyMultiplier: 1 });
+    expect(DB.item.xp_feeder).toMatchObject({ reward_method: "xp_feeder", money_multiplier: 1 });
+
+    const feeder = rewardBattle([
+      rewardMonster("fighter", 11),
+      rewardMonster("holder", 12, { heldItem: "xp_feeder" }),
+      rewardMonster("bench", 13),
+    ], [0]);
+    const feederTotal = calculateDefeatExperience(DB, feeder.loser, feeder.state.parties[0][0]!, 1);
+    expect([...defeatExperienceAwards(DB, feeder.state, feeder.loser)]).toEqual([
+      [feeder.state.parties[0][0]!.uid, feederTotal - Math.floor(feederTotal / 2)],
+      [feeder.state.parties[0][1]!.uid, Math.floor(feederTotal / 2)],
+    ]);
+
+    const priority = rewardBattle([
+      rewardMonster("fighter", 21, { heldItem: "xp_feeder" }),
+      rewardMonster("transmitter", 22, { heldItem: "xp_transmitter" }),
+      rewardMonster("bench", 23),
+    ], [0]);
+    const priorityTotal = calculateDefeatExperience(DB, priority.loser, priority.state.parties[0][0]!, 1);
+    const transmittedPool = priorityTotal - Math.floor(priorityTotal / 2);
+    expect([...defeatExperienceAwards(DB, priority.state, priority.loser)]).toEqual([
+      [priority.state.parties[0][0]!.uid, Math.floor(priorityTotal / 2)],
+      [priority.state.parties[0][1]!.uid, Math.floor(transmittedPool / 2)],
+      [priority.state.parties[0][2]!.uid, Math.floor(transmittedPool / 2)],
+    ]);
+
+    const noBench = rewardBattle([
+      rewardMonster("solo", 31, { heldItem: "xp_transmitter" }),
+    ], [0]);
+    const noBenchTotal = calculateDefeatExperience(DB, noBench.loser, noBench.state.parties[0][0]!, 1);
+    expect([...defeatExperienceAwards(DB, noBench.state, noBench.loser)])
+      .toEqual([[noBench.state.parties[0][0]!.uid, noBenchTotal]]);
+  });
+
+  test("pays multiple Feeder holders and uses the best participant multiplier for the bench", () => {
+    const holders = rewardBattle([
+      rewardMonster("fighter-holder", 41, { heldItem: "xp_feeder" }),
+      rewardMonster("bench-holder", 42, { heldItem: "xp_feeder" }),
+    ], [0]);
+    const holderTotal = calculateDefeatExperience(DB, holders.loser, holders.state.parties[0][0]!, 1);
+    const perHolder = Math.floor(holderTotal / 2);
+    expect([...defeatExperienceAwards(DB, holders.state, holders.loser)])
+      .toEqual(holders.state.parties[0].map((monster) => [monster.uid, perHolder]));
+
+    const best = rewardBattle([
+      rewardMonster("normal", 51),
+      rewardMonster("traded", 52, { acquisition: "traded" }),
+      rewardMonster("bench", 53, { heldItem: "xp_transmitter" }),
+    ], [0, 1]);
+    const normalTotal = calculateDefeatExperience(DB, best.loser, best.state.parties[0][0]!, 1);
+    const tradedTotal = calculateDefeatExperience(DB, best.loser, best.state.parties[0][1]!, 1);
+    const awards = defeatExperienceAwards(DB, best.state, best.loser);
+    expect(awards.get(best.state.parties[0][0]!.uid)).toBe(Math.floor(Math.floor(normalTotal / 2) / 2));
+    expect(awards.get(best.state.parties[0][1]!.uid)).toBe(Math.floor(Math.floor(tradedTotal / 2) / 2));
+    expect(awards.get(best.state.parties[0][2]!.uid)).toBe(tradedTotal - Math.floor(tradedTotal / 2));
+  });
+
+  test("actual defeat processing writes bench XP while keeping reward messages participant-only", () => {
+    const battle = rewardBattle([
+      rewardMonster("fighter", 61),
+      rewardMonster("holder", 62, { heldItem: "xp_feeder" }),
+      rewardMonster("bench", 63),
+    ], [0]);
+    const expected = defeatExperienceAwards(DB, battle.state, battle.loser);
+    const before = battle.state.parties[0].map(({ totalExperience }) => totalExperience);
+    battle.loser.currentHp = 0;
+    makeRules(DB).checkParty(battle.state);
+    expect(battle.state.parties[0].map((monster, index) => monster.totalExperience - before[index]!))
+      .toEqual(battle.state.parties[0].map((monster) => expected.get(monster.uid) ?? 0));
+    expect(battle.state.rewards.at(-1)!.winners.map(({ uid }) => uid))
+      .toEqual([battle.state.parties[0][0]!.uid]);
+    expect(battle.state.rewards.at(-1)!.winners[0]!.experience)
+      .toBe(expected.get(battle.state.parties[0][0]!.uid)!);
+  });
+
+  test("held money multipliers match participant-scaled and conserved upstream formulas", () => {
+    const db = {
+      ...DB,
+      item: {
+        ...DB.item,
+        xp_feeder: { ...DB.item.xp_feeder, money_multiplier: 2 },
+        xp_transmitter: { ...DB.item.xp_transmitter, money_multiplier: 3 },
+      },
+    };
+    const player = [
+      rewardMonster("penny-holder", 71, { heldItem: "xp_feeder" }),
+      rewardMonster("plain-fighter", 72),
+    ];
+    const enemy = rewardMonster("multiplied-loser", 73, { heldItem: "xp_transmitter" });
+
+    const prize = (moneyMethod: "participant_scaled" | "conserved"): number => {
+      const state = createBattle(db, {
+        seed: 4,
+        kind: "trainer",
+        player,
+        enemy: [enemy],
+        moneyMethod,
+      });
+      const loser = state.parties[1][0]!;
+      const participants = state.parties[0];
+      loser.moneyModifier = 1.9;
+      state.damageByDefender[String(loser.uid)] = participants.map(({ uid }) => uid);
+      loser.currentHp = 0;
+      makeRules(db).checkParty(state);
+      return state.rewards.at(-1)!.prize;
+    };
+
+    // Upstream truncates the base first: trunc(12 * 1.9) = 22. The legacy
+    // strategy pays both living winners and applies both sides' multipliers.
+    expect(prize("participant_scaled")).toBe(22 * 2 * 3 + 22 * 1 * 3);
+    // Conserved pays once using only the best winner multiplier.
+    expect(prize("conserved")).toBe(22 * 2);
+  });
+
   test("matches all reward acquisition multipliers and participant splits", () => {
     for (const entry of GOLDEN.rewards) {
       const player = Array.from({ length: entry.input.participants }, () => snapshot(entry.before));
@@ -354,6 +495,7 @@ describe("GB3 progression reducer differential", () => {
   test("matches applied evolution snapshots and exact spawn RNG", () => {
     for (const entry of GOLDEN.appliedEvolutions) {
       const source = snapshot(entry.before) as SpawnedMonsterSnapshot;
+      source.heldItem = "xp_feeder";
       const rng: RngState = { rng: entry.input.seed, rngDraws: 0 };
       const result = evolveMonsterSnapshot(
         SOURCE_DB,
@@ -364,6 +506,7 @@ describe("GB3 progression reducer differential", () => {
         () => nextRandom(rng),
       );
       expect(result?.target, entry.id).toBe(entry.input.target);
+      expect(result?.monster.heldItem, `${entry.id}:held-item`).toBe("xp_feeder");
       expect(dump(monsterFromSnapshot(DB, 1, result!.monster)), entry.id)
         .toEqual(entry.expected.after);
       expect({ cursor: rng.rng, draws: rng.rngDraws }, entry.id)

@@ -105,12 +105,25 @@ export interface DbItem {
   category: string;
   usable_in: string[];
   consumable: boolean;
+  reward_method: BattleDbRewardMethod;
+  money_multiplier: number;
   effects: DbRule[];
   conditions: DbRule[];
   behaviors: Record<string, unknown>;
   stat_modifiers: Partial<Record<StatName | "current_hp", DbStatModifier>>;
   immunity_to_status: string[];
 }
+
+export type BattleDbRewardMethod =
+  | "default"
+  | "xp_equal"
+  | "xp_transmitter"
+  | "xp_feeder"
+  | "xp_overkill"
+  | "xp_damage_prop"
+  | "xp_bond"
+  | "xp_stage"
+  | "xp_survivor";
 
 export interface DbCaptureEffect {
   target_attribute: string;
@@ -232,6 +245,8 @@ export interface BattleMonster {
   slug: string;
   /** Optional player-assigned name, preserved across battles and evolution. */
   nickname?: string;
+  /** Optional inventory item equipped by this monster. */
+  heldItem?: string;
   level: number;
   stage: string;
   gender: string;
@@ -271,6 +286,8 @@ export interface MonsterSnapshot {
   slug: string;
   /** Optional player-assigned name. Missing means use the localized species name. */
   nickname?: string;
+  /** Optional inventory item equipped by this monster. Missing in legacy saves. */
+  heldItem?: string;
   level: number;
   stage?: string;
   gender?: string;

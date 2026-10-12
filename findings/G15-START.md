@@ -26,42 +26,48 @@ from the old placeholder menu:
 
 | Feature | Upstream source | Port behavior |
 | --- | --- | --- |
-| Party list and submenu | `tuxemon/states/monster_menu.py` | Live party portraits, names, levels, HP, status, Info, Techniques, Move, Sort, and Release |
-| Party detail | `tuxemon/states/monster_info.py` | Species/element, level and experience, gender, taste, bond, physical fields, and the six live stats |
+| Party list and submenu | `tuxemon/states/monster_menu.py` | Live party portraits, names, levels, HP, status and held items; Info, Techniques, Give/Take/Swap item, Move, Sort, and Release |
+| Party detail | `tuxemon/states/monster_info.py` | Species/element, level and current-level experience, gender, taste, bond, physical fields, and the six live stats |
 | Techniques | `tuxemon/states/monster_moves.py` | Localized current techniques with type, range, power, potency, and accuracy |
 | Reorder and sort | `MonsterMenuHandler` | Direct move plus upstream level, HP ratio, localized-name, and Tuxepedia-ID ordering; the live array is persisted |
-| Release | `MonsterMenuHandler.release_monster` | Imported confirmation copy; the last party member cannot be released |
+| Release | `MonsterMenuHandler.release_monster` | Uppercase-name confirmation defaults to No and cannot be escaped; success remains visible until acknowledged; the last party member cannot be released |
 | Bag list | `tuxemon/states/item_menu.py` | Acquisition-order pages are sliced before upstream sort order; each row shows imported icon, category, quantity, name, and description |
 | Field item use | upstream item conditions/effects and controllers | Target and map guards, consumption timing, success/failure copy, monster effects, and typed field directives |
-| Player page | `tuxemon/states/character.py` | Live name, wallet, playtime, seen/caught counts, and player-side battle outcome summary |
+| Player page | `tuxemon/states/character.py` | Live name, wallet, playtime, walked distance, Tuxepedia completion, seen/caught counts, and player-side battle outcome summary |
 | START Exit | `tuxemon/world/manager.py` `quit_world` callback | No save prompt; the world object is replaced with a fresh authored session and title reopens |
-| Title Load/Autosave | `tuxemon/states/start.py` | Healthy manual saves add Load first; Autosave is offered only when both a healthy manual save and healthy automatic save exist |
+| Title Load/Autosave | `tuxemon/states/start.py` | Healthy manual saves add Load first; Autosave requires healthy manual and automatic saves, deliberately stricter than upstream's existence-only check |
 | Title Exit | `StartState.exit_game` | Desktop sends PocketJS's quit service intent; a host without close authority stays on a localized terminal page |
 
-Upstream's held-item equip/swap actions are not exposed. The current persistent
-monster snapshot has no held-item slot, so presenting those rows would either
-lose state or invent a second incompatible inventory model. The implemented
-view, reorder, sort, and release actions all map to existing persistent state.
+Held items use one optional persistent monster slot and the existing backpack;
+Give, Take, and Swap update both in one host replacement, so the total quantity
+across the bag and all party slots is conserved. The importer retains upstream
+reward and money multipliers. XP Feeder and XP Transmitter apply their exact
+party-scoped holder/participant/bench splits, including multiple holders and
+the fixed Transmitter-over-Feeder priority.
 
 ## Party and player pages
 
 The party root is derived on every open from the live extension party. It
-renders the imported lazy front sheet and localized species/status data rather
-than copying display fields into menu state. Info and Techniques are read-only;
+renders the imported lazy front sheet and localized species/status/item data
+rather than copying display fields into menu state. Info and Techniques are
+read-only; Give, Take, and Swap atomically replace the live party and backpack.
 Move, Sort, and confirmed Release replace only the live party array. Solo
 parties hide Move, Sort, and Release, matching upstream's safety rule.
 
 The order written by Move or Sort is the same array read by battle setup, so
 the first member of the next battle changes immediately. The four sort
 comparators match upstream: ascending level, descending HP ratio, ascending
-case-folded display name, and ascending positive Tuxepedia ID. Release requires
-an explicit localized Yes/No choice and never permits an empty party.
+case-folded display name, and ascending positive Tuxepedia ID. Release defaults
+to No, ignores Back while confirming, uppercases the selected name, shows the
+localized success result, and never permits an empty party.
 
 The player page reads the current player name and gold, uses the saved 60 Hz
-game clock rather than host-frame or map-frame counters, unions caught species
-into the seen count, and summarizes only history entries whose fighter is the
-player. Its values therefore survive transfer, save/load, and rewind without
-adding a parallel profile record.
+game clock rather than host-frame or map-frame counters, converts the saved
+global step count to km or mi, and reports caught progress against the 393
+positive-ID species browseable in this build. It unions caught species into the
+seen count and summarizes only history entries whose fighter is the player. Its
+values therefore survive transfer, save/load, and rewind without adding a
+parallel profile record.
 
 ## Bag and out-of-battle item semantics
 
@@ -87,7 +93,10 @@ The pure item reducer covers:
   fails;
 - experience tea, level/stat/move progression, item-specific evolution, and
   training-point grants with imported caps;
-- TMs, including the four-move forget picker and duplicate/base-tag guards;
+- TMs, including the four-move forget picker and duplicate/base-tag guards.
+  This intentionally completes upstream's pending-move TODO: the pinned source
+  currently appends a fifth move, while this port enforces the imported
+  `maxMoves` and requires an explicit replacement;
 - repellent installation without replacing an active tracker;
 - escape keys and persisted faint points;
 - fishing and facing-tile/facing-sprite field tools.
@@ -111,17 +120,21 @@ parse field-item rules.
 Title availability takes one refreshed storage snapshot. Empty, damaged, and
 foreign manual slots do not advertise Load. A healthy automatic slot alone
 does not advertise Autosave: upstream nests Autosave under the existence of a
-normal save, and the port preserves that condition. Load opens the established
-slot/code loader directly; Autosave loads the established read-only automatic
-slot directly. Both completion paths return control through the same title
-runtime rather than displaying the retired load toast.
+normal save, and the port preserves that condition. Unlike upstream's file-
+existence check, the port requires both advertised files to parse and validate;
+this prevents a guaranteed-failing title shortcut when either save is corrupt.
+Load opens the established slot/code loader directly; Autosave loads the
+established read-only automatic slot directly. Both completion paths return
+control through the same title runtime rather than displaying the retired load
+toast.
 
 START Exit intentionally has no save confirmation because upstream invokes
 `quit_world` directly. It calls the same fresh-session constructor as New Game,
 replaces the host state, clears every transient child overlay, and then opens
 title. Integration tests retain the old object and seed it with changed map,
 party, items, variables, and extension fields; none survives in the replacement
-session.
+session. The production Web journey also selects the real START row after a
+save/load cycle and verifies the callback closes START and restores title.
 
 Title Exit always enters a terminal state. Desktop hosts additionally receive
 the exact service payload `{"t":"quit"}`. Web and other hosts that cannot close

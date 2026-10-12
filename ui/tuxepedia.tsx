@@ -33,6 +33,11 @@ import {
   type TuxepediaRuntime,
 } from "./tuxepedia-runtime.ts";
 import type { Lang } from "./language.ts";
+import {
+  formatMonsterHeight,
+  formatMonsterWeight,
+  type UnitMeasure,
+} from "./settings.ts";
 
 const THEME = TUXEMON_UI_THEME;
 /** Font slot of `text-sm` (14 px regular): index 1 of the core's FONT_PX table. */
@@ -165,7 +170,10 @@ function statusMarker(caught: boolean, seen: boolean, preview: boolean): string 
 
 /** GameView overlay config for the Tuxepedia. `create(host)` builds the
  *  runtime (captured by the caller for the save menu's onExtra hook). */
-export function createTuxepediaOverlay(options: TuxepediaOptions): GameViewOverlayConfig & {
+export function createTuxepediaOverlay(options: TuxepediaOptions & {
+  /** Live installation preference. Defaults to upstream's metric setting. */
+  units?: () => UnitMeasure;
+}): GameViewOverlayConfig & {
   /** Captured on create(host); null until GameView mounts the overlay. */
   runtimeRef: { current: TuxepediaRuntime | null };
 } {
@@ -179,7 +187,11 @@ export function createTuxepediaOverlay(options: TuxepediaOptions): GameViewOverl
         step: runtime.step,
         isOpen: runtime.isOpen,
         render() {
-          return <TuxepediaView runtime={runtime} catalog={options.catalog} />;
+          return <TuxepediaView
+            runtime={runtime}
+            catalog={options.catalog}
+            units={options.units ?? (() => "metric")}
+          />;
         },
       };
     },
@@ -189,6 +201,7 @@ export function createTuxepediaOverlay(options: TuxepediaOptions): GameViewOverl
 const TuxepediaView: Component<{
   runtime: TuxepediaRuntime;
   catalog: TuxepediaOptions["catalog"];
+  units: () => UnitMeasure;
 }> = (props) => {
   const runtime = props.runtime;
   const catalog = props.catalog;
@@ -266,7 +279,11 @@ const TuxepediaView: Component<{
   const facts = createMemo(() => {
     const monster = detail();
     if (!monster) return { kind: "wrap", rows: [], overflow: 0 } as BoundedCell;
-    return boundXs(`${monster.types.map((type) => typeName(type, runtime.lang)).join(" / ")}   ${monster.height} cm   ${monster.weight} kg`, 248, 1);
+    return boundXs(
+      `${monster.types.map((type) => typeName(type, runtime.lang)).join(" / ")}   ${formatMonsterHeight(monster.height, props.units())}   ${formatMonsterWeight(monster.weight, props.units())}`,
+      248,
+      1,
+    );
   });
   const description = createMemo(() => {
     const monster = detail();

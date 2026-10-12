@@ -6,6 +6,7 @@ import {
   createTuxemonExtensions,
   initialTuxemonExtensionState,
   KENNEL_LIMIT,
+  packTuxemonExtensionState,
   PARTY_LIMIT,
   TUXEMON_EXT_SAVE_FORMAT,
   tuxemonExtensionState,
@@ -485,10 +486,14 @@ describe("Tuxemon party extension", () => {
       call: "tux.add_monster",
       args: { species: "nut", level: 5 },
     }]);
+    const equipped = tuxemonExtensionState(played.state.ext, DB);
+    equipped.party[0] = { ...equipped.party[0]!, heldItem: "xp_feeder" };
+    played.state.ext = packTuxemonExtensionState(equipped);
     const snapshot = createSessionSnapshot(played.session, played.state, 0);
     expect(snapshot.ext).toMatchObject({ format: TUXEMON_EXT_SAVE_FORMAT });
     const restored = restoreSessionEnvelope(played.session, encodeEnvelope(snapshot));
     expect(restored.ext).toEqual(played.state.ext);
+    expect(tuxemonExtensionState(restored.ext, DB).party[0]?.heldItem).toBe("xp_feeder");
 
     const legacy = {
       ...tuxemonExtensionState(played.state.ext, DB),
@@ -516,6 +521,13 @@ describe("Tuxemon party extension", () => {
     expect(migratedState).not.toHaveProperty("inventory");
     expect(migratedState).not.toHaveProperty("money");
 
+    const legacyParty = migratedState.party.map(({ heldItem: _heldItem, ...monster }) => monster);
+    const withoutHeldSlots = createTuxemonExtensions(DB).codec!.decode({
+      format: TUXEMON_EXT_SAVE_FORMAT,
+      state: { ...migratedState, party: legacyParty } as unknown as JsonValue,
+    });
+    expect(tuxemonExtensionState(withoutHeldSlots, DB).party[0]).not.toHaveProperty("heldItem");
+
     for (const missing of ["clock", "weather"] as const) {
       const partial = { ...tuxemonExtensionState(played.state.ext, DB) } as Record<string, unknown>;
       delete partial[missing];
@@ -540,6 +552,12 @@ describe("Tuxemon party extension", () => {
     }] };
     expect(() => startSession(project([]), played.session, undefined, invalidNickname as unknown as JsonValue))
       .toThrow(/nickname must contain 1\.\.15 characters/);
+    const invalidHeldItem = { ...initialTuxemonExtensionState(), party: [{
+      ...tuxemonExtensionState(played.state.ext, DB).party[0]!,
+      heldItem: "potion",
+    }] };
+    expect(() => startSession(project([]), played.session, undefined, invalidHeldItem as unknown as JsonValue))
+      .toThrow(/heldItem must name an imported holdable item/);
   });
 
   test("rewind refolds monster identity, attributes, and RNG byte-for-byte", () => {

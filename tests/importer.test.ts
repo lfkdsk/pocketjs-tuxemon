@@ -108,6 +108,7 @@ test("all maps pass schema and reference valid transfer destinations", () => {
   expect(result.project.system).toEqual({
     messageBlocksPlayer: true,
     transferPresentation: "retain",
+    stepCounter: true,
     inventory: { maxKinds: 99 },
   });
   expect(result.project.maps).toHaveLength(263);
@@ -698,8 +699,10 @@ test("default import output remains byte-pinned", () => {
   // combined pin. The economy limitations summary also lives here, so the
   // G-PC-LOCKER fix-2 lockerOverflow wording (the locker is implemented) and
   // the START Bag's localized-runtime description disposition move this hash.
+  // The save-owned global step counter is enabled so the imported upstream
+  // Player page can report walked distance across maps and hosts.
   expect(createHash("sha256").update(bytes).digest("hex")).toBe(
-    "926d5df05760fa9e9838e0f45d5dea9d14fe2d313e0634354bc36ee569d91a30",
+    "7196fb7fd35f224964abdac8e813ba234558f0ae3c8464c4b0a99e98e4fc58e3",
   );
 });
 

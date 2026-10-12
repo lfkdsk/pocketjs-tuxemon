@@ -10,7 +10,9 @@ import {
 import type { SpawnedMonsterSnapshot } from "../battle/types.ts";
 import {
   createStartMenuRuntime,
+  formatMonsterExperience,
   formatStartMenuPlaytime,
+  monsterExperienceProgress,
   partyActions,
   playerSummary,
   sortParty,
@@ -36,6 +38,9 @@ const labels: StartMenuLabels = {
   partyActions: {
     info: "Info",
     moves: "Moves",
+    unequip: "Unequip",
+    equip: "Equip",
+    swapItem: "Swap Item",
     move: "Move",
     sort: "Sort",
     release: "Release",
@@ -67,6 +72,15 @@ const catalog = {
       recharge: 0,
     },
   },
+  items: {
+    antidote_grapes: { name: "Antidote Grapes", behaviors: { holdable: true } },
+    xp_feeder: { name: "XP Feeder", behaviors: { holdable: true } },
+    xp_transmitter: { name: "XP Transmitter", behaviors: { holdable: true } },
+    potion: { name: "Potion", behaviors: { holdable: false } },
+    nu_phone: { name: "Nu Phone", behaviors: { holdable: false } },
+    app_tuxepedia: { name: "Tuxepedia", behaviors: { holdable: false } },
+  },
+  statuses: {},
 } as never;
 
 function monster(
@@ -121,6 +135,7 @@ function sessionState(party: SpawnedMonsterSnapshot[]): SessionState {
     sw: {
       playerName: "Red",
       gold: 4321,
+      steps: 1_234,
       items: { potion: 2, nu_phone: 1, app_tuxepedia: 1 },
     },
     ext: packTuxemonExtensionState(ext),
@@ -195,27 +210,34 @@ describe("START root ordering", () => {
 
 describe("Party pure helpers", () => {
   const party = [
-    monster("alpha", 12, 2, 10, "zED"),
-    monster("beta", 4, 9, 10, "amy"),
-    monster("gamma", 8, 5, 10),
+    monster("alpha", 4, 9, 10, "milo"),
+    monster("beta", 12, 6, 10, "zulu"),
+    monster("gamma", 8, 2, 10, "alpha"),
   ];
 
   test("matches upstream level, HP ratio, display-name, and Tuxepedia-ID sorting", () => {
-    expect(sortParty(party, "level", catalog).map((entry) => entry.slug)).toEqual(["beta", "gamma", "alpha"]);
-    expect(sortParty(party, "hp", catalog).map((entry) => entry.slug)).toEqual(["beta", "gamma", "alpha"]);
-    expect(sortParty(party, "name", catalog).map((entry) => entry.slug)).toEqual(["beta", "gamma", "alpha"]);
+    expect(sortParty(party, "level", catalog).map((entry) => entry.slug)).toEqual(["alpha", "gamma", "beta"]);
+    expect(sortParty(party, "hp", catalog).map((entry) => entry.slug)).toEqual(["alpha", "beta", "gamma"]);
+    expect(sortParty(party, "name", catalog).map((entry) => entry.slug)).toEqual(["gamma", "alpha", "beta"]);
     expect(sortParty(party, "id", catalog).map((entry) => entry.slug)).toEqual(["beta", "gamma", "alpha"]);
   });
 
+  test("sorts remain stable when comparator keys tie", () => {
+    const tied = [monster("gamma", 5, 5), monster("alpha", 5, 5), monster("beta", 5, 5)];
+    expect(sortParty(tied, "level", catalog).map((entry) => entry.slug)).toEqual(["gamma", "alpha", "beta"]);
+    expect(sortParty(tied, "hp", catalog).map((entry) => entry.slug)).toEqual(["gamma", "alpha", "beta"]);
+  });
+
   test("hides move/sort/release for a one-member party", () => {
-    expect(partyActions(party[0]!, 1)).toEqual(["info", "moves"]);
-    expect(partyActions({ ...party[0]!, moves: [] }, 1)).toEqual(["info"]);
+    expect(partyActions(party[0]!, 0, [party[0]!], {}, catalog)).toEqual(["info", "moves"]);
+    expect(partyActions({ ...party[0]!, moves: [] }, 0, [{ ...party[0]!, moves: [] }], {}, catalog))
+      .toEqual(["info"]);
   });
 });
 
 describe("Player summary", () => {
   test("uses live name/gold, the saved 60 Hz game clock, discovery union, and player-side battle history", () => {
-    const summary = playerSummary(sessionState([monster("alpha", 5, 10)]));
+    const summary = playerSummary(sessionState([monster("alpha", 5, 10)]), 393);
     expect(summary).toMatchObject({
       name: "Red",
       gold: 4321,
@@ -223,10 +245,30 @@ describe("Player summary", () => {
       playtime: "1h 1m",
       seen: 3,
       caught: 2,
+      steps: 1_234,
+      tuxepediaTotal: 393,
+      tuxepediaProgress: 0.8,
       battles: { total: 2, won: 1, lost: 0, draw: 1 },
     });
     expect(summary.history.map((entry) => entry.opponent)).toEqual(["trainer-a", "trainer-b"]);
     expect(formatStartMenuPlaytime(-5)).toBe("0h 0m");
+  });
+
+  test("matches upstream current-level XP at level one, mid-game, and the cap", () => {
+    const rules = {
+      levelRange: [0, 100] as [number, number],
+      experience: {
+        acquisitionMultipliers: {},
+        groups: { default: { multiplier: 1, experienceCoefficient: 3 } },
+      },
+    };
+    expect(monsterExperienceProgress({ level: 1, totalExperience: 7 }, rules))
+      .toEqual({ earned: 7, required: 7 });
+    expect(monsterExperienceProgress({ level: 10, totalExperience: 1_234 }, rules))
+      .toEqual({ earned: 234, required: 331 });
+    expect(monsterExperienceProgress({ level: 100, totalExperience: 1_001_234 }, rules))
+      .toEqual({ earned: 1_234, required: 0 });
+    expect(formatMonsterExperience({ earned: 1_234, required: 56_789 })).toBe("1,234/56,789");
   });
 });
 
@@ -302,15 +344,20 @@ describe("START/Party controller", () => {
 
     runtime.activateIndex(0); // beta -> actions
     runtime.activateIndex(4); // Release
-    expect(runtime.state().partyMenu).toMatchObject({ phase: "releaseConfirm", releaseCursor: 1 });
+    expect(runtime.state().partyMenu).toMatchObject({ phase: "releaseConfirm", releaseCursor: 0 });
     runtime.applyAction("confirm"); // default No
     expect(runtime.state().party).toHaveLength(3);
     runtime.activateIndex(0);
     runtime.activateIndex(4);
-    runtime.activateIndex(0); // Yes, using the shared touch-confirm path
+    runtime.applyAction("back"); // upstream confirmation cannot be escaped
+    expect(runtime.state().partyMenu.phase).toBe("releaseConfirm");
+    runtime.activateIndex(1); // Yes, using the shared touch-confirm path
     expect(runtime.state().party.map((entry) => entry.slug)).toEqual(["gamma", "alpha"]);
+    expect(runtime.state().partyMenu).toMatchObject({ phase: "releaseResult", releasedName: "AMY" });
     expect(tuxemonExtensionState(live.state().ext).party.map((entry) => entry.slug)).toEqual(["gamma", "alpha"]);
     expect(live.replacements()).toBe(3);
+    runtime.applyAction("confirm");
+    expect(runtime.state().partyMenu.phase).toBe("list");
 
     runtime.applyAction("back"); // party list -> root
     runtime.activateIndex(runtime.rows().findIndex((row) => row.id === "player"));
@@ -320,6 +367,106 @@ describe("START/Party controller", () => {
     runtime.activateIndex(runtime.rows().findIndex((row) => row.id === "bag"));
     expect(dispatched).toEqual(["bag"]);
     expect(runtime.isOpen()).toBe(true);
+    dispose();
+  });
+
+  test("equip, unequip, and swap commit party plus inventory atomically without creating items", () => {
+    const source = [
+      { ...monster("alpha", 12, 8), heldItem: "xp_feeder" },
+      { ...monster("beta", 10, 7), heldItem: "xp_transmitter" },
+    ];
+    const session = sessionState(source);
+    session.sw.items.antidote_grapes = 2;
+    const live = liveHost(session);
+    const totals = () => {
+      const ext = tuxemonExtensionState(live.state().ext);
+      const result: Record<string, number> = {};
+      for (const slug of ["antidote_grapes", "xp_feeder", "xp_transmitter"]) {
+        result[slug] = (live.state().sw.items[slug] ?? 0)
+          + ext.party.filter((entry) => entry.heldItem === slug).length;
+      }
+      return result;
+    };
+    const initialTotals = totals();
+    let dispose = () => {};
+    const runtime = createRoot((cleanup) => {
+      dispose = cleanup;
+      return createStartMenuRuntime({ catalog, labels }, live.host);
+    });
+    runtime.open();
+    runtime.activateIndex(runtime.rows().findIndex((row) => row.id === "party"));
+
+    runtime.activateIndex(0);
+    expect(runtime.actionRows()).toEqual([
+      "info", "moves", "unequip", "equip", "swapItem", "move", "sort", "release",
+    ]);
+    runtime.activateIndex(runtime.actionRows().indexOf("equip"));
+    expect(runtime.state().partyMenu.phase).toBe("equip");
+    runtime.activateIndex(runtime.itemRows().findIndex((row) => row.slug === "antidote_grapes"));
+    expect(runtime.state().party[0]!.heldItem).toBe("antidote_grapes");
+    expect(live.state().sw.items).toMatchObject({ antidote_grapes: 1, xp_feeder: 1 });
+    expect(tuxemonExtensionState(live.state().ext).party[0]!.heldItem).toBe("antidote_grapes");
+    expect(totals()).toEqual(initialTotals);
+
+    runtime.activateIndex(0);
+    runtime.activateIndex(runtime.actionRows().indexOf("unequip"));
+    expect(runtime.state().party[0]).not.toHaveProperty("heldItem");
+    expect(live.state().sw.items.antidote_grapes).toBe(2);
+    expect(totals()).toEqual(initialTotals);
+
+    runtime.activateIndex(0);
+    runtime.activateIndex(runtime.actionRows().indexOf("equip"));
+    runtime.activateIndex(runtime.itemRows().findIndex((row) => row.slug === "xp_feeder"));
+    expect(runtime.state().party[0]!.heldItem).toBe("xp_feeder");
+    expect(live.state().sw.items.xp_feeder).toBeUndefined();
+    expect(totals()).toEqual(initialTotals);
+
+    runtime.activateIndex(0);
+    runtime.activateIndex(runtime.actionRows().indexOf("swapItem"));
+    expect(runtime.swapRows()).toEqual([{
+      partyIndex: 1,
+      monsterName: "beta",
+      itemSlug: "xp_transmitter",
+      itemName: "XP Transmitter",
+    }]);
+    runtime.activateIndex(0);
+    expect(runtime.state().party.map((entry) => entry.heldItem))
+      .toEqual(["xp_transmitter", "xp_feeder"]);
+    expect(tuxemonExtensionState(live.state().ext).party.map((entry) => entry.heldItem))
+      .toEqual(["xp_transmitter", "xp_feeder"]);
+    expect(runtime.state().items).toEqual(live.state().sw.items);
+    expect(totals()).toEqual(initialTotals);
+    expect(live.replacements()).toBe(4);
+    dispose();
+  });
+
+  test("detail and moves phases work in the default runtime path", () => {
+    const live = liveHost(sessionState([
+      monster("alpha", 5, 10),
+      monster("beta", 6, 8),
+    ]));
+    let dispose = () => {};
+    const runtime = createRoot((cleanup) => {
+      dispose = cleanup;
+      return createStartMenuRuntime({ catalog, labels, tuxepediaTotal: 393 }, live.host);
+    });
+    runtime.open();
+    runtime.activateIndex(runtime.rows().findIndex((row) => row.id === "party"));
+    runtime.activateIndex(0);
+    runtime.activateIndex(0); // Info
+    expect(runtime.state().partyMenu).toMatchObject({ phase: "detail", cursor: 0 });
+    runtime.applyAction("right");
+    expect(runtime.state().partyMenu).toMatchObject({ phase: "detail", cursor: 1 });
+    runtime.applyAction("back");
+    expect(runtime.state().partyMenu.phase).toBe("list");
+    runtime.activateIndex(0);
+    runtime.activateIndex(1); // Moves
+    expect(runtime.state().partyMenu.phase).toBe("moves");
+    expect(runtime.moves().map((move) => move.slug)).toEqual(["ram"]);
+    runtime.applyAction("right");
+    expect(runtime.selectedMonster()?.slug).toBe("beta");
+    runtime.applyAction("back");
+    expect(runtime.state().partyMenu.phase).toBe("list");
     dispose();
   });
 

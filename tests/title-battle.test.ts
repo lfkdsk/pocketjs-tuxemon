@@ -549,6 +549,7 @@ describe("title root menu", () => {
           expect(f.runtime.isOpen()).toBeFalse();
           f.runtime.openTitle();
           expect(f.runtime.state().screen).toBe("title");
+          expect(f.runtime.titleRows()[f.runtime.state().titleIndex]).toBe(id);
         }
 
         f.runtime.selectTitle(f.runtime.titleRows().indexOf("exit"));

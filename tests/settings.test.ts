@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
-import type { AudioOps } from "@pocketjs/framework/audio";
+import { AUDIO_RING_FRAMES, type AudioOps } from "@pocketjs/framework/audio";
 import { BTN } from "@pocketjs/framework/input";
 import { createSimFsHost } from "../vendor/pocket-rpgkit/vendor/pocketjs/hosts/sim/fs.ts";
 import { AudioDriver, type AudioDriverState } from "../vendor/pocket-rpgkit/src/ui/audio/index.ts";
@@ -21,6 +21,7 @@ import {
   encodeSettings,
   formatMonsterHeight,
   formatMonsterWeight,
+  formatWalkedDistance,
   installButtonRemapFrame,
   loadSettings,
   persistSettings,
@@ -228,6 +229,35 @@ describe("control remapping", () => {
     expect(remapper.map(BTN.CIRCLE)).toBe(BTN.CROSS);
   });
 
+  test("default bindings stay on the cached identity path until a revision", () => {
+    let current = defaultSettings();
+    let revision = 0;
+    let reads = 0;
+    const remapper = createButtonRemapper({
+      revision: () => revision,
+      get: () => {
+        reads++;
+        return current;
+      },
+    });
+
+    expect(reads).toBe(1);
+    expect(remapper.map(BTN.UP | BTN.START)).toBe(BTN.UP | BTN.START);
+    expect(remapper.map(BTN.CIRCLE)).toBe(BTN.CIRCLE);
+    expect(remapper.map(0)).toBe(0);
+    expect(reads).toBe(1);
+
+    current = {
+      ...current,
+      controls: { ...current.controls, primary: "back", back: "primary" },
+    };
+    revision++;
+    expect(remapper.map(BTN.CROSS)).toBe(0);
+    expect(remapper.map(0)).toBe(0);
+    expect(remapper.map(BTN.CROSS)).toBe(BTN.CIRCLE);
+    expect(reads).toBe(2);
+  });
+
   test("the mounted host frame sees remapped buttons and unchanged auxiliary input", () => {
     const controller = createSettingsController({ channel: "browser", read: () => null, write() {} });
     controller.replace({
@@ -242,6 +272,12 @@ describe("control remapping", () => {
       const dispose = installButtonRemapFrame(createButtonRemapper(controller));
       globalsWithFrame.frame!(BTN.CROSS | BTN.START, 123, [1, 2], [3], [4]);
       expect(calls).toEqual([[BTN.CIRCLE | BTN.START, 123, [1, 2], [3], [4]]]);
+      const semanticFrame = (globalsWithFrame.frame as typeof globalsWithFrame.frame & {
+        __pocketSemanticFrame?: (...args: any[]) => void;
+      }).__pocketSemanticFrame;
+      expect(semanticFrame).toBeFunction();
+      semanticFrame!(BTN.CROSS | BTN.START, 456, [5], [6], [7]);
+      expect(calls.at(-1)).toEqual([BTN.CROSS | BTN.START, 456, [5], [6], [7]]);
       dispose();
       globalsWithFrame.frame!(BTN.CROSS);
       expect(calls.at(-1)).toEqual([BTN.CROSS]);
@@ -255,11 +291,18 @@ describe("control remapping", () => {
 describe("measurement preferences", () => {
   test("metric and imperial monster measurements match upstream thresholds", () => {
     expect(formatMonsterHeight(42, "metric")).toBe("42 cm");
+    expect(formatMonsterHeight(100, "metric")).toBe("1.0 m");
+    expect(formatMonsterHeight(125, "metric")).toBe("1.2 m");
+    expect(formatMonsterHeight(225, "metric")).toBe("2.2 m");
     expect(formatMonsterHeight(175, "metric")).toBe("1.8 m");
     expect(formatMonsterHeight(175, "imperial")).toBe("6 ft");
     expect(formatMonsterWeight(18.4, "metric")).toBe("18 kg");
-    expect(formatMonsterWeight(1_250, "metric")).toBe("1.3 t");
+    expect(formatMonsterWeight(1_000, "metric")).toBe("1.0 t");
+    expect(formatMonsterWeight(1_250, "metric")).toBe("1.2 t");
     expect(formatMonsterWeight(18.4, "imperial")).toBe("41 lb");
+    expect(formatWalkedDistance(0, "metric")).toBe("0 km");
+    expect(formatWalkedDistance(1_234, "metric")).toBe("1.23 km");
+    expect(formatWalkedDistance(1_234, "imperial")).toBe("0.76 mi");
   });
 });
 
@@ -289,15 +332,28 @@ function wav(samples: readonly number[]): Uint8Array {
 class VolumeAudioOps implements AudioOps {
   nextHandle = 1;
   readonly volumes: number[] = [];
-  createStream(): number { return this.nextHandle++; }
-  destroyStream(): void {}
-  writePcm(_handle: number, pcm: ArrayBuffer): number { return new Int16Array(pcm).length; }
-  play(): void {}
+  readonly created: number[] = [];
+  readonly destroyed: number[] = [];
+  readonly plays: number[] = [];
+  readonly writes: Array<{ handle: number; samples: number[] }> = [];
+  readonly events: string[] = [];
+  createStream(): number {
+    const handle = this.nextHandle++;
+    this.created.push(handle);
+    return handle;
+  }
+  destroyStream(handle: number): void { this.destroyed.push(handle); }
+  writePcm(handle: number, pcm: ArrayBuffer): number {
+    const samples = Array.from(new Int16Array(pcm));
+    this.writes.push({ handle, samples });
+    return samples.length;
+  }
+  play(handle: number): void { this.plays.push(handle); }
   pause(): void {}
   stop(): void {}
   setVolume(_handle: number, volume: number): void { this.volumes.push(volume); }
   endStream(): void {}
-  poll(): undefined { return undefined; }
+  poll(): string | undefined { return this.events.shift(); }
 }
 
 function audioFrame(frame: number): AudioDriverState {
@@ -352,9 +408,43 @@ describe("audio preferences", () => {
     const source = audioFrame(3);
     const first = adapter.apply(source);
     expect(adapter.apply(source)).toBe(first);
+    controller.update((current) => ({ ...current, units: "imperial" }));
+    expect(adapter.apply(source)).toBe(first);
     controller.update((current) => ({ ...current, musicVolume: 90 }));
     const changed = adapter.apply(source);
     expect(changed).not.toBe(first);
     expect(changed.interp.audio?.bgm?.volume).toBe(72);
+  });
+
+  test("a frozen-frame volume change keeps the real driver stream and PCM cursor", () => {
+    const controller = createSettingsController({ channel: "browser", read: () => null, write() {} });
+    const adapter = createAudioSettingsAdapter(controller);
+    const timeline = {
+      ...audioFrame(3),
+      interp: { ...audioFrame(3).interp, cues: [] },
+    };
+    const samples = Array.from({ length: AUDIO_RING_FRAMES + 64 }, (_, index) => index + 1);
+    const ops = new VolumeAudioOps();
+    const driver = new AudioDriver(ops, { song: "audio:wav.song" }, () => wav(samples));
+
+    driver.sync(adapter.apply(timeline), timeline);
+    expect(ops.created).toEqual([1]);
+    expect(ops.plays).toEqual([1]);
+    expect(ops.writes[0]?.samples).toEqual(samples.slice(0, AUDIO_RING_FRAMES));
+
+    ops.events.push(JSON.stringify({ t: "credit", h: 1, free: 32 }));
+    const createdBefore = ops.created.length;
+    const playedBefore = ops.plays.length;
+    controller.update((current) => ({ ...current, musicVolume: 90 }));
+    driver.sync(adapter.apply(timeline), timeline);
+
+    expect(ops.created.length - createdBefore).toBe(0);
+    expect(ops.destroyed).toEqual([]);
+    expect(ops.plays.length - playedBefore).toBe(0);
+    expect(ops.volumes.at(-1)).toBe(0.72);
+    expect(ops.writes[1]).toEqual({
+      handle: 1,
+      samples: samples.slice(AUDIO_RING_FRAMES, AUDIO_RING_FRAMES + 32),
+    });
   });
 });

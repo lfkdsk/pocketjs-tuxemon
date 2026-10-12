@@ -206,6 +206,8 @@ export interface BattleDb {
     usableIn: string[];
     cost: number | null;
     consumable: boolean;
+    rewardMethod: "default" | "xp_equal" | "xp_transmitter" | "xp_feeder" | "xp_overkill" | "xp_damage_prop" | "xp_bond" | "xp_stage" | "xp_survivor";
+    moneyMultiplier: number;
     effects: BattlePlugin[];
     conditions: BattlePlugin[];
     behaviors: Record<string, unknown>;
@@ -544,6 +546,11 @@ export function validateBattleDb(value: unknown, pakKeys?: ReadonlySet<string>):
       assert(typeof item.messages[key] === "string" && item.messages[key].length > 0, `item ${slug} has no localized ${key} message`);
     }
     assert(db.rules.actionOrder.sortOrder.includes(item.sort), `item ${slug} has unknown action sort ${item.sort}`);
+    assert([
+      "default", "xp_equal", "xp_transmitter", "xp_feeder", "xp_overkill",
+      "xp_damage_prop", "xp_bond", "xp_stage", "xp_survivor",
+    ].includes(item.rewardMethod), `item ${slug} has invalid reward method`);
+    assert(Number.isFinite(item.moneyMultiplier) && item.moneyMultiplier >= 0, `item ${slug} has invalid money multiplier`);
     validateStatModifiers(item.statModifiers, `item ${slug}`);
   }
   for (const [slug, status] of Object.entries(db.statuses)) {

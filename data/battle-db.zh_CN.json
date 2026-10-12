@@ -73491,6 +73491,8 @@
    ],
    "cost": null,
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -73528,6 +73530,8 @@
    ],
    "cost": null,
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -73565,6 +73569,8 @@
    ],
    "cost": null,
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -73604,6 +73610,8 @@
    ],
    "cost": null,
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -73641,6 +73649,8 @@
    ],
    "cost": null,
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -73678,6 +73688,8 @@
    ],
    "cost": null,
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -73715,6 +73727,8 @@
    ],
    "cost": 550,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "statchange"
@@ -73766,6 +73780,8 @@
    ],
    "cost": 550,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "statchange"
@@ -73817,6 +73833,8 @@
    ],
    "cost": 550,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "statchange"
@@ -73868,6 +73886,8 @@
    ],
    "cost": 550,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "statchange"
@@ -73919,6 +73939,8 @@
    ],
    "cost": 550,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "statchange"
@@ -73970,6 +73992,8 @@
    ],
    "cost": 450,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "switch_type",
@@ -74023,6 +74047,8 @@
    ],
    "cost": null,
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -74063,6 +74089,8 @@
    ],
    "cost": 1500,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "heal",
@@ -74128,6 +74156,8 @@
    ],
    "cost": null,
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -74165,6 +74195,8 @@
    ],
    "cost": 450,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "switch_type",
@@ -74218,6 +74250,8 @@
    ],
    "cost": 600,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "teleport_item",
@@ -74262,6 +74296,8 @@
    ],
    "cost": 450,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "switch_type",
@@ -74315,6 +74351,8 @@
    ],
    "cost": null,
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "fishing"
@@ -74364,6 +74402,8 @@
    ],
    "cost": 2000,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "evolve"
@@ -74417,6 +74457,8 @@
    ],
    "cost": null,
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -74454,6 +74496,8 @@
    ],
    "cost": 450,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "switch_type",
@@ -74507,6 +74551,8 @@
    ],
    "cost": null,
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -74544,6 +74590,8 @@
    ],
    "cost": 450,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "switch_type",
@@ -74598,6 +74646,8 @@
    ],
    "cost": 1000,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "heal",
@@ -74660,6 +74710,8 @@
    ],
    "cost": 3450,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "gain_xp",
@@ -74704,6 +74756,8 @@
    ],
    "cost": 450,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "switch_type",
@@ -74757,6 +74811,8 @@
    ],
    "cost": 2000,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "evolve"
@@ -74811,6 +74867,8 @@
    ],
    "cost": 500,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "heal",
@@ -74873,6 +74931,8 @@
    ],
    "cost": 450,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "switch_type",
@@ -74926,6 +74986,8 @@
    ],
    "cost": 2000,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "evolve"
@@ -74979,6 +75041,8 @@
    ],
    "cost": 1050,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "gain_xp",
@@ -75023,6 +75087,8 @@
    ],
    "cost": 450,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "switch_type",
@@ -75076,6 +75142,8 @@
    ],
    "cost": null,
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -75113,6 +75181,8 @@
    ],
    "cost": 2000,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "evolve"
@@ -75166,6 +75236,8 @@
    ],
    "cost": null,
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -75203,6 +75275,8 @@
    ],
    "cost": null,
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -75240,6 +75314,8 @@
    ],
    "cost": null,
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -75277,6 +75353,8 @@
    ],
    "cost": 2000,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "evolve"
@@ -75330,6 +75408,8 @@
    ],
    "cost": null,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "evolve"
@@ -75384,6 +75464,8 @@
    ],
    "cost": 100,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "heal",
@@ -75446,6 +75528,8 @@
    ],
    "cost": 2000,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "evolve"
@@ -75499,6 +75583,8 @@
    ],
    "cost": 10000,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "give_tp",
@@ -75552,6 +75638,8 @@
    ],
    "cost": 10000,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "give_tp",
@@ -75605,6 +75693,8 @@
    ],
    "cost": 10000,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "give_tp",
@@ -75658,6 +75748,8 @@
    ],
    "cost": 10000,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "give_tp",
@@ -75711,6 +75803,8 @@
    ],
    "cost": 10000,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "give_tp",
@@ -75764,6 +75858,8 @@
    ],
    "cost": 10000,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "give_tp",
@@ -75817,6 +75913,8 @@
    ],
    "cost": null,
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -75856,6 +75954,8 @@
    ],
    "cost": 100,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "repellent",
@@ -75901,6 +76001,8 @@
    ],
    "cost": 400,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "restore"
@@ -75956,6 +76058,8 @@
    ],
    "cost": 1000,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "restore"
@@ -76020,6 +76124,8 @@
    ],
    "cost": null,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "evolve"
@@ -76073,6 +76179,8 @@
    ],
    "cost": 2000,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "evolve"
@@ -76126,6 +76234,8 @@
    ],
    "cost": 450,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "switch_type",
@@ -76179,6 +76289,8 @@
    ],
    "cost": null,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "evolve"
@@ -76232,6 +76344,8 @@
    ],
    "cost": 450,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "switch_type",
@@ -76285,6 +76399,8 @@
    ],
    "cost": null,
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "remove_entity"
@@ -76334,6 +76450,8 @@
    ],
    "cost": null,
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -76371,6 +76489,8 @@
    ],
    "cost": 2000,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "evolve"
@@ -76425,6 +76545,8 @@
    ],
    "cost": 300,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "heal",
@@ -76487,6 +76609,8 @@
    ],
    "cost": null,
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -76524,6 +76648,8 @@
    ],
    "cost": 2000,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "evolve"
@@ -76577,6 +76703,8 @@
    ],
    "cost": 300,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "gain_xp",
@@ -76621,6 +76749,8 @@
    ],
    "cost": 2000,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "evolve"
@@ -76674,6 +76804,8 @@
    ],
    "cost": 2000,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "evolve"
@@ -76727,6 +76859,8 @@
    ],
    "cost": 2500,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "learn_tm",
@@ -76779,6 +76913,8 @@
    ],
    "cost": 2500,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "learn_tm",
@@ -76839,6 +76975,8 @@
    ],
    "cost": 2500,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "learn_tm",
@@ -76899,6 +77037,8 @@
    ],
    "cost": 2500,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "learn_tm",
@@ -76959,6 +77099,8 @@
    ],
    "cost": 2500,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "learn_tm",
@@ -77019,6 +77161,8 @@
    ],
    "cost": 2500,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "learn_tm",
@@ -77079,6 +77223,8 @@
    ],
    "cost": 2500,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "learn_tm",
@@ -77139,6 +77285,8 @@
    ],
    "cost": 2500,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "learn_tm",
@@ -77199,6 +77347,8 @@
    ],
    "cost": 2500,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "learn_tm",
@@ -77259,6 +77409,8 @@
    ],
    "cost": 2500,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "learn_tm",
@@ -77319,6 +77471,8 @@
    ],
    "cost": 2500,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "learn_tm",
@@ -77371,6 +77525,8 @@
    ],
    "cost": 2500,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "learn_tm",
@@ -77431,6 +77587,8 @@
    ],
    "cost": 2500,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "learn_tm",
@@ -77491,6 +77649,8 @@
    ],
    "cost": 2500,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "learn_tm",
@@ -77551,6 +77711,8 @@
    ],
    "cost": 2500,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "learn_tm",
@@ -77603,6 +77765,8 @@
    ],
    "cost": 100,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -77694,6 +77858,8 @@
    ],
    "cost": null,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -77785,6 +77951,8 @@
    ],
    "cost": 1000,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -77876,6 +78044,8 @@
    ],
    "cost": 400,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -77967,6 +78137,8 @@
    ],
    "cost": 350,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -78058,6 +78230,8 @@
    ],
    "cost": 250,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -78149,6 +78323,8 @@
    ],
    "cost": 250,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -78240,6 +78416,8 @@
    ],
    "cost": 250,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -78331,6 +78509,8 @@
    ],
    "cost": 400,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -78422,6 +78602,8 @@
    ],
    "cost": 500,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -78513,6 +78695,8 @@
    ],
    "cost": 350,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -78604,6 +78788,8 @@
    ],
    "cost": 450,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -78695,6 +78881,8 @@
    ],
    "cost": 300,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -78786,6 +78974,8 @@
    ],
    "cost": 600,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -78877,6 +79067,8 @@
    ],
    "cost": 250,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -78968,6 +79160,8 @@
    ],
    "cost": 250,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -79059,6 +79253,8 @@
    ],
    "cost": 250,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -79150,6 +79346,8 @@
    ],
    "cost": 200,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -79241,6 +79439,8 @@
    ],
    "cost": 350,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -79332,6 +79532,8 @@
    ],
    "cost": 250,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture_combined",
@@ -79429,6 +79631,8 @@
    ],
    "cost": null,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "park",
@@ -79515,6 +79719,8 @@
    ],
    "cost": 450,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -79606,6 +79812,8 @@
    ],
    "cost": 450,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -79697,6 +79905,8 @@
    ],
    "cost": 450,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -79788,6 +79998,8 @@
    ],
    "cost": 250,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -79879,6 +80091,8 @@
    ],
    "cost": 250,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -79970,6 +80184,8 @@
    ],
    "cost": 300,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture_combined",
@@ -80067,6 +80283,8 @@
    ],
    "cost": 450,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -80158,6 +80376,8 @@
    ],
    "cost": 450,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "switch_type",
@@ -80211,6 +80431,8 @@
    ],
    "cost": 450,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "switch_type",
@@ -80264,6 +80486,8 @@
    ],
    "cost": 450,
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "switch_type",
@@ -80317,6 +80541,8 @@
    ],
    "cost": null,
    "consumable": false,
+   "rewardMethod": "xp_feeder",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -80354,6 +80580,8 @@
    ],
    "cost": null,
    "consumable": false,
+   "rewardMethod": "xp_transmitter",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {

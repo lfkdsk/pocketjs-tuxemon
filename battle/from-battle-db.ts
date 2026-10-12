@@ -103,6 +103,8 @@ function toItem(slug: string, item: BattleDb["items"][string]): DbItem {
     category: item.category,
     usable_in: item.usableIn,
     consumable: item.consumable,
+    reward_method: item.rewardMethod,
+    money_multiplier: item.moneyMultiplier,
     effects,
     conditions: toRules(item.conditions),
     behaviors: item.behaviors,

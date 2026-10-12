@@ -72945,6 +72945,8 @@
     "WorldState"
    ],
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -72980,6 +72982,8 @@
     "WorldState"
    ],
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -73015,6 +73019,8 @@
     ""
    ],
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -73052,6 +73058,8 @@
     "WorldState"
    ],
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -73087,6 +73095,8 @@
     "WorldState"
    ],
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -73122,6 +73132,8 @@
     ""
    ],
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -73157,6 +73169,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "statchange"
@@ -73206,6 +73220,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "statchange"
@@ -73255,6 +73271,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "statchange"
@@ -73304,6 +73322,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "statchange"
@@ -73353,6 +73373,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "statchange"
@@ -73402,6 +73424,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "switch_type",
@@ -73453,6 +73477,8 @@
     ""
    ],
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -73491,6 +73517,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "heal",
@@ -73554,6 +73582,8 @@
     ""
    ],
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -73589,6 +73619,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "switch_type",
@@ -73640,6 +73672,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "teleport_item",
@@ -73682,6 +73716,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "switch_type",
@@ -73733,6 +73769,8 @@
     "WorldState"
    ],
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "fishing"
@@ -73780,6 +73818,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "evolve"
@@ -73831,6 +73871,8 @@
     "WorldState"
    ],
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -73866,6 +73908,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "switch_type",
@@ -73917,6 +73961,8 @@
     ""
    ],
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -73952,6 +73998,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "switch_type",
@@ -74004,6 +74052,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "heal",
@@ -74064,6 +74114,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "gain_xp",
@@ -74106,6 +74158,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "switch_type",
@@ -74157,6 +74211,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "evolve"
@@ -74209,6 +74265,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "heal",
@@ -74269,6 +74327,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "switch_type",
@@ -74320,6 +74380,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "evolve"
@@ -74371,6 +74433,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "gain_xp",
@@ -74413,6 +74477,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "switch_type",
@@ -74464,6 +74530,8 @@
     "WorldState"
    ],
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -74499,6 +74567,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "evolve"
@@ -74550,6 +74620,8 @@
     ""
    ],
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -74585,6 +74657,8 @@
     ""
    ],
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -74620,6 +74694,8 @@
     ""
    ],
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -74655,6 +74731,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "evolve"
@@ -74706,6 +74784,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "evolve"
@@ -74758,6 +74838,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "heal",
@@ -74818,6 +74900,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "evolve"
@@ -74869,6 +74953,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "give_tp",
@@ -74920,6 +75006,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "give_tp",
@@ -74971,6 +75059,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "give_tp",
@@ -75022,6 +75112,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "give_tp",
@@ -75073,6 +75165,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "give_tp",
@@ -75124,6 +75218,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "give_tp",
@@ -75175,6 +75271,8 @@
     ""
    ],
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -75212,6 +75310,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "repellent",
@@ -75255,6 +75355,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "restore"
@@ -75308,6 +75410,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "restore"
@@ -75370,6 +75474,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "evolve"
@@ -75421,6 +75527,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "evolve"
@@ -75472,6 +75580,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "switch_type",
@@ -75523,6 +75633,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "evolve"
@@ -75574,6 +75686,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "switch_type",
@@ -75625,6 +75739,8 @@
     "WorldState"
    ],
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "remove_entity"
@@ -75672,6 +75788,8 @@
     ""
    ],
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -75707,6 +75825,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "evolve"
@@ -75759,6 +75879,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "heal",
@@ -75819,6 +75941,8 @@
     ""
    ],
    "consumable": false,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -75854,6 +75978,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "evolve"
@@ -75905,6 +76031,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "gain_xp",
@@ -75947,6 +76075,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "evolve"
@@ -75998,6 +76128,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "evolve"
@@ -76049,6 +76181,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "learn_tm",
@@ -76099,6 +76233,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "learn_tm",
@@ -76157,6 +76293,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "learn_tm",
@@ -76215,6 +76353,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "learn_tm",
@@ -76273,6 +76413,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "learn_tm",
@@ -76331,6 +76473,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "learn_tm",
@@ -76389,6 +76533,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "learn_tm",
@@ -76447,6 +76593,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "learn_tm",
@@ -76505,6 +76653,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "learn_tm",
@@ -76563,6 +76713,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "learn_tm",
@@ -76621,6 +76773,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "learn_tm",
@@ -76671,6 +76825,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "learn_tm",
@@ -76729,6 +76885,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "learn_tm",
@@ -76787,6 +76945,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "learn_tm",
@@ -76845,6 +77005,8 @@
     "WorldState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "learn_tm",
@@ -76895,6 +77057,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -76984,6 +77148,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -77073,6 +77239,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -77162,6 +77330,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -77251,6 +77421,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -77340,6 +77512,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -77429,6 +77603,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -77518,6 +77694,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -77607,6 +77785,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -77696,6 +77876,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -77785,6 +77967,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -77874,6 +78058,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -77963,6 +78149,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -78052,6 +78240,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -78141,6 +78331,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -78230,6 +78422,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -78319,6 +78513,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -78408,6 +78604,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -78497,6 +78695,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -78586,6 +78786,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture_combined",
@@ -78681,6 +78883,8 @@
     "MainParkMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "park",
@@ -78765,6 +78969,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -78854,6 +79060,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -78943,6 +79151,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -79032,6 +79242,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -79121,6 +79333,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -79210,6 +79424,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture_combined",
@@ -79305,6 +79521,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "capture"
@@ -79394,6 +79612,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "switch_type",
@@ -79445,6 +79665,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "switch_type",
@@ -79496,6 +79718,8 @@
     "MainCombatMenuState"
    ],
    "consumable": true,
+   "rewardMethod": "default",
+   "moneyMultiplier": 1,
    "effects": [
     {
      "type": "switch_type",
@@ -79547,6 +79771,8 @@
     ""
    ],
    "consumable": false,
+   "rewardMethod": "xp_feeder",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {
@@ -79582,6 +79808,8 @@
     ""
    ],
    "consumable": false,
+   "rewardMethod": "xp_transmitter",
+   "moneyMultiplier": 1,
    "effects": [],
    "conditions": [],
    "behaviors": {

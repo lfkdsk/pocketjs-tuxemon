@@ -77,6 +77,7 @@ export interface OptionsRuntime {
   capture: Accessor<ControlAction | null>;
   conflict: Accessor<OptionsConflict | null>;
   persistFailed: Accessor<boolean>;
+  controlGlyph(action: ControlAction): string;
   activateIndex(index: number): void;
   adjustIndex(index: number, delta: -1 | 1): void;
   resolveConflict(accept: boolean): void;
@@ -102,6 +103,21 @@ const pick = (data: OptionsData, lang: Lang) => ({
 
 function clampPercent(value: number): number {
   return Math.max(0, Math.min(100, Math.round(value / 10) * 10));
+}
+
+const CONTROL_GLYPHS: Readonly<Record<PhysicalButton, string>> = Object.freeze({
+  up: "↑",
+  left: "←",
+  right: "→",
+  down: "↓",
+  primary: "○",
+  secondary: "△",
+  back: "×",
+});
+
+function cyclePercent(value: number): number {
+  if (value >= 100) return 0;
+  return Math.min(100, Math.floor(value / 10) * 10 + 10);
 }
 
 export function createOptionsRuntime(options: OptionsRuntimeOptions): OptionsRuntime {
@@ -271,7 +287,7 @@ export function createOptionsRuntime(options: OptionsRuntimeOptions): OptionsRun
         write((settings) => ({
           ...settings,
           [row.id === "music" ? "musicVolume" : "soundVolume"]:
-            (settings[row.id === "music" ? "musicVolume" : "soundVolume"] + 10) % 110,
+            cyclePercent(settings[row.id === "music" ? "musicVolume" : "soundVolume"]),
         }));
         break;
     }
@@ -376,6 +392,10 @@ export function createOptionsRuntime(options: OptionsRuntimeOptions): OptionsRun
     capture,
     conflict,
     persistFailed,
+    controlGlyph(action) {
+      settingsRevision();
+      return CONTROL_GLYPHS[options.settings.get().controls[action]];
+    },
     activateIndex,
     adjustIndex,
     resolveConflict,

@@ -13,7 +13,8 @@
 // step (the tape starts idle), frames 1..N are fed from data/g6-journey.json.
 // Any console error or uncaught exception fails the run. After the journey
 // the START menu's live Save/Load rows save to browser storage and load the
-// slot back.
+// slot back, then its production Exit callback must replace the campaign and
+// hand control to the title screen.
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
@@ -92,15 +93,39 @@ await send("Page.enable");
 // Freeze the page's real-time clock: the player only advances when we step it.
 await send("Page.addScriptToEvaluateOnNewDocument", {
   source: `globalThis.__pocketTuxemonInitialCivilTime = ${JSON.stringify(FIXED_INITIAL_CIVIL_TIME)};
+globalThis.__pocketTuxemonShowTitle = true;
 window.requestAnimationFrame = () => 0; window.cancelAnimationFrame = () => {};`,
 });
 const t0 = performance.now();
 await send("Page.navigate", { url: `http://127.0.0.1:${server.port}/pocket-tuxemon/` });
 for (let i = 0; i < 600; i++) {
-  const ready = await evaluate(`!!(globalThis.__pocketPlayer && globalThis.__pocketPlayer.state === "running" && globalThis.__rpgSessionState)`).catch(() => false);
+  const ready = await evaluate(`!!(globalThis.__pocketPlayer && globalThis.__pocketPlayer.state === "running" && globalThis.__rpgSessionState && globalThis.__pocketTitleBattle)`).catch(() => false);
   if (ready) break;
   await Bun.sleep(100);
 }
+// Fixed civil time normally identifies deterministic automation and omits the
+// release title entirely. This verifier forces it on, then enters Adventure
+// through the production handler before replaying the campaign tape. The same
+// runtime must be restored by START Exit at the end.
+const enteredAdventure = await evaluate(`(() => {
+  const title = globalThis.__pocketTitleBattle;
+  if (!title) return false;
+  const index = title.titleRows().indexOf("newGame");
+  if (index < 0) return false;
+  title.selectTitle(index);
+  if (title.state().screen !== "closed") return false;
+  // resetWorldSession publishes the replacement on the next host frame
+  // without folding input. Flush that frame before tape mask zero.
+  const p = globalThis.__pocketPlayer;
+  p.buttons = () => 0;
+  p.step();
+  // The ordinary no-title boot already folds masks[0] (idle) before the
+  // verifier attaches. Title consumed that boot frame, so fold the same idle
+  // mask now; the replay loop intentionally begins at masks[1].
+  p.step();
+  return globalThis.__rpgSessionState.frame === 1;
+})()`);
+if (!enteredAdventure) throw new Error("web journey: release title did not enter Adventure");
 const bootMs = performance.now() - t0;
 
 const checkpoints = new Map<number, string>(journey.checkpoints.map((c: any) => [c.frame, c.name]));
@@ -290,6 +315,54 @@ const saveLeg = await evaluate(`(() => {
 const saveShot = await send("Page.captureScreenshot", { format: "png" });
 writeFileSync(join(OUT, "save-loaded.png"), Buffer.from(saveShot.data, "base64"));
 
+// Exit is intentionally last: it destroys the active campaign. Drive the
+// real START row instead of calling resetWorldSession so this covers the
+// production close/reset/title-refresh callback chain in main.tsx.
+const exitLeg = await evaluate(`(() => {
+  const p = globalThis.__pocketPlayer;
+  const start = globalThis.__pocketStartMenu;
+  if (!start) throw new Error("web journey: START hook unavailable for Exit");
+  const press = (mask) => { p.buttons = () => mask; p.step(); p.buttons = () => 0; p.step(); };
+  const START = 0x0008, CIRCLE = 0x2000;
+  const before = globalThis.__rpgSessionState;
+  const beforeSummary = {
+    frame: before.frame,
+    location: [before.mapId, before.move.tx, before.move.ty],
+    gold: before.sw.gold,
+    itemKinds: Object.keys(before.sw.items).length,
+    ext: before.ext,
+  };
+  if (!start.isOpen()) press(START);
+  const index = start.rows().findIndex((row) => row.id === "exit");
+  if (index < 0) throw new Error("web journey: missing START Exit row");
+  // Selection is explicit because control remapping is installation-scoped;
+  // the confirm edge below still crosses the production reducer/effect shell.
+  start.selectIndex(index);
+  if (start.state().rootCursor !== index) throw new Error("web journey: could not select START Exit row");
+  press(CIRCLE);
+  const after = globalThis.__rpgSessionState;
+  const title = globalThis.__pocketTitleBattle;
+  p.paint();
+  return {
+    row: start.rows()[index]?.id ?? null,
+    replaced: after !== before,
+    before: beforeSummary,
+    after: {
+      frame: after.frame,
+      location: [after.mapId, after.move.tx, after.move.ty],
+      gold: after.sw.gold,
+      itemKinds: Object.keys(after.sw.items).length,
+      variables: Object.keys(after.sw.variables).length,
+      initialParty: typeof after.ext === "string" && after.ext.includes('"party":[]'),
+      extChanged: after.ext !== before.ext,
+    },
+    startOpen: start.isOpen(),
+    titleScreen: title?.state().screen ?? null,
+  };
+})()`);
+const exitShot = await send("Page.captureScreenshot", { format: "png" });
+writeFileSync(join(OUT, "exit-title.png"), Buffer.from(exitShot.data, "base64"));
+
 console.log(`boot ${bootMs.toFixed(0)} ms; replayed ${result.frames + 1} frames in ${result.ms.toFixed(0)} ms; viewport ${result.size.join("x")} @${result.density}x (${result.physicalSize.join("x")})`);
 let ok = true;
 const viewportOk = result.density === 2 && result.size.join() === "480,272" && result.physicalSize.join() === "960,544";
@@ -332,6 +405,13 @@ const saveOk = saveLeg.channel === "browser" && saveLeg.opened === "root" && sav
   saveLeg.toast === "Loaded slot 1" && saveLeg.loaded === saveLeg.saved;
 ok &&= saveOk;
 console.log(`${saveOk ? "ok  " : "FAIL"} save menu: ${saveLeg.channel} storage, saved at ${saveLeg.saved} (${saveLeg.stored} bytes, "${saveLeg.message}"), walked to ${saveLeg.walked}, loaded back to ${saveLeg.loaded} ("${saveLeg.toast}")`);
+const exitOk = exitLeg.row === "exit" && exitLeg.replaced && exitLeg.before.frame > 0 &&
+  exitLeg.before.location.join() !== "spyder_bedroom,4,4" &&
+  exitLeg.after.frame === 0 && exitLeg.after.location.join() === "spyder_bedroom,4,4" &&
+  exitLeg.after.gold === 500 && exitLeg.after.itemKinds === 0 && exitLeg.after.variables === 0 &&
+  exitLeg.after.initialParty && exitLeg.after.extChanged && !exitLeg.startOpen && exitLeg.titleScreen === "title";
+ok &&= exitOk;
+console.log(`${exitOk ? "ok  " : "FAIL"} START Exit: old frame/location ${exitLeg.before.frame}/${exitLeg.before.location.join(",")} -> fresh ${exitLeg.after.frame}/${exitLeg.after.location.join(",")} with ${exitLeg.after.gold} gold, ${exitLeg.after.itemKinds} item kinds, START ${exitLeg.startOpen ? "open" : "closed"}, title ${exitLeg.titleScreen}`);
 console.log(`console errors: ${errors.length}${errors.length ? "\n  " + errors.slice(0, 5).join("\n  ") : ""}`);
 ok &&= errors.length === 0;
 console.log(ok ? "WEB JOURNEY PASS" : "WEB JOURNEY FAIL");

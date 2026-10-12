@@ -25,7 +25,7 @@ import {
 } from "./settings.ts";
 
 interface SyncingAudioDriver {
-  sync(state: AudioDriverState): void;
+  sync(state: AudioDriverState, timelineState?: AudioDriverState): void;
   retryResource(pakKey: string): void;
   dispose(): void;
 }
@@ -36,7 +36,11 @@ export type StagedAudioFrameState = AudioDriverState & {
 };
 
 export interface StagedDesktopAudioCoordinator {
-  sync(state: StagedAudioFrameState, backgroundIdle: boolean): void;
+  sync(
+    state: StagedAudioFrameState,
+    backgroundIdle: boolean,
+    timelineState?: StagedAudioFrameState,
+  ): void;
   dispose(): void;
 }
 
@@ -67,10 +71,10 @@ export function createStagedDesktopAudioCoordinator(
   let postMapFrames = 0;
   let resumeAfterMap = false;
 
-  const syncExisting = (driverState: AudioDriverState): void => driver.sync(driverState);
-
   return {
-    sync(state, backgroundIdle) {
+    sync(state, backgroundIdle, timelineState = state) {
+      const syncExisting = (driverState: AudioDriverState): void =>
+        driver.sync(driverState, timelineState);
       const mapChanged = state.mapId !== lastMapId;
       const sceneKind = state.scene?.kind;
       const sceneChanged = sceneKind !== lastSceneKind;
@@ -178,12 +182,14 @@ export function createGameEffects(
     const host = audioHost();
     if (!host) return null;
     const audioSettings = settings ? createAudioSettingsAdapter(settings) : null;
-    const adjustedState = (): AudioDriverState => audioSettings?.apply(props.state()) ?? props.state();
     const ticksPerFrame = 60 / simulationHz();
     if (!desktopFs) {
       // Web and PSP keep all audio in the pak and retain the direct path.
       const driver = createAudioDriver(host, audioResources, readAudio, ticksPerFrame);
-      onFrame(() => driver.sync(adjustedState()));
+      onFrame(() => {
+        const timelineState = props.state();
+        driver.sync(audioSettings?.apply(timelineState) ?? timelineState, timelineState);
+      });
       onCleanup(() => driver.dispose());
       return null;
     }
@@ -205,10 +211,14 @@ export function createGameEffects(
       props.state().mapId,
       props.state().scene?.kind,
     );
-    onFrame(() => coordinator.sync(
-      adjustedState() as StagedAudioFrameState,
-      canRunDeferredAudio(),
-    ));
+    onFrame(() => {
+      const timelineState = props.state() as StagedAudioFrameState;
+      coordinator.sync(
+        (audioSettings?.apply(timelineState) ?? timelineState) as StagedAudioFrameState,
+        canRunDeferredAudio(),
+        timelineState,
+      );
+    });
     onCleanup(() => coordinator.dispose());
     return null;
   }

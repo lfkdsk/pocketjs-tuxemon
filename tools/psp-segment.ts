@@ -449,10 +449,10 @@ export function bakeSegmentBundle(
     `[0,-0,1.25,-4.5,1e30,Number.MIN_VALUE,NaN,Infinity,-Infinity].forEach(function(v){` +
     `if(!Object.is(__pspRoundTrip(v),v))throw new Error("PSP double ABI round trip failed");});` +
     `__pspLog(JSON.stringify({kind:"abi",passed:true,buildId:id}));` +
-    `var f=globalThis.frame,n=0,tape=${JSON.stringify(suffix)},started=false,lastMap=null,lastBattle=false;` +
+    `var f=globalThis.frame,sf=f.__pocketSemanticFrame||f,n=0,tape=${JSON.stringify(suffix)},started=false,lastMap=null,lastBattle=false;` +
     `globalThis.frame=function(buttons,analog){` +
-    `if(!started){f(0,analog);if(globalThis.__pocketTuxemonBootReady)started=true;return;}` +
-    `f(n<tape.length?tape[n]:buttons,analog);n++;` +
+    `if(!started){sf(0,analog);if(globalThis.__pocketTuxemonBootReady)started=true;return;}` +
+    `if(n<tape.length)sf(tape[n],analog);else f(buttons,analog);n++;` +
     `var s=globalThis.__rpgSessionState;` +
     `var inBattle=s.scene&&s.scene.kind==='battle';` +
     `if(s.mapId!==lastMap){__pspLog(JSON.stringify({kind:"event",frame:n,type:"map",map:s.mapId,buildId:id}));lastMap=s.mapId;}` +

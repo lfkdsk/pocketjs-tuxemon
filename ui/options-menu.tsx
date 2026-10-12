@@ -53,6 +53,10 @@ const CONTROL_COLUMN: OptionsRect = { x: 22, y: ROW_TOP, w: 211, h: 184 };
 const GENERAL_COLUMN: OptionsRect = { x: 247, y: ROW_TOP, w: 211, h: 184 };
 const SINGLE_COLUMN: OptionsRect = { x: 67, y: ROW_TOP, w: 346, h: 184 };
 const SELECTED = "#145064";
+const SAVE_FAILED = {
+  en_US: "⚠ settings not saved",
+  zh_CN: "⚠ 设置未保存",
+} as const;
 
 export function optionsCanvas(viewport: { w: number; h: number }): OptionsCanvas {
   const scale = Math.min(viewport.w / OPTIONS_BASE_W, viewport.h / OPTIONS_BASE_H);
@@ -270,15 +274,15 @@ const OptionsView: Component<{ runtime: OptionsRuntime; data: OptionsData; lang:
               debugName="options-legend"
             >
               {props.runtime.persistFailed()
-                ? "⚠ settings.json"
-                : `↑↓  ←→   ○ ${t(props.data.controls.primary)}`}
+                ? SAVE_FAILED[props.lang]
+                : `↑↓  ←→   ${props.runtime.controlGlyph("primary")} ${t(props.data.controls.primary)}`}
             </Text>
             <View
               class="absolute flex-row justify-center items-center"
               style={{ posType: 1, insetL: BACK.x - PANEL.x, insetT: BACK.y - PANEL.y, width: BACK.w, height: BACK.h, bgColor: SELECTED, borderWidth: 1, borderColor: TUXEMON_UI_THEME.accent }}
               debugName="options-back"
             >
-              <Text class="text-xs" style={{ width: 58, height: 15, lineHeight: 13, textAlign: 1, textColor: "#ffffff" }}>{`× ${t(props.data.back)}`}</Text>
+              <Text class="text-xs" style={{ width: 58, height: 15, lineHeight: 13, textAlign: 1, textColor: "#ffffff" }}>{`${props.runtime.controlGlyph("back")} ${t(props.data.back)}`}</Text>
             </View>
           </Panel>
 
@@ -308,10 +312,10 @@ const OptionsView: Component<{ runtime: OptionsRuntime; data: OptionsData; lang:
                 {`${t(props.data.controls[pending().action])}  ↔  ${t(props.data.controls[pending().occupiedBy])}`}
               </Text>
               <View class="absolute flex-row justify-center items-center" style={{ posType: 1, insetL: 44, insetT: 86, width: 116, height: 27, bgColor: SELECTED, borderWidth: 1, borderColor: TUXEMON_UI_THEME.accent }}>
-                <Text class="text-xs" style={{ width: 102, height: 15, lineHeight: 13, textAlign: 1, textColor: "#ffffff" }}>{`○ ${t(props.data.swap)}`}</Text>
+                <Text class="text-xs" style={{ width: 102, height: 15, lineHeight: 13, textAlign: 1, textColor: "#ffffff" }}>{`${props.runtime.controlGlyph("primary")} ${t(props.data.swap)}`}</Text>
               </View>
               <View class="absolute flex-row justify-center items-center" style={{ posType: 1, insetL: 180, insetT: 86, width: 116, height: 27, bgColor: TUXEMON_UI_THEME.paper, borderWidth: 1, borderColor: TUXEMON_UI_THEME.border }}>
-                <Text class="text-xs" style={{ width: 102, height: 15, lineHeight: 13, textAlign: 1, textColor: TUXEMON_UI_THEME.ink }}>{`× ${t(props.data.cancel)}`}</Text>
+                <Text class="text-xs" style={{ width: 102, height: 15, lineHeight: 13, textAlign: 1, textColor: TUXEMON_UI_THEME.ink }}>{`${props.runtime.controlGlyph("back")} ${t(props.data.cancel)}`}</Text>
               </View>
             </View>
           )}</Show>

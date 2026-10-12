@@ -137,7 +137,7 @@ describe("PSP segment terminal pin", () => {
     const spec = resolveSegment(ROOT, "radio-broadcast", 193227);
     const pin = replaySuffixTerminal(ROOT, spec);
     expect(pin.terminalSha256)
-      .toBe("1bd475f12f455ca6ad2a2bf645b9694c2e234343edb8c5200c2a51f6dea75055");
+      .toBe("04926ffae78129da1b51185f609b18aa81fa5ec81aa6ff734b715f660a725f8b");
     expect(pin.endMap).toBe("spyder_radiotower");
     expect(pin.endPosition).toEqual([9, 5]);
     expect(pin.endFrame).toBe(193227);
@@ -160,7 +160,7 @@ describe("PSP segment terminal pin", () => {
     };
     const pin = replaySuffixTerminal(ROOT, spec);
     expect(pin.terminalSha256)
-      .toBe("4c7b0a0283368fa57360d73ca4f28643ab2ab6dec75d6e148d0be1e83102ed37");
+      .toBe("59645ed2633892775f935cd88d1a00003ff93886896ee939973ba23a9fc0ee2e");
     expect(pin.endMap).toBe("spyder_datacenter");
     expect(pin.endPosition).toEqual([7, 4]);
     expect(pin.endFrame).toBe(206822);
@@ -417,6 +417,8 @@ describe("PSP segment wrapper baking (no SDK)", () => {
     let terminalAt = -1;
     let exitAt = -1;
     let calls = 0;
+    const semanticButtons: number[] = [];
+    const physicalButtons: number[] = [];
     // bakeSegmentBundle's prefix writes the time/snapshot/frame globals before
     // its wrapper replaces frame. Preserve descriptors (including absence),
     // not only values: leaving an own property with value undefined can still
@@ -437,7 +439,10 @@ describe("PSP segment wrapper baking (no SDK)", () => {
       Object.getOwnPropertyDescriptor(globalThis, key),
     ] as const));
     try {
-      g.frame = () => {};
+      const physicalFrame = ((buttons: number) => { physicalButtons.push(buttons); }) as
+        ((buttons: number) => void) & { __pocketSemanticFrame?: (buttons: number) => void };
+      physicalFrame.__pocketSemanticFrame = (buttons) => { semanticButtons.push(buttons); };
+      g.frame = physicalFrame;
       g.__pspLog = (line: string) => {
         const entry = JSON.parse(line) as { kind?: string };
         logs.push(entry);
@@ -456,6 +461,11 @@ describe("PSP segment wrapper baking (no SDK)", () => {
       expect(terminals).toHaveLength(1);
       expect((terminals[0] as { frame: number }).frame).toBe(L);
       expect(exitAt).toBe(terminalAt + 1);
+      // The first semantic zero boots the restored snapshot. Every recorded
+      // mask then bypasses the physical remapper; only the post-tape host
+      // frame uses the physical ingress before PSP exits.
+      expect(semanticButtons).toEqual([0, ...spec.suffix]);
+      expect(physicalButtons).toEqual([0]);
     } finally {
       for (const [key, descriptor] of saved) {
         delete g[key];

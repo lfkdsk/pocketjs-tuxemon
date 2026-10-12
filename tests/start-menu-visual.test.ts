@@ -24,6 +24,11 @@ import type { SpawnedMonsterSnapshot } from "../battle/types.ts";
 import featureModesJson from "../data/feature-modes.json";
 import type { FeatureModesRuntimeData } from "../ui/feature-modes-data.ts";
 import type { Lang } from "../ui/language.ts";
+import {
+  formatMonsterExperience,
+  monsterExperienceProgress,
+  PARTY_ACTION_ROW_HEIGHT,
+} from "../ui/start-menu-runtime.ts";
 import { TUXEMON_UI_THEME } from "../ui/tuxemon-theme.ts";
 import type {
   GameViewDemoRuntime,
@@ -90,6 +95,8 @@ const {
 
 const DATA = featureModesJson as unknown as FeatureModesRuntimeData;
 const RULES_DB = battleDbToTuxemonBattleDb(TUXEMON_BATTLE_DB);
+const TUXEMON_TOTAL = Object.values(TUXEMON_BATTLE_DB.monsters)
+  .filter((monster) => monster.txmnId > 0).length;
 const WASM = resolve(ROOT, "vendor/pocket-rpgkit/vendor/pocketjs/hosts/web/pocketjs.wasm");
 const browserSolid = !Bun.resolveSync("solid-js", import.meta.dir).endsWith("server.js");
 const semanticTest = browserSolid ? test : test.skip;
@@ -128,6 +135,8 @@ function fixture(lang: Lang): {
     member("nut", "party-nut", 12),
     member("budaye", "party-budaye", 16),
   ];
+  party[0]!.heldItem = "xp_feeder";
+  party[1]!.heldItem = "xp_transmitter";
   const ext = initialTuxemonExtensionState();
   ext.party = party;
   ext.seen = ["budaye"];
@@ -142,7 +151,8 @@ function fixture(lang: Lang): {
     sw: createSwitchState({
       playerName: lang === "zh_CN" ? "小红" : "Red",
       gold: 4_321,
-      items: { app_tuxepedia: 1, nu_phone: 1, potion: 2 },
+      steps: 1_234,
+      items: { app_tuxepedia: 1, nu_phone: 1, potion: 2, antidote_grapes: 1 },
     }),
     ext: packTuxemonExtensionState(ext),
   } as SessionState;
@@ -220,6 +230,7 @@ function mountMenu(
     data: DATA.startMenu,
     lang,
     catalog: f.catalog,
+    tuxepediaTotal: TUXEMON_TOTAL,
     nuPhoneLabel: DATA.nuPhoneMap.entry.phoneLabel,
   });
   const view = overlay.create(f.host);
@@ -416,29 +427,42 @@ describe("START menu semantic tree and touch", () => {
       expect(nodeText(namedNode("start-menu-party-level-0"))).toContain("20");
       expect(nodeText(namedNode("start-menu-party-hp-0"))).toContain("/");
       expect(nodeText(namedNode("start-menu-party-status-0"))).toBe("中毒");
+      expect(namedNode("start-menu-party-held-icon-0")).toBeDefined();
+      expect(nodeText(namedNode("start-menu-party-summary")))
+        .toContain(menu.runtime.selectedMonster()!.heldItemName!);
       expect(tileLoads.length).toBeGreaterThanOrEqual(3);
       expect(tileLoads.every((ref) => ref.startsWith("ui:tile.battle/"))).toBeTrue();
 
       // Party row -> action -> Sort -> Name, all through authored touch rows.
       menu.tap(80, 29 + 7 + 16);
       expect(menu.runtime.state().partyMenu.phase).toBe("action");
+      expect(menu.runtime.actionRows()).toEqual([
+        "info", "moves", "unequip", "equip", "swapItem", "move", "sort", "release",
+      ]);
+      expect(nodeText(namedNode("start-menu-party-action-label-unequip"))).toBe("卸下");
+      expect(nodeText(namedNode("start-menu-party-action-label-equip"))).toBe("装备");
+      expect(nodeText(namedNode("start-menu-party-action-label-swapItem"))).toBe("交换道具");
       const sortAction = menu.runtime.actionRows().indexOf("sort");
-      menu.tap(350, 29 + 48 + sortAction * 27 + 12);
+      menu.tap(350, 29 + 48 + sortAction * PARTY_ACTION_ROW_HEIGHT + 9);
       expect(menu.runtime.state().partyMenu.phase).toBe("sort");
       expect(namedNode("start-menu-party-sort-name")).toBeDefined();
       menu.tap(350, 29 + 48 + 2 * 34 + 15);
       expect(menu.runtime.state().partyMenu.phase).toBe("list");
       expect(menu.runtime.state().party.map((monster) => monster.slug)).toEqual(["budaye", "rockitten", "nut"]);
 
-      // Party row -> action -> Release -> No, including the dialog's shared
-      // confirmation-row activation path.
+      // Party row -> action -> Release -> Back (inert) -> No, including the
+      // dialog's shared confirmation-row activation path.
       menu.tap(80, 29 + 7 + 16);
       const releaseAction = menu.runtime.actionRows().indexOf("release");
-      menu.tap(350, 29 + 48 + releaseAction * 27 + 12);
+      menu.tap(350, 29 + 48 + releaseAction * PARTY_ACTION_ROW_HEIGHT + 9);
       expect(menu.runtime.state().partyMenu.phase).toBe("releaseConfirm");
       expect(namedNode("start-menu-release-dialog")).toBeDefined();
-      expect(nodeText(namedNode("start-menu-release-question"))).toContain(menu.runtime.selectedMonster()!.name);
-      menu.tap(330, 160);
+      expect(nodeText(namedNode("start-menu-release-question"))).toContain(menu.runtime.selectedMonster()!.name.toUpperCase());
+      expect(nodeText(namedNode("start-menu-release-answer-0"))).toBe("否");
+      expect(nodeText(namedNode("start-menu-release-answer-1"))).toBe("是");
+      menu.runtime.applyAction("back");
+      expect(menu.runtime.state().partyMenu.phase).toBe("releaseConfirm");
+      menu.tap(150, 160);
       expect(menu.runtime.state().partyMenu.phase).toBe("list");
       expect(menu.runtime.state().party).toHaveLength(3);
 
@@ -448,6 +472,12 @@ describe("START menu semantic tree and touch", () => {
       expect(menu.runtime.state().partyMenu.phase).toBe("detail");
       expect(nodeText(namedNode("start-menu-detail-name"))).toContain(menu.runtime.selectedMonster()!.name);
       expect(nodeText(namedNode("start-menu-detail-primary"))).toContain("经验");
+      const selected = menu.runtime.state().party[menu.runtime.state().partyMenu.cursor]!;
+      const expectedExperience = formatMonsterExperience(monsterExperienceProgress(
+        selected,
+        TUXEMON_SCENE_CATALOG.database().rules,
+      ));
+      expect(nodeText(namedNode("start-menu-detail-primary"))).toContain(`经验  ${expectedExperience}`);
       expect(nodeText(namedNode("start-menu-detail-primary"))).toContain("cm");
       expect(nodeText(namedNode("start-menu-detail-stats"))).toContain("速度");
       expect(nodeText(namedNode("start-menu-detail-ivs"))).toContain("个体值");
@@ -458,7 +488,7 @@ describe("START menu semantic tree and touch", () => {
       menu.tap(430, 15); // back to list
       menu.tap(80, 29 + 7 + menu.runtime.state().partyMenu.cursor * 34 + 16);
       const movesAction = menu.runtime.actionRows().indexOf("moves");
-      menu.tap(350, 29 + 48 + movesAction * 27 + 12);
+      menu.tap(350, 29 + 48 + movesAction * PARTY_ACTION_ROW_HEIGHT + 9);
       expect(menu.runtime.state().partyMenu.phase).toBe("moves");
       expect(namedNode("start-menu-move-row-0")).toBeDefined();
       expect(nodeText(namedNode("start-menu-move-name-0"))).not.toBe("");
@@ -475,12 +505,49 @@ describe("START menu semantic tree and touch", () => {
       menu.tap(220, 42 + playerIndex * 20 + 10);
       expect(menu.runtime.state().screen).toBe("player");
       expect(nodeText(namedNode("start-menu-player-wallet"))).toBe("小红的钱包： $4,321");
+      expect(nodeText(namedNode("start-menu-player-progress"))).toBe("精灵百科完成度： 0.8%!");
+      expect(nodeText(namedNode("start-menu-player-seen"))).toBe("看到了3只精灵，共有393");
+      expect(nodeText(namedNode("start-menu-player-caught"))).toBe("捉住了2只精灵，共有393");
       expect(nodeText(namedNode("start-menu-player-playtime"))).toBe("总游戏时长: 1h 1m");
+      expect(nodeText(namedNode("start-menu-player-walked"))).toBe("行走的路程 1.23 km");
       expect(nodeText(namedNode("start-menu-player-battles"))).toBe("战斗： 2 （胜利1 平局1 失败0)");
     } finally {
       menu.dispose();
     }
   });
+
+  for (const lang of ["en_US", "zh_CN"] as const) {
+    semanticTest(`matches upstream ${lang} release copy, answer order, and result dialog`, () => {
+      const menu = mountMenu(fakeOps(480, 272, []), 480, 272, lang);
+      try {
+        const partyIndex = menu.rows().findIndex((row) => row.id === "party");
+        menu.tap(220, 42 + partyIndex * 20 + 10);
+        menu.tap(80, 29 + 7 + 16);
+        const releaseAction = menu.runtime.actionRows().indexOf("release");
+        menu.tap(350, 29 + 48 + releaseAction * PARTY_ACTION_ROW_HEIGHT + 9);
+
+        const releasedName = menu.runtime.selectedMonster()!.name.toUpperCase();
+        const expectedQuestion = lang === "zh_CN"
+          ? `确定要放生${releasedName}吗？`
+          : `Are you sure you would like to release ${releasedName}?`;
+        expect(nodeText(namedNode("start-menu-release-question"))).toBe(expectedQuestion);
+        expect(nodeText(namedNode("start-menu-release-answer-0"))).toBe(lang === "zh_CN" ? "否" : "No");
+        expect(nodeText(namedNode("start-menu-release-answer-1"))).toBe(lang === "zh_CN" ? "是" : "Yes");
+
+        menu.tap(330, 160);
+        expect(menu.runtime.state().partyMenu.phase).toBe("releaseResult");
+        expect(menu.runtime.state().party).toHaveLength(2);
+        expect(nodeText(namedNode("start-menu-release-result-text"))).toBe(
+          lang === "zh_CN" ? `已放生${releasedName}。` : `${releasedName} has been released.`,
+        );
+
+        menu.tap(200, 130);
+        expect(menu.runtime.state().partyMenu.phase).toBe("list");
+      } finally {
+        menu.dispose();
+      }
+    });
+  }
 });
 
 interface RasterCapture {

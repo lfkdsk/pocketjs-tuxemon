@@ -36,6 +36,9 @@ export function createProductionTuxemonBattle(
   rules: ReturnType<typeof createTuxemonBattleRules>;
   scenes: ReturnType<typeof createTuxemonScenes>["rules"];
   catalog: ReturnType<typeof createTuxemonScenes>["catalog"];
+  /** Upstream CharacterState uses every positive-id MonsterModel as the
+   * Tuxepedia progress denominator, not the campaign-visible Journal slice. */
+  monsterTotal: number;
 } {
   const RUNTIME_SHELL = battleRuntimeShell(lang);
   const provider = createTuxemonBattleDbProvider(RUNTIME_SHELL, source);
@@ -50,5 +53,6 @@ export function createProductionTuxemonBattle(
     rules: createTuxemonBattleRules(provider, variableEnumsJson as VariableEnums),
     scenes: sceneBundle.rules,
     catalog: sceneBundle.catalog,
+    monsterTotal: RUNTIME_SHELL.monstersIndex.filter((entry) => entry.txmnId > 0).length,
   };
 }

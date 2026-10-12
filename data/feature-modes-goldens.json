@@ -1,5 +1,5 @@
 {
-  "format": "pocket-tuxemon/feature-modes-goldens/v4",
+  "format": "pocket-tuxemon/feature-modes-goldens/v5",
   "frames": [
     {
       "case": "title",
@@ -88,8 +88,26 @@
       "width": 480,
       "height": 272,
       "file": "feature-party-en_US-480x272.png",
-      "rgbaFnv1a": "5cea3415",
-      "pngSha256": "2dec10373d043d0e125f8c7670160c354292dab2bfa0f20a8f4f9bda4371c5f0"
+      "rgbaFnv1a": "2e9f9184",
+      "pngSha256": "fd2088d6c976c2ba3ff87c16ef9a11056395ee202305a675fc7cfd1470f4552f"
+    },
+    {
+      "case": "release-confirm",
+      "lang": "en_US",
+      "width": 480,
+      "height": 272,
+      "file": "feature-release-confirm-en_US-480x272.png",
+      "rgbaFnv1a": "d3423490",
+      "pngSha256": "897e0b9b42f2cb6d81cccd0b431dab0a833f1ebfc432c70ddae719195c10911e"
+    },
+    {
+      "case": "release-result",
+      "lang": "en_US",
+      "width": 480,
+      "height": 272,
+      "file": "feature-release-result-en_US-480x272.png",
+      "rgbaFnv1a": "1e2aa731",
+      "pngSha256": "9f7436824e49f5a86aba2137a5588e45df6dba9d88cdfc91c89dbe8203f31f54"
     },
     {
       "case": "player",
@@ -97,8 +115,8 @@
       "width": 480,
       "height": 272,
       "file": "feature-player-en_US-480x272.png",
-      "rgbaFnv1a": "a0fdf0dd",
-      "pngSha256": "c14269637a19af95c74f003bc2d86171639adcea9e699f5954566dd0fa2bf640"
+      "rgbaFnv1a": "6a6b43a6",
+      "pngSha256": "8b2ffddfed4ea6ba8b83fdb6e613d054bf78cd53fb78bf604c9ee8d9f08482d5"
     },
     {
       "case": "bag",
@@ -106,8 +124,8 @@
       "width": 480,
       "height": 272,
       "file": "feature-bag-en_US-480x272.png",
-      "rgbaFnv1a": "d5c62b74",
-      "pngSha256": "abe3a23c83827e5ccd6322e12f7bbe32c8251b07f15b805c11c7775b85ccc807"
+      "rgbaFnv1a": "060a5960",
+      "pngSha256": "085bfa8e6acb10494b67e378b2557801618ed922b2ae7ee6ef40bef2d82c7412"
     },
     {
       "case": "options-title",
@@ -214,8 +232,26 @@
       "width": 960,
       "height": 544,
       "file": "feature-party-en_US-960x544.png",
-      "rgbaFnv1a": "5413ac8c",
-      "pngSha256": "ab40a955be54ae2e49c621ab8fbae65aef4a34143b7e65f266d978b6e26904d5"
+      "rgbaFnv1a": "5e80b67c",
+      "pngSha256": "844843cf0a30f3675553caa047f9ff7293b5048569b0ecd6b8ed1255c8777564"
+    },
+    {
+      "case": "release-confirm",
+      "lang": "en_US",
+      "width": 960,
+      "height": 544,
+      "file": "feature-release-confirm-en_US-960x544.png",
+      "rgbaFnv1a": "940109ff",
+      "pngSha256": "af51a71f86ca669b94069cd8d3896fa71042725e3a54107604884c77f4eea6a8"
+    },
+    {
+      "case": "release-result",
+      "lang": "en_US",
+      "width": 960,
+      "height": 544,
+      "file": "feature-release-result-en_US-960x544.png",
+      "rgbaFnv1a": "fcd14d7a",
+      "pngSha256": "bd788a75a70838d451167e569a267ef6eb7c65dec82af1e1f17d9e8e5bce23c6"
     },
     {
       "case": "player",
@@ -223,8 +259,8 @@
       "width": 960,
       "height": 544,
       "file": "feature-player-en_US-960x544.png",
-      "rgbaFnv1a": "6b00f07c",
-      "pngSha256": "26914d7fa90c23957b68cc6d1ed3ea70388cb99d9b6f4c0f713389f70f8534bf"
+      "rgbaFnv1a": "85e7e882",
+      "pngSha256": "a5ea99a63faee446ec2a89c174fc2cb653992900d7f8ba0332ac9e6ffb689e65"
     },
     {
       "case": "bag",
@@ -232,8 +268,8 @@
       "width": 960,
       "height": 544,
       "file": "feature-bag-en_US-960x544.png",
-      "rgbaFnv1a": "d7df53a4",
-      "pngSha256": "01dbe2307f592d947ccd2cb5a2dc3145075f912c2e79362c4cbf55c45448fe60"
+      "rgbaFnv1a": "05815692",
+      "pngSha256": "b7bb71038a3b37240059df1daf504773d433c031815cc6e34805062431cf29a4"
     },
     {
       "case": "options-title",
@@ -340,8 +376,26 @@
       "width": 480,
       "height": 272,
       "file": "feature-party-zh_CN-480x272.png",
-      "rgbaFnv1a": "5ff3fd10",
-      "pngSha256": "dcf083ca1dc312d165a123342c8f2c2f1290c7d3593ef95097cf804892593563"
+      "rgbaFnv1a": "3adf677c",
+      "pngSha256": "be152a578fbe0096116a460deccb6d3fad7c38937f44de5db7903bbc515287fb"
+    },
+    {
+      "case": "release-confirm",
+      "lang": "zh_CN",
+      "width": 480,
+      "height": 272,
+      "file": "feature-release-confirm-zh_CN-480x272.png",
+      "rgbaFnv1a": "c9c1560d",
+      "pngSha256": "2248b4d60274047c2901c9b94fa57863861daea6690d37f0d6ea014fdf746c56"
+    },
+    {
+      "case": "release-result",
+      "lang": "zh_CN",
+      "width": 480,
+      "height": 272,
+      "file": "feature-release-result-zh_CN-480x272.png",
+      "rgbaFnv1a": "71e924bb",
+      "pngSha256": "0e5f0badecd35f7b937206dd0822f15c2215d16c8d4019083e64b26b3a5fb05c"
     },
     {
       "case": "player",
@@ -349,8 +403,8 @@
       "width": 480,
       "height": 272,
       "file": "feature-player-zh_CN-480x272.png",
-      "rgbaFnv1a": "9c63f8bb",
-      "pngSha256": "30ab28c88b050afb81a51901b8c2c37f6e6520006d62921293fbfda4bd806053"
+      "rgbaFnv1a": "70493a31",
+      "pngSha256": "ff0b356683fbe5b836f8e6ee57cb64dc34ff14d0d26c4b5bd1c2d1111e01b013"
     },
     {
       "case": "bag",
@@ -358,8 +412,8 @@
       "width": 480,
       "height": 272,
       "file": "feature-bag-zh_CN-480x272.png",
-      "rgbaFnv1a": "fa90e968",
-      "pngSha256": "1f3bd193ed0074396428fcd6c12bc2ba5e37ac8fc6daf5347a33d5ff79b4924f"
+      "rgbaFnv1a": "f63f7838",
+      "pngSha256": "0004bd09e4be091bb2d065a1dfeada2c85bda7cf064484d2f52a303d409f6eeb"
     },
     {
       "case": "options-title",
@@ -466,8 +520,26 @@
       "width": 960,
       "height": 544,
       "file": "feature-party-zh_CN-960x544.png",
-      "rgbaFnv1a": "20cb2ed4",
-      "pngSha256": "7391eee9ac8f102f4eb73b56b6c3d88d8b148241adb62e7763808e8be75b51f1"
+      "rgbaFnv1a": "03005026",
+      "pngSha256": "a23a830f1424c9f49076311fe6a049021de45357eee47691bb027e11e96dc1a6"
+    },
+    {
+      "case": "release-confirm",
+      "lang": "zh_CN",
+      "width": 960,
+      "height": 544,
+      "file": "feature-release-confirm-zh_CN-960x544.png",
+      "rgbaFnv1a": "562093d8",
+      "pngSha256": "7952d0237ecb7c4f6cddeb1d91e183a132ed8e06867e69f00f1841854abfabf8"
+    },
+    {
+      "case": "release-result",
+      "lang": "zh_CN",
+      "width": 960,
+      "height": 544,
+      "file": "feature-release-result-zh_CN-960x544.png",
+      "rgbaFnv1a": "45e96cf1",
+      "pngSha256": "ae2cf5b5e6f7d4fd546082b3aee632132d86c7591e4b096485815ef41828999f"
     },
     {
       "case": "player",
@@ -475,8 +547,8 @@
       "width": 960,
       "height": 544,
       "file": "feature-player-zh_CN-960x544.png",
-      "rgbaFnv1a": "b69c9386",
-      "pngSha256": "877f6f3e9216df7fe038e3e07771bdfb6a380f8b6178d57a673f258d9f627949"
+      "rgbaFnv1a": "870a6238",
+      "pngSha256": "3ca71e85e9592aed3160d116c2bfec83127d3c57d87dd50d13803b757c5515b4"
     },
     {
       "case": "bag",
@@ -484,8 +556,8 @@
       "width": 960,
       "height": 544,
       "file": "feature-bag-zh_CN-960x544.png",
-      "rgbaFnv1a": "d05dfc6d",
-      "pngSha256": "1e3e723a65afa3e5c1fca8bad4420724681acf85806689f9480706bdec768304"
+      "rgbaFnv1a": "5750a9ed",
+      "pngSha256": "9a5b47d101136006ec0829b7966d32dd0c8e5288d47c6bbb70873a775a3bf6af"
     },
     {
       "case": "options-title",

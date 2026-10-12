@@ -25,7 +25,7 @@ export const TUXEPEDIA_VIEWPORTS = [
   { width: 960, height: 544 },
 ] as const;
 
-export const TUXEPEDIA_CASES = ["populated", "unknown", "caughtFilter"] as const;
+export const TUXEPEDIA_CASES = ["populated", "imperial", "unknown", "caughtFilter"] as const;
 export type TuxepediaCase = typeof TUXEPEDIA_CASES[number];
 
 /** Monsters injected for the populated/caught-filter cases. */
@@ -49,6 +49,14 @@ function hook(): PocketTuxepediaHook {
   const value = globalThis.__pocketTuxepedia;
   if (!value) throw new Error("tuxepedia fixture: the overlay did not publish its hook");
   return value;
+}
+
+function useImperialUnits(): void {
+  const options = globalThis.__pocketOptions;
+  if (!options) throw new Error("tuxepedia fixture: the Options hook is unavailable");
+  const index = options.rows().findIndex((row) => row.id === "units");
+  if (index < 0) throw new Error("tuxepedia fixture: START Options has no units row");
+  options.activateIndex(index);
 }
 
 function injectDiscovery(seen: string[], caught: string[]): void {
@@ -145,6 +153,21 @@ async function captureOnWorld(
   pump(world, 40); // let the lazy front art load
   const populated = captureCase(world);
 
+  // --- imperial: change the real shared installation preference, reopen the
+  // Tuxepedia, and capture the same monster. This kills a presentation-only
+  // hard-coded cm/kg implementation as well as missing main-shell wiring.
+  h.close();
+  pump(world, 2);
+  useImperialUnits();
+  injectDiscovery(TUXEPEDIA_SEEN, TUXEPEDIA_CAUGHT);
+  h.open();
+  const imperialIndex = h.rows().indexOf(TUXEPEDIA_POPULATED_SLUG);
+  if (imperialIndex < 0) throw new Error(`tuxepedia fixture: ${TUXEPEDIA_POPULATED_SLUG} is not in the catalog`);
+  for (let i = 0; i < imperialIndex; i++) h.act("down");
+  pump(world, 8);
+  const imperial = captureCase(world);
+  useImperialUnits(); // restore metric for the pre-existing cases below
+
   // --- caught filter: toggle to caught-only ---
   h.act("toggleFilter");
   pump(world, 8);
@@ -167,7 +190,7 @@ async function captureOnWorld(
     width: viewport.width,
     height: viewport.height,
     lang,
-    cases: { populated, unknown, caughtFilter },
+    cases: { populated, imperial, unknown, caughtFilter },
     touch,
   };
 }
