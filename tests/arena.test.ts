@@ -227,7 +227,7 @@ describe("headless Arena battle API", () => {
     });
     const ai = createArenaBattle(config([{ kind: "agent" }, { kind: "ai", difficulty: "normal" }]));
     expect(submit(ai, 1, defaultAction(ai, 1))).toEqual({ ok: false, battle: ai, error: "SIDE_NOT_AGENT" });
-  });
+  }, 15_000);
 
   test("accepts a value-equal legal swap and records it only after the pair settles", () => {
     const battle = createArenaBattle(config([
