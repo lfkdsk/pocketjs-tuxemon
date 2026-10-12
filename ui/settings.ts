@@ -76,19 +76,57 @@ export function defaultSettings(): GameSettings {
   return { ...DEFAULT_SETTINGS, controls: { ...DEFAULT_CONTROLS } };
 }
 
-/** Python's round()/fixed-point formatting uses round-half-to-even, while
- * JavaScript's Math.round()/toFixed() do not. Measurements are non-negative,
- * so this small helper is enough to reproduce the upstream journal exactly. */
+const ROUND_BITS = new DataView(new ArrayBuffer(8));
+
+/** Python's round()/fixed-point formatting rounds the exact IEEE-754 input,
+ * not a value first multiplied in binary floating point. Keep that input as an
+ * integer significand times a power of two, apply the decimal scale with
+ * BigInt, and use an exact remainder comparison for the half-even decision. */
 export function roundHalfEven(value: number, digits = 0): number {
-  const scale = 10 ** digits;
-  const scaled = value * scale;
-  const lower = Math.floor(scaled);
-  const fraction = scaled - lower;
-  const tieTolerance = Number.EPSILON * Math.max(1, Math.abs(scaled)) * 2;
-  if (Math.abs(fraction - 0.5) <= tieTolerance) {
-    return (lower % 2 === 0 ? lower : lower + 1) / scale;
+  if (!Number.isInteger(digits)) throw new TypeError("round digits must be an integer");
+  if (!Number.isFinite(value) || value === 0) return value;
+
+  // CPython's float round uses the same no-effect/underflow bounds. Besides
+  // avoiding huge powers, these preserve subnormals at sufficiently fine
+  // precision and the sign of zero at sufficiently coarse precision.
+  if (digits > 323) return value;
+  if (digits < -308) return value < 0 ? -0 : 0;
+
+  const negative = value < 0;
+  ROUND_BITS.setFloat64(0, Math.abs(value), false);
+  const high = ROUND_BITS.getUint32(0, false);
+  const low = ROUND_BITS.getUint32(4, false);
+  const exponentBits = (high >>> 20) & 0x7ff;
+  const fraction = (BigInt(high & 0xfffff) << 32n) | BigInt(low);
+  const significand = exponentBits === 0 ? fraction : fraction | (1n << 52n);
+  let binaryExponent = (exponentBits === 0 ? -1022 : exponentBits - 1023) - 52;
+  let numerator = significand;
+  let denominator = 1n;
+
+  if (digits >= 0) {
+    numerator *= 5n ** BigInt(digits);
+    binaryExponent += digits;
+  } else {
+    const places = -digits;
+    denominator *= 5n ** BigInt(places);
+    binaryExponent -= places;
   }
-  return Math.round(scaled) / scale;
+  if (binaryExponent >= 0) numerator <<= BigInt(binaryExponent);
+  else denominator <<= BigInt(-binaryExponent);
+
+  let rounded = numerator / denominator;
+  const doubledRemainder = (numerator % denominator) * 2n;
+  if (doubledRemainder > denominator
+    || (doubledRemainder === denominator && rounded % 2n !== 0n)) {
+    rounded++;
+  }
+  if (rounded === 0n) return negative ? -0 : 0;
+
+  // Decimal parsing performs the final correctly-rounded conversion to a
+  // binary float without losing a large integer through Number(BigInt) first.
+  const result = Number(`${negative ? "-" : ""}${rounded}e${-digits}`);
+  if (!Number.isFinite(result)) throw new RangeError("rounded value too large to represent");
+  return result;
 }
 
 /** Match Tuxemon journal_info.py/formula.py unit formatting. */
