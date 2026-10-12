@@ -63,8 +63,9 @@ const SAVE_FIXTURES = [
   "main-08efc758",
   "main-35a2af17",
   "main-88347e8e",
+  "main-4520e7f8",
 ] as const;
-const IMMEDIATE_PREDECESSOR_FIXTURE = "main-88347e8e" as const;
+const IMMEDIATE_PREDECESSOR_FIXTURE = "main-4520e7f8" as const;
 
 interface PublishedSaveMetadata {
   content: { manifest: string; schema: string };
@@ -413,6 +414,7 @@ const CONTINUING_FIXTURES = [
   "main-f9db784a",
   "main-08efc758",
   "main-88347e8e",
+  "main-4520e7f8",
 ] as const;
 
 for (const name of CONTINUING_FIXTURES) test(`the ${name} main slot continues on the current tape`, () => {

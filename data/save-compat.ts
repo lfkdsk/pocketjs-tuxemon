@@ -67,4 +67,8 @@ export const TUXEMON_COMPATIBLE_SAVE_CONTENT = Object.freeze([
     manifest: "bb8a42742e61be05d1ff6abfc26b218747f2214abd52ac6749e184ad9d2c5009",
     schema: "c394541ca7c28bd85899f944e3d57e506a66cd3d221d14cb5d3d56b4a21cdc13",
   },
+  {
+    manifest: "888b97bbdfe8134fd24823568c43b56e84c1b50351e63c941aca232b79687fad",
+    schema: "a59ec3e0a1ee74fe08fb75dff938e56b01b8b6b66ccfd102cb9dbb2866d23444",
+  },
 ] as const satisfies readonly MapContentVersion[]);
