@@ -1,14 +1,14 @@
 {
   "format": "pocket-tuxemon/j4-goldens/v1",
-  "baseFrames": 193227,
+  "baseFrames": 193340,
   "segmentTapeSha256": "30196f252c542b9ec2d20c66e1da982a7c81fa756cd3d790402d6d2bc3711e3f",
-  "combinedTapeSha256": "fa161dc5df33fe08a9c31f7ed2a8495121058d2331550c65e65da2585e48c15f",
+  "combinedTapeSha256": "10b303618118323384be152fb348593ff2518fb4d2c69dfe3dbe6631a5eec82b",
   "frames": [
     {
       "name": "surfboard-collected",
       "frame": 2974,
-      "mergedFrame": 196201,
-      "timelineFrame": 196202,
+      "mergedFrame": 196314,
+      "timelineFrame": 196315,
       "map": "spyder_candy_town",
       "position": [
         28,
@@ -61,8 +61,8 @@
     {
       "name": "datacenter-upper-screens",
       "frame": 12672,
-      "mergedFrame": 205899,
-      "timelineFrame": 205900,
+      "mergedFrame": 206012,
+      "timelineFrame": 206013,
       "map": "spyder_datacenter",
       "position": [
         14,
@@ -115,8 +115,8 @@
     {
       "name": "kernel-defeated",
       "frame": 13594,
-      "mergedFrame": 206821,
-      "timelineFrame": 206822,
+      "mergedFrame": 206934,
+      "timelineFrame": 206935,
       "map": "spyder_datacenter",
       "position": [
         7,
@@ -169,8 +169,8 @@
     {
       "name": "surfboard-collected",
       "frame": 2974,
-      "mergedFrame": 196201,
-      "timelineFrame": 196202,
+      "mergedFrame": 196314,
+      "timelineFrame": 196315,
       "map": "spyder_candy_town",
       "position": [
         28,
@@ -223,8 +223,8 @@
     {
       "name": "datacenter-upper-screens",
       "frame": 12672,
-      "mergedFrame": 205899,
-      "timelineFrame": 205900,
+      "mergedFrame": 206012,
+      "timelineFrame": 206013,
       "map": "spyder_datacenter",
       "position": [
         14,
@@ -277,8 +277,8 @@
     {
       "name": "kernel-defeated",
       "frame": 13594,
-      "mergedFrame": 206821,
-      "timelineFrame": 206822,
+      "mergedFrame": 206934,
+      "timelineFrame": 206935,
       "map": "spyder_datacenter",
       "position": [
         7,

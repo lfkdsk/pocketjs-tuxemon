@@ -62,12 +62,12 @@ export const SPLIT_ENVELOPES = [
 ];
 
 // The pinned full-mainline extent this plan must cover: the J4 quest ends the
-// Spyder campaign at frame 206,822, split into 28 bounded segments. These are
+// Spyder campaign at frame 206,935, split into 28 bounded segments. These are
 // independent of the plan's own self-report (the plan is hand-written), so a
 // deleted or reordered segment is caught even though `verify` only walks the
 // plan as given.
 export const EXPECTED_SEGMENTS = 28;
-export const EXPECTED_END_FRAME = 206822;
+export const EXPECTED_END_FRAME = 206935;
 
 /** The fixed 28-segment identity table: every plan entry's id, chapter and
  *  [start, end) window, in order. This is independent of the plan's own
@@ -77,34 +77,34 @@ export const EXPECTED_END_FRAME = 206822;
  *  changes deliberately, regenerate with `bun tools/psp-mainline.ts plan`
  *  and update this table in the same change. */
 export const EXPECTED_PLAN_IDENTITIES: ReadonlyArray<{ id: string; chapter: string; start: number; end: number }> = [
-  { id: "01-bedroom", chapter: "bedroom", start: 0, end: 1387 },
-  { id: "02-paper-town", chapter: "paper-town", start: 1387, end: 1912 },
-  { id: "03-before-billie", chapter: "before-billie", start: 1912, end: 3210 },
-  { id: "04-starter", chapter: "starter", start: 3210, end: 3500 },
-  { id: "05-route-1", chapter: "route-1", start: 3500, end: 5581 },
-  { id: "06-cotton-town-a", chapter: "cotton-town", start: 5581, end: 18700 },
-  { id: "07-route2-a", chapter: "seg-18695", start: 18700, end: 32286 },
-  { id: "08-route2-b", chapter: "seg-31998", start: 32286, end: 47245 },
-  { id: "09-city-park-a", chapter: "city-park", start: 47245, end: 58414 },
-  { id: "10-route3-a", chapter: "seg-58414", start: 58414, end: 71851 },
-  { id: "11-route3-b", chapter: "seg-71527", start: 71851, end: 84641 },
-  { id: "12-route3-c", chapter: "seg-84640", start: 84641, end: 98594 },
-  { id: "13-leather-town", chapter: "seg-97765", start: 98594, end: 115842 },
-  { id: "14-route-3-north", chapter: "route-3-north", start: 115842, end: 121034 },
-  { id: "15-flower-city", chapter: "flower-city", start: 121034, end: 128718 },
-  { id: "16-captain-returns-a", chapter: "captain-returns", start: 128718, end: 137416 },
-  { id: "17-dojo", chapter: "seg-136615", start: 137416, end: 151011 },
-  { id: "18-route5", chapter: "seg-150832", start: 151011, end: 172078 },
-  { id: "19-candy-town", chapter: "candy-town", start: 172078, end: 178679 },
-  { id: "20-greenwash", chapter: "greenwash-aardant", start: 178679, end: 180114 },
-  { id: "21-hospital-cure", chapter: "hospital-cure", start: 180114, end: 187592 },
-  { id: "22-omnichannel", chapter: "omnichannel-open", start: 187592, end: 193204 },
-  { id: "23-radio-broadcast", chapter: "radio-broadcast", start: 193204, end: 195075 },
-  { id: "24-kernel-briefing", chapter: "kernel-briefing", start: 195075, end: 196191 },
-  { id: "25-surfboard", chapter: "surfboard", start: 196191, end: 198336 },
-  { id: "26-route-b", chapter: "route-b", start: 198336, end: 201828 },
-  { id: "27-data-center", chapter: "data-center", start: 201828, end: 206811 },
-  { id: "28-kernel-defeated", chapter: "kernel-defeated", start: 206811, end: 206822 },
+  { id: "01-bedroom", chapter: "bedroom", start: 0, end: 1516 },
+  { id: "02-paper-town", chapter: "paper-town", start: 1516, end: 2041 },
+  { id: "03-before-billie", chapter: "before-billie", start: 2041, end: 3339 },
+  { id: "04-starter", chapter: "starter", start: 3339, end: 3629 },
+  { id: "05-route-1", chapter: "route-1", start: 3629, end: 5710 },
+  { id: "06-cotton-town-a", chapter: "cotton-town", start: 5710, end: 18701 },
+  { id: "07-route2-a", chapter: "seg-18695", start: 18701, end: 32399 },
+  { id: "08-route2-b", chapter: "seg-31998", start: 32399, end: 47358 },
+  { id: "09-city-park-a", chapter: "city-park", start: 47358, end: 58417 },
+  { id: "10-route3-a", chapter: "seg-58414", start: 58417, end: 71964 },
+  { id: "11-route3-b", chapter: "seg-71527", start: 71964, end: 84640 },
+  { id: "12-route3-c", chapter: "seg-84640", start: 84640, end: 98707 },
+  { id: "13-leather-town", chapter: "seg-97765", start: 98707, end: 115955 },
+  { id: "14-route-3-north", chapter: "route-3-north", start: 115955, end: 121147 },
+  { id: "15-flower-city", chapter: "flower-city", start: 121147, end: 128831 },
+  { id: "16-captain-returns-a", chapter: "captain-returns", start: 128831, end: 137529 },
+  { id: "17-dojo", chapter: "seg-136615", start: 137529, end: 151124 },
+  { id: "18-route5", chapter: "seg-150832", start: 151124, end: 172191 },
+  { id: "19-candy-town", chapter: "candy-town", start: 172191, end: 178792 },
+  { id: "20-greenwash", chapter: "greenwash-aardant", start: 178792, end: 180227 },
+  { id: "21-hospital-cure", chapter: "hospital-cure", start: 180227, end: 187705 },
+  { id: "22-omnichannel", chapter: "omnichannel-open", start: 187705, end: 193317 },
+  { id: "23-radio-broadcast", chapter: "radio-broadcast", start: 193317, end: 195188 },
+  { id: "24-kernel-briefing", chapter: "kernel-briefing", start: 195188, end: 196304 },
+  { id: "25-surfboard", chapter: "surfboard", start: 196304, end: 198449 },
+  { id: "26-route-b", chapter: "route-b", start: 198449, end: 201941 },
+  { id: "27-data-center", chapter: "data-center", start: 201941, end: 206924 },
+  { id: "28-kernel-defeated", chapter: "kernel-defeated", start: 206924, end: 206935 },
 ];
 
 /** The 28-segment plan (exported so the coverage invariants are testable

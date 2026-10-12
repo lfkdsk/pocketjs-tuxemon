@@ -209,7 +209,7 @@ describe("J4 Surfboard and Data Center location goldens", () => {
       expect(tape.tapeSha256).toBe(sha256(JSON.stringify(tape.masks)));
     }
     expect(manifest.baseFrames).toBe(parentMasks.length);
-    expect(manifest.baseFrames).toBe(193_227);
+    expect(manifest.baseFrames).toBe(193_340);
     expect(manifest.segmentTapeSha256).toBe(journey.tapeSha256);
     expect(journey.combinedFrames).toBe(combinedMasks.length);
     expect(manifest.combinedTapeSha256).toBe(journey.combinedTapeSha256);
@@ -217,12 +217,12 @@ describe("J4 Surfboard and Data Center location goldens", () => {
     expect(manifest.frames.map(({ name, map, frame, mergedFrame, width, height }) =>
       [name, map, frame, mergedFrame, width, height]
     )).toEqual([
-      ["surfboard-collected", "spyder_candy_town", 2_974, 196_201, 480, 272],
-      ["datacenter-upper-screens", "spyder_datacenter", 12_672, 205_899, 480, 272],
-      ["kernel-defeated", "spyder_datacenter", 13_594, 206_821, 480, 272],
-      ["surfboard-collected", "spyder_candy_town", 2_974, 196_201, 960, 544],
-      ["datacenter-upper-screens", "spyder_datacenter", 12_672, 205_899, 960, 544],
-      ["kernel-defeated", "spyder_datacenter", 13_594, 206_821, 960, 544],
+      ["surfboard-collected", "spyder_candy_town", 2_974, 196_314, 480, 272],
+      ["datacenter-upper-screens", "spyder_datacenter", 12_672, 206_012, 480, 272],
+      ["kernel-defeated", "spyder_datacenter", 13_594, 206_934, 480, 272],
+      ["surfboard-collected", "spyder_candy_town", 2_974, 196_314, 960, 544],
+      ["datacenter-upper-screens", "spyder_datacenter", 12_672, 206_012, 960, 544],
+      ["kernel-defeated", "spyder_datacenter", 13_594, 206_934, 960, 544],
     ]);
   });
 

@@ -133,9 +133,15 @@ class Driver {
   until(predicate: (state: SessionState) => boolean, label: string, limit = 2_000): void {
     for (let frame = 0; frame < limit && !predicate(this.state); frame++) this.tick();
     if (!predicate(this.state)) {
+      const variables = this.state.sw.variables;
       throw new Error(
         `G identity: ${label} not reached from ${this.state.mapId}@` +
-          `${this.state.move.tx},${this.state.move.ty}`,
+          `${this.state.move.tx},${this.state.move.ty}; ` +
+          `scenario=${variables["v.scenario_choice"] ?? 0} ` +
+          `race=${variables["v.race_choice"] ?? 0} ` +
+          `pronoun=${variables["v.pronoun_choice"] ?? 0} ` +
+          `gender=${variables["v.gender_choice"] ?? 0} ` +
+          `modal=${this.state.interp.modal?.kind ?? "none"}`,
       );
     }
   }
@@ -157,9 +163,17 @@ export function runImportedIdentity(race: IdentityRace): SessionState {
   const session = createSession(project, 60, TUXEMON_SESSION_OPTIONS);
   const driver = new Driver(session, startSession(project, session));
 
-  driver.until((state) => state.interp.modal?.kind === "choices", "scenario choice");
+  driver.until(
+    (state) => state.interp.modal?.kind === "choices"
+      && state.interp.modal.options.some((label) => label.includes("Spyder and the Cathedral")),
+    "scenario choice",
+  );
   driver.choose(0); // Spyder
-  driver.until((state) => state.interp.modal?.kind === "choices", "appearance choice");
+  driver.until(
+    (state) => state.interp.modal?.kind === "choices"
+      && state.interp.modal.options.some((label) => label.includes("White male")),
+    "appearance choice",
+  );
   const appearance = driver.state.interp.modal;
   if (appearance?.kind !== "choices") throw new Error("G identity: appearance choice disappeared");
   const raceIndex = appearance.options.findIndex((label) => label.includes(race.option));
@@ -169,7 +183,14 @@ export function runImportedIdentity(race: IdentityRace): SessionState {
     (state) => state.sw.playerAppearance?.defaultSprite === race.sprite,
     `${race.option} appearance branch`,
   );
-  driver.until((state) => state.interp.modal?.kind === "choices", "pronoun choice");
+  // A backdrop pop may leave the resolved appearance modal visible for one
+  // more reducer frame while its parallel fiber closes. Wait for the actual
+  // pronoun options instead of treating that stale modal as the next screen.
+  driver.until(
+    (state) => state.interp.modal?.kind === "choices"
+      && state.interp.modal.options.includes("He/Him"),
+    "pronoun choice",
+  );
   driver.choose(race.pronoun);
   driver.until((state) => state.mapId === "spyder_bedroom", "Spyder transfer");
   return driver.state;

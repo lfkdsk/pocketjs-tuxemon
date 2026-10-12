@@ -26,6 +26,6 @@ describe("J4 QuickJS continuation tape", () => {
     // the calendar variables refreshed on map entry, the persisted step total,
     // and the map BGM clock.
     expect(tape.terminalStateSha256)
-      .toBe("59645ed2633892775f935cd88d1a00003ff93886896ee939973ba23a9fc0ee2e");
+      .toBe("faf682412dce51dc620b25f28c7c73049bd96f4bb3ee44a6dbc7394c0bdba665");
   });
 });

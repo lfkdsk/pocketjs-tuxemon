@@ -136,14 +136,14 @@ describe("GB6 Route 3 mainline map goldens", () => {
     expect(manifest.frames.map(({ name, map, frame, width, height }) =>
       [name, map, frame, width, height]
     )).toEqual([
-      ["cotton-town", "spyder_cotton_town", 5_603, 480, 272],
-      ["route-2", "spyder_route2", 9_593, 480, 272],
-      ["city-park", "spyder_citypark", 47_267, 480, 272],
-      ["route-3-end", "spyder_route3", 115_841, 480, 272],
-      ["cotton-town", "spyder_cotton_town", 5_603, 960, 544],
-      ["route-2", "spyder_route2", 9_593, 960, 544],
-      ["city-park", "spyder_citypark", 47_267, 960, 544],
-      ["route-3-end", "spyder_route3", 115_841, 960, 544],
+      ["cotton-town", "spyder_cotton_town", 5_732, 480, 272],
+      ["route-2", "spyder_route2", 9_706, 480, 272],
+      ["city-park", "spyder_citypark", 47_380, 480, 272],
+      ["route-3-end", "spyder_route3", 115_954, 480, 272],
+      ["cotton-town", "spyder_cotton_town", 5_732, 960, 544],
+      ["route-2", "spyder_route2", 9_706, 960, 544],
+      ["city-park", "spyder_citypark", 47_380, 960, 544],
+      ["route-3-end", "spyder_route3", 115_954, 960, 544],
     ]);
     for (const frame of manifest.frames) {
       expect(frame.timelineFrame, frame.file).toBe(frame.frame + 1);
