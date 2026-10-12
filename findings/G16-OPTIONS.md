@@ -312,3 +312,69 @@ the reviewed kit commit `0ff3c8be59597b63ce5180e04844f373bdbe5ace`.
 subagent 使用：3 个 / 音频根因、Tuxepedia 单位、G15 遗留对照 / 并行只读调查节省时间
 
 PASS
+
+## Exact binary64 rounding follow-up
+
+The metric-height regression came from treating values within an epsilon of a
+decimal half as ties.  That is not what Python does: `round(float, n)` rounds
+the exact binary64 input, so values such as the binary representation of
+`1.15` remain strictly below the decimal half.  `roundHalfEven` now decodes the
+IEEE-754 sign, exponent and significand, builds the exact scaled rational with
+`BigInt`, and compares twice the remainder with the denominator.  Equality is
+the only half-even path; there is no tolerance (`ui/settings.ts:79-130`).
+
+This restores all seven known metric-height displays to the upstream values:
+
+| Monsters | Height | Display |
+| --- | ---: | ---: |
+| tux, chillimp, elowind, urcine | 115 cm | 1.1 m |
+| aardart, weedlantis | 185 cm | 1.9 m |
+| conglolem | 245 cm | 2.5 m |
+
+The offline oracle generator reads the pinned upstream monster YAML files and
+uses Python's own rounding operations and conversion constants
+(`tools/generate-measurement-expectations.py:1-93`).  Its committed fixture is
+numeric-only: 411 sorted monsters, each with source height/weight plus metric
+and imperial height/weight results.  Regeneration wrote 411 rows and produced
+no diff.  The production test validates the tuple shape and finite cells, then
+checks all four formatted measurements for every monster
+(`tests/settings.test.ts:357-371`).
+
+The boundary suite covers the immediately adjacent binary64 values below and
+above exact decimal ties, exact even and odd ties, the problematic `1.15`,
+`1.85`, and `2.45` inputs, integer-rounding neighbours around `0.5`, and signed
+zero (`tests/settings.test.ts:304-339`).  A deterministic differential probe
+also compared 50,400 binary64/digits pairs, including subnormals, infinities,
+NaNs, maximum finite values and the `-308`/`323` cutoffs, directly with Python:
+50,400 checked, zero mismatches.  In isolated mutation copies, restoring the
+epsilon implementation failed two tests (including aardart), and replacing
+metric rounding with `toFixed` failed two tests (including the 125 cm and
+rhinocarpe cases).
+
+No committed Tuxepedia golden contains one of the seven corrected monsters:
+the populated visual fixture selects Nut
+(`tools/tuxepedia-visual-fixture.ts:33-35`).  Therefore no PNG was regenerated;
+the full Tuxepedia visual suite still passed its committed RGBA and hash
+comparisons.  Aardart appears only in Dojo captures that do not render height.
+
+### Follow-up gates
+
+| Gate | Result |
+| --- | --- |
+| `bunx tsc --noEmit` | exit 0 |
+| import twice | 7,074 files and 140,393,220 bytes both times; identical aggregate SHA-256 `c47b8acdb42feb920095bed155364d9dd8c7758c9571623c3c15a2ffb9866f0c`; clean generated diff |
+| production build and rebuilt wasm | exit 0; wasm 360,011 bytes |
+| settings suite | 20 pass, 0 fail; 2,493 focused measurement expectations |
+| importer / replay / locks-battle-terrain partitions | 53 / 12 / 22 pass, 0 fail |
+| rest a-l | 640 pass, 0 fail; 2 browser-conditional cases accounted for below |
+| rest m-z | 660 pass, 0 fail; 4 browser-conditional cases accounted for below |
+| browser-condition supplement | 9 pass, 0 fail; all six default-condition skips executed |
+| Chinese Web smoke | 13/13 assertions, 3,188 frames, 22 screenshots, no console errors |
+| J4 mainline from frame zero | PASS; 206,822 frames; terminal SHA-256 `59645ed2633892775f935cd88d1a00003ff93886896ee939973ba23a9fc0ee2e`, unchanged from the preceding fix |
+
+`bun.lock` is unchanged, the branch is linear, and no generated or visual
+artifact changed after the deterministic import checks.
+
+subagent 使用：3 个 / 分别核对上游舍入语义、夹具与测试辨识力、golden 影响范围 / 并行只读调查节省了探查时间
+
+PASS
