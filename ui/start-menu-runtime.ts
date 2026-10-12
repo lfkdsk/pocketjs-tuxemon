@@ -646,6 +646,8 @@ export interface StartMenuOptions {
   labels: StartMenuLabels;
   /** START by default. Must be one button bit. */
   openButton?: number;
+  /** True while another top-level transport owns START (attract/demo). */
+  suspended?: () => boolean;
   /** Override live defaults. false hides a row; "disabled" retains it. */
   availability?: StartMenuAvailability | ((state: SessionState) => StartMenuAvailability);
   /** Override the built-in Tuxepedia-at-0 and inventory-gated NuPhone-at-3 rows. */
@@ -843,7 +845,7 @@ export function createStartMenuRuntime(
 
   const step: GameViewDemoRuntime["step"] = (_buttons, pressed) => {
     if (!openSignal()) {
-      if (pressed & openButton) {
+      if ((pressed & openButton) !== 0 && !(options.suspended?.() ?? false)) {
         open();
         return { consumed: true };
       }

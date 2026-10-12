@@ -9,6 +9,7 @@ import {
   NameInputScene,
 } from "./ui/gp1-kit-stage.ts";
 import { onMount } from "solid-js";
+import { getOps } from "@pocketjs/framework/host";
 import { createGameEntryReaders, createGameMapRepository } from "./ui/entry-readers.ts";
 import type { ProjectShell } from "./vendor/pocket-rpgkit/src/engine/types.ts";
 import {
@@ -59,6 +60,18 @@ import { createTuxepediaOverlay } from "./ui/tuxepedia.tsx";
 import { createNuPhoneOverlay } from "./ui/nuphone.tsx";
 import { createTitleBattleOverlay } from "./ui/title-battle.tsx";
 import { createTitleBattleRules } from "./ui/title-battle-runtime.ts";
+import { createStartMenuOverlay } from "./ui/start-menu.tsx";
+import { createBagMenu } from "./ui/bag-menu.tsx";
+import {
+  requestHostQuit,
+  resetWorldSession,
+  titleSaveAvailability,
+} from "./ui/start-menu-integration.ts";
+import {
+  applyWorldItemDirectives,
+  liveWorldItemContext,
+} from "./ui/world-item-shell.ts";
+import type { BattleDb } from "./importer/battle-schema.ts";
 import featureModesJson from "./data/feature-modes.json";
 import type { FeatureModesRuntimeData } from "./ui/feature-modes-data.ts";
 import { createBootSnapshotOverlay } from "./ui/boot-snapshot-overlay.tsx";
@@ -278,23 +291,15 @@ const demo: GameViewDemoConfig | undefined = hasDemoChapters(lang) ? (() => {
 // verification (the kit owns the runtime; this only reads its state).
 (globalThis as typeof globalThis & { __rpgkitDemoMenuOpen?: () => boolean }).__rpgkitDemoMenuOpen = () =>
   demoMenu?.isOpen() ?? false;
-// The save/load menu (START) and the language switcher (R) share one
-// GameView overlay slot through the composite overlay. Each config wrapper
-// also captures its runtime so the weather overlay can suspend while either
-// menu is open. The language switcher is hidden on targets that cannot
-// persist a choice (PSP: no localStorage, no data.fs — the language is a
-// build-time choice there).
+// START owns the world-menu root. Bag, save/load, language and the imported
+// apps are programmatic children: dismissing one returns to the still-mounted
+// root, while a successful load/item use enters the world. The language
+// switcher is hidden on targets that cannot persist a choice (PSP: language
+// is a build-time choice there).
 const langSwitchable = canSwitchLang();
 const featureModes = featureModesJson as unknown as FeatureModesRuntimeData;
-// The Tuxepedia (START menu row): an overlay that reads the live seen/caught
-// state. Its runtime is captured here so the save menu's onExtra can open it.
 const tuxepediaConfig = createTuxepediaOverlay({ catalog, lang });
-const tuxepediaRowLabel = lang === "zh_CN" ? "图鉴" : "Tuxepedia";
-// Tuxemon exposes NuPhone as a hidden-inventory world-menu item. The save
-// overlay is this port's world menu, so its row resolves against the live
-// inventory and the phone itself opens the imported Map App.
 const nuPhoneConfig = createNuPhoneOverlay({ data: featureModes.nuPhoneMap, lang });
-const nuPhoneRowLabel = featureModes.nuPhoneMap.entry.phoneLabel[lang];
 const titleGlobals = globalThis as typeof globalThis & {
   __pocketTuxemonShowTitle?: boolean;
   __pocketTuxemonSkipTitle?: boolean;
@@ -309,17 +314,6 @@ const titleInitiallyOpen = titleGlobals.__pocketTuxemonShowTitle === true
 // disposable title runtime at all; release boots create both here.
 const titleRules = titleInitiallyOpen ? createTitleBattleRules(campaignBattleRules) : null;
 const rules = titleRules ?? campaignBattleRules;
-const titleBattleConfig = titleRules
-  ? createTitleBattleOverlay({
-      data: featureModes.titleBattle,
-      minigameData: featureModes.titleMinigame,
-      catalog,
-      lang,
-      rules: titleRules,
-      extensions,
-      initiallyOpen: true,
-    })
-  : undefined;
 // feature-modes.json supplies these names dynamically, so keep one literal
 // reachability list for PocketJS's static image scan. gen-assets.ts owns the
 // files and validates their upstream dimensions before every build.
@@ -331,44 +325,181 @@ const FEATURE_MODE_IMAGE_ASSETS = [
   "assets/nuphone/app-map.png",
 ] as const;
 void FEATURE_MODE_IMAGE_ASSETS;
+
+// Loading the complete battle database remains deferred until Bag is opened.
+// Property access then resolves the shared sharded catalog exactly once.
+const bagDb = new Proxy(Object.create(null) as BattleDb, {
+  get(_target, property) {
+    return Reflect.get(catalog.database(), property);
+  },
+});
+
 let saveMenuRuntime: GameViewDemoRuntime | null = null;
 const saveMenuConfig = createSaveMenu({
   suspended: () => demoMenu?.isOpen() ?? false,
   lang,
-  extraRows: (state) => [
-    { id: "tuxepedia", label: tuxepediaRowLabel },
-    ...((state.sw.items[featureModes.nuPhoneMap.entry.phoneItem] ?? 0) > 0
-      ? [{ id: "nuphone", label: nuPhoneRowLabel }]
-      : []),
-  ],
-  onExtra: (id) => {
-    if (id === "tuxepedia") tuxepediaConfig.runtimeRef.current?.open();
-    else if (id === "nuphone") nuPhoneConfig.runtimeRef.current?.open();
-  },
 });
-const baseSaveMenu: GameViewOverlayConfig = {
+let saveOrigin: "start" | "title" | null = null;
+let languageOrigin: "start" | "title" | null = null;
+let titleBattleConfig: ReturnType<typeof createTitleBattleOverlay> | undefined;
+
+function refreshTitleAvailability(): void {
+  const save = saveMenuConfig.runtimeRef.current;
+  const title = titleBattleConfig?.runtimeRef.current;
+  if (save && title) title.refreshAvailability(titleSaveAvailability(save));
+}
+
+function settleSaveHandoff(): void {
+  const completion = saveMenuConfig.runtimeRef.current?.completion();
+  if (!completion || saveOrigin === null) return;
+  const origin = saveOrigin;
+  saveOrigin = null;
+  if (completion.kind === "loaded") {
+    startMenuConfig.runtimeRef.current?.close();
+  } else if (origin === "title") {
+    titleBattleConfig?.runtimeRef.current?.openTitle();
+    refreshTitleAvailability();
+  }
+}
+
+function openSave(origin: "start" | "title", target: "root" | "load" | "code"): void {
+  const save = saveMenuConfig.runtimeRef.current;
+  if (!save) return;
+  saveOrigin = origin;
+  save.open(target);
+}
+
+const saveMenu: GameViewOverlayConfig = {
   create(host) {
     saveMenuRuntime = saveMenuConfig.create(host);
-    return saveMenuRuntime;
+    const runtime = saveMenuRuntime;
+    return {
+      ...runtime,
+      step(buttons, pressed) {
+        const result = runtime.step(buttons, pressed);
+        settleSaveHandoff();
+        return result;
+      },
+    };
   },
 };
-const saveMenu = worldDiagnostics
-  ? withWorldDiagnostics(baseSaveMenu, worldDiagnostics)
-  : baseSaveMenu;
+
+const bagMenuConfig = createBagMenu({
+  db: bagDb,
+  data: featureModes.startMenu,
+  lang,
+  context: (sessionHost) => liveWorldItemContext(sessionHost, featureModes.worldItems, lang),
+  onDirectives: (directives, _result, sessionHost) => {
+    applyWorldItemDirectives(sessionHost, directives);
+  },
+  onComplete: (completion) => {
+    if (completion.kind === "used") startMenuConfig.runtimeRef.current?.close();
+  },
+});
+
 let langMenuRuntime: GameViewDemoRuntime | null = null;
 const langMenuConfig = createLangMenu(lang);
 const langMenu: GameViewOverlayConfig = {
   create(host) {
     langMenuRuntime = langMenuConfig.create(host);
-    return langMenuRuntime;
+    const runtime = langMenuRuntime;
+    return {
+      ...runtime,
+      step(buttons, pressed) {
+        const wasOpen = runtime.isOpen();
+        const result = runtime.step(buttons, pressed);
+        if (wasOpen && !runtime.isOpen()) {
+          const origin = languageOrigin;
+          languageOrigin = null;
+          if (origin === "title") {
+            titleBattleConfig?.runtimeRef.current?.openTitle();
+            refreshTitleAvailability();
+          }
+        }
+        return result;
+      },
+    };
   },
 };
+
+function openLanguage(origin: "start" | "title"): void {
+  if (!langSwitchable) return;
+  languageOrigin = origin;
+  langMenuConfig.runtimeRef.current?.open();
+}
+
+const startMenuConfig = createStartMenuOverlay({
+  data: featureModes.startMenu,
+  lang,
+  catalog,
+  nuPhoneLabel: featureModes.nuPhoneMap.entry.phoneLabel,
+  suspended: () => demoMenu?.isOpen() ?? false,
+  callbacks: {
+    bag: () => bagMenuConfig.runtimeRef.current?.open(),
+    save: () => openSave("start", "root"),
+    load: () => openSave("start", "load"),
+    ...(langSwitchable ? { options: () => openLanguage("start") } : {}),
+    tuxepedia: () => tuxepediaConfig.runtimeRef.current?.open(),
+    nuphone: () => nuPhoneConfig.runtimeRef.current?.open(),
+    exit: (sessionHost) => {
+      startMenuConfig.runtimeRef.current?.close();
+      resetWorldSession(sessionHost);
+      titleBattleConfig?.runtimeRef.current?.resetTitle();
+      refreshTitleAvailability();
+    },
+  },
+});
+const startMenu: GameViewOverlayConfig = worldDiagnostics
+  ? withWorldDiagnostics(startMenuConfig, worldDiagnostics)
+  : startMenuConfig;
+
+if (titleRules) {
+  const base = createTitleBattleOverlay({
+    data: featureModes.titleBattle,
+    minigameData: featureModes.titleMinigame,
+    menuText: featureModes.startMenu.title,
+    catalog,
+    lang,
+    rules: titleRules,
+    extensions,
+    initiallyOpen: true,
+    onLoad: () => openSave("title", "load"),
+    onAutosave: () => {
+      const save = saveMenuConfig.runtimeRef.current;
+      if (!save) {
+        titleBattleConfig?.runtimeRef.current?.openTitle();
+        return;
+      }
+      saveOrigin = "title";
+      save.loadAutosave();
+      settleSaveHandoff();
+    },
+    onNewGame: (sessionHost) => {
+      resetWorldSession(sessionHost);
+      startMenuConfig.runtimeRef.current?.close();
+    },
+    onOptions: langSwitchable ? () => openLanguage("title") : undefined,
+    onExit: () => {
+      requestHostQuit(getOps());
+    },
+  });
+  titleBattleConfig = {
+    ...base,
+    create(sessionHost) {
+      const runtime = base.create(sessionHost);
+      refreshTitleAvailability();
+      return runtime;
+    },
+  };
+}
+
 const overlay = createCompositeOverlay(
-  saveMenu,
+  startMenu,
   langSwitchable ? langMenu : undefined,
   tuxepediaConfig,
   nuPhoneConfig,
   titleBattleConfig,
+  [saveMenu, bagMenuConfig],
 );
 // The boot-snapshot overlay runs first so a PSP segment build can restore a
 // chapter save before the tape replay starts. Production builds leave its
@@ -403,6 +534,8 @@ function TuxemonWeatherOverlay(_props: GameWorldOverlayProps) {
       bridge={weatherBridge}
       suspended={() =>
         weatherOverlaySuspended(demoMenu, saveMenuRuntime, tuxepediaConfig.runtimeRef.current)
+        || (startMenuConfig.runtimeRef.current?.isOpen() ?? false)
+        || (bagMenuConfig.runtimeRef.current?.isOpen() ?? false)
         || (nuPhoneConfig.runtimeRef.current?.isOpen() ?? false)
         || (titleBattleConfig?.runtimeRef.current?.isOpen() ?? false)
         || (langMenuRuntime?.isOpen() ?? false)}
