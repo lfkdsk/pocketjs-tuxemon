@@ -18,6 +18,39 @@ Per-action numbers come from the import coverage report,
 | Seamless outdoor world | Partial | The project defaults to `seamless-v1`. All 258 coordinate-preserving outdoor portal IDs cross atomically in eight ticks without a fade, including five Route 3 exits whose pinned `bottom` typo is repaired locally to `down`. Another 34 fixed-destination openings cross on all 137 proven lanes: the Classic region's 25 land openings use 75 lanes, and all 9 water-route openings use 62 lanes while the player is actively surfing. A trusted opening capability may relax only the destination water tile's solid flag; directional edges, event bodies, bounds and topology proof remain mandatory, and the same opening is blocked before surfing. This gives 292 runtime seamless portal IDs and no promoted lane left on a fade. The 56 wholly legacy outdoor portal IDs are 5 portal-only (3 Sanglorian exits into Route 1's interior, one Route A lane offset by a tile and one Classic Route 2 exit whose source guard faces back into the map), 33 linked across layout gaps, 4 rejected contacts and 14 non-seam/story transfers; each has its reason in `reports/outdoor-seam-audit.json` (`tools/audit-outdoor-seams.ts`). Ten direction-only seams have no portal action and are not legacy fades. Indoor/faint transfers and every unmarked transfer also stay legacy. The kit's world renderer stays mounted across both placed outdoor and unplaced indoor maps, so the game no longer keeps a stale last-known placement adapter. It shows neighbouring ground, upper layers, animated tiles and the neighbour NPC preview (next row) across 71 seams while keeping map and texture caches bounded. A completed seamless entry freezes the just-left map's painted NPCs in the saved `mapRuntime.leftMap` until the next entry or distance eviction, avoiding a preview jump immediately behind the player. Map-entry NPC-party clearing, destination banner, weather and encounter-step semantics match legacy; source clock/daylight and audio advance during the eight visible crossing ticks, whereas legacy freezes clock/daylight during its fade. See [importer](importer.md), the [seam reports](../findings/G8-SEAM2.md) and [verification](verification.md) |
 | Neighbour NPC preview | Done | The world renderer previews the characters on visible neighbour maps by entering each map in a sandbox (a private copy of the state, first target tick), so the people across a seam already stand where they will be after the crossing, and the map left behind stays frozen. The cache key leaves out step countdowns and the running clock but holds the calendar day, the hour and the weather, which is everything a `time_is` condition or `update_time` can read; a new hour or a weather change recomputes the previews. The volatile probe moves the minute inside the hour and rejects any character that depends on it (none do today) (`battle/preview-hooks.ts`). At the new-game state 1,158 events are previewable, 7,062 hidden (they paint nothing on entry) and 5 rejected (`entry-transfer` on `eclipse_park` and `eclipse_park_cave`): 99.6% of the events that paint. No mainline (`spyder_*`) event is rejected at any chapter (`verify:preview:coverage`). Six mainline seams are checked at both viewports in four frames each (`goldens:preview-seam`): every character the session state puts on screen is found at its place against its sprite image, and a scan of the whole frame finds no second copy of any of them. Presentation only: the session state is identical with and without it. A map's preview takes a few frames to compute after a story change, during which the previous one stays on screen. See [importer](../reports/G1-coverage.md) and [verification](verification.md) |
 
+## Menus and title modes
+
+The rows below audit the entries created by Tuxemon's title and in-world menus.
+They describe entry-point parity; a subsystem can work elsewhere while its
+upstream menu row is still Partial or Planned.
+
+### Title screen
+
+| Upstream entry | Status | Pocket Tuxemon mapping |
+| --- | --- | --- |
+| Load | Partial | Loading is fully supported after choosing **Adventure** and pressing START, but the upstream save-dependent title row is not exposed yet. See [saving and loading](../README.md#saving-and-loading) |
+| Autosave | Partial | Imported automatic saves are readable from the START menu after choosing **Adventure**; the upstream conditional title row is not exposed yet |
+| New Game | Done | **Adventure** enters the one bundled campaign from a fresh boot. The upstream multi-mod campaign picker is unnecessary because this build contains one campaign |
+| Battle | Done | **Battle** opens all five imported difficulty recipes and a disposable production battle; see [Title-screen Battle mode](#battles) |
+| Title-screen Minigame | Done | **Minigame** opens Easy, Normal or Hard **Name That Tuxemon**. It uses the complete 393-species positive-ID upstream pool, 3/5/5 distinct answers, +1/+2/+3 scoring, a streak notice from 10, image clues for Easy/Normal and losslessly paginated descriptions for Hard. Its content-derived deterministic RNG, score and streak are session-local: play never reads or changes campaign saves, RNG, party or Tuxepedia discovery. English and Chinese controller, keyboard and scaled-touch flows are tested at 480×272 and 960×544 ([runtime tests](../tests/title-minigame.test.ts), [visual tests](../tests/feature-modes-visual.test.ts)) |
+| Options | Partial | The **R** language switcher covers language selection. The upstream title control-options screen and remapping rows are not implemented |
+| Exit | Planned | There is no title Exit row. Closing a desktop window or browser tab remains platform-owned |
+
+### In-world START menu
+
+| Upstream entry | Status | Pocket Tuxemon mapping |
+| --- | --- | --- |
+| Tuxemon / party | Planned | Scripted party and monster pickers work where story actions require them, but START has no general party browser |
+| Bag | Planned | Story, shops and battles use the live inventory, but START has no general bag browser or out-of-battle item-use screen |
+| Player | Planned | Player identity and progress are saved, but START has no general player-status screen |
+| Missions | Planned | START has no mission-list screen. The pinned campaign's `set_mission` actions are upstream no-ops, so it currently has no populated mission list to show |
+| Save | Done | START opens three manual save slots plus save-code export; unsafe story, scene and transition points are refused with a reason |
+| Load | Done | The same START overlay loads three slots, a save code and the read-only Automatic Save row, including published older compatible formats |
+| Options | Partial | **R** opens the bilingual language switcher. The upstream control-options screen and remapping rows are not implemented |
+| Exit | Planned | START has no upstream-style **Exit** action that clears the current world session and returns to the title screen |
+| Tuxepedia (item-driven) | Partial | START opens the full journal browser, but the row is always present rather than gated by ownership of `app_tuxepedia`; see [Tuxepedia and journal](#monsters-and-party) |
+| Nu Phone (item-driven) | Done | START exposes Nu Phone only while `nu_phone` is owned, and its Map App uses the imported locations and item-gated entry; see [NuPhone GPS](#events-and-story) |
+
 ## Events and story
 
 | Feature | Status | Notes |
