@@ -1,7 +1,7 @@
-// Composite GameView overlay: the save/load menu (START), the language
-// switcher (R), and game-owned apps opened from the save/world menu. Only one
-// child screen is interactive at a time. A child takes priority over the save
-// menu it was opened from, so closing it returns the player to that menu.
+// Composite GameView overlay: the game-owned world menu (START), its save/load
+// child, the language switcher (R), and game-owned apps. Only one child screen
+// is interactive at a time. A child takes priority over the world menu it was
+// opened from, so closing it returns the player to that menu.
 
 import type { JSX } from "solid-js";
 import { BTN } from "@pocketjs/framework/input";
@@ -35,15 +35,20 @@ export function demoMenuBlocked(state: Readonly<SessionState>): boolean {
 }
 
 export function createCompositeOverlay(
-  saveMenu: GameViewOverlayConfig,
+  worldMenu: GameViewOverlayConfig,
   langMenu: GameViewOverlayConfig | undefined,
   tuxepedia?: GameViewOverlayConfig,
   nuPhone?: GameViewOverlayConfig,
   titleBattle?: SessionOwningOverlayConfig,
+  /** A child opened programmatically by the game-owned world/title menu.
+   * It is never stepped while closed, so its legacy START watcher cannot
+   * compete with the parent world menu. */
+  childMenu?: GameViewOverlayConfig,
 ): GameViewOverlayConfig {
   return {
     create(host: GameViewSessionHost): GameViewDemoRuntime {
-      const save = saveMenu.create(host);
+      const world = worldMenu.create(host);
+      const child = childMenu?.create(host);
       const lang = langMenu?.create(host);
       const tux = tuxepedia?.create(host);
       const phone = nuPhone?.create(host);
@@ -61,17 +66,21 @@ export function createCompositeOverlay(
           }
           if (phone?.isOpen()) return phone.step(buttons, pressed);
           if (tux?.isOpen()) return tux.step(buttons, pressed);
-          if (save.isOpen()) return save.step(buttons, pressed);
+          if (child?.isOpen()) return child.step(buttons, pressed);
+          if (world.isOpen()) return world.step(buttons, pressed);
           if (lang?.isOpen()) return lang.step(buttons, pressed);
-          // All closed: the save menu watches START, the language menu R.
-          const saveResult = save.step(buttons, pressed);
-          if (save.isOpen() || saveResult.consumed) return saveResult;
-          return lang ? lang.step(buttons, pressed) : saveResult;
+          // All closed: the game-owned world menu watches START, the
+          // language menu R. Child menus only open through parent callbacks.
+          const worldResult = world.step(buttons, pressed);
+          if (world.isOpen() || worldResult.consumed) return worldResult;
+          return lang ? lang.step(buttons, pressed) : worldResult;
         },
-        isOpen: () => save.isOpen() || (lang?.isOpen() ?? false) || (tux?.isOpen() ?? false) || (phone?.isOpen() ?? false) || (title?.isOpen() ?? false),
+        isOpen: () => world.isOpen() || (child?.isOpen() ?? false) || (lang?.isOpen() ?? false)
+          || (tux?.isOpen() ?? false) || (phone?.isOpen() ?? false) || (title?.isOpen() ?? false),
         render(theme?: Partial<UiTheme>, uiText?: UiTextOverrides): JSX.Element {
           return [
-            save.render(theme, uiText),
+            world.render(theme, uiText),
+            child?.render(theme, uiText),
             lang?.render(theme, uiText),
             tux?.render(theme, uiText),
             phone?.render(theme, uiText),
