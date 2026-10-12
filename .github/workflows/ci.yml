@@ -187,6 +187,8 @@ jobs:
         run: bun tools/verify-web-zh.ts
       - name: Play the demo controls in headless Chrome
         run: bun tools/verify-web-demo.ts
+      - name: Play an Arena tape in headless Chrome
+        run: bun run verify:web:arena
       - name: Play three imported music tracks in headless Chrome
         run: bun run verify:web:audio
       - name: Keep the web site
