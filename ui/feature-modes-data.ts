@@ -180,10 +180,35 @@ export interface StartMenuData {
   };
 }
 
+/** Compact build-time terrain facts needed by items usable from the Bag.
+ * Keeping only non-empty surfable cell lists avoids shipping the multi-MB
+ * terrain audit document in the runtime bundle. */
+export interface WorldItemMapData {
+  source: "mods/tuxemon/maps/*.tmx";
+  surfable: Record<string, number[]>;
+  fishingSource: "mods/fishing.yaml";
+  fishing: Record<string, {
+    trigger: number;
+    levelBounds: [number, number];
+    expReqMod: number;
+    stages: string[];
+    stageWeights: Record<string, number>;
+    shapes: string[];
+    shapeWeights: Record<string, number>;
+    types: string[];
+    typeWeights: Record<string, number>;
+    tags: string[];
+    tagWeights: Record<string, number>;
+    environment: { default: string; night: string };
+    failure: LocalizedFeatureText;
+  }>;
+}
+
 export interface FeatureModesRuntimeData {
   format: "pocket-tuxemon/feature-modes/v1";
   nuPhoneMap: NuPhoneMapData;
   titleBattle: TitleBattleData;
   titleMinigame: TitleMinigameData;
   startMenu: StartMenuData;
+  worldItems: WorldItemMapData;
 }

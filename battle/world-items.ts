@@ -9,6 +9,7 @@ import {
 } from "./progression.ts";
 import { calculateBaseStats, monsterFromSnapshot } from "./stats.ts";
 import { addStepTracker } from "./step-tracker.ts";
+import { stageOfDayFromClock } from "./time-weather.ts";
 import { STAT_NAMES, type BattleMonster, type DbEvolution, type SpawnedMonsterSnapshot, type StatName } from "./types.ts";
 import type { TuxemonExtensionState } from "./extension.ts";
 import { rngNext, type SwitchState } from "../vendor/pocket-rpgkit/src/engine/interpreter.ts";
@@ -29,6 +30,7 @@ export type WorldItemFailureReason =
   | "target-ineligible"
   | "wrong-location"
   | "no-faint-point"
+  | "no-catch"
   | "unsupported-condition"
   | "unsupported-effect"
   | "no-effect"
@@ -74,6 +76,24 @@ export interface WorldItemContext {
   facingSprite?: string | readonly string[];
   /** Owner of the faint point used by `teleport_item center`. */
   faintPointCharacter?: string;
+  /** Imported fishing.yaml rules, keyed by the rod item slug. */
+  fishing?: Readonly<Record<string, WorldItemFishingConfig>>;
+}
+
+export interface WorldItemFishingConfig {
+  trigger: number;
+  levelBounds: readonly [number, number];
+  expReqMod: number;
+  stages: readonly string[];
+  stageWeights: Readonly<Record<string, number>>;
+  shapes: readonly string[];
+  shapeWeights: Readonly<Record<string, number>>;
+  types: readonly string[];
+  typeWeights: Readonly<Record<string, number>>;
+  tags: readonly string[];
+  tagWeights: Readonly<Record<string, number>>;
+  environment: { default: string; night: string };
+  failure: string;
 }
 
 export type WorldItemTarget =
@@ -84,7 +104,14 @@ export type WorldItemTarget =
 
 export type WorldItemDirective =
   | { type: "teleport"; character: string; map: string; x: number; y: number }
-  | { type: "fishing"; facingTile: string | null }
+  | {
+      type: "fishing";
+      facingTile: string | null;
+      species: string;
+      level: number;
+      experienceModifier: number;
+      environment: string;
+    }
   | { type: "remove-facing-entity"; facingSprite: string | null };
 
 export interface WorldItemMoveChoice {
@@ -160,6 +187,45 @@ function values(value: string | readonly string[] | undefined): readonly string[
 function hasValue(value: string | readonly string[] | undefined, expected: string): boolean {
   const wanted = expected.trim().toLowerCase();
   return values(value).some((candidate) => candidate.trim().toLowerCase() === wanted);
+}
+
+function fishingPool(
+  db: BattleDb,
+  config: Readonly<WorldItemFishingConfig>,
+): Array<{ slug: string; weight: number }> {
+  return Object.entries(db.monsters).flatMap(([slug, monster]) => {
+    if (config.stages.length > 0 && !config.stages.includes(monster.stage)) return [];
+    if (config.shapes.length > 0 && !config.shapes.includes(monster.shape)) return [];
+    if (config.types.length > 0 && !monster.types.some((type) => config.types.includes(type))) return [];
+    if (config.tags.length > 0 && !monster.tags.some((tag) => config.tags.includes(tag))) return [];
+    const typeWeight = monster.types.reduce(
+      (weight, type) => Math.max(weight, config.typeWeights[type] ?? 1),
+      0,
+    ) || 1;
+    const tagWeight = monster.tags.reduce(
+      (weight, tag) => Math.max(weight, config.tagWeights[tag] ?? 1),
+      0,
+    ) || 1;
+    const weight = (config.stageWeights[monster.stage] ?? 1)
+      * (config.shapeWeights[monster.shape] ?? 1)
+      * typeWeight
+      * tagWeight;
+    return weight > 0 && Number.isFinite(weight) ? [{ slug, weight }] : [];
+  });
+}
+
+function weightedFishingMonster(
+  pool: readonly { slug: string; weight: number }[],
+  random: number,
+): string | null {
+  const total = pool.reduce((sum, entry) => sum + entry.weight, 0);
+  if (!(total > 0)) return null;
+  let cursor = random * total;
+  for (const entry of pool) {
+    cursor -= entry.weight;
+    if (cursor < 0) return entry.slug;
+  }
+  return pool.at(-1)?.slug ?? null;
 }
 
 function compare(left: number, operator: string, right: number): boolean {
@@ -645,6 +711,7 @@ export function useWorldItem(
   let success = false;
   let failureReason: WorldItemFailureReason | null = null;
   let failureDetail: string | null = null;
+  let resultMessage: string | null = null;
   let progression: ProgressionResult | undefined;
   const effects: WorldItemEffectResult[] = [];
   const directives: WorldItemDirective[] = [];
@@ -852,10 +919,47 @@ export function useWorldItem(
         effectResult(effect.type, true);
         break;
       }
-      case "fishing":
-        directives.push({ type: "fishing", facingTile: values(context.facingTile)[0] ?? null });
+      case "fishing": {
+        const config = context.fishing?.[request.item];
+        if (!config) {
+          failureDetail = "Fishing rules are unavailable for this item.";
+          effectResult(effect.type, false, "unsupported-effect");
+          break;
+        }
+        const draw = (): number => {
+          const sampled = rngNext(nextSwitches.rng);
+          nextSwitches = { ...nextSwitches, rng: sampled.next };
+          return sampled.value;
+        };
+        // Upstream chooses the weighted candidate before its bite check,
+        // then draws a level only after a successful bite.
+        const species = weightedFishingMonster(fishingPool(db, config), draw());
+        if (species === null) {
+          failureDetail = "No Tuxemon match this fishing item's filters.";
+          effectResult(effect.type, false, "no-catch");
+          break;
+        }
+        if (draw() > config.trigger) {
+          failureDetail = config.failure;
+          resultMessage = config.failure;
+          effectResult(effect.type, false, "no-catch");
+          break;
+        }
+        const [low, high] = config.levelBounds;
+        const level = low + Math.floor(draw() * (high - low + 1));
+        directives.push({
+          type: "fishing",
+          facingTile: values(context.facingTile)[0] ?? null,
+          species,
+          level,
+          experienceModifier: config.expReqMod,
+          environment: stageOfDayFromClock(nextExtension.clock) === "night"
+            ? config.environment.night
+            : config.environment.default,
+        });
         effectResult(effect.type, true);
         break;
+      }
       case "remove_entity":
         directives.push({ type: "remove-facing-entity", facingSprite: values(context.facingSprite)[0] ?? null });
         effectResult(effect.type, true);
@@ -884,7 +988,8 @@ export function useWorldItem(
     reason,
     detail: success ? null : failureDetail ?? "The item had no effect.",
     useMessage: formatMessage(item!.messages.use, item!.name, switches.playerName),
-    message: formatMessage(success ? item!.messages.success : item!.messages.failure, item!.name, switches.playerName),
+    message: resultMessage
+      ?? formatMessage(success ? item!.messages.success : item!.messages.failure, item!.name, switches.playerName),
     effects,
     directives,
     ...(progression === undefined ? {} : { progression }),

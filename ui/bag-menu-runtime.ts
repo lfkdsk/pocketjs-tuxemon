@@ -88,9 +88,13 @@ export interface BagMenuOptions {
   data: StartMenuData;
   lang: Lang;
   /** Live environmental facts needed by fishing, hammer, and item evolution. */
-  context?: WorldItemContext | (() => WorldItemContext);
+  context?: WorldItemContext | ((host: GameViewSessionHost) => WorldItemContext);
   /** The world shell applies teleport/fishing/entity directives. */
-  onDirectives?: (directives: readonly WorldItemDirective[]) => void;
+  onDirectives?: (
+    directives: readonly WorldItemDirective[],
+    result: Readonly<WorldItemUseResult>,
+    host: GameViewSessionHost,
+  ) => void;
   /** Actual use (success or post-effect failure) lets the parent close START. */
   onComplete?: (completion: BagMenuCompletion) => void;
   onClose?: () => void;
@@ -187,8 +191,8 @@ function initialState(): BagMenuState {
   };
 }
 
-function contextValue(options: BagMenuOptions): WorldItemContext {
-  return typeof options.context === "function" ? options.context() : (options.context ?? {});
+function contextValue(options: BagMenuOptions, host: GameViewSessionHost): WorldItemContext {
+  return typeof options.context === "function" ? options.context(host) : (options.context ?? {});
 }
 
 function unavailableMessage(
@@ -244,7 +248,7 @@ export function createBagMenuRuntime(
     const live = snapshot();
     return listWorldItems(options.db, live.extension, live.session.sw, {
       page: current.page,
-      context: contextValue(options),
+      context: contextValue(options, host),
     });
   };
   const selectedItem: Accessor<WorldItemListEntry | null> = () => {
@@ -253,7 +257,7 @@ export function createBagMenuRuntime(
       const live = snapshot();
       const all = listWorldItems(options.db, live.extension, live.session.sw, {
         page: current.page,
-        context: contextValue(options),
+        context: contextValue(options, host),
       });
       return all.items.find((row) => row.slug === current.selectedItem)
         ?? (options.db.items[current.selectedItem] ? {
@@ -286,7 +290,7 @@ export function createBagMenuRuntime(
         live.session.sw,
         slug,
         index,
-        contextValue(options),
+        contextValue(options, host),
       ).eligible,
     ));
   };
@@ -336,7 +340,7 @@ export function createBagMenuRuntime(
         ext: packTuxemonExtensionState(result.extension),
       }, host.heldButtons());
     }
-    if (result.directives.length > 0) options.onDirectives?.(result.directives);
+    if (result.directives.length > 0) options.onDirectives?.(result.directives, result, host);
     const used: BagMenuCompletion = { kind: "used", result };
     setCompletion(used);
     options.onComplete?.(used);
@@ -366,7 +370,7 @@ export function createBagMenuRuntime(
       item,
       ...(targetIndex === undefined ? {} : { target: targetIndex }),
       ...(forgetMove === undefined ? {} : { forgetMove }),
-      context: contextValue(options),
+      context: contextValue(options, host),
     });
     const stateChanged = result.extension !== live.extension || result.switches !== live.session.sw;
     if (result.reason === "move-choice-required" && result.moveChoice) {

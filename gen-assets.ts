@@ -127,7 +127,10 @@ function portableStaticPng(image: {
 // document, then cook the five referenced upstream images like every other
 // static PocketJS texture. Explicit logical dimensions let the UI undo the
 // required power-of-two texture resampling.
-const featureModes = loadFeatureModes(sourceRoot);
+const featureModes = loadFeatureModes(
+  sourceRoot,
+  Object.fromEntries(terrain.fragment.maps.map((map) => [map.id, map.surfaceLabels])),
+);
 const featureModeImages: Record<string, { psm: number }> = {};
 for (const image of Object.values(featureModes.nuPhoneMap.art)) {
   const decoded = decodePng(

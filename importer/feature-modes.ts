@@ -23,6 +23,7 @@ import type {
   TitleBattleDifficulty,
   TitleMinigameData,
   TitleMinigameDifficulty,
+  WorldItemMapData,
 } from "../ui/feature-modes-data.ts";
 
 export type { FeatureLocale } from "../ui/feature-modes-data.ts";
@@ -50,6 +51,7 @@ export interface FeatureModesImport {
   titleBattle: TitleBattleImport;
   titleMinigame: TitleMinigameData;
   startMenu: StartMenuData;
+  worldItems: WorldItemMapData;
 }
 
 const DIRECTIONS: readonly NuPhoneDirection[] = ["up", "right", "down", "left"];
@@ -86,6 +88,21 @@ function integer(value: unknown, at: string): number {
     throw new Error(`${at} must be an integer`);
   }
   return value;
+}
+
+function finite(value: unknown, at: string): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    throw new Error(`${at} must be a finite number`);
+  }
+  return value;
+}
+
+function numberRecord(value: unknown, at: string): Record<string, number> {
+  const source = record(value ?? {}, at);
+  return Object.fromEntries(Object.entries(source).map(([key, entry]) => [
+    key,
+    finite(entry, `${at}.${key}`),
+  ]));
 }
 
 function stringList(value: unknown, at: string): string[] {
@@ -514,7 +531,10 @@ export function loadTitleBattle(
 }
 
 /** Read all out-of-map feature sources and their item/menu metadata. */
-export function loadFeatureModes(sourceRoot: string): FeatureModesImport {
+export function loadFeatureModes(
+  sourceRoot: string,
+  surfaceLabels: Readonly<Record<string, Readonly<Record<string, readonly number[]>>>> = {},
+): FeatureModesImport {
   const catalogs = featureCatalogs();
   const mapPath = join(sourceRoot, "mods/nu_phone_map.yaml");
   const rawMap = Bun.YAML.parse(readFileSync(mapPath, "utf8")) as unknown;
@@ -531,6 +551,45 @@ export function loadFeatureModes(sourceRoot: string): FeatureModesImport {
     state: "NuPhoneMap",
   });
   const nuPhoneMap = parseNuPhoneMap(rawMap, catalogs);
+  const fishingPath = join(sourceRoot, "mods/fishing.yaml");
+  const fishingSource = record(Bun.YAML.parse(readFileSync(fishingPath, "utf8")), "fishing.yaml");
+  const fishing: WorldItemMapData["fishing"] = Object.fromEntries(
+    Object.entries(fishingSource).sort(([left], [right]) => left < right ? -1 : left > right ? 1 : 0)
+      .map(([slug, value]) => {
+        const row = record(value, `fishing.yaml.${slug}`);
+        const bounds = row.level_bounds;
+        if (!Array.isArray(bounds) || bounds.length !== 2) {
+          throw new Error(`fishing.yaml.${slug}.level_bounds must contain two numbers`);
+        }
+        const low = integer(bounds[0], `fishing.yaml.${slug}.level_bounds[0]`);
+        const high = integer(bounds[1], `fishing.yaml.${slug}.level_bounds[1]`);
+        if (low < 0 || high < low) throw new Error(`fishing.yaml.${slug}.level_bounds is invalid`);
+        const environment = record(row.environment, `fishing.yaml.${slug}.environment`);
+        const failureKey = nonEmptyString(row.failure_dialog, `fishing.yaml.${slug}.failure_dialog`);
+        const config: WorldItemMapData["fishing"][string] = {
+          trigger: finite(row.trigger, `fishing.yaml.${slug}.trigger`),
+          levelBounds: [low, high],
+          expReqMod: finite(row.exp_req_mod, `fishing.yaml.${slug}.exp_req_mod`),
+          stages: stringList(row.stages ?? [], `fishing.yaml.${slug}.stages`),
+          stageWeights: numberRecord(row.stage_weights, `fishing.yaml.${slug}.stage_weights`),
+          shapes: stringList(row.shapes ?? [], `fishing.yaml.${slug}.shapes`),
+          shapeWeights: numberRecord(row.shape_weights, `fishing.yaml.${slug}.shape_weights`),
+          types: stringList(row.types ?? [], `fishing.yaml.${slug}.types`),
+          typeWeights: numberRecord(row.type_weights, `fishing.yaml.${slug}.type_weights`),
+          tags: stringList(row.tags ?? [], `fishing.yaml.${slug}.tags`),
+          tagWeights: numberRecord(row.tag_shape, `fishing.yaml.${slug}.tag_shape`),
+          environment: {
+            default: nonEmptyString(environment.default, `fishing.yaml.${slug}.environment.default`),
+            night: nonEmptyString(environment.night, `fishing.yaml.${slug}.environment.night`),
+          },
+          failure: translate(catalogs, failureKey),
+        };
+        if (config.trigger < 0 || config.trigger > 1) {
+          throw new Error(`fishing.yaml.${slug}.trigger must be within 0..1`);
+        }
+        return [slug, config];
+      }),
+  );
 
   return {
     format: "pocket-tuxemon/feature-modes/v1",
@@ -554,6 +613,15 @@ export function loadFeatureModes(sourceRoot: string): FeatureModesImport {
     titleBattle: loadTitleBattle(sourceRoot, catalogs),
     titleMinigame: loadTitleMinigame(sourceRoot, catalogs),
     startMenu: loadStartMenu(catalogs),
+    worldItems: {
+      source: "mods/tuxemon/maps/*.tmx",
+      surfable: Object.fromEntries(Object.entries(surfaceLabels)
+        .filter(([, labels]) => (labels.surfable?.length ?? 0) > 0)
+        .sort(([left], [right]) => left < right ? -1 : left > right ? 1 : 0)
+        .map(([map, labels]) => [map, [...labels.surfable!].sort((a, b) => a - b)])),
+      fishingSource: "mods/fishing.yaml",
+      fishing,
+    },
   };
 }
 
@@ -571,5 +639,6 @@ export function featureModesRuntimeData(imported: FeatureModesImport): FeatureMo
     titleBattle: imported.titleBattle,
     titleMinigame: imported.titleMinigame,
     startMenu: imported.startMenu,
+    worldItems: imported.worldItems,
   };
 }

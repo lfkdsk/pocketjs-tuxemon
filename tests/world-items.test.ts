@@ -286,12 +286,49 @@ describe("world-owned item effects", () => {
     const wrongTile = useWorldItem(SOURCE_DB, ext, rodSwitches, { item: "fishing_rod" });
     expect(wrongTile).toMatchObject({ success: false, consumed: false, reason: "wrong-location" });
 
+    const fishingConfig = {
+      trigger: 1,
+      levelBounds: [5, 15] as const,
+      expReqMod: 2,
+      stages: ["basic"],
+      stageWeights: {},
+      shapes: ["polliwog", "piscine"],
+      shapeWeights: { polliwog: 0.7, piscine: 0.3 },
+      types: [],
+      typeWeights: {},
+      tags: [],
+      tagWeights: {},
+      environment: { default: "ocean", night: "night_ocean" },
+      failure: "The water ripples, but nothing bites.",
+    };
     const fishing = useWorldItem(SOURCE_DB, ext, rodSwitches, {
       item: "fishing_rod",
-      context: { facingTile: ["water", "surfable"] },
+      context: { facingTile: ["water", "surfable"], fishing: { fishing_rod: fishingConfig } },
     });
     expect(fishing).toMatchObject({ success: true, consumed: false });
-    expect(fishing.directives).toEqual([{ type: "fishing", facingTile: "water" }]);
+    expect(fishing.directives).toHaveLength(1);
+    expect(fishing.directives[0]).toMatchObject({
+      type: "fishing",
+      facingTile: "water",
+      experienceModifier: 2,
+      environment: "ocean",
+    });
+    if (fishing.directives[0]?.type !== "fishing") throw new Error("expected fishing directive");
+    expect(fishing.directives[0].level).toBeWithin(5, 16);
+    expect(["polliwog", "piscine"]).toContain(SOURCE_DB.monsters[fishing.directives[0].species]!.shape);
+    expect(fishing.switches.rng).not.toBe(rodSwitches.rng);
+
+    const noBite = useWorldItem(SOURCE_DB, ext, rodSwitches, {
+      item: "fishing_rod",
+      context: {
+        facingTile: "surfable",
+        fishing: { fishing_rod: { ...fishingConfig, trigger: 0 } },
+      },
+    });
+    expect(noBite).toMatchObject({ success: false, consumed: false, reason: "no-catch" });
+    expect(noBite.message).toBe("The water ripples, but nothing bites.");
+    expect(noBite.directives).toEqual([]);
+    expect(noBite.switches.rng).not.toBe(rodSwitches.rng);
 
     const hammer = useWorldItem(
       SOURCE_DB,
