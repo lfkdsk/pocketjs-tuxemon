@@ -11,15 +11,20 @@ import type { GameViewDemoRuntime, GameViewOverlayConfig, GameViewSessionHost } 
 import { Panel } from "../vendor/pocket-rpgkit/src/ui/Panel.tsx";
 import { resolveUiTheme, type UiTheme } from "../vendor/pocket-rpgkit/src/ui/theme.ts";
 import type { Lang } from "./language.ts";
-import { LANG_ROWS, createLangMenuRuntime } from "./lang-menu-runtime.ts";
+import { LANG_ROWS, createLangMenuRuntime, type LangMenuRuntime } from "./lang-menu-runtime.ts";
 
 export { LANG_MENU_BUTTON, type LangMenuRuntime } from "./lang-menu-runtime.ts";
 
 /** GameView overlay config for the language switcher. */
-export function createLangMenu(active: Lang): GameViewOverlayConfig {
+export function createLangMenu(active: Lang): GameViewOverlayConfig & {
+  runtimeRef: { current: LangMenuRuntime | null };
+} {
+  const runtimeRef: { current: LangMenuRuntime | null } = { current: null };
   return {
+    runtimeRef,
     create(_host: GameViewSessionHost): GameViewDemoRuntime {
       const menu = createLangMenuRuntime(active);
+      runtimeRef.current = menu;
       return {
         step: menu.step,
         isOpen: menu.isOpen,
