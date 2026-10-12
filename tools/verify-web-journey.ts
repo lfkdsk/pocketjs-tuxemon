@@ -12,7 +12,8 @@
 // advances only when this script steps it: frame 0 is the player's own boot
 // step (the tape starts idle), frames 1..N are fed from data/g6-journey.json.
 // Any console error or uncaught exception fails the run. After the journey
-// the START save menu saves to browser storage and loads the slot back.
+// the START menu's live Save/Load rows save to browser storage and load the
+// slot back.
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
@@ -237,32 +238,44 @@ if (UPDATE_DENSITY_GOLDEN) {
   writeFileSync(join(ROOT, "tests/goldens/web-density-paper-dialog.2x.png"), capturedDialog);
 }
 
-// After the journey: START opens the save menu, slot 1 saves into the page's
-// local storage, a short walk moves the player, and loading slot 1 puts them
-// back. The menu's own state and the stored envelope are read back here.
+// After the journey: navigate the live START rows to Save and Load, write
+// slot 1 into the page's local storage, walk, then restore the slot. Row
+// indices are inventory-dependent, so this deliberately avoids hardcoding
+// the menu order.
 const saveLeg = await evaluate(`(() => {
   const p = globalThis.__pocketPlayer;
   const menu = globalThis.__pocketTuxemonSave;
+  const start = globalThis.__pocketStartMenu;
   const at = () => { const s = globalThis.__rpgSessionState; return [s.mapId, s.move.tx, s.move.ty].join(","); };
   const press = (mask) => { p.buttons = () => mask; p.step(); p.buttons = () => 0; p.step(); };
   const hold = (mask, frames) => { p.buttons = () => mask; for (let i = 0; i < frames; i++) p.step(); p.buttons = () => 0; for (let i = 0; i < 20; i++) p.step(); };
   const START = 0x0008, DOWN = 0x0040, CIRCLE = 0x2000, UP = 0x0010, LEFT = 0x0080;
+  const openStartRow = (id) => {
+    if (!start) throw new Error("web journey: START hook unavailable");
+    if (!start.isOpen()) press(START);
+    const index = start.rows().findIndex((row) => row.id === id);
+    if (index < 0) throw new Error("web journey: missing START row " + id);
+    for (let i = 0; i < start.rows().length && start.state().rootCursor !== index; i++) press(DOWN);
+    if (start.state().rootCursor !== index) throw new Error("web journey: could not select START row " + id);
+    press(CIRCLE);
+    return index;
+  };
   const out = { channel: menu ? menu.channel() : null, saved: at() };
   localStorage.removeItem("pocket-tuxemon/save/slot-1");
-  press(START);
+  out.saveRow = openStartRow("save");
   out.opened = menu.menu().kind;
   press(CIRCLE);
   press(CIRCLE);
   out.message = menu.menu().title || null;
   out.stored = (localStorage.getItem("pocket-tuxemon/save/slot-1") || "").length;
   press(CIRCLE);
+  // Close the Save child, then the still-mounted START root underneath it.
   press(START);
+  if (start.isOpen()) press(START);
   hold(UP, 40);
   if (at() === out.saved) hold(LEFT, 40);
   out.walked = at();
-  press(START);
-  press(DOWN);
-  press(CIRCLE);
+  out.loadRow = openStartRow("load");
   // An imported autosave exists by this point and occupies the read-only
   // first row. Move to the first manual slot before confirming the restore.
   press(DOWN);
