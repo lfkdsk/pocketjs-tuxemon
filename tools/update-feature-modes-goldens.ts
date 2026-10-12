@@ -45,7 +45,7 @@ for (const lang of languages) {
 }
 
 writeFileSync(join(root, "data/feature-modes-goldens.json"), JSON.stringify({
-  format: "pocket-tuxemon/feature-modes-goldens/v1",
+  format: "pocket-tuxemon/feature-modes-goldens/v2",
   frames,
 }, null, 2) + "\n");
 console.log(`wrote data/feature-modes-goldens.json (${frames.length} frames)`);

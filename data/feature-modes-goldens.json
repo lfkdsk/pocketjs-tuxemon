@@ -1,5 +1,5 @@
 {
-  "format": "pocket-tuxemon/feature-modes-goldens/v1",
+  "format": "pocket-tuxemon/feature-modes-goldens/v2",
   "frames": [
     {
       "case": "title",
@@ -7,8 +7,8 @@
       "width": 480,
       "height": 272,
       "file": "feature-title-en_US-480x272.png",
-      "rgbaFnv1a": "a96ca27b",
-      "pngSha256": "8dcd7458cc7cea0ae6f5bb0425f45d821f811c736c2d816395487cffc9215da6"
+      "rgbaFnv1a": "92a53caf",
+      "pngSha256": "05304db5a14a980a9110e8b0a001591d387ca37ed56089d450f768fcd81334b8"
     },
     {
       "case": "difficulty",
@@ -27,6 +27,33 @@
       "file": "feature-battle-en_US-480x272.png",
       "rgbaFnv1a": "93b6daed",
       "pngSha256": "fdccc5830155cf64b16a00a20df0362ae256c6d35c2a48f7326096ba396084d0"
+    },
+    {
+      "case": "minigame-easy",
+      "lang": "en_US",
+      "width": 480,
+      "height": 272,
+      "file": "feature-minigame-easy-en_US-480x272.png",
+      "rgbaFnv1a": "cba3b414",
+      "pngSha256": "2dbeb5194f7921397cfef94f7f7b835344376a0b29478809d38b3fbcbfcf3c9b"
+    },
+    {
+      "case": "minigame-normal",
+      "lang": "en_US",
+      "width": 480,
+      "height": 272,
+      "file": "feature-minigame-normal-en_US-480x272.png",
+      "rgbaFnv1a": "b2453081",
+      "pngSha256": "9f4944266ff99095d6bfbcacb6e44bc01c2627a1731a9bd25706f3d43b3fd436"
+    },
+    {
+      "case": "minigame-hard",
+      "lang": "en_US",
+      "width": 480,
+      "height": 272,
+      "file": "feature-minigame-hard-en_US-480x272.png",
+      "rgbaFnv1a": "35da8172",
+      "pngSha256": "23990f53aa536971d6aa5d6d4ffc0f6147d9cff53ea177314569345ce109ab4c"
     },
     {
       "case": "phone",
@@ -52,8 +79,8 @@
       "width": 960,
       "height": 544,
       "file": "feature-title-en_US-960x544.png",
-      "rgbaFnv1a": "65c531a9",
-      "pngSha256": "30560a9f74c03ccd5eda8e0813527d533348ab851b01c84c6b73a6f50889d728"
+      "rgbaFnv1a": "eddc4242",
+      "pngSha256": "1fa858513d0d7ecb5a00d4d0e0af42877972d4ec29c8536e5c2b970fbfedbb85"
     },
     {
       "case": "difficulty",
@@ -72,6 +99,33 @@
       "file": "feature-battle-en_US-960x544.png",
       "rgbaFnv1a": "33ce7132",
       "pngSha256": "511c0a327aca9c1ee61ace6299121b1f0145a273b07bc830f1743922f403a661"
+    },
+    {
+      "case": "minigame-easy",
+      "lang": "en_US",
+      "width": 960,
+      "height": 544,
+      "file": "feature-minigame-easy-en_US-960x544.png",
+      "rgbaFnv1a": "76a14a15",
+      "pngSha256": "7197f4835585cd1ca199d7449146ab831437f235f603869602b7ac74606db479"
+    },
+    {
+      "case": "minigame-normal",
+      "lang": "en_US",
+      "width": 960,
+      "height": 544,
+      "file": "feature-minigame-normal-en_US-960x544.png",
+      "rgbaFnv1a": "f801a0e6",
+      "pngSha256": "db23da0fc71e7348478351c3e95a33bf1da9be6f4940ff9c654f1968875ccf9e"
+    },
+    {
+      "case": "minigame-hard",
+      "lang": "en_US",
+      "width": 960,
+      "height": 544,
+      "file": "feature-minigame-hard-en_US-960x544.png",
+      "rgbaFnv1a": "ff29d07e",
+      "pngSha256": "7ff44164dd812df2908548f498b91bd54a7a830947b7e091db831f2a51eef38b"
     },
     {
       "case": "phone",
@@ -97,8 +151,8 @@
       "width": 480,
       "height": 272,
       "file": "feature-title-zh_CN-480x272.png",
-      "rgbaFnv1a": "a12550c6",
-      "pngSha256": "e05f6618ca6a832d210a1ea3e29b4025c388fe498959e36eb81e816d3ea0a75d"
+      "rgbaFnv1a": "5fc9ac99",
+      "pngSha256": "46cdcca6870823b90e7578b407640cc6bf443a2b8b263ab8cdb48f22601767c7"
     },
     {
       "case": "difficulty",
@@ -117,6 +171,33 @@
       "file": "feature-battle-zh_CN-480x272.png",
       "rgbaFnv1a": "c0c36705",
       "pngSha256": "08ed85fcf6993c9eb59150a7199a8fba1406980dd505ec284ff8303240bcdc1f"
+    },
+    {
+      "case": "minigame-easy",
+      "lang": "zh_CN",
+      "width": 480,
+      "height": 272,
+      "file": "feature-minigame-easy-zh_CN-480x272.png",
+      "rgbaFnv1a": "52541429",
+      "pngSha256": "b2bb54c9a650d3c4bf1971a07b07cc241a2f3abd57d56f5ca1b725c7a309023e"
+    },
+    {
+      "case": "minigame-normal",
+      "lang": "zh_CN",
+      "width": 480,
+      "height": 272,
+      "file": "feature-minigame-normal-zh_CN-480x272.png",
+      "rgbaFnv1a": "a6effa3d",
+      "pngSha256": "4fe0cc5d14be9eb1d87bcd3e0fc448e8b19ceb94e2f80942954e7779c5016896"
+    },
+    {
+      "case": "minigame-hard",
+      "lang": "zh_CN",
+      "width": 480,
+      "height": 272,
+      "file": "feature-minigame-hard-zh_CN-480x272.png",
+      "rgbaFnv1a": "64111802",
+      "pngSha256": "7887a06160b8791a8b30f20118c02de6282cd3480c224994231f26b73fd1d0c6"
     },
     {
       "case": "phone",
@@ -142,8 +223,8 @@
       "width": 960,
       "height": 544,
       "file": "feature-title-zh_CN-960x544.png",
-      "rgbaFnv1a": "191cb918",
-      "pngSha256": "e0e409be0e0068657363bed0cf7b4375dff8804c50f4ff87d7499fc725155ddc"
+      "rgbaFnv1a": "b713d34e",
+      "pngSha256": "3d8808e4087b095777cc91b28d2993797dd85f84c1597a873681727020ad092b"
     },
     {
       "case": "difficulty",
@@ -162,6 +243,33 @@
       "file": "feature-battle-zh_CN-960x544.png",
       "rgbaFnv1a": "d1f7401c",
       "pngSha256": "222a12d2beff982072cb85912cbd4c6d5e2141cc074b1c181bd4323503323932"
+    },
+    {
+      "case": "minigame-easy",
+      "lang": "zh_CN",
+      "width": 960,
+      "height": 544,
+      "file": "feature-minigame-easy-zh_CN-960x544.png",
+      "rgbaFnv1a": "882d15ef",
+      "pngSha256": "dd2425c215a055195cb06db8a6f57853998eadd84333bee45ac279fa2740d97e"
+    },
+    {
+      "case": "minigame-normal",
+      "lang": "zh_CN",
+      "width": 960,
+      "height": 544,
+      "file": "feature-minigame-normal-zh_CN-960x544.png",
+      "rgbaFnv1a": "fe86a2ae",
+      "pngSha256": "c540de7c5a39d29aa5d1b6b66e38452b7bf26195cb1814f5f26675b8c1014c9e"
+    },
+    {
+      "case": "minigame-hard",
+      "lang": "zh_CN",
+      "width": 960,
+      "height": 544,
+      "file": "feature-minigame-hard-zh_CN-960x544.png",
+      "rgbaFnv1a": "818369b5",
+      "pngSha256": "934d908050ca60f4c2a5e937dc797b9fe0d4443040ab81242cb2695b3a47134d"
     },
     {
       "case": "phone",

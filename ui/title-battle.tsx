@@ -157,6 +157,13 @@ const TitleBattleView: Component<{ runtime: TitleBattleRuntime }> = (props) => {
   const imageActive = () => isMinigameQuestion(state().screen)
     && minigameDifficulty()?.clue === "image";
   const imageCache = createBattleImageCache(imageActive, { maxEntries: 1 });
+  const activeImageSource = (ref: BattleImageRef): TileImageSource => {
+    // The title view stays mounted while its image clue is closed. Re-open
+    // the cache scope before LazyImage acquires so a later quiz round cannot
+    // race the reactive active() effect after an earlier endScope().
+    if (imageActive()) imageCache.beginScope();
+    return imageSource(ref);
+  };
   const open = () => runtime.isOpen();
   const [viewport, setViewport] = createSignal({ w: TITLE_BATTLE_BASE_W, h: TITLE_BATTLE_BASE_H });
   onFrame(() => {
@@ -385,9 +392,17 @@ const TitleBattleView: Component<{ runtime: TitleBattleRuntime }> = (props) => {
               when={minigameDifficulty()?.clue === "image" ? currentMonster() : undefined}
               fallback={
                 <View class="absolute" style={{ posType: 1, insetL: 38, insetT: 38, width: 404, height: 88, borderWidth: 1, borderColor: TUXEMON_UI_THEME.rim, bgColor: "#071923ee" }} debugName="tux-minigame-description-panel">
-                  <Text class="text-xs" style={{ posType: 1, insetL: 22, insetT: 9, width: 360, height: 58, lineHeight: 14, textAlign: 1, textColor: TUXEMON_UI_THEME.ink }} debugName="tux-minigame-description">
-                    {minigame()!.question.descriptionPages[minigame()!.question.descriptionPage]!.join("\n")}
-                  </Text>
+                  <For each={minigame()!.question.descriptionPages[minigame()!.question.descriptionPage]!}>
+                    {(line, index) => (
+                      <Text
+                        class="text-xs"
+                        style={{ posType: 1, insetL: 22, insetT: 9 + index() * 14, width: 360, height: 14, lineHeight: 14, textAlign: 1, textColor: TUXEMON_UI_THEME.ink }}
+                        debugName={`tux-minigame-description-row-${index()}`}
+                      >
+                        {line}
+                      </Text>
+                    )}
+                  </For>
                   <Text class="text-xs" style={{ posType: 1, insetL: 4, insetT: 34, width: 28, height: 18, lineHeight: 15, textAlign: 1, textColor: TUXEMON_UI_THEME.accent }}>‹</Text>
                   <Text class="text-xs" style={{ posType: 1, insetR: 4, insetT: 34, width: 28, height: 18, lineHeight: 15, textAlign: 1, textColor: TUXEMON_UI_THEME.accent }}>›</Text>
                   <Text class="text-xs" style={{ posType: 1, insetR: 8, insetB: 3, width: 46, height: 15, lineHeight: 13, textAlign: 2, textColor: TUXEMON_UI_THEME.dim }} debugName="tux-minigame-page">
@@ -399,7 +414,7 @@ const TitleBattleView: Component<{ runtime: TitleBattleRuntime }> = (props) => {
               {(monster) => (
                 <View class="absolute overflow-hidden" style={{ posType: 1, insetL: 192, insetT: 38, width: 96, height: 96 }} debugName="tux-minigame-monster-clip">
                   <LazyImage
-                    src={imageSource(monster().art.sheet)}
+                    src={activeImageSource(monster().art.sheet)}
                     cache={imageCache}
                     active={imageActive()}
                     class="absolute"

@@ -8,12 +8,14 @@ import { join, resolve } from "node:path";
 import { describe, expect, test } from "bun:test";
 
 import { decodePng } from "../importer/png.ts";
+import featureModesJson from "../data/feature-modes.json";
 import {
   captureFeatureModes,
   FEATURE_MODES_CASES,
   FEATURE_MODES_VIEWPORTS,
   type FeatureModesCase,
 } from "../tools/feature-modes-visual-fixture.ts";
+import type { FeatureModesRuntimeData } from "../ui/feature-modes-data.ts";
 import { TUXEMON_UI_THEME } from "../ui/tuxemon-theme.ts";
 import { fnv1a, treeHasText } from "../vendor/pocket-rpgkit/vendor/pocketjs/hosts/sim/sim.ts";
 
@@ -29,6 +31,13 @@ if (!canBoot) {
 const simTest = canBoot ? test : test.skip;
 const LANGS = ["en_US", "zh_CN"] as const;
 type Lang = typeof LANGS[number];
+const DATA = featureModesJson as unknown as FeatureModesRuntimeData;
+const BATTLE_DB = Object.fromEntries(LANGS.map((lang) => [
+  lang,
+  JSON.parse(readFileSync(join(ROOT, `data/battle-db${lang === "zh_CN" ? ".zh_CN" : ""}.json`), "utf8")) as {
+    monsters: Record<string, { name: string; description: string }>;
+  },
+])) as Record<Lang, { monsters: Record<string, { name: string; description: string }> }>;
 
 interface GoldenEntry {
   case: FeatureModesCase;
@@ -102,7 +111,7 @@ function captured(viewportIndex: number, lang: Lang): Promise<Capture> {
 
 describe("NuPhone and title Battle production visuals", () => {
   simTest("match every committed bilingual golden at both resolutions", async () => {
-    expect(manifest.format).toBe("pocket-tuxemon/feature-modes-goldens/v1");
+    expect(manifest.format).toBe("pocket-tuxemon/feature-modes-goldens/v2");
     expect(manifest.frames).toHaveLength(FEATURE_MODES_CASES.length * LANGS.length * FEATURE_MODES_VIEWPORTS.length);
     for (let viewportIndex = 0; viewportIndex < FEATURE_MODES_VIEWPORTS.length; viewportIndex++) {
       for (const lang of LANGS) {
@@ -133,8 +142,10 @@ describe("NuPhone and title Battle production visuals", () => {
       expect(nodeText(namedNode(en.cases.title.tree, "tux-title-name"))).toBe("POCKET TUXEMON");
       expect(treeHasText(en.cases.title.tree, "Adventure")).toBeTrue();
       expect(treeHasText(en.cases.title.tree, "Battle")).toBeTrue();
+      expect(treeHasText(en.cases.title.tree, "Minigame")).toBeTrue();
       expect(treeHasText(zh.cases.title.tree, "冒险模式")).toBeTrue();
       expect(treeHasText(zh.cases.title.tree, "对战")).toBeTrue();
+      expect(treeHasText(zh.cases.title.tree, "迷你游戏")).toBeTrue();
       expect(nodeText(namedNode(en.cases.difficulty.tree, "tux-title-difficulty-prompt")))
         .toBe("Choose your difficulty level");
       expect(nodeText(namedNode(zh.cases.difficulty.tree, "tux-title-difficulty-prompt")))
@@ -146,6 +157,25 @@ describe("NuPhone and title Battle production visuals", () => {
       }
       for (const label of ["入门", "简单", "普通", "困难", "专家"] as const) {
         expect(treeHasText(zh.cases.difficulty.tree, label)).toBeTrue();
+      }
+      for (const [capture, lang] of [[en, "en_US"], [zh, "zh_CN"]] as const) {
+        for (const difficulty of DATA.titleMinigame.difficulties) {
+          const visualCase = `minigame-${difficulty.id}` as const;
+          const frame = capture.cases[visualCase];
+          const probe = capture.minigame[visualCase];
+          expect(nodeText(namedNode(frame.tree, "tux-minigame-question")))
+            .toBe(DATA.titleMinigame.question[lang]);
+          expect(nodeText(namedNode(frame.tree, "tux-minigame-score")))
+            .toBe(`${DATA.titleMinigame.scoreLabel[lang]}: 0`);
+          expect(nodeText(namedNode(frame.tree, "tux-minigame-streak")))
+            .toBe(`${DATA.titleMinigame.streakLabel[lang]}: 0`);
+          expect(probe.options).toHaveLength(difficulty.choices);
+          for (const [index, slug] of probe.options.entries()) {
+            expect(nodeText(namedNode(frame.tree, `tux-minigame-option-label-${index}`)))
+              .toBe(BATTLE_DB[lang].monsters[slug]!.name);
+          }
+          expect(probe.description).toBe(BATTLE_DB[lang].monsters[probe.target]!.description);
+        }
       }
       expect(nodeText(namedNode(en.cases.phone.tree, "tux-nuphone-title"))).toBe("Nu Phone");
       expect(treeHasText(en.cases.phone.tree, "Map App")).toBeTrue();
@@ -165,13 +195,44 @@ describe("NuPhone and title Battle production visuals", () => {
     expect(namedNode(capture.cases.battle.tree, "enemy-party-tray")).toBeDefined();
     const accent = rgb(TUXEMON_UI_THEME.accent);
     expect(countColour(capture.cases.title.rgba, 480, { x: 270, y: 140, width: 188, height: 98 }, accent))
-      .toBeGreaterThan(500);
+      .toBeGreaterThan(300);
     expect(countColour(capture.cases.difficulty.rgba, 480, { x: 120, y: 80, width: 240, height: 170 }, accent))
       .toBeGreaterThan(500);
     const green: readonly [number, number, number] = [0x7c, 0xf2, 0x9a];
     expect(countColour(capture.cases.map.rgba, 480, { x: 120, y: 40, width: 220, height: 190 }, green))
       .toBeGreaterThan(1);
   }, 120_000);
+
+  simTest("hard minigame shows description without monster art", async () => {
+    for (let viewportIndex = 0; viewportIndex < FEATURE_MODES_VIEWPORTS.length; viewportIndex++) {
+      for (const lang of LANGS) {
+        const capture = await captured(viewportIndex, lang);
+        for (const difficulty of ["easy", "normal"] as const) {
+          const tree = capture.cases[`minigame-${difficulty}`].tree;
+          expect(namedNode(tree, "tux-minigame-monster-art")).toBeDefined();
+          expect(namedNode(tree, "tux-minigame-description-panel")).toBeUndefined();
+        }
+        const hard = capture.cases["minigame-hard"];
+        const probe = capture.minigame["minigame-hard"];
+        expect(namedNode(hard.tree, "tux-minigame-monster-art")).toBeUndefined();
+        expect(namedNode(hard.tree, "tux-minigame-monster-clip")).toBeUndefined();
+        expect(namedNode(hard.tree, "tux-minigame-description-panel")).toBeDefined();
+        for (const [index, line] of probe.descriptionPage.entries()) {
+          const rendered = nodeText(namedNode(hard.tree, `tux-minigame-description-row-${index}`));
+          expect(rendered).toBe(line);
+          expect(rendered).not.toContain("…");
+        }
+        expect(namedNode(hard.tree, `tux-minigame-description-row-${probe.descriptionPage.length}`))
+          .toBeUndefined();
+        expect(capture.minigameArtUploads).toEqual({
+          difficulty: 0,
+          easy: 1,
+          normal: 1,
+          hard: 0,
+        });
+      }
+    }
+  }, 180_000);
 
   simTest("touch opens Battle, starts the match, opens GPS and selects a pin", async () => {
     for (let viewportIndex = 0; viewportIndex < FEATURE_MODES_VIEWPORTS.length; viewportIndex++) {
@@ -180,6 +241,10 @@ describe("NuPhone and title Battle production visuals", () => {
           titleBattle: true,
           difficultyBattle: true,
           titleBattleDemoBlocked: true,
+          titleMinigame: true,
+          minigameDifficulty: true,
+          minigameAnswers: true,
+          minigameExit: true,
           phoneMap: true,
           mapPoint: true,
         });

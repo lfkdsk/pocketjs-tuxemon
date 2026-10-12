@@ -31,8 +31,18 @@ export const FEATURE_MODES_VIEWPORTS = [
   { width: 960, height: 544 },
 ] as const;
 
-export const FEATURE_MODES_CASES = ["title", "difficulty", "battle", "phone", "map"] as const;
+export const FEATURE_MODES_CASES = [
+  "title",
+  "difficulty",
+  "battle",
+  "minigame-easy",
+  "minigame-normal",
+  "minigame-hard",
+  "phone",
+  "map",
+] as const;
 export type FeatureModesCase = typeof FEATURE_MODES_CASES[number];
+export type FeatureModesMinigameCase = Extract<FeatureModesCase, `minigame-${string}`>;
 
 interface CanvasPoint {
   x: number;
@@ -48,8 +58,20 @@ export interface FeatureModesTouchProbe {
   titleBattle: boolean;
   difficultyBattle: boolean;
   titleBattleDemoBlocked: boolean;
+  titleMinigame: boolean;
+  minigameDifficulty: boolean;
+  minigameAnswers: boolean;
+  minigameExit: boolean;
   phoneMap: boolean;
   mapPoint: boolean;
+}
+
+export interface FeatureModesMinigameProbe {
+  target: string;
+  options: string[];
+  description: string;
+  descriptionPage: string[];
+  descriptionPages: number;
 }
 
 export interface FeatureModesCapture {
@@ -58,6 +80,13 @@ export interface FeatureModesCapture {
   lang: "en_US" | "zh_CN";
   cases: Record<FeatureModesCase, FeatureModesFrame>;
   touch: FeatureModesTouchProbe;
+  minigame: Record<FeatureModesMinigameCase, FeatureModesMinigameProbe>;
+  minigameArtUploads: {
+    difficulty: number;
+    easy: number;
+    normal: number;
+    hard: number;
+  };
 }
 
 function pump(world: SimWorld, frames: number): void {
@@ -150,8 +179,8 @@ async function titleCases(
   pump(world, 12);
   const title = capture(world);
 
-  // Tap the Battle row where it is drawn (base rect 278,194,170,36).
-  tap(world, viewport, { x: 363, y: 212 });
+  // Tap the Battle row where it is drawn (base rect 278,164,170,31).
+  tap(world, viewport, { x: 363, y: 179.5 });
   const titleBattle = titleHook().state().screen === "difficulty";
   const difficulty = capture(world);
 
@@ -223,6 +252,106 @@ async function phoneCases(
   return { frames: { phone, map }, phoneMap, mapPoint };
 }
 
+const MINIGAME_DIFFICULTY_POINTS = [
+  { x: 240, y: 116.5 },
+  { x: 240, y: 155.5 },
+  { x: 240, y: 194.5 },
+] as const;
+const MINIGAME_OPTION_POINTS = [
+  { x: 94, y: 160 },
+  { x: 240, y: 160 },
+  { x: 386, y: 160 },
+  { x: 167, y: 194 },
+  { x: 313, y: 194 },
+] as const;
+
+async function minigameCases(
+  viewport: { width: number; height: number },
+  lang: "en_US" | "zh_CN",
+): Promise<{
+  frames: Pick<Record<FeatureModesCase, FeatureModesFrame>, FeatureModesMinigameCase>;
+  probes: Record<FeatureModesMinigameCase, FeatureModesMinigameProbe>;
+  artUploads: FeatureModesCapture["minigameArtUploads"];
+  titleMinigame: boolean;
+  minigameDifficulty: boolean;
+  minigameAnswers: boolean;
+  minigameExit: boolean;
+}> {
+  let uploads = 0;
+  const world = await bootWorld(BUNDLE, 60, {
+    ...FIXED_TIME_HOST_GLOBALS,
+    __pocketTuxemonLang: lang,
+    __pocketTuxemonShowTitle: true,
+  }, (ops) => {
+    const original = ops.uploadImgEntry as ((blob: Uint8Array) => number) | undefined;
+    if (!original) throw new Error("feature modes fixture: host has no IMG upload operation");
+    ops.uploadImgEntry = (blob: Uint8Array): number => {
+      uploads++;
+      return original.call(ops, blob);
+    };
+  }, viewport);
+  pump(world, 12);
+
+  const frames = {} as Record<FeatureModesMinigameCase, FeatureModesFrame>;
+  const probes = {} as Record<FeatureModesMinigameCase, FeatureModesMinigameProbe>;
+  const artUploads = { difficulty: 0, easy: 0, normal: 0, hard: 0 };
+  let titleMinigame = true;
+  let minigameDifficulty = true;
+  let minigameAnswers = true;
+  let minigameExit = true;
+
+  for (const [difficultyIndex, difficulty] of DATA.titleMinigame.difficulties.entries()) {
+    const beforeDifficulty = uploads;
+    // Tap the third title row: the imported Minigame entry.
+    tap(world, viewport, { x: 363, y: 217 });
+    titleMinigame &&= titleHook().state().screen === "minigameDifficulty";
+    artUploads.difficulty += uploads - beforeDifficulty;
+
+    const beforeQuestion = uploads;
+    tap(world, viewport, MINIGAME_DIFFICULTY_POINTS[difficultyIndex]!);
+    pump(world, 6);
+    const screen = titleHook().state();
+    minigameDifficulty &&= screen.screen === "minigameQuestion"
+      && screen.minigame?.difficultyIndex === difficultyIndex;
+    const state = screen.minigame;
+    if (!state) throw new Error(`feature modes fixture: ${difficulty.id} question is absent`);
+    const visualCase = `minigame-${difficulty.id}` as FeatureModesMinigameCase;
+    frames[visualCase] = capture(world);
+    probes[visualCase] = {
+      target: state.question.target,
+      options: [...state.question.options],
+      description: state.question.description,
+      descriptionPage: [...state.question.descriptionPages[state.question.descriptionPage]!],
+      descriptionPages: state.question.descriptionPages.length,
+    };
+    artUploads[difficulty.id] = uploads - beforeQuestion;
+
+    const correctIndex = state.question.options.indexOf(state.question.target);
+    if (correctIndex < 0) throw new Error(`feature modes fixture: ${difficulty.id} omitted its answer`);
+    tap(world, viewport, MINIGAME_OPTION_POINTS[correctIndex]!);
+    const answered = titleHook().state();
+    minigameAnswers &&= answered.screen === "minigameQuestion"
+      && answered.minigame?.score === difficulty.points
+      && answered.minigame.streak === 1;
+
+    // The always-visible Exit button must return directly to the title and
+    // clear score/streak state before the next difficulty starts.
+    tap(world, viewport, { x: 420, y: 247 });
+    const exited = titleHook().state();
+    minigameExit &&= exited.screen === "title" && exited.minigame === null;
+  }
+
+  return {
+    frames,
+    probes,
+    artUploads,
+    titleMinigame,
+    minigameDifficulty,
+    minigameAnswers,
+    minigameExit,
+  };
+}
+
 export async function captureFeatureModes(
   viewport: { width: number; height: number },
   lang: "en_US" | "zh_CN",
@@ -234,19 +363,26 @@ export async function captureFeatureModes(
   const previousLang = globals.__pocketTuxemonLang;
   try {
     const title = await titleCases(viewport, lang);
+    const minigame = await minigameCases(viewport, lang);
     const phone = await phoneCases(viewport, lang);
     return {
       width: viewport.width,
       height: viewport.height,
       lang,
-      cases: { ...title.frames, ...phone.frames },
+      cases: { ...title.frames, ...minigame.frames, ...phone.frames },
       touch: {
         titleBattle: title.titleBattle,
         difficultyBattle: title.difficultyBattle,
         titleBattleDemoBlocked: title.titleBattleDemoBlocked,
+        titleMinigame: minigame.titleMinigame,
+        minigameDifficulty: minigame.minigameDifficulty,
+        minigameAnswers: minigame.minigameAnswers,
+        minigameExit: minigame.minigameExit,
         phoneMap: phone.phoneMap,
         mapPoint: phone.mapPoint,
       },
+      minigame: minigame.probes,
+      minigameArtUploads: minigame.artUploads,
     };
   } finally {
     if (previousLang === undefined) delete globals.__pocketTuxemonLang;
