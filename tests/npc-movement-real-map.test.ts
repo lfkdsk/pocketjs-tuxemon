@@ -91,8 +91,9 @@ function assertExactTileCrossing(
       moving: true,
       stepTilesPerSecond: rate,
     });
-    expect(actor.px).toBeCloseTo(originX * 16 + dx * phase * 16 * rate / 60, 10);
-    expect(actor.py).toBeCloseTo(originY * 16 + dy * phase * 16 * rate / 60, 10);
+    const sample = `${actorId} ${rate} tiles/s phase ${phase}`;
+    expect(actor.px, `${sample} x`).toBeCloseTo(originX * 16 + dx * phase * 16 * rate / 60, 10);
+    expect(actor.py, `${sample} y`).toBeCloseTo(originY * 16 + dy * phase * 16 * rate / 60, 10);
     if (roundTrip && phase === midpoint) {
       const snapshot = createAutosaveSessionSnapshot(session, state, 0);
       expect(snapshot, `${actorId} phase ${phase} autosave`).not.toBeNull();
