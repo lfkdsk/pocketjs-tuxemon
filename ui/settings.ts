@@ -76,6 +76,22 @@ export function defaultSettings(): GameSettings {
   return { ...DEFAULT_SETTINGS, controls: { ...DEFAULT_CONTROLS } };
 }
 
+/** Match Tuxemon monster_info.py/formula.py unit formatting. */
+export function formatMonsterHeight(centimeters: number, units: UnitMeasure): string {
+  if (units === "imperial") return `${Math.round(centimeters * 0.032808399)} ft`;
+  return centimeters >= 100
+    ? `${(centimeters / 100).toFixed(1)} m`
+    : `${Math.round(centimeters)} cm`;
+}
+
+/** Match Tuxemon monster_info.py/formula.py unit formatting. */
+export function formatMonsterWeight(kilograms: number, units: UnitMeasure): string {
+  if (units === "imperial") return `${Math.round(kilograms * 2.2046)} lb`;
+  return kilograms >= 1_000
+    ? `${(kilograms / 1_000).toFixed(1)} t`
+    : `${Math.round(kilograms)} kg`;
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
@@ -395,6 +411,32 @@ export interface ButtonRemapper {
   map(buttons: number): number;
   physicalButtons(): number;
   physicalPressed(): number;
+}
+
+type PocketFrame = (
+  buttons: number,
+  analog?: number,
+  touches?: readonly number[],
+  hits?: readonly number[],
+  touchSurfaces?: readonly number[],
+  rightAnalog?: number,
+  axisDeltas?: readonly unknown[],
+  motion?: unknown,
+) => void;
+
+/** Install after PocketJS mount(), which owns globalThis.frame. The wrapper
+ * changes only the normalized PSP button mask and forwards every optional
+ * host input argument byte-for-byte. Keyboard and controller therefore share
+ * one persisted mapping, while touch contacts remain independent. */
+export function installButtonRemapFrame(input: ButtonRemapper): () => void {
+  const globals = globalThis as typeof globalThis & { frame?: PocketFrame };
+  const previous = globals.frame;
+  if (!previous) return () => undefined;
+  const wrapped: PocketFrame = (buttons, ...rest) => previous(input.map(buttons), ...rest);
+  globals.frame = wrapped;
+  return () => {
+    if (globals.frame === wrapped) globals.frame = previous;
+  };
 }
 
 /** Stateful frame adapter. Changing a mapping arms a release gate so the key

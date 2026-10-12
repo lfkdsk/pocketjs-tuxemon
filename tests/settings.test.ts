@@ -19,6 +19,9 @@ import {
   defaultSettings,
   detectSettingsStore,
   encodeSettings,
+  formatMonsterHeight,
+  formatMonsterWeight,
+  installButtonRemapFrame,
   loadSettings,
   persistSettings,
   pressedPhysicalButton,
@@ -223,6 +226,40 @@ describe("control remapping", () => {
     expect(remapper.map(BTN.CIRCLE)).toBe(0);
     expect(remapper.map(0)).toBe(0);
     expect(remapper.map(BTN.CIRCLE)).toBe(BTN.CROSS);
+  });
+
+  test("the mounted host frame sees remapped buttons and unchanged auxiliary input", () => {
+    const controller = createSettingsController({ channel: "browser", read: () => null, write() {} });
+    controller.replace({
+      ...controller.get(),
+      controls: { ...controller.get().controls, primary: "back", back: "primary" },
+    });
+    const calls: unknown[][] = [];
+    const globalsWithFrame = globalThis as typeof globalThis & { frame?: (...args: any[]) => void };
+    const previous = globalsWithFrame.frame;
+    globalsWithFrame.frame = (...args: unknown[]) => { calls.push(args); };
+    try {
+      const dispose = installButtonRemapFrame(createButtonRemapper(controller));
+      globalsWithFrame.frame!(BTN.CROSS | BTN.START, 123, [1, 2], [3], [4]);
+      expect(calls).toEqual([[BTN.CIRCLE | BTN.START, 123, [1, 2], [3], [4]]]);
+      dispose();
+      globalsWithFrame.frame!(BTN.CROSS);
+      expect(calls.at(-1)).toEqual([BTN.CROSS]);
+    } finally {
+      if (previous) globalsWithFrame.frame = previous;
+      else delete globalsWithFrame.frame;
+    }
+  });
+});
+
+describe("measurement preferences", () => {
+  test("metric and imperial monster measurements match upstream thresholds", () => {
+    expect(formatMonsterHeight(42, "metric")).toBe("42 cm");
+    expect(formatMonsterHeight(175, "metric")).toBe("1.8 m");
+    expect(formatMonsterHeight(175, "imperial")).toBe("6 ft");
+    expect(formatMonsterWeight(18.4, "metric")).toBe("18 kg");
+    expect(formatMonsterWeight(1_250, "metric")).toBe("1.3 t");
+    expect(formatMonsterWeight(18.4, "imperial")).toBe("41 lb");
   });
 });
 
