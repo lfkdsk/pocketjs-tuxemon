@@ -79,9 +79,26 @@ export interface SaveMenuOptions {
   onExtra?: (id: string) => void;
 }
 
+/** Screens a game-owned START/title menu may hand off to directly. */
+export type SaveMenuOpenTarget = "root" | "load" | "code";
+
+/** The save menu's externally observable reason for returning control. */
+export type SaveMenuCompletion =
+  | { kind: "dismissed" }
+  | { kind: "loaded"; target: LoadTarget };
+
 /** Test and tooling handle: the live menu publishes itself here. */
 export interface PocketTuxemonSaveHook {
-  open(): void;
+  /** Open the traditional root, the load-slot page, or the code importer. */
+  open(target?: SaveMenuOpenTarget): void;
+  /** Close the menu and return control to its game-owned parent. */
+  close(): void;
+  /** Load without navigating the legacy menu. False means pending or refused. */
+  loadSlot(slot: number): boolean;
+  /** Load the dedicated automatic slot without navigating the legacy menu. */
+  loadAutosave(): boolean;
+  /** Null while active; set when the current handoff is dismissed or loads. */
+  completion(): SaveMenuCompletion | null;
   menu(): MenuState;
   toast(): string | null;
   saveCode(): string;
@@ -99,7 +116,7 @@ function message(title: string, body: string, back: MenuState): MenuState {
   return { kind: "message", title, body, back };
 }
 
-type LoadTarget =
+export type LoadTarget =
   | { kind: "slot"; slot: number }
   | { kind: "code" }
   | { kind: "autosave" };
@@ -168,6 +185,12 @@ export interface SaveMenuRuntime {
   legend: Accessor<string>;
   /** Resolved game-owned rows for the current live session. */
   extraRows: Accessor<readonly ExtraRootRow[]>;
+  /** Programmatic handoff used by a game-owned START/title root. */
+  open(target?: SaveMenuOpenTarget): void;
+  close(): void;
+  loadSlot(slot: number): boolean;
+  loadAutosave(): boolean;
+  completion: Accessor<SaveMenuCompletion | null>;
   osk: OskController;
   hasSlots: boolean;
   title: string;
@@ -197,6 +220,7 @@ export function createSaveMenuRuntime(
   const [saveCode, setSaveCode] = createSignal("");
   const [typed, setTyped] = createSignal("");
   const [toast, setToast] = createSignal<string | null>(null);
+  const [completion, setCompletion] = createSignal<SaveMenuCompletion | null>(null);
   const extraRows = (): readonly ExtraRootRow[] => typeof options.extraRows === "function"
     ? options.extraRows(host.getState())
     : (options.extraRows ?? []);
@@ -211,6 +235,7 @@ export function createSaveMenuRuntime(
   // The keyboard closes on its own START/x press, which may run before this
   // runtime's step in the same frame; that press must not also close the menu.
   let keyboardClosed = false;
+  let osk: OskController;
 
   const refreshSlots = (): void => {
     setSlotInfo(listSlots(slots, content, options.lang ?? "en_US"));
@@ -220,10 +245,14 @@ export function createSaveMenuRuntime(
     setToast(text);
     toastFrames = SAVE_TOAST_FRAMES;
   };
-  const close = (): void => {
+  const finish = (result: SaveMenuCompletion): void => {
+    pending = null;
+    osk?.close();
     setMenu({ kind: "closed" });
+    setCompletion(result);
     waitRelease = true;
   };
+  const close = (): void => finish({ kind: "dismissed" });
 
   /** Restore and present a decoded save; false while its map is loading. */
   const load = (snapshot: SaveSnapshot, target: LoadTarget, back: MenuState): boolean => {
@@ -237,7 +266,7 @@ export function createSaveMenuRuntime(
       const restored = restoreSave(host.session, snapshot);
       host.replaceState(restored, snapshot.held);
       pending = null;
-      close();
+      finish({ kind: "loaded", target });
       showToast(loadedToast(target, text));
       return true;
     } catch (error) {
@@ -273,7 +302,7 @@ export function createSaveMenuRuntime(
     }
   };
 
-  const osk = createOsk({
+  osk = createOsk({
     value: typed,
     setValue: setTyped,
     onCommit(text) {
@@ -308,6 +337,86 @@ export function createSaveMenuRuntime(
     },
   });
 
+  const loadManualSlot = (slot: number): boolean => {
+    if (!Number.isInteger(slot) || slot < 1 || slot > 3) {
+      throw new RangeError("save menu: slot must be an integer from 1 to 3");
+    }
+    setCompletion(null);
+    const back: MenuState = { kind: "slots-load", index: slot - 1 };
+    if (!slots) {
+      const text = saveMenuText(uiText());
+      setMenu(message(
+        loadFailureTitle({ kind: "slot", slot }, text),
+        text["save.loadErrorRead"],
+        { kind: "root", index: 0 },
+      ));
+      return false;
+    }
+    // Peek at the save's language before the content check: a save from the
+    // other language build has a different map manifest and would otherwise
+    // be refused as "another build" before the prompt.
+    try {
+      const peeked = peekSlot(slots, slot);
+      if (options.lang && snapshotLang(peeked) !== options.lang) {
+        setMenu(languageMismatchMessage(snapshotLang(peeked), back));
+        return false;
+      }
+    } catch (error) {
+      const text = saveMenuText(uiText());
+      setMenu(message(
+        loadFailureTitle({ kind: "slot", slot }, text),
+        describeLoadError(error, uiText()),
+        back,
+      ));
+      return false;
+    }
+    try {
+      return load(loadSlot(slots, slot, content), { kind: "slot", slot }, back);
+    } catch (error) {
+      const text = saveMenuText(uiText());
+      setMenu(message(
+        loadFailureTitle({ kind: "slot", slot }, text),
+        describeLoadError(error, uiText()),
+        back,
+      ));
+      return false;
+    }
+  };
+
+  const loadAutomaticSlot = (): boolean => {
+    setCompletion(null);
+    const back: MenuState = { kind: "slots-load", index: 0 };
+    try {
+      const peeked = loadAutosaveSlot(null);
+      if (!peeked) throw new Error("automatic save is empty");
+      if (options.lang && snapshotLang(peeked) !== options.lang) {
+        setMenu(languageMismatchMessage(snapshotLang(peeked), back));
+        return false;
+      }
+    } catch (error) {
+      const text = saveMenuText(uiText());
+      setMenu(message(
+        loadFailureTitle({ kind: "autosave" }, text),
+        describeLoadError(error, uiText()),
+        back,
+      ));
+      return false;
+    }
+    try {
+      const snapshot = loadAutosaveSlot(content);
+      if (!snapshot) throw new Error("automatic save is empty");
+      return load(snapshot, { kind: "autosave" }, back);
+    } catch (error) {
+      const text = saveMenuText(uiText());
+      setMenu(message(
+        loadFailureTitle({ kind: "autosave" }, text),
+        describeLoadError(error, uiText()),
+        back,
+      ));
+      return false;
+    }
+  };
+
   const perform = (next: MenuState, command: NonNullable<ReturnType<typeof menuStep>["command"]>): boolean => {
     switch (command.op) {
       case "save-slot": {
@@ -337,70 +446,10 @@ export function createSaveMenuRuntime(
         return false;
       }
       case "load-slot": {
-        const back: MenuState = { kind: "slots-load", index: command.slot - 1 };
-        // Peek at the save's language before the content check: a save from
-        // the other language build has a different map manifest and would
-        // otherwise be refused as "another build" before the prompt.
-        try {
-          const peeked = peekSlot(slots!, command.slot);
-          if (options.lang && snapshotLang(peeked) !== options.lang) {
-            setMenu(languageMismatchMessage(snapshotLang(peeked), back));
-            return false;
-          }
-        } catch (error) {
-          const text = saveMenuText(uiText());
-          setMenu(message(
-            loadFailureTitle({ kind: "slot", slot: command.slot }, text),
-            describeLoadError(error, uiText()),
-            back,
-          ));
-          return false;
-        }
-        let snapshot: SaveSnapshot;
-        try {
-          snapshot = loadSlot(slots!, command.slot, content);
-        } catch (error) {
-          const text = saveMenuText(uiText());
-          setMenu(message(
-            loadFailureTitle({ kind: "slot", slot: command.slot }, text),
-            describeLoadError(error, uiText()),
-            back,
-          ));
-          return false;
-        }
-        return load(snapshot, { kind: "slot", slot: command.slot }, back);
+        return loadManualSlot(command.slot);
       }
       case "load-autosave": {
-        const back: MenuState = { kind: "slots-load", index: 0 };
-        try {
-          const peeked = loadAutosaveSlot(null);
-          if (!peeked) throw new Error("automatic save is empty");
-          if (options.lang && snapshotLang(peeked) !== options.lang) {
-            setMenu(languageMismatchMessage(snapshotLang(peeked), back));
-            return false;
-          }
-        } catch (error) {
-          const text = saveMenuText(uiText());
-          setMenu(message(
-            loadFailureTitle({ kind: "autosave" }, text),
-            describeLoadError(error, uiText()),
-            back,
-          ));
-          return false;
-        }
-        try {
-          const snapshot = loadAutosaveSlot(content);
-          if (!snapshot) throw new Error("automatic save is empty");
-          return load(snapshot, { kind: "autosave" }, back);
-        } catch (error) {
-          const text = saveMenuText(uiText());
-          setMenu(message(
-            loadFailureTitle({ kind: "autosave" }, text),
-            describeLoadError(error, uiText()),
-            back,
-          ));
-          return false;
-        }
+        return loadAutomaticSlot();
       }
       case "open-export": {
         const back: MenuState = { kind: "root", index: rootIndex("code-export") };
@@ -432,9 +481,29 @@ export function createSaveMenuRuntime(
     return null;
   };
 
-  const openMenu = (): void => {
+  const openMenu = (target: SaveMenuOpenTarget = "root"): void => {
+    pending = null;
+    osk.close();
     refreshSlots();
+    setCompletion(null);
+    if (target === "load" && (hasSlots || autosaveInfo() !== null)) {
+      setMenu({ kind: "slots-load", index: 0 });
+      return;
+    }
+    if (target === "code") {
+      setTyped("");
+      setMenu({ kind: "code-import" });
+      osk.open();
+      return;
+    }
     setMenu({ kind: "root", index: 0 });
+  };
+
+  const publicOpen = (target: SaveMenuOpenTarget = "root"): void => {
+    // Preserve open()'s original idempotence for existing callers. A named
+    // handoff may deliberately switch pages while the menu is already open.
+    if (target === "root" && menu().kind !== "closed") return;
+    openMenu(target);
   };
 
   const runtime: SaveMenuRuntime = {
@@ -514,23 +583,30 @@ export function createSaveMenuRuntime(
       return zh ? "o: 选择   x: 返回   START: 关闭" : "o: select   x: back   START: close";
     },
     extraRows,
+    open: publicOpen,
+    close,
+    loadSlot: loadManualSlot,
+    loadAutosave: loadAutomaticSlot,
+    completion,
     osk,
     hasSlots,
     title: channelTitle(slots),
   };
 
   const hook: PocketTuxemonSaveHook = {
-    open: () => {
-      if (menu().kind === "closed") openMenu();
-    },
+    open: publicOpen,
+    close,
+    loadSlot: loadManualSlot,
+    loadAutosave: loadAutomaticSlot,
+    completion,
     menu,
     toast,
     saveCode,
     importCode(code: string) {
       if (menu().kind !== "code-import") {
-        setTyped("");
-        setMenu({ kind: "code-import" });
-        osk.open();
+        openMenu("code");
+      } else {
+        setCompletion(null);
       }
       setTyped(code);
       osk.commit();
