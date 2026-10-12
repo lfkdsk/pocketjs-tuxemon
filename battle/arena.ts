@@ -15,6 +15,15 @@ import type { TitleBattleData } from "../ui/feature-modes-data.ts";
 import { canonicalJson, utf8Encode } from "../vendor/pocket-rpgkit/src/engine/save.ts";
 import { sha256Bytes } from "../vendor/pocket-rpgkit/src/engine/map-repository.ts";
 import { nextRandom, type RngState } from "./core.ts";
+import {
+  buildValidatedArenaTeam,
+  DEFAULT_ARENA_TEAM_RULES,
+  validateTeam,
+  type ArenaProvenanceEvent,
+  type ArenaTeamRecord,
+  type ArenaTeamRules,
+  type ArenaTeamValidation,
+} from "./arena-team.ts";
 import { battleDbToTuxemonBattleDb } from "./from-battle-db.ts";
 import { spawnMonster } from "./spawn.ts";
 import {
@@ -51,7 +60,19 @@ export type ArenaFormat = "single" | "double";
 
 export type ArenaSideConfig =
   | { kind: "agent"; /** Omitted means the normal title recipe. */ difficulty?: ArenaDifficulty }
+  | { kind: "agent"; team: ArenaTeamRecord[] }
   | { kind: "ai"; difficulty: ArenaDifficulty };
+
+export {
+  DEFAULT_ARENA_TEAM_RULES,
+  validateTeam,
+};
+export type {
+  ArenaProvenanceEvent,
+  ArenaTeamRecord,
+  ArenaTeamRules,
+  ArenaTeamValidation,
+};
 
 export interface ArenaConfig {
   seed: string;
@@ -200,14 +221,25 @@ function normalizeSideConfig(value: unknown, label: string): ArenaSideConfig {
   if (!isRecord(value) || (value.kind !== "agent" && value.kind !== "ai")) {
     throw new Error(`${label}: side must be an agent or ai object`);
   }
-  if (!exactKeys(value, ["kind", "difficulty"])) {
-    throw new Error(`${label}: side has unknown or missing fields`);
-  }
   if (value.kind === "ai") {
+    if (!exactKeys(value, ["kind", "difficulty"])) {
+      throw new Error(`${label}: ai side has unknown or missing fields`);
+    }
     if (typeof value.difficulty !== "string" || !DIFFICULTIES.has(value.difficulty)) {
       throw new Error(`${label}: ai difficulty is invalid`);
     }
     return { kind: "ai", difficulty: value.difficulty as ArenaDifficulty };
+  }
+  if ("team" in value) {
+    if (!exactKeys(value, ["kind", "team"])) {
+      throw new Error(`${label}: team agent has unknown or missing fields`);
+    }
+    const checked = validateTeam(value.team, DEFAULT_ARENA_TEAM_RULES);
+    if (!checked.ok) throw new Error(`${label}: ${checked.errors.join("; ")}`);
+    return { kind: "agent", team: clone(value.team as ArenaTeamRecord[]) };
+  }
+  if (!exactKeys(value, ["kind", "difficulty"])) {
+    throw new Error(`${label}: agent side has unknown or missing fields`);
   }
   if (value.difficulty !== undefined &&
       (typeof value.difficulty !== "string" || !DIFFICULTIES.has(value.difficulty))) {
@@ -247,13 +279,18 @@ function domainSeed(seed: string, domain: string): number {
 }
 
 function recipe(config: ArenaSideConfig) {
-  const difficulty = config.kind === "agent" ? config.difficulty ?? "normal" : config.difficulty;
+  const difficulty = config.kind === "ai"
+    ? config.difficulty
+    : "difficulty" in config ? config.difficulty ?? "normal" : "normal";
   const found = TITLE_DATA.difficulties.find((entry) => entry.id === difficulty);
   if (!found) throw new Error(`arena: missing title recipe '${difficulty}'`);
   return found;
 }
 
 function team(seed: string, side: ArenaSide, config: ArenaSideConfig) {
+  if (config.kind === "agent" && "team" in config) {
+    return buildValidatedArenaTeam(config.team, DEFAULT_ARENA_TEAM_RULES);
+  }
   const selected = recipe(config);
   const rng: RngState = { rng: domainSeed(seed, `team:${side}`), rngDraws: 0 };
   return Array.from({ length: selected.partySize }, (_, slot) => {
@@ -491,13 +528,15 @@ function runAiOnly(battle: ArenaBattle): ArenaBattle {
 
 export function createArenaBattle(value: ArenaConfig): ArenaBattle {
   const config = normalizeConfig(value);
+  const player = team(config.seed, 0, config.sides[0]);
+  const enemy = team(config.seed, 1, config.sides[1]);
   const core = createBattle(RULES_DB, {
     seed: domainSeed(config.seed, "battle"),
     kind: "trainer",
     opponent: "arena",
     policy: "first",
-    player: team(config.seed, 0, config.sides[0]),
-    enemy: team(config.seed, 1, config.sides[1]),
+    player,
+    enemy,
     fieldSize: config.format === "double" ? 2 : 1,
     moneyMethod: "conserved",
     inventory: {},

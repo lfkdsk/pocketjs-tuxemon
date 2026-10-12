@@ -2036,8 +2036,10 @@ export function reduceBattleSimultaneous(
     // protocol has paired submissions only, so resolve such one-sided windows
     // with the same seeded policy as the ordinary reducer until another
     // paired boundary (or the terminal state) is reached.
-    for (let guard = 0; state.phase !== "ended" && guard < 100_000; guard++) {
-      if (state.phase !== "decision") return state;
+    for (let guard = 0; guard < 100_000; guard++) {
+      const phase = (state as TuxemonBattleState).phase;
+      if (phase === "ended") return state;
+      if (phase !== "decision") return state;
       const sides = new Set(state.decisionQueue.map((uid) => getSide(state, uid)));
       if (sides.size > 1) return state;
       for (const uid of state.decisionQueue) enqueueAction(state, rules.decideAi(state, uid));
@@ -2046,7 +2048,7 @@ export function reduceBattleSimultaneous(
       state.phase = "action";
       advanceBattle(state, rules);
     }
-    if (state.phase === "decision" &&
+    if ((state as TuxemonBattleState).phase === "decision" &&
         new Set(state.decisionQueue.map((uid) => getSide(state, uid))).size <= 1) {
       throw new Error("battle: simultaneous auto-decision limit exceeded");
     }
