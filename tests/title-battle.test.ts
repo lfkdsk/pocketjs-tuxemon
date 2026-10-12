@@ -315,7 +315,7 @@ describe("title Battle mode", () => {
     });
   });
 
-  test("composite routes every programmatic child and Options before the mounted START root", () => {
+  test("composite routes nested Language before Options, then children before START", () => {
     const f = fixture(false);
     const calls: string[] = [];
     let childOneOpen = false;
@@ -344,15 +344,15 @@ describe("title Battle mode", () => {
     ).create(f.host);
 
     composite.step(0, 0);
-    expect(calls).toEqual(["child-two"]);
-
-    childTwoOpen = false;
-    composite.step(0, 0);
-    expect(calls).toEqual(["child-two", "language"]);
+    expect(calls).toEqual(["language"]);
 
     languageOpen = false;
     composite.step(0, 0);
-    expect(calls).toEqual(["child-two", "language", "world"]);
+    expect(calls).toEqual(["language", "child-two"]);
+
+    childTwoOpen = false;
+    composite.step(0, 0);
+    expect(calls).toEqual(["language", "child-two", "world"]);
 
     childOneOpen = true;
     composite.step(0, 0);

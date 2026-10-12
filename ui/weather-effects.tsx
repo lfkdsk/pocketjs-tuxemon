@@ -19,6 +19,10 @@ import {
   type AudioChunkHost,
   type StagedDesktopAudioReader,
 } from "./desktop-audio-loader.ts";
+import {
+  createAudioSettingsAdapter,
+  type SettingsController,
+} from "./settings.ts";
 
 interface SyncingAudioDriver {
   sync(state: AudioDriverState): void;
@@ -166,17 +170,20 @@ export function createGameEffects(
   readAudio: AudioResourceReader,
   desktopFs: AudioChunkHost | null = null,
   canRunDeferredAudio: () => boolean = () => true,
+  settings: Pick<SettingsController, "get" | "revision"> | null = null,
 ): { Effects: GameEffectsComponent; bridge: WeatherStateBridge } {
   const bridge: WeatherStateBridge = { get: null };
   function Effects(props: GameEffectsProps) {
     bridge.get = props.state;
     const host = audioHost();
     if (!host) return null;
+    const audioSettings = settings ? createAudioSettingsAdapter(settings) : null;
+    const adjustedState = (): AudioDriverState => audioSettings?.apply(props.state()) ?? props.state();
     const ticksPerFrame = 60 / simulationHz();
     if (!desktopFs) {
       // Web and PSP keep all audio in the pak and retain the direct path.
       const driver = createAudioDriver(host, audioResources, readAudio, ticksPerFrame);
-      onFrame(() => driver.sync(props.state()));
+      onFrame(() => driver.sync(adjustedState()));
       onCleanup(() => driver.dispose());
       return null;
     }
@@ -198,7 +205,10 @@ export function createGameEffects(
       props.state().mapId,
       props.state().scene?.kind,
     );
-    onFrame(() => coordinator.sync(props.state(), canRunDeferredAudio()));
+    onFrame(() => coordinator.sync(
+      adjustedState() as StagedAudioFrameState,
+      canRunDeferredAudio(),
+    ));
     onCleanup(() => coordinator.dispose());
     return null;
   }

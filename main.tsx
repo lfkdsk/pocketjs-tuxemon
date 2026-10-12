@@ -111,6 +111,12 @@ import { WeatherOverlay } from "./ui/weather-overlay.tsx";
 import { weatherOverlaySuspended } from "./ui/weather-overlay-policy.ts";
 import { createGameEffects } from "./ui/weather-effects.tsx";
 import { PortraitBackdropEffects } from "./ui/portrait-backdrop.tsx";
+import { createOptionsOverlay } from "./ui/options-menu.tsx";
+import {
+  createButtonRemapper,
+  createSettingsController,
+  installButtonRemapFrame,
+} from "./ui/settings.ts";
 
 // ui/gp1-kit-stage.ts and ui/gp1-data-stage.ts are thin re-export wrappers:
 // each one's trailing gp1Mark() call fires right
@@ -124,6 +130,8 @@ import { PortraitBackdropEffects } from "./ui/portrait-backdrop.tsx";
 // for battle display-name lookups. The PSP stub reports them unavailable and
 // therefore boots English regardless of stored or requested language.
 const host = fsHost();
+const settingsController = createSettingsController();
+const buttonRemapper = createButtonRemapper(settingsController);
 const requestedLang = zhData.available ? detectLang() : "en_US";
 const bootReaders = requestedLang === "zh_CN" ? createGameEntryReaders(host) : null;
 const localizedData = bootReaders
@@ -181,7 +189,10 @@ const initialTimeWeather = initialCivilTime === undefined
   );
 const { extensions, rules: campaignBattleRules, scenes, catalog } = createProductionTuxemonBattle(
   { read: readEntry },
-  { initialTimeWeather },
+  {
+    initialTimeWeather,
+    hemisphere: () => settingsController.get().hemisphere,
+  },
   lang,
 );
 gp1Mark("battle-registration");
@@ -244,6 +255,7 @@ const { Effects, bridge: weatherBridge } = createGameEffects(
   readEntry,
   host,
   () => deferredAudioIdle,
+  settingsController,
 );
 
 // Allocation-regression switch: when false, the particle overlay is not
@@ -353,7 +365,6 @@ const saveMenuConfig = createSaveMenu({
   lang,
 });
 let saveOrigin: "start" | "title" | null = null;
-let languageOrigin: "start" | "title" | null = null;
 let titleBattleConfig: ReturnType<typeof createTitleBattleOverlay> | undefined;
 
 function refreshTitleAvailability(): void {
@@ -416,43 +427,44 @@ const langMenuConfig = createLangMenu(lang);
 const langMenu: GameViewOverlayConfig = {
   create(host) {
     langMenuRuntime = langMenuConfig.create(host);
-    const runtime = langMenuRuntime;
-    return {
-      ...runtime,
-      step(buttons, pressed) {
-        const wasOpen = runtime.isOpen();
-        const result = runtime.step(buttons, pressed);
-        if (wasOpen && !runtime.isOpen()) {
-          const origin = languageOrigin;
-          languageOrigin = null;
-          if (origin === "title") {
-            titleBattleConfig?.runtimeRef.current?.openTitle();
-            refreshTitleAvailability();
-          }
-        }
-        return result;
-      },
-    };
+    return langMenuRuntime;
   },
 };
 
-function openLanguage(origin: "start" | "title"): void {
+function openLanguageFromOptions(): void {
   if (!langSwitchable) return;
-  languageOrigin = origin;
+  // Options remains mounted beneath Language, so closing Language should
+  // return there instead of reopening either parent menu.
   langMenuConfig.runtimeRef.current?.open();
 }
+
+const optionsMenuConfig = createOptionsOverlay({
+  data: featureModes.options,
+  lang,
+  settings: settingsController,
+  input: buttonRemapper,
+  canSwitchLanguage: langSwitchable,
+  onLanguage: openLanguageFromOptions,
+  onClose: (origin) => {
+    if (origin === "title") {
+      titleBattleConfig?.runtimeRef.current?.openTitle();
+      refreshTitleAvailability();
+    }
+  },
+});
 
 const startMenuConfig = createStartMenuOverlay({
   data: featureModes.startMenu,
   lang,
   catalog,
   nuPhoneLabel: featureModes.nuPhoneMap.entry.phoneLabel,
+  units: () => settingsController.get().units,
   suspended: () => demoMenu?.isOpen() ?? false,
   callbacks: {
     bag: () => bagMenuConfig.runtimeRef.current?.open(),
     save: () => openSave("start", "root"),
     load: () => openSave("start", "load"),
-    ...(langSwitchable ? { options: () => openLanguage("start") } : {}),
+    options: () => optionsMenuConfig.runtimeRef.current?.open("start"),
     tuxepedia: () => tuxepediaConfig.runtimeRef.current?.open(),
     nuphone: () => nuPhoneConfig.runtimeRef.current?.open(),
     exit: (sessionHost) => {
@@ -492,7 +504,7 @@ if (titleRules) {
       resetWorldSession(sessionHost);
       startMenuConfig.runtimeRef.current?.close();
     },
-    onOptions: langSwitchable ? () => openLanguage("title") : undefined,
+    onOptions: () => optionsMenuConfig.runtimeRef.current?.open("title"),
     onExit: () => {
       requestHostQuit(getOps());
     },
@@ -513,7 +525,7 @@ const overlay = createCompositeOverlay(
   tuxepediaConfig,
   nuPhoneConfig,
   titleBattleConfig,
-  [saveMenu, bagMenuConfig],
+  [saveMenu, bagMenuConfig, optionsMenuConfig],
 );
 // The boot-snapshot overlay runs first so a PSP segment build can restore a
 // chapter save before the tape replay starts. Production builds leave its
@@ -552,7 +564,8 @@ function TuxemonWeatherOverlay(_props: GameWorldOverlayProps) {
         || (bagMenuConfig.runtimeRef.current?.isOpen() ?? false)
         || (nuPhoneConfig.runtimeRef.current?.isOpen() ?? false)
         || (titleBattleConfig?.runtimeRef.current?.isOpen() ?? false)
-        || (langMenuRuntime?.isOpen() ?? false)}
+        || (langMenuRuntime?.isOpen() ?? false)
+        || (optionsMenuConfig.runtimeRef.current?.isOpen() ?? false)}
     />
   );
 }
@@ -626,4 +639,5 @@ mount(() => (
       }}
     />
 ));
+installButtonRemapFrame(buttonRemapper);
 gp1Mark("mount");

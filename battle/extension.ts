@@ -213,7 +213,9 @@ export interface TuxemonExtensionRuntimeOptions {
   initialTimeWeather?: TimeWeatherState;
   /** Imported weather slugs and deterministic duration bounds. */
   weatherSchedule?: WeatherSchedule;
-  hemisphere?: Hemisphere;
+  /** Player preference, read lazily so Options changes affect the next
+   * season condition/update without entering reducer or save state. */
+  hemisphere?: Hemisphere | (() => Hemisphere);
   /** Content language the save is written with; recorded in the encoded ext
    *  so a load in the other language can be refused with a clear message. */
   lang?: GameLang;
@@ -3133,10 +3135,16 @@ export function createTuxemonExtensions(
     ? undefined
     : new Set(options.campaignMonsterIds);
   const names = dojoNames(source, options.lang ?? "en_US", options.battleNames);
-  const hemisphere = options.hemisphere ?? "northern";
-  if (hemisphere !== "northern" && hemisphere !== "southern") {
-    throw new Error(`Tuxemon extension: unsupported hemisphere '${String(hemisphere)}'`);
-  }
+  const hemisphere = (): Hemisphere => {
+    const value = typeof options.hemisphere === "function"
+      ? options.hemisphere()
+      : options.hemisphere ?? "northern";
+    if (value !== "northern" && value !== "southern") {
+      throw new Error(`Tuxemon extension: unsupported hemisphere '${String(value)}'`);
+    }
+    return value;
+  };
+  hemisphere();
   const initial = json(initialTuxemonExtensionState(options.initialTimeWeather));
   const validationDb = typeof source !== "function" && !("load" in source) ? source : undefined;
   // cloneExtension invokes the validator on every frame. The envelope's
@@ -3294,7 +3302,7 @@ export function createTuxemonExtensions(
           throw new Error("tux.update_time: character must be a string");
         }
         const current = currentExtensionState(context.ext);
-        return { writes: updateTimeWrites(current.clock, hemisphere) };
+        return { writes: updateTimeWrites(current.clock, hemisphere()) };
       },
       "tux.set_faint_point": (context, value) => {
         const args = argsRecord(value, "tux.set_faint_point");
@@ -3390,7 +3398,7 @@ export function createTuxemonExtensions(
           args.property,
           args.operation,
           args.value,
-          hemisphere,
+          hemisphere(),
         ), args);
       },
       "tux.has_faint_point": (context, value) => {

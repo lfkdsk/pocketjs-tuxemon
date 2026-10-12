@@ -22,6 +22,11 @@ import type { LocalizedFeatureText, StartMenuData } from "./feature-modes-data.t
 import { imageSource, title } from "./journal-scene.tsx";
 import type { Lang } from "./language.ts";
 import {
+  formatMonsterHeight,
+  formatMonsterWeight,
+  type UnitMeasure,
+} from "./settings.ts";
+import {
   createStartMenuRuntime,
   partyMonsterView,
   type PartyActionId,
@@ -158,6 +163,8 @@ export interface StartMenuOverlayOptions extends Omit<StartMenuOptions, "catalog
   catalog: TuxemonSceneCatalog;
   /** Usually featureModes.nuPhoneMap.entry.phoneLabel. */
   nuPhoneLabel?: string | LocalizedFeatureText;
+  /** Live install preference; changing it updates an already-open detail page. */
+  units?: () => UnitMeasure;
 }
 
 export function createStartMenuOverlay(options: StartMenuOverlayOptions): GameViewOverlayConfig & {
@@ -177,7 +184,13 @@ export function createStartMenuOverlay(options: StartMenuOverlayOptions): GameVi
         step: runtime.step,
         isOpen: runtime.isOpen,
         render() {
-          return <StartMenuView runtime={runtime} data={options.data} lang={options.lang} catalog={options.catalog} />;
+          return <StartMenuView
+            runtime={runtime}
+            data={options.data}
+            lang={options.lang}
+            catalog={options.catalog}
+            units={options.units ?? (() => "metric")}
+          />;
         },
       };
     },
@@ -484,6 +497,7 @@ function DetailPage(props: {
   active: boolean;
   data: StartMenuData;
   lang: Lang;
+  units: () => UnitMeasure;
 }) {
   const state = () => props.runtime.state();
   const menu = () => state().partyMenu;
@@ -505,7 +519,7 @@ function DetailPage(props: {
           <Text class="text-xs" style={{ posType: 1, insetL: 12, insetT: 184, width: 150, height: 20, lineHeight: 14, textAlign: 1, textColor: THEME.dim }} debugName="start-menu-detail-species">{db()?.species ?? monster()!.slug}</Text>
 
           <Text class="text-xs" style={{ posType: 1, insetL: 172, insetT: 38, width: 137, height: 164, lineHeight: 15, textColor: THEME.ink }} debugName="start-menu-detail-primary">
-            {`${label(props.data.common.hp)}  ${view()!.hp}/${view()!.maxHp}\n${t().experience}  ${monster()!.totalExperience ?? 0}\n${t().type}  ${types() || "—"}\n${t().gender}  ${displayValue(monster()!.gender)}\n${t().stage}  ${displayValue(monster()!.stage)}\n${t().status}  ${displayValue(view()!.status)}\n${t().bond}  ${monster()!.bond ?? 0}\n${t().acquisition}  ${displayValue(monster()!.acquisition)}\n${label(props.data.common.taste)}  ${displayValue(monster()!.tasteCold)} / ${displayValue(monster()!.tasteWarm)}\n${label(props.data.common.height)}  ${monster()!.height} cm\n${label(props.data.common.weight)}  ${monster()!.weight} kg`}
+            {`${label(props.data.common.hp)}  ${view()!.hp}/${view()!.maxHp}\n${t().experience}  ${monster()!.totalExperience ?? 0}\n${t().type}  ${types() || "—"}\n${t().gender}  ${displayValue(monster()!.gender)}\n${t().stage}  ${displayValue(monster()!.stage)}\n${t().status}  ${displayValue(view()!.status)}\n${t().bond}  ${monster()!.bond ?? 0}\n${t().acquisition}  ${displayValue(monster()!.acquisition)}\n${label(props.data.common.taste)}  ${displayValue(monster()!.tasteCold)} / ${displayValue(monster()!.tasteWarm)}\n${label(props.data.common.height)}  ${formatMonsterHeight(monster()!.height, props.units())}\n${label(props.data.common.weight)}  ${formatMonsterWeight(monster()!.weight, props.units())}`}
           </Text>
           <Text class="text-xs" style={{ posType: 1, insetL: 316, insetT: 38, width: 134, height: 102, lineHeight: 15, textColor: THEME.ink }} debugName="start-menu-detail-stats">
             {`${label(props.data.common.armour)}  ${monster()!.base.armour}\n${label(props.data.common.dodge)}  ${monster()!.base.dodge}\n${label(props.data.common.melee)}  ${monster()!.base.melee}\n${label(props.data.common.ranged)}  ${monster()!.base.ranged}\n${label(props.data.common.speed)}  ${monster()!.base.speed}`}
@@ -608,6 +622,7 @@ export const StartMenuView: Component<{
   data: StartMenuData;
   lang: Lang;
   catalog: TuxemonSceneCatalog;
+  units: () => UnitMeasure;
 }> = (props) => {
   const open = () => props.runtime.openSignal();
   const state = () => props.runtime.state();
@@ -701,7 +716,7 @@ export const StartMenuView: Component<{
             <PartyList runtime={props.runtime} catalog={props.catalog} cache={imageCache} active={open()} data={props.data} lang={props.lang} />
           </Show>
           <Show when={detailPhase()}>
-            <DetailPage runtime={props.runtime} catalog={props.catalog} cache={imageCache} active={open()} data={props.data} lang={props.lang} />
+            <DetailPage runtime={props.runtime} catalog={props.catalog} cache={imageCache} active={open()} data={props.data} lang={props.lang} units={props.units} />
           </Show>
           <Show when={movesPhase()}>
             <MovesPage runtime={props.runtime} catalog={props.catalog} cache={imageCache} active={open()} data={props.data} lang={props.lang} />

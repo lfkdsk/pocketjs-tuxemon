@@ -271,6 +271,24 @@ describe("time/weather runtime handlers", () => {
     } });
   });
 
+  test("hemisphere is an install preference read at condition/update time", () => {
+    let hemisphere: "northern" | "southern" = "northern";
+    const live = createTuxemonExtensions({} as never, { hemisphere: () => hemisphere });
+    const liveContext = { ...ctx, ext: live.initial! };
+    const condition = live.conditions!["tux.time_is"]!;
+    const update = live.commands!["tux.update_time"]!;
+    const season = (value: string) => condition(liveContext, {
+      property: "season",
+      operation: "equals",
+      value,
+      negate: false,
+    });
+    expect(season("spring")).toBeTrue();
+    hemisphere = "southern";
+    expect(season("autumn")).toBeTrue();
+    expect(update(liveContext, { character: "player" })?.writes?.["v.season"]).toBe("autumn");
+  });
+
   test("tux.tick_time_weather advances only the extension stream", () => {
     const result = tick(ctx, {});
     expect(result?.writes).toBeUndefined();

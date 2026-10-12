@@ -78,6 +78,10 @@ export function createCompositeOverlay(
           }
           if (phone?.isOpen()) return phone.step(buttons, pressed);
           if (tux?.isOpen()) return tux.step(buttons, pressed);
+          // Language can be opened from an already-open Options child. It
+          // must temporarily outrank that child so dismissing Language
+          // returns to Options instead of sending both menus the same edge.
+          if (lang?.isOpen()) return lang.step(buttons, pressed);
           const child = children.find((runtime) => runtime.isOpen());
           if (child) return child.step(buttons, pressed);
           // A completed load closes immediately, but its confirmation toast
@@ -86,10 +90,6 @@ export function createCompositeOverlay(
           for (const passive of passiveChildren) {
             if (passive.needed()) passive.runtime.step(buttons, 0);
           }
-          // Options is also a programmatic child of START/title. Give an
-          // already-open language screen priority over the still-mounted
-          // START root so dismissing it returns to the parent menu.
-          if (lang?.isOpen()) return lang.step(buttons, pressed);
           if (world.isOpen()) return world.step(buttons, pressed);
           // All closed: the game-owned world menu watches START, the
           // language menu R. Child menus only open through parent callbacks.
