@@ -3,6 +3,7 @@ import { AUDIO_RING_FRAMES, type AudioOps } from "@pocketjs/framework/audio";
 import { BTN } from "@pocketjs/framework/input";
 import { createSimFsHost } from "../vendor/pocket-rpgkit/vendor/pocketjs/hosts/sim/fs.ts";
 import { AudioDriver, type AudioDriverState } from "../vendor/pocket-rpgkit/src/ui/audio/index.ts";
+import measurementExpectationsJson from "./fixtures/monster-measurements.json";
 import type { PspSaveHost } from "../ui/save-psp.ts";
 import {
   CONTROL_ACTIONS,
@@ -27,9 +28,21 @@ import {
   persistSettings,
   pressedPhysicalButton,
   remapButtons,
+  roundHalfEven,
   type GameSettings,
   type SettingsStore,
 } from "../ui/settings.ts";
+
+type MeasurementExpectation = readonly [
+  height: number,
+  weight: number,
+  metricHeight: number,
+  imperialHeight: number,
+  metricWeight: number,
+  imperialWeight: number,
+];
+
+const MEASUREMENT_EXPECTATIONS = measurementExpectationsJson as Record<string, MeasurementExpectation>;
 
 interface MemoryStorage {
   readonly values: Map<string, string>;
@@ -289,6 +302,42 @@ describe("control remapping", () => {
 });
 
 describe("measurement preferences", () => {
+  function adjacentPositiveFloat(value: number, direction: -1 | 1): number {
+    const view = new DataView(new ArrayBuffer(8));
+    view.setFloat64(0, value, false);
+    let high = view.getUint32(0, false);
+    let low = view.getUint32(4, false);
+    if (direction > 0) {
+      low = (low + 1) >>> 0;
+      if (low === 0) high++;
+    } else {
+      if (low === 0) high--;
+      low = (low - 1) >>> 0;
+    }
+    view.setUint32(0, high, false);
+    view.setUint32(4, low, false);
+    return view.getFloat64(0, false);
+  }
+
+  test("rounds the exact binary value below, at and above decimal ties", () => {
+    const cases: Array<readonly [number, number]> = [
+      [adjacentPositiveFloat(1.25, -1), 1.2],
+      [1.25, 1.2],
+      [adjacentPositiveFloat(1.25, 1), 1.3],
+      [adjacentPositiveFloat(1.75, -1), 1.7],
+      [1.75, 1.8],
+      [adjacentPositiveFloat(1.75, 1), 1.8],
+      [1.15, 1.1],
+      [1.85, 1.9],
+      [2.45, 2.5],
+    ];
+    for (const [value, expected] of cases) expect(roundHalfEven(value, 1), value.toPrecision(17)).toBe(expected);
+    expect(roundHalfEven(0.49999999999999994)).toBe(0);
+    expect(roundHalfEven(0.5)).toBe(0);
+    expect(roundHalfEven(0.5000000000000001)).toBe(1);
+    expect(Object.is(roundHalfEven(-0.1), -0)).toBeTrue();
+  });
+
   test("metric and imperial monster measurements match upstream thresholds", () => {
     expect(formatMonsterHeight(42, "metric")).toBe("42 cm");
     expect(formatMonsterHeight(100, "metric")).toBe("1.0 m");
@@ -303,6 +352,21 @@ describe("measurement preferences", () => {
     expect(formatWalkedDistance(0, "metric")).toBe("0 km");
     expect(formatWalkedDistance(1_234, "metric")).toBe("1.23 km");
     expect(formatWalkedDistance(1_234, "imperial")).toBe("0.76 mi");
+  });
+
+  test("all 411 upstream monsters match the offline Python measurement oracle", () => {
+    const entries = Object.entries(MEASUREMENT_EXPECTATIONS);
+    expect(entries).toHaveLength(411);
+    for (const [slug, row] of entries) {
+      expect(row, `${slug}: numeric oracle columns`).toHaveLength(6);
+      const [height, weight, metricHeight, imperialHeight, metricWeight, imperialWeight] = row;
+      const metricHeightText = height >= 100 ? `${metricHeight.toFixed(1)} m` : `${metricHeight} cm`;
+      const metricWeightText = weight >= 1_000 ? `${metricWeight.toFixed(1)} t` : `${metricWeight} kg`;
+      expect(formatMonsterHeight(height, "metric"), `${slug}: metric height`).toBe(metricHeightText);
+      expect(formatMonsterHeight(height, "imperial"), `${slug}: imperial height`).toBe(`${imperialHeight} ft`);
+      expect(formatMonsterWeight(weight, "metric"), `${slug}: metric weight`).toBe(metricWeightText);
+      expect(formatMonsterWeight(weight, "imperial"), `${slug}: imperial weight`).toBe(`${imperialWeight} lb`);
+    }
   });
 });
 
