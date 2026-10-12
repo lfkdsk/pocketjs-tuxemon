@@ -651,8 +651,8 @@ export interface StartMenuOptions {
   /** Override the built-in Tuxepedia-at-0 and inventory-gated NuPhone-at-3 rows. */
   apps?: readonly StartMenuAppRow[] | ((state: SessionState) => readonly StartMenuAppRow[]);
   /** External root rows (bag/missions/save/load/options/apps/exit) dispatch here. */
-  onDispatch?: (id: StartMenuRowId) => void;
-  callbacks?: Partial<Record<StartMenuRowId, () => void>>;
+  onDispatch?: (id: StartMenuRowId, host: GameViewSessionHost) => void;
+  callbacks?: Partial<Record<StartMenuRowId, (host: GameViewSessionHost) => void>>;
 }
 
 export interface StartMenuRuntime {
@@ -812,9 +812,11 @@ export function createStartMenuRuntime(
       } else if (effect.type === "close") {
         close();
       } else {
-        close();
-        options.callbacks?.[effect.id]?.();
-        options.onDispatch?.(effect.id);
+        // Child overlays take input priority while this root remains mounted;
+        // closing a Bag/Save/app therefore returns to the same START menu.
+        // Session-ending callbacks (Exit) close explicitly through runtimeRef.
+        options.callbacks?.[effect.id]?.(host);
+        options.onDispatch?.(effect.id, host);
       }
     }
     return stateChanged;

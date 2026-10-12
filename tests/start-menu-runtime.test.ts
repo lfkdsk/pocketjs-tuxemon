@@ -319,7 +319,7 @@ describe("START/Party controller", () => {
     runtime.applyAction("back");
     runtime.activateIndex(runtime.rows().findIndex((row) => row.id === "bag"));
     expect(dispatched).toEqual(["bag"]);
-    expect(runtime.isOpen()).toBe(false);
+    expect(runtime.isOpen()).toBe(true);
     dispose();
   });
 
