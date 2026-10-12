@@ -638,10 +638,13 @@ export const StartMenuView: Component<{
   const basePoint = (x: number, y: number) => startMenuBasePoint(canvas(), x, y);
 
   createGesture({
-    region: { rect: () => open() && state().screen === "root" ? startMenuViewRect(canvas(), ROOT_ROWS) : disabledRect },
+    region: { rect: () => open() && state().screen === "root"
+      ? startMenuViewRect(canvas(), { ...ROOT_ROWS, h: props.runtime.rows().length * ROOT_ROW_H })
+      : disabledRect },
     onTap: (contact) => {
       const point = basePoint(contact.x, contact.y);
-      props.runtime.activateIndex(Math.floor((point.y - ROOT_ROWS.y) / ROOT_ROW_H));
+      const index = Math.floor((point.y - ROOT_ROWS.y) / ROOT_ROW_H);
+      if (index >= 0 && index < props.runtime.rows().length) props.runtime.activateIndex(index);
     },
   });
   createGesture({

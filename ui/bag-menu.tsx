@@ -117,21 +117,25 @@ const BagMenuView: Component<{ runtime: BagMenuRuntime; theme?: Partial<UiTheme>
   const disabledRect = { x: -1, y: -1, w: 0, h: 0 } as const;
 
   createGesture({
+    region: { rect: () => open() && state().screen === "items" && page().items.length > 0
+      ? bagViewRect(canvas(), {
+          ...BAG_LIST_RECT,
+          h: BAG_ROW_TOP + page().items.length * BAG_ROW_HEIGHT,
+        })
+      : disabledRect },
+    tapSlop: 10,
+    onTap: (contact) => {
+      const point = bagBasePoint(canvas(), contact.x, contact.y);
+      const index = Math.floor((point.y - BAG_LIST_RECT.y - BAG_ROW_TOP) / BAG_ROW_HEIGHT);
+      if (index >= 0 && index < page().items.length) runtime.activateIndex(index);
+    },
+  });
+  createGesture({
     region: { rect: () => open() && state().screen === "items"
       ? bagViewRect(canvas(), BAG_LIST_RECT)
       : disabledRect },
-    tapSlop: 10,
     panSlop: 14,
     axis: "any",
-    onTap: (contact) => {
-      const point = bagBasePoint(canvas(), contact.x, contact.y);
-      runtime.activateIndex(rowIndex(
-        point.y,
-        BAG_LIST_RECT.y + BAG_ROW_TOP,
-        BAG_ROW_HEIGHT,
-        page().items.length,
-      ));
-    },
     onPanEnd: (contact) => {
       const dx = contact.dx / canvas().scale;
       const dy = contact.dy / canvas().scale;

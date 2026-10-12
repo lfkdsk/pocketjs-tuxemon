@@ -400,6 +400,13 @@ describe("START menu semantic tree and touch", () => {
       expect(nodeText(namedNode("start-menu-root-label-party"))).toBe(DATA.startMenu.root.party.zh_CN);
       expect(nodeText(namedNode("start-menu-root-label-tuxepedia"))).toBe("精灵百科");
 
+      // Blank panel space below the authored rows is not an implicit Exit
+      // target. This catches regressions where the touch index was clamped to
+      // the final row by the shared runtime.
+      menu.tap(220, 42 + menu.rows().length * 20 + 6);
+      expect(menu.runtime.isOpen()).toBeTrue();
+      expect(menu.runtime.state().screen).toBe("root");
+
       const partyIndex = menu.rows().findIndex((row) => row.id === "party");
       menu.tap(220, 42 + partyIndex * 20 + 10);
       expect(menu.runtime.state().screen).toBe("party");

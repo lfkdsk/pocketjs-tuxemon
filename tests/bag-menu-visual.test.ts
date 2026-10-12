@@ -302,6 +302,11 @@ describe("Bag semantic tree and touch", () => {
       expect(nodeText(namedNode("tux-bag-item-name"))).toBe(first.name);
       expect(nodeText(namedNode("tux-bag-item-description"))).toBe(first.description);
 
+      // The unused lower half of the panel must not clamp to and use the
+      // final item on a short page.
+      menu.tap(80, BAG_LIST_RECT.y + BAG_ROW_TOP + menu.runtime.page().items.length * BAG_ROW_HEIGHT + 12);
+      expect(menu.runtime.state().screen).toBe("items");
+
       menu.swipe(260, 130, 40, 130);
       expect(menu.runtime.page().page).toBe(1);
       menu.swipe(40, 130, 260, 130);
