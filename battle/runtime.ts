@@ -1080,6 +1080,13 @@ export function createTuxemonBattleRules(source: BattleDbSource, enums: Variable
             moneyModifier: setup.moneyModifier,
           })];
         } else if (setup.kind === "random") {
+          // Upstream checks the player's repellent tracker before making an
+          // encounter-probability draw. An expired tracker remains persisted
+          // but no longer suppresses encounters once its countdown reaches 0.
+          if ((ext.stepTrackers?.player?.repellent?.countdown ?? 0) > 0) {
+            release();
+            return null;
+          }
           if (nextRandom(rng) * 100 > (setup.probability ?? 1)) {
             release();
             return null;

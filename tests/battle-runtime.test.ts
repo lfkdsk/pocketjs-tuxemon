@@ -873,6 +873,22 @@ describe("Tuxemon BattleRules adapter", () => {
     // Pin the clock to noon so the live-clock daytime filter is "true" and the
     // battle hour is 12, matching the row selection below.
     ext.clock = { ...ext.clock, minuteOfDay: 12 * 60 };
+    ext.stepTrackers = {
+      player: {
+        repellent: {
+          countdown: 100,
+          initialCountdown: 100,
+          milestones: [],
+          status: {},
+        },
+      },
+    };
+    expect(startBattle(rules, ext, json({
+      kind: "random",
+      table: "spyder_route1",
+      probability: 100,
+    }), 302)).toBeNull();
+    ext.stepTrackers.player!.repellent!.countdown = 0;
     expect(startBattle(rules, ext, json({
       kind: "random",
       table: "spyder_route1",
