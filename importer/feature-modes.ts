@@ -238,6 +238,9 @@ export function loadOptions(
     northern: t("menu_hemisphere_north"),
     southern: t("menu_hemisphere_south"),
     capturePrompt: t("options_new_input_key0"),
+    back: t("menu_back"),
+    cancel: t("item_confirm_cancel"),
+    swap: t("swap"),
   };
 }
 

@@ -1,4 +1,4 @@
-// Regenerate title, NuPhone, and START-menu production-bundle screenshots.
+// Regenerate title, Options, NuPhone, and START-menu production screenshots.
 //
 //   bun run build && bun run build:wasm
 //   bun tools/update-feature-modes-goldens.ts
@@ -45,7 +45,7 @@ for (const lang of languages) {
 }
 
 writeFileSync(join(root, "data/feature-modes-goldens.json"), JSON.stringify({
-  format: "pocket-tuxemon/feature-modes-goldens/v3",
+  format: "pocket-tuxemon/feature-modes-goldens/v4",
   frames,
 }, null, 2) + "\n");
 console.log(`wrote data/feature-modes-goldens.json (${frames.length} frames)`);

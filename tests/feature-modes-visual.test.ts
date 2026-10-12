@@ -1,6 +1,6 @@
-// Production-bundle visual gate for title modes, NuPhone/GPS, and START menu
-// children: exact bilingual goldens at both supported resolutions, semantic
-// tree/pixel assertions, touch interaction, lazy art, and 2x composition.
+// Production-bundle visual gate for title modes, Options, NuPhone/GPS, and
+// START children: exact bilingual goldens at both supported resolutions,
+// semantic tree/pixel assertions, touch interaction, lazy art, and 2x scale.
 
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
@@ -115,7 +115,7 @@ function captured(viewportIndex: number, lang: Lang): Promise<Capture> {
 
 describe("Feature-mode and START production visuals", () => {
   simTest("match every committed bilingual golden at both resolutions", async () => {
-    expect(manifest.format).toBe("pocket-tuxemon/feature-modes-goldens/v3");
+    expect(manifest.format).toBe("pocket-tuxemon/feature-modes-goldens/v4");
     expect(manifest.frames).toHaveLength(FEATURE_MODES_CASES.length * LANGS.length * FEATURE_MODES_VIEWPORTS.length);
     for (let viewportIndex = 0; viewportIndex < FEATURE_MODES_VIEWPORTS.length; viewportIndex++) {
       for (const lang of LANGS) {
@@ -188,6 +188,34 @@ describe("Feature-mode and START production visuals", () => {
       expect(treeHasText(en.cases.map.tree, "YOU ARE HERE")).toBeTrue();
       expect(treeHasText(zh.cases.map.tree, "当前位置")).toBeTrue();
       for (const [capture, lang] of [[en, "en_US"], [zh, "zh_CN"]] as const) {
+        const titleOptions = capture.cases["options-title"];
+        const startOptions = capture.cases["options-start"];
+        expect(nodeText(namedNode(titleOptions.tree, "options-title"))).toBe(DATA.options.title[lang]);
+        expect(nodeText(namedNode(startOptions.tree, "options-title"))).toBe(DATA.options.title[lang]);
+        for (const [action, label] of Object.entries(DATA.options.controls)) {
+          expect(nodeText(namedNode(titleOptions.tree, `options-label-control:${action}`))).toBe(label[lang]);
+          expect(nodeText(namedNode(titleOptions.tree, `options-value-control:${action}`))).toBe(label[lang]);
+        }
+        expect(nodeText(namedNode(titleOptions.tree, "options-label-reset")))
+          .toBe(DATA.options.resetDefault[lang]);
+        expect(nodeText(namedNode(startOptions.tree, "options-label-music")))
+          .toBe(DATA.options.musicVolume[lang]);
+        expect(nodeText(namedNode(startOptions.tree, "options-label-sound")))
+          .toBe(DATA.options.soundVolume[lang]);
+        expect(nodeText(namedNode(startOptions.tree, "options-label-units"))).toBe(DATA.options.units[lang]);
+        expect(nodeText(namedNode(startOptions.tree, "options-label-hemisphere")))
+          .toBe(DATA.options.hemisphere[lang]);
+        expect(nodeText(namedNode(startOptions.tree, "options-back"))).toContain(DATA.options.back[lang]);
+        expect(nodeText(namedNode(startOptions.tree, "options-legend")))
+          .toContain(DATA.options.controls.primary[lang]);
+        expect(nodeText(namedNode(startOptions.tree, "options-value-screen"))).toBe("480×272");
+        expect(nodeText(namedNode(startOptions.tree, "options-value-music"))).toBe("50%");
+        expect(nodeText(namedNode(startOptions.tree, "options-value-sound"))).toBe("20%");
+        expect(nodeText(namedNode(startOptions.tree, "options-value-units"))).toBe(DATA.options.metric[lang]);
+        expect(nodeText(namedNode(startOptions.tree, "options-value-hemisphere")))
+          .toBe(DATA.options.northern[lang]);
+        expect(namedNode(startOptions.tree, "options-origin")).toBeUndefined();
+        expect(nodeText(namedNode(startOptions.tree, "options-overlay"))).not.toContain("…");
         expect(nodeText(namedNode(capture.cases.start.tree, "start-menu-root-title")))
           .toBe(lang === "zh_CN" ? "开始菜单" : "START MENU");
         expect(nodeText(namedNode(capture.cases.start.tree, "start-menu-root-label-party")))
@@ -229,6 +257,10 @@ describe("Feature-mode and START production visuals", () => {
       .toBeGreaterThan(2_500);
     expect(countColour(capture.cases.bag.rgba, 480, { x: 13, y: 41, width: 270, height: 185 }, accent))
       .toBeGreaterThan(2_000);
+    expect(countColour(capture.cases["options-title"].rgba, 480, { x: 22, y: 49, width: 211, height: 21 }, selected))
+      .toBeGreaterThan(3_000);
+    expect(countColour(capture.cases["options-start"].rgba, 480, { x: 22, y: 49, width: 211, height: 21 }, selected))
+      .toBeGreaterThan(3_000);
   }, 120_000);
 
   simTest("hard minigame shows description without monster art", async () => {
@@ -278,6 +310,10 @@ describe("Feature-mode and START production visuals", () => {
           startParty: true,
           startPlayer: true,
           startBag: true,
+          titleOptions: true,
+          titleOptionsCapture: true,
+          startOptions: true,
+          startOptionsVolume: true,
         });
       }
     }

@@ -2,7 +2,7 @@
 // generated PO-backed labels and the installation-scoped SettingsController;
 // no preference enters reducer/session state.
 
-import { createSignal, type Accessor } from "solid-js";
+import { createSignal, onCleanup, type Accessor } from "solid-js";
 import { BTN } from "@pocketjs/framework/input";
 import type { GameViewDemoRuntime } from "../vendor/pocket-rpgkit/src/ui/demo-contract.ts";
 import type { OptionsData } from "./feature-modes-data.ts";
@@ -82,6 +82,15 @@ export interface OptionsRuntime {
   resolveConflict(accept: boolean): void;
 }
 
+export type PocketOptionsHook = Pick<OptionsRuntime,
+  "isOpen" | "origin" | "rows" | "cursor" | "capture" | "conflict"
+  | "activateIndex" | "adjustIndex" | "resolveConflict">;
+
+declare global {
+  // eslint-disable-next-line no-var
+  var __pocketOptions: PocketOptionsHook | undefined;
+}
+
 const controlRowId = (action: ControlAction): ControlRowId => `control:${action}`;
 const rowControl = (id: OptionsRowId): ControlAction | null =>
   id.startsWith("control:") ? id.slice("control:".length) as ControlAction : null;
@@ -102,9 +111,11 @@ export function createOptionsRuntime(options: OptionsRuntimeOptions): OptionsRun
   const [capture, setCapture] = createSignal<ControlAction | null>(null);
   const [conflict, setConflict] = createSignal<OptionsConflict | null>(null);
   const [persistFailed, setPersistFailed] = createSignal(false);
+  const [settingsRevision, setSettingsRevision] = createSignal(0);
   const labels = pick(options.data, options.lang);
 
   const rows = (): readonly OptionsRow[] => {
+    settingsRevision();
     const settings = options.settings.get();
     const out: OptionsRow[] = [];
     if (options.capabilities.remap) {
@@ -141,7 +152,7 @@ export function createOptionsRuntime(options: OptionsRuntimeOptions): OptionsRun
         id: "screen",
         section: "general",
         label: labels.text(options.data.screenSize),
-        value: "480×272 · AUTO",
+        value: "480×272",
         enabled: false,
       });
     }
@@ -183,8 +194,13 @@ export function createOptionsRuntime(options: OptionsRuntimeOptions): OptionsRun
     return out;
   };
 
+  const recordWrite = (persisted: boolean): void => {
+    setSettingsRevision((revision) => revision + 1);
+    setPersistFailed(!persisted);
+  };
+
   const write = (change: Parameters<SettingsController["update"]>[0]): void => {
-    setPersistFailed(!options.settings.update(change));
+    recordWrite(options.settings.update(change));
   };
 
   const close = (): void => {
@@ -239,7 +255,7 @@ export function createOptionsRuntime(options: OptionsRuntimeOptions): OptionsRun
     }
     switch (row.id) {
       case "reset":
-        setPersistFailed(!options.settings.resetControls());
+        recordWrite(options.settings.resetControls());
         break;
       case "language":
         options.onLanguage?.(origin());
@@ -265,7 +281,7 @@ export function createOptionsRuntime(options: OptionsRuntimeOptions): OptionsRun
     const pending = conflict();
     if (!pending) return;
     if (accept) {
-      setPersistFailed(!options.settings.replace(
+      recordWrite(options.settings.replace(
         swapControl(options.settings.get(), pending.action, pending.button),
       ));
     }
@@ -299,7 +315,7 @@ export function createOptionsRuntime(options: OptionsRuntimeOptions): OptionsRun
         if (result.conflict) {
           setConflict({ action: binding, button, occupiedBy: result.conflict });
         } else {
-          setPersistFailed(!options.settings.replace(result.settings));
+          recordWrite(options.settings.replace(result.settings));
         }
       }
       return { consumed: true };
@@ -317,6 +333,29 @@ export function createOptionsRuntime(options: OptionsRuntimeOptions): OptionsRun
     }
     return { consumed: true };
   };
+
+  const adjustIndex: OptionsRuntime["adjustIndex"] = (index, delta) => {
+    const current = rows();
+    if (current[index]) {
+      setCursor(index);
+      adjust(current[index]!, delta);
+    }
+  };
+  const hook: PocketOptionsHook = {
+    isOpen: openSignal,
+    origin,
+    rows,
+    cursor,
+    capture,
+    conflict,
+    activateIndex,
+    adjustIndex,
+    resolveConflict,
+  };
+  globalThis.__pocketOptions = hook;
+  onCleanup(() => {
+    if (globalThis.__pocketOptions === hook) delete globalThis.__pocketOptions;
+  });
 
   return {
     step,
@@ -338,13 +377,7 @@ export function createOptionsRuntime(options: OptionsRuntimeOptions): OptionsRun
     conflict,
     persistFailed,
     activateIndex,
-    adjustIndex(index, delta) {
-      const current = rows();
-      if (current[index]) {
-        setCursor(index);
-        adjust(current[index]!, delta);
-      }
-    },
+    adjustIndex,
     resolveConflict,
   };
 }

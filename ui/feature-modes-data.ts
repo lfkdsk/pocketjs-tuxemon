@@ -210,6 +210,9 @@ export interface OptionsData {
   northern: LocalizedFeatureText;
   southern: LocalizedFeatureText;
   capturePrompt: LocalizedFeatureText;
+  back: LocalizedFeatureText;
+  cancel: LocalizedFeatureText;
+  swap: LocalizedFeatureText;
 }
 
 /** Compact build-time terrain facts needed by items usable from the Bag.

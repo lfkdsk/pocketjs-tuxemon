@@ -1,5 +1,5 @@
 {
-  "format": "pocket-tuxemon/feature-modes-goldens/v3",
+  "format": "pocket-tuxemon/feature-modes-goldens/v4",
   "frames": [
     {
       "case": "title",
@@ -110,6 +110,24 @@
       "pngSha256": "abe3a23c83827e5ccd6322e12f7bbe32c8251b07f15b805c11c7775b85ccc807"
     },
     {
+      "case": "options-title",
+      "lang": "en_US",
+      "width": 480,
+      "height": 272,
+      "file": "feature-options-title-en_US-480x272.png",
+      "rgbaFnv1a": "5dbbedd7",
+      "pngSha256": "779a538e3d8709d2fb2da6c034fdafeccf9d4ed98c4435ef9ee3f4ce86257c42"
+    },
+    {
+      "case": "options-start",
+      "lang": "en_US",
+      "width": 480,
+      "height": 272,
+      "file": "feature-options-start-en_US-480x272.png",
+      "rgbaFnv1a": "62495885",
+      "pngSha256": "ccb7a88a26fe25223cd6457a5bc7715e39bd5c67345f276d51c2c1d40af90787"
+    },
+    {
       "case": "title",
       "lang": "en_US",
       "width": 960,
@@ -216,6 +234,24 @@
       "file": "feature-bag-en_US-960x544.png",
       "rgbaFnv1a": "d7df53a4",
       "pngSha256": "01dbe2307f592d947ccd2cb5a2dc3145075f912c2e79362c4cbf55c45448fe60"
+    },
+    {
+      "case": "options-title",
+      "lang": "en_US",
+      "width": 960,
+      "height": 544,
+      "file": "feature-options-title-en_US-960x544.png",
+      "rgbaFnv1a": "e5f60f83",
+      "pngSha256": "2ccb5d0b09d0b75fc9f32331b07cb8af0d93bcb8adabb0d7d2bcee858a298b8d"
+    },
+    {
+      "case": "options-start",
+      "lang": "en_US",
+      "width": 960,
+      "height": 544,
+      "file": "feature-options-start-en_US-960x544.png",
+      "rgbaFnv1a": "01d404d1",
+      "pngSha256": "149f6e39f17cbe9be98d413e1fe604d382976a20b37aa018739231273bed9b19"
     },
     {
       "case": "title",
@@ -326,6 +362,24 @@
       "pngSha256": "1f3bd193ed0074396428fcd6c12bc2ba5e37ac8fc6daf5347a33d5ff79b4924f"
     },
     {
+      "case": "options-title",
+      "lang": "zh_CN",
+      "width": 480,
+      "height": 272,
+      "file": "feature-options-title-zh_CN-480x272.png",
+      "rgbaFnv1a": "17cde0e8",
+      "pngSha256": "f8b03a2300a8f7807fa6a0b91999d7ee3f82c2a0378136cbeffeb90415b2ac2a"
+    },
+    {
+      "case": "options-start",
+      "lang": "zh_CN",
+      "width": 480,
+      "height": 272,
+      "file": "feature-options-start-zh_CN-480x272.png",
+      "rgbaFnv1a": "6c0bcb1f",
+      "pngSha256": "32a62197e038753e20de26f4283ff722d3db4a354f38a4b01a332b3556458cb6"
+    },
+    {
       "case": "title",
       "lang": "zh_CN",
       "width": 960,
@@ -432,6 +486,24 @@
       "file": "feature-bag-zh_CN-960x544.png",
       "rgbaFnv1a": "d05dfc6d",
       "pngSha256": "1e3e723a65afa3e5c1fca8bad4420724681acf85806689f9480706bdec768304"
+    },
+    {
+      "case": "options-title",
+      "lang": "zh_CN",
+      "width": 960,
+      "height": 544,
+      "file": "feature-options-title-zh_CN-960x544.png",
+      "rgbaFnv1a": "94938eb9",
+      "pngSha256": "7363e26ce65f942efa4d54af0ccb534b975cce4143f34d917169b1735adf7714"
+    },
+    {
+      "case": "options-start",
+      "lang": "zh_CN",
+      "width": 960,
+      "height": 544,
+      "file": "feature-options-start-zh_CN-960x544.png",
+      "rgbaFnv1a": "58251130",
+      "pngSha256": "5a9444e36a0a877e7ae131f044d42bc29979e3db3439c8805bfe79f49311df2c"
     }
   ]
 }

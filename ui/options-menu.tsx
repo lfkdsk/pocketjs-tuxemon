@@ -223,13 +223,6 @@ const OptionsView: Component<{ runtime: OptionsRuntime; data: OptionsData; lang:
             >
               {t(props.data.title)}
             </Text>
-            <Text
-              class="text-xs"
-              style={{ posType: 1, insetR: 15, insetT: 12, width: 150, height: 16, lineHeight: 14, textAlign: 2, textColor: TUXEMON_UI_THEME.dim }}
-              debugName="options-origin"
-            >
-              {props.runtime.origin() === "title" ? "TITLE" : "START"}
-            </Text>
             <For each={layout()}>{({ row, index, rect }) => {
               const selected = () => props.runtime.cursor() === index;
               return (
@@ -249,15 +242,21 @@ const OptionsView: Component<{ runtime: OptionsRuntime; data: OptionsData; lang:
                   debugName={`options-row-${row.id}`}
                 >
                   <Text
-                    class="text-xs"
-                    style={{ marginL: 6, width: rect.w - 82, height: 16, lineHeight: 14, textColor: selected() ? "#ffffff" : TUXEMON_UI_THEME.ink }}
+                    class={row.id === "screen" ? "text-2xs" : "text-xs"}
+                    style={{
+                      marginL: 6,
+                      width: rect.w - (row.id === "screen" ? 55 : 82),
+                      height: 16,
+                      lineHeight: 14,
+                      textColor: selected() ? "#ffffff" : TUXEMON_UI_THEME.ink,
+                    }}
                     debugName={`options-label-${row.id}`}
                   >
                     {row.label}
                   </Text>
                   <Text
-                    class="text-xs"
-                    style={{ width: 70, height: 16, lineHeight: 14, textAlign: 2, textColor: selected() ? "#ffffff" : TUXEMON_UI_THEME.accent }}
+                    class={row.id === "screen" ? "text-2xs" : "text-xs"}
+                    style={{ width: row.id === "screen" ? 43 : 70, height: 16, lineHeight: 14, textAlign: 2, textColor: selected() ? "#ffffff" : TUXEMON_UI_THEME.accent }}
                     debugName={`options-value-${row.id}`}
                   >
                     {row.value}
@@ -270,14 +269,16 @@ const OptionsView: Component<{ runtime: OptionsRuntime; data: OptionsData; lang:
               style={{ posType: 1, insetL: 15, insetB: 9, width: 270, height: 16, lineHeight: 14, textColor: props.runtime.persistFailed() ? "#e2574c" : TUXEMON_UI_THEME.dim }}
               debugName="options-legend"
             >
-              {props.runtime.persistFailed() ? "⚠ settings.json" : "↑↓  ←→ CHANGE   ○ SELECT"}
+              {props.runtime.persistFailed()
+                ? "⚠ settings.json"
+                : `↑↓  ←→   ○ ${t(props.data.controls.primary)}`}
             </Text>
             <View
               class="absolute flex-row justify-center items-center"
               style={{ posType: 1, insetL: BACK.x - PANEL.x, insetT: BACK.y - PANEL.y, width: BACK.w, height: BACK.h, bgColor: SELECTED, borderWidth: 1, borderColor: TUXEMON_UI_THEME.accent }}
               debugName="options-back"
             >
-              <Text class="text-xs" style={{ width: 58, height: 15, lineHeight: 13, textAlign: 1, textColor: "#ffffff" }}>× BACK</Text>
+              <Text class="text-xs" style={{ width: 58, height: 15, lineHeight: 13, textAlign: 1, textColor: "#ffffff" }}>{`× ${t(props.data.back)}`}</Text>
             </View>
           </Panel>
 
@@ -293,7 +294,7 @@ const OptionsView: Component<{ runtime: OptionsRuntime; data: OptionsData; lang:
               <Text class="text-sm" style={{ posType: 1, insetL: 18, insetT: 64, width: 324, height: 22, lineHeight: 18, textAlign: 1, textColor: TUXEMON_UI_THEME.accent }} debugName="options-capture-action">
                 {t(props.data.controls[action()])}
               </Text>
-              <Text class="text-xs" style={{ posType: 1, insetL: 18, insetT: 98, width: 324, height: 16, lineHeight: 14, textAlign: 1, textColor: TUXEMON_UI_THEME.dim }}>START · CANCEL</Text>
+              <Text class="text-xs" style={{ posType: 1, insetL: 18, insetT: 98, width: 324, height: 16, lineHeight: 14, textAlign: 1, textColor: TUXEMON_UI_THEME.dim }}>{`START · ${t(props.data.cancel)}`}</Text>
             </View>
           )}</Show>
 
@@ -307,10 +308,10 @@ const OptionsView: Component<{ runtime: OptionsRuntime; data: OptionsData; lang:
                 {`${t(props.data.controls[pending().action])}  ↔  ${t(props.data.controls[pending().occupiedBy])}`}
               </Text>
               <View class="absolute flex-row justify-center items-center" style={{ posType: 1, insetL: 44, insetT: 86, width: 116, height: 27, bgColor: SELECTED, borderWidth: 1, borderColor: TUXEMON_UI_THEME.accent }}>
-                <Text class="text-xs" style={{ width: 102, height: 15, lineHeight: 13, textAlign: 1, textColor: "#ffffff" }}>○ SWAP</Text>
+                <Text class="text-xs" style={{ width: 102, height: 15, lineHeight: 13, textAlign: 1, textColor: "#ffffff" }}>{`○ ${t(props.data.swap)}`}</Text>
               </View>
               <View class="absolute flex-row justify-center items-center" style={{ posType: 1, insetL: 180, insetT: 86, width: 116, height: 27, bgColor: TUXEMON_UI_THEME.paper, borderWidth: 1, borderColor: TUXEMON_UI_THEME.border }}>
-                <Text class="text-xs" style={{ width: 102, height: 15, lineHeight: 13, textAlign: 1, textColor: TUXEMON_UI_THEME.ink }}>× CANCEL</Text>
+                <Text class="text-xs" style={{ width: 102, height: 15, lineHeight: 13, textAlign: 1, textColor: TUXEMON_UI_THEME.ink }}>{`× ${t(props.data.cancel)}`}</Text>
               </View>
             </View>
           )}</Show>

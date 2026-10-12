@@ -2720,6 +2720,18 @@
   "capturePrompt": {
    "en_US": "Press a key to set your new input key",
    "zh_CN": "按下一个键来设置新的输入键"
+  },
+  "back": {
+   "en_US": "Back",
+   "zh_CN": "返回"
+  },
+  "cancel": {
+   "en_US": "Cancel",
+   "zh_CN": "取消"
+  },
+  "swap": {
+   "en_US": "Swap",
+   "zh_CN": "交换"
   }
  }
 }

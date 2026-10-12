@@ -1,6 +1,6 @@
 // Production-bundle visual fixture for the out-of-map feature programs. It
-// captures title modes, NuPhone/GPS, and the START/Party/Player/Bag path. All
-// interactions use public touch regions at the requested viewport.
+// captures title modes, Options, NuPhone/GPS, and the START/Party/Player/Bag
+// path. All interactions use public touch regions at the requested viewport.
 
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
@@ -18,6 +18,7 @@ import { spawnMonster } from "../battle/spawn.ts";
 import type { PocketBagMenuHook } from "../ui/bag-menu-runtime.ts";
 import type { FeatureModesRuntimeData } from "../ui/feature-modes-data.ts";
 import type { PocketNuPhoneHook } from "../ui/nuphone-runtime.ts";
+import type { PocketOptionsHook } from "../ui/options-runtime.ts";
 import type { PocketStartMenuHook } from "../ui/start-menu-runtime.ts";
 import type { PocketTitleBattleHook, TitleMenuRowId } from "../ui/title-battle-runtime.ts";
 import type { SessionState } from "../vendor/pocket-rpgkit/src/engine/session.ts";
@@ -28,6 +29,7 @@ import {
 import {
   bootWorld,
   type SimWorld,
+  treeHasText,
 } from "../vendor/pocket-rpgkit/vendor/pocketjs/hosts/sim/sim.ts";
 
 const ROOT = resolve(import.meta.dir, "..");
@@ -53,6 +55,8 @@ export const FEATURE_MODES_CASES = [
   "party",
   "player",
   "bag",
+  "options-title",
+  "options-start",
 ] as const;
 export type FeatureModesCase = typeof FEATURE_MODES_CASES[number];
 export type FeatureModesMinigameCase = Extract<FeatureModesCase, `minigame-${string}`>;
@@ -80,6 +84,10 @@ export interface FeatureModesTouchProbe {
   startParty: boolean;
   startPlayer: boolean;
   startBag: boolean;
+  titleOptions: boolean;
+  titleOptionsCapture: boolean;
+  startOptions: boolean;
+  startOptionsVolume: boolean;
 }
 
 export interface FeatureModesMinigameProbe {
@@ -191,6 +199,12 @@ function startHook(): PocketStartMenuHook {
 function bagHook(): PocketBagMenuHook {
   const hook = globalThis.__pocketBagMenu;
   if (!hook) throw new Error("feature modes fixture: Bag hook is unavailable");
+  return hook;
+}
+
+function optionsHook(): PocketOptionsHook {
+  const hook = globalThis.__pocketOptions;
+  if (!hook) throw new Error("feature modes fixture: Options hook is unavailable");
   return hook;
 }
 
@@ -371,6 +385,62 @@ async function startCases(
   };
 }
 
+async function optionsCases(
+  viewport: { width: number; height: number },
+  lang: "en_US" | "zh_CN",
+): Promise<{
+  frames: Pick<Record<FeatureModesCase, FeatureModesFrame>, "options-title" | "options-start">;
+  titleOptions: boolean;
+  titleOptionsCapture: boolean;
+  startOptions: boolean;
+  startOptionsVolume: boolean;
+}> {
+  const titleWorld = await bootWorld(BUNDLE, 60, {
+    ...FIXED_TIME_HOST_GLOBALS,
+    __pocketTuxemonLang: lang,
+    __pocketTuxemonShowTitle: true,
+  }, undefined, viewport);
+  pump(titleWorld, 12);
+  tap(titleWorld, viewport, titleRowPoint("options"));
+  const titleOptions = treeHasNode(titleWorld.getTree(), "options-overlay");
+  const optionsTitle = capture(titleWorld);
+  // The first controls row is a real scaled touch target. Capturing begins
+  // immediately and remains inside Options instead of leaking to the title.
+  tap(titleWorld, viewport, { x: 100, y: 59 });
+  const titleOptionsCapture = treeHasNode(titleWorld.getTree(), "options-capture-dialog");
+
+  const startWorld = await bootWorld(BUNDLE, 60, {
+    ...FIXED_TIME_HOST_GLOBALS,
+    __pocketTuxemonLang: lang,
+    __pocketTuxemonShowTitle: false,
+    __pocketTuxemonSkipTitle: true,
+  }, undefined, viewport);
+  pump(startWorld, 3);
+  press(startWorld, BTN.START);
+  const runtime = startHook();
+  const optionsIndex = runtime.rows().findIndex((row) => row.id === "options");
+  if (optionsIndex < 0) throw new Error("feature modes fixture: START Options row is absent");
+  tap(startWorld, viewport, { x: 220, y: 42 + optionsIndex * 20 + 10 });
+  const startOptions = treeHasNode(startWorld.getTree(), "options-overlay");
+  const optionsStart = capture(startWorld);
+  // Resolve the general-column row from the production runtime, so the same
+  // touch remains valid when a host does or does not offer language switching.
+  const general = optionsHook().rows().filter((row) => row.section === "general");
+  const musicIndex = general.findIndex((row) => row.id === "music");
+  if (musicIndex < 0) throw new Error("feature modes fixture: Music row is absent");
+  tap(startWorld, viewport, { x: 350, y: 49 + musicIndex * 23 + 10 });
+  const startOptionsVolume = optionsHook().rows().find((row) => row.id === "music")?.value === "60%"
+    && treeHasText(startWorld.getTree(), "60%");
+
+  return {
+    frames: { "options-title": optionsTitle, "options-start": optionsStart },
+    titleOptions,
+    titleOptionsCapture,
+    startOptions,
+    startOptionsVolume,
+  };
+}
+
 const MINIGAME_DIFFICULTY_POINTS = [
   { x: 240, y: 116.5 },
   { x: 240, y: 155.5 },
@@ -484,11 +554,12 @@ export async function captureFeatureModes(
     const minigame = await minigameCases(viewport, lang);
     const phone = await phoneCases(viewport, lang);
     const start = await startCases(viewport, lang);
+    const options = await optionsCases(viewport, lang);
     return {
       width: viewport.width,
       height: viewport.height,
       lang,
-      cases: { ...title.frames, ...minigame.frames, ...phone.frames, ...start.frames },
+      cases: { ...title.frames, ...minigame.frames, ...phone.frames, ...start.frames, ...options.frames },
       touch: {
         titleBattle: title.titleBattle,
         difficultyBattle: title.difficultyBattle,
@@ -502,6 +573,10 @@ export async function captureFeatureModes(
         startParty: start.startParty,
         startPlayer: start.startPlayer,
         startBag: start.startBag,
+        titleOptions: options.titleOptions,
+        titleOptionsCapture: options.titleOptionsCapture,
+        startOptions: options.startOptions,
+        startOptionsVolume: options.startOptionsVolume,
       },
       minigame: minigame.probes,
       minigameArtUploads: minigame.artUploads,

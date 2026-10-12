@@ -58,7 +58,7 @@ describe("Options runtime rows", () => {
       "language", "screen",
     ]);
     expect(h.runtime.rows().find((row) => row.id === "screen")).toMatchObject({
-      value: "480×272 · AUTO",
+      value: "480×272",
       enabled: false,
     });
     h.runtime.open("start");
