@@ -18,6 +18,7 @@ import type {
   NuPhoneDirection,
   NuPhoneMapData,
   NuPhoneMapPoint,
+  OptionsData,
   StartMenuData,
   TitleBattleData,
   TitleBattleDifficulty,
@@ -51,6 +52,7 @@ export interface FeatureModesImport {
   titleBattle: TitleBattleImport;
   titleMinigame: TitleMinigameData;
   startMenu: StartMenuData;
+  options: OptionsData;
   worldItems: WorldItemMapData;
 }
 
@@ -199,6 +201,43 @@ export function loadStartMenu(
       potency: t("technique_potency"),
       power: t("technique_power"),
     },
+  };
+}
+
+/** Import every authored ControlState label used by the game-owned Options
+ * overlay. Missing translations fail the import instead of leaking msgids. */
+export function loadOptions(
+  catalogs: Readonly<Record<FeatureLocale, TextCatalog>> = featureCatalogs(),
+): OptionsData {
+  const t = (key: string) => translate(catalogs, key);
+  return {
+    source: "tuxemon/states/control_state.py",
+    title: t("menu_options"),
+    controls: {
+      up: t("menu_up_key"),
+      left: t("menu_left_key"),
+      right: t("menu_right_key"),
+      down: t("menu_down_key"),
+      primary: t("menu_primary_select_key"),
+      secondary: t("menu_secondary_select_key"),
+      back: t("menu_back_key"),
+    },
+    resetDefault: t("menu_reset_default"),
+    language: t("menu_language"),
+    languageEnglish: t("language_en_us"),
+    languageChinese: t("language_zh_cn"),
+    screenSize: t("menu_screen_size"),
+    muteMusic: t("menu_mute_music"),
+    unmuteMusic: t("menu_unmute_music"),
+    musicVolume: t("menu_music_volume"),
+    soundVolume: t("menu_sound_volume"),
+    units: t("menu_units"),
+    metric: t("menu_units_metric"),
+    imperial: t("menu_units_imperial"),
+    hemisphere: t("menu_hemisphere"),
+    northern: t("menu_hemisphere_north"),
+    southern: t("menu_hemisphere_south"),
+    capturePrompt: t("options_new_input_key0"),
   };
 }
 
@@ -613,6 +652,7 @@ export function loadFeatureModes(
     titleBattle: loadTitleBattle(sourceRoot, catalogs),
     titleMinigame: loadTitleMinigame(sourceRoot, catalogs),
     startMenu: loadStartMenu(catalogs),
+    options: loadOptions(catalogs),
     worldItems: {
       source: "mods/tuxemon/maps/*.tmx",
       surfable: Object.fromEntries(Object.entries(surfaceLabels)
@@ -639,6 +679,7 @@ export function featureModesRuntimeData(imported: FeatureModesImport): FeatureMo
     titleBattle: imported.titleBattle,
     titleMinigame: imported.titleMinigame,
     startMenu: imported.startMenu,
+    options: imported.options,
     worldItems: imported.worldItems,
   };
 }

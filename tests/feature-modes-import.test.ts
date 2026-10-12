@@ -4,6 +4,7 @@ import { join } from "node:path";
 
 import {
   loadFeatureModes,
+  loadOptions,
   loadStartMenu,
   loadTitleMinigame,
   parseNuPhoneMap,
@@ -43,6 +44,36 @@ describe("G12 out-of-map feature importer", () => {
       cannotUseHere: { en_US: "{name} cannot be used here!" },
     });
     expect(menu.title.newGame).toEqual({ en_US: "New Game", zh_CN: "新游戏" });
+  });
+
+  test("imports the complete Options copy from the real bilingual catalogs", () => {
+    const options = loadOptions();
+    expect(options.source).toBe("tuxemon/states/control_state.py");
+    expect(options.controls).toEqual({
+      up: { en_US: "Up Key", zh_CN: "上键" },
+      left: { en_US: "Left Key", zh_CN: "左键" },
+      right: { en_US: "Right Key", zh_CN: "右键" },
+      down: { en_US: "Down Key", zh_CN: "下键" },
+      primary: { en_US: "Action Key", zh_CN: "行动键" },
+      secondary: { en_US: "Cancel Key", zh_CN: "取消键" },
+      back: { en_US: "Back Key", zh_CN: "返回键" },
+    });
+    expect(options).toMatchObject({
+      resetDefault: { en_US: "Reset Keys to Default", zh_CN: "恢复默认按键" },
+      language: { en_US: "Language", zh_CN: "语言" },
+      screenSize: { en_US: "Screen Size (EXPERIMENTAL)", zh_CN: "屏幕尺寸（实验）" },
+      muteMusic: { en_US: "Mute Music", zh_CN: "音乐静音" },
+      musicVolume: { en_US: "Music Volume", zh_CN: "音乐音量" },
+      soundVolume: { en_US: "Sound Volume", zh_CN: "音效音量" },
+      units: { en_US: "Unit", zh_CN: "单位" },
+      metric: { en_US: "Metric", zh_CN: "公制" },
+      hemisphere: { en_US: "Hemisphere", zh_CN: "半球" },
+      northern: { en_US: "Northern", zh_CN: "北部" },
+      capturePrompt: {
+        en_US: "Press a key to set your new input key",
+        zh_CN: "按下一个键来设置新的输入键",
+      },
+    });
   });
 
   test("imports the real NuPhone graph, menu items, bilingual labels, and art", () => {

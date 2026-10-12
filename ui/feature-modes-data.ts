@@ -180,6 +180,38 @@ export interface StartMenuData {
   };
 }
 
+/** Imported copy for Tuxemon's ControlState/Options page. The port keeps the
+ * authored labels while adapting screen sizing and input capture to PocketJS. */
+export interface OptionsData {
+  source: "tuxemon/states/control_state.py";
+  title: LocalizedFeatureText;
+  controls: {
+    up: LocalizedFeatureText;
+    left: LocalizedFeatureText;
+    right: LocalizedFeatureText;
+    down: LocalizedFeatureText;
+    primary: LocalizedFeatureText;
+    secondary: LocalizedFeatureText;
+    back: LocalizedFeatureText;
+  };
+  resetDefault: LocalizedFeatureText;
+  language: LocalizedFeatureText;
+  languageEnglish: LocalizedFeatureText;
+  languageChinese: LocalizedFeatureText;
+  screenSize: LocalizedFeatureText;
+  muteMusic: LocalizedFeatureText;
+  unmuteMusic: LocalizedFeatureText;
+  musicVolume: LocalizedFeatureText;
+  soundVolume: LocalizedFeatureText;
+  units: LocalizedFeatureText;
+  metric: LocalizedFeatureText;
+  imperial: LocalizedFeatureText;
+  hemisphere: LocalizedFeatureText;
+  northern: LocalizedFeatureText;
+  southern: LocalizedFeatureText;
+  capturePrompt: LocalizedFeatureText;
+}
+
 /** Compact build-time terrain facts needed by items usable from the Bag.
  * Keeping only non-empty surfable cell lists avoids shipping the multi-MB
  * terrain audit document in the runtime bundle. */
@@ -210,6 +242,7 @@ export interface FeatureModesRuntimeData {
   titleBattle: TitleBattleData;
   titleMinigame: TitleMinigameData;
   startMenu: StartMenuData;
+  options: OptionsData;
   worldItems: WorldItemMapData;
 }
 
