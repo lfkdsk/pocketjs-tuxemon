@@ -42,7 +42,7 @@ type MeasurementExpectation = readonly [
   imperialWeight: number,
 ];
 
-const MEASUREMENT_EXPECTATIONS = measurementExpectationsJson as Record<string, MeasurementExpectation>;
+const MEASUREMENT_EXPECTATIONS = measurementExpectationsJson as unknown as Record<string, MeasurementExpectation>;
 
 interface MemoryStorage {
   readonly values: Map<string, string>;
