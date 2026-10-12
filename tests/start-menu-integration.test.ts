@@ -16,7 +16,7 @@ const PROJECT: Project = {
   initialGold: 25,
   playerName: "Hero",
   sheets: [{ id: "plain", cols: 1, rows: 1, pak: "chunks", defaultPassage: "pass" }],
-  items: [{ id: "potion", name: "Potion", price: 1 }],
+  items: [{ id: "potion", name: "Potion", sprite: "plain.0", price: 1 }],
   maps: [{
     id: "start",
     name: "Start",
