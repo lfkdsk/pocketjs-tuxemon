@@ -286,7 +286,7 @@
  "byFate": {
   "T1": 38172,
   "T3-dropped": 2,
-  "T1-lowered": 1779,
+  "T1-lowered": 1785,
   "T4-dropped": 1419,
   "T2-dropped": 195,
   "structural": 793
@@ -1491,6 +1491,12 @@
    "fate": "T1-lowered",
    "count": 468,
    "note": "partitioned: match flags then bodies"
+  },
+  {
+   "key": "trigger:start screen duplicate shadow:T1-lowered",
+   "fate": "T1-lowered",
+   "count": 6,
+   "note": "the later identical scenario materialization is the sole visible modal owner; the first page remains dormant for save ancestry"
   },
   {
    "key": "trigger:surf(boundary lowering):T1-lowered",
