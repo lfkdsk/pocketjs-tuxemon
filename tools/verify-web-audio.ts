@@ -1,8 +1,10 @@
 #!/usr/bin/env bun
-// Prove three newly imported music tracks through the real Chrome/PocketJS
-// audio path. Each map deep link runs its authored play_music event, the
-// runtime QOA decoder writes non-zero PCM to the host, the host accepts and
-// plays it, and Chrome exposes a running realtime AudioContext worklet.
+// Prove imported map and battle-lifecycle music through the real
+// Chrome/PocketJS audio path. Map deep links run authored play_music events;
+// the maintained opening tape then enters a real imported trainer battle and
+// reaches its victory presentation. For every case the runtime QOA decoder
+// writes non-zero PCM, the host accepts and plays it, and Chrome exposes a
+// running realtime AudioContext worklet without underruns.
 //
 //   bun run web
 //   bun run verify:web:audio
@@ -24,6 +26,9 @@ const TRACKS = [
   { map: "spyder_scoop1", id: "music_omnichannel" },
   { map: "tunnel_below", id: "music_dragons_cave" },
 ] as const;
+const journey = JSON.parse(readFileSync(join(ROOT, "data/g6-journey.json"), "utf8")) as {
+  masks: number[];
+};
 
 if (!existsSync(join(SITE, "pocket-tuxemon", "index.html"))) {
   console.error("verify-web-audio: no site at dist/web; run `bun run web` first");
@@ -267,6 +272,128 @@ for (const track of TRACKS) {
     `underruns=${state.probe.underruns}, errors=${errors.length - errorsBefore}`,
   );
 }
+
+// The direct-map probes above validate independent QOA assets. This replay
+// additionally validates the reducer-owned lifecycle itself: authored map
+// music -> battle -> victory -> the exact prior map track.
+audioContexts.clear();
+audioNodes.clear();
+const lifecycleErrorsBefore = errors.length;
+await navigate(base);
+await stepUntil(
+  "opening journey boot",
+  `globalThis.__pocketPlayer?.state === "running" && !!globalThis.__rpgSessionState`,
+);
+await send("Input.dispatchKeyEvent", { type: "rawKeyDown", key: "F1", code: "F1", windowsVirtualKeyCode: 112 });
+await send("Input.dispatchKeyEvent", { type: "keyUp", key: "F1", code: "F1", windowsVirtualKeyCode: 112 });
+
+interface LifecyclePhase {
+  id: string;
+  writes: number;
+  acceptedFrames: number;
+  nonZeroSamples: number;
+  maxAbs: number;
+  underruns: number;
+  stream?: { rate: number; channels: number };
+}
+
+const lifecycle = await evaluate<{
+  phases: Record<string, LifecyclePhase>;
+  preBattle: string | null;
+  restored: string | null;
+  finalScene: string | null;
+}>(`(async () => {
+  const masks = ${JSON.stringify(journey.masks)};
+  const wanted = new Set(["music_battle_loop", "music_win_battle_boss"]);
+  const p = globalThis.__pocketPlayer;
+  const probe = globalThis.__musicAudioProbe;
+  const snap = () => ({
+    writes: probe.writes,
+    acceptedFrames: probe.acceptedFrames,
+    nonZeroSamples: probe.nonZeroSamples,
+    maxAbs: probe.maxAbs,
+    underruns: probe.underruns,
+    creates: probe.creates.length,
+    plays: probe.plays.length,
+  });
+  const phases = {};
+  let active = null;
+  let previousId = globalThis.__rpgSessionState.interp.audio?.bgm?.id ?? null;
+  let preBattle = null;
+  let restored = null;
+  for (let frame = 1; frame < masks.length; frame++) {
+    const before = snap();
+    p.buttons = () => masks[frame];
+    p.step();
+    const state = globalThis.__rpgSessionState;
+    const id = state.interp.audio?.bgm?.id ?? null;
+    if (id !== previousId && wanted.has(id)) {
+      if (id === "music_battle_loop") preBattle = previousId;
+      active = { id, start: before };
+    }
+    if (active && id === active.id) {
+      const after = snap();
+      const newCreates = probe.creates.slice(active.start.creates);
+      const newPlays = probe.plays.slice(active.start.plays);
+      const stream = newCreates.find((candidate) => newPlays.includes(candidate.handle));
+      phases[active.id] = {
+        id: active.id,
+        writes: after.writes - active.start.writes,
+        acceptedFrames: after.acceptedFrames - active.start.acceptedFrames,
+        nonZeroSamples: after.nonZeroSamples - active.start.nonZeroSamples,
+        maxAbs: after.maxAbs,
+        underruns: after.underruns - active.start.underruns,
+        ...(stream ? { stream: { rate: stream.rate, channels: stream.channels } } : {}),
+      };
+    }
+    if (preBattle && phases.music_win_battle_boss && state.scene === null && id === preBattle) {
+      restored = id;
+    }
+    previousId = id;
+    if (frame % 60 === 0) await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+  const final = globalThis.__rpgSessionState;
+  return { phases, preBattle, restored, finalScene: final.scene?.kind ?? null };
+})()`);
+
+const lifecycleDeadline = Date.now() + 10_000;
+let lifecycleContext: Record<string, any> | undefined;
+let lifecycleWorklet: Record<string, any> | undefined;
+while (Date.now() < lifecycleDeadline) {
+  lifecycleContext = [...audioContexts.values()].find((candidate) =>
+    candidate.contextType === "realtime" && candidate.contextState === "running"
+  );
+  lifecycleWorklet = lifecycleContext && [...audioNodes.values()].find((candidate) =>
+    candidate.contextId === lifecycleContext!.contextId && /worklet/i.test(String(candidate.nodeType))
+  );
+  if (lifecycleContext && lifecycleWorklet) break;
+  await sleep(20);
+}
+
+for (const id of ["music_battle_loop", "music_win_battle_boss"] as const) {
+  const phase = lifecycle.phases[id];
+  const ok = phase !== undefined && phase.writes > 0 && phase.acceptedFrames > 0 &&
+    phase.nonZeroSamples > 0 && phase.maxAbs > 0 && phase.underruns === 0 &&
+    phase.stream?.rate === 22050 && phase.stream.channels === 1;
+  if (!ok) failures++;
+  console.log(
+    `${ok ? "ok  " : "FAIL"} ${id} in imported trainer battle: ` +
+    `stream=${phase?.stream?.rate ?? "?"}Hz/${phase?.stream?.channels ?? "?"}ch, ` +
+    `writes=${phase?.writes ?? 0}, accepted=${phase?.acceptedFrames ?? 0}, ` +
+    `nonzero=${phase?.nonZeroSamples ?? 0}, peak=${phase?.maxAbs ?? 0}, ` +
+    `underruns=${phase?.underruns ?? "?"}`,
+  );
+}
+const lifecycleOk = lifecycle.preBattle !== null && lifecycle.restored === lifecycle.preBattle &&
+  lifecycle.finalScene === null && lifecycleContext !== undefined && lifecycleWorklet !== undefined &&
+  errors.length === lifecycleErrorsBefore;
+if (!lifecycleOk) failures++;
+console.log(
+  `${lifecycleOk ? "ok  " : "FAIL"} battle audio lifecycle: ` +
+  `map=${lifecycle.preBattle ?? "missing"}->battle->victory->${lifecycle.restored ?? "missing"}, ` +
+  `context=${lifecycleContext?.contextState ?? "missing"}, ` +
+  `node=${lifecycleWorklet?.nodeType ?? "missing"}, errors=${errors.length - lifecycleErrorsBefore}`,
+);
 
 if (errors.length > 0) {
   console.error(`verify-web-audio: ${errors.length} browser error(s):\n  ${errors.join("\n  ")}`);

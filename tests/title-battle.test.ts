@@ -30,6 +30,7 @@ import type {
 import {
   createSession,
   startSession,
+  stepSession,
   type SessionState,
 } from "../vendor/pocket-rpgkit/src/engine/session.ts";
 import type { Project } from "../vendor/pocket-rpgkit/src/engine/types.ts";
@@ -70,6 +71,20 @@ function fixture(initiallyOpen = true) {
     battle: rules,
   });
   let live = startSession(PROJECT, session);
+  live = {
+    ...live,
+    interp: {
+      ...live.interp,
+      audio: {
+        bgm: {
+          id: "music_title_theme",
+          volume: 80,
+          pitch: 110,
+          positionTicks: 37,
+        },
+      },
+    },
+  };
   const campaign = live;
   const host: GameViewSessionHost = {
     project: PROJECT,
@@ -113,6 +128,16 @@ describe("title Battle mode", () => {
         const temporary = f.live();
         expect(temporary).not.toBe(f.campaign);
         expect(temporary.scene?.kind).toBe("battle");
+        expect(temporary.scene?.kind === "battle" ? temporary.scene.returnAudio : undefined)
+          .toEqual(f.campaign.interp.audio);
+        expect(temporary.interp.audio).toEqual({
+          bgm: {
+            id: "music_battle_loop",
+            volume: 100,
+            pitch: 100,
+            positionTicks: 0,
+          },
+        });
         expect(f.runtime.ownsSession()).toBeTrue();
         const started = tuxemonRuntimeBattleState(temporary.scene!.state);
         expect(started.battle.parties.map((party) => party.length)).toEqual([1, 1]);
@@ -121,6 +146,7 @@ describe("title Battle mode", () => {
         expect(f.rules.done(temporary.scene!.state)).toBeNull();
 
         let restored = false;
+        let resultTrack: string | null | undefined;
         for (let frame = 0; frame < 20_000; frame++) {
           const live = f.live();
           if (live === f.campaign) {
@@ -130,8 +156,11 @@ describe("title Battle mode", () => {
           if (live.scene?.kind !== "battle") throw new Error("title battle scene disappeared");
           const state = tuxemonRuntimeBattleState(live.scene.state);
           const input = battleAutoplayInput(RULES_DB, state, { capture: "never" });
-          const next = f.rules.step(live.scene.state, input, 15);
-          f.setLive({ ...live, scene: { ...live.scene, state: next } });
+          f.setLive(stepSession(f.host.session, live, input));
+          const stepped = f.live();
+          if (stepped.scene?.kind !== "battle") throw new Error("title battle scene disappeared");
+          const completion = f.rules.titleCompletion(stepped.scene.state);
+          if (completion !== null) resultTrack = stepped.interp.audio?.bgm?.id;
           f.runtime.step(0, 0);
         }
         expect(restored).toBeTrue();
@@ -141,6 +170,8 @@ describe("title Battle mode", () => {
         expect(f.runtime.ownsSession()).toBeFalse();
         expect(f.runtime.state().result).not.toBeNull();
         expect(["win", "lose", "draw"]).toContain(f.runtime.state().result!);
+        if (f.runtime.state().result === "win") expect(resultTrack).toBe("music_win_battle_boss");
+        if (f.runtime.state().result === "lose") expect(resultTrack).toBe("music_gameover");
       } finally {
         dispose();
       }

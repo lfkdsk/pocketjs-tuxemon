@@ -29,6 +29,10 @@ export const TUXEMON_COMPATIBLE_SAVE_CONTENT = Object.freeze([
   },
   {
     manifest: "6322d4d6af2331cd68011422320424f4357d6e546e3d6f83e7e7ef47ae7c4551",
+    schema: "9435a3b7f420c7e7876a7d211e8b2842bdc60e483c54c60cd550d7f5effc7d1c",
+  },
+  {
+    manifest: "6322d4d6af2331cd68011422320424f4357d6e546e3d6f83e7e7ef47ae7c4551",
     schema: "5eecc57a1acad4721139225b1bed1e35ae581706c29e611909d58b2c90efb41b",
   },
   {

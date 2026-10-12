@@ -149,6 +149,7 @@ function settle(answers: string[] = [], maxFrames = 3000): void {
       continue;
     }
     if (m.kind === "text") { tick(0, { confirm: true }); tick(); continue; }
+    if (m.kind === "scrollText") { tick(BTN_CONFIRM); tick(); continue; }
     if (m.kind === "shop") { tick(0, { cancel: true }); tick(); continue; }
     const want = answers.shift();
     const idx = want === undefined ? 0 : m.options.findIndex((o) => o === want);
@@ -274,6 +275,18 @@ function expect(what: string, ok: boolean): void {
   if (!ok) { writeOut(); throw new Error(`smoke: ${what}`); }
 }
 
+/** Track program without the reducer clock: a restored map mix resumes from
+ * its suspended position, then advances again before this post-battle sample. */
+function audioProgram(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(audioProgram);
+  if (value !== null && typeof value === "object") {
+    return Object.fromEntries(Object.entries(value as Record<string, unknown>)
+      .filter(([key]) => key !== "positionTicks")
+      .map(([key, child]) => [key, audioProgram(child)]));
+  }
+  return value;
+}
+
 function checkpoint(name: string): void {
   checkpoints.push({ name, frame: frames - 1, map: st.mapId, position: [st.move.tx, st.move.ty] });
   note(`MARK  ${name} ${st.mapId} @${st.move.tx},${st.move.ty}`);
@@ -397,10 +410,14 @@ const baseline = new AttractController(inlineProject, [], {
   rewindSeconds: 1 / HZ,
 });
 baseline.startPlay();
-for (const mask of masks) baseline.step(mask);
+const rewindTarget = Math.floor((battleStartFrame + battleEndFrame) / 2);
+let rewindTargetState = "";
+for (let frame = 0; frame < masks.length; frame++) {
+  baseline.step(masks[frame]!);
+  if (frame + 1 === rewindTarget) rewindTargetState = canonicalJson(baseline.state);
+}
 expect("the recorded tape replays to the reducer-identical result", canonicalJson(baseline.state) === canonicalJson(st));
 
-const rewindTarget = Math.floor((battleStartFrame + battleEndFrame) / 2);
 const rewindAt = Math.min(masks.length, battleEndFrame + Math.max(2, Math.ceil(HZ / 5)));
 const rewound = new AttractController(inlineProject, [], {
   ...attractOptions,
@@ -408,9 +425,26 @@ const rewound = new AttractController(inlineProject, [], {
 });
 rewound.startPlay();
 for (let frame = 0; frame < rewindAt; frame++) rewound.step(masks[frame]!);
+const mapAudioBeforeRewind = canonicalJson(rewound.state.interp.audio ?? null);
 rewound.step(BTN_LTRIGGER);
 expect("L rewind crossed back into the active battle", rewound.state.scene?.kind === "battle");
-for (let frame = rewindTarget; frame < masks.length; frame++) rewound.step(masks[frame]!);
+expect("L rewind restored the imported battle cue",
+  rewound.state.interp.audio?.bgm?.id === "music_battle_loop");
+expect("L rewind retained the suspended map mix program",
+  rewound.state.scene?.kind === "battle" &&
+  canonicalJson(audioProgram(rewound.state.scene.returnAudio ?? null)) ===
+    canonicalJson(audioProgram(JSON.parse(mapAudioBeforeRewind))));
+expect("L rewind restored the reducer-identical active battle state",
+  canonicalJson(rewound.state) === rewindTargetState);
+let replayedResultCue = false;
+for (let frame = rewindTarget; frame < masks.length; frame++) {
+  rewound.step(masks[frame]!);
+  if (rewound.state.interp.audio?.bgm?.id ===
+    (OUTCOME === "win" ? "music_win_battle_boss" : "music_gameover")) {
+    replayedResultCue = true;
+  }
+}
+expect(`replaying after L rewind projected the ${OUTCOME} result cue`, replayedResultCue);
 expect("replaying after L rewind restores the identical result", canonicalJson(rewound.state) === canonicalJson(baseline.state));
 
 note(`END   frames=${frames} at ${HZ} Hz (${(frames / HZ).toFixed(1)} s virtual)`);

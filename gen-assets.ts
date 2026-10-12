@@ -738,8 +738,14 @@ writeFileSync(join(DIST, "weather.json"), jsonBytes({
 // One spawn per map for the demo menu's map jump list: a transfer landing
 // when one exists, else the first standable cell outside every event area.
 writeFileSync(join(ROOT, "data/warp.json"), jsonBytes(warpIndex));
-writeFileSync(join(ROOT, "reports/G1-coverage.md"), coverageMarkdown(imported.report));
-writeFileSync(join(ROOT, "reports/G1-coverage.zh_CN.md"), coverageMarkdown(zhImported.report));
+writeFileSync(
+  join(ROOT, "reports/G1-coverage.md"),
+  coverageMarkdown(imported.report, battle.report.battleMusic),
+);
+writeFileSync(
+  join(ROOT, "reports/G1-coverage.zh_CN.md"),
+  coverageMarkdown(zhImported.report, battleZh.report.battleMusic),
+);
 
 function gameAssetsSource(
   player: PlayerFrames,

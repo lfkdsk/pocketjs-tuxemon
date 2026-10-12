@@ -677,6 +677,34 @@ export interface ChapterSuffixResult {
   suffixFrames: number;
   terminalSha256: string;
   matches: boolean;
+  audioTransitions: number;
+  audioMatches: boolean;
+}
+
+interface ChapterAudioTransition {
+  frame: number;
+  battle: boolean;
+  bgm: string | null;
+}
+
+function audioTransition(frame: number, state: SessionState): ChapterAudioTransition {
+  return {
+    frame,
+    battle: state.scene?.kind === "battle",
+    bgm: state.interp.audio?.bgm?.id ?? null,
+  };
+}
+
+function pushAudioTransition(
+  transitions: ChapterAudioTransition[],
+  frame: number,
+  state: SessionState,
+): void {
+  const next = audioTransition(frame, state);
+  const previous = transitions[transitions.length - 1];
+  if (!previous || previous.battle !== next.battle || previous.bgm !== next.bgm) {
+    transitions.push(next);
+  }
 }
 
 /** Prove every committed chapter envelope, restored through the public
@@ -708,12 +736,21 @@ export function verifyChapterSuffixes(root: string = ROOT): ChapterSuffixResult[
 
   // One full replay: the terminal state every suffix must reach.
   let terminal = startSession(project, session);
+  const fullAudio: ChapterAudioTransition[] = [audioTransition(0, terminal)];
   let previous = 0;
   for (let f = 1; f <= combined.length; f++) {
     const mask = combined[f - 1]!;
     terminal = stepSession(session, terminal, input(mask, previous));
+    pushAudioTransition(fullAudio, f, terminal);
     previous = mask;
   }
+  expect("full replay never selected the imported battle cue",
+    fullAudio.some((transition) => transition.battle && transition.bgm === "music_battle_loop"));
+  expect("full replay never selected the imported victory cue",
+    fullAudio.some((transition) => transition.battle && transition.bgm === "music_win_battle_boss"));
+  expect("full replay never restored map music after a victory cue",
+    fullAudio.some((transition, index) => index > 0 && !transition.battle && transition.bgm !== null &&
+      fullAudio[index - 1]!.bgm === "music_win_battle_boss"));
   const terminalHash = sha256(canonicalJson(terminal));
   const j4 = JSON.parse(readFileSync(J4_PATH, "utf8")) as { terminalStateSha256?: string };
   expect("full-replay terminal hash != the J4 journey pin",
@@ -726,13 +763,21 @@ export function verifyChapterSuffixes(root: string = ROOT): ChapterSuffixResult[
     // Resume the global timeline the envelope does not carry (see the
     // timelineFrame field comment).
     state = { ...state, frame: chapter.timelineFrame };
+    const chapterAudio: ChapterAudioTransition[] = [audioTransition(chapter.frame, state)];
     let prev = decoded.held >>> 0;
     for (let f = chapter.frame; f < combined.length; f++) {
       const mask = combined[f]!;
       state = stepSession(session, state, input(mask, prev));
+      pushAudioTransition(chapterAudio, f + 1, state);
       prev = mask;
     }
     const hash = sha256(canonicalJson(state));
+    const activeAtStart = [...fullAudio].reverse().find((transition) => transition.frame <= chapter.frame)!;
+    const expectedAudio: ChapterAudioTransition[] = [
+      { ...activeAtStart, frame: chapter.frame },
+      ...fullAudio.filter((transition) => transition.frame > chapter.frame),
+    ];
+    const audioMatches = canonicalJson(chapterAudio) === canonicalJson(expectedAudio);
     results.push({
       id: chapter.id,
       startFrame: chapter.frame,
@@ -740,11 +785,15 @@ export function verifyChapterSuffixes(root: string = ROOT): ChapterSuffixResult[
       suffixFrames: chapter.suffixFrames,
       terminalSha256: hash,
       matches: hash === terminalHash,
+      audioTransitions: chapterAudio.length,
+      audioMatches,
     });
   }
   for (const result of results) {
     expect(`chapter ${result.id}: snapshot + suffix did not reach the full-replay terminal state`,
       result.matches);
+    expect(`chapter ${result.id}: snapshot + suffix changed battle/map audio transitions`,
+      result.audioMatches);
   }
   return results;
 }

@@ -5,6 +5,7 @@
 // the full pak's index over a filtered sidecar — is rejected.
 
 import { describe, expect, test } from "bun:test";
+import { createHash } from "node:crypto";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -115,6 +116,12 @@ describe("PSP build self-check (checkExternalPak)", () => {
     { key: "battle/items/app_map.json", dtype: 0, data: new Uint8Array([4]) },
     { key: "maps-zh/spyder_bedroom.json", dtype: 0, data: new Uint8Array([5]) },
   ];
+  const town = sidecarEntries[1]!;
+  const townRequirement = {
+    key: town.key,
+    bytes: town.data.length,
+    sha256: createHash("sha256").update(town.data).digest("hex"),
+  };
 
   /** A synthetic PSP output dir: sidecar + boot pak whose embedded index is
    *  the sidecar's header+directory prefix. */
@@ -144,6 +151,26 @@ describe("PSP build self-check (checkExternalPak)", () => {
       // the map sample (the old loose predicate picked battle/items/app_map.json).
       expect(keys).not.toContain("battle/items/app_map.json");
       expect(summary.samples.every((s) => s.bytes > 0)).toBe(true);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("pins required lifecycle audio by exact key, size and hash", () => {
+    const dir = buildOutDir();
+    try {
+      const summary = checkExternalPak(dir, [townRequirement]);
+      expect(summary.samples).toContainEqual({
+        kind: "battle-audio",
+        key: town.key,
+        bytes: town.data.length,
+      });
+      expect(() => checkExternalPak(dir, [{ ...townRequirement, bytes: town.data.length - 1 }]))
+        .toThrow(/has 440096 bytes, expected 440095/);
+      expect(() => checkExternalPak(dir, [{ ...townRequirement, sha256: "0".repeat(64) }]))
+        .toThrow(/sha256/);
+      expect(() => checkExternalPak(dir, [{ ...townRequirement, key: "audio:qoa.music/missing.qoa" }]))
+        .toThrow(/embedded index cannot locate/);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

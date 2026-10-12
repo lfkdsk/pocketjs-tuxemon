@@ -50,6 +50,7 @@ describe("content music catalogue", () => {
   test("finds all map and environment references", () => {
     expect(catalog.mapActionCount).toBe(200);
     expect(catalog.environmentReferenceCount).toBe(120);
+    expect(catalog.npcReferenceCount).toBe(0);
   });
 
   test("resolves exactly the 24 content-backed music slugs", () => {

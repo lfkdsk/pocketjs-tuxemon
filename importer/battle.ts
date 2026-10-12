@@ -30,6 +30,8 @@ import {
   type BattleAnimationRef,
   type BattleDb,
   type BattleImageRef,
+  type BattleMusicCatalog,
+  type BattleMusicSet,
   type JournalMonsterIndexEntry,
   type BattlePlugin,
   type BattleRangeRule,
@@ -41,6 +43,7 @@ import {
   type WeatherRow,
 } from "./battle-schema.ts";
 import { loadWeatherTable } from "./time-weather.ts";
+import { audioAssetIds, audioId } from "./audio.ts";
 
 const DB_PAK_KEY = "game:battle-db";
 const PLAYER_NAMES = new Set(["", "player"]);
@@ -169,6 +172,7 @@ interface Tables {
   environment: Record<string, Raw>;
   animation: Record<string, Raw>;
   economy: Record<string, Raw>;
+  music: Record<string, Raw>;
 }
 
 export interface BattleAssetStats {
@@ -227,6 +231,14 @@ export interface BattleImportReport {
   battleDbBytes: number;
   runtimeDbBytes: number;
   pakKey: string;
+  battleMusic: {
+    environmentSets: number;
+    npcOverrideSets: number;
+    resolvedCues: number;
+    silentCues: number;
+    uniqueTracks: string[];
+    invalidReferencePolicy: "reject-like-upstream-music-properties";
+  };
   /** GP1: the sharded, lazily-loaded projection of the runtime database. */
   battleRepository: {
     shellBytes: number;
@@ -287,6 +299,51 @@ function number(value: unknown, fallback = 0): number {
 
 function optionalString(value: unknown): string | null {
   return typeof value === "string" && value.length > 0 ? value : null;
+}
+
+const BATTLE_MUSIC_FIELDS = [
+  ["battle", "battle"],
+  ["victory_music", "victory"],
+  ["defeat_music", "defeat"],
+] as const;
+
+/** Normalize one upstream BattleMusicModel. Invalid DB slugs fail import,
+ * matching MusicProperties.music_exists; valid-but-unpackaged tracks also
+ * fail because a runtime logical id that cannot play is not useful. */
+export function parseBattleMusicSet(
+  value: unknown,
+  label: string,
+  musicSlugs: ReadonlySet<string>,
+  packagedAudioIds: ReadonlySet<string>,
+): BattleMusicSet {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error(`battle importer: ${label} battle_music must be an object`);
+  }
+  const raw = value as Raw;
+  const output = {} as BattleMusicSet;
+  for (const [sourceField, runtimeField] of BATTLE_MUSIC_FIELDS) {
+    const properties = raw[sourceField];
+    if (!properties || typeof properties !== "object" || Array.isArray(properties) || !("music" in properties)) {
+      throw new Error(`battle importer: ${label} battle_music.${sourceField}.music is required`);
+    }
+    const music = (properties as Raw).music;
+    if (music === null) {
+      output[runtimeField] = null;
+      continue;
+    }
+    if (typeof music !== "string" || music.length === 0) {
+      throw new Error(`battle importer: ${label} battle_music.${sourceField}.music must be a non-empty slug or null`);
+    }
+    if (!musicSlugs.has(music)) {
+      throw new Error(`battle importer: ${label} battle_music.${sourceField} references missing upstream music '${music}'`);
+    }
+    const id = audioId(music);
+    if (!packagedAudioIds.has(id)) {
+      throw new Error(`battle importer: ${label} battle_music.${sourceField} references unpackaged music '${music}'`);
+    }
+    output[runtimeField] = id;
+  }
+  return output;
 }
 
 /** Parent slugs from the history entry matching this monster's slug. The
@@ -387,7 +444,24 @@ function loadTables(sourceRoot: string): Tables {
     environment: loadTable(dbRoot, "environment"),
     animation: loadTable(dbRoot, "animation"),
     economy: loadTable(dbRoot, "economy"),
+    music: loadTable(dbRoot, "music"),
   };
+}
+
+function battleMusicCatalog(tables: Tables): BattleMusicCatalog {
+  const musicSlugs = new Set(sortedKeys(tables.music));
+  const packaged = audioAssetIds();
+  const environments = Object.fromEntries(sortedKeys(tables.environment).map((slug) => [
+    slug,
+    parseBattleMusicSet(tables.environment[slug]!.battle_music, `environment ${slug}`, musicSlugs, packaged),
+  ]));
+  const npcOverrides: Record<string, BattleMusicSet> = {};
+  for (const slug of sortedKeys(tables.npc)) {
+    const override = object(tables.npc[slug]!.audio).battle_music;
+    if (override === undefined || override === null) continue;
+    npcOverrides[slug] = parseBattleMusicSet(override, `npc ${slug}`, musicSlugs, packaged);
+  }
+  return { environments, npcOverrides };
 }
 
 function arg(rule: Rule, index: number, fallback = ""): string {
@@ -1117,6 +1191,7 @@ export function runtimeBattleDb(db: BattleDb): BattleDb {
     items,
     statuses,
     encounters: db.encounters,
+    battleMusic: db.battleMusic,
     npcs: Object.fromEntries(Object.entries(db.npcs).map(([slug, npc]) => [slug, {
       combatSheet: npc.combatSheet,
       ...(npc.art ? { art: npc.art } : {}),
@@ -1201,6 +1276,7 @@ export function splitBattleRuntimeDb(
     tastes: db.tastes,
     tasteOrder: db.tasteOrder,
     encounters: db.encounters,
+    battleMusic: db.battleMusic,
     environments: db.environments,
     weather: db.weather,
     npcs: db.npcs,
@@ -1514,6 +1590,7 @@ export function writeBattleArtifacts(options: BattleImportOptions): BattleBuild 
     })),
     sources: party.sources,
   }));
+  const battleMusic = battleMusicCatalog(tables);
 
   const db: BattleDb = {
     format: "pocket-tuxemon/battle-db/v1",
@@ -1567,6 +1644,7 @@ export function writeBattleArtifacts(options: BattleImportOptions): BattleBuild 
     items,
     statuses,
     encounters,
+    battleMusic,
     npcs,
     trainerParties,
     environments,
@@ -1627,6 +1705,17 @@ export function writeBattleArtifacts(options: BattleImportOptions): BattleBuild 
     battleDbBytes: dbData.byteLength,
     runtimeDbBytes: runtimeDbData.byteLength,
     pakKey: DB_PAK_KEY,
+    battleMusic: {
+      environmentSets: Object.keys(battleMusic.environments).length,
+      npcOverrideSets: Object.keys(battleMusic.npcOverrides).length,
+      resolvedCues: [...Object.values(battleMusic.environments), ...Object.values(battleMusic.npcOverrides)]
+        .flatMap((set) => [set.battle, set.victory, set.defeat]).filter((cue) => cue !== null).length,
+      silentCues: [...Object.values(battleMusic.environments), ...Object.values(battleMusic.npcOverrides)]
+        .flatMap((set) => [set.battle, set.victory, set.defeat]).filter((cue) => cue === null).length,
+      uniqueTracks: [...new Set([...Object.values(battleMusic.environments), ...Object.values(battleMusic.npcOverrides)]
+        .flatMap((set) => [set.battle, set.victory, set.defeat]).filter((cue): cue is string => cue !== null))].sort(),
+      invalidReferencePolicy: "reject-like-upstream-music-properties",
+    },
     battleRepository: {
       shellBytes: split.shellText.length,
       entries: split.entries.length,

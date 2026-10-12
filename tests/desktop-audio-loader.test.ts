@@ -192,22 +192,18 @@ test("ready and deferred handoff frames still sync one-frame WAV cues", () => {
     releaseReady: (releasedKey) => released.push(releasedKey),
   };
   const synced: string[][] = [];
-  const drivers: Array<{ sync(state: StagedAudioFrameState): void; dispose(): void }> = [];
-  const createDriver = () => {
-    const driver = {
-      sync(state: StagedAudioFrameState) {
-        synced.push(state.interp.cues.map((cue) => "stop" in cue ? "stop" : cue.name));
-      },
-      dispose() {},
-    };
-    drivers.push(driver);
-    return driver;
+  const retried: string[] = [];
+  const driver = {
+    sync(state: StagedAudioFrameState) {
+      synced.push(state.interp.cues.map((cue) => "stop" in cue ? "stop" : cue.name));
+    },
+    retryResource: (resource: string) => retried.push(resource),
+    dispose() {},
   };
   const coordinator = createStagedDesktopAudioCoordinator(
     { song: key, click: "audio:wav.click" },
     staged,
-    createDriver(),
-    createDriver,
+    driver,
     "map-a",
   );
 
@@ -220,11 +216,11 @@ test("ready and deferred handoff frames still sync one-frame WAV cues", () => {
     ["click-waiting"],
     ["click-handoff"],
   ]);
-  expect(drivers).toHaveLength(2);
+  expect(retried).toEqual([key]);
   expect(released).toEqual([key]);
 });
 
-test("a stale ready buffer invalidates the driver's cached miss on the next idle frame", () => {
+test("a stale ready buffer invalidates only its cached miss", () => {
   const key = "audio:qoa.music/a.qoa";
   let pending = true;
   const released: string[] = [];
@@ -237,34 +233,30 @@ test("a stale ready buffer invalidates the driver's cached miss on the next idle
     },
     releaseReady: (releasedKey) => released.push(releasedKey),
   };
-  const syncFrames: number[][] = [];
+  const syncFrames: number[] = [];
+  const retried: string[] = [];
   let disposed = 0;
-  const createDriver = () => {
-    const frames: number[] = [];
-    syncFrames.push(frames);
-    return {
-      sync(state: StagedAudioFrameState) { frames.push(state.frame); },
-      dispose() { disposed++; },
-    };
+  const driver = {
+    sync(state: StagedAudioFrameState) { syncFrames.push(state.frame); },
+    retryResource(resource: string) { retried.push(resource); },
+    dispose() { disposed++; },
   };
   const coordinator = createStagedDesktopAudioCoordinator(
     { song: key },
     staged,
-    createDriver(),
-    createDriver,
+    driver,
     "map-a",
   );
 
   coordinator.sync(audioState(1, "map-a", "song", "first"), true);
   coordinator.sync(audioState(2, "map-b", undefined, "busy"), false);
-  expect(syncFrames).toHaveLength(1);
   coordinator.sync(audioState(3, "map-b", undefined, "cooldown"), true);
-  expect(syncFrames).toHaveLength(1);
   coordinator.sync(audioState(4, "map-b", undefined, "reset"), true);
 
   expect(released).toEqual([key]);
-  expect(syncFrames).toEqual([[1, 2, 3], [4]]);
-  expect(disposed).toBe(1);
+  expect(retried).toEqual([key]);
+  expect(syncFrames).toEqual([1, 2, 3, 4]);
+  expect(disposed).toBe(0);
 });
 
 test("handoff of a repeated reducer state does not replay its one-frame cue", () => {
@@ -280,17 +272,21 @@ test("handoff of a repeated reducer state does not replay its one-frame cue", ()
     releaseReady() {},
   };
   const synced: string[][] = [];
-  const createDriver = () => ({
+  let previous: StagedAudioFrameState | undefined;
+  const driver = {
     sync(state: StagedAudioFrameState) {
-      synced.push(state.interp.cues.map((cue) => "stop" in cue ? "stop" : cue.name));
+      synced.push(previous === state
+        ? []
+        : state.interp.cues.map((cue) => "stop" in cue ? "stop" : cue.name));
+      previous = state;
     },
+    retryResource() {},
     dispose() {},
-  });
+  };
   const coordinator = createStagedDesktopAudioCoordinator(
     { song: key, click: "audio:wav.click" },
     staged,
-    createDriver(),
-    createDriver,
+    driver,
     "map-a",
   );
   const state = audioState(1, "map-a", "song", "click-once");
@@ -299,4 +295,52 @@ test("handoff of a repeated reducer state does not replay its one-frame cue", ()
   coordinator.sync(state, true);
 
   expect(synced).toEqual([["click-once"], []]);
+});
+
+test("scene boundaries sync immediately but defer desktop sidecar I/O one frame", () => {
+  let pumps = 0;
+  const staged: StagedDesktopAudioReader = {
+    read: () => new Uint8Array([1]),
+    hasPending: () => true,
+    pump: () => {
+      pumps++;
+      return { kind: "progress", key: "audio:qoa.music/pending.qoa" };
+    },
+    releaseReady() {},
+  };
+  const syncFrames: number[] = [];
+  const driver = {
+    sync(state: StagedAudioFrameState) { syncFrames.push(state.frame); },
+    retryResource() {},
+    dispose() {},
+  };
+  const coordinator = createStagedDesktopAudioCoordinator(
+    { map: "audio:qoa.music/map.qoa", battle: "audio:qoa.music/battle.qoa" },
+    staged,
+    driver,
+    "map-a",
+  );
+  const state = (
+    frame: number,
+    scene: StagedAudioFrameState["scene"],
+    bgm: string,
+  ): StagedAudioFrameState => ({
+    ...audioState(frame, "map-a", bgm, `cue-${frame}`),
+    scene,
+  });
+
+  coordinator.sync(state(1, null, "map"), false);
+  coordinator.sync(state(2, { kind: "battle" }, "battle"), true);
+  expect(pumps).toBe(0);
+  // GameWorldCacheDriver reports busy for the whole scene because map
+  // prefetch is parked. Only the boundary frame is forbidden; the stable
+  // battle frame must still make progress on its scene-owned sidecar.
+  coordinator.sync(state(3, { kind: "battle" }, "battle"), false);
+  expect(pumps).toBe(1);
+  coordinator.sync(state(4, null, "map"), true);
+  expect(pumps).toBe(1);
+  coordinator.sync(state(5, null, "map"), true);
+  expect(pumps).toBe(2);
+
+  expect(syncFrames).toEqual([1, 2, 3, 4, 5]);
 });

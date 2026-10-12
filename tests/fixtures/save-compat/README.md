@@ -31,6 +31,9 @@ not hand-authored envelopes or toy projects:
 - `main-08efc758/` is the current published main before the NuPhone map and
   title Battle mode. It carries the current mainline tape hash and
   continuation digest.
+- `main-35a2af17/` is the published NuPhone/title-Battle main immediately
+  before battle lifecycle music. Its unedited slot is replayed through every
+  remaining battle by the compatibility test.
 
 To reproduce a fixture, make a detached checkout of the named game commit with
 recursive submodules, run `bun install --frozen-lockfile`, run the importer

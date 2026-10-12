@@ -489,6 +489,15 @@ mod g6_quickjs_bench {
         let host_init_ms = host_init_start.elapsed().as_secs_f64() * 1_000.0;
 
         let (compile_ms, eval_ms) = gp1_eval_staged(&guest, &args.app, &source)?;
+        // Native-audio verification wraps the mounted audio namespace after
+        // the production bundle has installed its frame handler. Ordinary
+        // performance runs do not set this variable and pay no extra eval or
+        // per-frame work.
+        if let Ok(path) = std::env::var("G6_AUDIO_PROBE_SCRIPT") {
+            let probe = std::fs::read_to_string(&path)
+                .map_err(|error| anyhow!("read audio probe {path}: {error}"))?;
+            guest.eval("g6-native-audio-probe", &probe)?;
+        }
 
         let host_finish_start = Instant::now();
         if !guest.has_frame() {
@@ -2604,6 +2613,12 @@ mod g6_quickjs_bench {
             used as f64 / 1_048_576.0,
             malloc as f64 / 1_048_576.0,
         );
+        if std::env::var("G6_AUDIO_PROBE_SCRIPT").is_ok() {
+            let report = bench.string(
+                "JSON.stringify(globalThis.__pocketTuxemonAudioProbe.report())",
+            );
+            println!("AUDIO_PROBE {report}");
+        }
         let _ = std::fs::remove_dir_all(data);
     }
 

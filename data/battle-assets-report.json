@@ -26,7 +26,7 @@
   "textureBytes": 30922008,
   "encodedBytes": 2780624,
   "residentBytes": 16214784,
-  "pakBytes": 4417424,
+  "pakBytes": 4422640,
   "maxWidth": 512,
   "maxHeight": 512,
   "quantization": {
@@ -126,11 +126,23 @@
    }
   }
  },
- "battleDbBytes": 1577736,
- "runtimeDbBytes": 1428739,
+ "battleDbBytes": 1582957,
+ "runtimeDbBytes": 1433960,
  "pakKey": "game:battle-db",
+ "battleMusic": {
+  "environmentSets": 40,
+  "npcOverrideSets": 0,
+  "resolvedCues": 120,
+  "silentCues": 0,
+  "uniqueTracks": [
+   "music_battle_loop",
+   "music_gameover",
+   "music_win_battle_boss"
+  ],
+  "invalidReferencePolicy": "reject-like-upstream-music-properties"
+ },
  "battleRepository": {
-  "shellBytes": 233042,
+  "shellBytes": 238263,
   "entries": 815,
   "entryBytes": 1116356
  }

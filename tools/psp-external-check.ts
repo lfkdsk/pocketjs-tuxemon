@@ -7,6 +7,7 @@
 // fails fast on a mismatched index, and so a test can exercise the logic
 // without the PSP toolchain.
 
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { unpack } from "../vendor/pocket-rpgkit/vendor/pocketjs/framework/compiler/pak.ts";
@@ -116,7 +117,16 @@ export function readEntryVia(index: Uint8Array, sidecar: Uint8Array, key: string
  *  battle tile are located THROUGH THE EMBEDDED DIRECTORY (the same binary
  *  search the PSP host runs) and read from the sidecar. Returns a summary
  *  object. */
-export function checkExternalPak(outDir: string): {
+export interface RequiredAudioEntry {
+  key: string;
+  bytes: number;
+  sha256: string;
+}
+
+export function checkExternalPak(
+  outDir: string,
+  requiredAudio: readonly RequiredAudioEntry[] = [],
+): {
   sidecarBytes: number;
   indexBytes: number;
   entries: number;
@@ -148,6 +158,25 @@ export function checkExternalPak(outDir: string): {
     const bytes = readEntryVia(index, sidecar, key);
     return { kind: key.split(/[:/]/)[0]!, key, bytes: bytes.length };
   });
+  // Battle lifecycle cues are contractual, not random samples: locate each
+  // exact manifest key through the embedded PSP directory and bind its bytes
+  // to the committed transcode hash. This catches missing, swapped and stale
+  // battle/victory/defeat payloads before the emulator boots.
+  for (const expected of requiredAudio) {
+    const bytes = readEntryVia(index, sidecar, expected.key);
+    if (bytes.length !== expected.bytes) {
+      throw new Error(
+        `PSP battle audio ${expected.key} has ${bytes.length} bytes, expected ${expected.bytes}`,
+      );
+    }
+    const actual = createHash("sha256").update(bytes).digest("hex");
+    if (actual !== expected.sha256) {
+      throw new Error(
+        `PSP battle audio ${expected.key} sha256 ${actual}, expected ${expected.sha256}`,
+      );
+    }
+    samples.push({ kind: "battle-audio", key: expected.key, bytes: bytes.length });
+  }
   return {
     sidecarBytes: sidecar.length,
     indexBytes: index.length,

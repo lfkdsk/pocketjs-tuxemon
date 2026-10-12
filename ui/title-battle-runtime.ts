@@ -9,6 +9,7 @@ import type {
   BattleRules,
   BattleStart,
 } from "../vendor/pocket-rpgkit/src/engine/battle.ts";
+import { cloneAudioState, type AudioState } from "../vendor/pocket-rpgkit/src/engine/audio.ts";
 import type {
   ExtensionCommandContext,
   ExtensionOptions,
@@ -78,6 +79,7 @@ export function createTitleBattleRules(base: BattleRules): TitleBattleRules {
       const next = base.step(state, input, ticks);
       return marked(state) ? mark(next) : next;
     },
+    ...(base.audio === undefined ? {} : { audio: (state: JsonValue) => base.audio!(state) }),
     done(state) {
       return marked(state) ? null : base.done(state);
     },
@@ -196,18 +198,57 @@ function spawnTitleParties(
   return { ext, seed: Math.floor(nextRandom(rng) * 4294967296) >>> 0 };
 }
 
+/** The title overlay starts a detached battle instead of queueing an authored
+ * event fiber. Mirror the engine's BattleStart.audio validation and state
+ * compilation so this path owns BGM on exactly the same contract. */
+function titleBattleAudio(value: BattleStart["audio"]): AudioState | null | undefined {
+  if (value === undefined) return undefined;
+  if (value === null || typeof value !== "object" || Array.isArray(value) || !("bgm" in value)) {
+    throw new Error("title battle start audio: object with bgm required");
+  }
+  if (value.bgm === null) return null;
+  if (typeof value.bgm !== "object" || Array.isArray(value.bgm)) {
+    throw new Error("title battle start audio.bgm: track object or null required");
+  }
+  const { id, volume = 100, pitch = 100 } = value.bgm;
+  if (typeof id !== "string" || id.length === 0) {
+    throw new Error("title battle start audio.bgm.id: non-empty string required");
+  }
+  if (!Number.isInteger(volume) || volume < 0 || volume > 100) {
+    throw new Error("title battle start audio.bgm.volume: integer 0..100 required");
+  }
+  if (!Number.isInteger(pitch) || pitch < 50 || pitch > 150) {
+    throw new Error("title battle start audio.bgm.pitch: integer 50..150 required");
+  }
+  return { bgm: { id, volume, pitch, positionTicks: 0 } };
+}
+
 function titleBattleState(
   campaign: Readonly<SessionState>,
   start: BattleStart,
 ): SessionState {
+  const battleAudio = titleBattleAudio(start.audio);
+  const returnAudio = battleAudio === undefined
+    ? undefined
+    : campaign.interp.audio === undefined
+      ? null
+      : cloneAudioState(campaign.interp.audio);
+  let interp = campaign.interp;
+  if (battleAudio !== undefined) {
+    interp = { ...campaign.interp };
+    if (battleAudio === null) delete interp.audio;
+    else interp.audio = battleAudio;
+  }
   return {
     ...campaign,
     ext: start.ext,
+    interp,
     scene: {
       kind: "battle",
       fiber: TITLE_FIBER,
       state: start.state,
       pausedTicks: 0,
+      ...(returnAudio !== undefined ? { returnAudio } : {}),
     },
   };
 }

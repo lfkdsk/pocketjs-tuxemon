@@ -106,6 +106,7 @@ export function createTuxemonBattleDbProvider(
         tastes: shell.tastes,
         tasteOrder: shell.tasteOrder,
         encounters: shell.encounters,
+        battleMusic: shell.battleMusic,
         environments: shell.environments,
         weather: shell.weather,
         npcs: shell.npcs,

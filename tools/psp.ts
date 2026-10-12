@@ -20,7 +20,14 @@ import {
   pack,
   unpack,
 } from "../vendor/pocket-rpgkit/vendor/pocketjs/framework/compiler/pak.ts";
-import { checkExternalPak } from "./psp-external-check.ts";
+import { checkExternalPak, type RequiredAudioEntry } from "./psp-external-check.ts";
+import {
+  AUDIO_PROBE_GLOBAL,
+  BATTLE_TRACK,
+  DEFEAT_TRACK,
+  hostAudioProbeSource,
+  VICTORY_TRACK,
+} from "./host-audio-probe.ts";
 import { bakeSegmentBundle, resolveSegment, replaySuffixTerminal } from "./psp-segment.ts";
 import { minifyRuntimeBundle } from "./runtime-bundle.ts";
 
@@ -207,10 +214,18 @@ console.log(
 );
 
 // Self-check: the embedded index must satisfy the PSP host's acceptance rules
-// (declared length == sidecar length; index is a byte-for-byte prefix of the
-// sidecar), and one map, one audio and one battle entry must be readable
-// through the host's binary-search + read_at path.
-checkExternalPak(out);
+// and the three battle lifecycle tracks must match the committed audio
+// manifest byte-for-byte through the host's binary-search + read_at path.
+const audioManifest = JSON.parse(readFileSync(join(root, "assets/audio/manifest.json"), "utf8")) as {
+  files: Record<string, { slug: string; pakKey: string; bytes: number; sha256: string }>;
+};
+const battleAudioRequirements: RequiredAudioEntry[] = [BATTLE_TRACK, VICTORY_TRACK, DEFEAT_TRACK]
+  .map((slug) => {
+    const entry = Object.values(audioManifest.files).find((candidate) => candidate.slug === slug);
+    if (!entry) throw new Error(`PSP battle audio manifest has no ${slug}`);
+    return { key: entry.pakKey, bytes: entry.bytes, sha256: entry.sha256 };
+  });
+const externalPakCheck = checkExternalPak(out, battleAudioRequirements);
 
 // The --zh package streams CJK glyphs from a 2bpp font archive on the
 // memory stick (the boot pak's atlases are ASCII-only). Bake the archive
@@ -278,8 +293,9 @@ if (args.has("--journey")) {
     .digest("hex");
   const prefix =
     `${langPrefix}globalThis.__pocketTuxemonInitialCivilTime=${JSON.stringify(FIXED_INITIAL_CIVIL_TIME)};\n`;
+  const audioProbe = hostAudioProbeSource();
   const suffix =
-    `\n;(function(){var id=${JSON.stringify(journeyBuildId)};` +
+    `\n${audioProbe}\n;(function(){var id=${JSON.stringify(journeyBuildId)};` +
     `__pspLog(JSON.stringify({kind:"session",buildId:id}));` +
     `[0,-0,1.25,-4.5,1e30,Number.MIN_VALUE,NaN,Infinity,-Infinity].forEach(function(v){` +
     `if(!Object.is(__pspRoundTrip(v),v))throw new Error("PSP double ABI round trip failed");});` +
@@ -289,7 +305,8 @@ if (args.has("--journey")) {
     `var s=globalThis.__rpgSessionState;` +
     `if(n%300===0)__pspLog(JSON.stringify({frame:n,map:s.mapId,pos:[s.move.tx,s.move.ty],` +
     `scene:s.scene?.kind,modal:s.interp.modal,error:s.interp.error,buildId:id}));` +
-    `if(n===tape.length)__pspLog(JSON.stringify({kind:"terminal",frame:n,state:s,buildId:id}));` +
+    `if(n===tape.length){__pspLog(JSON.stringify({kind:"terminal",frame:n,state:s,buildId:id}));` +
+    `var p=globalThis[${JSON.stringify(AUDIO_PROBE_GLOBAL)}];if(p){var a=p.report();a.kind="audio";a.buildId=id;__pspLog(JSON.stringify(a));}}` +
     `if(n===tape.length&&typeof __pspExit==="function")__pspExit();};})();\n`;
   writeFileSync(bundlePath, prefix + original + suffix);
 }
@@ -500,6 +517,7 @@ writeFileSync(join(out, "build-receipt.json"), JSON.stringify({
   source: identity(root),
   rpgkit: identity(join(root, "vendor/pocket-rpgkit")),
   pocketjs: identity(framework),
+  battleAudio: externalPakCheck.samples.filter((sample) => sample.kind === "battle-audio"),
   artifacts: Object.fromEntries([
     "pocket-tuxemon.prx",
     "EBOOT.PBP",

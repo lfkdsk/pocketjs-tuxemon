@@ -2,7 +2,7 @@ import { afterAll, describe, expect, test } from "bun:test";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { battleArtifactPaths, runtimeBattleDb, writeBattleArtifacts } from "../importer/battle.ts";
+import { battleArtifactPaths, parseBattleMusicSet, runtimeBattleDb, writeBattleArtifacts } from "../importer/battle.ts";
 import {
   collectBattleArtRefs,
   validateBattleDb,
@@ -214,6 +214,55 @@ describe("GB1 battle database", () => {
     });
     expect(validated.elements.fire.multipliers).toMatchObject({ earth: 0.5, metal: 2, water: 0.5, wood: 2 });
     expect(validated.encounters.spyder_route1.monsters.map((row) => row.weight)).toEqual([3.5, 3.5, 3.5, 3.5, 3.5, 3.5]);
+  });
+
+  test("imports every environment battle-music set independently of art scope", () => {
+    expect(Object.keys(validated.environments)).toHaveLength(10);
+    expect(Object.keys(validated.battleMusic.environments)).toHaveLength(40);
+    expect(validated.battleMusic.npcOverrides).toEqual({});
+    expect(new Set(Object.values(validated.battleMusic.environments).map((set) => JSON.stringify(set))))
+      .toEqual(new Set([JSON.stringify({
+        battle: "music_battle_loop",
+        victory: "music_win_battle_boss",
+        defeat: "music_gameover",
+      })]));
+    expect(report.battleMusic).toEqual({
+      environmentSets: 40,
+      npcOverrideSets: 0,
+      resolvedCues: 120,
+      silentCues: 0,
+      uniqueTracks: ["music_battle_loop", "music_gameover", "music_win_battle_boss"],
+      invalidReferencePolicy: "reject-like-upstream-music-properties",
+    });
+    expect(runtimeShell).toMatchObject({ battleMusic: validated.battleMusic });
+  });
+
+  test("rejects bad battle-music references and preserves authored silence", () => {
+    const valid = {
+      battle: { music: "battle" },
+      victory_music: { music: "victory" },
+      defeat_music: { music: null },
+    };
+    expect(parseBattleMusicSet(valid, "npc fixture", new Set(["battle", "victory"]), new Set(["battle", "victory"])))
+      .toEqual({ battle: "battle", victory: "victory", defeat: null });
+    expect(() => parseBattleMusicSet(
+      { ...valid, battle: { music: "missing" } },
+      "npc fixture",
+      new Set(["battle", "victory"]),
+      new Set(["battle", "victory"]),
+    )).toThrow("npc fixture battle_music.battle references missing upstream music 'missing'");
+    expect(() => parseBattleMusicSet(
+      valid,
+      "npc fixture",
+      new Set(["battle", "victory"]),
+      new Set(["battle"]),
+    )).toThrow("npc fixture battle_music.victory_music references unpackaged music 'victory'");
+    expect(() => parseBattleMusicSet(
+      { ...valid, victory_music: {} },
+      "npc fixture",
+      new Set(["battle", "victory"]),
+      new Set(["battle", "victory"]),
+    )).toThrow("npc fixture battle_music.victory_music.music is required");
   });
 
   test("resolves variable trainer species and every spawn move", () => {

@@ -20,7 +20,7 @@ import {
 import { spawnMonster } from "../battle/spawn.ts";
 import { createBattle, getSide, reduceBattle } from "../battle/tuxemon.ts";
 import type { SpawnedMonsterSnapshot, Stats } from "../battle/types.ts";
-import { validateBattleDb } from "../importer/battle-schema.ts";
+import { validateBattleDb, type BattleDb } from "../importer/battle-schema.ts";
 import type { BattleCompletion, BattleRules } from "../vendor/pocket-rpgkit/src/engine/battle.ts";
 import type { JsonValue } from "../vendor/pocket-rpgkit/src/engine/types.ts";
 
@@ -186,6 +186,49 @@ describe("Tuxemon BattleRules adapter", () => {
     expect(startBattle(rules, ext, setup, 31)).not.toBeNull();
     expect(startBattle(rules, ext, setup, 32)).not.toBeNull();
     expect(loads).toBe(1);
+  });
+
+  test("selects NPC music over the environment and projects win/loss cues", () => {
+    const db = JSON.parse(JSON.stringify(DB)) as BattleDb;
+    db.battleMusic.environments.grass = {
+      battle: "music_battle_loop",
+      victory: "music_win_battle_boss",
+      defeat: "music_gameover",
+    };
+    db.battleMusic.npcOverrides[OPPONENT] = {
+      battle: "music_gameover",
+      victory: "music_battle_loop",
+      defeat: "music_win_battle_boss",
+    };
+    const rules = createTuxemonBattleRules(db, ENUMS);
+    const trainer = (playerSpecies: string, playerLevel: number, enemySpecies: string, enemyLevel: number) =>
+      startBattle(rules, extensionWith(monster(playerSpecies, playerLevel, "txmn-player", 17)), json({
+        kind: "trainer",
+        opponent: OPPONENT,
+        party: [{ species: enemySpecies, level: enemyLevel }],
+        environment: "grass",
+      }), 202)!;
+
+    const winning = trainer("nut", 50, "budaye", 2);
+    expect(winning.audio).toEqual({ bgm: { id: "music_gameover" } });
+    expect(tuxemonRuntimeBattleState(winning.state).audio).toEqual(db.battleMusic.npcOverrides[OPPONENT]!);
+    const won = finish(rules, winning);
+    expect(won.completion.result).toBe("win");
+    expect(rules.audio!(json(won.state))).toEqual({ bgm: { id: "music_battle_loop" } });
+
+    const losing = trainer("budaye", 2, "nut", 50);
+    const lost = finish(rules, losing);
+    expect(lost.completion.result).toBe("lose");
+    expect(rules.audio!(json(lost.state))).toEqual({ bgm: { id: "music_win_battle_boss" } });
+
+    const wild = startBattle(
+      rules,
+      extensionWith(monster("nut", 20, "txmn-player", 31)),
+      json({ kind: "wild", species: "budaye", level: 5, environment: "grass" }),
+      717,
+    )!;
+    expect(wild.audio).toEqual({ bgm: { id: "music_battle_loop" } });
+    expect(tuxemonRuntimeBattleState(wild.state).audio).toEqual(db.battleMusic.environments.grass!);
   });
 
   test("keeps the upstream trainer and wild root-menu profiles with explicit availability", () => {

@@ -10,7 +10,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { readTmx, readYamlEvents } from "../importer/source.ts";
 
-export type MusicReferenceKind = "map" | "environment";
+export type MusicReferenceKind = "map" | "environment" | "npc";
 
 export interface MusicReference {
   slug: string;
@@ -25,6 +25,7 @@ export interface ResolvedMusicReference extends MusicReference {
 export interface MusicCatalog {
   mapActionCount: number;
   environmentReferenceCount: number;
+  npcReferenceCount: number;
   resolved: ResolvedMusicReference[];
   unresolved: MusicReference[];
 }
@@ -99,10 +100,33 @@ function scanEnvironmentMusic(
   return count;
 }
 
+/** Scan complete NPC-level BattleMusicModel overrides. An override replaces
+ * the complete environment set upstream; partial sets are rejected later by
+ * the battle importer. */
+function scanNpcMusic(
+  sourceRoot: string,
+  refs: Map<string, { count: number; kinds: Set<MusicReferenceKind> }>,
+): number {
+  const npcDir = join(sourceRoot, "mods", "tuxemon", "db", "npc");
+  let count = 0;
+  for (const name of readdirSync(npcDir).filter((file) => file.endsWith(".yaml")).sort()) {
+    const document = Bun.YAML.parse(readFileSync(join(npcDir, name), "utf8")) as {
+      audio?: { battle_music?: Record<string, { music?: unknown } | null> | null } | null;
+    } | null;
+    for (const entry of Object.values(document?.audio?.battle_music ?? {})) {
+      if (typeof entry?.music !== "string" || entry.music.length === 0) continue;
+      increment(refs, entry.music, "npc");
+      count++;
+    }
+  }
+  return count;
+}
+
 export function buildMusicCatalog(sourceRoot: string): MusicCatalog {
   const refs = new Map<string, { count: number; kinds: Set<MusicReferenceKind> }>();
   const mapActionCount = scanMapMusic(sourceRoot, refs);
   const environmentReferenceCount = scanEnvironmentMusic(sourceRoot, refs);
+  const npcReferenceCount = scanNpcMusic(sourceRoot, refs);
   const index = loadMusicSlugIndex(sourceRoot);
   const resolved: ResolvedMusicReference[] = [];
   const unresolved: MusicReference[] = [];
@@ -114,7 +138,7 @@ export function buildMusicCatalog(sourceRoot: string): MusicCatalog {
     else unresolved.push(base);
   }
 
-  return { mapActionCount, environmentReferenceCount, resolved, unresolved };
+  return { mapActionCount, environmentReferenceCount, npcReferenceCount, resolved, unresolved };
 }
 
 if (import.meta.main) {

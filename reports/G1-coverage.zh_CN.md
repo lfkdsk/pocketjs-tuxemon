@@ -122,6 +122,27 @@ scene. Plague-state rows stay deterministic without being
 claimed as full P2 behavior. The long-term target remains zero Placeholder
 uses.
 
+
+## Battle music catalog
+
+The battle importer parses every environment `battle_music` set and every
+NPC `audio.battle_music` override before runtime data is emitted. An NPC row
+is a complete three-cue override; otherwise the environment set is used.
+Every non-null cue must resolve through the upstream music database and to a
+packaged logical audio id, so a stale or unpackaged reference fails the import
+instead of becoming silent accidentally. Explicit upstream `null` remains an
+intentional silent cue.
+
+| Scope | Sets | Resolved cues | Silent cues |
+|---|---:|---:|---:|
+| Environments | 40 | — | — |
+| NPC overrides | 0 | — | — |
+| Total cue slots | 40 sets | 120 | 0 |
+
+Resolved logical tracks (3): `music_battle_loop`, `music_gameover`, `music_win_battle_boss`.
+Invalid-reference policy: `reject-like-upstream-music-properties`.
+
+
 ## Economy and item catalog
 
 The importer read 14 economies with

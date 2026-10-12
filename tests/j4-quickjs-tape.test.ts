@@ -22,9 +22,9 @@ describe("J4 QuickJS continuation tape", () => {
       opponent: "wild:kernel",
       outcome: "won",
     });
-    // Terminal includes the deterministic player identity selected in G6 and
-    // the calendar variables refreshed on map entry.
+    // Terminal includes the deterministic player identity selected in G6,
+    // the calendar variables refreshed on map entry, and the map BGM clock.
     expect(tape.terminalStateSha256)
-      .toBe("5d22fc6decde61c569d60d3fd26ef4985e9c8bfc2973c383192185c4147cc85e");
+      .toBe("4c7b0a0283368fa57360d73ca4f28643ab2ab6dec75d6e148d0be1e83102ed37");
   });
 });

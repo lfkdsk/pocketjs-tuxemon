@@ -61,8 +61,9 @@ const SAVE_FIXTURES = [
   "main-c6d57a62",
   "main-f9db784a",
   "main-08efc758",
+  "main-35a2af17",
 ] as const;
-const IMMEDIATE_PREDECESSOR_FIXTURE = "main-08efc758" as const;
+const IMMEDIATE_PREDECESSOR_FIXTURE = "main-35a2af17" as const;
 
 interface PublishedSaveMetadata {
   content: { manifest: string; schema: string };
@@ -409,7 +410,7 @@ const CONTINUING_FIXTURES = [
   "main-78493afa",
   "main-3a9e95b2",
   "main-f9db784a",
-  IMMEDIATE_PREDECESSOR_FIXTURE,
+  "main-08efc758",
 ] as const;
 
 for (const name of CONTINUING_FIXTURES) test(`the ${name} main slot continues on the current tape`, () => {
@@ -448,3 +449,50 @@ for (const name of CONTINUING_FIXTURES) test(`the ${name} main slot continues on
   expect(sha256(canonicalJson({ ...state, frame: state.frame + frameOffset })))
     .toBe(metadata.continuation.stateSha256);
 });
+
+test("the immediate predecessor slot continues through every battle music transition", () => {
+  const { envelope, metadata } = loadPublishedSave(IMMEDIATE_PREDECESSOR_FIXTURE);
+  const tape = JSON.parse(readFileSync(resolve(ROOT, metadata.tape.path), "utf8")) as {
+    worldTraversal: WorldTraversalMode;
+    masks: number[];
+    terminalStateSha256: string;
+  };
+  const { project, repository } = readShardedProject(ROOT);
+  const session = createSession(project, 60, createTuxemonSessionOptions(
+    project,
+    tape.worldTraversal,
+    { maps: repository, paginateText: productionPaginator(ROOT) },
+  ));
+  const { slots } = memorySlots(envelope);
+  const snapshot = loadSlot(slots, 1, session.content);
+  let state = restoreSave(session, snapshot);
+  const frameOffset = metadata.save.timelineFrame - state.frame;
+  let previous = metadata.save.held;
+  let battleEntries = 0;
+  let battleExits = 0;
+  let sawVictory = false;
+
+  for (let frame = metadata.save.frame; frame < tape.masks.length; frame++) {
+    const before = state.scene;
+    const mask = tape.masks[frame]!;
+    state = stepSession(session, state, sessionInput(mask, previous));
+    previous = mask;
+    if (before?.kind !== "battle" && state.scene?.kind === "battle") {
+      battleEntries++;
+      expect(state.interp.audio?.bgm?.id).toBe("music_battle_loop");
+    }
+    if (state.scene?.kind === "battle" && state.interp.audio?.bgm?.id === "music_win_battle_boss") {
+      sawVictory = true;
+    }
+    if (before?.kind === "battle" && state.scene?.kind !== "battle") {
+      battleExits++;
+      expect(state.interp.audio).toEqual(before.returnAudio ?? undefined);
+    }
+  }
+
+  expect(battleEntries).toBeGreaterThan(0);
+  expect(battleExits).toBe(battleEntries);
+  expect(sawVictory).toBeTrue();
+  expect(sha256(canonicalJson({ ...state, frame: state.frame + frameOffset })))
+    .toBe(tape.terminalStateSha256);
+}, 30_000);

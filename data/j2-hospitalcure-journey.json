@@ -10,8 +10,8 @@
     "worldTraversal": "seamless-v1",
     "frames": 128718,
     "tapeSha256": "e428449c118d24296f139a759f61b03bfae04b5eae7a1089d7fba87d7eb082c2",
-    "terminalStateSha256": "e3f4a709c341a7ec617ad12da78d179f99c5e5ca99ad31cb135ec2dbf333ac71",
-    "terminalSnapshotSha256": "1a3cd2bde32f5cfee6956c7e35cd41e09953975e008c7ec6e57ed723b556ec47",
+    "terminalStateSha256": "6f21d87d7631b067e46dc306d8b3a22853c145714300679957570df0f3a7c25d",
+    "terminalSnapshotSha256": "a22f57adc11820fe6fa9f817426609302f69604f1cfd238483f7de90386c3281",
     "heldMask": 0,
     "timelineFrame": 128718,
     "map": "spyder_mansion",
@@ -57346,7 +57346,7 @@
       "maxHp": 161
     }
   ],
-  "initialStateSha256": "e3f4a709c341a7ec617ad12da78d179f99c5e5ca99ad31cb135ec2dbf333ac71",
+  "initialStateSha256": "6f21d87d7631b067e46dc306d8b3a22853c145714300679957570df0f3a7c25d",
   "terminalStateSha256": "f0b63d5e627b4661eb8c2ecc936bc55a7fad5e3d046bb87dfe52c4c6ecacf1e4",
   "tapeSha256": "0d672b532b8d0aba7cd7d1edc413f4e3c48fbb0f4254d3b4c4865317a81a4afd",
   "combinedTapeSha256": "ad94283035d0cefa9f3c2c325055cfe9bc569e5ae4ad44d629a0743ec791c958"

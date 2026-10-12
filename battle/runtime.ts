@@ -1,11 +1,12 @@
 import type {
+  BattleAudio,
   BattleCompletion,
   BattleInput,
   BattleRules,
 } from "../vendor/pocket-rpgkit/src/engine/battle.ts";
 import type { ExtensionReadContext } from "../vendor/pocket-rpgkit/src/engine/extensions.ts";
 import type { JsonValue } from "../vendor/pocket-rpgkit/src/engine/types.ts";
-import type { BattleAnimationRef, BattleDb, BattleImageRef } from "../importer/battle-schema.ts";
+import type { BattleAnimationRef, BattleDb, BattleImageRef, BattleMusicSet } from "../importer/battle-schema.ts";
 import {
   applyBattleSharesToBills,
   initialTuxemonExtensionState,
@@ -150,6 +151,9 @@ export interface RuntimeBattleState {
   /** Session wallet at battle entry; rewards are added on completion. */
   startingGold: number;
   environment: string;
+  /** Complete set selected once at entry (NPC override or environment).
+   * Serialising it makes result music deterministic under rewind/replay. */
+  audio: BattleMusicSet;
   visuals: {
     environment: BattleDb["environments"][string];
     ui: Pick<BattleDb["ui"], "hpBar" | "expBar">;
@@ -439,6 +443,9 @@ function runtimeState(value: JsonValue): RuntimeBattleState {
     || !safeInteger(value.menuIndex) || value.menuIndex < 0
     || !safeInteger(value.startingGold) || value.startingGold < 0
     || typeof value.environment !== "string"
+    || !isRecord(value.audio)
+    || ![value.audio.battle, value.audio.victory, value.audio.defeat]
+      .every((cue) => cue === null || typeof cue === "string" && cue.length > 0)
     || value.park !== undefined && (!isRecord(value.park)
       || typeof value.park.monster !== "string" || value.park.monster.length === 0
       || !safeInteger(value.park.turnsRemaining) || value.park.turnsRemaining < 0
@@ -446,6 +453,25 @@ function runtimeState(value: JsonValue): RuntimeBattleState {
     throw new Error("Tuxemon battle runtime state is invalid");
   }
   return value as unknown as RuntimeBattleState;
+}
+
+function battleAudio(id: string | null): BattleAudio {
+  return { bgm: id === null ? null : { id } };
+}
+
+function selectedBattleMusic(
+  db: BattleDb,
+  environment: string,
+  setup: TuxemonBattleSetup,
+): BattleMusicSet {
+  const fallback = db.battleMusic.environments[environment];
+  if (!fallback) {
+    throw new Error(`Tuxemon battle environment '${environment}' has no battle music`);
+  }
+  const opponent = setup.kind === "trainer" ? setup.opponent
+    : setup.kind === "spectate" ? setup.foe
+      : null;
+  return opponent === null ? fallback : db.battleMusic.npcOverrides[opponent] ?? fallback;
 }
 
 function activeOpponents(state: TuxemonBattleState, uid: number): BattleMonster[] {
@@ -1123,6 +1149,7 @@ export function createTuxemonBattleRules(source: BattleDbSource, enums: Variable
         }
 
         const environment = setup.environment ?? ext.environment!;
+        const audio = selectedBattleMusic(db, environment, setup);
         let parkInfo: ParkBattleInfo | null = null;
         if (kind === "wild" && ext.parkSession?.active
           && (environment === "park" || environment === "night_park")) {
@@ -1195,6 +1222,7 @@ export function createTuxemonBattleRules(source: BattleDbSource, enums: Variable
           ext: startedExt,
           startingGold: context.gold,
           environment,
+          audio,
           visuals: {
             environment: battleEnvironment,
             ui: { hpBar: db.ui.hpBar, expBar: db.ui.expBar },
@@ -1230,7 +1258,11 @@ export function createTuxemonBattleRules(source: BattleDbSource, enums: Variable
           ...(parkInfo ? { park: parkInfo } : {}),
         };
         state.menu = battleMenuEntries(state, rulesDb, "root");
-        return { state: asJson(state), ext: packTuxemonExtensionState(startedExt) };
+        return {
+          state: asJson(state),
+          ext: packTuxemonExtensionState(startedExt),
+          audio: battleAudio(audio.battle),
+        };
       } catch (error) {
         release();
         throw error;
@@ -1340,6 +1372,15 @@ export function createTuxemonBattleRules(source: BattleDbSource, enums: Variable
         setMenu(state, rulesDb, "root");
       }
       return asJson(state);
+    },
+
+    audio(value) {
+      const state = runtimeState(value);
+      if (state.spectator) return undefined;
+      const outcome = state.battle.result?.outcome;
+      if (outcome === "won") return battleAudio(state.audio.victory);
+      if (outcome === "lost") return battleAudio(state.audio.defeat);
+      return undefined;
     },
 
     done(value) {

@@ -155,6 +155,7 @@ function settle(answers: string[] = [], maxFrames = 3000): void {
       continue;
     }
     if (m.kind === "text") { tick(0, { confirm: true }); tick(); continue; }
+    if (m.kind === "scrollText") { tick(BTN_CONFIRM); tick(); continue; }
     if (m.kind === "shop") { tick(0, { cancel: true }); tick(); continue; }
     const want = answers.shift();
     const idx = want === undefined ? 0 : m.options.findIndex((o) => o === want);

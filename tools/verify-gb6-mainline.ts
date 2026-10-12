@@ -162,6 +162,7 @@ function replayBaseline(journey: Gb6JourneyResult): ReplayResult {
   const rewindBattle = journey.battles.find((row) => row.opponent === "spyder_route3_novak");
   expect("missing Connor save/load checkpoint", saveBattle !== undefined);
   expect("missing Novak rewind checkpoint", rewindBattle !== undefined);
+  const rewindTarget = rewindBattle.startFrame + 1;
   let beforeSave: SavedPoint | null = null;
   let afterSave: SavedPoint | null = null;
   let rewindTargetState: string | null = null;
@@ -212,7 +213,7 @@ function replayBaseline(journey: Gb6JourneyResult): ReplayResult {
     if (!afterSave && nextFrame >= saveBattle.endFrame && nextFrame <= saveBattle.endFrame + 300 && canSnapshot(state)) {
       afterSave = snapshot(session, state, mask, nextFrame);
     }
-    if (nextFrame === rewindBattle.startFrame) rewindTargetState = canonicalJson(state);
+    if (nextFrame === rewindTarget) rewindTargetState = canonicalJson(state);
   }
   expect("tape ended inside a battle", active === null);
   return {
@@ -260,7 +261,7 @@ function verifyRewind(journey: Gb6JourneyResult, expectedState: string): Record<
   const project = readInlineProject(ROOT);
   const battle = journey.battles.find((row) => row.opponent === "spyder_route3_novak");
   expect("missing Novak rewind battle", battle !== undefined);
-  const target = battle.startFrame;
+  const target = battle.startFrame + 1;
   const from = Math.min(journey.frames, battle.endFrame + 60);
   const controller = new AttractController(project, [], {
     hz: 60,
@@ -270,14 +271,29 @@ function verifyRewind(journey: Gb6JourneyResult, expectedState: string): Record<
   });
   controller.startPlay();
   for (let frame = 0; frame < from; frame++) controller.step(journey.masks[frame]!);
+  const restoredMapTrack = controller.state.interp.audio?.bgm;
   const started = performance.now();
   const result = controller.step(BTN_LTRIGGER);
   const refoldMs = performance.now() - started;
   expect("L did not report a rewind", result.status.rewound);
   expect(`L rewind landed at ${controller.length}, expected ${target}`, controller.length === target);
-  expect("L rewind did not cross to before the Novak battle", controller.state.scene === null);
+  expect("L rewind did not cross into the active Novak battle", controller.state.scene?.kind === "battle");
+  const rewindBattleBgm = controller.state.interp.audio?.bgm?.id;
+  expect(`L rewind restored ${rewindBattleBgm ?? "silence"}, not the selected battle music`,
+    rewindBattleBgm === "music_battle_loop");
+  expect("L rewind changed the suspended map music",
+    controller.state.scene?.kind === "battle" &&
+    controller.state.scene.returnAudio?.bgm?.id === restoredMapTrack?.id &&
+    controller.state.scene.returnAudio?.bgm?.volume === restoredMapTrack?.volume &&
+    controller.state.scene.returnAudio?.bgm?.pitch === restoredMapTrack?.pitch);
   expect("L rewind state differs from the original prefix", canonicalJson(controller.state) === expectedState);
-  for (let frame = target; frame < journey.masks.length; frame++) controller.step(journey.masks[frame]!);
+  let sawVictory = false;
+  for (let frame = target; frame < journey.masks.length; frame++) {
+    controller.step(journey.masks[frame]!);
+    const bgmId = controller.state.interp.audio?.bgm?.id as string | undefined;
+    if (bgmId === "music_win_battle_boss") sawVictory = true;
+  }
+  expect("post-rewind replay never selected victory music", sawVictory);
   expect("replaying the post-rewind suffix changed the terminal state", digest(controller.state) === journey.terminalStateSha256);
   return {
     target,

@@ -83017,6 +83017,211 @@
    ]
   }
  },
+ "battleMusic": {
+  "environments": {
+   "37707": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "arid": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "beach": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "bridge": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "canyon": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "cave": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "cavern": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "cliff": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "clouds": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "desert": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "forest": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "grass": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "interior": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "night_arid": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "night_beach": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "night_bridge": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "night_canyon": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "night_cliff": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "night_desert": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "night_forest": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "night_grass": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "night_ocean": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "night_park": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "night_plain": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "night_sand": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "night_sea": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "night_snow": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "night_snowplain": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "night_valley": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "ocean": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "park": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "plain": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "sand": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "sea": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "snow": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "snowplain": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "stadium": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "sunset": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "underwater": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   },
+   "valley": {
+    "battle": "music_battle_loop",
+    "victory": "music_win_battle_boss",
+    "defeat": "music_gameover"
+   }
+  },
+  "npcOverrides": {}
+ },
  "npcs": {
   "professor": {
    "combat": {},

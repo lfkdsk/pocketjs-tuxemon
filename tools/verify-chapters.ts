@@ -88,8 +88,11 @@ for (const result of suffixes) {
     fail(`chapter ${result.id}: snapshot + suffix reached ${result.terminalSha256.slice(0, 12)}, `
       + `not the full-replay terminal ${terminal.slice(0, 12)}`);
   }
+  if (!result.audioMatches) {
+    fail(`chapter ${result.id}: snapshot + suffix changed battle/map audio transitions`);
+  }
 }
 
 console.log(`CHAPTERS PASS ${baked.chapters.chapters.length} chapters, `
   + `${baked.chapters.tape.frames} combined tape frames, snapshots and thumbnails byte-identical; `
-  + `${suffixes.length} chapter suffix replays all reach terminal ${terminal.slice(0, 12)}`);
+  + `${suffixes.length} chapter suffix replays preserve battle/map audio transitions and reach terminal ${terminal.slice(0, 12)}`);

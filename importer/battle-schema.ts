@@ -61,6 +61,23 @@ export interface BattleAnimationRef {
   loops: number;
 }
 
+/** One complete upstream BattleMusicModel, normalized to runtime logical
+ * audio ids. A null cue is authored silence; unresolved slugs never reach
+ * this shape because the importer rejects them just as upstream's
+ * MusicProperties validator does. */
+export interface BattleMusicSet {
+  battle: string | null;
+  victory: string | null;
+  defeat: string | null;
+}
+
+export interface BattleMusicCatalog {
+  /** Every authored environment, independent of battle-art scope. */
+  environments: Record<string, BattleMusicSet>;
+  /** Only NPCs that author audio.battle_music; one complete set overrides. */
+  npcOverrides: Record<string, BattleMusicSet>;
+}
+
 export interface BattleDb {
   format: "pocket-tuxemon/battle-db/v1";
   sourceRevision: string;
@@ -224,6 +241,7 @@ export interface BattleDb {
       variables: Array<{ key: string; value: string }>;
     }>;
   }>;
+  battleMusic: BattleMusicCatalog;
   npcs: Record<string, {
     combat: Record<string, unknown>;
     items: Array<{ slug: string; quantity?: number }>;
@@ -324,6 +342,7 @@ export interface BattleRuntimeShell {
   tastes: BattleDb["tastes"];
   tasteOrder: string[];
   encounters: BattleDb["encounters"];
+  battleMusic: BattleDb["battleMusic"];
   environments: BattleDb["environments"];
   weather: BattleDb["weather"];
   npcs: BattleDb["npcs"];
@@ -394,9 +413,24 @@ export function validateBattleDb(value: unknown, pakKeys?: ReadonlySet<string>):
   assert(value.format === "pocket-tuxemon/battle-db/v1", "unsupported format");
   assert(value.scope === "spyder" || value.scope === "full", "scope must be spyder or full");
   const db = value as unknown as BattleDb;
-  for (const key of ["shapes", "elements", "tastes", "monsters", "techniques", "items", "statuses", "encounters", "npcs", "environments", "weather"] as const) {
+  for (const key of ["shapes", "elements", "tastes", "monsters", "techniques", "items", "statuses", "encounters", "battleMusic", "npcs", "environments", "weather"] as const) {
     assert(isRecord(db[key]), `${key} must be an object`);
   }
+  assert(isRecord(db.battleMusic.environments), "battleMusic.environments must be an object");
+  assert(isRecord(db.battleMusic.npcOverrides), "battleMusic.npcOverrides must be an object");
+  const validateMusicSets = (sets: Record<string, BattleMusicSet>, owner: string): void => {
+    for (const [slug, music] of Object.entries(sets)) {
+      assert(isRecord(music), `${owner} ${slug} battle music must be an object`);
+      for (const cue of ["battle", "victory", "defeat"] as const) {
+        assert(
+          music[cue] === null || (typeof music[cue] === "string" && music[cue].length > 0),
+          `${owner} ${slug} has invalid ${cue} music`,
+        );
+      }
+    }
+  };
+  validateMusicSets(db.battleMusic.environments, "environment");
+  validateMusicSets(db.battleMusic.npcOverrides, "npc");
   assert(Array.isArray(db.trainerParties), "trainerParties must be an array");
   assert(Array.isArray(db.elementOrder), "elementOrder must be an array");
   assert(new Set(db.elementOrder).size === db.elementOrder.length, "elementOrder contains duplicates");

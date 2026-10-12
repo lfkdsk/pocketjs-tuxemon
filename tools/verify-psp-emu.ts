@@ -23,6 +23,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
+import { validateBattleAudioReport } from "./host-audio-probe.ts";
 
 const root = resolve(import.meta.dir, "..");
 const pspOut = join(root, "dist/psp");
@@ -87,6 +88,31 @@ if (!existsSync(profilePath)) {
   throw new Error("No profile.jsonl — the journey did not boot or did not log. " +
     "Check the PPSSPP output above (a halt message shows on the PSP debug screen).");
 }
+
+const profileLines = readFileSync(profilePath, "utf8").trim().split("\n").filter(Boolean);
+const profile = profileLines.map((line) => JSON.parse(line) as Record<string, unknown>);
+const audio = profile.find((entry) => entry.kind === "audio");
+if (!audio) throw new Error("No native audio probe record in profile.jsonl");
+// PPSSPPHeadless deliberately hard-codes enableSound=false + fastForward=true.
+// It executes the PSP audio module and sceAudioOutput* HLE calls, but drains
+// them without a real-time device clock, so starvation edges are expected and
+// cannot be used as a product underrun gate. A future paced emulator binary
+// still gets the strict zero-underrun check.
+const unthrottledHeadless = headless.endsWith("PPSSPPHeadless");
+const audioErrors = validateBattleAudioReport(audio, {
+  allowUnthrottledUnderruns: unthrottledHeadless,
+});
+if (audioErrors.length > 0) {
+  throw new Error(`PSP audio verification failed:\n  ${audioErrors.join("\n  ")}`);
+}
+const battle = (audio.phases as Record<string, Record<string, number>>).music_battle_loop!;
+const victory = (audio.phases as Record<string, Record<string, number>>).music_win_battle_boss!;
+console.log(
+  `PSP AUDIO battle accepted=${battle.acceptedFrames} nonzero=${battle.nonZeroSamples} ` +
+  `victory accepted=${victory.acceptedFrames} nonzero=${victory.nonZeroSamples}; ` +
+  `device credited=${String(audio.creditedFrames)}; underruns=${String(audio.underruns)}` +
+  (unthrottledHeadless ? " (observed; PPSSPPHeadless is unpaced)" : ""),
+);
 
 // Terminal-state verification (reuses the device-profile verifier).
 const verify = spawnSync(
@@ -158,4 +184,4 @@ if (qjsPeak > 0) {
 console.log("slowest frames (frame, work_ms): " +
   globalSlowest.map((s) => `${s[0]}@${(s[1] / 1000).toFixed(0)}ms`).join(", "));
 console.log("");
-console.log("PASS: PSP opening journey terminal matches desktop replay.");
+console.log("PASS: PSP opening journey terminal and native battle audio match desktop expectations.");
