@@ -369,7 +369,8 @@ function openSave(origin: "start" | "title", target: "root" | "load" | "code"): 
   save.open(target);
 }
 
-const saveMenu: GameViewOverlayConfig = {
+const saveMenu: GameViewOverlayConfig & { needsPassiveStep(): boolean } = {
+  needsPassiveStep: saveMenuConfig.needsPassiveStep,
   create(host) {
     saveMenuRuntime = saveMenuConfig.create(host);
     const runtime = saveMenuRuntime;

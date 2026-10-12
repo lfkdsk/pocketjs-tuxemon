@@ -40,11 +40,15 @@ export function SaveToast(props: { text: () => string | null; theme?: Partial<Ui
 /** GameView overlay config for the save/load menu. */
 export function createSaveMenu(options: SaveMenuOptions = {}): GameViewOverlayConfig & {
   runtimeRef: { current: SaveMenuRuntime | null };
+  /** A closed menu still needs frames while its non-blocking save/load toast
+   * is visible. Programmatic parents use this without giving it input. */
+  needsPassiveStep(): boolean;
 } {
   validateOpenButton(options.openButton ?? BTN.START);
   const runtimeRef: { current: SaveMenuRuntime | null } = { current: null };
   return {
     runtimeRef,
+    needsPassiveStep: () => runtimeRef.current?.toast() !== null,
     create(host) {
       let activeUiText: UiTextOverrides | undefined;
       const menu = createSaveMenuRuntime(options, host, createOsk, () => activeUiText);

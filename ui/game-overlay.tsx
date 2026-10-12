@@ -21,6 +21,12 @@ export interface SessionOwningOverlayConfig extends GameViewOverlayConfig {
   ownsSession(): boolean;
 }
 
+/** Programmatic children do not watch global buttons while closed. A child
+ * may still request no-edge frames for a bounded presentational transient. */
+export interface PassiveChildOverlayConfig extends GameViewOverlayConfig {
+  needsPassiveStep?(): boolean;
+}
+
 /** The demo transport replaces the complete live session. Keep it out of
  * reducer-owned scenes and the Park's multi-map session so a modal flow cannot
  * be abandoned halfway through. Players can open SELECT again after the scene
@@ -43,15 +49,18 @@ export function createCompositeOverlay(
   /** A child opened programmatically by the game-owned world/title menu.
    * It is never stepped while closed, so its legacy START watcher cannot
    * compete with the parent world menu. */
-  childMenu?: GameViewOverlayConfig | readonly GameViewOverlayConfig[],
+  childMenu?: PassiveChildOverlayConfig | readonly PassiveChildOverlayConfig[],
 ): GameViewOverlayConfig {
-  const childMenus = childMenu === undefined
+  const childMenus: readonly PassiveChildOverlayConfig[] = childMenu === undefined
     ? []
-    : Array.isArray(childMenu) ? childMenu : [childMenu];
+    : Array.isArray(childMenu) ? childMenu : [childMenu as PassiveChildOverlayConfig];
   return {
     create(host: GameViewSessionHost): GameViewDemoRuntime {
       const world = worldMenu.create(host);
       const children = childMenus.map((config) => config.create(host));
+      const passiveChildren = childMenus.flatMap((config, index) => config.needsPassiveStep
+        ? [{ runtime: children[index]!, needed: config.needsPassiveStep }]
+        : []);
       const lang = langMenu?.create(host);
       const tux = tuxepedia?.create(host);
       const phone = nuPhone?.create(host);
@@ -71,6 +80,12 @@ export function createCompositeOverlay(
           if (tux?.isOpen()) return tux.step(buttons, pressed);
           const child = children.find((runtime) => runtime.isOpen());
           if (child) return child.step(buttons, pressed);
+          // A completed load closes immediately, but its confirmation toast
+          // retains a short frame budget. Advance only declared transients
+          // with no edge input; their result never steals a world/menu action.
+          for (const passive of passiveChildren) {
+            if (passive.needed()) passive.runtime.step(buttons, 0);
+          }
           // Options is also a programmatic child of START/title. Give an
           // already-open language screen priority over the still-mounted
           // START root so dismissing it returns to the parent menu.

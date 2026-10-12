@@ -359,6 +359,44 @@ describe("title Battle mode", () => {
     expect(calls.at(-1)).toBe("child-one");
   });
 
+  test("composite advances a closed child transient without stealing world input", () => {
+    const f = fixture(false);
+    const calls: string[] = [];
+    let transient = true;
+    const world: GameViewOverlayConfig = {
+      create: () => ({
+        step: (buttons, pressed) => {
+          calls.push(`world:${buttons}:${pressed}`);
+          return { consumed: false };
+        },
+        isOpen: () => false,
+        render: () => undefined,
+      }),
+    };
+    const child = {
+      needsPassiveStep: () => transient,
+      create: () => ({
+        step: (buttons: number, pressed: number) => {
+          calls.push(`child:${buttons}:${pressed}`);
+          transient = false;
+          return { consumed: true };
+        },
+        isOpen: () => false,
+        render: () => undefined,
+      }),
+    };
+    const composite = createCompositeOverlay(world, undefined, undefined, undefined, undefined, child)
+      .create(f.host);
+
+    expect(composite.step(BTN.START, BTN.START)).toEqual({ consumed: false });
+    expect(calls).toEqual([`child:${BTN.START}:0`, `world:${BTN.START}:${BTN.START}`]);
+    expect(composite.isOpen()).toBeFalse();
+
+    composite.step(0, 0);
+    expect(calls.at(-1)).toBe("world:0:0");
+    expect(calls.filter((entry) => entry.startsWith("child:"))).toHaveLength(1);
+  });
+
   test("back returns from the real five-row difficulty picker without touching the world", () => {
     createRoot((dispose) => {
       try {

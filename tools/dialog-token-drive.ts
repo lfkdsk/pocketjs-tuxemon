@@ -200,9 +200,20 @@ export async function driveDialog(
     else break;
   }
 
-  // 4. Load slot 1 through the real save menu: START -> DOWN (Load) -> CIRCLE.
+  // 4. Load slot 1 through the real START and save menus. The START row set
+  //    is inventory/party dependent, so navigate to the live Load row rather
+  //    than baking the old save-root's one-DOWN position into this fixture.
   press(BTN_START);
-  press(BTN_DOWN);
+  const start = globalThis.__pocketStartMenu;
+  if (!start) throw new Error("dialog-drive: START menu hook is unavailable");
+  const loadIndex = start.rows().findIndex((row) => row.id === "load");
+  if (loadIndex < 0) throw new Error("dialog-drive: START menu has no Load row");
+  for (let i = 0; i < start.rows().length && start.state().rootCursor !== loadIndex; i++) {
+    press(BTN_DOWN);
+  }
+  if (start.state().rootCursor !== loadIndex) {
+    throw new Error("dialog-drive: could not select the START Load row");
+  }
   press(BTN_CIRCLE);
   press(BTN_CIRCLE);
   for (let i = 0; i < 180; i++) {
