@@ -1,0 +1,43 @@
+{
+  "format": "pocket-tuxemon-save-compat/v1",
+  "source": {
+    "game": "88347e8e69460d6dad02e78413302c2cfb8da5b4",
+    "kit": "0aecc05a6f911208cc5df8041fd00e76a6f35a1b",
+    "pocketjs": "862040bd77edc49b1f815beff63952b6616a14c6",
+    "tuxemon": "9e6258ff726b786040a267e8bdbbf037b560285e"
+  },
+  "content": {
+    "manifest": "bb8a42742e61be05d1ff6abfc26b218747f2214abd52ac6749e184ad9d2c5009",
+    "schema": "c394541ca7c28bd85899f944e3d57e506a66cd3d221d14cb5d3d56b4a21cdc13"
+  },
+  "tape": {
+    "path": "data/gb6-mainline-journey.json",
+    "sha256": "2c1a08b38994dae5005fc6b9041e5d36426e3f021e015a2a3912abe41aac487c",
+    "continuationPrefix": {
+      "frames": 283,
+      "sha256": "4ecbdd0a2ece190f74ee72cf459127f97f6e3e6aab20d67985b6e5dff5a471f8"
+    }
+  },
+  "save": {
+    "frame": 26,
+    "timelineFrame": 26,
+    "held": 0,
+    "map": "spyder_paper_scoop",
+    "position": [
+      4,
+      8
+    ],
+    "stateSha256": "b65e87245ed511c62971726cc70a278638597c16ef354c91011919777ea3bd95",
+    "envelopeSha256": "768288eb8722b69b695e9c3eb694c50490b3360d5cbfb1efd98dc0d7b1f100ff"
+  },
+  "continuation": {
+    "frames": 257,
+    "targetFrame": 283,
+    "map": "spyder_paper_scoop",
+    "position": [
+      4,
+      8
+    ],
+    "stateSha256": "5c40d03f6bd42b6278914cf9874a8074a8e3c07cde04910cd0c1ae4b30bfc0fd"
+  }
+}

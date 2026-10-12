@@ -34,6 +34,10 @@ not hand-authored envelopes or toy projects:
 - `main-35a2af17/` is the published NuPhone/title-Battle main immediately
   before battle lifecycle music. Its unedited slot is replayed through every
   remaining battle by the compatibility test.
+- `main-88347e8e/` is the published START-menu main immediately before the
+  Options and PC parity work. Its unedited slot is loaded by the current game,
+  continued on the maintained tape, and replayed through every remaining
+  battle by the compatibility test.
 
 To reproduce a fixture, make a detached checkout of the named game commit with
 recursive submodules, run `bun install --frozen-lockfile`, run the importer
