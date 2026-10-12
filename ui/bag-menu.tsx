@@ -243,7 +243,7 @@ const BagMenuView: Component<{ runtime: BagMenuRuntime; theme?: Partial<UiTheme>
                     <Text class="text-xs" style={{ width: 220, height: 15, lineHeight: 14, textColor: state().cursor === index ? theme().paper : row.usable ? theme().ink : theme().dim }}>
                       {row.name}
                     </Text>
-                    <Text class="text-xs" style={{ width: 40, height: 15, lineHeight: 14, textAlign: "right", textColor: state().cursor === index ? theme().paper : theme().ink }} debugName={`tux-bag-quantity-${index}`}>
+                    <Text class="text-xs" style={{ width: 40, height: 15, lineHeight: 14, textAlign: 2, textColor: state().cursor === index ? theme().paper : theme().ink }} debugName={`tux-bag-quantity-${index}`}>
                       {`x${row.quantity}`}
                     </Text>
                   </View>
@@ -270,7 +270,7 @@ const BagMenuView: Component<{ runtime: BagMenuRuntime; theme?: Partial<UiTheme>
             <Text class="text-xs" style={{ posType: 1, insetL: 12, insetT: 244, width: 280, height: 16, lineHeight: 14, textColor: theme().dim }} debugName="tux-bag-legend">
               {"↑↓  ○  ×    ←→ / swipe"}
             </Text>
-            <Text class="text-xs" style={{ posType: 1, insetL: 382, insetT: 244, width: 86, height: 16, lineHeight: 14, textAlign: "right", textColor: theme().dim }} debugName="tux-bag-page">
+            <Text class="text-xs" style={{ posType: 1, insetL: 382, insetT: 244, width: 86, height: 16, lineHeight: 14, textAlign: 2, textColor: theme().dim }} debugName="tux-bag-page">
               {`${page().page + 1}/${page().pageCount}`}
             </Text>
           </Show>
@@ -323,7 +323,7 @@ const BagMenuView: Component<{ runtime: BagMenuRuntime; theme?: Partial<UiTheme>
                   <Text class="text-xs" style={{ width: 58, height: 16, lineHeight: 14, textColor: state().partyCursor === index ? theme().paper : theme().dim }}>
                     {`Lv.${row.level}`}
                   </Text>
-                  <Text class="text-xs" style={{ width: 120, height: 16, lineHeight: 14, textAlign: "right", textColor: state().partyCursor === index ? theme().paper : theme().dim }}>
+                  <Text class="text-xs" style={{ width: 120, height: 16, lineHeight: 14, textAlign: 2, textColor: state().partyCursor === index ? theme().paper : theme().dim }}>
                     {`${runtime.labels.hp} ${row.hp}/${row.maxHp}`}
                   </Text>
                 </View>
@@ -358,7 +358,7 @@ const BagMenuView: Component<{ runtime: BagMenuRuntime; theme?: Partial<UiTheme>
               <Text class="text-sm" style={{ posType: 1, insetL: 10, insetT: 12, width: 348, height: 62, lineHeight: 18, textColor: theme().ink }} debugName="tux-bag-message">
                 {state().message?.text ?? ""}
               </Text>
-              <Text class="text-xs" style={{ posType: 1, insetL: 10, insetT: 88, width: 348, height: 16, lineHeight: 14, textAlign: "right", textColor: theme().accent }} debugName="tux-bag-message-back">
+              <Text class="text-xs" style={{ posType: 1, insetL: 10, insetT: 88, width: 348, height: 16, lineHeight: 14, textAlign: 2, textColor: theme().accent }} debugName="tux-bag-message-back">
                 {`○ ${runtime.labels.back}`}
               </Text>
             </Panel>
