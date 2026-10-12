@@ -1,6 +1,11 @@
 import { describe, expect, test } from "bun:test";
 
-import { TUXEMON_BATTLE_DB, TUXEMON_SESSION_OPTIONS, TUXEMON_VARIABLE_ENUMS } from "../battle/game.ts";
+import {
+  TUXEMON_BATTLE_DB,
+  TUXEMON_CAMPAIGN_MONSTER_IDS,
+  TUXEMON_SESSION_OPTIONS,
+  TUXEMON_VARIABLE_ENUMS,
+} from "../battle/game.ts";
 import { TUXEMON_BATTLE_DB_ZH, TUXEMON_SESSION_OPTIONS_ZH } from "../battle/game-zh.ts";
 import zhNamesJson from "../data/battle-names.zh_CN.json";
 import { battleDbToTuxemonBattleDb } from "../battle/from-battle-db.ts";
@@ -465,9 +470,12 @@ describe("Spyder Dojo devolution (dojo_method monster) on the imported map", () 
     }
   });
 
-  test("a monster whose earlier form is not imported is refunded instead of charged", () => {
+  test("a monster whose earlier form is outside the campaign journal is refunded instead of charged", () => {
+    const campaign = new Set(TUXEMON_CAMPAIGN_MONSTER_IDS);
     const species = Object.keys(DB.monsters).find((slug) => DB.monsters[slug]!.stage === "stage1"
-      && !DB.monsters[slug]!.evolvesFrom.some((parent) => DB.monsters[parent]?.stage === "basic"))!;
+      && DB.monsters[slug]!.evolvesFrom.some((parent) => DB.monsters[parent]?.stage === "basic")
+      && !DB.monsters[slug]!.evolvesFrom.some((parent) => campaign.has(parent) && DB.monsters[parent]?.stage === "basic"))!;
+    expect(species).toBeDefined();
     const lead = monster(species, 30, "fu-orphan");
     const dojo = new Dojo("en_US", "student2", [lead], 500).talk(YES, { key: "fu-orphan" });
     expect(dojo.state.sw.gold).toBe(500);
