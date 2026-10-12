@@ -1976,10 +1976,10 @@ mod g6_quickjs_bench {
         seed_audio(data);
     }
 
-    /// Focused real-QuickJS acceptance for the release title Battle mode and
-    /// the NuPhone Map App. It uses the production bundle, UiSurface and
-    /// framebuffer hashing path at both supported viewports; only scene
-    /// selection is benchmark-owned.
+    /// Focused real-QuickJS acceptance for the release title Battle and
+    /// Minigame modes plus the NuPhone Map App. It uses the production bundle,
+    /// UiSurface and framebuffer hashing path at both supported viewports;
+    /// only scene selection is benchmark-owned.
     #[test]
     #[ignore]
     fn feature_modes() {
@@ -2023,6 +2023,64 @@ mod g6_quickjs_bench {
         report_feature_case(&viewport, "feature-title-steady", &title_steady);
         report_feature_heap(&viewport, "feature-title", &title);
 
+        title.unit("globalThis.__pocketTitleBattle.selectTitle(2)");
+        assert!(
+            title.boolean("globalThis.__pocketTitleBattle.state().screen==='minigameDifficulty'"),
+            "Minigame row did not open its difficulty picker",
+        );
+        title.unit("globalThis.__pocketTitleBattle.selectMinigameDifficulty(0)");
+        assert!(
+            title.boolean("globalThis.__pocketTitleBattle.state().screen==='minigameQuestion'&&globalThis.__pocketTitleBattle.state().minigame.difficultyIndex===0"),
+            "Easy did not enter the title minigame",
+        );
+        let minigame_easy_entry = feature_frames(&mut title, &mut frame, 1);
+        report_feature_case(
+            &viewport,
+            "feature-minigame-easy-entry",
+            &minigame_easy_entry,
+        );
+        let _ = feature_frames(&mut title, &mut frame, 11);
+        let minigame_easy_steady = feature_frames(&mut title, &mut frame, 120);
+        report_feature_case(
+            &viewport,
+            "feature-minigame-easy-steady",
+            &minigame_easy_steady,
+        );
+        report_feature_heap(&viewport, "feature-minigame-easy", &title);
+
+        title.unit("globalThis.__pocketTitleBattle.act('back')");
+        assert!(
+            title.boolean("globalThis.__pocketTitleBattle.state().screen==='title'"),
+            "leaving Easy did not return to the title",
+        );
+        let _ = feature_frames(&mut title, &mut frame, 1);
+        title.unit("globalThis.__pocketTitleBattle.selectTitle(2)");
+        title.unit("globalThis.__pocketTitleBattle.selectMinigameDifficulty(2)");
+        assert!(
+            title.boolean("globalThis.__pocketTitleBattle.state().screen==='minigameQuestion'&&globalThis.__pocketTitleBattle.state().minigame.difficultyIndex===2"),
+            "Hard did not enter the title minigame",
+        );
+        let minigame_hard_entry = feature_frames(&mut title, &mut frame, 1);
+        report_feature_case(
+            &viewport,
+            "feature-minigame-hard-entry",
+            &minigame_hard_entry,
+        );
+        let _ = feature_frames(&mut title, &mut frame, 11);
+        let minigame_hard_steady = feature_frames(&mut title, &mut frame, 120);
+        report_feature_case(
+            &viewport,
+            "feature-minigame-hard-steady",
+            &minigame_hard_steady,
+        );
+        report_feature_heap(&viewport, "feature-minigame-hard", &title);
+
+        title.unit("globalThis.__pocketTitleBattle.act('back')");
+        assert!(
+            title.boolean("globalThis.__pocketTitleBattle.state().screen==='title'"),
+            "leaving Hard did not return to the title",
+        );
+        let _ = feature_frames(&mut title, &mut frame, 1);
         title.unit("globalThis.__pocketTitleBattle.selectTitle(1)");
         assert!(
             title.boolean("globalThis.__pocketTitleBattle.state().screen==='difficulty'"),
