@@ -274,7 +274,7 @@ describe("Bag touch, pagination, TM choice, and localization", () => {
       expect(mounted.runtime.page().items[0]).toMatchObject({
         name: ZH_DB.items.potion!.name,
         description: ZH_DB.items.potion!.description,
-        category: ZH_DB.items.potion!.category,
+        category: ZH_DB.items.potion!.categoryName,
       });
     } finally {
       mounted.dispose();

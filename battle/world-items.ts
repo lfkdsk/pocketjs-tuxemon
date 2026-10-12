@@ -534,7 +534,7 @@ export function listWorldItems(
         description: item.description,
         quantity,
         sort: item.sort,
-        category: item.category,
+        category: item.categoryName,
         requiresTarget: item.behaviors.requires_monster_menu === true,
         usable: use.eligible,
         reason: use.reason,

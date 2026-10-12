@@ -118,7 +118,7 @@ function fixture(lang: Lang): {
 } {
   const rockitten = member("rockitten", "party-rockitten", 20, {
     nickname: lang === "zh_CN" ? "岩岩" : "Pebble",
-    status: "poisoned",
+    status: "poison",
     bond: 47,
     trainingPoints: { hp: 2, armour: 3, dodge: 4, melee: 5, ranged: 6, speed: 7 },
   });
@@ -408,7 +408,7 @@ describe("START menu semantic tree and touch", () => {
       expect(nodeText(namedNode("start-menu-party-name-0"))).toBe("岩岩");
       expect(nodeText(namedNode("start-menu-party-level-0"))).toContain("20");
       expect(nodeText(namedNode("start-menu-party-hp-0"))).toContain("/");
-      expect(nodeText(namedNode("start-menu-party-status-0"))).toBe("Poisoned");
+      expect(nodeText(namedNode("start-menu-party-status-0"))).toBe("中毒");
       expect(tileLoads.length).toBeGreaterThanOrEqual(3);
       expect(tileLoads.every((ref) => ref.startsWith("ui:tile.battle/"))).toBeTrue();
 

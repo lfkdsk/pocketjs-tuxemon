@@ -1149,6 +1149,7 @@ export function runtimeBattleDb(db: BattleDb): BattleDb {
     ...(technique.animation ? { animation: technique.animation } : {}),
   }]));
   const statuses = Object.fromEntries(Object.entries(db.statuses).map(([slug, status]) => [slug, {
+    name: status.name,
     category: status.category,
     behaviors: status.behaviors,
     effects: status.effects,
@@ -1169,6 +1170,7 @@ export function runtimeBattleDb(db: BattleDb): BattleDb {
     name: item.name,
     description: item.description,
     sort: item.sort,
+    categoryName: item.categoryName,
     category: item.category,
     usableIn: item.usableIn,
     consumable: item.consumable,
@@ -1441,6 +1443,7 @@ export function writeBattleArtifacts(options: BattleImportOptions): BattleBuild 
       name: po.get(slug) ?? slug,
       description: po.get(`${slug}_description`) || (po.get(slug) ?? slug),
       sort: string(raw.sort),
+      categoryName: po.get(category) ?? category,
       category,
       usableIn: list<unknown>(raw.usable_in).map(String),
       cost: raw.cost === undefined || raw.cost === null ? null : number(raw.cost),
@@ -1466,6 +1469,7 @@ export function writeBattleArtifacts(options: BattleImportOptions): BattleBuild 
     const raw = tables.status[slug]!;
     const animation = animationFor(cooker, raw, "item-status-animations");
     statuses[slug] = {
+      name: po.get(slug) ?? slug,
       sort: string(raw.sort),
       category: optionalString(raw.category),
       behaviors: { persists_after_combat: false, ...object(raw.behaviors) },

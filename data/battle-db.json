@@ -73484,6 +73484,7 @@
    "name": "Aardant",
    "description": "An innocuous application of Fusion technology.",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     "WorldState"
@@ -73520,6 +73521,7 @@
    "name": "Ancient Egg",
    "description": "A peculiar egg. If you plant it, maybe it will hatch.",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     "WorldState"
@@ -73556,6 +73558,7 @@
    "name": "Antidote Grapes",
    "description": "Pop a few of these and you'll laugh in the face of poison! Delicious and detoxifying all in one bite.",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     ""
@@ -73594,6 +73597,7 @@
    "name": "Map App",
    "description": "Use this on your phone to see where you are.",
    "sort": "utility",
+   "categoryName": "phone",
    "category": "phone",
    "usableIn": [
     "WorldState"
@@ -73630,6 +73634,7 @@
    "name": "Tuxepedia App",
    "description": "Keep track of information about Tuxemon here, and share it with the world.",
    "sort": "utility",
+   "categoryName": "phone",
    "category": "phone",
    "usableIn": [
     "WorldState"
@@ -73666,6 +73671,7 @@
    "name": "Book of Wishes",
    "description": "The Achievement Maniac's list of achievements for you to attempt.",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     ""
@@ -73702,6 +73708,7 @@
    "name": "Boost Armor",
    "description": "For the rest of the combat, increase Armor by two stages.",
    "sort": "utility",
+   "categoryName": "stats",
    "category": "stats",
    "usableIn": [
     "MainCombatMenuState"
@@ -73752,6 +73759,7 @@
    "name": "Boost Dodge",
    "description": "For the rest of the combat, increase Dodge by two stages.",
    "sort": "utility",
+   "categoryName": "stats",
    "category": "stats",
    "usableIn": [
     "MainCombatMenuState"
@@ -73802,6 +73810,7 @@
    "name": "Boost Melee",
    "description": "For the rest of the combat, increase Melee by two stages.",
    "sort": "utility",
+   "categoryName": "stats",
    "category": "stats",
    "usableIn": [
     "MainCombatMenuState"
@@ -73852,6 +73861,7 @@
    "name": "Boost Ranged",
    "description": "For the rest of the combat, increase Ranged by two stages.",
    "sort": "utility",
+   "categoryName": "stats",
    "category": "stats",
    "usableIn": [
     "MainCombatMenuState"
@@ -73902,6 +73912,7 @@
    "name": "Boost Speed",
    "description": "For the rest of the combat, increase Speed by two stages.",
    "sort": "utility",
+   "categoryName": "stats",
    "category": "stats",
    "usableIn": [
     "MainCombatMenuState"
@@ -73952,6 +73963,7 @@
    "name": "Cosmic Berry",
    "description": "It changes monster type to Cosmic.",
    "sort": "utility",
+   "categoryName": "elements",
    "category": "elements",
    "usableIn": [
     "MainCombatMenuState"
@@ -74004,6 +74016,7 @@
    "name": "Cure Festering",
    "description": "Rinse out the wound and you'll be right.",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     ""
@@ -74042,6 +74055,7 @@
    "name": "Cureall",
    "description": "Heals your tuxemon to full health and removes any conditions.",
    "sort": "potion",
+   "categoryName": "Potion",
    "category": "potion",
    "usableIn": [
     "MainCombatMenuState",
@@ -74107,6 +74121,7 @@
    "name": "Dojo Pass",
    "description": "Admit one to the Dojo of the Elements.",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     ""
@@ -74143,6 +74158,7 @@
    "name": "Earth Berry",
    "description": "It changes monster type to Earth.",
    "sort": "utility",
+   "categoryName": "elements",
    "category": "elements",
    "usableIn": [
     "MainCombatMenuState"
@@ -74195,6 +74211,7 @@
    "name": "Escape Key",
    "description": "Slip out the back door.",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     "WorldState"
@@ -74238,6 +74255,7 @@
    "name": "Fire Berry",
    "description": "It changes monster type to Fire.",
    "sort": "utility",
+   "categoryName": "elements",
    "category": "elements",
    "usableIn": [
     "MainCombatMenuState"
@@ -74290,6 +74308,7 @@
    "name": "Fishing Rod",
    "description": "Catch fish.",
    "sort": "utility",
+   "categoryName": "fish",
    "category": "fish",
    "usableIn": [
     "WorldState"
@@ -74338,6 +74357,7 @@
    "name": "Flintstone",
    "description": "A flaky stone used to make stone tools and start fires. Not at the same time.",
    "sort": "utility",
+   "categoryName": "morph",
    "category": "morph",
    "usableIn": [
     "WorldState"
@@ -74390,6 +74410,7 @@
    "name": "Friendship Scroll",
    "description": "It allows to deepen your relationship with the monsters.",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     "WorldState"
@@ -74426,6 +74447,7 @@
    "name": "Frost Berry",
    "description": "It changes monster type to Frost.",
    "sort": "utility",
+   "categoryName": "elements",
    "category": "elements",
    "usableIn": [
     "MainCombatMenuState"
@@ -74478,6 +74500,7 @@
    "name": "Gold Pass",
    "description": "Enjoy the Cathedral's deluxe services.",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     ""
@@ -74514,6 +74537,7 @@
    "name": "Heroic Berry",
    "description": "It changes monster type to Heroic.",
    "sort": "utility",
+   "categoryName": "elements",
    "category": "elements",
    "usableIn": [
     "MainCombatMenuState"
@@ -74566,6 +74590,7 @@
    "name": "Imperial Potion",
    "description": "Heals a monster by 500 HP.",
    "sort": "potion",
+   "categoryName": "Potion",
    "category": "potion",
    "usableIn": [
     "MainCombatMenuState",
@@ -74628,6 +74653,7 @@
    "name": "Imperial Tea",
    "description": "Adds 10,000 to a monster's XP.",
    "sort": "potion",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     "WorldState"
@@ -74671,6 +74697,7 @@
    "name": "Lightning Berry",
    "description": "It changes monster type to Lightning.",
    "sort": "utility",
+   "categoryName": "elements",
    "category": "elements",
    "usableIn": [
     "MainCombatMenuState"
@@ -74723,6 +74750,7 @@
    "name": "Lucky Bamboo",
    "description": "Technically, it's not bamboo at all. Nor is it particularly lucky. But it makes a nice indoor plant.",
    "sort": "utility",
+   "categoryName": "morph",
    "category": "morph",
    "usableIn": [
     "WorldState"
@@ -74775,6 +74803,7 @@
    "name": "Mega Potion",
    "description": "Heals a monster by 200 HP.",
    "sort": "potion",
+   "categoryName": "Potion",
    "category": "potion",
    "usableIn": [
     "MainCombatMenuState",
@@ -74837,6 +74866,7 @@
    "name": "Metal Berry",
    "description": "It changes monster type to Metal.",
    "sort": "utility",
+   "categoryName": "elements",
    "category": "elements",
    "usableIn": [
     "MainCombatMenuState"
@@ -74889,6 +74919,7 @@
    "name": "Miaow Milk",
    "description": "Cats love the taste of Miaow Milk™!",
    "sort": "utility",
+   "categoryName": "morph",
    "category": "morph",
    "usableIn": [
     "WorldState"
@@ -74941,6 +74972,7 @@
    "name": "Mystery Tea",
    "description": "Adds 1,500 to a monster's XP.",
    "sort": "potion",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     "WorldState"
@@ -74984,6 +75016,7 @@
    "name": "Normal Berry",
    "description": "It changes monster type to Normal.",
    "sort": "utility",
+   "categoryName": "elements",
    "category": "elements",
    "usableIn": [
     "MainCombatMenuState"
@@ -75036,6 +75069,7 @@
    "name": "Nu Phone",
    "description": "You can do a lot with this, e.g. phone home.",
    "sort": "utility",
+   "categoryName": "phone",
    "category": "phone",
    "usableIn": [
     "WorldState"
@@ -75072,6 +75106,7 @@
    "name": "Ox Stick",
    "description": "An inspiring weapon for an ancient tuxemon.",
    "sort": "utility",
+   "categoryName": "morph",
    "category": "morph",
    "usableIn": [
     "WorldState"
@@ -75124,6 +75159,7 @@
    "name": "Eyes Meet",
    "description": "Painting 'Monsters' Eyes Meet', medium: oil on canvas. Hand-signed by the artist.",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     ""
@@ -75160,6 +75196,7 @@
    "name": "Starry Night",
    "description": "Painting 'Starry, Starry, Starry Night', medium: oil on canvas. Hand-signed by the artist.",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     ""
@@ -75196,6 +75233,7 @@
    "name": "Trepidation",
    "description": "Painting 'Trepidation', medium: oil on canvas. Hand-signed by the artist.",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     ""
@@ -75232,6 +75270,7 @@
    "name": "Peace Lily",
    "description": "A hardy indoor plant for someone special.",
    "sort": "utility",
+   "categoryName": "morph",
    "category": "morph",
    "usableIn": [
     "WorldState"
@@ -75284,6 +75323,7 @@
    "name": "Petrified Dung",
    "description": "It looks like, well, poo ... but it's hard as stone.",
    "sort": "utility",
+   "categoryName": "morph",
    "category": "morph",
    "usableIn": [
     "WorldState"
@@ -75336,6 +75376,7 @@
    "name": "Potion",
    "description": "Heals a monster by 50 HP.",
    "sort": "potion",
+   "categoryName": "Potion",
    "category": "potion",
    "usableIn": [
     "MainCombatMenuState",
@@ -75398,6 +75439,7 @@
    "name": "Pyramidion",
    "description": "A golden triangle that hums with celestial power.",
    "sort": "utility",
+   "categoryName": "morph",
    "category": "morph",
    "usableIn": [
     "WorldState"
@@ -75450,6 +75492,7 @@
    "name": "Raise Armor",
    "description": "Learn the hardness of the diamond. Train Armor.",
    "sort": "utility",
+   "categoryName": "stats",
    "category": "stats",
    "usableIn": [
     "WorldState"
@@ -75502,6 +75545,7 @@
    "name": "Raise Dodge",
    "description": "Learn the iridescence of the opal. Train Dodge.",
    "sort": "utility",
+   "categoryName": "stats",
    "category": "stats",
    "usableIn": [
     "WorldState"
@@ -75554,6 +75598,7 @@
    "name": "Raise HP",
    "description": "Learn the bulk and abundance of quartz. Train HP.",
    "sort": "utility",
+   "categoryName": "stats",
    "category": "stats",
    "usableIn": [
     "WorldState"
@@ -75606,6 +75651,7 @@
    "name": "Raise Melee",
    "description": "Learn the anger of the ruby. Train Melee.",
    "sort": "utility",
+   "categoryName": "stats",
    "category": "stats",
    "usableIn": [
     "WorldState"
@@ -75658,6 +75704,7 @@
    "name": "Raise Ranged",
    "description": "Learn the aim of the emerald. Train Ranged.",
    "sort": "utility",
+   "categoryName": "stats",
    "category": "stats",
    "usableIn": [
     "WorldState"
@@ -75710,6 +75757,7 @@
    "name": "Raise Speed",
    "description": "Learn the reflexes of the spinel. Train Speed.",
    "sort": "utility",
+   "categoryName": "stats",
    "category": "stats",
    "usableIn": [
     "WorldState"
@@ -75762,6 +75810,7 @@
    "name": "Refreshing Slice",
    "description": "Take a juicy bite and feel the fatigue melt away. Exhaustion doesn't stand a chance against this revitalizing treat!",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     ""
@@ -75800,6 +75849,7 @@
    "name": "Repellent",
    "description": "Deter wild encounters with this stinky spray.",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     "WorldState"
@@ -75843,6 +75893,7 @@
    "name": "Restoration",
    "description": "Remove any condition currently affecting the target.",
    "sort": "potion",
+   "categoryName": "Potion",
    "category": "potion",
    "usableIn": [
     "MainCombatMenuState",
@@ -75897,6 +75948,7 @@
    "name": "Revive",
    "description": "Revives knocked out Tuxemon and restores half HP.",
    "sort": "potion",
+   "categoryName": "Potion",
    "category": "potion",
    "usableIn": [
     "MainCombatMenuState",
@@ -75961,6 +76013,7 @@
    "name": "Rhincus Fossil",
    "description": "It looks like the skull of a toothed bird, but it's hard as stone.",
    "sort": "utility",
+   "categoryName": "fossil",
    "category": "fossil",
    "usableIn": [
     "WorldState"
@@ -76013,6 +76066,7 @@
    "name": "Sea Girdle",
    "description": "A string of baubles, soft and slimy like kelp.",
    "sort": "utility",
+   "categoryName": "morph",
    "category": "morph",
    "usableIn": [
     "WorldState"
@@ -76065,6 +76119,7 @@
    "name": "Shadow Berry",
    "description": "It changes monster type to Shadow.",
    "sort": "utility",
+   "categoryName": "elements",
    "category": "elements",
    "usableIn": [
     "MainCombatMenuState"
@@ -76117,6 +76172,7 @@
    "name": "Shammer Fossil",
    "description": "It looks like the skull of an ancient dog, but it's hard as stone.",
    "sort": "utility",
+   "categoryName": "fossil",
    "category": "fossil",
    "usableIn": [
     "WorldState"
@@ -76169,6 +76225,7 @@
    "name": "Sky Berry",
    "description": "It changes monster type to Sky.",
    "sort": "utility",
+   "categoryName": "elements",
    "category": "elements",
    "usableIn": [
     "MainCombatMenuState"
@@ -76221,6 +76278,7 @@
    "name": "Sledgehammer",
    "description": "Smash apart gray boulders.",
    "sort": "utility",
+   "categoryName": "destroy",
    "category": "destroy",
    "usableIn": [
     "WorldState"
@@ -76269,6 +76327,7 @@
    "name": "Spyder Pass",
    "description": "This should let you in to places only Spyder conspirators are meant to go.",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     ""
@@ -76305,6 +76364,7 @@
    "name": "Stovepipe",
    "description": "A long iron pipe. Handling it leaves your hands sooty and ashen.",
    "sort": "utility",
+   "categoryName": "morph",
    "category": "morph",
    "usableIn": [
     "WorldState"
@@ -76357,6 +76417,7 @@
    "name": "Super Potion",
    "description": "Heals a monster by 100 HP.",
    "sort": "potion",
+   "categoryName": "Potion",
    "category": "potion",
    "usableIn": [
     "MainCombatMenuState",
@@ -76419,6 +76480,7 @@
    "name": "Surfboard",
    "description": "From your Mom. It lets you travel faster.",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     ""
@@ -76455,6 +76517,7 @@
    "name": "Sweet Sand",
    "description": "In parts of the world, people clean themselves with this fragrant, sudsy sand.",
    "sort": "utility",
+   "categoryName": "morph",
    "category": "morph",
    "usableIn": [
     "WorldState"
@@ -76507,6 +76570,7 @@
    "name": "Tea",
    "description": "Adds 500 to a monster's XP.",
    "sort": "potion",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     "WorldState"
@@ -76550,6 +76614,7 @@
    "name": "Tectonic Drill",
    "description": "A big click-clack machine used to drill into the earth.",
    "sort": "utility",
+   "categoryName": "morph",
    "category": "morph",
    "usableIn": [
     "WorldState"
@@ -76602,6 +76667,7 @@
    "name": "Thunderstone",
    "description": "An old stone relic, now carried about for good luck.",
    "sort": "utility",
+   "categoryName": "morph",
    "category": "morph",
    "usableIn": [
     "WorldState"
@@ -76654,6 +76720,7 @@
    "name": "TM: Acid",
    "description": "Technique Manual that teaches the Acid technique.",
    "sort": "utility",
+   "categoryName": "technique",
    "category": "technique",
    "usableIn": [
     "WorldState"
@@ -76705,6 +76772,7 @@
    "name": "TM: All In",
    "description": "Technique Manual that teaches the Leaf Barrage technique.",
    "sort": "utility",
+   "categoryName": "technique",
    "category": "technique",
    "usableIn": [
     "WorldState"
@@ -76764,6 +76832,7 @@
    "name": "TM: Altitude",
    "description": "Technique Manual that teaches the Altitude technique.",
    "sort": "utility",
+   "categoryName": "technique",
    "category": "technique",
    "usableIn": [
     "WorldState"
@@ -76823,6 +76892,7 @@
    "name": "TM: Avalanche",
    "description": "Technique Manual that teaches the Avalanche technique.",
    "sort": "utility",
+   "categoryName": "technique",
    "category": "technique",
    "usableIn": [
     "WorldState"
@@ -76882,6 +76952,7 @@
    "name": "TM: Blade",
    "description": "Technique Manual that teaches the Blade technique.",
    "sort": "utility",
+   "categoryName": "technique",
    "category": "technique",
    "usableIn": [
     "WorldState"
@@ -76941,6 +77012,7 @@
    "name": "TM: Blossom",
    "description": "Technique Manual that teaches the Blossom technique.",
    "sort": "utility",
+   "categoryName": "technique",
    "category": "technique",
    "usableIn": [
     "WorldState"
@@ -77000,6 +77072,7 @@
    "name": "TM: Frostbite",
    "description": "Technique Manual that teaches the Frostbite technique.",
    "sort": "utility",
+   "categoryName": "technique",
    "category": "technique",
    "usableIn": [
     "WorldState"
@@ -77059,6 +77132,7 @@
    "name": "TM: Ice Shield",
    "description": "Technique Manual that teaches the Ice Shield technique.",
    "sort": "utility",
+   "categoryName": "technique",
    "category": "technique",
    "usableIn": [
     "WorldState"
@@ -77118,6 +77192,7 @@
    "name": "TM: Leaf Barrage",
    "description": "Technique Manual that teaches the Leaf Barrage technique.",
    "sort": "utility",
+   "categoryName": "technique",
    "category": "technique",
    "usableIn": [
     "WorldState"
@@ -77177,6 +77252,7 @@
    "name": "TM: Panjandrum",
    "description": "Technique Manual that teaches the Panjandrum technique.",
    "sort": "utility",
+   "categoryName": "technique",
    "category": "technique",
    "usableIn": [
     "WorldState"
@@ -77236,6 +77312,7 @@
    "name": "TM: Scope",
    "description": "Technique Manual that teaches the Scope technique.",
    "sort": "utility",
+   "categoryName": "technique",
    "category": "technique",
    "usableIn": [
     "WorldState"
@@ -77287,6 +77364,7 @@
    "name": "TM: Shadow Boxing",
    "description": "Technique Manual that teaches the Shadow Boxing technique.",
    "sort": "utility",
+   "categoryName": "technique",
    "category": "technique",
    "usableIn": [
     "WorldState"
@@ -77346,6 +77424,7 @@
    "name": "TM: Supernova",
    "description": "Technique Manual that teaches the Supernova technique.",
    "sort": "utility",
+   "categoryName": "technique",
    "category": "technique",
    "usableIn": [
     "WorldState"
@@ -77405,6 +77484,7 @@
    "name": "TM: Ubuntu",
    "description": "Technique Manual that teaches the Ubuntu technique.",
    "sort": "utility",
+   "categoryName": "technique",
    "category": "technique",
    "usableIn": [
     "WorldState"
@@ -77464,6 +77544,7 @@
    "name": "TM: Vorpal",
    "description": "Technique Manual that teaches the Vorpal technique.",
    "sort": "utility",
+   "categoryName": "technique",
    "category": "technique",
    "usableIn": [
     "WorldState"
@@ -77515,6 +77596,7 @@
    "name": "Tuxeball",
    "description": "Captures a monster.",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -77605,6 +77687,7 @@
    "name": "Ancient Tuxeball",
    "description": "This Tuxeball was made a long time ago and is capable of catching any Tuxemon without fail.",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -77695,6 +77778,7 @@
    "name": "Candy Tuxeball",
    "description": "Captures Tuxemon and increases its level by one upon capture.",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -77785,6 +77869,7 @@
    "name": "Crusher Tuxeball",
    "description": "This Tuxeball breaks through defenses and increases the catch rate the higher the opposing Tuxemon's defense is. It will fail to catch if a protective condition is in place.",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -77875,6 +77960,7 @@
    "name": "Diurnal Tuxeball",
    "description": "Captures more easily during daytime, but its effectiveness is significantly reduced during the night.",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -77965,6 +78051,7 @@
    "name": "Earth Tuxeball",
    "description": "Captures more easily an Earth Tuxemon.",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -78055,6 +78142,7 @@
    "name": "Female Tuxeball",
    "description": "Captures more easily a Female Tuxemon.",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -78145,6 +78233,7 @@
    "name": "Fire Tuxeball",
    "description": "Captures more easily a Fire Tuxemon.",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -78235,6 +78324,7 @@
    "name": "Gambler Tuxeball",
    "description": "This tuxeball is known for its unpredictable nature. Its catch rate fluctuates wildly, with the chance of capturing a tuxemon ranging from extremely low to exceptionally high.",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -78325,6 +78415,7 @@
    "name": "Grand Tuxeball",
    "description": "Offers an even higher capture rate than the Lavish Tuxeball.",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -78415,6 +78506,7 @@
    "name": "Hardened Tuxeball",
    "description": "Captures Tuxemon and it doesn't break when it fails.",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -78505,6 +78597,7 @@
    "name": "Hearty Tuxeball",
    "description": "Upon capture, the tuxemon's positive taste changes to hearty.",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -78595,6 +78688,7 @@
    "name": "Lavish Tuxeball",
    "description": "Boasts a significantly higher capture rate than the Noble Tuxeball.",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -78685,6 +78779,7 @@
    "name": "Majestic Tuxeball",
    "description": "The ultimate choice for catching even the most elusive tuxemon.",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -78775,6 +78870,7 @@
    "name": "Male Tuxeball",
    "description": "Captures more easily a Male Tuxemon.",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -78865,6 +78961,7 @@
    "name": "Metal Tuxeball",
    "description": "Captures more easily a Metal Tuxemon.",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -78955,6 +79052,7 @@
    "name": "Neuter Tuxeball",
    "description": "Captures more easily a Neuter Tuxemon.",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -79045,6 +79143,7 @@
    "name": "Noble Tuxeball",
    "description": "A moderate upgrade to the standard Tuxeball.",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -79135,6 +79234,7 @@
    "name": "Nocturnal Tuxeball",
    "description": "Captures more easily during nighttime, but its effectiveness is significantly reduced during the day.",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -79225,6 +79325,7 @@
    "name": "Omni Tuxeball",
    "description": "This odd Tuxeball increases the chance of succeeding if the opposing Tuxemon is the same type as yours, but has a decreased chance if they are different types.",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -79321,6 +79422,7 @@
    "name": "Park Tuxeball",
    "description": "The official Park capture device. It only works inside the Park.",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainParkMenuState"
@@ -79406,6 +79508,7 @@
    "name": "Peppy Tuxeball",
    "description": "Upon capture, the tuxemon's positive taste changes to peppy.",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -79496,6 +79599,7 @@
    "name": "Refined Tuxeball",
    "description": "Upon capture, the tuxemon's positive taste changes to refined.",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -79586,6 +79690,7 @@
    "name": "Salty Tuxeball",
    "description": "Upon capture, the tuxemon's positive taste changes to salty.",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -79676,6 +79781,7 @@
    "name": "Water Tuxeball",
    "description": "Captures more easily a Water Tuxemon.",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -79766,6 +79872,7 @@
    "name": "Wood Tuxeball",
    "description": "Captures more easily a Wood Tuxemon.",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -79856,6 +79963,7 @@
    "name": "Xero Tuxeball",
    "description": "This odd Tuxeball increases the chance of succeeding if the opposing Tuxemon is a different type than yours, but has a decreased chance if they are the same type.",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -79952,6 +80060,7 @@
    "name": "Zesty Tuxeball",
    "description": "Upon capture, the tuxemon's positive taste changes to zesty.",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -80042,6 +80151,7 @@
    "name": "Venom Berry",
    "description": "It changes monster type to Venom.",
    "sort": "utility",
+   "categoryName": "elements",
    "category": "elements",
    "usableIn": [
     "MainCombatMenuState"
@@ -80094,6 +80204,7 @@
    "name": "Water Berry",
    "description": "It changes monster type to Water.",
    "sort": "utility",
+   "categoryName": "elements",
    "category": "elements",
    "usableIn": [
     "MainCombatMenuState"
@@ -80146,6 +80257,7 @@
    "name": "Wood Berry",
    "description": "It changes monster type to Wood.",
    "sort": "utility",
+   "categoryName": "elements",
    "category": "elements",
    "usableIn": [
     "MainCombatMenuState"
@@ -80198,6 +80310,7 @@
    "name": "XP Feeder",
    "description": "A tuxemon that holds this item receives half of all XP gained by your party, regardless of whether it participated in battle.\\n The remainder of the XP is split between monsters that did participate.",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     ""
@@ -80234,6 +80347,7 @@
    "name": "XP Transmitter",
    "description": "When this item is in your possession, all monsters that did not participate in defeating a monster get half of the XP. The remainder goes to the monsters that did participate.",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     ""
@@ -80269,6 +80383,7 @@
  },
  "statuses": {
   "blinded": {
+   "name": "Blinded",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -80325,6 +80440,7 @@
    }
   },
   "burn": {
+   "name": "Burn",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -80381,6 +80497,7 @@
    }
   },
   "chargedup": {
+   "name": "Charged Up",
    "sort": "meta",
    "category": "positive",
    "behaviors": {
@@ -80467,6 +80584,7 @@
    }
   },
   "charging": {
+   "name": "Charging",
    "sort": "meta",
    "category": "positive",
    "behaviors": {
@@ -80504,6 +80622,7 @@
    }
   },
   "charmed": {
+   "name": "Charmed",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -80544,6 +80663,7 @@
    }
   },
   "confused": {
+   "name": "Confused",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -80584,6 +80704,7 @@
    }
   },
   "diehard": {
+   "name": "Die Hard",
    "sort": "meta",
    "category": "positive",
    "behaviors": {
@@ -80624,6 +80745,7 @@
    }
   },
   "elementalshield": {
+   "name": "Elemental Shield",
    "sort": "meta",
    "category": "positive",
    "behaviors": {
@@ -80665,6 +80787,7 @@
    }
   },
   "eliminated": {
+   "name": "Eliminated",
    "sort": "meta",
    "category": null,
    "behaviors": {
@@ -80698,6 +80821,7 @@
    }
   },
   "enraged": {
+   "name": "Berserk",
    "sort": "meta",
    "category": "positive",
    "behaviors": {
@@ -80754,6 +80878,7 @@
    }
   },
   "exhausted": {
+   "name": "Exhausted",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -80813,6 +80938,7 @@
    }
   },
   "faint": {
+   "name": "Faint",
    "sort": "meta",
    "category": "neutral",
    "behaviors": {
@@ -80846,6 +80972,7 @@
    }
   },
   "feedback": {
+   "name": "Feedback",
    "sort": "meta",
    "category": "positive",
    "behaviors": {
@@ -80887,6 +81014,7 @@
    }
   },
   "festering": {
+   "name": "Festering",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -80924,6 +81052,7 @@
    }
   },
   "flinching": {
+   "name": "Flinching",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -80964,6 +81093,7 @@
    }
   },
   "focused": {
+   "name": "Focused",
    "sort": "meta",
    "category": "positive",
    "behaviors": {
@@ -81011,6 +81141,7 @@
    }
   },
   "grabbed": {
+   "name": "Grabbed",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -81061,6 +81192,7 @@
    }
   },
   "hardshell": {
+   "name": "Hard Shell",
    "sort": "meta",
    "category": "positive",
    "behaviors": {
@@ -81108,6 +81240,7 @@
    }
   },
   "harpooned": {
+   "name": "Harpooned",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -81148,6 +81281,7 @@
    }
   },
   "lifegift": {
+   "name": "Life Gift",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -81197,6 +81331,7 @@
    }
   },
   "lifeleech": {
+   "name": "Lifeleech",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -81246,6 +81381,7 @@
    }
   },
   "lockdown": {
+   "name": "Lockdown",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -81283,6 +81419,7 @@
    }
   },
   "noddingoff": {
+   "name": "Nodding Off",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -81323,6 +81460,7 @@
    }
   },
   "poison": {
+   "name": "Poison",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -81398,6 +81536,7 @@
    }
   },
   "prickly": {
+   "name": "Prickly",
    "sort": "meta",
    "category": "positive",
    "behaviors": {
@@ -81439,6 +81578,7 @@
    }
   },
   "recover": {
+   "name": "Recover",
    "sort": "meta",
    "category": "positive",
    "behaviors": {
@@ -81479,6 +81619,7 @@
    }
   },
   "retaliate": {
+   "name": "Retaliate",
    "sort": "meta",
    "category": "positive",
    "behaviors": {
@@ -81516,6 +81657,7 @@
    }
   },
   "revenge": {
+   "name": "Revenge",
    "sort": "meta",
    "category": "positive",
    "behaviors": {
@@ -81553,6 +81695,7 @@
    }
   },
   "slow": {
+   "name": "Slow",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -81600,6 +81743,7 @@
    }
   },
   "sniping": {
+   "name": "Sniping",
    "sort": "meta",
    "category": "positive",
    "behaviors": {
@@ -81656,6 +81800,7 @@
    }
   },
   "softened": {
+   "name": "Softened",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -81712,6 +81857,7 @@
    }
   },
   "spiky": {
+   "name": "Spiky",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -81752,6 +81898,7 @@
    }
   },
   "stuck": {
+   "name": "Stuck",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -81802,6 +81949,7 @@
    }
   },
   "wasting": {
+   "name": "Wasting",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -81842,6 +81990,7 @@
    }
   },
   "wild": {
+   "name": "Wild",
    "sort": "meta",
    "category": "negative",
    "behaviors": {

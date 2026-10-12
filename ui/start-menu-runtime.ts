@@ -147,7 +147,7 @@ export interface PartyMoveView {
   recharge: number | null;
 }
 
-export type StartMenuCatalog = Pick<BattleDb, "monsters" | "techniques">;
+export type StartMenuCatalog = Pick<BattleDb, "monsters" | "techniques" | "statuses">;
 
 export function partyMonsterView(
   monster: Readonly<SpawnedMonsterSnapshot>,
@@ -166,7 +166,7 @@ export function partyMonsterView(
     hp,
     maxHp,
     hpRatio: maxHp > 0 ? hp / maxHp : 0,
-    status: monster.status ?? null,
+    status: monster.status ? catalog.statuses[monster.status]?.name ?? monster.status : null,
     types: [...(monster.types ?? species?.types ?? [])],
   };
 }

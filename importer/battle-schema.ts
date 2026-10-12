@@ -200,6 +200,8 @@ export interface BattleDb {
     name: string;
     description: string;
     sort: string;
+    /** Localized category label; `category` remains the stable rule key. */
+    categoryName: string;
     category: string;
     usableIn: string[];
     cost: number | null;
@@ -216,6 +218,7 @@ export interface BattleDb {
     animation?: BattleAnimationRef;
   }>;
   statuses: Record<string, {
+    name: string;
     sort: string;
     category: string | null;
     behaviors: Record<string, unknown>;
@@ -535,6 +538,7 @@ export function validateBattleDb(value: unknown, pakKeys?: ReadonlySet<string>):
   for (const [slug, item] of Object.entries(db.items)) {
     assert(typeof item.name === "string" && item.name.length > 0, `item ${slug} has no localized name`);
     assert(typeof item.description === "string" && item.description.length > 0, `item ${slug} has no localized description`);
+    assert(typeof item.categoryName === "string" && item.categoryName.length > 0, `item ${slug} has no localized category`);
     assert(isRecord(item.messages), `item ${slug} messages must be an object`);
     for (const key of ["use", "success", "failure"] as const) {
       assert(typeof item.messages[key] === "string" && item.messages[key].length > 0, `item ${slug} has no localized ${key} message`);
@@ -543,6 +547,7 @@ export function validateBattleDb(value: unknown, pakKeys?: ReadonlySet<string>):
     validateStatModifiers(item.statModifiers, `item ${slug}`);
   }
   for (const [slug, status] of Object.entries(db.statuses)) {
+    assert(typeof status.name === "string" && status.name.length > 0, `status ${slug} has no localized name`);
     validateStatModifiers(status.statModifiers, `status ${slug}`);
     assert(Array.isArray(status.modifiers), `status ${slug} modifiers must be an array`);
     for (const modifier of status.modifiers) {

@@ -73484,6 +73484,7 @@
    "name": "阿尔丹特",
    "description": "融合技术的一项无害应用。",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     "WorldState"
@@ -73520,6 +73521,7 @@
    "name": "远古蛋",
    "description": "一枚奇特的蛋。把它种下去，或许就会孵化。",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     "WorldState"
@@ -73556,6 +73558,7 @@
    "name": "解毒葡萄",
    "description": "吃上几颗，便能笑对剧毒！一口之下，美味与解毒兼得。",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     ""
@@ -73594,6 +73597,7 @@
    "name": "手机地图",
    "description": "在手机上使用它来查看您的位置。",
    "sort": "utility",
+   "categoryName": "phone",
    "category": "phone",
    "usableIn": [
     "WorldState"
@@ -73630,6 +73634,7 @@
    "name": "精灵百科",
    "description": "在这里跟踪有关精灵的信息， 并与世界分享。",
    "sort": "utility",
+   "categoryName": "phone",
    "category": "phone",
    "usableIn": [
     "WorldState"
@@ -73666,6 +73671,7 @@
    "name": "愿望之书",
    "description": "成就狂人列出的成就清单，等你来挑战。",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     ""
@@ -73702,6 +73708,7 @@
    "name": "护甲增幅剂",
    "description": "在本场战斗剩余时间内，防御提升2级。",
    "sort": "utility",
+   "categoryName": "stats",
    "category": "stats",
    "usableIn": [
     "MainCombatMenuState"
@@ -73752,6 +73759,7 @@
    "name": "闪避增幅剂",
    "description": "在本场战斗剩余时间内，闪避提升2级。",
    "sort": "utility",
+   "categoryName": "stats",
    "category": "stats",
    "usableIn": [
     "MainCombatMenuState"
@@ -73802,6 +73810,7 @@
    "name": "近战增幅剂",
    "description": "在本场战斗剩余时间内，近战提升2级。",
    "sort": "utility",
+   "categoryName": "stats",
    "category": "stats",
    "usableIn": [
     "MainCombatMenuState"
@@ -73852,6 +73861,7 @@
    "name": "远程增幅剂",
    "description": "在本场战斗剩余时间内，远程提升2级。",
    "sort": "utility",
+   "categoryName": "stats",
    "category": "stats",
    "usableIn": [
     "MainCombatMenuState"
@@ -73902,6 +73912,7 @@
    "name": "速度增幅剂",
    "description": "在本场战斗剩余时间内，速度提升2级。",
    "sort": "utility",
+   "categoryName": "stats",
    "category": "stats",
    "usableIn": [
     "MainCombatMenuState"
@@ -73952,6 +73963,7 @@
    "name": "宇宙浆果",
    "description": "将精灵的属性变为宇宙系。",
    "sort": "utility",
+   "categoryName": "elements",
    "category": "elements",
    "usableIn": [
     "MainCombatMenuState"
@@ -74004,6 +74016,7 @@
    "name": "溃烂治愈剂",
    "description": "冲洗伤口，你就会好起来。",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     ""
@@ -74042,6 +74055,7 @@
    "name": "百愈剂",
    "description": "将你的精灵治愈至满生命，并解除所有状态。",
    "sort": "potion",
+   "categoryName": "治疗药水",
    "category": "potion",
    "usableIn": [
     "MainCombatMenuState",
@@ -74107,6 +74121,7 @@
    "name": "道场通行证",
    "description": "元素道场的单人入场凭证。",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     ""
@@ -74143,6 +74158,7 @@
    "name": "大地浆果",
    "description": "将精灵的属性变为土系。",
    "sort": "utility",
+   "categoryName": "elements",
    "category": "elements",
    "usableIn": [
     "MainCombatMenuState"
@@ -74195,6 +74211,7 @@
    "name": "逃脱钥匙",
    "description": "从后门悄悄溜走。",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     "WorldState"
@@ -74238,6 +74255,7 @@
    "name": "火焰浆果",
    "description": "将精灵的属性变为火系。",
    "sort": "utility",
+   "categoryName": "elements",
    "category": "elements",
    "usableIn": [
     "MainCombatMenuState"
@@ -74290,6 +74308,7 @@
    "name": "鱼竿",
    "description": "可以用来捕鱼。",
    "sort": "utility",
+   "categoryName": "fish",
    "category": "fish",
    "usableIn": [
     "WorldState"
@@ -74338,6 +74357,7 @@
    "name": "打火石",
    "description": "一种片状的石头，用于制造石制工具和生火。不是在同一时间。",
    "sort": "utility",
+   "categoryName": "morph",
    "category": "morph",
    "usableIn": [
     "WorldState"
@@ -74390,6 +74410,7 @@
    "name": "友谊卷轴",
    "description": "它能加深你与精灵之间的羁绊。",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     "WorldState"
@@ -74426,6 +74447,7 @@
    "name": "冰霜浆果",
    "description": "将精灵的属性变为冰系。",
    "sort": "utility",
+   "categoryName": "elements",
    "category": "elements",
    "usableIn": [
     "MainCombatMenuState"
@@ -74478,6 +74500,7 @@
    "name": "黄金通行证",
    "description": "享受大教堂的豪华服务。",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     ""
@@ -74514,6 +74537,7 @@
    "name": "英勇浆果",
    "description": "将精灵的属性变为英勇系。",
    "sort": "utility",
+   "categoryName": "elements",
    "category": "elements",
    "usableIn": [
     "MainCombatMenuState"
@@ -74566,6 +74590,7 @@
    "name": "皇室治疗药水",
    "description": "为一只精灵恢复 500 点生命值。",
    "sort": "potion",
+   "categoryName": "治疗药水",
    "category": "potion",
    "usableIn": [
     "MainCombatMenuState",
@@ -74628,6 +74653,7 @@
    "name": "皇家茶",
    "description": "为精灵增加10000点经验值。",
    "sort": "potion",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     "WorldState"
@@ -74671,6 +74697,7 @@
    "name": "闪电浆果",
    "description": "将精灵的属性变为闪电系。",
    "sort": "utility",
+   "categoryName": "elements",
    "category": "elements",
    "usableIn": [
     "MainCombatMenuState"
@@ -74723,6 +74750,7 @@
    "name": "幸运竹",
    "description": "严格来说，这根本不是竹子。它也不是特别幸运。但它是一种不错的室内植物。",
    "sort": "utility",
+   "categoryName": "morph",
    "category": "morph",
    "usableIn": [
     "WorldState"
@@ -74775,6 +74803,7 @@
    "name": "特级治疗药水",
    "description": "为精灵恢复200点HP。",
    "sort": "potion",
+   "categoryName": "治疗药水",
    "category": "potion",
    "usableIn": [
     "MainCombatMenuState",
@@ -74837,6 +74866,7 @@
    "name": "金属浆果",
    "description": "将精灵的属性变为金属系。",
    "sort": "utility",
+   "categoryName": "elements",
    "category": "elements",
    "usableIn": [
     "MainCombatMenuState"
@@ -74889,6 +74919,7 @@
    "name": "妙乳",
    "description": "猫咪喜欢妙乳™的味道！",
    "sort": "utility",
+   "categoryName": "morph",
    "category": "morph",
    "usableIn": [
     "WorldState"
@@ -74941,6 +74972,7 @@
    "name": "神秘茶",
    "description": "为精灵增加1500点经验值。",
    "sort": "potion",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     "WorldState"
@@ -74984,6 +75016,7 @@
    "name": "普通浆果",
    "description": "将精灵的属性变为普通系。",
    "sort": "utility",
+   "categoryName": "elements",
    "category": "elements",
    "usableIn": [
     "MainCombatMenuState"
@@ -75036,6 +75069,7 @@
    "name": "Nu 手机",
    "description": "它的用处可多了，比如给家里打电话。",
    "sort": "utility",
+   "categoryName": "phone",
    "category": "phone",
    "usableIn": [
     "WorldState"
@@ -75072,6 +75106,7 @@
    "name": "牛杖",
    "description": "为古老精灵打造的激励武器。",
    "sort": "utility",
+   "categoryName": "morph",
    "category": "morph",
    "usableIn": [
     "WorldState"
@@ -75124,6 +75159,7 @@
    "name": "四目相对",
    "description": "画作《精灵四目相对》，材质：布面油画。艺术家亲笔签名。",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     ""
@@ -75160,6 +75196,7 @@
    "name": "星夜",
    "description": "画作《星，星，星夜》，材质：布面油画。艺术家亲笔签名。",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     ""
@@ -75196,6 +75233,7 @@
    "name": "惊恐",
    "description": "画作《惊恐》，材质：布面油画。艺术家亲笔签名。",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     ""
@@ -75232,6 +75270,7 @@
    "name": "和平百合",
    "description": "送给特别之人的耐养室内植物。",
    "sort": "utility",
+   "categoryName": "morph",
    "category": "morph",
    "usableIn": [
     "WorldState"
@@ -75284,6 +75323,7 @@
    "name": "石化粪便",
    "description": "它看起来像，嗯，便便。。。。。。但它像石头一样硬。",
    "sort": "utility",
+   "categoryName": "morph",
    "category": "morph",
    "usableIn": [
     "WorldState"
@@ -75336,6 +75376,7 @@
    "name": "治疗药水",
    "description": "为一只精灵恢复 50 点生命值。",
    "sort": "potion",
+   "categoryName": "治疗药水",
    "category": "potion",
    "usableIn": [
     "MainCombatMenuState",
@@ -75398,6 +75439,7 @@
    "name": "金字塔",
    "description": "一个嗡嗡作响、充满苍穹之力的金色三角体。",
    "sort": "utility",
+   "categoryName": "morph",
    "category": "morph",
    "usableIn": [
     "WorldState"
@@ -75450,6 +75492,7 @@
    "name": "防御提升",
    "description": "学习钻石的坚硬。锻炼防御。",
    "sort": "utility",
+   "categoryName": "stats",
    "category": "stats",
    "usableIn": [
     "WorldState"
@@ -75502,6 +75545,7 @@
    "name": "闪避提升",
    "description": "学习欧泊的虹彩。锻炼闪避。",
    "sort": "utility",
+   "categoryName": "stats",
    "category": "stats",
    "usableIn": [
     "WorldState"
@@ -75554,6 +75598,7 @@
    "name": "生命提升",
    "description": "学习石英的丰盈。锻炼生命。",
    "sort": "utility",
+   "categoryName": "stats",
    "category": "stats",
    "usableIn": [
     "WorldState"
@@ -75606,6 +75651,7 @@
    "name": "近战提升",
    "description": "学习红宝石的愤怒。锻炼近战。",
    "sort": "utility",
+   "categoryName": "stats",
    "category": "stats",
    "usableIn": [
     "WorldState"
@@ -75658,6 +75704,7 @@
    "name": "远程提升",
    "description": "学习祖母绿的精准。锻炼远程。",
    "sort": "utility",
+   "categoryName": "stats",
    "category": "stats",
    "usableIn": [
     "WorldState"
@@ -75710,6 +75757,7 @@
    "name": "速度提升",
    "description": "学习尖晶石的敏捷。锻炼速度。",
    "sort": "utility",
+   "categoryName": "stats",
    "category": "stats",
    "usableIn": [
     "WorldState"
@@ -75762,6 +75810,7 @@
    "name": "清爽切片",
    "description": "咬下多汁的一口，疲惫随之消融。在这提神美味面前，倦意毫无胜算！",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     ""
@@ -75800,6 +75849,7 @@
    "name": "驱虫剂",
    "description": "用这种臭烘烘的喷雾驱赶野生精灵。",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     "WorldState"
@@ -75843,6 +75893,7 @@
    "name": "恢复剂",
    "description": "解除目标当前受到的任何状态影响。",
    "sort": "potion",
+   "categoryName": "治疗药水",
    "category": "potion",
    "usableIn": [
     "MainCombatMenuState",
@@ -75897,6 +75948,7 @@
    "name": "复活草",
    "description": "复活倒下的精灵，并恢复一半生命值。",
    "sort": "potion",
+   "categoryName": "治疗药水",
    "category": "potion",
    "usableIn": [
     "MainCombatMenuState",
@@ -75961,6 +76013,7 @@
    "name": "沙默化石",
    "description": "它看起来像一只有齿鸟的头骨，但它像石头一样硬。",
    "sort": "utility",
+   "categoryName": "fossil",
    "category": "fossil",
    "usableIn": [
     "WorldState"
@@ -76013,6 +76066,7 @@
    "name": "金字塔",
    "description": "一串串的小玩意，像海带一样柔软而粘稠。",
    "sort": "utility",
+   "categoryName": "morph",
    "category": "morph",
    "usableIn": [
     "WorldState"
@@ -76065,6 +76119,7 @@
    "name": "暗影浆果",
    "description": "将精灵的属性变为暗影系。",
    "sort": "utility",
+   "categoryName": "elements",
    "category": "elements",
    "usableIn": [
     "MainCombatMenuState"
@@ -76117,6 +76172,7 @@
    "name": "沙默化石",
    "description": "它看起来像一只古代狗的头骨，但它像石头一样坚硬。",
    "sort": "utility",
+   "categoryName": "fossil",
    "category": "fossil",
    "usableIn": [
     "WorldState"
@@ -76169,6 +76225,7 @@
    "name": "天空浆果",
    "description": "将精灵的属性变为天空系。",
    "sort": "utility",
+   "categoryName": "elements",
    "category": "elements",
    "usableIn": [
     "MainCombatMenuState"
@@ -76221,6 +76278,7 @@
    "name": "大锤",
    "description": "粉碎灰色巨石。",
    "sort": "utility",
+   "categoryName": "destroy",
    "category": "destroy",
    "usableIn": [
     "WorldState"
@@ -76269,6 +76327,7 @@
    "name": "斯派德通行证",
    "description": "有了它，你就能进入只有斯派德同伙才该去的地方。",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     ""
@@ -76305,6 +76364,7 @@
    "name": "烟囱管",
    "description": "一根长长的铁管。拿过之后，双手会沾满黑灰。",
    "sort": "utility",
+   "categoryName": "morph",
    "category": "morph",
    "usableIn": [
     "WorldState"
@@ -76357,6 +76417,7 @@
    "name": "超级治疗药水",
    "description": "回复一只精灵100点生命。",
    "sort": "potion",
+   "categoryName": "治疗药水",
    "category": "potion",
    "usableIn": [
     "MainCombatMenuState",
@@ -76419,6 +76480,7 @@
    "name": "冲浪板",
    "description": "妈妈送的礼物，能让你移动得更快。",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     ""
@@ -76455,6 +76517,7 @@
    "name": "甜沙",
    "description": "在世界上的一些地方，人们会用这种芳香、能搓出泡沫的沙子清洁身体。",
    "sort": "utility",
+   "categoryName": "morph",
    "category": "morph",
    "usableIn": [
     "WorldState"
@@ -76507,6 +76570,7 @@
    "name": "茶",
    "description": "为精灵增加500点经验值。",
    "sort": "potion",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     "WorldState"
@@ -76550,6 +76614,7 @@
    "name": "构造钻探",
    "description": "一台用来钻入大地、会发出咔嗒声的大机器。",
    "sort": "utility",
+   "categoryName": "morph",
    "category": "morph",
    "usableIn": [
     "WorldState"
@@ -76602,6 +76667,7 @@
    "name": "雷石",
    "description": "一个古老的石头遗物，现在被人带着走，以图好运。",
    "sort": "utility",
+   "categoryName": "morph",
    "category": "morph",
    "usableIn": [
     "WorldState"
@@ -76654,6 +76720,7 @@
    "name": "招式学习器：酸",
    "description": "教导「酸」招式的招式学习器。",
    "sort": "utility",
+   "categoryName": "technique",
    "category": "technique",
    "usableIn": [
     "WorldState"
@@ -76705,6 +76772,7 @@
    "name": "招式学习器：全力以赴",
    "description": "教导「树叶弹幕」招式的招式学习器。",
    "sort": "utility",
+   "categoryName": "technique",
    "category": "technique",
    "usableIn": [
     "WorldState"
@@ -76764,6 +76832,7 @@
    "name": "招式学习器：升空",
    "description": "教导「升空」招式的招式学习器。",
    "sort": "utility",
+   "categoryName": "technique",
    "category": "technique",
    "usableIn": [
     "WorldState"
@@ -76823,6 +76892,7 @@
    "name": "招式学习器：雪崩",
    "description": "教授“雪崩”招式的招式学习器。",
    "sort": "utility",
+   "categoryName": "technique",
    "category": "technique",
    "usableIn": [
     "WorldState"
@@ -76882,6 +76952,7 @@
    "name": "招式学习器：叶之刃",
    "description": "教导「叶之刃」招式的招式学习器。",
    "sort": "utility",
+   "categoryName": "technique",
    "category": "technique",
    "usableIn": [
     "WorldState"
@@ -76941,6 +77012,7 @@
    "name": "招式学习器：绽放",
    "description": "教授“绽放”招式的招式学习器。",
    "sort": "utility",
+   "categoryName": "technique",
    "category": "technique",
    "usableIn": [
     "WorldState"
@@ -77000,6 +77072,7 @@
    "name": "招式学习器：冻疮",
    "description": "教导「冻疮」招式的招式学习器。",
    "sort": "utility",
+   "categoryName": "technique",
    "category": "technique",
    "usableIn": [
     "WorldState"
@@ -77059,6 +77132,7 @@
    "name": "招式学习器：冰盾",
    "description": "教导「冰盾」招式的招式学习器。",
    "sort": "utility",
+   "categoryName": "technique",
    "category": "technique",
    "usableIn": [
     "WorldState"
@@ -77118,6 +77192,7 @@
    "name": "招式学习器：树叶弹幕",
    "description": "教导「树叶弹幕」招式的招式学习器。",
    "sort": "utility",
+   "categoryName": "technique",
    "category": "technique",
    "usableIn": [
     "WorldState"
@@ -77177,6 +77252,7 @@
    "name": "招式学习器：潘詹德拉姆",
    "description": "教导「潘詹德拉姆」招式的招式学习器。",
    "sort": "utility",
+   "categoryName": "technique",
    "category": "technique",
    "usableIn": [
     "WorldState"
@@ -77236,6 +77312,7 @@
    "name": "招式学习器：瞄准镜",
    "description": "教导「瞄准镜」招式的招式学习器。",
    "sort": "utility",
+   "categoryName": "technique",
    "category": "technique",
    "usableIn": [
     "WorldState"
@@ -77287,6 +77364,7 @@
    "name": "招式学习器：太极拳",
    "description": "教导暗影招式「太极拳」的招式学习器。",
    "sort": "utility",
+   "categoryName": "technique",
    "category": "technique",
    "usableIn": [
     "WorldState"
@@ -77346,6 +77424,7 @@
    "name": "招式学习器：超新星",
    "description": "教导「超新星」招式的招式学习器。",
    "sort": "utility",
+   "categoryName": "technique",
    "category": "technique",
    "usableIn": [
     "WorldState"
@@ -77405,6 +77484,7 @@
    "name": "招式学习器：乌班图",
    "description": "教导「乌班图」招式的招式学习器。",
    "sort": "utility",
+   "categoryName": "technique",
    "category": "technique",
    "usableIn": [
     "WorldState"
@@ -77464,6 +77544,7 @@
    "name": "招式学习器：斩锋",
    "description": "教导「Vorpal」招式的招式学习器。",
    "sort": "utility",
+   "categoryName": "technique",
    "category": "technique",
    "usableIn": [
     "WorldState"
@@ -77515,6 +77596,7 @@
    "name": "精灵球",
    "description": "用来捕捉精灵。",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -77605,6 +77687,7 @@
    "name": "远古精灵球",
    "description": "这种精灵球制作于久远的年代，能够万无一失地捕捉任何精灵。",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -77695,6 +77778,7 @@
    "name": "糖果精灵球",
    "description": "捕捉精灵，并在捕捉成功后使其等级提升1级。",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -77785,6 +77869,7 @@
    "name": "粉碎精灵球",
    "description": "这种精灵球能突破防御，对手精灵的防御越高，捕捉率就越高。若对方处于守护状态，则会捕捉失败。",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -77875,6 +77960,7 @@
    "name": "昼行精灵球",
    "description": "白天更容易捕捉精灵，但在夜晚效果会大打折扣。",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -77965,6 +78051,7 @@
    "name": "土系精灵球",
    "description": "更容易捕捉土系精灵。",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -78055,6 +78142,7 @@
    "name": "雌性精灵球",
    "description": "更容易捕捉雌性精灵。",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -78145,6 +78233,7 @@
    "name": "火系精灵球",
    "description": "更容易捕捉火系精灵。",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -78235,6 +78324,7 @@
    "name": "赌徒精灵球",
    "description": "这种精灵球以变幻莫测著称。捕捉率波动极大，捕捉精灵的成功率可能极低，也可能出奇地高。",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -78325,6 +78415,7 @@
    "name": "豪华精灵球",
    "description": "捕捉率比奢华精灵球更胜一筹。",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -78415,6 +78506,7 @@
    "name": "坚硬精灵球",
    "description": "用于捕捉精灵，捕捉失败时不会损坏。",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -78505,6 +78597,7 @@
    "name": "丰盛精灵球",
    "description": "捕捉成功后，精灵的正面口味会变为丰盛。",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -78595,6 +78688,7 @@
    "name": "奢华精灵球",
    "description": "捕捉率远高于高贵精灵球。",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -78685,6 +78779,7 @@
    "name": "庄严精灵球",
    "description": "捕捉最难以捉摸的精灵的终极之选。",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -78775,6 +78870,7 @@
    "name": "雄性精灵球",
    "description": "更容易捕捉雄性精灵。",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -78865,6 +78961,7 @@
    "name": "金属精灵球",
    "description": "更容易捕捉金属系精灵。",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -78955,6 +79052,7 @@
    "name": "中性精灵球",
    "description": "更容易捕捉中性精灵。",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -79045,6 +79143,7 @@
    "name": "高贵精灵球",
    "description": "标准精灵球的适度升级版。",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -79135,6 +79234,7 @@
    "name": "夜行精灵球",
    "description": "夜晚更容易捕捉精灵，但在白天效果会大打折扣。",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -79225,6 +79325,7 @@
    "name": "全能精灵球",
    "description": "这种奇特的精灵球在对手精灵与你的精灵属性相同时会提高捕捉成功率，属性不同时则会降低。",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -79321,6 +79422,7 @@
    "name": "公园精灵球",
    "description": "公园官方的捕捉装置，只在公园内有效。",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainParkMenuState"
@@ -79406,6 +79508,7 @@
    "name": "活力精灵球",
    "description": "捕捉成功后，精灵的正面口味会变为活力。",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -79496,6 +79599,7 @@
    "name": "精制精灵球",
    "description": "捕捉成功后，精灵的正面口味会变为精制。",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -79586,6 +79690,7 @@
    "name": "咸味精灵球",
    "description": "捕捉成功后，精灵的正面口味会变为咸味。",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -79676,6 +79781,7 @@
    "name": "水系精灵球",
    "description": "更容易捕捉水系精灵。",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -79766,6 +79872,7 @@
    "name": "木系精灵球",
    "description": "更容易捕捉木系精灵。",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -79856,6 +79963,7 @@
    "name": "Xero精灵球",
    "description": "这种奇特的精灵球在对手精灵与你的精灵属性不同时会提高捕捉成功率，属性相同时则会降低。",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -79952,6 +80060,7 @@
    "name": "香辣精灵球",
    "description": "捕捉成功后，精灵的正面口味会变为香辣。",
    "sort": "utility",
+   "categoryName": "capture",
    "category": "capture",
    "usableIn": [
     "MainCombatMenuState"
@@ -80042,6 +80151,7 @@
    "name": "毒液浆果",
    "description": "将精灵的属性变为毒液系。",
    "sort": "utility",
+   "categoryName": "elements",
    "category": "elements",
    "usableIn": [
     "MainCombatMenuState"
@@ -80094,6 +80204,7 @@
    "name": "水流浆果",
    "description": "将精灵的属性变为水系。",
    "sort": "utility",
+   "categoryName": "elements",
    "category": "elements",
    "usableIn": [
     "MainCombatMenuState"
@@ -80146,6 +80257,7 @@
    "name": "林木浆果",
    "description": "将精灵的属性变为木系。",
    "sort": "utility",
+   "categoryName": "elements",
    "category": "elements",
    "usableIn": [
     "MainCombatMenuState"
@@ -80198,6 +80310,7 @@
    "name": "经验喂食器",
    "description": "持有此道具的精灵可获得队伍全部经验值的一半，无论它是否参战。\\n 剩余经验值由参战的精灵平分。",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     ""
@@ -80234,6 +80347,7 @@
    "name": "经验发射器",
    "description": "持有此道具时，未参与击败对手的精灵可获得一半经验值，剩余部分由参战的精灵分配。",
    "sort": "utility",
+   "categoryName": "none",
    "category": "none",
    "usableIn": [
     ""
@@ -80269,6 +80383,7 @@
  },
  "statuses": {
   "blinded": {
+   "name": "失明",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -80325,6 +80440,7 @@
    }
   },
   "burn": {
+   "name": "灼伤",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -80381,6 +80497,7 @@
    }
   },
   "chargedup": {
+   "name": "蓄能完毕",
    "sort": "meta",
    "category": "positive",
    "behaviors": {
@@ -80467,6 +80584,7 @@
    }
   },
   "charging": {
+   "name": "蓄能中",
    "sort": "meta",
    "category": "positive",
    "behaviors": {
@@ -80504,6 +80622,7 @@
    }
   },
   "charmed": {
+   "name": "魅惑",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -80544,6 +80663,7 @@
    }
   },
   "confused": {
+   "name": "困惑",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -80584,6 +80704,7 @@
    }
   },
   "diehard": {
+   "name": "虎胆龙威",
    "sort": "meta",
    "category": "positive",
    "behaviors": {
@@ -80624,6 +80745,7 @@
    }
   },
   "elementalshield": {
+   "name": "元素护盾",
    "sort": "meta",
    "category": "positive",
    "behaviors": {
@@ -80665,6 +80787,7 @@
    }
   },
   "eliminated": {
+   "name": "已淘汰",
    "sort": "meta",
    "category": null,
    "behaviors": {
@@ -80698,6 +80821,7 @@
    }
   },
   "enraged": {
+   "name": "狂怒",
    "sort": "meta",
    "category": "positive",
    "behaviors": {
@@ -80754,6 +80878,7 @@
    }
   },
   "exhausted": {
+   "name": "筋疲力尽",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -80813,6 +80938,7 @@
    }
   },
   "faint": {
+   "name": "昏倒",
    "sort": "meta",
    "category": "neutral",
    "behaviors": {
@@ -80846,6 +80972,7 @@
    }
   },
   "feedback": {
+   "name": "反馈",
    "sort": "meta",
    "category": "positive",
    "behaviors": {
@@ -80887,6 +81014,7 @@
    }
   },
   "festering": {
+   "name": "溃烂",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -80924,6 +81052,7 @@
    }
   },
   "flinching": {
+   "name": "畏缩",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -80964,6 +81093,7 @@
    }
   },
   "focused": {
+   "name": "专注",
    "sort": "meta",
    "category": "positive",
    "behaviors": {
@@ -81011,6 +81141,7 @@
    }
   },
   "grabbed": {
+   "name": "被抓住",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -81061,6 +81192,7 @@
    }
   },
   "hardshell": {
+   "name": "硬壳",
    "sort": "meta",
    "category": "positive",
    "behaviors": {
@@ -81108,6 +81240,7 @@
    }
   },
   "harpooned": {
+   "name": "叉伤",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -81148,6 +81281,7 @@
    }
   },
   "lifegift": {
+   "name": "生命馈赠",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -81197,6 +81331,7 @@
    }
   },
   "lifeleech": {
+   "name": "生命汲取",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -81246,6 +81381,7 @@
    }
   },
   "lockdown": {
+   "name": "封锁",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -81283,6 +81419,7 @@
    }
   },
   "noddingoff": {
+   "name": "打瞌睡",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -81323,6 +81460,7 @@
    }
   },
   "poison": {
+   "name": "中毒",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -81398,6 +81536,7 @@
    }
   },
   "prickly": {
+   "name": "尖刺",
    "sort": "meta",
    "category": "positive",
    "behaviors": {
@@ -81439,6 +81578,7 @@
    }
   },
   "recover": {
+   "name": "恢复",
    "sort": "meta",
    "category": "positive",
    "behaviors": {
@@ -81479,6 +81619,7 @@
    }
   },
   "retaliate": {
+   "name": "反击",
    "sort": "meta",
    "category": "positive",
    "behaviors": {
@@ -81516,6 +81657,7 @@
    }
   },
   "revenge": {
+   "name": "复仇",
    "sort": "meta",
    "category": "positive",
    "behaviors": {
@@ -81553,6 +81695,7 @@
    }
   },
   "slow": {
+   "name": "迟缓",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -81600,6 +81743,7 @@
    }
   },
   "sniping": {
+   "name": "狙击",
    "sort": "meta",
    "category": "positive",
    "behaviors": {
@@ -81656,6 +81800,7 @@
    }
   },
   "softened": {
+   "name": "软化",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -81712,6 +81857,7 @@
    }
   },
   "spiky": {
+   "name": "棘刺",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -81752,6 +81898,7 @@
    }
   },
   "stuck": {
+   "name": "卡住",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -81802,6 +81949,7 @@
    }
   },
   "wasting": {
+   "name": "衰弱",
    "sort": "meta",
    "category": "negative",
    "behaviors": {
@@ -81842,6 +81990,7 @@
    }
   },
   "wild": {
+   "name": "野生",
    "sort": "meta",
    "category": "negative",
    "behaviors": {

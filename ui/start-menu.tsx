@@ -148,6 +148,7 @@ export function lazyStartMenuCatalog(catalog: Readonly<TuxemonSceneCatalog>): St
   return {
     monsters: lazyRecord((slug) => catalog.monster(slug)) as BattleDb["monsters"],
     techniques: lazyRecord((slug) => catalog.technique(slug)) as BattleDb["techniques"],
+    statuses: lazyRecord((slug) => catalog.status(slug)) as BattleDb["statuses"],
   };
 }
 
@@ -504,7 +505,7 @@ function DetailPage(props: {
           <Text class="text-xs" style={{ posType: 1, insetL: 12, insetT: 184, width: 150, height: 20, lineHeight: 14, textAlign: 1, textColor: THEME.dim }} debugName="start-menu-detail-species">{db()?.species ?? monster()!.slug}</Text>
 
           <Text class="text-xs" style={{ posType: 1, insetL: 172, insetT: 38, width: 137, height: 164, lineHeight: 15, textColor: THEME.ink }} debugName="start-menu-detail-primary">
-            {`${label(props.data.common.hp)}  ${view()!.hp}/${view()!.maxHp}\n${t().experience}  ${monster()!.totalExperience ?? 0}\n${t().type}  ${types() || "—"}\n${t().gender}  ${displayValue(monster()!.gender)}\n${t().stage}  ${displayValue(monster()!.stage)}\n${t().status}  ${displayValue(monster()!.status)}\n${t().bond}  ${monster()!.bond ?? 0}\n${t().acquisition}  ${displayValue(monster()!.acquisition)}\n${label(props.data.common.taste)}  ${displayValue(monster()!.tasteCold)} / ${displayValue(monster()!.tasteWarm)}\n${label(props.data.common.height)}  ${monster()!.height} cm\n${label(props.data.common.weight)}  ${monster()!.weight} kg`}
+            {`${label(props.data.common.hp)}  ${view()!.hp}/${view()!.maxHp}\n${t().experience}  ${monster()!.totalExperience ?? 0}\n${t().type}  ${types() || "—"}\n${t().gender}  ${displayValue(monster()!.gender)}\n${t().stage}  ${displayValue(monster()!.stage)}\n${t().status}  ${displayValue(view()!.status)}\n${t().bond}  ${monster()!.bond ?? 0}\n${t().acquisition}  ${displayValue(monster()!.acquisition)}\n${label(props.data.common.taste)}  ${displayValue(monster()!.tasteCold)} / ${displayValue(monster()!.tasteWarm)}\n${label(props.data.common.height)}  ${monster()!.height} cm\n${label(props.data.common.weight)}  ${monster()!.weight} kg`}
           </Text>
           <Text class="text-xs" style={{ posType: 1, insetL: 316, insetT: 38, width: 134, height: 102, lineHeight: 15, textColor: THEME.ink }} debugName="start-menu-detail-stats">
             {`${label(props.data.common.armour)}  ${monster()!.base.armour}\n${label(props.data.common.dodge)}  ${monster()!.base.dodge}\n${label(props.data.common.melee)}  ${monster()!.base.melee}\n${label(props.data.common.ranged)}  ${monster()!.base.ranged}\n${label(props.data.common.speed)}  ${monster()!.base.speed}`}
