@@ -125,6 +125,8 @@ export interface PcLabels {
   lastMonster: string;
   itemPickUp: string;
   itemDropOff: string;
+  multiplayer: string;
+  notImplemented: string;
   itemTake: string;
   itemDisband: string;
   itemEmpty: string;
@@ -176,6 +178,8 @@ const PC_LABELS: PcLabels = {
   lastMonster: "{name} is your last Tuxemon able to fight.",
   itemPickUp: "Pick Up Item",
   itemDropOff: "Drop Off Item",
+  multiplayer: "Multiplayer",
+  notImplemented: "This feature is not yet implemented.",
   itemTake: "Take",
   itemDisband: "Disband",
   itemEmpty: "This locker is empty, there are no items to take.",
@@ -201,7 +205,7 @@ const PC_LABELS: PcLabels = {
   partyTitle: "PARTY {party}/{max}",
 };
 
-export type PcMenuItem = "pickUp" | "dropOff" | "itemPickUp" | "itemDropOff" | "logOff";
+export type PcMenuItem = "pickUp" | "dropOff" | "itemPickUp" | "itemDropOff" | "multiplayer" | "logOff";
 export type PcOption = "pick" | "move" | "release" | "cancel";
 export type PcItemOption = "take" | "disband" | "cancel";
 export type PcPhase =
@@ -274,7 +278,9 @@ export function pcMenuItems(state: Readonly<PcSceneState>): PcMenuItem[] {
   // items; item drop-off shows when the bag carries more than one item type.
   if (pcLockerItemCount(state) > 0) items.push("itemPickUp");
   if (pcBagKindCount(state) > 1) items.push("itemDropOff");
-  items.push("logOff");
+  // PCMenuBuilder always places its networking placeholder immediately
+  // before Log Off, even when every storage provider is hidden.
+  items.push("multiplayer", "logOff");
   return items;
 }
 
@@ -426,6 +432,7 @@ function pcStep(state: PcSceneState, input: Readonly<SceneInput>): void {
       else if (input.confirmEdge) {
         const item = items[state.menuCursor]!;
         if (item === "logOff") state.phase = "done";
+        else if (item === "multiplayer") state.message = labels.notImplemented;
         else if (item === "pickUp") {
           state.mode = "pickUp";
           state.phase = "boxes";

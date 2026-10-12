@@ -225,6 +225,7 @@ function menuLabel(state: PcSceneState, item: PcMenuItem): string {
     case "dropOff": return state.labels.dropOff;
     case "itemPickUp": return state.labels.itemPickUp;
     case "itemDropOff": return state.labels.itemDropOff;
+    case "multiplayer": return state.labels.multiplayer;
     case "logOff": return state.labels.logOff;
   }
 }

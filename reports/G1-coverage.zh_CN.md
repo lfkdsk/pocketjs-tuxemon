@@ -11,7 +11,7 @@ When conversion discards a whole event, every source rule in it is Dropped.
 
 | Kind | Kinds | Uses | Native | Degraded | Placeholder | Dropped | S1 T1 baseline |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Actions | 98 | 13617 | 13212 | 193 | 0 | 212 | 6430 / 6246 (47.22% / 45.9%) |
+| Actions | 98 | 13617 | 13222 | 183 | 0 | 212 | 6430 / 6246 (47.22% / 45.9%) |
 | Conditions | 64 | 8663 | 8452 | 21 | 0 | 190 | 4782 / 4591 (55.20% / 53.0%) |
 
 The S1 acceptance baselines are 6,246 action uses (45.9%) and 4,591
@@ -21,8 +21,8 @@ Degraded count toward them. This import records 6430
 (55.20%), respectively: 184 above
 for actions and 191 above for conditions. The old
 type-table Native figure was 5,448 / 13,617 (40.0%); conversion-path accounting
-supersedes it with 13212 / 13617
-(97.0%). “Executable”
+supersedes it with 13222 / 13617
+(97.1%). “Executable”
 (native + degraded + deliberate P1 placeholder) is
 98.4% for actions and
 97.8% for conditions.
@@ -104,7 +104,8 @@ so `iid_slot_*` always has a party to read. Scripted `trading` runs the `tux.tra
 which replaces the sent monster in its party slot with a freshly spawned
 monster at the same level and records it as caught. `access_pc` opens the
 `tux.pc` storage scene (monster boxes plus the item locker: deposit,
-withdraw with a quantity picker, and disband); `create_kennel`,
+withdraw with a quantity picker, and disband, followed by upstream's
+Multiplayer not-implemented placeholder); `create_kennel`,
 `set_kennel_visible`, `kennel` and
 `has_kennel` read and write the same saved boxes. All eight authored
 `quarantine` calls are Native: they move infected monsters between the party
@@ -517,7 +518,7 @@ four-neighbour BFS with fixed tie-breaking selects the nearest walkable cell:
 
 | Kind | Source type | Native | Degraded | Placeholder | Dropped | Total |
 |---|---|---:|---:|---:|---:|---:|
-| Action | `access_pc` | 0 | 10 | 0 | 0 | 10 |
+| Action | `access_pc` | 10 | 0 | 0 | 0 | 10 |
 | Action | `add_item` | 117 | 0 | 0 | 1 | 118 |
 | Action | `add_monster` | 792 | 0 | 0 | 0 | 792 |
 | Action | `add_step_tracker` | 3 | 0 | 0 | 0 | 3 |

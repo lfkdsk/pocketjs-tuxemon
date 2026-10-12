@@ -284,19 +284,19 @@
  "schemaErrors": [],
  "audioQoaPending": [],
  "byFate": {
-  "T1-lowered": 1953,
+  "T1": 38023,
   "T3-dropped": 2,
-  "T1": 38007,
+  "T1-lowered": 1937,
   "T4-dropped": 1419,
   "T2-dropped": 186,
   "structural": 793
  },
  "rows": [
   {
-   "key": "act:access_pc:T1-lowered",
-   "fate": "T1-lowered",
+   "key": "act:access_pc:T1",
+   "fate": "T1",
    "count": 16,
-   "note": "campaign storage and item-locker providers are complete; the upstream multiplayer placeholder row is absent"
+   "note": "campaign storage, item locker, and the upstream Multiplayer not-implemented placeholder are complete"
   },
   {
    "key": "act:add_item(npc):T3-dropped",
@@ -5130,11 +5130,11 @@
    "summary": {
     "types": 98,
     "uses": 13617,
-    "native": 13212,
-    "degraded": 193,
+    "native": 13222,
+    "degraded": 183,
     "placeholder": 0,
     "dropped": 212,
-    "nativePercent": 97,
+    "nativePercent": 97.1,
     "executablePercent": 98.4,
     "tier1": {
      "uses": 6430,
@@ -5148,13 +5148,13 @@
     {
      "type": "access_pc",
      "total": 10,
-     "native": 0,
-     "degraded": 10,
+     "native": 10,
+     "degraded": 0,
      "placeholder": 0,
      "dropped": 0,
      "reasons": {
-      "degraded": [
-       "campaign storage and item-locker providers are complete; the upstream multiplayer placeholder row is absent"
+      "native": [
+       "campaign storage, item locker, and the upstream Multiplayer not-implemented placeholder are complete"
       ]
      }
     },

@@ -2466,6 +2466,8 @@ function pcScene(): Command {
         // "disband" have no upstream msgid, so the defaults own them.
         itemPickUp: poText("menu_item_storage"),
         itemDropOff: poText("menu_item_dropoff"),
+        multiplayer: poText("menu_multiplayer"),
+        notImplemented: poText("not_implemented"),
         itemEmpty: poText("menu_storage_empty_locker"),
         bagFull: poText("menu_storage_items_full"),
         itemTaken: poText("menu_storage_take_item"),
@@ -4164,7 +4166,7 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         break;
       case "access_pc":
         if (ctx.options.battle && g[0] === "player") {
-          noteAction(a, a.type, "T1-lowered", "campaign storage and item-locker providers are complete; the upstream multiplayer placeholder row is absent");
+          noteAction(a, a.type, "T1", "campaign storage, item locker, and the upstream Multiplayer not-implemented placeholder are complete");
           out.push(pcScene());
         } else noteAction(a, a.type, "T3-dropped", ctx.options.battle ? "PC storage is modelled for the player only" : "monster/combat subsystem (P2)");
         break;

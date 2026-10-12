@@ -60,6 +60,7 @@ const REQUIRED: Record<GpcZhCase, readonly string[]> = {
     "放下精灵",
     "取出道具",
     "放入道具",
+    "多人游戏",
     "退出登录",
     "队伍 3/6",
     "上键/下键: 选择  行动键: 确定",

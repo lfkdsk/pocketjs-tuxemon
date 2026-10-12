@@ -278,7 +278,8 @@ so \`iid_slot_*\` always has a party to read. Scripted \`trading\` runs the \`tu
 which replaces the sent monster in its party slot with a freshly spawned
 monster at the same level and records it as caught. \`access_pc\` opens the
 \`tux.pc\` storage scene (monster boxes plus the item locker: deposit,
-withdraw with a quantity picker, and disband); \`create_kennel\`,
+withdraw with a quantity picker, and disband, followed by upstream's
+Multiplayer not-implemented placeholder); \`create_kennel\`,
 \`set_kennel_visible\`, \`kennel\` and
 \`has_kennel\` read and write the same saved boxes. All eight authored
 \`quarantine\` calls are Native: they move infected monsters between the party

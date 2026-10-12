@@ -122,15 +122,26 @@ describe("G-PC-LOCKER extension state", () => {
 
 describe("G-PC-LOCKER PC menu entries", () => {
   test("item entries follow the upstream visibility rules", () => {
-    // No locker items, one bag type: only Log Off.
-    expect(pcMenuItems(open({}, { potion: 1 }).view)).toEqual(["logOff"]);
+    // No storage providers: the two upstream constant rows remain.
+    expect(pcMenuItems(open({}, { potion: 1 }).view)).toEqual(["multiplayer", "logOff"]);
     // Locker stocked: Pick Up Item appears.
-    expect(pcMenuItems(open({ potion: 2 }, { potion: 1 }).view)).toEqual(["itemPickUp", "logOff"]);
+    expect(pcMenuItems(open({ potion: 2 }, { potion: 1 }).view)).toEqual(["itemPickUp", "multiplayer", "logOff"]);
     // Bag with two types: Drop Off Item appears.
-    expect(pcMenuItems(open({}, { potion: 1, tuxeball: 5 }).view)).toEqual(["itemDropOff", "logOff"]);
+    expect(pcMenuItems(open({}, { potion: 1, tuxeball: 5 }).view)).toEqual(["itemDropOff", "multiplayer", "logOff"]);
     // Both: upstream order item storage, item dropoff, log off.
     expect(pcMenuItems(open({ potion: 2 }, { potion: 1, tuxeball: 5 }).view))
-      .toEqual(["itemPickUp", "itemDropOff", "logOff"]);
+      .toEqual(["itemPickUp", "itemDropOff", "multiplayer", "logOff"]);
+  });
+
+  test("Multiplayer is a non-destructive not-implemented placeholder", () => {
+    const opened = open({}, { potion: 1 });
+    const state = step(opened.state, A);
+    expect(view(state)).toMatchObject({
+      phase: "menu",
+      menuCursor: 0,
+      message: "This feature is not yet implemented.",
+    });
+    expect(rules.done(state)).toBeNull();
   });
 
   test("the drop-off list hides invisible items and sorts by slug", () => {
@@ -255,7 +266,7 @@ describe("G-PC-LOCKER withdraw and disband", () => {
 
   test("empty locker offers no take entry; drop-off still opens the bag", () => {
     const opened = open({}, { potion: 1, tuxeball: 1 });
-    expect(pcMenuItems(view(opened.state))).toEqual(["itemDropOff", "logOff"]);
+    expect(pcMenuItems(view(opened.state))).toEqual(["itemDropOff", "multiplayer", "logOff"]);
     const state = step(opened.state, A, A); // itemDropOff -> itemBoxes -> itemBag
     expect(view(state).phase).toBe("itemBag");
     expect(pcBagRows(view(state))).toEqual(["potion", "tuxeball"]);

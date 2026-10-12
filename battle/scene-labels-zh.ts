@@ -28,6 +28,8 @@ export const PC_LABELS_ZH: PcLabels = {
   lastMonster: "{name} 是你最后一只还能战斗的精灵。",
   itemPickUp: "取出道具",
   itemDropOff: "存入道具",
+  multiplayer: "多人游戏",
+  notImplemented: "该特性尚未实现.",
   itemTake: "取出",
   itemDisband: "销毁",
   itemEmpty: "这个保管箱是空的，没有道具可以取出。",

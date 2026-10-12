@@ -173,7 +173,7 @@ describe("GI-2b PC storage scene", () => {
     const started = start(value);
     expect(tuxemonExtensionState(started.ext).kennelBox).toBe(true);
     let state = started.state;
-    expect(pcMenuItems(view(state))).toEqual(["dropOff", "logOff"]);
+    expect(pcMenuItems(view(state))).toEqual(["dropOff", "multiplayer", "logOff"]);
     // Hidden boxes are never listed.
     expect(pcVisibleBoxes(view(state)).map((box) => box.id)).toEqual(["Kennel"]);
 
@@ -191,8 +191,8 @@ describe("GI-2b PC storage scene", () => {
     state = stepScene(rules, state, A, A, A);
     expect(view(state).party).toEqual(["p-rock"]);
     expect(view(state).boxes[0]!.monsters).toEqual(["p-nut"]);
-    expect(pcMenuItems(view(state))).toEqual(["pickUp", "logOff"]);
-    state = stepScene(rules, state, DOWN, A);
+    expect(pcMenuItems(view(state))).toEqual(["pickUp", "multiplayer", "logOff"]);
+    state = stepScene(rules, state, UP, A);
     const completion = rules.done(state)!;
     const committed = tuxemonExtensionState(completion.ext!, DB);
     expect(committed.party.map((entry) => entry.iid)).toEqual(["p-rock"]);
@@ -236,7 +236,7 @@ describe("GI-2b PC storage scene", () => {
     // The emptied box returns to the box list.
     expect(view(state).phase).toBe("boxes");
 
-    state = stepScene(rules, state, B, DOWN, DOWN, A);
+    state = stepScene(rules, state, B, DOWN, DOWN, DOWN, A);
     const committed = tuxemonExtensionState(rules.done(state)!.ext!, DB);
     expect(committed.party.map((entry) => entry.iid)).toEqual(["p-nut", "k-aard"]);
     expect(committed.kennel).toEqual([]);
@@ -412,7 +412,7 @@ describe("GI-2b imported events", () => {
 
     // Drop off Rockitten into the Shelter, then log off.
     const rewindPoint = driver.state;
-    for (const mask of [BTN_CONFIRM, BTN_BITS.DOWN, BTN_CONFIRM, BTN_CONFIRM, BTN_BITS.DOWN, BTN_CONFIRM]) {
+    for (const mask of [BTN_CONFIRM, BTN_BITS.DOWN, BTN_CONFIRM, BTN_CONFIRM, BTN_BITS.UP, BTN_CONFIRM]) {
       driver.press(mask);
     }
     expect(driver.sceneId()).toBeNull();
@@ -425,7 +425,7 @@ describe("GI-2b imported events", () => {
     // Rewind: replaying the same inputs from the mid-scene state is exact.
     const replay = new Driver({ map: "spyder_timber_cafe", x: 10, y: 4, dir: "up" }, value);
     replay.state = rewindPoint;
-    for (const mask of [BTN_CONFIRM, BTN_BITS.DOWN, BTN_CONFIRM, BTN_CONFIRM, BTN_BITS.DOWN, BTN_CONFIRM]) {
+    for (const mask of [BTN_CONFIRM, BTN_BITS.DOWN, BTN_CONFIRM, BTN_CONFIRM, BTN_BITS.UP, BTN_CONFIRM]) {
       replay.press(mask);
     }
     expect(canonicalJson(replay.state)).toBe(canonicalJson(driver.state));
