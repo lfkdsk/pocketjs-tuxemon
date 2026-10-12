@@ -55524,7 +55524,11 @@
  },
  "techniques": {
   "acid": {
+   "name": "Acid",
+   "description": "A corrosive liquid is ejected from the user's mouth, burning the opponent.",
+   "id": 119,
    "sort": "damage",
+   "category": "basic",
    "range": "reliable",
    "speed": "normal",
    "accuracy": 1,
@@ -55583,7 +55587,11 @@
    }
   },
   "adamantine": {
+   "name": "Adamantine",
+   "description": "The user's body glows intensely before it delivers a crushing blow.",
+   "id": 120,
    "sort": "damage",
+   "category": "reserved",
    "range": "touch",
    "speed": "very_slow",
    "accuracy": 1,
@@ -55642,7 +55650,11 @@
    }
   },
   "air_chain": {
+   "name": "Air Chain",
+   "description": "The user rapidly strikes the air, creating a series of powerful gusts that hit the opponent.",
+   "id": 121,
    "sort": "damage",
+   "category": "simple",
    "range": "reach",
    "speed": "slow",
    "accuracy": 0.75,
@@ -55704,7 +55716,11 @@
    }
   },
   "all_in": {
+   "name": "All In",
+   "description": "The user draws on their last ounce of strength, striking hard and getting their second wind.",
+   "id": 54,
    "sort": "damage",
+   "category": "powerful",
    "range": "touch",
    "speed": "slow",
    "accuracy": 0.8,
@@ -55770,7 +55786,11 @@
    }
   },
   "altitude": {
+   "name": "Altitude",
+   "description": "Fly high out of reach, then dive with a powerful attack.",
+   "id": 180,
    "sort": "damage",
+   "category": "special",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.8,
@@ -55821,7 +55841,11 @@
    }
   },
   "amnesia": {
+   "name": "Amnesia",
+   "description": "The combatants' minds touch, leaving both befuddled.",
+   "id": 53,
    "sort": "damage",
+   "category": "simple",
    "range": "reach",
    "speed": "normal",
    "accuracy": 0.8,
@@ -55887,7 +55911,11 @@
    }
   },
   "ants": {
+   "name": "Ants",
+   "description": "The user summons a swarm of ants that crawl over the opponent, changing their type to Earth.",
+   "id": 131,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -55950,7 +55978,11 @@
    }
   },
   "arcane_eye": {
+   "name": "Arcane Eye",
+   "description": "An arcane veil lashes at those that would curse the user.",
+   "id": 158,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -56013,7 +56045,11 @@
    }
   },
   "assault": {
+   "name": "Assault",
+   "description": "The user unleashes a flurry of rapid, powerful attacks.",
+   "id": 94,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "fast",
    "accuracy": 0.9,
@@ -56072,7 +56108,11 @@
    }
   },
   "avalanche": {
+   "name": "Avalanche",
+   "description": "The user gathers momentum before unleashing a devastating avalanche of ice and rock.",
+   "id": 33,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "extremely_slow",
    "accuracy": 0.8,
@@ -56141,7 +56181,11 @@
    }
   },
   "barking": {
+   "name": "Barking",
+   "description": "The user lets out a powerful, intimidating roar that makes the opponent flinch.",
+   "id": 112,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -56204,7 +56248,11 @@
    }
   },
   "battery_acid": {
+   "name": "Battery Acid",
+   "description": "A corrosive liquid is ejected from the user's body, poisoning the opponent.",
+   "id": 88,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.8,
@@ -56270,7 +56318,11 @@
    }
   },
   "battery_discharge": {
+   "name": "Battery Discharge",
+   "description": "The user's body emits a bright light as it restores its own health.",
+   "id": 83,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.9,
@@ -56335,7 +56387,11 @@
    }
   },
   "beam": {
+   "name": "Beam",
+   "description": "A concentrated beam of energy is fired from the user's eyes, blinding the opponent.",
+   "id": 18,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 1,
@@ -56401,7 +56457,11 @@
    }
   },
   "berserk": {
+   "name": "Berserk",
+   "description": "The user enters a frenzied state, attacking with reckless abandon.",
+   "id": 44,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "slow",
    "accuracy": 0.8,
@@ -56467,7 +56527,11 @@
    }
   },
   "biting_winds": {
+   "name": "Biting Winds",
+   "description": "A chill wind leaves the target weak and exposed.",
+   "id": 24,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "slow",
    "accuracy": 1,
@@ -56533,7 +56597,11 @@
    }
   },
   "blade": {
+   "name": "Blade",
+   "description": "A lightning-fast cut.",
+   "id": 7,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "extremely_fast",
    "accuracy": 1,
@@ -56592,7 +56660,11 @@
    }
   },
   "blood_bond": {
+   "name": "Blood Bond",
+   "description": "The user sucks the target's blood, but leaves something of themselves behind.",
+   "id": 79,
    "sort": "damage",
+   "category": "exotic",
    "range": "touch",
    "speed": "normal",
    "accuracy": 0.8,
@@ -56658,7 +56730,11 @@
    }
   },
   "blood_nets": {
+   "name": "Blood Nets",
+   "description": "A web of sticky, blood-red substance is shot from the user's body, draining the opponent's life force.",
+   "id": 164,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -56721,7 +56797,11 @@
    }
   },
   "blossom": {
+   "name": "Blossom",
+   "description": "Carnivorous plants grow around the target, drawing away nutrients for the user's benefit.",
+   "id": 26,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.85,
@@ -56786,7 +56866,11 @@
    }
   },
   "boulder": {
+   "name": "Boulder",
+   "description": "The user shelters beneath a rocky shell.",
+   "id": 11,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -56858,7 +56942,11 @@
    }
   },
   "breath": {
+   "name": "Breath",
+   "description": "The user exhales a cloud of sleep-inducing gas.",
+   "id": 122,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -56921,7 +57009,11 @@
    }
   },
   "breathe_fire": {
+   "name": "Breathe Fire",
+   "description": "Fire bursts from the user's mouth, scorching the target.",
+   "id": 64,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.8,
@@ -56980,7 +57072,11 @@
    }
   },
   "bubble_trap": {
+   "name": "Bubble Trap",
+   "description": "The user creates a large bubble that traps both itself and the opponent.",
+   "id": 57,
    "sort": "damage",
+   "category": "exotic",
    "range": "reach",
    "speed": "normal",
    "accuracy": 0.75,
@@ -57046,7 +57142,11 @@
    }
   },
   "bubbles": {
+   "name": "Bubbles",
+   "description": "The user blows a wide jet of bubbles at the target, weak but difficult to avoid.",
+   "id": 214,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 1,
@@ -57105,7 +57205,11 @@
    }
   },
   "bullet": {
+   "name": "Bullet",
+   "description": "A piece of metal is flung at the target with great alacrity.",
+   "id": 8,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "extremely_fast",
    "accuracy": 1,
@@ -57164,7 +57268,11 @@
    }
   },
   "burrow_blast": {
+   "name": "Burrow Blast",
+   "description": "The user digs underground and reappear at a different location, striking the opponent with a burst of dirt and debris.",
+   "id": 204,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.8,
@@ -57215,7 +57323,11 @@
    }
   },
   "buzz": {
+   "name": "Buzz",
+   "description": "The user generates a close-ranged blast of electromagnetic energy from its body, striking the opponent with a burst of electric force, dealing damage.",
+   "id": 197,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -57281,7 +57393,11 @@
    }
   },
   "canine": {
+   "name": "Canine",
+   "description": "The user unleashes a primal, ferocious attack that sends the opponent into a frenzy.",
+   "id": 123,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -57344,7 +57460,11 @@
    }
   },
   "cat_calling": {
+   "name": "Cat Calling",
+   "description": "The user emits a high-pitched cry that distracts the opponent.",
+   "id": 124,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -57407,7 +57527,11 @@
    }
   },
   "caustic_spray": {
+   "name": "Caustic Spray",
+   "description": "The user secretes a corrosive acid that burns the opponent upon contact.",
+   "id": 153,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.9,
@@ -57466,7 +57590,11 @@
    }
   },
   "cavity": {
+   "name": "Cavity",
+   "description": "The user strikes with pinpoint accuracy, targeting the opponent's weak points.",
+   "id": 118,
    "sort": "damage",
+   "category": "reserved",
    "range": "reliable",
    "speed": "normal",
    "accuracy": 0.7,
@@ -57525,7 +57653,11 @@
    }
   },
   "chameleon": {
+   "name": "Chameleon",
+   "description": "The user changes its type to Wood, while also creating a protective shell around itself.",
+   "id": 97,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -57595,7 +57727,11 @@
    }
   },
   "changeling": {
+   "name": "Changeling",
+   "description": "The user undergoes a transformation, healing its wounds in the process.",
+   "id": 183,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -57639,7 +57775,11 @@
    }
   },
   "chill_mist": {
+   "name": "Chill Mist",
+   "description": "The user releases a freezing mist that lowers the opponent's stats.",
+   "id": 77,
    "sort": "damage",
+   "category": "basic",
    "range": "ranged",
    "speed": "slow",
    "accuracy": 0.8,
@@ -57701,7 +57841,11 @@
    }
   },
   "clairaudience": {
+   "name": "Clairaudience",
+   "description": "The user attunes its senses, anticipating the opponent's next move and preparing a counterattack.",
+   "id": 125,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -57764,7 +57908,11 @@
    }
   },
   "clamp_on": {
+   "name": "Clamp On",
+   "description": "The user latches onto the opponent with its powerful jaws.",
+   "id": 17,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -57834,7 +57982,11 @@
    }
   },
   "clock": {
+   "name": "Clock",
+   "description": "The user creates a swirling vortex that confuses the opponent.",
+   "id": 105,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -57897,7 +58049,11 @@
    }
   },
   "cloud_aether": {
+   "name": "Cloud Aether",
+   "description": "The user is enveloped in a swirling cloud, causing both it and the opponent to change types randomly.",
+   "id": 126,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -57960,7 +58116,11 @@
    }
   },
   "combat_clone": {
+   "name": "Combat Clone",
+   "description": "They begin to divide themselves and send the copy to attack.",
+   "id": 263,
    "sort": "damage",
+   "category": "exotic",
    "range": "melee",
    "speed": "slow",
    "accuracy": 1,
@@ -58029,7 +58189,11 @@
    }
   },
   "conjurer": {
+   "name": "Conjurer",
+   "description": "The user conjures a force field that traps the opponent.",
+   "id": 127,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -58092,7 +58256,11 @@
    }
   },
   "constrict": {
+   "name": "Constrict",
+   "description": "The user wraps its body around the opponent, squeezing tightly.",
+   "id": 75,
    "sort": "damage",
+   "category": "simple",
    "range": "reliable",
    "speed": "very_slow",
    "accuracy": 1,
@@ -58158,7 +58326,11 @@
    }
   },
   "crushing_bite": {
+   "name": "Crushing Bite",
+   "description": "The user bites down with bone-crushing force. May leave the target unable to act.",
+   "id": 216,
    "sort": "damage",
+   "category": "simple",
    "range": "touch",
    "speed": "very_slow",
    "accuracy": 0.9,
@@ -58224,7 +58396,11 @@
    }
   },
   "crystal": {
+   "name": "Crystal",
+   "description": "The user fires a sharp, crystalline projectile at the opponent.",
+   "id": 128,
    "sort": "damage",
+   "category": "basic",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.9,
@@ -58283,7 +58459,11 @@
    }
   },
   "cutting_leaves": {
+   "name": "Cutting Leaves",
+   "description": "They charge into the opponent with cutting, sharp leaves that may snag against the foe.",
+   "id": 224,
    "sort": "damage",
+   "category": "powerful",
    "range": "melee",
    "speed": "slow",
    "accuracy": 0.95,
@@ -58349,7 +58529,11 @@
    }
   },
   "damage_division": {
+   "name": "Damage Division",
+   "description": "They divide into two and give the duplicate part of their damage.",
+   "id": 261,
    "sort": "damage",
+   "category": "special",
    "range": "special",
    "speed": "extremely_slow",
    "accuracy": 1,
@@ -58412,7 +58596,11 @@
    }
   },
   "demiurge": {
+   "name": "Demiurge",
+   "description": "The user undergoes a transformation, healing itself and confusing the opponent.",
+   "id": 147,
    "sort": "damage",
+   "category": "reserved",
    "range": "touch",
    "speed": "normal",
    "accuracy": 0.8,
@@ -58485,7 +58673,11 @@
    }
   },
   "depth_charge": {
+   "name": "Depth Charge",
+   "description": "The user dives underwater and then explode upwards, dealing damage to the opponent.",
+   "id": 205,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.8,
@@ -58536,7 +58728,11 @@
    }
   },
   "diet": {
+   "name": "Diet",
+   "description": "The user fuels their body with healthy foods, enhancing their physical resilience and making them more resistant to damage.",
+   "id": 231,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -58599,7 +58795,11 @@
    }
   },
   "divinity_beam": {
+   "name": "Divinity Beam",
+   "description": "A ray of divinity blinds those who look upon it.",
+   "id": 192,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.95,
@@ -58665,7 +58865,11 @@
    }
   },
   "dreamwalk": {
+   "name": "Dreamwalk",
+   "description": "Allows the user to enter the dreams of sleeping opponents, potentially dealing damage.",
+   "id": 211,
    "sort": "damage",
+   "category": "exotic",
    "range": "reliable",
    "speed": "normal",
    "accuracy": 1,
@@ -58733,7 +58937,11 @@
    }
   },
   "earthquake": {
+   "name": "Earthquake",
+   "description": "The ground shakes violently as the user unleashes a powerful ground attack.",
+   "id": 168,
    "sort": "damage",
+   "category": "powerful",
    "range": "touch",
    "speed": "extremely_slow",
    "accuracy": 0.7,
@@ -58792,7 +59000,11 @@
    }
   },
   "egg_smash": {
+   "name": "Egg Smash",
+   "description": "The user hurls an egg or egg fragment at the opponent, striking them with a messy and disorienting blow.",
+   "id": 232,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.9,
@@ -58851,7 +59063,11 @@
    }
   },
   "electric_multibite": {
+   "name": "Electric Multibite",
+   "description": "The user bites repeatedly while channeling electricity. May shock the target.",
+   "id": 220,
    "sort": "damage",
+   "category": "exotic",
    "range": "touch",
    "speed": "fast",
    "accuracy": 0.9,
@@ -58920,7 +59136,11 @@
    }
   },
   "electrical_storm": {
+   "name": "Electrical Storm",
+   "description": "The user summons a raging thunderstorm, striking the opponent with lightning bolts.",
+   "id": 76,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "very_slow",
    "accuracy": 0.75,
@@ -58982,7 +59202,11 @@
    }
   },
   "electroplate": {
+   "name": "Electroplate",
+   "description": "Electricity causes the target to be coated in metal, changing its type.",
+   "id": 151,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -59045,7 +59269,11 @@
    }
   },
   "empty": {
+   "name": "Empty",
+   "description": "Empty",
+   "id": 0,
    "sort": "meta",
+   "category": "notype",
    "range": "special",
    "speed": "normal",
    "accuracy": 0,
@@ -59076,7 +59304,11 @@
    }
   },
   "energy_beam": {
+   "name": "Energy Beam",
+   "description": "The user fires a beam of energy that burns all in its path.",
+   "id": 191,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.95,
@@ -59142,7 +59374,11 @@
    }
   },
   "energy_claws": {
+   "name": "Energy Claws",
+   "description": "The user's claws glow with energy as it delivers a powerful, focused attack.",
+   "id": 31,
    "sort": "damage",
+   "category": "exotic",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.8,
@@ -59208,7 +59444,11 @@
    }
   },
   "energy_field": {
+   "name": "Energy Field",
+   "description": "The device saps the target's energy, empowering the user.",
+   "id": 22,
    "sort": "damage",
+   "category": "powerful",
    "range": "special",
    "speed": "very_fast",
    "accuracy": 1,
@@ -59278,7 +59518,11 @@
    }
   },
   "entomb": {
+   "name": "Entomb",
+   "description": "They pin you to the ground with great force and assemble a tomb around you.",
+   "id": 248,
    "sort": "damage",
+   "category": "powerful",
    "range": "melee",
    "speed": "extremely_slow",
    "accuracy": 0.9,
@@ -59338,7 +59582,11 @@
    }
   },
   "evasion": {
+   "name": "Evasion",
+   "description": "The user becomes a blur of motion, making it difficult to hit with ranged attacks.",
+   "id": 116,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "extremely_fast",
    "accuracy": 1,
@@ -59401,7 +59649,11 @@
    }
   },
   "external_power": {
+   "name": "External Power",
+   "description": "The user uses a ranged attack that can be different types.",
+   "id": 255,
    "sort": "damage",
+   "category": "basic",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 1,
@@ -59466,7 +59718,11 @@
    }
   },
   "eyebite": {
+   "name": "Eyebite",
+   "description": "A glance from the user saps the target of its vim and vigor.",
+   "id": 35,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "very_fast",
    "accuracy": 1,
@@ -59503,7 +59759,11 @@
    }
   },
   "feint": {
+   "name": "Feint",
+   "description": "The user feigns an attack, then strikes with a swift, surprise blow.",
+   "id": 36,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -59585,7 +59845,11 @@
    }
   },
   "fester": {
+   "name": "Fester",
+   "description": "A foul smell washes across the battlefield, hindering the recovery of all combatants.",
+   "id": 78,
    "sort": "damage",
+   "category": "exotic",
    "range": "reach",
    "speed": "normal",
    "accuracy": 1,
@@ -59651,7 +59915,11 @@
    }
   },
   "fiery": {
+   "name": "Fiery",
+   "description": "The user emits a powerful blast of fire that changes the opponent's type to Fire.",
+   "id": 98,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -59714,7 +59982,11 @@
    }
   },
   "fire_ball": {
+   "name": "Fire Ball",
+   "description": "An orb of scorching fire is flung at the target.",
+   "id": 4,
    "sort": "damage",
+   "category": "basic",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.9,
@@ -59776,7 +60048,11 @@
    }
   },
   "fire_claw": {
+   "name": "Fire Claw",
+   "description": "The user's claws ignite with fire as it delivers a burning attack.",
+   "id": 3,
    "sort": "damage",
+   "category": "simple",
    "range": "reach",
    "speed": "normal",
    "accuracy": 0.75,
@@ -59842,7 +60118,11 @@
    }
   },
   "fire_shield": {
+   "name": "Fire Shield",
+   "description": "The user surrounds itself with a protective wall of fire, while also burning the opponent.",
+   "id": 167,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -59912,7 +60192,11 @@
    }
   },
   "firestorm": {
+   "name": "Firestorm",
+   "description": "The user creates a raging inferno that engulfs the opponent.",
+   "id": 166,
    "sort": "damage",
+   "category": "powerful",
    "range": "reach",
    "speed": "very_slow",
    "accuracy": 0.8,
@@ -59971,7 +60255,11 @@
    }
   },
   "flamethrower": {
+   "name": "Flamethrower",
+   "description": "The user spews a stream of intense flames at the opponent.",
+   "id": 73,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.8,
@@ -60037,7 +60325,11 @@
    }
   },
   "fledgling": {
+   "name": "Fledgling",
+   "description": "The user hurls sharp feathers at the opponent.",
+   "id": 117,
    "sort": "damage",
+   "category": "basic",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.75,
@@ -60096,7 +60388,11 @@
    }
   },
   "flood": {
+   "name": "Flood",
+   "description": "The user summons a powerful flood that washes over the opponent.",
+   "id": 10,
    "sort": "damage",
+   "category": "basic",
    "range": "ranged",
    "speed": "extremely_slow",
    "accuracy": 0.8,
@@ -60158,7 +60454,11 @@
    }
   },
   "flow": {
+   "name": "Flow",
+   "description": "The user channels a powerful water stream.",
+   "id": 9,
    "sort": "damage",
+   "category": "basic",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.8,
@@ -60220,7 +60520,11 @@
    }
   },
   "flower_armor": {
+   "name": "Flower Armor",
+   "description": "The user creates an armor out of flowers.",
+   "id": 226,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -60283,7 +60587,11 @@
    }
   },
   "flower_bloom": {
+   "name": "Flower Bloom",
+   "description": "A hard to evade massive bloom of flower petals blasts like a blizzard across the landscape.",
+   "id": 227,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "slow",
    "accuracy": 0.95,
@@ -60345,7 +60653,11 @@
    }
   },
   "fluff_up": {
+   "name": "Fluff Up",
+   "description": "The user's body puffs up, healing its wounds.",
+   "id": 71,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -60408,7 +60720,11 @@
    }
   },
   "font": {
+   "name": "Font",
+   "description": "The user draws energy from a mystical font to heal itself.",
+   "id": 48,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 1,
@@ -60474,7 +60790,11 @@
    }
   },
   "food_fight": {
+   "name": "Food Fight",
+   "description": "The user initiates a frantic food fight, rapidly throwing edible projectiles at the opponent with reckless abandon.",
+   "id": 229,
    "sort": "damage",
+   "category": "exotic",
    "range": "ranged",
    "speed": "fast",
    "accuracy": 0.95,
@@ -60540,7 +60860,11 @@
    }
   },
   "frighten": {
+   "name": "Frighten",
+   "description": "A spooked opponent takes to the higher ground, helping ranged attacks at the expense of close combat.",
+   "id": 244,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "fast",
    "accuracy": 1,
@@ -60603,7 +60927,11 @@
    }
   },
   "frostbite": {
+   "name": "Frostbite",
+   "description": "The user shoots a freezing blast that inflicts poison on the opponent.",
+   "id": 87,
    "sort": "damage",
+   "category": "powerful",
    "range": "reach",
    "speed": "normal",
    "accuracy": 0.8,
@@ -60666,7 +60994,11 @@
    }
   },
   "fume": {
+   "name": "Fume",
+   "description": "The user becomes enraged.",
+   "id": 28,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -60729,7 +61061,11 @@
    }
   },
   "fungal_spore": {
+   "name": "Fungal Spore",
+   "description": "On touch, the user explodes with spores. These have a small chance of infecting the target and leeching life from them.",
+   "id": 239,
    "sort": "damage",
+   "category": "simple",
    "range": "touch",
    "speed": "normal",
    "accuracy": 1,
@@ -60795,7 +61131,11 @@
    }
   },
   "geyser": {
+   "name": "Geyser",
+   "description": "The user erupts with a powerful water spout, changing the opponent's type to Water.",
+   "id": 91,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -60858,7 +61198,11 @@
    }
   },
   "give_all": {
+   "name": "Give All",
+   "description": "The user sacrifices itself.",
+   "id": 34,
    "sort": "damage",
+   "category": "powerful",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -60924,7 +61268,11 @@
    }
   },
   "glower": {
+   "name": "Glower",
+   "description": "At the user's glare, the target grows weak and vulnerable.",
+   "id": 13,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "very_fast",
    "accuracy": 1,
@@ -60996,7 +61344,11 @@
    }
   },
   "gnaw": {
+   "name": "Gnaw",
+   "description": "The user nibbles at the target, dealing a small amount of damage. A weak but fast and consistent attack.",
+   "id": 215,
    "sort": "damage",
+   "category": "basic",
    "range": "touch",
    "speed": "fast",
    "accuracy": 1,
@@ -61055,7 +61407,11 @@
    }
   },
   "goad": {
+   "name": "Goad",
+   "description": "The user taunts the opponent, causing them to become enraged.",
+   "id": 39,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "very_fast",
    "accuracy": 0.8,
@@ -61121,7 +61477,11 @@
    }
   },
   "gold_digger": {
+   "name": "Gold Digger",
+   "description": "The user digs into the ground, finding treasure or attacking itself.",
+   "id": 99,
    "sort": "damage",
+   "category": "exotic",
    "range": "melee",
    "speed": "very_slow",
    "accuracy": 0.8,
@@ -61180,7 +61540,11 @@
    }
   },
   "gourmet": {
+   "name": "Gourmet",
+   "description": "The user devours a nourishing meal, restoring their vitality and rejuvenating their spirits.",
+   "id": 234,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -61249,7 +61613,11 @@
    }
   },
   "greenstone": {
+   "name": "Greenstone",
+   "description": "The user strikes with the force of a falling stone.",
+   "id": 106,
    "sort": "damage",
+   "category": "powerful",
    "range": "touch",
    "speed": "slow",
    "accuracy": 0.6,
@@ -61308,7 +61676,11 @@
    }
   },
   "grinding": {
+   "name": "Grinding",
+   "description": "The user relentlessly batters the opponent with a barrage of grinding blows, wearing them down with sustained pressure.",
+   "id": 109,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "slow",
    "accuracy": 0.75,
@@ -61368,7 +61740,11 @@
    }
   },
   "gust": {
+   "name": "Gust",
+   "description": "The user creates a powerful wind that blows the opponent back.",
+   "id": 161,
    "sort": "damage",
+   "category": "basic",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 1,
@@ -61427,7 +61803,11 @@
    }
   },
   "hallucinogen_spore": {
+   "name": "Hallucinogen Spore",
+   "description": "The user releases a cloud of hallucinogenic spores, disorienting the opponent and altering their perception of reality.",
+   "id": 240,
    "sort": "damage",
+   "category": "exotic",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.9,
@@ -61494,7 +61874,11 @@
    }
   },
   "hammerhead": {
+   "name": "Hammerhead",
+   "description": "The user charges forward, striking the opponent with its head.",
+   "id": 72,
    "sort": "damage",
+   "category": "basic",
    "range": "melee",
    "speed": "slow",
    "accuracy": 1,
@@ -61527,7 +61911,11 @@
    }
   },
   "hawk": {
+   "name": "Hawk",
+   "description": "The user soars high into the air before diving down with a powerful attack.",
+   "id": 111,
    "sort": "damage",
+   "category": "special",
    "range": "touch",
    "speed": "normal",
    "accuracy": 1,
@@ -61589,7 +61977,11 @@
    }
   },
   "heavenly_desserts": {
+   "name": "Heavenly Desserts",
+   "description": "A bizarre move that can both heal you and send you to heaven by how good it tastes.",
+   "id": 233,
    "sort": "damage",
+   "category": "reserved",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.9,
@@ -61655,7 +62047,11 @@
    }
   },
   "hibernate": {
+   "name": "Hibernate",
+   "description": "The user falls into a restorative sleep.",
+   "id": 45,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -61699,7 +62095,11 @@
    }
   },
   "hook": {
+   "name": "Hook",
+   "description": "They aim to hook the opponent, perhaps with a horn or limb.",
+   "id": 246,
    "sort": "damage",
+   "category": "basic",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.95,
@@ -61766,7 +62166,11 @@
    }
   },
   "horn": {
+   "name": "Horn",
+   "description": "They jab powerfully but wildly with a horn, risking many misses.",
+   "id": 245,
    "sort": "damage",
+   "category": "powerful",
    "range": "touch",
    "speed": "slow",
    "accuracy": 0.75,
@@ -61825,7 +62229,11 @@
    }
   },
   "ice_claw": {
+   "name": "Ice Claw",
+   "description": "The user's claws become covered in ice as it delivers a freezing attack.",
+   "id": 21,
    "sort": "damage",
+   "category": "basic",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -61884,7 +62292,11 @@
    }
   },
   "ice_shield": {
+   "name": "Ice Shield",
+   "description": "The user surrounds itself with a protective wall of ice, while also slowing down the opponent.",
+   "id": 172,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -61954,7 +62366,11 @@
    }
   },
   "ice_storm": {
+   "name": "Ice Storm",
+   "description": "The opponent is engulfed in a freezing aura, creating a treacherous environment.",
+   "id": 171,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "very_slow",
    "accuracy": 0.6,
@@ -62013,7 +62429,11 @@
    }
   },
   "icicle_spear": {
+   "name": "Icicle Spear",
+   "description": "The user launches a volley of sharp ice shards at the opponent.",
+   "id": 23,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.75,
@@ -62075,7 +62495,11 @@
    }
   },
   "infectious_bite": {
+   "name": "Infectious Bite",
+   "description": "A sharp fast bite that injects a festering toxin. May leave the target with a lingering injury.",
+   "id": 218,
    "sort": "damage",
+   "category": "simple",
    "range": "touch",
    "speed": "fast",
    "accuracy": 0.95,
@@ -62141,7 +62565,11 @@
    }
   },
   "inner_power": {
+   "name": "Inner Power",
+   "description": "The user calls upon their inner power to unleash an attack of the same type.",
+   "id": 254,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -62206,7 +62634,11 @@
    }
   },
   "insanity": {
+   "name": "Insanity",
+   "description": "The user becomes consumed by rage, increasing its power.",
+   "id": 130,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -62269,7 +62701,11 @@
    }
   },
   "invictus": {
+   "name": "Invictus",
+   "description": "The user enters a berserker state, attacking with relentless fury and trapping the opponent.",
+   "id": 63,
    "sort": "damage",
+   "category": "simple",
    "range": "touch",
    "speed": "slow",
    "accuracy": 0.95,
@@ -62342,7 +62778,11 @@
    }
   },
   "just_desserts": {
+   "name": "Just Desserts",
+   "description": "The user offers the opponent a poisoned treat, exacting a sweet revenge as they succumb to the toxic effects.",
+   "id": 230,
    "sort": "damage",
+   "category": "exotic",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.8,
@@ -62415,7 +62855,11 @@
    }
   },
   "kindling_flame": {
+   "name": "Kindling Flame",
+   "description": "The user ignites with inner fire, increasing its attack power.",
+   "id": 30,
    "sort": "damage",
+   "category": "exotic",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.8,
@@ -62481,7 +62925,11 @@
    }
   },
   "kiss": {
+   "name": "Kiss",
+   "description": "They exchange a kiss, and health.",
+   "id": 253,
    "sort": "damage",
+   "category": "special",
    "range": "touch",
    "speed": "extremely_slow",
    "accuracy": 1,
@@ -62543,7 +62991,11 @@
    }
   },
   "kraken": {
+   "name": "Kraken",
+   "description": "The user summons the power of a legendary sea creature, unleashing a devastating attack.",
+   "id": 132,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "extremely_slow",
    "accuracy": 0.8,
@@ -62602,7 +63054,11 @@
    }
   },
   "lantern": {
+   "name": "Lantern",
+   "description": "The user damages the target with bright light.",
+   "id": 133,
    "sort": "damage",
+   "category": "basic",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.9,
@@ -62661,7 +63117,11 @@
    }
   },
   "laser_beam": {
+   "name": "Laser Beam",
+   "description": "A powerful ranged energy attack that may blind that goes at the speed of light.",
+   "id": 238,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "extremely_fast",
    "accuracy": 1,
@@ -62727,7 +63187,11 @@
    }
   },
   "lava": {
+   "name": "Lava",
+   "description": "The user erupts with molten lava, burning both itself and the opponent.",
+   "id": 134,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "very_slow",
    "accuracy": 0.8,
@@ -62793,7 +63257,11 @@
    }
   },
   "leaf_barrage": {
+   "name": "Leaf Barrage",
+   "description": "Barrage the opponent with a series of leaves.",
+   "id": 223,
    "sort": "damage",
+   "category": "simple",
    "range": "reach",
    "speed": "slow",
    "accuracy": 0.9,
@@ -62855,7 +63323,11 @@
    }
   },
   "leaf_stab": {
+   "name": "Leaf Stab",
+   "description": "The user throws a prickly sharp leaf, which induces a burning feeling on contact as the stab wound bleeds.",
+   "id": 222,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.9,
@@ -62921,7 +63393,11 @@
    }
   },
   "levitate": {
+   "name": "Levitate",
+   "description": "Combatants float into the air, giving them a vantage point but leaving both struggling to connect with their hand-to-hand attacks.",
+   "id": 82,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -62958,7 +63434,11 @@
    }
   },
   "lick_lash": {
+   "name": "Lick Lash",
+   "description": "The user lashes out with its tongue, dealing damage and possibly leaving the opponent stunned.",
+   "id": 209,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -63024,7 +63504,11 @@
    }
   },
   "life_surge": {
+   "name": "Life Surge",
+   "description": "An eruption of life charges the monster, but at the expense of healing its opponent.",
+   "id": 175,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -63093,7 +63577,11 @@
    }
   },
   "lightning_spheres": {
+   "name": "Lightning Spheres",
+   "description": "The user launches multiple balls of electricity at the opponent.",
+   "id": 163,
    "sort": "damage",
+   "category": "basic",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.9,
@@ -63152,7 +63640,11 @@
    }
   },
   "lineage": {
+   "name": "Lineage",
+   "description": "The user draws power from its ancestors to unleash an attack.",
+   "id": 135,
    "sort": "damage",
+   "category": "basic",
    "range": "reach",
    "speed": "normal",
    "accuracy": 1,
@@ -63211,7 +63703,11 @@
    }
   },
   "lock_horns": {
+   "name": "Lock Horns",
+   "description": "They try to lock horns with the enemy. ",
+   "id": 259,
    "sort": "damage",
+   "category": "basic",
    "range": "touch",
    "speed": "normal",
    "accuracy": 0.95,
@@ -63277,7 +63773,11 @@
    }
   },
   "lust": {
+   "name": "Lust",
+   "description": "The user uses its charm to weaken the opponent's defenses.",
+   "id": 136,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -63340,7 +63840,11 @@
    }
   },
   "magic_spell": {
+   "name": "Magic Spell",
+   "description": "They try to increase enemy cooldowns of non-ranged moves.",
+   "id": 251,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "extremely_fast",
    "accuracy": 0.95,
@@ -63405,7 +63909,11 @@
    }
   },
   "magma": {
+   "name": "Magma",
+   "description": "The user erupts with a torrent of molten rock.",
+   "id": 137,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "very_slow",
    "accuracy": 0.8,
@@ -63464,7 +63972,11 @@
    }
   },
   "magnetic_body": {
+   "name": "Magnetic Body",
+   "description": "A powerful magnetic field is generated, sending metal objects flying wildly across the battlefield and disrupting the opponent's movements.",
+   "id": 237,
    "sort": "damage",
+   "category": "powerful",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -63530,7 +64042,11 @@
    }
   },
   "meltdown": {
+   "name": "Meltdown",
+   "description": "The user unleashes a corrosive attack that damages the opponent.",
+   "id": 103,
    "sort": "damage",
+   "category": "powerful",
    "range": "reach",
    "speed": "very_slow",
    "accuracy": 0.7,
@@ -63596,7 +64112,11 @@
    }
   },
   "mending": {
+   "name": "Mending",
+   "description": "The user draws energy from its surroundings to heal itself.",
+   "id": 169,
    "sort": "damage",
+   "category": "special",
    "range": "special",
    "speed": "extremely_fast",
    "accuracy": 1,
@@ -63658,7 +64178,11 @@
    }
   },
   "midnight_mantle": {
+   "name": "Midnight Mantle",
+   "description": "The user shrouds itself in a cloak of darkness, striking out with shadowy tendrils that inflict damage and disorient the opponent.",
+   "id": 55,
    "sort": "damage",
+   "category": "basic",
    "range": "ranged",
    "speed": "very_fast",
    "accuracy": 0.8,
@@ -63723,7 +64247,11 @@
    }
   },
   "mind_explosion": {
+   "name": "Mind Explosion",
+   "description": "A powerful psychic or mushroom hallucinogen attack.",
+   "id": 225,
    "sort": "damage",
+   "category": "exotic",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 1,
@@ -63797,7 +64325,11 @@
    }
   },
   "mind_vise": {
+   "name": "Mind Vise",
+   "description": "The user traps the opponent's mind, preventing them from acting.",
+   "id": 185,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -63863,7 +64395,11 @@
    }
   },
   "mobbing": {
+   "name": "Mobbing",
+   "description": "A swarm of small creatures emerges from the user, overwhelming the opponent with a flurry of attacks.",
+   "id": 115,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "slow",
    "accuracy": 1,
@@ -63922,7 +64458,11 @@
    }
   },
   "muck": {
+   "name": "Muck",
+   "description": "The user covers the opponent in a sticky, poisonous substance.",
+   "id": 138,
    "sort": "damage",
+   "category": "simple",
    "range": "reach",
    "speed": "normal",
    "accuracy": 0.8,
@@ -63981,7 +64521,11 @@
    }
   },
   "muddle": {
+   "name": "Muddle",
+   "description": "A haze over the battlefield makes it harder for attacks to connect.",
+   "id": 43,
    "sort": "damage",
+   "category": "simple",
    "range": "reach",
    "speed": "normal",
    "accuracy": 1,
@@ -64047,7 +64591,11 @@
    }
   },
   "mudslide": {
+   "name": "Mudslide",
+   "description": "The user creates a massive mudslide that engulfs the opponent.",
+   "id": 89,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "extremely_slow",
    "accuracy": 0.8,
@@ -64122,7 +64670,11 @@
    }
   },
   "mystic_blending": {
+   "name": "Mystic Blending",
+   "description": "The user becomes one with its surroundings, healing itself.",
+   "id": 139,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -64198,7 +64750,11 @@
    }
   },
   "needle": {
+   "name": "Needle",
+   "description": "The user stabs the target rapidly with a needle or thorns.",
+   "id": 196,
    "sort": "damage",
+   "category": "exotic",
    "range": "ranged",
    "speed": "very_fast",
    "accuracy": 0.9,
@@ -64257,7 +64813,11 @@
    }
   },
   "negation": {
+   "name": "Negation",
+   "description": "The user cancels out the effects of the opponent's healing.",
+   "id": 140,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -64294,7 +64854,11 @@
    }
   },
   "nest": {
+   "name": "Nest",
+   "description": "The user constructs a protective nest around itself.",
+   "id": 114,
    "sort": "damage",
+   "category": "powerful",
    "range": "special",
    "speed": "normal",
    "accuracy": 0.8,
@@ -64363,7 +64927,11 @@
    }
   },
   "neutralize": {
+   "name": "Neutralize",
+   "description": "The battlefield is reset, with all conditions and other changes cleared.",
+   "id": 179,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "fast",
    "accuracy": 1,
@@ -64406,7 +64974,11 @@
    }
   },
   "oedipus": {
+   "name": "Oedipus",
+   "description": "The user attacks with a vengeance, confusing the opponent and seeking revenge.",
+   "id": 100,
    "sort": "damage",
+   "category": "reserved",
    "range": "reach",
    "speed": "slow",
    "accuracy": 0.85,
@@ -64453,7 +65025,11 @@
    }
   },
   "one_million_talons": {
+   "name": "One Million Talons",
+   "description": "The user unleashes a flurry of rapid, razor-sharp attacks.",
+   "id": 186,
    "sort": "damage",
+   "category": "powerful",
    "range": "melee",
    "speed": "slow",
    "accuracy": 1,
@@ -64493,7 +65069,11 @@
    }
   },
   "one_two": {
+   "name": "One-Two",
+   "description": "Two decisive strikes bring the target to its knees.",
+   "id": 52,
    "sort": "damage",
+   "category": "simple",
    "range": "touch",
    "speed": "normal",
    "accuracy": 0.8,
@@ -64555,7 +65135,11 @@
    }
   },
   "orbs": {
+   "name": "Orbs",
+   "description": "The user fires off an energy ball that causes a mystical transformation in the target.",
+   "id": 141,
    "sort": "damage",
+   "category": "exotic",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 1,
@@ -64621,7 +65205,11 @@
    }
   },
   "oven": {
+   "name": "Oven",
+   "description": "The user throws themselves into a fiery oven or pyre, then re-emerges to attack.",
+   "id": 236,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.8,
@@ -64698,7 +65286,11 @@
    }
   },
   "overfeed": {
+   "name": "Overfeed",
+   "description": "The user overloads the opponent with energy, slowing them down.",
+   "id": 173,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "extremely_fast",
    "accuracy": 1,
@@ -64770,7 +65362,11 @@
    }
   },
   "overgrowth": {
+   "name": "Overgrowth",
+   "description": "Vines lash the target, locking them in place.",
+   "id": 27,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "very_slow",
    "accuracy": 0.8,
@@ -64836,7 +65432,11 @@
    }
   },
   "panjandrum": {
+   "name": "Panjandrum",
+   "description": "A reliable technique that hurts any monster in proportion to its HP.",
+   "id": 177,
    "sort": "damage",
+   "category": "exotic",
    "range": "reliable",
    "speed": "normal",
    "accuracy": 1,
@@ -64899,7 +65499,11 @@
    }
   },
   "peck": {
+   "name": "Peck",
+   "description": "The user attacks with a sharp peck from its beak.",
+   "id": 70,
    "sort": "damage",
+   "category": "basic",
    "range": "reach",
    "speed": "normal",
    "accuracy": 1,
@@ -64958,7 +65562,11 @@
    }
   },
   "peregrine": {
+   "name": "Peregrine",
+   "description": "The user dives from the sky with incredible speed, delivering a powerful, piercing attack.",
+   "id": 65,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "extremely_fast",
    "accuracy": 0.8,
@@ -65017,7 +65625,11 @@
    }
   },
   "perfect_cut": {
+   "name": "Perfect Cut",
+   "description": "The user strikes with surgical precision, leaving no room for error.",
+   "id": 61,
    "sort": "damage",
+   "category": "simple",
    "range": "reliable",
    "speed": "normal",
    "accuracy": 1,
@@ -65076,7 +65688,11 @@
    }
   },
   "petrify": {
+   "name": "Petrify",
+   "description": "The user emits a powerful aura that renders the opponent stuck.",
+   "id": 37,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "very_fast",
    "accuracy": 1,
@@ -65139,7 +65755,11 @@
    }
   },
   "phantasmal_force": {
+   "name": "Phantasmal Force",
+   "description": "The user creates an illusionary copy of itself that attacks the opponent.",
+   "id": 162,
    "sort": "damage",
+   "category": "basic",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.9,
@@ -65198,7 +65818,11 @@
    }
   },
   "piece_of_cake": {
+   "name": "Piece of Cake",
+   "description": "The user enters a state of effortless ease, healing their wounds and restoring their vitality as everything becomes as simple as enjoying a delicious cake.",
+   "id": 228,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "fast",
    "accuracy": 1,
@@ -65267,7 +65891,11 @@
    }
   },
   "pit": {
+   "name": "Pit",
+   "description": "The user creates a pit beneath the opponent, causing them to fall and take damage.",
+   "id": 142,
    "sort": "damage",
+   "category": "simple",
    "range": "touch",
    "speed": "very_slow",
    "accuracy": 0.8,
@@ -65333,7 +65961,11 @@
    }
   },
   "platinum": {
+   "name": "Platinum",
+   "description": "The user's body becomes infused with a lustrous metal, granting it increased defense and the ability to inflict damage.",
+   "id": 143,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.7,
@@ -65406,7 +66038,11 @@
    }
   },
   "poison_courtship": {
+   "name": "Poison Courtship",
+   "description": "The user emits a seductive aura laces with toxins, charming the opponent while slowly poisoning them.",
+   "id": 113,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -65469,7 +66105,11 @@
    }
   },
   "pollen_blast": {
+   "name": "Pollen Blast",
+   "description": "Releases a cloud of pollen, dealing damage to opponents and potentially causing them to become disoriented.",
+   "id": 212,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 1,
@@ -65535,7 +66175,11 @@
    }
   },
   "potluck": {
+   "name": "Potluck",
+   "description": "The user and opponent engage in a mutual exchange of gifts, fostering a brief moment of camaraderie in the midst of battle.",
+   "id": 235,
    "sort": "damage",
+   "category": "special",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -65617,7 +66261,11 @@
    }
   },
   "pouch": {
+   "name": "Pouch",
+   "description": "The user refreshes themselves with a tasty morsel from a pouch or bag.",
+   "id": 198,
    "sort": "damage",
+   "category": "special",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -65682,7 +66330,11 @@
    }
   },
   "power_theft": {
+   "name": "Power Theft",
+   "description": "The user steals some power, perhaps by gene exchange, and uses it to launch an attack of the enemy type.",
+   "id": 256,
    "sort": "damage",
+   "category": "basic",
    "range": "touch",
    "speed": "normal",
    "accuracy": 1,
@@ -65754,7 +66406,11 @@
    }
   },
   "proboscis": {
+   "name": "Proboscis",
+   "description": "The user extends a long, proboscis-like appendage, draining the opponent's life force while inflicting damage.",
+   "id": 47,
    "sort": "damage",
+   "category": "simple",
    "range": "reach",
    "speed": "normal",
    "accuracy": 1,
@@ -65817,7 +66473,11 @@
    }
   },
   "pseudopod": {
+   "name": "Pseudopod",
+   "description": "The user extends a pseudopod to deliver a forceful, sticky blow.",
+   "id": 68,
    "sort": "damage",
+   "category": "simple",
    "range": "reach",
    "speed": "normal",
    "accuracy": 1,
@@ -65883,7 +66543,11 @@
    }
   },
   "punch": {
+   "name": "Punch",
+   "description": "A classic, powerful strike with the user's fist.",
+   "id": 182,
    "sort": "damage",
+   "category": "basic",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.9,
@@ -65942,7 +66606,11 @@
    }
   },
   "pyrokinesis": {
+   "name": "Pyrokinesis",
+   "description": "The user unleashes a wave of intense heat and flames that can scorch its opponents.",
+   "id": 208,
    "sort": "damage",
+   "category": "exotic",
    "range": "melee",
    "speed": "fast",
    "accuracy": 0.8,
@@ -66002,7 +66670,11 @@
    }
   },
   "quicksand": {
+   "name": "Quicksand",
+   "description": "The user creates a treacherous patch of quicksand, trapping and damaging the opponent.",
+   "id": 90,
    "sort": "damage",
+   "category": "simple",
    "range": "touch",
    "speed": "very_slow",
    "accuracy": 0.8,
@@ -66068,7 +66740,11 @@
    }
   },
   "radiance": {
+   "name": "Radiance",
+   "description": "The user emits blinding flash of light, followed by a powerful energy blast.",
+   "id": 144,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.95,
@@ -66127,7 +66803,11 @@
    }
   },
   "ram": {
+   "name": "Ram",
+   "description": "The user charges forward with incredible force, delivering a devastating physical blow.",
+   "id": 5,
    "sort": "damage",
+   "category": "basic",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -66186,7 +66866,11 @@
    }
   },
   "refresh": {
+   "name": "Refresh",
+   "description": "The user rejuvenates itself, restoring health and entering a state of rapid recovery.",
+   "id": 40,
    "sort": "damage",
+   "category": "powerful",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -66255,7 +66939,11 @@
    }
   },
   "revenge_stance": {
+   "name": "Revenge Stance",
+   "description": "The user adopts a defensive posture, provoking the opponent into attacking first, while preparing for revenge.",
+   "id": 181,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "extremely_fast",
    "accuracy": 1,
@@ -66318,7 +67006,11 @@
    }
   },
   "rift_dash": {
+   "name": "Rift Dash",
+   "description": "The user creates a temporary rift in space and dash through it, reappearing at a different location and striking the opponent with a swift attack.",
+   "id": 206,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.8,
@@ -66370,7 +67062,11 @@
    }
   },
   "ring": {
+   "name": "Ring",
+   "description": "The user conjures a ring that expands, engulfing the opponent.",
+   "id": 145,
    "sort": "damage",
+   "category": "reserved",
    "range": "reach",
    "speed": "normal",
    "accuracy": 0.8,
@@ -66439,7 +67135,11 @@
    }
   },
   "riposte": {
+   "name": "Riposte",
+   "description": "The user assumes a defensive stance, preparing to counter any attack with a swift and powerful retaliation.",
+   "id": 187,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "extremely_fast",
    "accuracy": 1,
@@ -66502,7 +67202,11 @@
    }
   },
   "rock": {
+   "name": "Rock",
+   "description": "A heavy rock falls on the target.",
+   "id": 6,
    "sort": "damage",
+   "category": "basic",
    "range": "touch",
    "speed": "normal",
    "accuracy": 1,
@@ -66561,7 +67265,11 @@
    }
   },
   "rocky_barrage": {
+   "name": "Rocky Barrage",
+   "description": "The user unleashes a furious barrage of rocks, threatening to overwhelm the opponent with a crushing avalanche of stone.",
+   "id": 241,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.9,
@@ -66623,7 +67331,11 @@
    }
   },
   "roll": {
+   "name": "Roll",
+   "description": "The user curls into a ball and rolls over or against the opponent.",
+   "id": 202,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "fast",
    "accuracy": 0.9,
@@ -66689,7 +67401,11 @@
    }
   },
   "rot": {
+   "name": "Rot",
+   "description": "A sickness befalls the target.",
+   "id": 38,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -66752,7 +67468,11 @@
    }
   },
   "ruby": {
+   "name": "Ruby",
+   "description": "The user fires a concentrated beam of ruby-like energy, inflicting damage.",
+   "id": 146,
    "sort": "damage",
+   "category": "simple",
    "range": "reach",
    "speed": "normal",
    "accuracy": 0.8,
@@ -66811,7 +67531,11 @@
    }
   },
   "rust_bomb": {
+   "name": "Rust Bomb",
+   "description": "A corrosive projectile that explodes on impact, dealing damage and poisoning the opponent.",
+   "id": 86,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.6,
@@ -66880,7 +67604,11 @@
    }
   },
   "saber": {
+   "name": "Saber",
+   "description": "The user strikes with a swift and powerful sword-like attack.",
+   "id": 102,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.8,
@@ -66939,7 +67667,11 @@
    }
   },
   "salamander": {
+   "name": "Salamander",
+   "description": "A bite brimming with heat and lashing pain.",
+   "id": 85,
    "sort": "damage",
+   "category": "simple",
    "range": "reach",
    "speed": "normal",
    "accuracy": 1,
@@ -67005,7 +67737,11 @@
    }
   },
   "sand_spray": {
+   "name": "Sand Spray",
+   "description": "A cloud of abrasive sand is hurled at the opponent, damaging their vision and inflicting damage.",
+   "id": 32,
    "sort": "damage",
+   "category": "simple",
    "range": "touch",
    "speed": "normal",
    "accuracy": 1,
@@ -67071,7 +67807,11 @@
    }
   },
   "sands_of_time": {
+   "name": "Sands of Time",
+   "description": "They imbue sand around them with the power to turn time.",
+   "id": 249,
    "sort": "damage",
+   "category": "powerful",
    "range": "touch",
    "speed": "fast",
    "accuracy": 0.9,
@@ -67138,7 +67878,11 @@
    }
   },
   "scope": {
+   "name": "Scope",
+   "description": "Identifies an opponent's strengths and weaknesses.",
+   "id": 176,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -67197,7 +67941,11 @@
    }
   },
   "shadow_blast": {
+   "name": "Shadow Blast",
+   "description": "The user releases a blast of negative energy, sucking life from other beings.",
+   "id": 193,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "very_fast",
    "accuracy": 0.95,
@@ -67263,7 +68011,11 @@
    }
   },
   "shadow_boxing": {
+   "name": "Shadow Boxing",
+   "description": "A flurry of punches strikes the target.",
+   "id": 51,
    "sort": "damage",
+   "category": "basic",
    "range": "touch",
    "speed": "normal",
    "accuracy": 1,
@@ -67322,7 +68074,11 @@
    }
   },
   "shapechange": {
+   "name": "Shapechange",
+   "description": "The user undergoes a rapid transformation, striking the opponent with a surprising and powerful attack.",
+   "id": 160,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.7,
@@ -67388,7 +68144,11 @@
    }
   },
   "shooting_star": {
+   "name": "Shooting Star",
+   "description": "Heals the user's health by harnessing the energy of a shooting star streaking across the night sky.",
+   "id": 190,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -67452,7 +68212,11 @@
    }
   },
   "shrapnel": {
+   "name": "Shrapnel",
+   "description": "The user unleashes a barrage of sharp fragments, causing widespread damage.",
+   "id": 60,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "fast",
    "accuracy": 0.6,
@@ -67514,7 +68278,11 @@
    }
   },
   "shuriken": {
+   "name": "Shuriken",
+   "description": "The user hurls a deadly array of throwing stars, reinforcing its own resolve with each hit.",
+   "id": 16,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.8,
@@ -67580,7 +68348,11 @@
    }
   },
   "sleep_bomb": {
+   "name": "Sleep Bomb",
+   "description": "A violent explosion of sleeping powder threatens to send both combatants into a doze.",
+   "id": 59,
    "sort": "damage",
+   "category": "exotic",
    "range": "reach",
    "speed": "normal",
    "accuracy": 0.75,
@@ -67646,7 +68418,11 @@
    }
   },
   "sleeping_powder": {
+   "name": "Sleeping Powder",
+   "description": "A cloud of sleep-inducing pollen is released, causing the opponent to fall asleep.",
+   "id": 49,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -67709,7 +68485,11 @@
    }
   },
   "slice": {
+   "name": "Slice",
+   "description": "The user wields a sharp blade, delivery a powerful, cutting attack.",
+   "id": 101,
    "sort": "damage",
+   "category": "basic",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.9,
@@ -67768,7 +68548,11 @@
    }
   },
   "slime": {
+   "name": "Slime",
+   "description": "A sticky, viscous substance is emitted, engulfing the opponent and dealing damage.",
+   "id": 96,
    "sort": "damage",
+   "category": "simple",
    "range": "reach",
    "speed": "normal",
    "accuracy": 1,
@@ -67834,7 +68618,11 @@
    }
   },
   "snowball": {
+   "name": "Snowball",
+   "description": "The user hurls a compact ball of snow at the target, dealing light damage and chilling them slightly.",
+   "id": 267,
    "sort": "damage",
+   "category": "basic",
    "range": "ranged",
    "speed": "fast",
    "accuracy": 0.9,
@@ -67900,7 +68688,11 @@
    }
   },
   "snowstorm": {
+   "name": "Snowstorm",
+   "description": "A blizzard engulfs the opponent, inflicting cold damage and leaving them exhausted.",
+   "id": 25,
    "sort": "damage",
+   "category": "powerful",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.6,
@@ -67969,7 +68761,11 @@
    }
   },
   "sockpuppet": {
+   "name": "Sockpuppet",
+   "description": "The user whips out a quirky sock puppet that mimics its movements, confusing the foe and shielding the user from tricks and status moves for several turns.",
+   "id": 258,
    "sort": "damage",
+   "category": "special",
    "range": "special",
    "speed": "fast",
    "accuracy": 1,
@@ -68034,7 +68830,11 @@
    }
   },
   "solar_synthesis": {
+   "name": "Solar Synthesis",
+   "description": "Heals the user's health by absorbing sunlight.",
+   "id": 189,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -68098,7 +68898,11 @@
    }
   },
   "spiky_strike": {
+   "name": "Spiky Strike",
+   "description": "The user lashes out with its sharp spines or quills, striking the opponent with a flurry of piercing blows, inflicting pain and damage.",
+   "id": 199,
    "sort": "damage",
+   "category": "basic",
    "range": "reach",
    "speed": "normal",
    "accuracy": 0.95,
@@ -68157,7 +68961,11 @@
    }
   },
   "spit_poison": {
+   "name": "Spit Poison",
+   "description": "Liquid death sprays from the user's venom sacs.",
+   "id": 2,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 1,
@@ -68223,7 +69031,11 @@
    }
   },
   "splinter": {
+   "name": "Splinter",
+   "description": "The user launches a barrage of wooden splinters, blinding and damaging the opponent.",
+   "id": 41,
    "sort": "damage",
+   "category": "simple",
    "range": "reach",
    "speed": "normal",
    "accuracy": 1,
@@ -68289,7 +69101,11 @@
    }
   },
   "stabilo": {
+   "name": "Stabilo",
+   "description": "The user summons a barrage of sharp wooden splinters that pierce the opponent.",
+   "id": 108,
    "sort": "damage",
+   "category": "simple",
    "range": "reliable",
    "speed": "normal",
    "accuracy": 0.75,
@@ -68351,7 +69167,11 @@
    }
   },
   "staff_smash": {
+   "name": "Staff Smash",
+   "description": "The user delivers a powerful blow with its staff.",
+   "id": 207,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.8,
@@ -68411,7 +69231,11 @@
    }
   },
   "stampede": {
+   "name": "Stampede",
+   "description": "A powerful charge that puts the user in motion.",
+   "id": 14,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -68477,7 +69301,11 @@
    }
   },
   "starfall": {
+   "name": "Starfall",
+   "description": "A shower of celestial bodies descends upon the opponent, inflicting damage and granting the user heightened focus while exhausting the opponent.",
+   "id": 56,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 1,
@@ -68550,7 +69378,11 @@
    }
   },
   "static_field": {
+   "name": "Static Field",
+   "description": "The user generates a static electric field around itself, granting it increased defense.",
+   "id": 15,
    "sort": "damage",
+   "category": "powerful",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -68620,7 +69452,11 @@
    }
   },
   "steel_jaws": {
+   "name": "Steel Jaws",
+   "description": "The user clamps down with jaws reinforced by metal. A powerful biting attack.",
+   "id": 217,
    "sort": "damage",
+   "category": "powerful",
    "range": "touch",
    "speed": "normal",
    "accuracy": 0.95,
@@ -68679,7 +69515,11 @@
    }
   },
   "stick": {
+   "name": "Stick",
+   "description": "The user uses a stick, plant part or twig to poke or smack the opponent.",
+   "id": 221,
    "sort": "damage",
+   "category": "basic",
    "range": "reach",
    "speed": "normal",
    "accuracy": 0.95,
@@ -68738,7 +69578,11 @@
    }
   },
   "sting": {
+   "name": "Sting",
+   "description": "The user inflicts a painful sting, injecting poison into the opponent's body.",
+   "id": 1,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.95,
@@ -68804,7 +69648,11 @@
    }
   },
   "stone_rot": {
+   "name": "Stone Rot",
+   "description": "A sickness quickly befalls the target.",
+   "id": 84,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "fast",
    "accuracy": 1,
@@ -68867,7 +69715,11 @@
    }
   },
   "stonehenge": {
+   "name": "Stonehenge",
+   "description": "The user manipulates the earth, creating a ring of stones that crush the opponent.",
+   "id": 107,
    "sort": "damage",
+   "category": "powerful",
    "range": "reach",
    "speed": "very_slow",
    "accuracy": 0.8,
@@ -68929,7 +69781,11 @@
    }
   },
   "strangulation": {
+   "name": "Strangulation",
+   "description": "The user constricts the opponent's throat, cutting off their air supply.",
+   "id": 93,
    "sort": "damage",
+   "category": "powerful",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.8,
@@ -68988,7 +69844,11 @@
    }
   },
   "strike": {
+   "name": "Strike",
+   "description": "The user delivers a powerful, focused blow.",
+   "id": 74,
    "sort": "damage",
+   "category": "basic",
    "range": "reliable",
    "speed": "normal",
    "accuracy": 1,
@@ -69050,7 +69910,11 @@
    }
   },
   "struggle": {
+   "name": "Struggle",
+   "description": "They fight back with raw instinct when no other options remain.",
+   "id": 268,
    "sort": "damage",
+   "category": "basic",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 1,
@@ -69109,7 +69973,11 @@
    }
   },
   "suck_poison": {
+   "name": "Suck Poison",
+   "description": "The user draws out the poison from their own body and infects their enemy with it.",
+   "id": 58,
    "sort": "damage",
+   "category": "reserved",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -69175,7 +70043,11 @@
    }
   },
   "sudden_glow": {
+   "name": "Sudden Glow",
+   "description": "The user emits a radiant light, healing itself and restoring its stamina.",
+   "id": 67,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -69266,7 +70138,11 @@
    }
   },
   "sunburst": {
+   "name": "Sunburst",
+   "description": "The user channels the energy of the sun, unleashing a blindingly bright attack.",
+   "id": 159,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.9,
@@ -69332,7 +70208,11 @@
    }
   },
   "supernova": {
+   "name": "Supernova",
+   "description": "A cataclysmic explosion of energy, dealing immense damage to all opponents.",
+   "id": 81,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "extremely_slow",
    "accuracy": 0.75,
@@ -69398,7 +70278,11 @@
    }
   },
   "suplex": {
+   "name": "Suplex",
+   "description": "A powerful grappling move that throws the opponent to the ground, inflicting damage and granting the user increased resilience.",
+   "id": 184,
    "sort": "damage",
+   "category": "reserved",
    "range": "melee",
    "speed": "fast",
    "accuracy": 0.95,
@@ -69471,7 +70355,11 @@
    }
   },
   "surf": {
+   "name": "Surf",
+   "description": "A massive wave crashes down upon the opponent.",
+   "id": 174,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.6,
@@ -69533,7 +70421,11 @@
    }
   },
   "surge": {
+   "name": "Surge",
+   "description": "A powerful electric discharge that shocks the opponent.",
+   "id": 19,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 1,
@@ -69599,7 +70491,11 @@
    }
   },
   "sylvan": {
+   "name": "Sylvan",
+   "description": "The user summons the power of nature, transforming the opponent into a wooden puppet.",
+   "id": 148,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -69662,7 +70558,11 @@
    }
   },
   "tail_lash": {
+   "name": "Tail Lash",
+   "description": "The user lashes out with their tail or tail like appendage.",
+   "id": 201,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -69728,7 +70628,11 @@
    }
   },
   "take_cover": {
+   "name": "Take Cover",
+   "description": "The user assumes a defensive stance, increasing its accuracy.",
+   "id": 29,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -69791,7 +70695,11 @@
    }
   },
   "taunt": {
+   "name": "Taunt",
+   "description": "A quick jab provokes the opponent into a powerful but distracted rage.",
+   "id": 243,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "fast",
    "accuracy": 1,
@@ -69854,7 +70762,11 @@
    }
   },
   "ten_thousand_feathers": {
+   "name": "Ten Thousand Feathers",
+   "description": "A flurry of feathers descends upon the opponent, inflicting multiple hits.",
+   "id": 188,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.9,
@@ -69894,7 +70806,11 @@
    }
   },
   "terror": {
+   "name": "Terror",
+   "description": "The target is shaking with fear, unable to pick up or use items.",
+   "id": 149,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -69957,7 +70873,11 @@
    }
   },
   "thorn_burst": {
+   "name": "Thorn Burst",
+   "description": "The user unleashes a rain of thorns, shooting a cloud of sharp, piercing projectiles at the opponent, dealing damage and potentially causing the opponent to become stuck, immobilized by the thorny barrage.",
+   "id": 200,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.95,
@@ -70023,7 +70943,11 @@
    }
   },
   "thunderball": {
+   "name": "Thunderball",
+   "description": "With a rumbling like thunder, a hard ball of rock strikes the target.",
+   "id": 12,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -70089,7 +71013,11 @@
    }
   },
   "thunderclap": {
+   "name": "Thunderclap",
+   "description": "A sudden, deafening clap of thunder that stuns and damages the opponent.",
+   "id": 20,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.95,
@@ -70155,7 +71083,11 @@
    }
   },
   "time_crisis": {
+   "name": "Time Crisis",
+   "description": "The user distorts the flow of time, causing the opponent damage.",
+   "id": 104,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "very_fast",
    "accuracy": 0.8,
@@ -70221,7 +71153,11 @@
    }
   },
   "tinder": {
+   "name": "Tinder",
+   "description": "The target is set alight.",
+   "id": 178,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -70284,7 +71220,11 @@
    }
   },
   "tip": {
+   "name": "Tip",
+   "description": "The user delivery a swift, precise strike to a vital point.",
+   "id": 110,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -70350,7 +71290,11 @@
    }
   },
   "tonguespear": {
+   "name": "Tonguespear",
+   "description": "The tongue is jabbed into the opponent, and their blood drained.",
+   "id": 50,
    "sort": "damage",
+   "category": "powerful",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.8,
@@ -70416,7 +71360,11 @@
    }
   },
   "tooth_for_tooth": {
+   "name": "Tooth for Tooth",
+   "description": "The user bares their fangs, taking pain to give it back.",
+   "id": 242,
    "sort": "damage",
+   "category": "reserved",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -70486,7 +71434,11 @@
    }
   },
   "torch": {
+   "name": "Torch",
+   "description": "A projectile that strikes the opponent.",
+   "id": 150,
    "sort": "damage",
+   "category": "simple",
    "range": "reach",
    "speed": "normal",
    "accuracy": 0.9,
@@ -70552,7 +71504,11 @@
    }
   },
   "tornado": {
+   "name": "Tornado",
+   "description": "The user summons a swirling vortex of air, unleashing a devastating tornado that lifts the opponent off the ground and deals damage.",
+   "id": 194,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.8,
@@ -70618,7 +71574,11 @@
    }
   },
   "trample": {
+   "name": "Trample",
+   "description": "The user charges at the opponent with a powerful shoulder tackle, knocking them to the ground and then quickly moving away, leaving the target stuck in place.",
+   "id": 219,
    "sort": "damage",
+   "category": "powerful",
    "range": "melee",
    "speed": "fast",
    "accuracy": 0.9,
@@ -70684,7 +71644,11 @@
    }
   },
   "tsunami": {
+   "name": "Tsunami",
+   "description": "The user summons a colossal wave that crashes down upon the opponent.",
+   "id": 170,
    "sort": "damage",
+   "category": "powerful",
    "range": "reach",
    "speed": "extremely_slow",
    "accuracy": 0.75,
@@ -70743,7 +71707,11 @@
    }
   },
   "tux_attack": {
+   "name": "Tux Attack",
+   "description": "The user transforms into a whirlwind of data, dealing heavy damage.",
+   "id": 92,
    "sort": "damage",
+   "category": "reserved",
    "range": "melee",
    "speed": "extremely_fast",
    "accuracy": 1,
@@ -70803,7 +71771,11 @@
    }
   },
   "ubuntu": {
+   "name": "Ubuntu",
+   "description": "The user emits a chaotic energy that randomly alters the opponent's type.",
+   "id": 95,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -70866,7 +71838,11 @@
    }
   },
   "undertaker": {
+   "name": "Undertaker",
+   "description": "A desperate, self-sacrificing attack that deals a massive damage at the cost of the user's health.",
+   "id": 152,
    "sort": "damage",
+   "category": "exotic",
    "range": "melee",
    "speed": "extremely_slow",
    "accuracy": 1,
@@ -70935,7 +71911,11 @@
    }
   },
   "venomous_tentacle": {
+   "name": "Venomous Tentacle",
+   "description": "A poisonous tentacle strikes the opponent, inflicting damage and poisoning them.",
+   "id": 80,
    "sort": "damage",
+   "category": "simple",
    "range": "reach",
    "speed": "normal",
    "accuracy": 0.8,
@@ -71001,7 +71981,11 @@
    }
   },
   "viper": {
+   "name": "Viper",
+   "description": "The user launches a volley of sharp, wooden darts with incredible speed and accuracy.",
+   "id": 154,
    "sort": "damage",
+   "category": "powerful",
    "range": "reliable",
    "speed": "normal",
    "accuracy": 0.8,
@@ -71060,7 +72044,11 @@
    }
   },
   "vorpal": {
+   "name": "Vorpal",
+   "description": "The user unleashes a devastating, precision strike that inflicts severe damage and fills the opponent with a burning desire for revenge.",
+   "id": 155,
    "sort": "damage",
+   "category": "reserved",
    "range": "melee",
    "speed": "fast",
    "accuracy": 0.95,
@@ -71126,7 +72114,11 @@
    }
   },
   "wall_fire": {
+   "name": "Wall Fire",
+   "description": "The user conjures a fiery wall that both protects it and scorches the opponent.",
+   "id": 165,
    "sort": "damage",
+   "category": "simple",
    "range": "reach",
    "speed": "very_slow",
    "accuracy": 0.8,
@@ -71199,7 +72191,11 @@
    }
   },
   "wall_of_steel": {
+   "name": "Wall of Steel",
+   "description": "The user spins about, creating a biting, shielding wall of steel.",
+   "id": 62,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -71265,7 +72261,11 @@
    }
   },
   "wallow": {
+   "name": "Wallow",
+   "description": "The user relaxes in a pool of mud, healing its wounds.",
+   "id": 46,
    "sort": "damage",
+   "category": "special",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -71334,7 +72334,11 @@
    }
   },
   "walls": {
+   "name": "Walls",
+   "description": "The user constructs sturdy walls of earth or rock to create a defensive barrier.",
+   "id": 156,
    "sort": "damage",
+   "category": "simple",
    "range": "touch",
    "speed": "normal",
    "accuracy": 1,
@@ -71400,7 +72404,11 @@
    }
   },
   "water_blast": {
+   "name": "Water Blast",
+   "description": "The user unleashes a powerful blast of water, striking the opponent with a torrent of liquid force, dealing damage.",
+   "id": 195,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 1,
@@ -71459,7 +72467,11 @@
    }
   },
   "water_bullet": {
+   "name": "Water Bullet",
+   "description": "A mouthful of water is flung at the target with great alacrity.",
+   "id": 213,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "very_fast",
    "accuracy": 0.9,
@@ -71518,7 +72530,11 @@
    }
   },
   "web": {
+   "name": "Web",
+   "description": "A sticky web is shot at the opponent, trapping them and inflicting damage.",
+   "id": 42,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -71584,7 +72600,11 @@
    }
   },
   "webs_wind": {
+   "name": "Webs Wind",
+   "description": "The user creates a swirling vortex of sticky webs that ensnare the opponent, dealing multiple hits and slowing their movement.",
+   "id": 157,
    "sort": "damage",
+   "category": "reserved",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.9,
@@ -71653,7 +72673,11 @@
    }
   },
   "whirlwind": {
+   "name": "Whirlwind",
+   "description": "The user creates a powerful vortex of wind that sweeps the opponent away.",
+   "id": 66,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "very_fast",
    "accuracy": 1,
@@ -71712,7 +72736,11 @@
    }
   },
   "wicked_wind": {
+   "name": "Wicked Wind",
+   "description": "An ill wind draws near.",
+   "id": 250,
    "sort": "damage",
+   "category": "exotic",
    "range": "ranged",
    "speed": "fast",
    "accuracy": 0.85,
@@ -71779,7 +72807,11 @@
    }
   },
   "wing_tip": {
+   "name": "Wing Tip",
+   "description": "The user delivers a sharp, cutting attack with the tip of its wing.",
+   "id": 69,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "fast",
    "accuracy": 1,
@@ -71838,7 +72870,11 @@
    }
   },
   "woodsmash": {
+   "name": "Woodsmash",
+   "description": "The user slams into the opponent with a powerful wooden strike, dealing damage and potentially knocking them back.",
+   "id": 203,
    "sort": "damage",
+   "category": "powerful",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.9,
@@ -71900,6 +72936,8 @@
  },
  "items": {
   "aardant": {
+   "name": "Aardant",
+   "description": "An innocuous application of Fusion technology.",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -71924,9 +72962,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "ancient_egg": {
+   "name": "Ancient Egg",
+   "description": "A peculiar egg. If you plant it, maybe it will hatch.",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -71951,9 +72996,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "antidote_grapes": {
+   "name": "Antidote Grapes",
+   "description": "Pop a few of these and you'll laugh in the face of poison! Delicious and detoxifying all in one bite.",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -71980,9 +73032,16 @@
    "statModifiers": {},
    "immunityToStatus": [
     "poison"
-   ]
+   ],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "app_map": {
+   "name": "Map App",
+   "description": "Use this on your phone to see where you are.",
    "sort": "utility",
    "category": "phone",
    "usableIn": [
@@ -72007,9 +73066,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "app_tuxepedia": {
+   "name": "Tuxepedia App",
+   "description": "Keep track of information about Tuxemon here, and share it with the world.",
    "sort": "utility",
    "category": "phone",
    "usableIn": [
@@ -72034,9 +73100,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "book_wishes": {
+   "name": "Book of Wishes",
+   "description": "The Achievement Maniac's list of achievements for you to attempt.",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -72061,9 +73134,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "boost_armour": {
+   "name": "Boost Armor",
+   "description": "For the rest of the combat, increase Armor by two stages.",
    "sort": "utility",
    "category": "stats",
    "usableIn": [
@@ -72102,9 +73182,16 @@
      "scaling_mode": "nonlinear"
     }
    },
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "boost_dodge": {
+   "name": "Boost Dodge",
+   "description": "For the rest of the combat, increase Dodge by two stages.",
    "sort": "utility",
    "category": "stats",
    "usableIn": [
@@ -72143,9 +73230,16 @@
      "scaling_mode": "nonlinear"
     }
    },
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "boost_melee": {
+   "name": "Boost Melee",
+   "description": "For the rest of the combat, increase Melee by two stages.",
    "sort": "utility",
    "category": "stats",
    "usableIn": [
@@ -72184,9 +73278,16 @@
      "scaling_mode": "nonlinear"
     }
    },
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "boost_ranged": {
+   "name": "Boost Ranged",
+   "description": "For the rest of the combat, increase Ranged by two stages.",
    "sort": "utility",
    "category": "stats",
    "usableIn": [
@@ -72225,9 +73326,16 @@
      "scaling_mode": "nonlinear"
     }
    },
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "boost_speed": {
+   "name": "Boost Speed",
+   "description": "For the rest of the combat, increase Speed by two stages.",
    "sort": "utility",
    "category": "stats",
    "usableIn": [
@@ -72266,9 +73374,16 @@
      "scaling_mode": "nonlinear"
     }
    },
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "cosmic_berry": {
+   "name": "Cosmic Berry",
+   "description": "It changes monster type to Cosmic.",
    "sort": "utility",
    "category": "elements",
    "usableIn": [
@@ -72309,9 +73424,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "cure_festering": {
+   "name": "Cure Festering",
+   "description": "Rinse out the wound and you'll be right.",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -72338,9 +73460,16 @@
    "statModifiers": {},
    "immunityToStatus": [
     "festering"
-   ]
+   ],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "cureall": {
+   "name": "Cureall",
+   "description": "Heals your tuxemon to full health and removes any conditions.",
    "sort": "potion",
    "category": "potion",
    "usableIn": [
@@ -72394,9 +73523,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "dojo_pass": {
+   "name": "Dojo Pass",
+   "description": "Admit one to the Dojo of the Elements.",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -72421,9 +73557,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "earth_berry": {
+   "name": "Earth Berry",
+   "description": "It changes monster type to Earth.",
    "sort": "utility",
    "category": "elements",
    "usableIn": [
@@ -72464,9 +73607,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "escape_key": {
+   "name": "Escape Key",
+   "description": "Slip out the back door.",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -72498,9 +73648,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "fire_berry": {
+   "name": "Fire Berry",
+   "description": "It changes monster type to Fire.",
    "sort": "utility",
    "category": "elements",
    "usableIn": [
@@ -72541,9 +73698,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "fishing_rod": {
+   "name": "Fishing Rod",
+   "description": "Catch fish.",
    "sort": "utility",
    "category": "fish",
    "usableIn": [
@@ -72580,9 +73744,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "The water ripples, but nothing bites."
+   }
   },
   "flintstone": {
+   "name": "Flintstone",
+   "description": "A flaky stone used to make stone tools and start fires. Not at the same time.",
    "sort": "utility",
    "category": "morph",
    "usableIn": [
@@ -72623,9 +73794,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "friendship_scroll": {
+   "name": "Friendship Scroll",
+   "description": "It allows to deepen your relationship with the monsters.",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -72650,9 +73828,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "frost_berry": {
+   "name": "Frost Berry",
+   "description": "It changes monster type to Frost.",
    "sort": "utility",
    "category": "elements",
    "usableIn": [
@@ -72693,9 +73878,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "gold_pass": {
+   "name": "Gold Pass",
+   "description": "Enjoy the Cathedral's deluxe services.",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -72720,9 +73912,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "heroic_berry": {
+   "name": "Heroic Berry",
+   "description": "It changes monster type to Heroic.",
    "sort": "utility",
    "category": "elements",
    "usableIn": [
@@ -72763,9 +73962,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "imperial_potion": {
+   "name": "Imperial Potion",
+   "description": "Heals a monster by 500 HP.",
    "sort": "potion",
    "category": "potion",
    "usableIn": [
@@ -72816,9 +74022,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "imperial_tea": {
+   "name": "Imperial Tea",
+   "description": "Adds 10,000 to a monster's XP.",
    "sort": "potion",
    "category": "none",
    "usableIn": [
@@ -72850,9 +74063,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "lightning_berry": {
+   "name": "Lightning Berry",
+   "description": "It changes monster type to Lightning.",
    "sort": "utility",
    "category": "elements",
    "usableIn": [
@@ -72893,9 +74113,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "lucky_bamboo": {
+   "name": "Lucky Bamboo",
+   "description": "Technically, it's not bamboo at all. Nor is it particularly lucky. But it makes a nice indoor plant.",
    "sort": "utility",
    "category": "morph",
    "usableIn": [
@@ -72936,9 +74163,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "mega_potion": {
+   "name": "Mega Potion",
+   "description": "Heals a monster by 200 HP.",
    "sort": "potion",
    "category": "potion",
    "usableIn": [
@@ -72989,9 +74223,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "metal_berry": {
+   "name": "Metal Berry",
+   "description": "It changes monster type to Metal.",
    "sort": "utility",
    "category": "elements",
    "usableIn": [
@@ -73032,9 +74273,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "miaow_milk": {
+   "name": "Miaow Milk",
+   "description": "Cats love the taste of Miaow Milk™!",
    "sort": "utility",
    "category": "morph",
    "usableIn": [
@@ -73075,9 +74323,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "mystery_tea": {
+   "name": "Mystery Tea",
+   "description": "Adds 1,500 to a monster's XP.",
    "sort": "potion",
    "category": "none",
    "usableIn": [
@@ -73109,9 +74364,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "normal_berry": {
+   "name": "Normal Berry",
+   "description": "It changes monster type to Normal.",
    "sort": "utility",
    "category": "elements",
    "usableIn": [
@@ -73152,9 +74414,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "nu_phone": {
+   "name": "Nu Phone",
+   "description": "You can do a lot with this, e.g. phone home.",
    "sort": "utility",
    "category": "phone",
    "usableIn": [
@@ -73179,9 +74448,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "ox_stick": {
+   "name": "Ox Stick",
+   "description": "An inspiring weapon for an ancient tuxemon.",
    "sort": "utility",
    "category": "morph",
    "usableIn": [
@@ -73222,9 +74498,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "p_monsters_eyes": {
+   "name": "Eyes Meet",
+   "description": "Painting 'Monsters' Eyes Meet', medium: oil on canvas. Hand-signed by the artist.",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -73249,9 +74532,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "p_starry_night": {
+   "name": "Starry Night",
+   "description": "Painting 'Starry, Starry, Starry Night', medium: oil on canvas. Hand-signed by the artist.",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -73276,9 +74566,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "p_trepidation": {
+   "name": "Trepidation",
+   "description": "Painting 'Trepidation', medium: oil on canvas. Hand-signed by the artist.",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -73303,9 +74600,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "peace_lily": {
+   "name": "Peace Lily",
+   "description": "A hardy indoor plant for someone special.",
    "sort": "utility",
    "category": "morph",
    "usableIn": [
@@ -73346,9 +74650,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "petrified_dung": {
+   "name": "Petrified Dung",
+   "description": "It looks like, well, poo ... but it's hard as stone.",
    "sort": "utility",
    "category": "morph",
    "usableIn": [
@@ -73389,9 +74700,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "potion": {
+   "name": "Potion",
+   "description": "Heals a monster by 50 HP.",
    "sort": "potion",
    "category": "potion",
    "usableIn": [
@@ -73442,9 +74760,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "pyramidion": {
+   "name": "Pyramidion",
+   "description": "A golden triangle that hums with celestial power.",
    "sort": "utility",
    "category": "morph",
    "usableIn": [
@@ -73485,9 +74810,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "raise_armour": {
+   "name": "Raise Armor",
+   "description": "Learn the hardness of the diamond. Train Armor.",
    "sort": "utility",
    "category": "stats",
    "usableIn": [
@@ -73528,9 +74860,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "raise_dodge": {
+   "name": "Raise Dodge",
+   "description": "Learn the iridescence of the opal. Train Dodge.",
    "sort": "utility",
    "category": "stats",
    "usableIn": [
@@ -73571,9 +74910,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "raise_hp": {
+   "name": "Raise HP",
+   "description": "Learn the bulk and abundance of quartz. Train HP.",
    "sort": "utility",
    "category": "stats",
    "usableIn": [
@@ -73614,9 +74960,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "raise_melee": {
+   "name": "Raise Melee",
+   "description": "Learn the anger of the ruby. Train Melee.",
    "sort": "utility",
    "category": "stats",
    "usableIn": [
@@ -73657,9 +75010,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "raise_ranged": {
+   "name": "Raise Ranged",
+   "description": "Learn the aim of the emerald. Train Ranged.",
    "sort": "utility",
    "category": "stats",
    "usableIn": [
@@ -73700,9 +75060,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "raise_speed": {
+   "name": "Raise Speed",
+   "description": "Learn the reflexes of the spinel. Train Speed.",
    "sort": "utility",
    "category": "stats",
    "usableIn": [
@@ -73743,9 +75110,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "refreshing_slice": {
+   "name": "Refreshing Slice",
+   "description": "Take a juicy bite and feel the fatigue melt away. Exhaustion doesn't stand a chance against this revitalizing treat!",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -73772,9 +75146,16 @@
    "statModifiers": {},
    "immunityToStatus": [
     "exhausted"
-   ]
+   ],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "repellent": {
+   "name": "Repellent",
+   "description": "Deter wild encounters with this stinky spray.",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -73806,9 +75187,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "restoration": {
+   "name": "Restoration",
+   "description": "Remove any condition currently affecting the target.",
    "sort": "potion",
    "category": "potion",
    "usableIn": [
@@ -73851,9 +75239,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "revive": {
+   "name": "Revive",
+   "description": "Revives knocked out Tuxemon and restores half HP.",
    "sort": "potion",
    "category": "potion",
    "usableIn": [
@@ -73906,9 +75301,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "rhincus_fossil": {
+   "name": "Rhincus Fossil",
+   "description": "It looks like the skull of a toothed bird, but it's hard as stone.",
    "sort": "utility",
    "category": "fossil",
    "usableIn": [
@@ -73949,9 +75351,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "sea_girdle": {
+   "name": "Sea Girdle",
+   "description": "A string of baubles, soft and slimy like kelp.",
    "sort": "utility",
    "category": "morph",
    "usableIn": [
@@ -73992,9 +75401,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "shadow_berry": {
+   "name": "Shadow Berry",
+   "description": "It changes monster type to Shadow.",
    "sort": "utility",
    "category": "elements",
    "usableIn": [
@@ -74035,9 +75451,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "shammer_fossil": {
+   "name": "Shammer Fossil",
+   "description": "It looks like the skull of an ancient dog, but it's hard as stone.",
    "sort": "utility",
    "category": "fossil",
    "usableIn": [
@@ -74078,9 +75501,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "sky_berry": {
+   "name": "Sky Berry",
+   "description": "It changes monster type to Sky.",
    "sort": "utility",
    "category": "elements",
    "usableIn": [
@@ -74121,9 +75551,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "sledgehammer": {
+   "name": "Sledgehammer",
+   "description": "Smash apart gray boulders.",
    "sort": "utility",
    "category": "destroy",
    "usableIn": [
@@ -74160,9 +75597,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "The sledgehammer smashes the boulder apart.",
+    "failure": "It failed!"
+   }
   },
   "spyder_pass": {
+   "name": "Spyder Pass",
+   "description": "This should let you in to places only Spyder conspirators are meant to go.",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -74187,9 +75631,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "stovepipe": {
+   "name": "Stovepipe",
+   "description": "A long iron pipe. Handling it leaves your hands sooty and ashen.",
    "sort": "utility",
    "category": "morph",
    "usableIn": [
@@ -74230,9 +75681,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "super_potion": {
+   "name": "Super Potion",
+   "description": "Heals a monster by 100 HP.",
    "sort": "potion",
    "category": "potion",
    "usableIn": [
@@ -74283,9 +75741,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "surfboard": {
+   "name": "Surfboard",
+   "description": "From your Mom. It lets you travel faster.",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -74310,9 +75775,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "sweet_sand": {
+   "name": "Sweet Sand",
+   "description": "In parts of the world, people clean themselves with this fragrant, sudsy sand.",
    "sort": "utility",
    "category": "morph",
    "usableIn": [
@@ -74353,9 +75825,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "tea": {
+   "name": "Tea",
+   "description": "Adds 500 to a monster's XP.",
    "sort": "potion",
    "category": "none",
    "usableIn": [
@@ -74387,9 +75866,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "tectonic_drill": {
+   "name": "Tectonic Drill",
+   "description": "A big click-clack machine used to drill into the earth.",
    "sort": "utility",
    "category": "morph",
    "usableIn": [
@@ -74430,9 +75916,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "thunderstone": {
+   "name": "Thunderstone",
+   "description": "An old stone relic, now carried about for good luck.",
    "sort": "utility",
    "category": "morph",
    "usableIn": [
@@ -74473,9 +75966,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "tm_acid": {
+   "name": "TM: Acid",
+   "description": "Technique Manual that teaches the Acid technique.",
    "sort": "utility",
    "category": "technique",
    "usableIn": [
@@ -74515,9 +76015,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "tm_all_in": {
+   "name": "TM: All In",
+   "description": "Technique Manual that teaches the Leaf Barrage technique.",
    "sort": "utility",
    "category": "technique",
    "usableIn": [
@@ -74565,9 +76072,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "tm_altitude": {
+   "name": "TM: Altitude",
+   "description": "Technique Manual that teaches the Altitude technique.",
    "sort": "utility",
    "category": "technique",
    "usableIn": [
@@ -74615,9 +76129,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "tm_avalanche": {
+   "name": "TM: Avalanche",
+   "description": "Technique Manual that teaches the Avalanche technique.",
    "sort": "utility",
    "category": "technique",
    "usableIn": [
@@ -74665,9 +76186,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "tm_blade": {
+   "name": "TM: Blade",
+   "description": "Technique Manual that teaches the Blade technique.",
    "sort": "utility",
    "category": "technique",
    "usableIn": [
@@ -74715,9 +76243,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "tm_blossom": {
+   "name": "TM: Blossom",
+   "description": "Technique Manual that teaches the Blossom technique.",
    "sort": "utility",
    "category": "technique",
    "usableIn": [
@@ -74765,9 +76300,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "tm_frostbite": {
+   "name": "TM: Frostbite",
+   "description": "Technique Manual that teaches the Frostbite technique.",
    "sort": "utility",
    "category": "technique",
    "usableIn": [
@@ -74815,9 +76357,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "tm_ice_shield": {
+   "name": "TM: Ice Shield",
+   "description": "Technique Manual that teaches the Ice Shield technique.",
    "sort": "utility",
    "category": "technique",
    "usableIn": [
@@ -74865,9 +76414,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "tm_leaf_barrage": {
+   "name": "TM: Leaf Barrage",
+   "description": "Technique Manual that teaches the Leaf Barrage technique.",
    "sort": "utility",
    "category": "technique",
    "usableIn": [
@@ -74915,9 +76471,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "tm_panjandrum": {
+   "name": "TM: Panjandrum",
+   "description": "Technique Manual that teaches the Panjandrum technique.",
    "sort": "utility",
    "category": "technique",
    "usableIn": [
@@ -74965,9 +76528,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "tm_scope": {
+   "name": "TM: Scope",
+   "description": "Technique Manual that teaches the Scope technique.",
    "sort": "utility",
    "category": "technique",
    "usableIn": [
@@ -75007,9 +76577,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "tm_shadow_boxing": {
+   "name": "TM: Shadow Boxing",
+   "description": "Technique Manual that teaches the Shadow Boxing technique.",
    "sort": "utility",
    "category": "technique",
    "usableIn": [
@@ -75057,9 +76634,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "tm_supernova": {
+   "name": "TM: Supernova",
+   "description": "Technique Manual that teaches the Supernova technique.",
    "sort": "utility",
    "category": "technique",
    "usableIn": [
@@ -75107,9 +76691,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "tm_ubuntu": {
+   "name": "TM: Ubuntu",
+   "description": "Technique Manual that teaches the Ubuntu technique.",
    "sort": "utility",
    "category": "technique",
    "usableIn": [
@@ -75157,9 +76748,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "tm_vorpal": {
+   "name": "TM: Vorpal",
+   "description": "Technique Manual that teaches the Vorpal technique.",
    "sort": "utility",
    "category": "technique",
    "usableIn": [
@@ -75199,9 +76797,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "tuxeball": {
+   "name": "Tuxeball",
+   "description": "Captures a monster.",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -75244,6 +76849,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball#0",
     "width": 32,
@@ -75283,6 +76893,8 @@
    }
   },
   "tuxeball_ancient": {
+   "name": "Ancient Tuxeball",
+   "description": "This Tuxeball was made a long time ago and is capable of catching any Tuxemon without fail.",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -75325,6 +76937,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_ancient#0",
     "width": 32,
@@ -75364,6 +76981,8 @@
    }
   },
   "tuxeball_candy": {
+   "name": "Candy Tuxeball",
+   "description": "Captures Tuxemon and increases its level by one upon capture.",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -75406,6 +77025,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_candy#0",
     "width": 32,
@@ -75445,6 +77069,8 @@
    }
   },
   "tuxeball_crusher": {
+   "name": "Crusher Tuxeball",
+   "description": "This Tuxeball breaks through defenses and increases the catch rate the higher the opposing Tuxemon's defense is. It will fail to catch if a protective condition is in place.",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -75487,6 +77113,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_crusher#0",
     "width": 32,
@@ -75526,6 +77157,8 @@
    }
   },
   "tuxeball_diurnal": {
+   "name": "Diurnal Tuxeball",
+   "description": "Captures more easily during daytime, but its effectiveness is significantly reduced during the night.",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -75568,6 +77201,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_diurnal#0",
     "width": 32,
@@ -75607,6 +77245,8 @@
    }
   },
   "tuxeball_earth": {
+   "name": "Earth Tuxeball",
+   "description": "Captures more easily an Earth Tuxemon.",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -75649,6 +77289,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_earth#0",
     "width": 32,
@@ -75688,6 +77333,8 @@
    }
   },
   "tuxeball_female": {
+   "name": "Female Tuxeball",
+   "description": "Captures more easily a Female Tuxemon.",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -75730,6 +77377,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_female#0",
     "width": 32,
@@ -75769,6 +77421,8 @@
    }
   },
   "tuxeball_fire": {
+   "name": "Fire Tuxeball",
+   "description": "Captures more easily a Fire Tuxemon.",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -75811,6 +77465,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_fire#0",
     "width": 32,
@@ -75850,6 +77509,8 @@
    }
   },
   "tuxeball_gambler": {
+   "name": "Gambler Tuxeball",
+   "description": "This tuxeball is known for its unpredictable nature. Its catch rate fluctuates wildly, with the chance of capturing a tuxemon ranging from extremely low to exceptionally high.",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -75892,6 +77553,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_gambler#0",
     "width": 32,
@@ -75931,6 +77597,8 @@
    }
   },
   "tuxeball_grand": {
+   "name": "Grand Tuxeball",
+   "description": "Offers an even higher capture rate than the Lavish Tuxeball.",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -75973,6 +77641,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_grand#0",
     "width": 32,
@@ -76012,6 +77685,8 @@
    }
   },
   "tuxeball_hardened": {
+   "name": "Hardened Tuxeball",
+   "description": "Captures Tuxemon and it doesn't break when it fails.",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -76054,6 +77729,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_hardened#0",
     "width": 32,
@@ -76093,6 +77773,8 @@
    }
   },
   "tuxeball_hearty": {
+   "name": "Hearty Tuxeball",
+   "description": "Upon capture, the tuxemon's positive taste changes to hearty.",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -76135,6 +77817,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_hearty#0",
     "width": 32,
@@ -76174,6 +77861,8 @@
    }
   },
   "tuxeball_lavish": {
+   "name": "Lavish Tuxeball",
+   "description": "Boasts a significantly higher capture rate than the Noble Tuxeball.",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -76216,6 +77905,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_lavish#0",
     "width": 32,
@@ -76255,6 +77949,8 @@
    }
   },
   "tuxeball_majestic": {
+   "name": "Majestic Tuxeball",
+   "description": "The ultimate choice for catching even the most elusive tuxemon.",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -76297,6 +77993,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_majestic#0",
     "width": 32,
@@ -76336,6 +78037,8 @@
    }
   },
   "tuxeball_male": {
+   "name": "Male Tuxeball",
+   "description": "Captures more easily a Male Tuxemon.",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -76378,6 +78081,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_male#0",
     "width": 32,
@@ -76417,6 +78125,8 @@
    }
   },
   "tuxeball_metal": {
+   "name": "Metal Tuxeball",
+   "description": "Captures more easily a Metal Tuxemon.",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -76459,6 +78169,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_metal#0",
     "width": 32,
@@ -76498,6 +78213,8 @@
    }
   },
   "tuxeball_neuter": {
+   "name": "Neuter Tuxeball",
+   "description": "Captures more easily a Neuter Tuxemon.",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -76540,6 +78257,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_neuter#0",
     "width": 32,
@@ -76579,6 +78301,8 @@
    }
   },
   "tuxeball_noble": {
+   "name": "Noble Tuxeball",
+   "description": "A moderate upgrade to the standard Tuxeball.",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -76621,6 +78345,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_noble#0",
     "width": 32,
@@ -76660,6 +78389,8 @@
    }
   },
   "tuxeball_nocturnal": {
+   "name": "Nocturnal Tuxeball",
+   "description": "Captures more easily during nighttime, but its effectiveness is significantly reduced during the day.",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -76702,6 +78433,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_nocturnal#0",
     "width": 32,
@@ -76741,6 +78477,8 @@
    }
   },
   "tuxeball_omni": {
+   "name": "Omni Tuxeball",
+   "description": "This odd Tuxeball increases the chance of succeeding if the opposing Tuxemon is the same type as yours, but has a decreased chance if they are different types.",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -76789,6 +78527,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_omni#0",
     "width": 32,
@@ -76828,6 +78571,8 @@
    }
   },
   "tuxeball_park": {
+   "name": "Park Tuxeball",
+   "description": "The official Park capture device. It only works inside the Park.",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -76865,6 +78610,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_park#0",
     "width": 32,
@@ -76904,6 +78654,8 @@
    }
   },
   "tuxeball_peppy": {
+   "name": "Peppy Tuxeball",
+   "description": "Upon capture, the tuxemon's positive taste changes to peppy.",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -76946,6 +78698,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_peppy#0",
     "width": 32,
@@ -76985,6 +78742,8 @@
    }
   },
   "tuxeball_refined": {
+   "name": "Refined Tuxeball",
+   "description": "Upon capture, the tuxemon's positive taste changes to refined.",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -77027,6 +78786,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_refined#0",
     "width": 32,
@@ -77066,6 +78830,8 @@
    }
   },
   "tuxeball_salty": {
+   "name": "Salty Tuxeball",
+   "description": "Upon capture, the tuxemon's positive taste changes to salty.",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -77108,6 +78874,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_salty#0",
     "width": 32,
@@ -77147,6 +78918,8 @@
    }
   },
   "tuxeball_water": {
+   "name": "Water Tuxeball",
+   "description": "Captures more easily a Water Tuxemon.",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -77189,6 +78962,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_water#0",
     "width": 32,
@@ -77228,6 +79006,8 @@
    }
   },
   "tuxeball_wood": {
+   "name": "Wood Tuxeball",
+   "description": "Captures more easily a Wood Tuxemon.",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -77270,6 +79050,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_wood#0",
     "width": 32,
@@ -77309,6 +79094,8 @@
    }
   },
   "tuxeball_xero": {
+   "name": "Xero Tuxeball",
+   "description": "This odd Tuxeball increases the chance of succeeding if the opposing Tuxemon is a different type than yours, but has a decreased chance if they are the same type.",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -77357,6 +79144,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_xero#0",
     "width": 32,
@@ -77396,6 +79188,8 @@
    }
   },
   "tuxeball_zesty": {
+   "name": "Zesty Tuxeball",
+   "description": "Upon capture, the tuxemon's positive taste changes to zesty.",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -77438,6 +79232,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_zesty#0",
     "width": 32,
@@ -77477,6 +79276,8 @@
    }
   },
   "venom_berry": {
+   "name": "Venom Berry",
+   "description": "It changes monster type to Venom.",
    "sort": "utility",
    "category": "elements",
    "usableIn": [
@@ -77517,9 +79318,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "water_berry": {
+   "name": "Water Berry",
+   "description": "It changes monster type to Water.",
    "sort": "utility",
    "category": "elements",
    "usableIn": [
@@ -77560,9 +79368,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "wood_berry": {
+   "name": "Wood Berry",
+   "description": "It changes monster type to Wood.",
    "sort": "utility",
    "category": "elements",
    "usableIn": [
@@ -77603,9 +79418,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "xp_feeder": {
+   "name": "XP Feeder",
+   "description": "A tuxemon that holds this item receives half of all XP gained by your party, regardless of whether it participated in battle.\\n The remainder of the XP is split between monsters that did participate.",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -77630,9 +79452,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   },
   "xp_transmitter": {
+   "name": "XP Transmitter",
+   "description": "When this item is in your possession, all monsters that did not participate in defeating a monster get half of the XP. The remainder goes to the monsters that did participate.",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -77657,7 +79486,12 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user} used {name}!",
+    "success": "It worked!",
+    "failure": "It failed!"
+   }
   }
  },
  "statuses": {

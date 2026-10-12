@@ -199,11 +199,34 @@ describe("GB1 battle database", () => {
       }
     }
     expect(validated.techniques.ram).toMatchObject({
+      name: "Ram",
+      description: "The user charges forward with incredible force, delivering a devastating physical blow.",
+      id: 5,
       accuracy: 1,
       power: 1.5,
       range: "melee",
       recharge: 1,
       effects: [{ type: "damage" }],
+    });
+    expect(validated.items.potion).toMatchObject({
+      name: "Potion",
+      description: "Heals a monster by 50 HP.",
+      messages: {
+        use: "{user} used {name}!",
+        success: "It worked!",
+        failure: "It failed!",
+      },
+    });
+    expect((runtimeDb as BattleDb).techniques.ram).toMatchObject({
+      name: "Ram",
+      description: "The user charges forward with incredible force, delivering a devastating physical blow.",
+      id: 5,
+      category: "basic",
+    });
+    expect((runtimeDb as BattleDb).items.potion).toMatchObject({
+      name: "Potion",
+      description: "Heals a monster by 50 HP.",
+      messages: { success: "It worked!", failure: "It failed!" },
     });
     expect(validated.statuses.grabbed).toMatchObject({ bond: true, category: "negative" });
     expect(validated.rules.capture).toMatchObject({ total_shakes: 4, shake_constant: 524325, shake_divisor: 65536 });

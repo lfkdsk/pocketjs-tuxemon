@@ -62,6 +62,21 @@ function monster(iid: string, slug: string, nickname?: string): SpawnedMonsterSn
 }
 
 describe("Tuxemon utility scenes", () => {
+  test("catalog exposes localized move and item metadata from lazy runtime shards", () => {
+    expect(bundle.catalog.technique("ram")).toMatchObject({
+      name: "Ram",
+      description: "The user charges forward with incredible force, delivering a devastating physical blow.",
+      id: 5,
+    });
+    expect(bundle.catalog.item("potion")).toMatchObject({
+      name: "Potion",
+      description: "Heals a monster by 50 HP.",
+      messages: { success: "It worked!", failure: "It failed!" },
+    });
+    expect(bundle.catalog.status("burn")).toBeDefined();
+    expect(bundle.catalog.database().monsters.rockitten.name).toBe("Rockitten");
+  });
+
   test("journal starts on a direct reveal without mutating Tuxepedia state", () => {
     const ext = initialTuxemonExtensionState();
     ext.seen.push("budaye");

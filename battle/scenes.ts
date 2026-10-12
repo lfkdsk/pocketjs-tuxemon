@@ -83,6 +83,11 @@ export interface ParkSummarySceneState extends ParkSummary {
 export interface TuxemonSceneCatalog {
   readonly index: readonly JournalMonsterIndexEntry[];
   monster(slug: string): BattleDb["monsters"][string] | undefined;
+  technique(slug: string): BattleDb["techniques"][string] | undefined;
+  item(slug: string): BattleDb["items"][string] | undefined;
+  status(slug: string): BattleDb["statuses"][string] | undefined;
+  /** Shared lazy database; callers pay only for the shards they access. */
+  database(): BattleDb;
 }
 
 export interface TuxemonSceneBundle {
@@ -324,6 +329,18 @@ export function createTuxemonScenes(
     index,
     monster(slug) {
       return resolveBattleDb(source).monsters[slug];
+    },
+    technique(slug) {
+      return resolveBattleDb(source).techniques[slug];
+    },
+    item(slug) {
+      return resolveBattleDb(source).items[slug];
+    },
+    status(slug) {
+      return resolveBattleDb(source).statuses[slug];
+    },
+    database() {
+      return resolveBattleDb(source);
     },
   };
   const names = new Map(index.map((entry) => [entry.id, entry.name]));

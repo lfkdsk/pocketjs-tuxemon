@@ -1128,7 +1128,11 @@ export function runtimeBattleDb(db: BattleDb): BattleDb {
     art: monster.art,
   }]));
   const techniques = Object.fromEntries(Object.entries(db.techniques).map(([slug, technique]) => [slug, {
+    name: technique.name,
+    description: technique.description,
+    id: technique.id,
     sort: technique.sort,
+    category: technique.category,
     range: technique.range,
     speed: technique.speed,
     accuracy: technique.accuracy,
@@ -1162,6 +1166,8 @@ export function runtimeBattleDb(db: BattleDb): BattleDb {
     ...(status.animation ? { animation: status.animation } : {}),
   }]));
   const items = Object.fromEntries(Object.entries(db.items).map(([slug, item]) => [slug, {
+    name: item.name,
+    description: item.description,
     sort: item.sort,
     category: item.category,
     usableIn: item.usableIn,
@@ -1171,6 +1177,7 @@ export function runtimeBattleDb(db: BattleDb): BattleDb {
     behaviors: item.behaviors,
     statModifiers: item.statModifiers,
     immunityToStatus: item.immunityToStatus,
+    messages: item.messages,
     ...(item.captureSprite ? { captureSprite: item.captureSprite } : {}),
     ...(item.animation ? { animation: item.animation } : {}),
   }]));
@@ -1402,6 +1409,8 @@ export function writeBattleArtifacts(options: BattleImportOptions): BattleBuild 
     const raw = tables.technique[slug]!;
     const animation = animationFor(cooker, raw, "technique-animations");
     techniques[slug] = {
+      name: po.get(slug) ?? slug,
+      description: po.get(`${slug}_description`) || (po.get(slug) ?? slug),
       id: Math.trunc(number(raw.tech_id)),
       sort: string(raw.sort),
       category: string(raw.category),
@@ -1429,6 +1438,8 @@ export function writeBattleArtifacts(options: BattleImportOptions): BattleBuild 
     const category = string(raw.category);
     const animation = animationFor(cooker, raw, "item-status-animations");
     items[slug] = {
+      name: po.get(slug) ?? slug,
+      description: po.get(`${slug}_description`) || (po.get(slug) ?? slug),
       sort: string(raw.sort),
       category,
       usableIn: list<unknown>(raw.usable_in).map(String),
@@ -1440,6 +1451,11 @@ export function writeBattleArtifacts(options: BattleImportOptions): BattleBuild 
       modifiers: list(raw.modifiers),
       statModifiers: expandStatModifiers(raw.stat_modifiers),
       immunityToStatus: list<unknown>(raw.immunity_to_status).map(String),
+      messages: {
+        use: po.get(string(raw.use_item, "combat_used_x")) ?? string(raw.use_item, "combat_used_x"),
+        success: po.get(string(raw.use_success, "generic_success")) ?? string(raw.use_success, "generic_success"),
+        failure: po.get(string(raw.use_failure, "generic_failure")) ?? string(raw.use_failure, "generic_failure"),
+      },
       ...(category === "capture" ? { captureSprite: cooker.staticImage(string(raw.sprite), "capture-devices") } : {}),
       ...(animation ? { animation } : {}),
     };

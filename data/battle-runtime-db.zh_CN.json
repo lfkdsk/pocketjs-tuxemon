@@ -55524,7 +55524,11 @@
  },
  "techniques": {
   "acid": {
+   "name": "酸",
+   "description": "从使用者口中喷出腐蚀性液体，灼烧对手。",
+   "id": 119,
    "sort": "damage",
+   "category": "basic",
    "range": "reliable",
    "speed": "normal",
    "accuracy": 1,
@@ -55583,7 +55587,11 @@
    }
   },
   "adamantine": {
+   "name": "金刚合金",
+   "description": "使用者全身发出耀眼光芒，随后发出致命一击。",
+   "id": 120,
    "sort": "damage",
+   "category": "reserved",
    "range": "touch",
    "speed": "very_slow",
    "accuracy": 1,
@@ -55642,7 +55650,11 @@
    }
   },
   "air_chain": {
+   "name": "空气链",
+   "description": "使用者急速击向空气，掀起一连串强力狂风命中对手。",
+   "id": 121,
    "sort": "damage",
+   "category": "simple",
    "range": "reach",
    "speed": "slow",
    "accuracy": 0.75,
@@ -55704,7 +55716,11 @@
    }
   },
   "all_in": {
+   "name": "全力以赴",
+   "description": "使用者榨出最后一丝力气猛烈攻击，并借此重振旗鼓。",
+   "id": 54,
    "sort": "damage",
+   "category": "powerful",
    "range": "touch",
    "speed": "slow",
    "accuracy": 0.8,
@@ -55770,7 +55786,11 @@
    }
   },
   "altitude": {
+   "name": "升空",
+   "description": "高飞至对手无法触及之处，再俯冲发动强力一击。",
+   "id": 180,
    "sort": "damage",
+   "category": "special",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.8,
@@ -55821,7 +55841,11 @@
    }
   },
   "amnesia": {
+   "name": "失忆",
+   "description": "交战双方的意识相触，双双陷入迷茫。",
+   "id": 53,
    "sort": "damage",
+   "category": "simple",
    "range": "reach",
    "speed": "normal",
    "accuracy": 0.8,
@@ -55887,7 +55911,11 @@
    }
   },
   "ants": {
+   "name": "蚂蚁",
+   "description": "使用者召唤蚁群爬满对手全身，使其属性变为土。",
+   "id": 131,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -55950,7 +55978,11 @@
    }
   },
   "arcane_eye": {
+   "name": "奥术之眼",
+   "description": "一道奥术帷幕鞭笞任何企图诅咒使用者的敌人。",
+   "id": 158,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -56013,7 +56045,11 @@
    }
   },
   "assault": {
+   "name": "突击",
+   "description": "使用者释放出一连串迅猛而强力的攻击。",
+   "id": 94,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "fast",
    "accuracy": 0.9,
@@ -56072,7 +56108,11 @@
    }
   },
   "avalanche": {
+   "name": "雪崩",
+   "description": "使用者积蓄势能，随后释放出冰雪与岩石的毁灭性雪崩。",
+   "id": 33,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "extremely_slow",
    "accuracy": 0.8,
@@ -56141,7 +56181,11 @@
    }
   },
   "barking": {
+   "name": "叫声",
+   "description": "使用者发出一声震慑人心的咆哮，令对手畏缩。",
+   "id": 112,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -56204,7 +56248,11 @@
    }
   },
   "battery_acid": {
+   "name": "电解液",
+   "description": "从使用者体内喷出腐蚀性液体，使对手中毒。",
+   "id": 88,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.8,
@@ -56270,7 +56318,11 @@
    }
   },
   "battery_discharge": {
+   "name": "放电",
+   "description": "使用者全身发出明亮光芒，同时恢复自身生命。",
+   "id": 83,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.9,
@@ -56335,7 +56387,11 @@
    }
   },
   "beam": {
+   "name": "激光束",
+   "description": "从使用者眼中射出一道凝聚的能量光束，使对手失明。",
+   "id": 18,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 1,
@@ -56401,7 +56457,11 @@
    }
   },
   "berserk": {
+   "name": "狂怒",
+   "description": "使用者陷入狂暴状态，不顾一切地发起攻击。",
+   "id": 44,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "slow",
    "accuracy": 0.8,
@@ -56467,7 +56527,11 @@
    }
   },
   "biting_winds": {
+   "name": "寒风",
+   "description": "一阵寒风令目标虚弱而无所遁形。",
+   "id": 24,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "slow",
    "accuracy": 1,
@@ -56533,7 +56597,11 @@
    }
   },
   "blade": {
+   "name": "叶之刃",
+   "description": "电光石火般的一击斩击。",
+   "id": 7,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "extremely_fast",
    "accuracy": 1,
@@ -56592,7 +56660,11 @@
    }
   },
   "blood_bond": {
+   "name": "血之契约",
+   "description": "使用者吸取目标的血液，却也留下了自身的一部分。",
+   "id": 79,
    "sort": "damage",
+   "category": "exotic",
    "range": "touch",
    "speed": "normal",
    "accuracy": 0.8,
@@ -56658,7 +56730,11 @@
    }
   },
   "blood_nets": {
+   "name": "血网",
+   "description": "从使用者体内射出一张黏腻的血红之网，汲取对手的生命力。",
+   "id": 164,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -56721,7 +56797,11 @@
    }
   },
   "blossom": {
+   "name": "绽放",
+   "description": "目标周围长出食肉植物，将养分汲取给使用者。",
+   "id": 26,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.85,
@@ -56786,7 +56866,11 @@
    }
   },
   "boulder": {
+   "name": "岩石护罩",
+   "description": "使用者躲进岩石外壳之下护身。",
+   "id": 11,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -56858,7 +56942,11 @@
    }
   },
   "breath": {
+   "name": "呼吸",
+   "description": "使用者呼出一团催眠气体。",
+   "id": 122,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -56921,7 +57009,11 @@
    }
   },
   "breathe_fire": {
+   "name": "暴怒",
+   "description": "火焰从使用者口中喷涌而出，烧焦目标。",
+   "id": 64,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.8,
@@ -56980,7 +57072,11 @@
    }
   },
   "bubble_trap": {
+   "name": "气泡陷阱",
+   "description": "使用者制造出一个巨大气泡，将自己与对手一同困住。",
+   "id": 57,
    "sort": "damage",
+   "category": "exotic",
    "range": "reach",
    "speed": "normal",
    "accuracy": 0.75,
@@ -57046,7 +57142,11 @@
    }
   },
   "bubbles": {
+   "name": "泡泡",
+   "description": "使用者向目标喷出一大片泡泡，威力虽弱却难以躲避。",
+   "id": 214,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 1,
@@ -57105,7 +57205,11 @@
    }
   },
   "bullet": {
+   "name": "高速球",
+   "description": "一块金属以极快的速度掷向目标。",
+   "id": 8,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "extremely_fast",
    "accuracy": 1,
@@ -57164,7 +57268,11 @@
    }
   },
   "burrow_blast": {
+   "name": "掘地爆破",
+   "description": "使用者钻入地下，再从另一处破土而出，以泥石爆发袭击对手。",
+   "id": 204,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.8,
@@ -57215,7 +57323,11 @@
    }
   },
   "buzz": {
+   "name": "嗡嗡",
+   "description": "使用者从体内释放近距离电磁能量爆发，以电流冲击对手并造成伤害。",
+   "id": 197,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -57281,7 +57393,11 @@
    }
   },
   "canine": {
+   "name": "犬",
+   "description": "使用者释放出原始而凶猛的一击，令对手陷入狂乱。",
+   "id": 123,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -57344,7 +57460,11 @@
    }
   },
   "cat_calling": {
+   "name": "猫叫",
+   "description": "使用者发出一声尖锐的叫声，分散对手的注意力。",
+   "id": 124,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -57407,7 +57527,11 @@
    }
   },
   "caustic_spray": {
+   "name": "腐蚀喷雾",
+   "description": "使用者分泌出腐蚀性酸液，一经接触便灼伤对手。",
+   "id": 153,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.9,
@@ -57466,7 +57590,11 @@
    }
   },
   "cavity": {
+   "name": "腔",
+   "description": "使用者以精准无比的手法击中对手的弱点。",
+   "id": 118,
    "sort": "damage",
+   "category": "reserved",
    "range": "reliable",
    "speed": "normal",
    "accuracy": 0.7,
@@ -57525,7 +57653,11 @@
    }
   },
   "chameleon": {
+   "name": "变色龙",
+   "description": "使用者将自身属性变为木，同时在周围形成一层保护壳。",
+   "id": 97,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -57595,7 +57727,11 @@
    }
   },
   "changeling": {
+   "name": "变形者",
+   "description": "使用者化身为另一形态，并在此过程中治愈伤口。",
+   "id": 183,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -57639,7 +57775,11 @@
    }
   },
   "chill_mist": {
+   "name": "冷雾",
+   "description": "使用者释放出冰冷的雾气，降低对手的属性。",
+   "id": 77,
    "sort": "damage",
+   "category": "basic",
    "range": "ranged",
    "speed": "slow",
    "accuracy": 0.8,
@@ -57701,7 +57841,11 @@
    }
   },
   "clairaudience": {
+   "name": "千里眼观众",
+   "description": "使用者凝神静气，预判对手的下一步并准备反击。",
+   "id": 125,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -57764,7 +57908,11 @@
    }
   },
   "clamp_on": {
+   "name": "紧锁",
+   "description": "使用者以强有力的颚部紧紧咬住对手。",
+   "id": 17,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -57834,7 +57982,11 @@
    }
   },
   "clock": {
+   "name": "时钟",
+   "description": "使用者制造出一个旋转的漩涡，使对手陷入混乱。",
+   "id": 105,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -57897,7 +58049,11 @@
    }
   },
   "cloud_aether": {
+   "name": "云以太",
+   "description": "使用者被旋转的云雾包裹，使自己与对手的属性随机变化。",
+   "id": 126,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -57960,7 +58116,11 @@
    }
   },
   "combat_clone": {
+   "name": "战斗分身",
+   "description": "它们开始分裂自身，并派出分身发动攻击。",
+   "id": 263,
    "sort": "damage",
+   "category": "exotic",
    "range": "melee",
    "speed": "slow",
    "accuracy": 1,
@@ -58029,7 +58189,11 @@
    }
   },
   "conjurer": {
+   "name": "魔术师",
+   "description": "使用者召唤出一道力场，将对手困住。",
+   "id": 127,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -58092,7 +58256,11 @@
    }
   },
   "constrict": {
+   "name": "缠绕",
+   "description": "使用者用身体缠住对手，狠狠收紧。",
+   "id": 75,
    "sort": "damage",
+   "category": "simple",
    "range": "reliable",
    "speed": "very_slow",
    "accuracy": 1,
@@ -58158,7 +58326,11 @@
    }
   },
   "crushing_bite": {
+   "name": "粉碎之咬",
+   "description": "使用者以碎骨之力咬下。可能使目标无法行动。",
+   "id": 216,
    "sort": "damage",
+   "category": "simple",
    "range": "touch",
    "speed": "very_slow",
    "accuracy": 0.9,
@@ -58224,7 +58396,11 @@
    }
   },
   "crystal": {
+   "name": "晶体",
+   "description": "使用者向对手射出一枚锋利的晶体弹。",
+   "id": 128,
    "sort": "damage",
+   "category": "basic",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.9,
@@ -58283,7 +58459,11 @@
    }
   },
   "cutting_leaves": {
+   "name": "利刃叶",
+   "description": "它们裹着锋利的叶片冲向对手，叶片可能会勾住敌人。",
+   "id": 224,
    "sort": "damage",
+   "category": "powerful",
    "range": "melee",
    "speed": "slow",
    "accuracy": 0.95,
@@ -58349,7 +58529,11 @@
    }
   },
   "damage_division": {
+   "name": "伤害分摊",
+   "description": "它们一分为二，并将部分伤害转移给分身。",
+   "id": 261,
    "sort": "damage",
+   "category": "special",
    "range": "special",
    "speed": "extremely_slow",
    "accuracy": 1,
@@ -58412,7 +58596,11 @@
    }
   },
   "demiurge": {
+   "name": "德米乌尔",
+   "description": "使用者化身为另一形态，治愈自身并使对手混乱。",
+   "id": 147,
    "sort": "damage",
+   "category": "reserved",
    "range": "touch",
    "speed": "normal",
    "accuracy": 0.8,
@@ -58485,7 +58673,11 @@
    }
   },
   "depth_charge": {
+   "name": "深水炸弹",
+   "description": "使用者潜入水下，随后向上炸开，对对手造成伤害。",
+   "id": 205,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.8,
@@ -58536,7 +58728,11 @@
    }
   },
   "diet": {
+   "name": "节食",
+   "description": "使用者以健康食物滋养身体，增强体魄，提升对伤害的抵抗力。",
+   "id": 231,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -58599,7 +58795,11 @@
    }
   },
   "divinity_beam": {
+   "name": "神圣光束",
+   "description": "一道神圣之光使所有注视它的人失明。",
+   "id": 192,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.95,
@@ -58665,7 +58865,11 @@
    }
   },
   "dreamwalk": {
+   "name": "梦游",
+   "description": "让使用者进入沉睡对手的梦境，有几率造成伤害。",
+   "id": 211,
    "sort": "damage",
+   "category": "exotic",
    "range": "reliable",
    "speed": "normal",
    "accuracy": 1,
@@ -58733,7 +58937,11 @@
    }
   },
   "earthquake": {
+   "name": "地震",
+   "description": "使用者释放强力的地面攻击，大地剧烈震动。",
+   "id": 168,
    "sort": "damage",
+   "category": "powerful",
    "range": "touch",
    "speed": "extremely_slow",
    "accuracy": 0.7,
@@ -58792,7 +59000,11 @@
    }
   },
   "egg_smash": {
+   "name": "碎蛋",
+   "description": "使用者向对手投掷鸡蛋或蛋壳碎片，造成混乱而令人晕头转向的一击。",
+   "id": 232,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.9,
@@ -58851,7 +59063,11 @@
    }
   },
   "electric_multibite": {
+   "name": "电击连咬",
+   "description": "使用者一边引导电流一边反复撕咬，有几率使目标麻痹。",
+   "id": 220,
    "sort": "damage",
+   "category": "exotic",
    "range": "touch",
    "speed": "fast",
    "accuracy": 0.9,
@@ -58920,7 +59136,11 @@
    }
   },
   "electrical_storm": {
+   "name": "雷暴",
+   "description": "使用者召唤狂怒的雷暴，用闪电劈击对手。",
+   "id": 76,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "very_slow",
    "accuracy": 0.75,
@@ -58982,7 +59202,11 @@
    }
   },
   "electroplate": {
+   "name": "电镀",
+   "description": "电流使目标全身镀上金属，改变其属性。",
+   "id": 151,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -59045,7 +59269,11 @@
    }
   },
   "empty": {
+   "name": "空无",
+   "description": "空无",
+   "id": 0,
    "sort": "meta",
+   "category": "notype",
    "range": "special",
    "speed": "normal",
    "accuracy": 0,
@@ -59076,7 +59304,11 @@
    }
   },
   "energy_beam": {
+   "name": "能量光束",
+   "description": "使用者发射能量光束，燃尽沿途的一切。",
+   "id": 191,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.95,
@@ -59142,7 +59374,11 @@
    }
   },
   "energy_claws": {
+   "name": "能量之爪",
+   "description": "使用者的爪子闪耀能量光芒，发出强力而集中的一击。",
+   "id": 31,
    "sort": "damage",
+   "category": "exotic",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.8,
@@ -59208,7 +59444,11 @@
    }
   },
   "energy_field": {
+   "name": "能量场",
+   "description": "装置汲取目标的能量，强化使用者。",
+   "id": 22,
    "sort": "damage",
+   "category": "powerful",
    "range": "special",
    "speed": "very_fast",
    "accuracy": 1,
@@ -59278,7 +59518,11 @@
    }
   },
   "entomb": {
+   "name": "埋葬",
+   "description": "它以巨力将你按倒在地，并在你周围筑起一座坟墓。",
+   "id": 248,
    "sort": "damage",
+   "category": "powerful",
    "range": "melee",
    "speed": "extremely_slow",
    "accuracy": 0.9,
@@ -59338,7 +59582,11 @@
    }
   },
   "evasion": {
+   "name": "规避",
+   "description": "使用者化作一道残影，令远程攻击难以命中。",
+   "id": 116,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "extremely_fast",
    "accuracy": 1,
@@ -59401,7 +59649,11 @@
    }
   },
   "external_power": {
+   "name": "外部能量",
+   "description": "使用者发出一发可能是不同属性的远程攻击。",
+   "id": 255,
    "sort": "damage",
+   "category": "basic",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 1,
@@ -59466,7 +59718,11 @@
    }
   },
   "eyebite": {
+   "name": "摄心目光",
+   "description": "使用者的一瞥便抽走了目标的元气与活力。",
+   "id": 35,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "very_fast",
    "accuracy": 1,
@@ -59503,7 +59759,11 @@
    }
   },
   "feint": {
+   "name": "假动作",
+   "description": "使用者虚晃一招，随即以迅捷的奇袭命中对手。",
+   "id": 36,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -59585,7 +59845,11 @@
    }
   },
   "fester": {
+   "name": "脓液之力",
+   "description": "一股恶臭弥漫战场，阻碍所有战斗者的恢复。",
+   "id": 78,
    "sort": "damage",
+   "category": "exotic",
    "range": "reach",
    "speed": "normal",
    "accuracy": 1,
@@ -59651,7 +59915,11 @@
    }
   },
   "fiery": {
+   "name": "火热",
+   "description": "使用者喷出强力火焰，将对手的属性变为火。",
+   "id": 98,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -59714,7 +59982,11 @@
    }
   },
   "fire_ball": {
+   "name": "火球",
+   "description": "一颗灼热的火球朝目标掷去。",
+   "id": 4,
    "sort": "damage",
+   "category": "basic",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.9,
@@ -59776,7 +60048,11 @@
    }
   },
   "fire_claw": {
+   "name": "火之爪",
+   "description": "使用者的爪子燃起火焰，发出燃烧的一击。",
+   "id": 3,
    "sort": "damage",
+   "category": "simple",
    "range": "reach",
    "speed": "normal",
    "accuracy": 0.75,
@@ -59842,7 +60118,11 @@
    }
   },
   "fire_shield": {
+   "name": "防火盾",
+   "description": "使用者以火墙护身，同时灼伤对手。",
+   "id": 167,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -59912,7 +60192,11 @@
    }
   },
   "firestorm": {
+   "name": "风暴",
+   "description": "使用者掀起熊熊烈焰，将对手吞噬。",
+   "id": 166,
    "sort": "damage",
+   "category": "powerful",
    "range": "reach",
    "speed": "very_slow",
    "accuracy": 0.8,
@@ -59971,7 +60255,11 @@
    }
   },
   "flamethrower": {
+   "name": "火焰喷射",
+   "description": "使用者向对手喷出一道炽热的火焰。",
+   "id": 73,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.8,
@@ -60037,7 +60325,11 @@
    }
   },
   "fledgling": {
+   "name": "雏鸟",
+   "description": "使用者向对手投掷锋利的羽毛。",
+   "id": 117,
    "sort": "damage",
+   "category": "basic",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.75,
@@ -60096,7 +60388,11 @@
    }
   },
   "flood": {
+   "name": "洪流",
+   "description": "使用者召唤汹涌的洪水淹没对手。",
+   "id": 10,
    "sort": "damage",
+   "category": "basic",
    "range": "ranged",
    "speed": "extremely_slow",
    "accuracy": 0.8,
@@ -60158,7 +60454,11 @@
    }
   },
   "flow": {
+   "name": "水枪",
+   "description": "使用者引导一股强劲的水流。",
+   "id": 9,
    "sort": "damage",
+   "category": "basic",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.8,
@@ -60220,7 +60520,11 @@
    }
   },
   "flower_armor": {
+   "name": "花之铠",
+   "description": "使用者用花朵编织出一副铠甲。",
+   "id": 226,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -60283,7 +60587,11 @@
    }
   },
   "flower_bloom": {
+   "name": "花开",
+   "description": "难以躲避的漫天花瓣如暴风雪般席卷大地。",
+   "id": 227,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "slow",
    "accuracy": 0.95,
@@ -60345,7 +60653,11 @@
    }
   },
   "fluff_up": {
+   "name": "拍松",
+   "description": "使用者鼓起身体，治愈伤口。",
+   "id": 71,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -60408,7 +60720,11 @@
    }
   },
   "font": {
+   "name": "洗礼",
+   "description": "使用者从神秘的圣泉中汲取能量以治愈自身。",
+   "id": 48,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 1,
@@ -60474,7 +60790,11 @@
    }
   },
   "food_fight": {
+   "name": "食物大战",
+   "description": "使用者发起一场疯狂的食物大战，不顾一切地朝对手猛扔食物。",
+   "id": 229,
    "sort": "damage",
+   "category": "exotic",
    "range": "ranged",
    "speed": "fast",
    "accuracy": 0.95,
@@ -60540,7 +60860,11 @@
    }
   },
   "frighten": {
+   "name": "恐吓",
+   "description": "受惊的对手退向高处，利于远程攻击却不利于近身格斗。",
+   "id": 244,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "fast",
    "accuracy": 1,
@@ -60603,7 +60927,11 @@
    }
   },
   "frostbite": {
+   "name": "冻疮",
+   "description": "使用者射出冰冻冲击，使对手中毒。",
+   "id": 87,
    "sort": "damage",
+   "category": "powerful",
    "range": "reach",
    "speed": "normal",
    "accuracy": 0.8,
@@ -60666,7 +60994,11 @@
    }
   },
   "fume": {
+   "name": "发怒",
+   "description": "使用者勃然大怒。",
+   "id": 28,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -60729,7 +61061,11 @@
    }
   },
   "fungal_spore": {
+   "name": "真菌孢子",
+   "description": "一被触碰，使用者便迸发出孢子。孢子有几率感染目标并吸取其生命。",
+   "id": 239,
    "sort": "damage",
+   "category": "simple",
    "range": "touch",
    "speed": "normal",
    "accuracy": 1,
@@ -60795,7 +61131,11 @@
    }
   },
   "geyser": {
+   "name": "吉瑟",
+   "description": "使用者喷出强劲的水柱，将对手的属性变为水。",
+   "id": 91,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -60858,7 +61198,11 @@
    }
   },
   "give_all": {
+   "name": "持有全部",
+   "description": "使用者牺牲自己。",
+   "id": 34,
    "sort": "damage",
+   "category": "powerful",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -60924,7 +61268,11 @@
    }
   },
   "glower": {
+   "name": "热切注视",
+   "description": "在使用者的怒视下，目标变得虚弱而脆弱。",
+   "id": 13,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "very_fast",
    "accuracy": 1,
@@ -60996,7 +61344,11 @@
    }
   },
   "gnaw": {
+   "name": "啃咬",
+   "description": "使用者啃咬目标，造成少量伤害。虽弱却快速而稳定。",
+   "id": 215,
    "sort": "damage",
+   "category": "basic",
    "range": "touch",
    "speed": "fast",
    "accuracy": 1,
@@ -61055,7 +61407,11 @@
    }
   },
   "goad": {
+   "name": "挑衅打击",
+   "description": "使用者嘲弄对手，使其暴怒。",
+   "id": 39,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "very_fast",
    "accuracy": 0.8,
@@ -61121,7 +61477,11 @@
    }
   },
   "gold_digger": {
+   "name": "淘金",
+   "description": "使用者挖入地下，或寻得宝物，或伤到自己。",
+   "id": 99,
    "sort": "damage",
+   "category": "exotic",
    "range": "melee",
    "speed": "very_slow",
    "accuracy": 0.8,
@@ -61180,7 +61540,11 @@
    }
   },
   "gourmet": {
+   "name": "美食家",
+   "description": "使用者享用一顿滋养的美餐，恢复活力、振奋精神。",
+   "id": 234,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -61249,7 +61613,11 @@
    }
   },
   "greenstone": {
+   "name": "绿石",
+   "description": "使用者以落石之势发动攻击。",
+   "id": 106,
    "sort": "damage",
+   "category": "powerful",
    "range": "touch",
    "speed": "slow",
    "accuracy": 0.6,
@@ -61308,7 +61676,11 @@
    }
   },
   "grinding": {
+   "name": "研磨",
+   "description": "使用者以连绵的研磨重击无情地打击对手，以持续的压力将其消耗。",
+   "id": 109,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "slow",
    "accuracy": 0.75,
@@ -61368,7 +61740,11 @@
    }
   },
   "gust": {
+   "name": "阵风",
+   "description": "使用者掀起一阵强风，将对手吹退。",
+   "id": 161,
    "sort": "damage",
+   "category": "basic",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 1,
@@ -61427,7 +61803,11 @@
    }
   },
   "hallucinogen_spore": {
+   "name": "致幻孢子",
+   "description": "使用者释放一团致幻孢子，扰乱对手的感知，扭曲其对现实的认知。",
+   "id": 240,
    "sort": "damage",
+   "category": "exotic",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.9,
@@ -61494,7 +61874,11 @@
    }
   },
   "hammerhead": {
+   "name": "锤头",
+   "description": "使用者向前冲锋，用头部撞击对手。",
+   "id": 72,
    "sort": "damage",
+   "category": "basic",
    "range": "melee",
    "speed": "slow",
    "accuracy": 1,
@@ -61527,7 +61911,11 @@
    }
   },
   "hawk": {
+   "name": "鹰",
+   "description": "使用者先高飞入云，再俯冲而下发动强力一击。",
+   "id": 111,
    "sort": "damage",
+   "category": "special",
    "range": "touch",
    "speed": "normal",
    "accuracy": 1,
@@ -61589,7 +61977,11 @@
    }
   },
   "heavenly_desserts": {
+   "name": "天堂甜点",
+   "description": "一道奇异的招式，美味到既能治愈你，又能送你上天堂。",
+   "id": 233,
    "sort": "damage",
+   "category": "reserved",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.9,
@@ -61655,7 +62047,11 @@
    }
   },
   "hibernate": {
+   "name": "冬眠",
+   "description": "使用者进入恢复性的睡眠。",
+   "id": 45,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -61699,7 +62095,11 @@
    }
   },
   "hook": {
+   "name": "钩子",
+   "description": "它试图钩住对手，或许用角，或许用肢体。",
+   "id": 246,
    "sort": "damage",
+   "category": "basic",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.95,
@@ -61766,7 +62166,11 @@
    }
   },
   "horn": {
+   "name": "角击",
+   "description": "它用角猛烈却胡乱地戳刺，很容易落空。",
+   "id": 245,
    "sort": "damage",
+   "category": "powerful",
    "range": "touch",
    "speed": "slow",
    "accuracy": 0.75,
@@ -61825,7 +62229,11 @@
    }
   },
   "ice_claw": {
+   "name": "冰之爪",
+   "description": "使用者的爪子覆上寒冰，发出冰冻的一击。",
+   "id": 21,
    "sort": "damage",
+   "category": "basic",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -61884,7 +62292,11 @@
    }
   },
   "ice_shield": {
+   "name": "冰盾",
+   "description": "使用者以冰墙护身，同时减缓对手的速度。",
+   "id": 172,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -61954,7 +62366,11 @@
    }
   },
   "ice_storm": {
+   "name": "冰风暴",
+   "description": "对手被寒气笼罩，陷入险恶的环境。",
+   "id": 171,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "very_slow",
    "accuracy": 0.6,
@@ -62013,7 +62429,11 @@
    }
   },
   "icicle_spear": {
+   "name": "冰矛",
+   "description": "使用者向对手射出一阵锋利的冰锥。",
+   "id": 23,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.75,
@@ -62075,7 +62495,11 @@
    }
   },
   "infectious_bite": {
+   "name": "感染之咬",
+   "description": "尖锐迅猛的一咬，注入溃烂的毒素，可能使目标留下久治不愈的伤。",
+   "id": 218,
    "sort": "damage",
+   "category": "simple",
    "range": "touch",
    "speed": "fast",
    "accuracy": 0.95,
@@ -62141,7 +62565,11 @@
    }
   },
   "inner_power": {
+   "name": "内在力量",
+   "description": "使用者唤醒内在力量，发出同属性的一击。",
+   "id": 254,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -62206,7 +62634,11 @@
    }
   },
   "insanity": {
+   "name": "精神错乱",
+   "description": "使用者被怒火吞噬，力量提升。",
+   "id": 130,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -62269,7 +62701,11 @@
    }
   },
   "invictus": {
+   "name": "不可征服",
+   "description": "使用者进入狂暴状态，以无尽的怒火攻击并困住对手。",
+   "id": 63,
    "sort": "damage",
+   "category": "simple",
    "range": "touch",
    "speed": "slow",
    "accuracy": 0.95,
@@ -62342,7 +62778,11 @@
    }
   },
   "just_desserts": {
+   "name": "自食其果",
+   "description": "使用者递给对手一份下毒的甜点，在其毒发时完成甜蜜的复仇。",
+   "id": 230,
    "sort": "damage",
+   "category": "exotic",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.8,
@@ -62415,7 +62855,11 @@
    }
   },
   "kindling_flame": {
+   "name": "烈火燃烧",
+   "description": "使用者燃起内心之火，攻击力提升。",
+   "id": 30,
    "sort": "damage",
+   "category": "exotic",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.8,
@@ -62481,7 +62925,11 @@
    }
   },
   "kiss": {
+   "name": "亲吻",
+   "description": "它们交换一个吻，也交换了生命。",
+   "id": 253,
    "sort": "damage",
+   "category": "special",
    "range": "touch",
    "speed": "extremely_slow",
    "accuracy": 1,
@@ -62543,7 +62991,11 @@
    }
   },
   "kraken": {
+   "name": "海妖",
+   "description": "使用者召唤传说海怪之力，发出毁灭性的一击。",
+   "id": 132,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "extremely_slow",
    "accuracy": 0.8,
@@ -62602,7 +63054,11 @@
    }
   },
   "lantern": {
+   "name": "灯笼",
+   "description": "使用者以强光伤害目标。",
+   "id": 133,
    "sort": "damage",
+   "category": "basic",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.9,
@@ -62661,7 +63117,11 @@
    }
   },
   "laser_beam": {
+   "name": "激光束",
+   "description": "以光速射出的强力远程能量攻击，可能使对手失明。",
+   "id": 238,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "extremely_fast",
    "accuracy": 1,
@@ -62727,7 +63187,11 @@
    }
   },
   "lava": {
+   "name": "熔岩",
+   "description": "使用者喷出熔岩，灼伤自己与对手。",
+   "id": 134,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "very_slow",
    "accuracy": 0.8,
@@ -62793,7 +63257,11 @@
    }
   },
   "leaf_barrage": {
+   "name": "树叶弹幕",
+   "description": "用一连串树叶向对手发起弹幕攻击。",
+   "id": 223,
    "sort": "damage",
+   "category": "simple",
    "range": "reach",
    "speed": "slow",
    "accuracy": 0.9,
@@ -62855,7 +63323,11 @@
    }
   },
   "leaf_stab": {
+   "name": "叶片突刺",
+   "description": "使用者掷出一片带刺的尖叶，刺入后伤口流血，并带来灼烧感。",
+   "id": 222,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.9,
@@ -62921,7 +63393,11 @@
    }
   },
   "levitate": {
+   "name": "吹起",
+   "description": "战斗者们浮上空中，获得了视野优势，却也让双方的近身攻击都难以命中。",
+   "id": 82,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -62958,7 +63434,11 @@
    }
   },
   "lick_lash": {
+   "name": "舔鞭",
+   "description": "使用者甩舌抽打，造成伤害，可能使对手麻痹。",
+   "id": 209,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -63024,7 +63504,11 @@
    }
   },
   "life_surge": {
+   "name": "生命涌动",
+   "description": "生命的爆发为精灵充能，代价却是治愈了对手。",
+   "id": 175,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -63093,7 +63577,11 @@
    }
   },
   "lightning_spheres": {
+   "name": "闪电球",
+   "description": "使用者向对手发射多发电球。",
+   "id": 163,
    "sort": "damage",
+   "category": "basic",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.9,
@@ -63152,7 +63640,11 @@
    }
   },
   "lineage": {
+   "name": "血统",
+   "description": "使用者汲取祖先的力量发动攻击。",
+   "id": 135,
    "sort": "damage",
+   "category": "basic",
    "range": "reach",
    "speed": "normal",
    "accuracy": 1,
@@ -63211,7 +63703,11 @@
    }
   },
   "lock_horns": {
+   "name": "角力",
+   "description": "它试图与敌人角力。",
+   "id": 259,
    "sort": "damage",
+   "category": "basic",
    "range": "touch",
    "speed": "normal",
    "accuracy": 0.95,
@@ -63277,7 +63773,11 @@
    }
   },
   "lust": {
+   "name": "欲望",
+   "description": "使用者以魅力削弱对手的防御。",
+   "id": 136,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -63340,7 +63840,11 @@
    }
   },
   "magic_spell": {
+   "name": "魔法",
+   "description": "它试图延长敌人非远程招式的冷却时间。",
+   "id": 251,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "extremely_fast",
    "accuracy": 0.95,
@@ -63405,7 +63909,11 @@
    }
   },
   "magma": {
+   "name": "岩浆攻击",
+   "description": "使用者喷出一股灼热的岩浆。",
+   "id": 137,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "very_slow",
    "accuracy": 0.8,
@@ -63464,7 +63972,11 @@
    }
   },
   "magnetic_body": {
+   "name": "磁体",
+   "description": "强大的磁场生成，金属物体在战场上乱飞，扰乱对手的行动。",
+   "id": 237,
    "sort": "damage",
+   "category": "powerful",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -63530,7 +64042,11 @@
    }
   },
   "meltdown": {
+   "name": "崩溃",
+   "description": "使用者发出腐蚀性的攻击伤害对手。",
+   "id": 103,
    "sort": "damage",
+   "category": "powerful",
    "range": "reach",
    "speed": "very_slow",
    "accuracy": 0.7,
@@ -63596,7 +64112,11 @@
    }
   },
   "mending": {
+   "name": "修补",
+   "description": "使用者从周围环境汲取能量以治愈自身。",
+   "id": 169,
    "sort": "damage",
+   "category": "special",
    "range": "special",
    "speed": "extremely_fast",
    "accuracy": 1,
@@ -63658,7 +64178,11 @@
    }
   },
   "midnight_mantle": {
+   "name": "午夜地幔",
+   "description": "使用者披上黑暗的斗篷，以暗影触须攻击，造成伤害并扰乱对手。",
+   "id": 55,
    "sort": "damage",
+   "category": "basic",
    "range": "ranged",
    "speed": "very_fast",
    "accuracy": 0.8,
@@ -63723,7 +64247,11 @@
    }
   },
   "mind_explosion": {
+   "name": "精神爆发",
+   "description": "强力的精神攻击，或蘑菇致幻剂攻击。",
+   "id": 225,
    "sort": "damage",
+   "category": "exotic",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 1,
@@ -63797,7 +64325,11 @@
    }
   },
   "mind_vise": {
+   "name": "精神钳制",
+   "description": "使用者钳制住对手的精神，使其无法行动。",
+   "id": 185,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -63863,7 +64395,11 @@
    }
   },
   "mobbing": {
+   "name": "围攻",
+   "description": "一群小生物从使用者体内涌出，以密集的攻击淹没对手。",
+   "id": 115,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "slow",
    "accuracy": 1,
@@ -63922,7 +64458,11 @@
    }
   },
   "muck": {
+   "name": "垃圾攻击",
+   "description": "使用者用黏稠的有毒物质裹住对手。",
+   "id": 138,
    "sort": "damage",
+   "category": "simple",
    "range": "reach",
    "speed": "normal",
    "accuracy": 0.8,
@@ -63981,7 +64521,11 @@
    }
   },
   "muddle": {
+   "name": "捣蛋",
+   "description": "战场弥漫起薄雾，使攻击更难命中。",
+   "id": 43,
    "sort": "damage",
+   "category": "simple",
    "range": "reach",
    "speed": "normal",
    "accuracy": 1,
@@ -64047,7 +64591,11 @@
    }
   },
   "mudslide": {
+   "name": "泥石流",
+   "description": "使用者掀起巨大的泥石流，将对手吞没。",
+   "id": 89,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "extremely_slow",
    "accuracy": 0.8,
@@ -64122,7 +64670,11 @@
    }
   },
   "mystic_blending": {
+   "name": "神秘混合",
+   "description": "使用者与周围环境融为一体，治愈自身。",
+   "id": 139,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -64198,7 +64750,11 @@
    }
   },
   "needle": {
+   "name": "针刺",
+   "description": "使用者用针或荆棘快速刺击目标。",
+   "id": 196,
    "sort": "damage",
+   "category": "exotic",
    "range": "ranged",
    "speed": "very_fast",
    "accuracy": 0.9,
@@ -64257,7 +64813,11 @@
    }
   },
   "negation": {
+   "name": "否定",
+   "description": "使用者抵消对手的治疗效果。",
+   "id": 140,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -64294,7 +64854,11 @@
    }
   },
   "nest": {
+   "name": "筑巢",
+   "description": "使用者在自己周围筑起保护性的巢穴。",
+   "id": 114,
    "sort": "damage",
+   "category": "powerful",
    "range": "special",
    "speed": "normal",
    "accuracy": 0.8,
@@ -64363,7 +64927,11 @@
    }
   },
   "neutralize": {
+   "name": "中和",
+   "description": "战场被重置，所有状态与变化都被清除。",
+   "id": 179,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "fast",
    "accuracy": 1,
@@ -64406,7 +64974,11 @@
    }
   },
   "oedipus": {
+   "name": "俄狄浦斯",
+   "description": "使用者怀着复仇之心攻击，使对手混乱并伺机报复。",
+   "id": 100,
    "sort": "damage",
+   "category": "reserved",
    "range": "reach",
    "speed": "slow",
    "accuracy": 0.85,
@@ -64453,7 +65025,11 @@
    }
   },
   "one_million_talons": {
+   "name": "百万利爪",
+   "description": "使用者发出一连串迅疾而锋利的攻击。",
+   "id": 186,
    "sort": "damage",
+   "category": "powerful",
    "range": "melee",
    "speed": "slow",
    "accuracy": 1,
@@ -64493,7 +65069,11 @@
    }
   },
   "one_two": {
+   "name": "二连击",
+   "description": "两记果断的连击令目标跪倒在地。",
+   "id": 52,
    "sort": "damage",
+   "category": "simple",
    "range": "touch",
    "speed": "normal",
    "accuracy": 0.8,
@@ -64555,7 +65135,11 @@
    }
   },
   "orbs": {
+   "name": "丢球",
+   "description": "使用者射出一颗能量球，使目标发生神秘的变化。",
+   "id": 141,
    "sort": "damage",
+   "category": "exotic",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 1,
@@ -64621,7 +65205,11 @@
    }
   },
   "oven": {
+   "name": "烘烤",
+   "description": "使用者纵身跃入烈火烤炉或火堆，再重新现身发动攻击。",
+   "id": 236,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.8,
@@ -64698,7 +65286,11 @@
    }
   },
   "overfeed": {
+   "name": "胡吃海塞",
+   "description": "使用者向对手灌注过量能量，使其速度减缓。",
+   "id": 173,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "extremely_fast",
    "accuracy": 1,
@@ -64770,7 +65362,11 @@
    }
   },
   "overgrowth": {
+   "name": "过度生长",
+   "description": "藤蔓抽打目标，将其牢牢困住。",
+   "id": 27,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "very_slow",
    "accuracy": 0.8,
@@ -64836,7 +65432,11 @@
    }
   },
   "panjandrum": {
+   "name": "潘詹德拉姆",
+   "description": "可靠的招式，对任何精灵造成的伤害都与其HP成正比。",
+   "id": 177,
    "sort": "damage",
+   "category": "exotic",
    "range": "reliable",
    "speed": "normal",
    "accuracy": 1,
@@ -64899,7 +65499,11 @@
    }
   },
   "peck": {
+   "name": "啄",
+   "description": "使用者用喙尖锐地啄击对手。",
+   "id": 70,
    "sort": "damage",
+   "category": "basic",
    "range": "reach",
    "speed": "normal",
    "accuracy": 1,
@@ -64958,7 +65562,11 @@
    }
   },
   "peregrine": {
+   "name": "游隼",
+   "description": "使用者以惊人的速度从空中俯冲，发出强力而锐利的一击。",
+   "id": 65,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "extremely_fast",
    "accuracy": 0.8,
@@ -65017,7 +65625,11 @@
    }
   },
   "perfect_cut": {
+   "name": "完美切割",
+   "description": "使用者以外科手术般的精准出击，毫无破绽。",
+   "id": 61,
    "sort": "damage",
+   "category": "simple",
    "range": "reliable",
    "speed": "normal",
    "accuracy": 1,
@@ -65076,7 +65688,11 @@
    }
   },
   "petrify": {
+   "name": "美杜莎之眼",
+   "description": "使用者释放强大的气场，使对手动弹不得。",
+   "id": 37,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "very_fast",
    "accuracy": 1,
@@ -65139,7 +65755,11 @@
    }
   },
   "phantasmal_force": {
+   "name": "幻觉力量",
+   "description": "使用者制造出自己的幻影分身攻击对手。",
+   "id": 162,
    "sort": "damage",
+   "category": "basic",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.9,
@@ -65198,7 +65818,11 @@
    }
   },
   "piece_of_cake": {
+   "name": "小菜一碟",
+   "description": "使用者进入轻松自如的状态，治愈伤口、恢复活力，一切都变得像享用美味蛋糕一样简单。",
+   "id": 228,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "fast",
    "accuracy": 1,
@@ -65267,7 +65891,11 @@
    }
   },
   "pit": {
+   "name": "挖坑",
+   "description": "使用者在对手脚下挖出深坑，使其坠落受伤。",
+   "id": 142,
    "sort": "damage",
+   "category": "simple",
    "range": "touch",
    "speed": "very_slow",
    "accuracy": 0.8,
@@ -65333,7 +65961,11 @@
    }
   },
   "platinum": {
+   "name": "白金",
+   "description": "使用者的身体融入闪亮的金属，防御提升，并获得攻击能力。",
+   "id": 143,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.7,
@@ -65406,7 +66038,11 @@
    }
   },
   "poison_courtship": {
+   "name": "毒物求爱",
+   "description": "使用者释放掺毒的魅惑气息，迷住对手并使其慢慢中毒。",
+   "id": 113,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -65469,7 +66105,11 @@
    }
   },
   "pollen_blast": {
+   "name": "花粉冲击",
+   "description": "释放一团花粉，伤害对手并可能使其迷失方向。",
+   "id": 212,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 1,
@@ -65535,7 +66175,11 @@
    }
   },
   "potluck": {
+   "name": "百家饭",
+   "description": "使用者与对手互赠礼物，在战斗中缔结短暂的情谊。",
+   "id": 235,
    "sort": "damage",
+   "category": "special",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -65617,7 +66261,11 @@
    }
   },
   "pouch": {
+   "name": "育儿袋",
+   "description": "使用者从育儿袋或包里取出美味的小食，恢复精神。",
+   "id": 198,
    "sort": "damage",
+   "category": "special",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -65682,7 +66330,11 @@
    }
   },
   "power_theft": {
+   "name": "能量窃取",
+   "description": "使用者窃取力量（或许通过基因交换），并以此发出敌方属性的攻击。",
+   "id": 256,
    "sort": "damage",
+   "category": "basic",
    "range": "touch",
    "speed": "normal",
    "accuracy": 1,
@@ -65754,7 +66406,11 @@
    }
   },
   "proboscis": {
+   "name": "探针打击",
+   "description": "使用者伸出探针般的长附肢，汲取对手的生命力并造成伤害。",
+   "id": 47,
    "sort": "damage",
+   "category": "simple",
    "range": "reach",
    "speed": "normal",
    "accuracy": 1,
@@ -65817,7 +66473,11 @@
    }
   },
   "pseudopod": {
+   "name": "伪足",
+   "description": "使用者伸出伪足，发出有力而黏腻的一击。",
+   "id": 68,
    "sort": "damage",
+   "category": "simple",
    "range": "reach",
    "speed": "normal",
    "accuracy": 1,
@@ -65883,7 +66543,11 @@
    }
   },
   "punch": {
+   "name": "拳击",
+   "description": "使用者用拳头发出的经典而有力的一击。",
+   "id": 182,
    "sort": "damage",
+   "category": "basic",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.9,
@@ -65942,7 +66606,11 @@
    }
   },
   "pyrokinesis": {
+   "name": "操火术",
+   "description": "使用者释放炽热的火焰波浪，足以烧焦对手。",
+   "id": 208,
    "sort": "damage",
+   "category": "exotic",
    "range": "melee",
    "speed": "fast",
    "accuracy": 0.8,
@@ -66002,7 +66670,11 @@
    }
   },
   "quicksand": {
+   "name": "危险流沙",
+   "description": "使用者制造一片危险的流沙，困住并伤害对手。",
+   "id": 90,
    "sort": "damage",
+   "category": "simple",
    "range": "touch",
    "speed": "very_slow",
    "accuracy": 0.8,
@@ -66068,7 +66740,11 @@
    }
   },
   "radiance": {
+   "name": "光芒力量",
+   "description": "使用者发出耀眼的闪光，随后是强力的能量冲击。",
+   "id": 144,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.95,
@@ -66127,7 +66803,11 @@
    }
   },
   "ram": {
+   "name": "猛撞",
+   "description": "使用者以惊人的力量向前冲锋，发出毁灭性的物理一击。",
+   "id": 5,
    "sort": "damage",
+   "category": "basic",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -66186,7 +66866,11 @@
    }
   },
   "refresh": {
+   "name": "小憩",
+   "description": "使用者恢复元气，回复生命并进入快速恢复状态。",
+   "id": 40,
    "sort": "damage",
+   "category": "powerful",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -66255,7 +66939,11 @@
    }
   },
   "revenge_stance": {
+   "name": "复仇姿态",
+   "description": "使用者摆出防御姿态，诱使对手先攻，同时准备复仇。",
+   "id": 181,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "extremely_fast",
    "accuracy": 1,
@@ -66318,7 +67006,11 @@
    }
   },
   "rift_dash": {
+   "name": "裂隙冲刺",
+   "description": "使用者撕开一道临时的空间裂隙并穿行其中，在别处现身并向对手发动迅捷一击。",
+   "id": 206,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.8,
@@ -66370,7 +67062,11 @@
    }
   },
   "ring": {
+   "name": "戒指",
+   "description": "使用者召唤出一枚不断扩大的戒指，将对手吞没。",
+   "id": 145,
    "sort": "damage",
+   "category": "reserved",
    "range": "reach",
    "speed": "normal",
    "accuracy": 0.8,
@@ -66439,7 +67135,11 @@
    }
   },
   "riposte": {
+   "name": "还击",
+   "description": "使用者摆出防御姿态，准备以迅捷有力的反击回敬任何攻击。",
+   "id": 187,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "extremely_fast",
    "accuracy": 1,
@@ -66502,7 +67202,11 @@
    }
   },
   "rock": {
+   "name": "岩石攻击",
+   "description": "一块巨石砸向目标。",
+   "id": 6,
    "sort": "damage",
+   "category": "basic",
    "range": "touch",
    "speed": "normal",
    "accuracy": 1,
@@ -66561,7 +67265,11 @@
    }
   },
   "rocky_barrage": {
+   "name": "岩石弹幕",
+   "description": "使用者掀起狂暴的岩石弹幕，以粉碎性的石崩淹没对手。",
+   "id": 241,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.9,
@@ -66623,7 +67331,11 @@
    }
   },
   "roll": {
+   "name": "翻滚",
+   "description": "使用者蜷成一团，碾过或撞向对手。",
+   "id": 202,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "fast",
    "accuracy": 0.9,
@@ -66689,7 +67401,11 @@
    }
   },
   "rot": {
+   "name": "腐烂",
+   "description": "目标染上了疾病。",
+   "id": 38,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -66752,7 +67468,11 @@
    }
   },
   "ruby": {
+   "name": "红宝石",
+   "description": "使用者射出一道红宝石般凝聚的能量光束，造成伤害。",
+   "id": 146,
    "sort": "damage",
+   "category": "simple",
    "range": "reach",
    "speed": "normal",
    "accuracy": 0.8,
@@ -66811,7 +67531,11 @@
    }
   },
   "rust_bomb": {
+   "name": "铁锈炸弹",
+   "description": "腐蚀性的投掷物，命中时爆炸，造成伤害并使对手中毒。",
+   "id": 86,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.6,
@@ -66880,7 +67604,11 @@
    }
   },
   "saber": {
+   "name": "剑客",
+   "description": "使用者以迅捷有力的剑技攻击。",
+   "id": 102,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.8,
@@ -66939,7 +67667,11 @@
    }
   },
   "salamander": {
+   "name": "焰蜴召唤",
+   "description": "充满灼热与剧痛的一咬。",
+   "id": 85,
    "sort": "damage",
+   "category": "simple",
    "range": "reach",
    "speed": "normal",
    "accuracy": 1,
@@ -67005,7 +67737,11 @@
    }
   },
   "sand_spray": {
+   "name": "流沙喷发",
+   "description": "一团粗糙的沙砾掷向对手，迷其视线并造成伤害。",
+   "id": 32,
    "sort": "damage",
+   "category": "simple",
    "range": "touch",
    "speed": "normal",
    "accuracy": 1,
@@ -67071,7 +67807,11 @@
    }
   },
   "sands_of_time": {
+   "name": "时之沙",
+   "description": "它将操控时间的力量注入周围的沙中。",
+   "id": 249,
    "sort": "damage",
+   "category": "powerful",
    "range": "touch",
    "speed": "fast",
    "accuracy": 0.9,
@@ -67138,7 +67878,11 @@
    }
   },
   "scope": {
+   "name": "瞄准镜",
+   "description": "识破对手的强项与弱点。",
+   "id": 176,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -67197,7 +67941,11 @@
    }
   },
   "shadow_blast": {
+   "name": "暗影冲击",
+   "description": "使用者释放负能量冲击，吸取其他生物的生命。",
+   "id": 193,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "very_fast",
    "accuracy": 0.95,
@@ -67263,7 +68011,11 @@
    }
   },
   "shadow_boxing": {
+   "name": "太极拳",
+   "description": "一连串拳影击向目标。",
+   "id": 51,
    "sort": "damage",
+   "category": "basic",
    "range": "touch",
    "speed": "normal",
    "accuracy": 1,
@@ -67322,7 +68074,11 @@
    }
   },
   "shapechange": {
+   "name": "变形",
+   "description": "使用者迅速变形，以出其不意的强力一击命中对手。",
+   "id": 160,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.7,
@@ -67388,7 +68144,11 @@
    }
   },
   "shooting_star": {
+   "name": "流星",
+   "description": "借助划过夜空的流星之力治愈使用者的生命。",
+   "id": 190,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -67452,7 +68212,11 @@
    }
   },
   "shrapnel": {
+   "name": "榴霰弹",
+   "description": "使用者射出一阵锋利的破片，造成大范围伤害。",
+   "id": 60,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "fast",
    "accuracy": 0.6,
@@ -67514,7 +68278,11 @@
    }
   },
   "shuriken": {
+   "name": "手里剑",
+   "description": "使用者掷出致命的手里剑，每命中一次便坚定一分意志。",
+   "id": 16,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.8,
@@ -67580,7 +68348,11 @@
    }
   },
   "sleep_bomb": {
+   "name": "催眠炸弹",
+   "description": "催眠粉猛烈炸开，可能令双方都陷入昏睡。",
+   "id": 59,
    "sort": "damage",
+   "category": "exotic",
    "range": "reach",
    "speed": "normal",
    "accuracy": 0.75,
@@ -67646,7 +68418,11 @@
    }
   },
   "sleeping_powder": {
+   "name": "催眠粉",
+   "description": "释放一团催眠花粉，使对手陷入沉睡。",
+   "id": 49,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -67709,7 +68485,11 @@
    }
   },
   "slice": {
+   "name": "斩击",
+   "description": "使用者挥舞利刃，发出强力的斩击。",
+   "id": 101,
    "sort": "damage",
+   "category": "basic",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.9,
@@ -67768,7 +68548,11 @@
    }
   },
   "slime": {
+   "name": "泥浆攻击",
+   "description": "喷出黏稠的物质，吞没对手并造成伤害。",
+   "id": 96,
    "sort": "damage",
+   "category": "simple",
    "range": "reach",
    "speed": "normal",
    "accuracy": 1,
@@ -67834,7 +68618,11 @@
    }
   },
   "snowball": {
+   "name": "雪球",
+   "description": "使用者向目标掷出紧实的雪球，造成轻微伤害并使其略感寒意。",
+   "id": 267,
    "sort": "damage",
+   "category": "basic",
    "range": "ranged",
    "speed": "fast",
    "accuracy": 0.9,
@@ -67900,7 +68688,11 @@
    }
   },
   "snowstorm": {
+   "name": "暴风雪",
+   "description": "暴风雪吞没对手，造成冰寒伤害并使其精疲力竭。",
+   "id": 25,
    "sort": "damage",
+   "category": "powerful",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.6,
@@ -67969,7 +68761,11 @@
    }
   },
   "sockpuppet": {
+   "name": "袜子木偶",
+   "description": "使用者掏出一个古怪的袜子木偶模仿自己的动作，迷惑敌人，并在数回合内免疫诡计与状态招式。",
+   "id": 258,
    "sort": "damage",
+   "category": "special",
    "range": "special",
    "speed": "fast",
    "accuracy": 1,
@@ -68034,7 +68830,11 @@
    }
   },
   "solar_synthesis": {
+   "name": "日光合成",
+   "description": "通过吸收阳光治愈使用者的生命。",
+   "id": 189,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -68098,7 +68898,11 @@
    }
   },
   "spiky_strike": {
+   "name": "尖刺打击",
+   "description": "使用者挥舞尖刺或刚毛，以一连串穿刺打击命中对手，造成疼痛与伤害。",
+   "id": 199,
    "sort": "damage",
+   "category": "basic",
    "range": "reach",
    "speed": "normal",
    "accuracy": 0.95,
@@ -68157,7 +68961,11 @@
    }
   },
   "spit_poison": {
+   "name": "毒雾",
+   "description": "致命的毒液从使用者的毒囊中喷出。",
+   "id": 2,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 1,
@@ -68223,7 +69031,11 @@
    }
   },
   "splinter": {
+   "name": "分裂",
+   "description": "使用者射出一阵木屑，迷盲并伤害对手。",
+   "id": 41,
    "sort": "damage",
+   "category": "simple",
    "range": "reach",
    "speed": "normal",
    "accuracy": 1,
@@ -68289,7 +69101,11 @@
    }
   },
   "stabilo": {
+   "name": "斯泰必罗",
+   "description": "使用者召唤一阵锋利的木屑刺穿对手。",
+   "id": 108,
    "sort": "damage",
+   "category": "simple",
    "range": "reliable",
    "speed": "normal",
    "accuracy": 0.75,
@@ -68351,7 +69167,11 @@
    }
   },
   "staff_smash": {
+   "name": "杖击",
+   "description": "使用者用杖发出强力的一击。",
+   "id": 207,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.8,
@@ -68411,7 +69231,11 @@
    }
   },
   "stampede": {
+   "name": "奔腾冲击",
+   "description": "势不可挡的强力冲锋。",
+   "id": 14,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -68477,7 +69301,11 @@
    }
   },
   "starfall": {
+   "name": "星落",
+   "description": "一阵天体之雨倾泻在对手身上，造成伤害，令使用者精神集中，却使对手疲惫不堪。",
+   "id": 56,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 1,
@@ -68550,7 +69378,11 @@
    }
   },
   "static_field": {
+   "name": "静态场",
+   "description": "使用者在周身生成静电场，防御提升。",
+   "id": 15,
    "sort": "damage",
+   "category": "powerful",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -68620,7 +69452,11 @@
    }
   },
   "steel_jaws": {
+   "name": "钢颚",
+   "description": "使用者以金属强化的双颚咬下，是强力的啃咬攻击。",
+   "id": 217,
    "sort": "damage",
+   "category": "powerful",
    "range": "touch",
    "speed": "normal",
    "accuracy": 0.95,
@@ -68679,7 +69515,11 @@
    }
   },
   "stick": {
+   "name": "粘住",
+   "description": "使用者用树枝、植物的一部分或细枝戳刺或拍打对手。",
+   "id": 221,
    "sort": "damage",
+   "category": "basic",
    "range": "reach",
    "speed": "normal",
    "accuracy": 0.95,
@@ -68738,7 +69578,11 @@
    }
   },
   "sting": {
+   "name": "叮咬",
+   "description": "使用者施以痛苦的蛰刺，将毒液注入对手体内。",
+   "id": 1,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.95,
@@ -68804,7 +69648,11 @@
    }
   },
   "stone_rot": {
+   "name": "石腐",
+   "description": "目标很快染上了疾病。",
+   "id": 84,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "fast",
    "accuracy": 1,
@@ -68867,7 +69715,11 @@
    }
   },
   "stonehenge": {
+   "name": "巨石阵",
+   "description": "使用者操控大地，造出一圈巨石碾碎对手。",
+   "id": 107,
    "sort": "damage",
+   "category": "powerful",
    "range": "reach",
    "speed": "very_slow",
    "accuracy": 0.8,
@@ -68929,7 +69781,11 @@
    }
   },
   "strangulation": {
+   "name": "缠绕",
+   "description": "使用者勒住对手的喉咙，切断其空气供给。",
+   "id": 93,
    "sort": "damage",
+   "category": "powerful",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.8,
@@ -68988,7 +69844,11 @@
    }
   },
   "strike": {
+   "name": "罢工",
+   "description": "使用者发出强力而集中的一击。",
+   "id": 74,
    "sort": "damage",
+   "category": "basic",
    "range": "reliable",
    "speed": "normal",
    "accuracy": 1,
@@ -69050,7 +69910,11 @@
    }
   },
   "struggle": {
+   "name": "挣扎",
+   "description": "走投无路时，它凭原始本能反击。",
+   "id": 268,
    "sort": "damage",
+   "category": "basic",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 1,
@@ -69109,7 +69973,11 @@
    }
   },
   "suck_poison": {
+   "name": "毒液汲取",
+   "description": "使用者将自己体内的毒吸出，再感染给敌人。",
+   "id": 58,
    "sort": "damage",
+   "category": "reserved",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -69175,7 +70043,11 @@
    }
   },
   "sudden_glow": {
+   "name": "骤然光辉",
+   "description": "使用者发出璀璨的光芒，治愈自身并恢复体力。",
+   "id": 67,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -69266,7 +70138,11 @@
    }
   },
   "sunburst": {
+   "name": "旭日子",
+   "description": "使用者引导太阳之力，发出耀眼夺目的一击。",
+   "id": 159,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.9,
@@ -69332,7 +70208,11 @@
    }
   },
   "supernova": {
+   "name": "超新星",
+   "description": "灾难性的能量爆炸，对所有对手造成巨大伤害。",
+   "id": 81,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "extremely_slow",
    "accuracy": 0.75,
@@ -69398,7 +70278,11 @@
    }
   },
   "suplex": {
+   "name": "背摔",
+   "description": "强力的擒拿技，将对手摔倒在地，造成伤害并提升使用者的韧性。",
+   "id": 184,
    "sort": "damage",
+   "category": "reserved",
    "range": "melee",
    "speed": "fast",
    "accuracy": 0.95,
@@ -69471,7 +70355,11 @@
    }
   },
   "surf": {
+   "name": "冲浪",
+   "description": "一道巨浪朝对手拍下。",
+   "id": 174,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.6,
@@ -69533,7 +70421,11 @@
    }
   },
   "surge": {
+   "name": "爆发",
+   "description": "强力的电击，使对手触电。",
+   "id": 19,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 1,
@@ -69599,7 +70491,11 @@
    }
   },
   "sylvan": {
+   "name": "塞尔万",
+   "description": "使用者召唤自然之力，将对手变成木偶。",
+   "id": 148,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -69662,7 +70558,11 @@
    }
   },
   "tail_lash": {
+   "name": "尾鞭",
+   "description": "使用者甩动尾巴或尾状附肢抽打对手。",
+   "id": 201,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -69728,7 +70628,11 @@
    }
   },
   "take_cover": {
+   "name": "隐蔽",
+   "description": "使用者摆出防御姿态，命中率提升。",
+   "id": 29,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -69791,7 +70695,11 @@
    }
   },
   "taunt": {
+   "name": "嘲讽",
+   "description": "迅疾的一击激怒对手，使其陷入狂暴却心神涣散。",
+   "id": 243,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "fast",
    "accuracy": 1,
@@ -69854,7 +70762,11 @@
    }
   },
   "ten_thousand_feathers": {
+   "name": "万羽",
+   "description": "一阵羽毛之雨倾泻在对手身上，造成多次命中。",
+   "id": 188,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.9,
@@ -69894,7 +70806,11 @@
    }
   },
   "terror": {
+   "name": "惊吓",
+   "description": "目标吓得瑟瑟发抖，无法拾取或使用道具。",
+   "id": 149,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -69957,7 +70873,11 @@
    }
   },
   "thorn_burst": {
+   "name": "荆棘爆发",
+   "description": "使用者降下荆棘之雨，射出漫天锋利的穿刺物，造成伤害，并可能使对手被荆棘困住、无法动弹。",
+   "id": 200,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.95,
@@ -70023,7 +70943,11 @@
    }
   },
   "thunderball": {
+   "name": "霹雳弹",
+   "description": "伴随着雷鸣般的轰响，一颗坚硬的石球击中目标。",
+   "id": 12,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -70089,7 +71013,11 @@
    }
   },
   "thunderclap": {
+   "name": "打雷",
+   "description": "突如其来的震耳雷鸣，使对手麻痹并受伤。",
+   "id": 20,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.95,
@@ -70155,7 +71083,11 @@
    }
   },
   "time_crisis": {
+   "name": "时间危机",
+   "description": "使用者扭曲时间的流动，对对手造成伤害。",
+   "id": 104,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "very_fast",
    "accuracy": 0.8,
@@ -70221,7 +71153,11 @@
    }
   },
   "tinder": {
+   "name": "火绒",
+   "description": "目标被点燃了。",
+   "id": 178,
    "sort": "damage",
+   "category": "condition_imposer",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -70284,7 +71220,11 @@
    }
   },
   "tip": {
+   "name": "提示",
+   "description": "使用者迅捷而精准地击中要害。",
+   "id": 110,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -70350,7 +71290,11 @@
    }
   },
   "tonguespear": {
+   "name": "汲取",
+   "description": "舌头刺入对手体内，吸干其血液。",
+   "id": 50,
    "sort": "damage",
+   "category": "powerful",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.8,
@@ -70416,7 +71360,11 @@
    }
   },
   "tooth_for_tooth": {
+   "name": "以牙还牙",
+   "description": "使用者露出獠牙，以牙还牙，加倍奉还痛苦。",
+   "id": 242,
    "sort": "damage",
+   "category": "reserved",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -70486,7 +71434,11 @@
    }
   },
   "torch": {
+   "name": "火炬攻击",
+   "description": "击中对手的投掷物。",
+   "id": 150,
    "sort": "damage",
+   "category": "simple",
    "range": "reach",
    "speed": "normal",
    "accuracy": 0.9,
@@ -70552,7 +71504,11 @@
    }
   },
   "tornado": {
+   "name": "龙卷风",
+   "description": "使用者召唤旋转的气流，掀起毁灭性的龙卷风，将对手卷离地面并造成伤害。",
+   "id": 194,
    "sort": "damage",
+   "category": "powerful",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.8,
@@ -70618,7 +71574,11 @@
    }
   },
   "trample": {
+   "name": "践踏",
+   "description": "使用者以强力的肩撞冲向对手，将其撞倒后迅速离开，使目标动弹不得。",
+   "id": 219,
    "sort": "damage",
+   "category": "powerful",
    "range": "melee",
    "speed": "fast",
    "accuracy": 0.9,
@@ -70684,7 +71644,11 @@
    }
   },
   "tsunami": {
+   "name": "海啸",
+   "description": "使用者召唤滔天巨浪，朝对手轰然压下。",
+   "id": 170,
    "sort": "damage",
+   "category": "powerful",
    "range": "reach",
    "speed": "extremely_slow",
    "accuracy": 0.75,
@@ -70743,7 +71707,11 @@
    }
   },
   "tux_attack": {
+   "name": "Tux攻击",
+   "description": "使用者化作数据旋风，造成大量伤害。",
+   "id": 92,
    "sort": "damage",
+   "category": "reserved",
    "range": "melee",
    "speed": "extremely_fast",
    "accuracy": 1,
@@ -70803,7 +71771,11 @@
    }
   },
   "ubuntu": {
+   "name": "乌班图",
+   "description": "使用者释放混乱的能量，随机改变对手的属性。",
+   "id": 95,
    "sort": "damage",
+   "category": "exotic",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -70866,7 +71838,11 @@
    }
   },
   "undertaker": {
+   "name": "承办",
+   "description": "孤注一掷的自我牺牲攻击，以使用者的生命为代价造成巨大伤害。",
+   "id": 152,
    "sort": "damage",
+   "category": "exotic",
    "range": "melee",
    "speed": "extremely_slow",
    "accuracy": 1,
@@ -70935,7 +71911,11 @@
    }
   },
   "venomous_tentacle": {
+   "name": "毒触须",
+   "description": "有毒的触须击中对手，造成伤害并使其中毒。",
+   "id": 80,
    "sort": "damage",
+   "category": "simple",
    "range": "reach",
    "speed": "normal",
    "accuracy": 0.8,
@@ -71001,7 +71981,11 @@
    }
   },
   "viper": {
+   "name": "毒蛇攻击",
+   "description": "使用者以惊人的速度与精准射出一阵锋利的木镖。",
+   "id": 154,
    "sort": "damage",
+   "category": "powerful",
    "range": "reliable",
    "speed": "normal",
    "accuracy": 0.8,
@@ -71060,7 +72044,11 @@
    }
   },
   "vorpal": {
+   "name": "Vorpal",
+   "description": "使用者发出毁灭性的精准一击，造成重创，并激起对手强烈的复仇之心。",
+   "id": 155,
    "sort": "damage",
+   "category": "reserved",
    "range": "melee",
    "speed": "fast",
    "accuracy": 0.95,
@@ -71126,7 +72114,11 @@
    }
   },
   "wall_fire": {
+   "name": "火墙",
+   "description": "使用者召唤火墙，既保护自己又灼伤对手。",
+   "id": 165,
    "sort": "damage",
+   "category": "simple",
    "range": "reach",
    "speed": "very_slow",
    "accuracy": 0.8,
@@ -71199,7 +72191,11 @@
    }
   },
   "wall_of_steel": {
+   "name": "钢铁之墙",
+   "description": "使用者旋转身体，造出一面锋利而坚固的钢铁之墙。",
+   "id": 62,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -71265,7 +72261,11 @@
    }
   },
   "wallow": {
+   "name": "打滚",
+   "description": "使用者在泥塘中放松，治愈伤口。",
+   "id": 46,
    "sort": "damage",
+   "category": "special",
    "range": "special",
    "speed": "normal",
    "accuracy": 1,
@@ -71334,7 +72334,11 @@
    }
   },
   "walls": {
+   "name": "墙体",
+   "description": "使用者筑起坚固的土墙或石墙，形成防御屏障。",
+   "id": 156,
    "sort": "damage",
+   "category": "simple",
    "range": "touch",
    "speed": "normal",
    "accuracy": 1,
@@ -71400,7 +72404,11 @@
    }
   },
   "water_blast": {
+   "name": "水流冲击",
+   "description": "使用者释放强力的水流冲击，以洪流之力命中对手并造成伤害。",
+   "id": 195,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 1,
@@ -71459,7 +72467,11 @@
    }
   },
   "water_bullet": {
+   "name": "水弹",
+   "description": "一口水以极快的速度喷向目标。",
+   "id": 213,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "very_fast",
    "accuracy": 0.9,
@@ -71518,7 +72530,11 @@
    }
   },
   "web": {
+   "name": "束缚之网",
+   "description": "一张黏网射向对手，将其困住并造成伤害。",
+   "id": 42,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "normal",
    "accuracy": 1,
@@ -71584,7 +72600,11 @@
    }
   },
   "webs_wind": {
+   "name": "网风",
+   "description": "使用者制造黏网的漩涡缠住对手，造成多次命中并减缓其行动。",
+   "id": 157,
    "sort": "damage",
+   "category": "reserved",
    "range": "ranged",
    "speed": "normal",
    "accuracy": 0.9,
@@ -71653,7 +72673,11 @@
    }
   },
   "whirlwind": {
+   "name": "旋风",
+   "description": "使用者制造强大的旋风，将对手卷走。",
+   "id": 66,
    "sort": "damage",
+   "category": "simple",
    "range": "ranged",
    "speed": "very_fast",
    "accuracy": 1,
@@ -71712,7 +72736,11 @@
    }
   },
   "wicked_wind": {
+   "name": "邪风",
+   "description": "一阵邪风逼近。",
+   "id": 250,
    "sort": "damage",
+   "category": "exotic",
    "range": "ranged",
    "speed": "fast",
    "accuracy": 0.85,
@@ -71779,7 +72807,11 @@
    }
   },
   "wing_tip": {
+   "name": "翅膀攻击",
+   "description": "使用者以翼尖发出锐利的斩击。",
+   "id": 69,
    "sort": "damage",
+   "category": "simple",
    "range": "melee",
    "speed": "fast",
    "accuracy": 1,
@@ -71838,7 +72870,11 @@
    }
   },
   "woodsmash": {
+   "name": "碎木",
+   "description": "使用者以强力的木质一击撞向对手，造成伤害并可能将其击退。",
+   "id": 203,
    "sort": "damage",
+   "category": "powerful",
    "range": "melee",
    "speed": "normal",
    "accuracy": 0.9,
@@ -71900,6 +72936,8 @@
  },
  "items": {
   "aardant": {
+   "name": "阿尔丹特",
+   "description": "融合技术的一项无害应用。",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -71924,9 +72962,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "ancient_egg": {
+   "name": "远古蛋",
+   "description": "一枚奇特的蛋。把它种下去，或许就会孵化。",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -71951,9 +72996,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "antidote_grapes": {
+   "name": "解毒葡萄",
+   "description": "吃上几颗，便能笑对剧毒！一口之下，美味与解毒兼得。",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -71980,9 +73032,16 @@
    "statModifiers": {},
    "immunityToStatus": [
     "poison"
-   ]
+   ],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "app_map": {
+   "name": "手机地图",
+   "description": "在手机上使用它来查看您的位置。",
    "sort": "utility",
    "category": "phone",
    "usableIn": [
@@ -72007,9 +73066,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "app_tuxepedia": {
+   "name": "精灵百科",
+   "description": "在这里跟踪有关精灵的信息， 并与世界分享。",
    "sort": "utility",
    "category": "phone",
    "usableIn": [
@@ -72034,9 +73100,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "book_wishes": {
+   "name": "愿望之书",
+   "description": "成就狂人列出的成就清单，等你来挑战。",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -72061,9 +73134,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "boost_armour": {
+   "name": "护甲增幅剂",
+   "description": "在本场战斗剩余时间内，防御提升2级。",
    "sort": "utility",
    "category": "stats",
    "usableIn": [
@@ -72102,9 +73182,16 @@
      "scaling_mode": "nonlinear"
     }
    },
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "boost_dodge": {
+   "name": "闪避增幅剂",
+   "description": "在本场战斗剩余时间内，闪避提升2级。",
    "sort": "utility",
    "category": "stats",
    "usableIn": [
@@ -72143,9 +73230,16 @@
      "scaling_mode": "nonlinear"
     }
    },
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "boost_melee": {
+   "name": "近战增幅剂",
+   "description": "在本场战斗剩余时间内，近战提升2级。",
    "sort": "utility",
    "category": "stats",
    "usableIn": [
@@ -72184,9 +73278,16 @@
      "scaling_mode": "nonlinear"
     }
    },
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "boost_ranged": {
+   "name": "远程增幅剂",
+   "description": "在本场战斗剩余时间内，远程提升2级。",
    "sort": "utility",
    "category": "stats",
    "usableIn": [
@@ -72225,9 +73326,16 @@
      "scaling_mode": "nonlinear"
     }
    },
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "boost_speed": {
+   "name": "速度增幅剂",
+   "description": "在本场战斗剩余时间内，速度提升2级。",
    "sort": "utility",
    "category": "stats",
    "usableIn": [
@@ -72266,9 +73374,16 @@
      "scaling_mode": "nonlinear"
     }
    },
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "cosmic_berry": {
+   "name": "宇宙浆果",
+   "description": "将精灵的属性变为宇宙系。",
    "sort": "utility",
    "category": "elements",
    "usableIn": [
@@ -72309,9 +73424,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "cure_festering": {
+   "name": "溃烂治愈剂",
+   "description": "冲洗伤口，你就会好起来。",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -72338,9 +73460,16 @@
    "statModifiers": {},
    "immunityToStatus": [
     "festering"
-   ]
+   ],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "cureall": {
+   "name": "百愈剂",
+   "description": "将你的精灵治愈至满生命，并解除所有状态。",
    "sort": "potion",
    "category": "potion",
    "usableIn": [
@@ -72394,9 +73523,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "dojo_pass": {
+   "name": "道场通行证",
+   "description": "元素道场的单人入场凭证。",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -72421,9 +73557,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "earth_berry": {
+   "name": "大地浆果",
+   "description": "将精灵的属性变为土系。",
    "sort": "utility",
    "category": "elements",
    "usableIn": [
@@ -72464,9 +73607,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "escape_key": {
+   "name": "逃脱钥匙",
+   "description": "从后门悄悄溜走。",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -72498,9 +73648,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "fire_berry": {
+   "name": "火焰浆果",
+   "description": "将精灵的属性变为火系。",
    "sort": "utility",
    "category": "elements",
    "usableIn": [
@@ -72541,9 +73698,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "fishing_rod": {
+   "name": "鱼竿",
+   "description": "可以用来捕鱼。",
    "sort": "utility",
    "category": "fish",
    "usableIn": [
@@ -72580,9 +73744,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "水面泛起涟漪，但没有鱼儿上钩。"
+   }
   },
   "flintstone": {
+   "name": "打火石",
+   "description": "一种片状的石头，用于制造石制工具和生火。不是在同一时间。",
    "sort": "utility",
    "category": "morph",
    "usableIn": [
@@ -72623,9 +73794,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "friendship_scroll": {
+   "name": "友谊卷轴",
+   "description": "它能加深你与精灵之间的羁绊。",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -72650,9 +73828,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "frost_berry": {
+   "name": "冰霜浆果",
+   "description": "将精灵的属性变为冰系。",
    "sort": "utility",
    "category": "elements",
    "usableIn": [
@@ -72693,9 +73878,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "gold_pass": {
+   "name": "黄金通行证",
+   "description": "享受大教堂的豪华服务。",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -72720,9 +73912,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "heroic_berry": {
+   "name": "英勇浆果",
+   "description": "将精灵的属性变为英勇系。",
    "sort": "utility",
    "category": "elements",
    "usableIn": [
@@ -72763,9 +73962,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "imperial_potion": {
+   "name": "皇室治疗药水",
+   "description": "为一只精灵恢复 500 点生命值。",
    "sort": "potion",
    "category": "potion",
    "usableIn": [
@@ -72816,9 +74022,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "imperial_tea": {
+   "name": "皇家茶",
+   "description": "为精灵增加10000点经验值。",
    "sort": "potion",
    "category": "none",
    "usableIn": [
@@ -72850,9 +74063,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "lightning_berry": {
+   "name": "闪电浆果",
+   "description": "将精灵的属性变为闪电系。",
    "sort": "utility",
    "category": "elements",
    "usableIn": [
@@ -72893,9 +74113,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "lucky_bamboo": {
+   "name": "幸运竹",
+   "description": "严格来说，这根本不是竹子。它也不是特别幸运。但它是一种不错的室内植物。",
    "sort": "utility",
    "category": "morph",
    "usableIn": [
@@ -72936,9 +74163,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "mega_potion": {
+   "name": "特级治疗药水",
+   "description": "为精灵恢复200点HP。",
    "sort": "potion",
    "category": "potion",
    "usableIn": [
@@ -72989,9 +74223,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "metal_berry": {
+   "name": "金属浆果",
+   "description": "将精灵的属性变为金属系。",
    "sort": "utility",
    "category": "elements",
    "usableIn": [
@@ -73032,9 +74273,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "miaow_milk": {
+   "name": "妙乳",
+   "description": "猫咪喜欢妙乳™的味道！",
    "sort": "utility",
    "category": "morph",
    "usableIn": [
@@ -73075,9 +74323,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "mystery_tea": {
+   "name": "神秘茶",
+   "description": "为精灵增加1500点经验值。",
    "sort": "potion",
    "category": "none",
    "usableIn": [
@@ -73109,9 +74364,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "normal_berry": {
+   "name": "普通浆果",
+   "description": "将精灵的属性变为普通系。",
    "sort": "utility",
    "category": "elements",
    "usableIn": [
@@ -73152,9 +74414,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "nu_phone": {
+   "name": "Nu 手机",
+   "description": "它的用处可多了，比如给家里打电话。",
    "sort": "utility",
    "category": "phone",
    "usableIn": [
@@ -73179,9 +74448,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "ox_stick": {
+   "name": "牛杖",
+   "description": "为古老精灵打造的激励武器。",
    "sort": "utility",
    "category": "morph",
    "usableIn": [
@@ -73222,9 +74498,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "p_monsters_eyes": {
+   "name": "四目相对",
+   "description": "画作《精灵四目相对》，材质：布面油画。艺术家亲笔签名。",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -73249,9 +74532,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "p_starry_night": {
+   "name": "星夜",
+   "description": "画作《星，星，星夜》，材质：布面油画。艺术家亲笔签名。",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -73276,9 +74566,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "p_trepidation": {
+   "name": "惊恐",
+   "description": "画作《惊恐》，材质：布面油画。艺术家亲笔签名。",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -73303,9 +74600,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "peace_lily": {
+   "name": "和平百合",
+   "description": "送给特别之人的耐养室内植物。",
    "sort": "utility",
    "category": "morph",
    "usableIn": [
@@ -73346,9 +74650,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "petrified_dung": {
+   "name": "石化粪便",
+   "description": "它看起来像，嗯，便便。。。。。。但它像石头一样硬。",
    "sort": "utility",
    "category": "morph",
    "usableIn": [
@@ -73389,9 +74700,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "potion": {
+   "name": "治疗药水",
+   "description": "为一只精灵恢复 50 点生命值。",
    "sort": "potion",
    "category": "potion",
    "usableIn": [
@@ -73442,9 +74760,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "pyramidion": {
+   "name": "金字塔",
+   "description": "一个嗡嗡作响、充满苍穹之力的金色三角体。",
    "sort": "utility",
    "category": "morph",
    "usableIn": [
@@ -73485,9 +74810,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "raise_armour": {
+   "name": "防御提升",
+   "description": "学习钻石的坚硬。锻炼防御。",
    "sort": "utility",
    "category": "stats",
    "usableIn": [
@@ -73528,9 +74860,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "raise_dodge": {
+   "name": "闪避提升",
+   "description": "学习欧泊的虹彩。锻炼闪避。",
    "sort": "utility",
    "category": "stats",
    "usableIn": [
@@ -73571,9 +74910,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "raise_hp": {
+   "name": "生命提升",
+   "description": "学习石英的丰盈。锻炼生命。",
    "sort": "utility",
    "category": "stats",
    "usableIn": [
@@ -73614,9 +74960,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "raise_melee": {
+   "name": "近战提升",
+   "description": "学习红宝石的愤怒。锻炼近战。",
    "sort": "utility",
    "category": "stats",
    "usableIn": [
@@ -73657,9 +75010,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "raise_ranged": {
+   "name": "远程提升",
+   "description": "学习祖母绿的精准。锻炼远程。",
    "sort": "utility",
    "category": "stats",
    "usableIn": [
@@ -73700,9 +75060,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "raise_speed": {
+   "name": "速度提升",
+   "description": "学习尖晶石的敏捷。锻炼速度。",
    "sort": "utility",
    "category": "stats",
    "usableIn": [
@@ -73743,9 +75110,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "refreshing_slice": {
+   "name": "清爽切片",
+   "description": "咬下多汁的一口，疲惫随之消融。在这提神美味面前，倦意毫无胜算！",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -73772,9 +75146,16 @@
    "statModifiers": {},
    "immunityToStatus": [
     "exhausted"
-   ]
+   ],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "repellent": {
+   "name": "驱虫剂",
+   "description": "用这种臭烘烘的喷雾驱赶野生精灵。",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -73806,9 +75187,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "restoration": {
+   "name": "恢复剂",
+   "description": "解除目标当前受到的任何状态影响。",
    "sort": "potion",
    "category": "potion",
    "usableIn": [
@@ -73851,9 +75239,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "revive": {
+   "name": "复活草",
+   "description": "复活倒下的精灵，并恢复一半生命值。",
    "sort": "potion",
    "category": "potion",
    "usableIn": [
@@ -73906,9 +75301,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "rhincus_fossil": {
+   "name": "沙默化石",
+   "description": "它看起来像一只有齿鸟的头骨，但它像石头一样硬。",
    "sort": "utility",
    "category": "fossil",
    "usableIn": [
@@ -73949,9 +75351,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "sea_girdle": {
+   "name": "金字塔",
+   "description": "一串串的小玩意，像海带一样柔软而粘稠。",
    "sort": "utility",
    "category": "morph",
    "usableIn": [
@@ -73992,9 +75401,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "shadow_berry": {
+   "name": "暗影浆果",
+   "description": "将精灵的属性变为暗影系。",
    "sort": "utility",
    "category": "elements",
    "usableIn": [
@@ -74035,9 +75451,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "shammer_fossil": {
+   "name": "沙默化石",
+   "description": "它看起来像一只古代狗的头骨，但它像石头一样坚硬。",
    "sort": "utility",
    "category": "fossil",
    "usableIn": [
@@ -74078,9 +75501,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "sky_berry": {
+   "name": "天空浆果",
+   "description": "将精灵的属性变为天空系。",
    "sort": "utility",
    "category": "elements",
    "usableIn": [
@@ -74121,9 +75551,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "sledgehammer": {
+   "name": "大锤",
+   "description": "粉碎灰色巨石。",
    "sort": "utility",
    "category": "destroy",
    "usableIn": [
@@ -74160,9 +75597,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "大锤子将巨石砸开。",
+    "failure": "失败了！"
+   }
   },
   "spyder_pass": {
+   "name": "斯派德通行证",
+   "description": "有了它，你就能进入只有斯派德同伙才该去的地方。",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -74187,9 +75631,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "stovepipe": {
+   "name": "烟囱管",
+   "description": "一根长长的铁管。拿过之后，双手会沾满黑灰。",
    "sort": "utility",
    "category": "morph",
    "usableIn": [
@@ -74230,9 +75681,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "super_potion": {
+   "name": "超级治疗药水",
+   "description": "回复一只精灵100点生命。",
    "sort": "potion",
    "category": "potion",
    "usableIn": [
@@ -74283,9 +75741,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "surfboard": {
+   "name": "冲浪板",
+   "description": "妈妈送的礼物，能让你移动得更快。",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -74310,9 +75775,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "sweet_sand": {
+   "name": "甜沙",
+   "description": "在世界上的一些地方，人们会用这种芳香、能搓出泡沫的沙子清洁身体。",
    "sort": "utility",
    "category": "morph",
    "usableIn": [
@@ -74353,9 +75825,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "tea": {
+   "name": "茶",
+   "description": "为精灵增加500点经验值。",
    "sort": "potion",
    "category": "none",
    "usableIn": [
@@ -74387,9 +75866,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "tectonic_drill": {
+   "name": "构造钻探",
+   "description": "一台用来钻入大地、会发出咔嗒声的大机器。",
    "sort": "utility",
    "category": "morph",
    "usableIn": [
@@ -74430,9 +75916,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "thunderstone": {
+   "name": "雷石",
+   "description": "一个古老的石头遗物，现在被人带着走，以图好运。",
    "sort": "utility",
    "category": "morph",
    "usableIn": [
@@ -74473,9 +75966,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "tm_acid": {
+   "name": "招式学习器：酸",
+   "description": "教导「酸」招式的招式学习器。",
    "sort": "utility",
    "category": "technique",
    "usableIn": [
@@ -74515,9 +76015,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "tm_all_in": {
+   "name": "招式学习器：全力以赴",
+   "description": "教导「树叶弹幕」招式的招式学习器。",
    "sort": "utility",
    "category": "technique",
    "usableIn": [
@@ -74565,9 +76072,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "tm_altitude": {
+   "name": "招式学习器：升空",
+   "description": "教导「升空」招式的招式学习器。",
    "sort": "utility",
    "category": "technique",
    "usableIn": [
@@ -74615,9 +76129,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "tm_avalanche": {
+   "name": "招式学习器：雪崩",
+   "description": "教授“雪崩”招式的招式学习器。",
    "sort": "utility",
    "category": "technique",
    "usableIn": [
@@ -74665,9 +76186,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "tm_blade": {
+   "name": "招式学习器：叶之刃",
+   "description": "教导「叶之刃」招式的招式学习器。",
    "sort": "utility",
    "category": "technique",
    "usableIn": [
@@ -74715,9 +76243,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "tm_blossom": {
+   "name": "招式学习器：绽放",
+   "description": "教授“绽放”招式的招式学习器。",
    "sort": "utility",
    "category": "technique",
    "usableIn": [
@@ -74765,9 +76300,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "tm_frostbite": {
+   "name": "招式学习器：冻疮",
+   "description": "教导「冻疮」招式的招式学习器。",
    "sort": "utility",
    "category": "technique",
    "usableIn": [
@@ -74815,9 +76357,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "tm_ice_shield": {
+   "name": "招式学习器：冰盾",
+   "description": "教导「冰盾」招式的招式学习器。",
    "sort": "utility",
    "category": "technique",
    "usableIn": [
@@ -74865,9 +76414,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "tm_leaf_barrage": {
+   "name": "招式学习器：树叶弹幕",
+   "description": "教导「树叶弹幕」招式的招式学习器。",
    "sort": "utility",
    "category": "technique",
    "usableIn": [
@@ -74915,9 +76471,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "tm_panjandrum": {
+   "name": "招式学习器：潘詹德拉姆",
+   "description": "教导「潘詹德拉姆」招式的招式学习器。",
    "sort": "utility",
    "category": "technique",
    "usableIn": [
@@ -74965,9 +76528,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "tm_scope": {
+   "name": "招式学习器：瞄准镜",
+   "description": "教导「瞄准镜」招式的招式学习器。",
    "sort": "utility",
    "category": "technique",
    "usableIn": [
@@ -75007,9 +76577,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "tm_shadow_boxing": {
+   "name": "招式学习器：太极拳",
+   "description": "教导暗影招式「太极拳」的招式学习器。",
    "sort": "utility",
    "category": "technique",
    "usableIn": [
@@ -75057,9 +76634,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "tm_supernova": {
+   "name": "招式学习器：超新星",
+   "description": "教导「超新星」招式的招式学习器。",
    "sort": "utility",
    "category": "technique",
    "usableIn": [
@@ -75107,9 +76691,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "tm_ubuntu": {
+   "name": "招式学习器：乌班图",
+   "description": "教导「乌班图」招式的招式学习器。",
    "sort": "utility",
    "category": "technique",
    "usableIn": [
@@ -75157,9 +76748,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "tm_vorpal": {
+   "name": "招式学习器：斩锋",
+   "description": "教导「Vorpal」招式的招式学习器。",
    "sort": "utility",
    "category": "technique",
    "usableIn": [
@@ -75199,9 +76797,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "tuxeball": {
+   "name": "精灵球",
+   "description": "用来捕捉精灵。",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -75244,6 +76849,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball#0",
     "width": 32,
@@ -75283,6 +76893,8 @@
    }
   },
   "tuxeball_ancient": {
+   "name": "远古精灵球",
+   "description": "这种精灵球制作于久远的年代，能够万无一失地捕捉任何精灵。",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -75325,6 +76937,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_ancient#0",
     "width": 32,
@@ -75364,6 +76981,8 @@
    }
   },
   "tuxeball_candy": {
+   "name": "糖果精灵球",
+   "description": "捕捉精灵，并在捕捉成功后使其等级提升1级。",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -75406,6 +77025,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_candy#0",
     "width": 32,
@@ -75445,6 +77069,8 @@
    }
   },
   "tuxeball_crusher": {
+   "name": "粉碎精灵球",
+   "description": "这种精灵球能突破防御，对手精灵的防御越高，捕捉率就越高。若对方处于守护状态，则会捕捉失败。",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -75487,6 +77113,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_crusher#0",
     "width": 32,
@@ -75526,6 +77157,8 @@
    }
   },
   "tuxeball_diurnal": {
+   "name": "昼行精灵球",
+   "description": "白天更容易捕捉精灵，但在夜晚效果会大打折扣。",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -75568,6 +77201,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_diurnal#0",
     "width": 32,
@@ -75607,6 +77245,8 @@
    }
   },
   "tuxeball_earth": {
+   "name": "土系精灵球",
+   "description": "更容易捕捉土系精灵。",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -75649,6 +77289,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_earth#0",
     "width": 32,
@@ -75688,6 +77333,8 @@
    }
   },
   "tuxeball_female": {
+   "name": "雌性精灵球",
+   "description": "更容易捕捉雌性精灵。",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -75730,6 +77377,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_female#0",
     "width": 32,
@@ -75769,6 +77421,8 @@
    }
   },
   "tuxeball_fire": {
+   "name": "火系精灵球",
+   "description": "更容易捕捉火系精灵。",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -75811,6 +77465,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_fire#0",
     "width": 32,
@@ -75850,6 +77509,8 @@
    }
   },
   "tuxeball_gambler": {
+   "name": "赌徒精灵球",
+   "description": "这种精灵球以变幻莫测著称。捕捉率波动极大，捕捉精灵的成功率可能极低，也可能出奇地高。",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -75892,6 +77553,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_gambler#0",
     "width": 32,
@@ -75931,6 +77597,8 @@
    }
   },
   "tuxeball_grand": {
+   "name": "豪华精灵球",
+   "description": "捕捉率比奢华精灵球更胜一筹。",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -75973,6 +77641,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_grand#0",
     "width": 32,
@@ -76012,6 +77685,8 @@
    }
   },
   "tuxeball_hardened": {
+   "name": "坚硬精灵球",
+   "description": "用于捕捉精灵，捕捉失败时不会损坏。",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -76054,6 +77729,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_hardened#0",
     "width": 32,
@@ -76093,6 +77773,8 @@
    }
   },
   "tuxeball_hearty": {
+   "name": "丰盛精灵球",
+   "description": "捕捉成功后，精灵的正面口味会变为丰盛。",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -76135,6 +77817,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_hearty#0",
     "width": 32,
@@ -76174,6 +77861,8 @@
    }
   },
   "tuxeball_lavish": {
+   "name": "奢华精灵球",
+   "description": "捕捉率远高于高贵精灵球。",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -76216,6 +77905,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_lavish#0",
     "width": 32,
@@ -76255,6 +77949,8 @@
    }
   },
   "tuxeball_majestic": {
+   "name": "庄严精灵球",
+   "description": "捕捉最难以捉摸的精灵的终极之选。",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -76297,6 +77993,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_majestic#0",
     "width": 32,
@@ -76336,6 +78037,8 @@
    }
   },
   "tuxeball_male": {
+   "name": "雄性精灵球",
+   "description": "更容易捕捉雄性精灵。",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -76378,6 +78081,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_male#0",
     "width": 32,
@@ -76417,6 +78125,8 @@
    }
   },
   "tuxeball_metal": {
+   "name": "金属精灵球",
+   "description": "更容易捕捉金属系精灵。",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -76459,6 +78169,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_metal#0",
     "width": 32,
@@ -76498,6 +78213,8 @@
    }
   },
   "tuxeball_neuter": {
+   "name": "中性精灵球",
+   "description": "更容易捕捉中性精灵。",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -76540,6 +78257,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_neuter#0",
     "width": 32,
@@ -76579,6 +78301,8 @@
    }
   },
   "tuxeball_noble": {
+   "name": "高贵精灵球",
+   "description": "标准精灵球的适度升级版。",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -76621,6 +78345,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_noble#0",
     "width": 32,
@@ -76660,6 +78389,8 @@
    }
   },
   "tuxeball_nocturnal": {
+   "name": "夜行精灵球",
+   "description": "夜晚更容易捕捉精灵，但在白天效果会大打折扣。",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -76702,6 +78433,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_nocturnal#0",
     "width": 32,
@@ -76741,6 +78477,8 @@
    }
   },
   "tuxeball_omni": {
+   "name": "全能精灵球",
+   "description": "这种奇特的精灵球在对手精灵与你的精灵属性相同时会提高捕捉成功率，属性不同时则会降低。",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -76789,6 +78527,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_omni#0",
     "width": 32,
@@ -76828,6 +78571,8 @@
    }
   },
   "tuxeball_park": {
+   "name": "公园精灵球",
+   "description": "公园官方的捕捉装置，只在公园内有效。",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -76865,6 +78610,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_park#0",
     "width": 32,
@@ -76904,6 +78654,8 @@
    }
   },
   "tuxeball_peppy": {
+   "name": "活力精灵球",
+   "description": "捕捉成功后，精灵的正面口味会变为活力。",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -76946,6 +78698,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_peppy#0",
     "width": 32,
@@ -76985,6 +78742,8 @@
    }
   },
   "tuxeball_refined": {
+   "name": "精制精灵球",
+   "description": "捕捉成功后，精灵的正面口味会变为精制。",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -77027,6 +78786,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_refined#0",
     "width": 32,
@@ -77066,6 +78830,8 @@
    }
   },
   "tuxeball_salty": {
+   "name": "咸味精灵球",
+   "description": "捕捉成功后，精灵的正面口味会变为咸味。",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -77108,6 +78874,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_salty#0",
     "width": 32,
@@ -77147,6 +78918,8 @@
    }
   },
   "tuxeball_water": {
+   "name": "水系精灵球",
+   "description": "更容易捕捉水系精灵。",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -77189,6 +78962,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_water#0",
     "width": 32,
@@ -77228,6 +79006,8 @@
    }
   },
   "tuxeball_wood": {
+   "name": "木系精灵球",
+   "description": "更容易捕捉木系精灵。",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -77270,6 +79050,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_wood#0",
     "width": 32,
@@ -77309,6 +79094,8 @@
    }
   },
   "tuxeball_xero": {
+   "name": "Xero精灵球",
+   "description": "这种奇特的精灵球在对手精灵与你的精灵属性不同时会提高捕捉成功率，属性相同时则会降低。",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -77357,6 +79144,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_xero#0",
     "width": 32,
@@ -77396,6 +79188,8 @@
    }
   },
   "tuxeball_zesty": {
+   "name": "香辣精灵球",
+   "description": "捕捉成功后，精灵的正面口味会变为香辣。",
    "sort": "utility",
    "category": "capture",
    "usableIn": [
@@ -77438,6 +79232,11 @@
    },
    "statModifiers": {},
    "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   },
    "captureSprite": {
     "key": "ui:tile.battle/gfx/items/tuxeball_zesty#0",
     "width": 32,
@@ -77477,6 +79276,8 @@
    }
   },
   "venom_berry": {
+   "name": "毒液浆果",
+   "description": "将精灵的属性变为毒液系。",
    "sort": "utility",
    "category": "elements",
    "usableIn": [
@@ -77517,9 +79318,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "water_berry": {
+   "name": "水流浆果",
+   "description": "将精灵的属性变为水系。",
    "sort": "utility",
    "category": "elements",
    "usableIn": [
@@ -77560,9 +79368,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "wood_berry": {
+   "name": "林木浆果",
+   "description": "将精灵的属性变为木系。",
    "sort": "utility",
    "category": "elements",
    "usableIn": [
@@ -77603,9 +79418,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "xp_feeder": {
+   "name": "经验喂食器",
+   "description": "持有此道具的精灵可获得队伍全部经验值的一半，无论它是否参战。\\n 剩余经验值由参战的精灵平分。",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -77630,9 +79452,16 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   },
   "xp_transmitter": {
+   "name": "经验发射器",
+   "description": "持有此道具时，未参与击败对手的精灵可获得一半经验值，剩余部分由参战的精灵分配。",
    "sort": "utility",
    "category": "none",
    "usableIn": [
@@ -77657,7 +79486,12 @@
     "block_evolution": false
    },
    "statModifiers": {},
-   "immunityToStatus": []
+   "immunityToStatus": [],
+   "messages": {
+    "use": "{user}使用了{name}!",
+    "success": "成功了！",
+    "failure": "失败了！"
+   }
   }
  },
  "statuses": {

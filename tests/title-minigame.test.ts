@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { TUXEMON_BATTLE_DB, TUXEMON_SCENE_CATALOG } from "../battle/game.ts";
-import type { TuxemonSceneCatalog } from "../battle/scenes.ts";
+import { createTuxemonScenes, type TuxemonSceneCatalog } from "../battle/scenes.ts";
 import { validateBattleDb } from "../importer/battle-schema.ts";
 import featureModesJson from "../data/feature-modes.json";
 import type { FeatureModesRuntimeData, TitleMinigameData } from "../ui/feature-modes-data.ts";
@@ -18,10 +18,7 @@ const DATA = (featureModesJson as unknown as FeatureModesRuntimeData).titleMinig
 const ZH_DB = validateBattleDb(JSON.parse(
   readFileSync(join(import.meta.dir, "../data/battle-db.zh_CN.json"), "utf8"),
 ));
-const ZH_CATALOG: TuxemonSceneCatalog = {
-  index: [],
-  monster: (slug) => ZH_DB.monsters[slug],
-};
+const ZH_CATALOG = createTuxemonScenes(ZH_DB, [], "zh_CN").catalog;
 
 function answerCorrect(
   data: Readonly<TitleMinigameData>,

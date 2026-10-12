@@ -173,6 +173,9 @@ export interface BattleDb {
     };
   }>;
   techniques: Record<string, {
+    /** Localized display name and description from the active .po catalog. */
+    name: string;
+    description: string;
     id: number;
     sort: string;
     category: string;
@@ -193,6 +196,9 @@ export interface BattleDb {
     animation?: BattleAnimationRef;
   }>;
   items: Record<string, {
+    /** Localized display name and description from the active .po catalog. */
+    name: string;
+    description: string;
     sort: string;
     category: string;
     usableIn: string[];
@@ -204,6 +210,8 @@ export interface BattleDb {
     modifiers: unknown[];
     statModifiers: Record<string, BattleStatModifier>;
     immunityToStatus: string[];
+    /** Localized result text selected by upstream ItemController. */
+    messages: { use: string; success: string; failure: string };
     captureSprite?: BattleImageRef;
     animation?: BattleAnimationRef;
   }>;
@@ -512,6 +520,8 @@ export function validateBattleDb(value: unknown, pakKeys?: ReadonlySet<string>):
     assert(monster.catchResistance[0] >= db.rules.catchResistanceRange[0] && monster.catchResistance[0] <= monster.catchResistance[1] && monster.catchResistance[1] <= db.rules.catchResistanceRange[1], `monster ${slug} has invalid catch resistance`);
   }
   for (const [slug, technique] of Object.entries(db.techniques)) {
+    assert(typeof technique.name === "string" && technique.name.length > 0, `technique ${slug} has no localized name`);
+    assert(typeof technique.description === "string" && technique.description.length > 0, `technique ${slug} has no localized description`);
     assert(Number.isFinite(technique.accuracy) && technique.accuracy >= 0, `technique ${slug} has invalid accuracy`);
     assert(Number.isFinite(technique.recharge) && technique.recharge >= 0, `technique ${slug} has invalid recharge`);
     assert(technique.sort in Object.fromEntries(db.rules.actionOrder.sortOrder.map((sort) => [sort, true])), `technique ${slug} has unknown action sort ${technique.sort}`);
@@ -523,6 +533,12 @@ export function validateBattleDb(value: unknown, pakKeys?: ReadonlySet<string>):
     validateStatModifiers(technique.statModifiers, `technique ${slug}`);
   }
   for (const [slug, item] of Object.entries(db.items)) {
+    assert(typeof item.name === "string" && item.name.length > 0, `item ${slug} has no localized name`);
+    assert(typeof item.description === "string" && item.description.length > 0, `item ${slug} has no localized description`);
+    assert(isRecord(item.messages), `item ${slug} messages must be an object`);
+    for (const key of ["use", "success", "failure"] as const) {
+      assert(typeof item.messages[key] === "string" && item.messages[key].length > 0, `item ${slug} has no localized ${key} message`);
+    }
     assert(db.rules.actionOrder.sortOrder.includes(item.sort), `item ${slug} has unknown action sort ${item.sort}`);
     validateStatModifiers(item.statModifiers, `item ${slug}`);
   }
