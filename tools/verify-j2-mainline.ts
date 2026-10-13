@@ -117,6 +117,7 @@ const REQUIRED_TRAINERS: Readonly<Record<string, number>> = {
 };
 const REQUIRED_WILDS: Readonly<Record<string, number>> = {
   "wild:anoleaf": 1,
+  "wild:cateye": 1,
   "wild:dracune": 1,
   "wild:pigabyte": 1,
   "wild:sclairus": 1,
@@ -392,7 +393,7 @@ function validateBattles(label: string, battles: readonly Gb6BattleCheckpoint[],
   const wilds = playerBattles.filter((battle) => battle.kind === "wild");
   expect(`${label} battle kind changed`, trainers.length + wilds.length === playerBattles.length);
   expect(`${label} trainer count changed`, trainers.length === 50);
-  expect(`${label} wild count changed`, wilds.length === 6);
+  expect(`${label} wild count changed`, wilds.length === 7);
   expect(`${label} spectator count changed`, spectatorBattles.length === 1);
   expect(`${label} battle did not win`, playerBattles.every((battle) => battle.outcome === "won"));
   expect(`${label} trainer roster changed`, canonicalJson(counts(trainers)) === canonicalJson(REQUIRED_TRAINERS));

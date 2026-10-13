@@ -84,6 +84,7 @@ const REQUIRED_TRAINERS: Readonly<Record<string, number>> = {
   spyder_omnichannel_beaverbrook: 1,
 };
 const REQUIRED_WILDS: Readonly<Record<string, number>> = {
+  "wild:cataspike": 1,
   "wild:xeon_2": 1,
 };
 
@@ -393,7 +394,7 @@ function validateBattles(
   const trainers = battles.filter((battle) => battle.kind === "trainer");
   const wilds = battles.filter((battle) => battle.kind === "wild");
   expect(label + " trainer count changed", trainers.length === 13);
-  expect(label + " wild count changed", wilds.length === 1);
+  expect(label + " wild count changed", wilds.length === 2);
   expect(label + " battle did not win", battles.every((battle) => battle.outcome === "won"));
   expect(label + " trainer roster changed",
     canonicalJson(counts(trainers)) === canonicalJson(REQUIRED_TRAINERS));
