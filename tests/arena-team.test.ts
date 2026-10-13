@@ -75,6 +75,7 @@ describe("Arena persistent team validation", () => {
       experience: 501,
       moves: ["ram", "boulder", "mudslide", "assault"],
     });
+    expect(record.provenanceHash).toMatch(/^[0-9a-f]{64}$/);
     expect(validateTeam([record], { levelCap: 20 })).toEqual({ ok: true, errors: [] });
     const snapshot = buildValidatedArenaTeam([record], { levelCap: 20 })[0]!;
     expect(snapshot.totalExperience).toBe(501);
@@ -93,6 +94,20 @@ describe("Arena persistent team validation", () => {
     const changedClaim = clone(record);
     changedClaim.experience!++;
     expect(validateTeam([changedClaim], { levelCap: 20 }).ok).toBe(false);
+
+    // Route 2 is otherwise a structurally valid starter area, so this proves
+    // the expedition integrity checksum detects provenance-only edits.
+    const changedOrigin = clone(record);
+    const acquisition = changedOrigin.provenance[0];
+    if (acquisition?.type !== "acquire" || !acquisition.origin) {
+      throw new Error("expedition acquisition fixture missing");
+    }
+    acquisition.origin.area = "spyder_route2";
+    expect(validateTeam([changedOrigin], { levelCap: 20 }).ok).toBe(false);
+
+    const missingHash = clone(record);
+    delete missingHash.provenanceHash;
+    expect(validateTeam([missingHash], { levelCap: 20 }).ok).toBe(false);
   });
 
   test("rebuilds a valid team from provenance and round-trips it through the battle tape", () => {

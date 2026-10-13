@@ -9,7 +9,7 @@ import battleDbJson from "../data/battle-db.json";
 import { validateBattleDb } from "../importer/battle-schema.ts";
 import { createSwitchState } from "../vendor/pocket-rpgkit/src/engine/interpreter.ts";
 import { sha256Bytes } from "../vendor/pocket-rpgkit/src/engine/map-repository.ts";
-import { utf8Encode } from "../vendor/pocket-rpgkit/src/engine/save.ts";
+import { canonicalJson, utf8Encode } from "../vendor/pocket-rpgkit/src/engine/save.ts";
 import type { RngState } from "./core.ts";
 import { initialTuxemonExtensionState } from "./extension.ts";
 import { battleDbToTuxemonBattleDb } from "./from-battle-db.ts";
@@ -105,6 +105,9 @@ export interface ArenaTeamRecord {
   /** Required on expedition records so partial progress between levels is
    * caller-visible and checked against the complete event log. */
   experience?: number;
+  /** Integrity checksum for server-created expedition provenance. This is not
+   * an ownership signature; authenticated storage remains the trust boundary. */
+  provenanceHash?: string;
   provenance: ArenaProvenanceEvent[];
 }
 
@@ -136,6 +139,7 @@ export type ArenaTeamValidation =
 const SOURCE_DB = validateBattleDb(battleDbJson);
 const RULES_DB = battleDbToTuxemonBattleDb(SOURCE_DB);
 const HEX_SEED = /^[0-9a-fA-F]{64}$/;
+const LOWER_HEX = /^[0-9a-f]{64}$/;
 const MAX_PROVENANCE_EVENTS = 1_024;
 
 export const DEFAULT_ARENA_TEAM_RULES: Readonly<Required<ArenaTeamRules>> = Object.freeze({
@@ -167,6 +171,12 @@ function clone<T>(value: T): T {
 function recordSeed(seed: string, seq: number): number {
   const digest = sha256Bytes(utf8Encode(`pocket-tuxemon/arena-team/v1\n${seq}\n${seed.toLowerCase()}`));
   return Number.parseInt(digest.slice(0, 8), 16) >>> 0;
+}
+
+function expeditionProvenanceHash(provenance: readonly ArenaProvenanceEvent[]): string {
+  return sha256Bytes(utf8Encode(
+    `pocket-tuxemon/arena-team/expedition-v1\n${canonicalJson(provenance)}\n`,
+  ));
 }
 
 function stringSet(
@@ -583,10 +593,12 @@ function rebuildTeam(records: unknown, rulesValue: unknown, compareClaims = true
   const snapshots: SpawnedMonsterSnapshot[] = [];
   for (const [recordIndex, rawRecord] of records.entries()) {
     const prefix = `team[${recordIndex}]`;
-    if (!isRecord(rawRecord) || !exactObject(rawRecord, ["species", "level", "moves", "experience", "provenance"], [
+    if (!isRecord(rawRecord) || !exactObject(rawRecord, [
+      "species", "level", "moves", "experience", "provenanceHash", "provenance",
+    ], [
       "species", "level", "moves", "provenance",
     ])) {
-      errors.push(`${prefix} must contain only species, level, moves, optional experience, and provenance`);
+      errors.push(`${prefix} must contain only species, level, moves, optional experience, provenanceHash, and provenance`);
       continue;
     }
     if (typeof rawRecord.species !== "string" || !Object.hasOwn(SOURCE_DB.monsters, rawRecord.species)) {
@@ -645,6 +657,15 @@ function rebuildTeam(records: unknown, rulesValue: unknown, compareClaims = true
         `${prefix}.provenance[0].origin`,
         errors,
       );
+    if (compareClaims && origin) {
+      const expectedHash = expeditionProvenanceHash(rawRecord.provenance as ArenaProvenanceEvent[]);
+      if (typeof rawRecord.provenanceHash !== "string" || !LOWER_HEX.test(rawRecord.provenanceHash) ||
+          rawRecord.provenanceHash !== expectedHash) {
+        errors.push(`${prefix}.provenanceHash does not match the expedition provenance`);
+      }
+    } else if (compareClaims && rawRecord.provenanceHash !== undefined) {
+      errors.push(`${prefix}.provenanceHash requires a valid expedition origin`);
+    }
     let previousSeq = first.seq as number;
     let previousStep = origin?.step ?? 0;
     let expectedAudits: Array<
@@ -848,12 +869,106 @@ export function arenaTeamRecordFromProvenance(
     throw new Error(`arena provenance rejected: ${rebuilt.errors.join("; ")}`);
   }
   const snapshot = rebuilt.snapshots[0]!;
+  const expedition = provenance[0]?.type === "acquire" && provenance[0].origin !== undefined;
   return {
     species: snapshot.slug,
     level: snapshot.level,
     moves: [...snapshot.moves],
     experience: snapshot.totalExperience,
+    ...(expedition ? { provenanceHash: expeditionProvenanceHash(provenance) } : {}),
     provenance: clone(provenance),
+  };
+}
+
+export interface ArenaProvenanceAppendResult {
+  record: ArenaTeamRecord;
+  nextSeq: number;
+}
+
+function checkedAppendStart(
+  record: ArenaTeamRecord,
+  firstSeq: number,
+  rules: ArenaTeamRules,
+): { snapshot: SpawnedMonsterSnapshot; provenance: ArenaProvenanceEvent[] } {
+  if (!Number.isSafeInteger(firstSeq) || firstSeq < 1) {
+    throw new Error("arena provenance sequence must be a positive safe integer");
+  }
+  const last = record.provenance.at(-1)?.seq ?? 0;
+  if (firstSeq <= last) throw new Error("arena provenance sequence must increase");
+  const snapshot = buildValidatedArenaTeam([record], {
+    ...rules,
+    minSize: 1,
+    maxSize: 1,
+    uniformLevel: null,
+  })[0]!;
+  return { snapshot, provenance: clone(record.provenance) };
+}
+
+/** Append one server-awarded XP transaction and its exact derived audits. */
+export function appendArenaExperience(
+  record: ArenaTeamRecord,
+  event: Omit<ArenaExperienceEvent, "seq">,
+  firstSeq: number,
+  rules: ArenaTeamRules = {},
+): ArenaProvenanceAppendResult {
+  const { snapshot, provenance } = checkedAppendStart(record, firstSeq, rules);
+  const errors: string[] = [];
+  const amount = experienceSourceAmount(snapshot, event.source, "experience source", errors);
+  if (amount === null || amount !== event.amount || errors.length > 0) {
+    throw new Error(`arena experience rejected: ${errors.join("; ") || "amount does not match source"}`);
+  }
+  const normalized = normalizeRules({ ...rules, minSize: 1, maxSize: 1, uniformLevel: null }, errors);
+  const progression = applyExperience(snapshot, amount, normalized.levelCap);
+  let seq = firstSeq;
+  provenance.push({ ...clone(event), seq: seq++ });
+  for (const level of progression.levels) {
+    provenance.push({ seq: seq++, type: "level", level, step: event.step });
+  }
+  for (const learn of progression.learns) {
+    provenance.push({ seq: seq++, type: "learn", ...learn, step: event.step });
+  }
+  return {
+    record: arenaTeamRecordFromProvenance(record.species, provenance, rules),
+    nextSeq: seq,
+  };
+}
+
+/** Append one consumed expedition item, including TM or XP-derived audits. */
+export function appendArenaItem(
+  record: ArenaTeamRecord,
+  event: Omit<ArenaItemEvent, "seq"> & { step: number },
+  firstSeq: number,
+  rules: ArenaTeamRules = {},
+): ArenaProvenanceAppendResult {
+  const { snapshot, provenance } = checkedAppendStart(record, firstSeq, rules);
+  const errors: string[] = [];
+  const normalized = normalizeRules({ ...rules, minSize: 1, maxSize: 1, uniformLevel: null }, errors);
+  const applied = applyItem(snapshot, event.item, event.forget, normalized, "item", errors, true);
+  if (errors.length > 0) throw new Error(`arena item rejected: ${errors.join("; ")}`);
+  let seq = firstSeq;
+  provenance.push({ seq: seq++, type: "item", item: event.item, step: event.step,
+    ...(event.forget === undefined ? {} : { forget: event.forget }) });
+  for (const learn of applied.learns) {
+    provenance.push({ seq: seq++, type: "learn", ...learn, step: event.step });
+  }
+  if (applied.experienceItem) {
+    const source = { kind: "item" as const, item: applied.experienceItem };
+    const amount = experienceSourceAmount(snapshot, source, "experience item", errors);
+    if (amount === null || errors.length > 0) {
+      throw new Error(`arena item rejected: ${errors.join("; ")}`);
+    }
+    const progression = applyExperience(snapshot, amount, normalized.levelCap);
+    provenance.push({ seq: seq++, type: "experience", step: event.step, amount, source });
+    for (const level of progression.levels) {
+      provenance.push({ seq: seq++, type: "level", level, step: event.step });
+    }
+    for (const learn of progression.learns) {
+      provenance.push({ seq: seq++, type: "learn", ...learn, step: event.step });
+    }
+  }
+  return {
+    record: arenaTeamRecordFromProvenance(record.species, provenance, rules),
+    nextSeq: seq,
   };
 }
 
