@@ -138,7 +138,14 @@ function entryFrames(entry: ValidatedExpeditionJournalEntry): ExpeditionReplayFr
 export function prepareExpeditionReplay(value: unknown): PreparedExpeditionReplay {
   const checked = validateExpeditionJournal(value);
   if (!checked.ok) throw new ExpeditionJournalError(`expedition replay: ${checked.error}`);
-  const journal = checked.journal;
+  return prepareValidatedExpeditionReplay(checked.journal);
+}
+
+/** Build frames from the normalized output of load/parse, avoiding a second
+ * encoded-wire validation after entries have already been expanded. */
+export function prepareValidatedExpeditionReplay(
+  journal: ValidatedExpeditionJournal,
+): PreparedExpeditionReplay {
   const frames: ExpeditionReplayFrame[] = [{
     index: 0,
     journalStep: 0,

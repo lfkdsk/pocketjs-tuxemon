@@ -39,6 +39,17 @@ await run([
 ]);
 const replayBundle = minifyRuntimeBundle(join(gameDir, "battle-replay.js"));
 console.log(`replay bundle: ${replayBundle.before} -> ${replayBundle.after} bytes`);
+await run([
+  process.execPath,
+  join(root, "vendor", "pocket-rpgkit", "vendor", "pocketjs", "tools", "build.ts"),
+  join(root, "expedition-replay.tsx"),
+  "--framework=solid",
+  "--density=2",
+  `--project-root=${root}`,
+  `--outdir=${gameDir}`,
+]);
+const expeditionReplayBundle = minifyRuntimeBundle(join(gameDir, "expedition-replay.js"));
+console.log(`expedition replay bundle: ${expeditionReplayBundle.before} -> ${expeditionReplayBundle.after} bytes`);
 
 const replayControls = `
 <section class="arena-replay-panel" aria-labelledby="arena-replay-title">
@@ -61,6 +72,32 @@ const replayStyles = `<style>
 .arena-replay-row button{min-width:3rem}.arena-replay-row output{margin-left:auto;font-variant-numeric:tabular-nums}
 .arena-replay-panel p{margin:.65rem 0 0}.arena-replay-entry{text-align:center}
 </style>`;
+const expeditionReplayControls = `
+<section class="expedition-replay-panel" aria-labelledby="expedition-replay-title">
+  <h2 id="expedition-replay-title">Expedition replay</h2>
+  <div class="expedition-replay-row" role="group" aria-label="Expedition replay controls">
+    <button type="button" id="expedition-replay-play" aria-pressed="false" disabled>Play</button>
+    <button type="button" id="expedition-replay-step" disabled>Step</button>
+    <span id="expedition-replay-speed-label">Speed</span>
+    <button type="button" id="expedition-replay-speed-1" data-expedition-replay-speed aria-pressed="true">1×</button>
+    <button type="button" id="expedition-replay-speed-2" data-expedition-replay-speed aria-pressed="false">2×</button>
+    <button type="button" id="expedition-replay-speed-4" data-expedition-replay-speed aria-pressed="false">4×</button>
+    <output id="expedition-replay-counter">Frame 0 / 0</output>
+  </div>
+  <div class="expedition-replay-timeline-row">
+    <label id="expedition-replay-timeline-label" for="expedition-replay-timeline">Timeline</label>
+    <input type="range" id="expedition-replay-timeline" min="0" max="0" value="0" step="1" disabled>
+  </div>
+  <p id="expedition-replay-status" role="status" aria-live="polite">Loading expedition journal…</p>
+  <p id="expedition-replay-help">Reads public, seedless versioned JSON journals only.</p>
+</section>`;
+const expeditionReplayStyles = `<style>
+.expedition-replay-panel{max-width:60rem;margin:1rem auto;padding:1rem;border:1px solid var(--line,#5f7180);border-radius:.75rem;background:var(--panel,#17232d)}
+.expedition-replay-panel h2{margin-top:0}.expedition-replay-row,.expedition-replay-timeline-row{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap}
+.expedition-replay-row button{min-width:3rem}.expedition-replay-row output{margin-left:auto;font-variant-numeric:tabular-nums}
+.expedition-replay-timeline-row{margin-top:.75rem}.expedition-replay-timeline-row input{flex:1;min-width:12rem}
+.expedition-replay-panel p{margin:.65rem 0 0}.arena-replay-entry{text-align:center}
+</style>`;
 
 const playerPath = join(gameDir, "index.html");
 const playerHtml = await Bun.file(playerPath).text();
@@ -77,11 +114,21 @@ const replayHtml = playerHtml
   .replace('<section class="info">', `${replayControls}\n<section class="info">`)
   .replace(configPattern, `$1${JSON.stringify(replayConfig).replace(/</g, "\\u003c")}$3`);
 await Bun.write(join(gameDir, "replay.html"), replayHtml);
+const expeditionReplayConfig = { ...replayConfig };
+expeditionReplayConfig.app = "expedition-replay";
+expeditionReplayConfig.bundle = "expedition-replay.js";
+expeditionReplayConfig.pak = "expedition-replay.pak";
+expeditionReplayConfig.autosaveStorageKey = "pocket-rpgkit:expedition-replay:unused:v1";
+const expeditionReplayHtml = playerHtml
+  .replace("</head>", `${expeditionReplayStyles}\n</head>`)
+  .replace('<section class="info">', `${expeditionReplayControls}\n<section class="info">`)
+  .replace(configPattern, `$1${JSON.stringify(expeditionReplayConfig).replace(/</g, "\\u003c")}$3`);
+await Bun.write(join(gameDir, "expedition-replay.html"), expeditionReplayHtml);
 await Bun.write(
   playerPath,
   playerHtml.replace(
     '<section class="info">',
-    '<p class="arena-replay-entry"><a href="replay.html">Battle replay / 对战回放</a></p>\n<section class="info">',
+    '<p class="arena-replay-entry"><a href="replay.html">Battle replay / 对战回放</a> · <a href="expedition-replay.html">Expedition replay / 远征回放</a></p>\n<section class="info">',
   ),
 );
 copyFileSync(
