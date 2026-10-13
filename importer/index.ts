@@ -296,9 +296,13 @@ move at most the six-member party into a hidden capacity-30 box.
 \`park_experience\` is Native for all eight Eclipse actions: it activates a
 saved Park session, switches wild encounters to the dedicated Ball/Food/Doll/Run
 profile, records captures and blocks each stop event on the bilingual summary
-scene. Plague-state rows stay deterministic without being
-claimed as full P2 behavior. The long-term target remains zero Placeholder
-uses.
+scene. The root plague profile and its same-named technique are imported into
+battle data. Before an infected combatant's ordinary move, the reducer runs
+the upstream eligibility, resistance and seeded spread pre-check; only success
+substitutes the plague technique. The resulting player, NPC and captured-monster
+phases persist through the existing save table, and the battle scene presents
+the sneeze and new-infection moments separately in English and Chinese. The
+long-term target remains zero Placeholder uses.
 
 ${battleMusicSection}
 
