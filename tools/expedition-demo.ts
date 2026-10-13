@@ -79,6 +79,7 @@ const teamValidation = validateTeam(expedition.team, {
   minSize: 1,
   maxSize: 5,
   levelCap: expedition.rules.levelCap,
+  requiredKind: "expedition",
 });
 if (!teamValidation.ok) {
   throw new Error(`expedition demo: team validation failed: ${teamValidation.errors.join("; ")}`);
@@ -88,7 +89,12 @@ let battle = createArenaBattle({
   seed: sha256Bytes(utf8Encode(`pocket-tuxemon/expedition-demo/arena/v1\n${seed}\n`)),
   format: "single",
   sides: [{ kind: "agent", team: expedition.team }, { kind: "ai", difficulty: "normal" }],
-  teamRules: { minSize: 1, maxSize: 5, levelCap: expedition.rules.levelCap },
+  teamRules: {
+    minSize: 1,
+    maxSize: 5,
+    levelCap: expedition.rules.levelCap,
+    requiredKind: "expedition",
+  },
 });
 const arenaRandom = randomStream("arena-policy");
 while (!arenaIsOver(battle)) {

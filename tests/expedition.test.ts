@@ -199,7 +199,10 @@ describe("Arena expeditions", () => {
     expect(itemRun.ledger.consumedItems.raise_melee).toBe(1);
     expect(itemRun.team[0]).not.toEqual(beforeRecord);
     expect(itemRun.team[0]!.provenance.at(-1)).toMatchObject({ type: "item", item: "raise_melee", step: 1 });
-    expect(validateTeam(itemRun.team, { levelCap: itemRun.rules.levelCap })).toEqual({ ok: true, errors: [] });
+    expect(validateTeam(itemRun.team, {
+      levelCap: itemRun.rules.levelCap,
+      requiredKind: "expedition",
+    })).toEqual({ ok: true, errors: [] });
     expect(checkExpeditionConservation(itemRun)).toEqual([]);
 
     itemRun = apply(itemRun, action(itemRun, "useItem"));
@@ -236,7 +239,10 @@ describe("Arena expeditions", () => {
         capture: { result: "caught", item: "tuxeball", success: true },
       },
     });
-    expect(validateTeam(expedition.team, { levelCap: expedition.rules.levelCap })).toEqual({ ok: true, errors: [] });
+    expect(validateTeam(expedition.team, {
+      levelCap: expedition.rules.levelCap,
+      requiredKind: "expedition",
+    })).toEqual({ ok: true, errors: [] });
     expect(checkExpeditionConservation(expedition)).toEqual([]);
   });
 
@@ -257,7 +263,10 @@ describe("Arena expeditions", () => {
     expect(expedition.encounter).toBeNull();
     expect(expedition.team[0]!.experience).toBeGreaterThan(beforeExperience);
     expect(expedition.team[0]!.provenance.some((event) => event.type === "experience")).toBe(true);
-    expect(validateTeam(expedition.team, { levelCap: expedition.rules.levelCap })).toEqual({ ok: true, errors: [] });
+    expect(validateTeam(expedition.team, {
+      levelCap: expedition.rules.levelCap,
+      requiredKind: "expedition",
+    })).toEqual({ ok: true, errors: [] });
     expect(checkExpeditionConservation(expedition)).toEqual([]);
   });
 
@@ -300,7 +309,10 @@ describe("Arena expeditions", () => {
     expect(continued.nextEventSeq).toBe(persistent.nextEventSeq);
     expect(continued.ended).toBe(false);
     expect(continued.endReason).toBeNull();
-    expect(validateTeam(continued.team, { levelCap: continued.rules.levelCap })).toEqual({ ok: true, errors: [] });
+    expect(validateTeam(continued.team, {
+      levelCap: continued.rules.levelCap,
+      requiredKind: "expedition",
+    })).toEqual({ ok: true, errors: [] });
     expect(checkExpeditionConservation(continued)).toEqual([]);
     expect(() => createExpedition({
       seed: NEXT_SEED,

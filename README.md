@@ -468,10 +468,13 @@ An agent side may carry persistent `team` records. `validateTeam` and battle
 creation replay each acquisition, experience award, derived level and move,
 TM, training item and experience item, then recompute stats and enforce the
 supplied level, size and ban rules; claimed derived values are never trusted.
-Expedition records include a canonical provenance checksum so accidental or
-partial edits are rejected. The checksum is not a signature. Ownership is a
-caller boundary: services must load these records from authenticated storage
-for that player, not accept an agent's inline provenance as proof of ownership.
+Storage-aware callers set `requiredKind: "expedition"` or `"legacy"` so a
+record cannot silently switch validation contracts. Expedition records include
+a canonical provenance checksum and globally ordered root transactions, so
+accidental or partial edits are rejected. The checksum is not a signature.
+Ownership and record class are caller boundaries: services must load records
+from authenticated storage for that player, not accept an agent's inline
+provenance as proof of ownership.
 
 The deterministic CLI example plays a random legal-action agent against the
 normal AI and prints one JSON object containing `tape`, `result`, and
@@ -517,21 +520,40 @@ automatic Arena combat, capture devices through the production capture
 formula, and fleeing. Outside encounters, legal actions cover real item
 effects and move eligibility, authored shop prices and finite stock, healing,
 travel and voluntary completion. Battle experience, level thresholds,
-level-up moves, TMs and training items append exact step-numbered provenance;
-`validateTeam` rebuilds the resulting monster before it can enter Arena.
+level-up moves, TMs and training items append exact step-numbered provenance.
+Arena's reward result supplies the complete damage-contributor divisor and
+each living winner's real experience, training points and bond gain; zero-XP
+max-level rewards are retained. Use
+`validateTeam(team, { requiredKind: "expedition" })` to rebuild the result
+before it can enter Arena.
+
+A caught monster keeps the generated individual, capture-time HP, actual
+device, captured acquisition type and capture-time persistent condition.
+Capture-device refunds and all five warm-taste balls follow the production
+capture transaction; mutable burn/poison state then travels separately from
+immutable acquisition provenance and can be cleared by real restore/heal
+actions. The pinned upstream `tuxeball_candy` success effect raises instead of
+capturing because it writes a read-only level, so that one broken device is
+not advertised as a legal expedition action.
 
 Every accepted action consumes one step and advances its sequence exactly
 once. Repeating an old sequence or skipping ahead is rejected without changing
-the state. Inventory and money ledgers are checked after every transition, and
-the observation omits the seed, RNG cursor, future encounter, ledgers and
+the state. Before and after every transition the reducer checks one exact,
+bounded canonical-JSON envelope: version, rules, area, terminal state, action
+budget, RNG cursor/draw count, contiguous provenance sequence, cross-team root
+transactions, shop/heal receipts, and inventory/money conservation. The
+observation omits the seed, RNG cursor, future encounter, ledgers and
 provenance. There is intentionally no expedition restore, rewind or replay API.
-The service must keep the full state private and commit each accepted result
-atomically; as with Arena team ownership, client-supplied state is not trusted.
+These checks detect malformed and partially rewritten state; they are not a
+cryptographic authenticator. The service must keep the full state private in
+authenticated storage and commit each accepted result atomically. Client-
+supplied state is never trusted.
 
 `cycle: "ranked"` always starts from the configured fixed initial state.
 `cycle: "persistent"` may start a fresh budget from an ended persistent state;
-the service supplies the prior authoritative value through `continuation`, and
-can lower or retain a configured level cap but cannot accept an invalid team.
+the service supplies the prior authoritative value through `continuation` with
+a fresh seed, and can lower or retain a configured level cap but cannot accept
+an invalid team.
 
 The end-to-end CLI chooses a deterministic random legal policy, validates its
 final team, enters a normal Arena match, validates the battle tape, and prints

@@ -71,6 +71,7 @@ describe("expedition demo CLI", () => {
       minSize: 1,
       maxSize: 5,
       levelCap: 50,
+      requiredKind: "expedition",
     })).toEqual({ ok: true, errors: [] });
 
     const checked = validateBattleTape(output.arena.tape);
