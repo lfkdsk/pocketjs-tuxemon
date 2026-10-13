@@ -216,6 +216,7 @@ export function battleDbToTuxemonBattleDb(db: BattleDb): TuxemonBattleDb {
     ),
     status: lazyRecord(db.statuses, (slug) => toStatus(slug, db.statuses[slug]!)),
     weather: db.weather,
+    plague: db.plagues,
     capture: {
       ...(db.rules.capture as unknown as Omit<DbCaptureRules, "max_catch_rate">),
       max_catch_rate: db.rules.catchRateRange[1],

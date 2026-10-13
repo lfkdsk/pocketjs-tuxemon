@@ -19,6 +19,8 @@ export interface BattleSceneLabels {
   attackMissed: string;
   damage: (amount: number) => string;
   used: (name: string, technique: string) => string;
+  plagueSpread: (user: string, target: string) => string;
+  plagueInfected: (target: string) => string;
   parkFlavor: (key: string, name: string) => string;
   grewLevels: (name: string, levels: number) => string;
   gainedXp: (name: string, xp: number) => string;
@@ -64,6 +66,8 @@ const EN: BattleSceneLabels = {
   attackMissed: "The attack missed!",
   damage: (amount) => `${Math.trunc(amount)} damage!`,
   used: (name, technique) => `${name} used ${technique}!`,
+  plagueSpread: (user, target) => `Ah ... Ahchoo! ${user} sneezed on ${target}.`,
+  plagueInfected: (target) => `${target} begins to sniffle.`,
   parkFlavor: (key, name) => {
     switch (key) {
       case "afraid": return `${name} recoils, its body tense and ready to flee.`;
@@ -130,6 +134,8 @@ const ZH: BattleSceneLabels = {
   attackMissed: "攻击没有命中！",
   damage: (amount) => `${Math.trunc(amount)} 点伤害！`,
   used: (name, technique) => `${name} 使用了 ${technique}！`,
+  plagueSpread: (user, target) => `哈……哈啾！${user} 朝 ${target} 打了个喷嚏。`,
+  plagueInfected: (target) => `${target} 开始抽鼻子了。`,
   parkFlavor: (key, name) => {
     switch (key) {
       case "afraid": return `${name} 往后一缩，身体紧张，准备逃跑。`;

@@ -94,11 +94,12 @@ describe("GB1 battle database", () => {
     expect(report.sourceRevision).toBe("9e6258ff726b786040a267e8bdbbf037b560285e");
     expect(report.counts).toEqual({
       monsters: 407,
-      techniques: 259,
+      techniques: 260,
       items: 114,
       elements: 13,
       tastes: 12,
       statuses: 35,
+      plagues: 1,
       encounters: 22,
       npcs: 206,
       environments: 10,
@@ -397,6 +398,7 @@ describe("GB1 full database switch", () => {
       elements: 13,
       tastes: 12,
       statuses: 35,
+      plagues: 1,
       encounters: 35,
       npcs: 1_139,
       environments: 40,

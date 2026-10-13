@@ -188,6 +188,7 @@ export function monsterFromSnapshot(
       linked: null,
       appliedEffects: [],
     } : null,
+    plagues: { ...(snapshot.plagues ?? {}) },
     outOfRange: false,
     isConfused: false,
   };

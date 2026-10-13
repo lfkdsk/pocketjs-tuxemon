@@ -86,6 +86,11 @@ function eventMessage(state: Runtime, event: BattleEvent | null, monsters: reado
       if (typeof event.parkFlavor === "string") {
         return L.parkFlavor(event.parkFlavor, monster(event.user));
       }
+      if (event.plague && typeof event.plague === "object") {
+        return tick >= 34
+          ? L.plagueInfected(monster(event.target))
+          : L.plagueSpread(monster(event.user), monster(event.target));
+      }
       if (tick >= 34 && event.hit === false) return L.attackMissed;
       if (tick >= 34 && Number(event.damage) > 0) return L.damage(Number(event.damage));
       return L.used(monster(event.user), battleDisplayName("technique", String(event.technique ?? "move")));

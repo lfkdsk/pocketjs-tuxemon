@@ -63,6 +63,9 @@ export interface BattleAction {
   parkCapture?: true;
   /** One of upstream ParkEffect's six idle narration keys. */
   parkFlavor?: string;
+  /** Plague technique that already infected its target during upstream's
+   * pre-check call and was therefore substituted for the selected move. */
+  plaguePrechecked?: string;
   /** EnqueuedAction.sub_priority, consumed even when sorting ignores it. */
   subPriority: number;
 }

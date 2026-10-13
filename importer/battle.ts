@@ -194,6 +194,7 @@ export interface BattleImportReport {
     elements: number;
     tastes: number;
     statuses: number;
+    plagues: number;
     encounters: number;
     npcs: number;
     environments: number;
@@ -399,6 +400,72 @@ function weatherTable(): Record<string, WeatherRow> {
     modifiers: entry.modifiers.map((modifier, index) => weatherModifier(modifier, entry.slug, index)),
   }));
   return Object.fromEntries(rows.map((row) => [row.slug, row]));
+}
+
+function numericRecord(value: unknown): Record<string, number> {
+  return Object.fromEntries(Object.entries(object(value))
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, entry]) => [key, number(entry)]));
+}
+
+function optionalRange(value: unknown, label: string): [number, number] | null {
+  if (value === null || value === undefined) return null;
+  const raw = list<unknown>(value);
+  if (raw.length !== 2) throw new Error(`battle importer: ${label} must contain two numbers`);
+  return [number(raw[0]), number(raw[1])];
+}
+
+function optionalStrings(value: unknown): string[] | null {
+  return value === null || value === undefined ? null : list<unknown>(value).map(String);
+}
+
+/** Normalize every root plague profile. The same slug names the technique
+ * instantiated by CombatSession.pre_checking upstream. */
+function plagueTable(sourceRoot: string): BattleDb["plagues"] {
+  const root = object(readYaml(join(sourceRoot, "mods/plagues.yaml")));
+  const rows = object(root.plagues);
+  return Object.fromEntries(sortedKeys(rows).map((slug) => {
+    const raw = object(rows[slug]);
+    const resistance = object(raw.resistance_modifiers);
+    const inoculationRaw = raw.inoculation === null || raw.inoculation === undefined
+      ? null : object(raw.inoculation);
+    const cureRaw = raw.cure === null || raw.cure === undefined ? null : object(raw.cure);
+    return [slug, {
+      spreadness: number(raw.spreadness),
+      carrierSpreadness: raw.carrier_spreadness === null || raw.carrier_spreadness === undefined
+        ? null : number(raw.carrier_spreadness),
+      naturalRecoveryChance: number(raw.natural_recovery_chance),
+      symptomOnsetChance: number(raw.symptom_onset_chance),
+      typeWeights: numericRecord(raw.type_weights),
+      shapeWeights: numericRecord(raw.shape_weights),
+      statusWeights: numericRecord(raw.status_weights),
+      resistanceModifiers: {
+        types: numericRecord(resistance.types),
+        shapes: numericRecord(resistance.shapes),
+        statuses: numericRecord(resistance.statuses),
+      },
+      weightRange: optionalRange(raw.weight_range, `plague ${slug}.weight_range`),
+      heightRange: optionalRange(raw.height_range, `plague ${slug}.height_range`),
+      inoculation: inoculationRaw === null ? null : {
+        requiredHeldItem: optionalString(inoculationRaw.required_held_item),
+        eligibleTypes: optionalStrings(inoculationRaw.eligible_types),
+        eligibleShapes: optionalStrings(inoculationRaw.eligible_shapes),
+      },
+      cure: cureRaw === null ? null : {
+        chance: number(cureRaw.chance),
+        messageCured: optionalString(cureRaw.message_cured),
+        messageCarrierCured: optionalString(cureRaw.message_carrier_cured),
+      },
+      messages: {
+        spreadSuccess: optionalString(raw.message_spread_success),
+        targetResists: optionalString(raw.message_target_resists),
+        minorEffect: optionalString(raw.message_minor_effect),
+        targetInfected: optionalString(raw.message_target_infected),
+        userSuppressed: optionalString(raw.message_user_suppressed),
+        symptomOnset: optionalString(raw.message_symptom_onset),
+      },
+    }];
+  }));
 }
 
 function sortedKeys<T>(values: Record<string, T>): string[] {
@@ -1209,6 +1276,7 @@ export function runtimeBattleDb(db: BattleDb): BattleDb {
     }])),
     environments: db.environments,
     weather: db.weather,
+    plagues: db.plagues,
     ui: {
       hpBar: db.ui.hpBar,
       expBar: db.ui.expBar,
@@ -1290,6 +1358,7 @@ export function splitBattleRuntimeDb(
     battleMusic: db.battleMusic,
     environments: db.environments,
     weather: db.weather,
+    plagues: db.plagues,
     npcs: db.npcs,
     ui: db.ui,
     monstersIndex: monsters.index,
@@ -1319,6 +1388,11 @@ export function writeBattleArtifacts(options: BattleImportOptions): BattleBuild 
   const lang: ImportLang = options.lang ?? "en_US";
   const po: TextCatalog = createTextCatalog(lang);
   const selection = buildSelection(scope, tables, loadAllMaps(), sourceRoot, options.extraSelection);
+  const plagues = plagueTable(sourceRoot);
+  for (const slug of Object.keys(plagues)) {
+    if (!(slug in tables.technique)) throw new Error(`battle importer: plague ${slug} has no matching technique`);
+    selection.techniques.add(slug);
+  }
   const battleDir = join(outputRoot, "assets/battle");
   const battlePakDir = join(outputRoot, "dist/battle-art");
   rmSync(battleDir, { recursive: true, force: true });
@@ -1673,6 +1747,7 @@ export function writeBattleArtifacts(options: BattleImportOptions): BattleBuild 
     trainerParties,
     environments,
     weather: weatherTable(),
+    plagues,
     ui: {
       hpBar: cooker.staticImage("gfx/ui/monster/hp_bar.png", "ui"),
       expBar: cooker.staticImage("gfx/ui/monster/exp_bar.png", "ui"),
@@ -1716,6 +1791,7 @@ export function writeBattleArtifacts(options: BattleImportOptions): BattleBuild 
       elements: Object.keys(elements).length,
       tastes: Object.keys(tastes).length,
       statuses: Object.keys(statuses).length,
+      plagues: Object.keys(plagues).length,
       encounters: Object.keys(encounters).length,
       npcs: Object.keys(npcs).length,
       environments: Object.keys(environments).length,

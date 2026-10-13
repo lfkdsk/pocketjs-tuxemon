@@ -89,11 +89,12 @@
   "scope": "spyder",
   "counts": {
    "monsters": 407,
-   "techniques": 259,
+   "techniques": 260,
    "items": 114,
    "elements": 13,
    "tastes": 12,
    "statuses": 35,
+   "plagues": 1,
    "encounters": 22,
    "npcs": 206,
    "environments": 10,
@@ -111,7 +112,7 @@
    "textureBytes": 30922008,
    "encodedBytes": 2780624,
    "residentBytes": 16214784,
-   "pakBytes": 4489680,
+   "pakBytes": 4491072,
    "maxWidth": 512,
    "maxHeight": 512,
    "quantization": {
@@ -211,8 +212,8 @@
     }
    }
   },
-  "battleDbBytes": 1649987,
-  "runtimeDbBytes": 1511476,
+  "battleDbBytes": 1651378,
+  "runtimeDbBytes": 1512847,
   "pakKey": "game:battle-db",
   "battleMusic": {
    "environmentSets": 40,
@@ -227,9 +228,9 @@
    "invalidReferencePolicy": "reject-like-upstream-music-properties"
   },
   "battleRepository": {
-   "shellBytes": 238263,
-   "entries": 815,
-   "entryBytes": 1189450
+   "shellBytes": 238996,
+   "entries": 816,
+   "entryBytes": 1190077
   }
  },
  "itemIcons": {

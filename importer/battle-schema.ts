@@ -78,6 +78,44 @@ export interface BattleMusicCatalog {
   npcOverrides: Record<string, BattleMusicSet>;
 }
 
+/** One root `mods/plagues.yaml` profile. Field names are normalized to the
+ * game schema while preserving every upstream knob, including currently
+ * dormant recovery/carrier settings. */
+export interface BattlePlagueRow {
+  spreadness: number;
+  carrierSpreadness: number | null;
+  naturalRecoveryChance: number;
+  symptomOnsetChance: number;
+  typeWeights: Record<string, number>;
+  shapeWeights: Record<string, number>;
+  statusWeights: Record<string, number>;
+  resistanceModifiers: {
+    types: Record<string, number>;
+    shapes: Record<string, number>;
+    statuses: Record<string, number>;
+  };
+  weightRange: [number, number] | null;
+  heightRange: [number, number] | null;
+  inoculation: {
+    requiredHeldItem: string | null;
+    eligibleTypes: string[] | null;
+    eligibleShapes: string[] | null;
+  } | null;
+  cure: {
+    chance: number;
+    messageCured: string | null;
+    messageCarrierCured: string | null;
+  } | null;
+  messages: {
+    spreadSuccess: string | null;
+    targetResists: string | null;
+    minorEffect: string | null;
+    targetInfected: string | null;
+    userSuppressed: string | null;
+    symptomOnset: string | null;
+  };
+}
+
 export interface BattleDb {
   format: "pocket-tuxemon/battle-db/v1";
   sourceRevision: string;
@@ -288,6 +326,9 @@ export interface BattleDb {
    * dormant until the rows are populated. See battle/weather-modifiers.ts.
    */
   weather: Record<string, WeatherRow>;
+  /** Root plague profiles whose same-named techniques can replace an infected
+   * monster's chosen enemy-targeting move during combat. */
+  plagues: Record<string, BattlePlagueRow>;
   ui: {
     hpBar: BattleImageRef;
     expBar: BattleImageRef;
@@ -358,6 +399,8 @@ export interface BattleRuntimeShell {
   battleMusic: BattleDb["battleMusic"];
   environments: BattleDb["environments"];
   weather: BattleDb["weather"];
+  /** Absent only in pre-plague runtime shells. */
+  plagues?: BattleDb["plagues"];
   npcs: BattleDb["npcs"];
   ui: BattleDb["ui"];
   monstersIndex: JournalMonsterIndexEntry[];
@@ -426,7 +469,7 @@ export function validateBattleDb(value: unknown, pakKeys?: ReadonlySet<string>):
   assert(value.format === "pocket-tuxemon/battle-db/v1", "unsupported format");
   assert(value.scope === "spyder" || value.scope === "full", "scope must be spyder or full");
   const db = value as unknown as BattleDb;
-  for (const key of ["shapes", "elements", "tastes", "monsters", "techniques", "items", "statuses", "encounters", "battleMusic", "npcs", "environments", "weather"] as const) {
+  for (const key of ["shapes", "elements", "tastes", "monsters", "techniques", "items", "statuses", "encounters", "battleMusic", "npcs", "environments", "weather", "plagues"] as const) {
     assert(isRecord(db[key]), `${key} must be an object`);
   }
   assert(isRecord(db.battleMusic.environments), "battleMusic.environments must be an object");
@@ -536,6 +579,54 @@ export function validateBattleDb(value: unknown, pakKeys?: ReadonlySet<string>):
     }
     for (const type of technique.types) assert(type in db.elements, `technique ${slug} references missing element ${type}`);
     validateStatModifiers(technique.statModifiers, `technique ${slug}`);
+  }
+  for (const [slug, plague] of Object.entries(db.plagues)) {
+    assert(isRecord(plague), `plague ${slug} must be an object`);
+    for (const [field, chance] of [
+      ["spreadness", plague.spreadness],
+      ["naturalRecoveryChance", plague.naturalRecoveryChance],
+      ["symptomOnsetChance", plague.symptomOnsetChance],
+    ] as const) {
+      assert(Number.isFinite(chance) && chance >= 0 && chance <= 1, `plague ${slug} has invalid ${field}`);
+    }
+    assert(plague.carrierSpreadness === null || (Number.isFinite(plague.carrierSpreadness)
+      && plague.carrierSpreadness >= 0 && plague.carrierSpreadness <= 1), `plague ${slug} has invalid carrierSpreadness`);
+    assert(plague.weightRange === null || isFiniteRange(plague.weightRange), `plague ${slug} has invalid weightRange`);
+    assert(plague.heightRange === null || isFiniteRange(plague.heightRange), `plague ${slug} has invalid heightRange`);
+    const weights = {
+      typeWeights: plague.typeWeights,
+      shapeWeights: plague.shapeWeights,
+      statusWeights: plague.statusWeights,
+      resistanceTypes: plague.resistanceModifiers?.types,
+      resistanceShapes: plague.resistanceModifiers?.shapes,
+      resistanceStatuses: plague.resistanceModifiers?.statuses,
+    };
+    for (const [label, values] of Object.entries(weights)) {
+      assert(isRecord(values), `plague ${slug} ${label} must be an object`);
+      assert(Object.entries(values).every(([key, value]) => key.length > 0
+        && Number.isFinite(value) && Number(value) >= 0), `plague ${slug} has invalid ${label}`);
+    }
+    if (plague.inoculation !== null) {
+      assert(isRecord(plague.inoculation), `plague ${slug} inoculation must be an object or null`);
+      assert(plague.inoculation.requiredHeldItem === null || (typeof plague.inoculation.requiredHeldItem === "string"
+        && plague.inoculation.requiredHeldItem.length > 0), `plague ${slug} has invalid inoculation item`);
+      for (const [label, values] of [["eligibleTypes", plague.inoculation.eligibleTypes], ["eligibleShapes", plague.inoculation.eligibleShapes]] as const) {
+        assert(values === null || (Array.isArray(values) && values.every((value) => typeof value === "string" && value.length > 0)),
+          `plague ${slug} has invalid inoculation ${label}`);
+      }
+    }
+    if (plague.cure !== null) {
+      assert(isRecord(plague.cure) && Number.isFinite(plague.cure.chance)
+        && plague.cure.chance >= 0 && plague.cure.chance <= 1, `plague ${slug} has invalid cure`);
+      assert(plague.cure.messageCured === null || typeof plague.cure.messageCured === "string", `plague ${slug} has invalid cure message`);
+      assert(plague.cure.messageCarrierCured === null || typeof plague.cure.messageCarrierCured === "string", `plague ${slug} has invalid carrier cure message`);
+    }
+    assert(isRecord(plague.messages) && Object.values(plague.messages).every((message) => message === null || typeof message === "string"),
+      `plague ${slug} has invalid messages`);
+    const technique = db.techniques[slug];
+    assert(technique !== undefined, `plague ${slug} references missing technique ${slug}`);
+    assert(technique.effects.some((effect) => effect.type === "plague" && String(effect.parameters?.[0]) === slug),
+      `plague ${slug} technique must apply its matching plague effect`);
   }
   for (const [slug, item] of Object.entries(db.items)) {
     assert(typeof item.name === "string" && item.name.length > 0, `item ${slug} has no localized name`);

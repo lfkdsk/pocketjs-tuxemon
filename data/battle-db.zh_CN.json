@@ -69589,6 +69589,45 @@
     "loops": 0
    }
   },
+  "spyderbite": {
+   "name": "斯皮德咬合",
+   "description": "斯皮德咬合",
+   "id": 0,
+   "sort": "meta",
+   "category": "notype",
+   "range": "special",
+   "speed": "normal",
+   "accuracy": 0,
+   "potency": 0,
+   "power": 0,
+   "healingPower": 0,
+   "recharge": 0,
+   "types": [],
+   "target": {
+    "enemy_monster": false,
+    "enemy_team": false,
+    "enemy_trainer": false,
+    "own_monster": false,
+    "own_team": false,
+    "own_trainer": false
+   },
+   "behaviors": {},
+   "effects": [
+    {
+     "type": "plague",
+     "parameters": [
+      "spyderbite"
+     ]
+    }
+   ],
+   "conditions": [],
+   "statModifiers": {},
+   "messages": {
+    "use": "combat_used_x",
+    "success": null,
+    "failure": "spyderbite_miss"
+   }
+  },
   "stabilo": {
    "name": "斯泰必罗",
    "description": "使用者召唤一阵锋利的木屑刺穿对手。",
@@ -96270,6 +96309,34 @@
    "temperature": "mild",
    "wind": "windy",
    "modifiers": []
+  }
+ },
+ "plagues": {
+  "spyderbite": {
+   "spreadness": 0.125,
+   "carrierSpreadness": null,
+   "naturalRecoveryChance": 0,
+   "symptomOnsetChance": 0,
+   "typeWeights": {},
+   "shapeWeights": {},
+   "statusWeights": {},
+   "resistanceModifiers": {
+    "types": {},
+    "shapes": {},
+    "statuses": {}
+   },
+   "weightRange": null,
+   "heightRange": null,
+   "inoculation": null,
+   "cure": null,
+   "messages": {
+    "spreadSuccess": "combat_state_plague2",
+    "targetResists": "combat_state_plague3",
+    "minorEffect": "combat_state_plague1",
+    "targetInfected": "combat_state_plague4",
+    "userSuppressed": null,
+    "symptomOnset": null
+   }
   }
  },
  "ui": {

@@ -7,7 +7,7 @@ import type {
   BattlePhase,
   PendingBattleAction,
 } from "./core.ts";
-import type { WeatherRow } from "../importer/battle-schema.ts";
+import type { BattlePlagueRow, WeatherRow } from "../importer/battle-schema.ts";
 
 export const STAT_NAMES = ["armour", "dodge", "hp", "melee", "ranged", "speed"] as const;
 export type StatName = (typeof STAT_NAMES)[number];
@@ -201,6 +201,9 @@ export interface TuxemonBattleDb {
   /** The ten imported weather rows; empty modifier lists make every
    *  weather a damage no-op until upstream populates them. */
   weather: Record<string, WeatherRow>;
+  /** Root plague rules; each key also names its replacement technique. */
+  /** Optional for pre-plague oracle fixtures; generated databases always carry it. */
+  plague?: Record<string, BattlePlagueRow>;
   capture: DbCaptureRules;
   capture_devices: {
     status_modifier: number;
@@ -276,6 +279,8 @@ export interface BattleMonster {
   fallback: string;
   fallbackHit: boolean;
   status: BattleStatus | null;
+  /** Persistent disease phase projected from the extension for this battle. */
+  plagues: Record<string, PlaguePhase>;
   outOfRange: boolean;
   isConfused: boolean;
 }
@@ -307,6 +312,8 @@ export interface MonsterSnapshot {
   bond?: number;
   trainingPoints?: Partial<Stats>;
   status?: string | null;
+  /** Battle-only projection; canonical saves keep this in ext.plagueByIid. */
+  plagues?: Record<string, PlaguePhase>;
   acquisition?: string;
   captureDevice?: string;
   waitingToEvolve?: boolean;
@@ -315,6 +322,8 @@ export interface MonsterSnapshot {
   /** Breeding lineage written by the daycare newborn pipeline. */
   fatherIid?: string;
 }
+
+export type PlaguePhase = "infected" | "inoculated" | "carrier" | "recovered";
 
 /** Complete persistent snapshot produced by the Tuxemon spawn pipeline. */
 export interface SpawnedMonsterSnapshot extends MonsterSnapshot {

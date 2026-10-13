@@ -46,6 +46,7 @@ import {
 import type {
   BattleEvent,
   BattleMonster,
+  PlaguePhase,
   SpawnedMonsterSnapshot,
   TuxemonBattleDb,
   TuxemonBattleState,
@@ -398,6 +399,17 @@ function enemySnapshot(
   return snapshot;
 }
 
+function withBattlePlagues(
+  snapshot: SpawnedMonsterSnapshot,
+  plagueByIid: TuxemonExtensionState["plagueByIid"],
+): SpawnedMonsterSnapshot {
+  const raw = snapshot.iid === undefined ? undefined : plagueByIid[snapshot.iid];
+  return raw === undefined ? snapshot : {
+    ...snapshot,
+    plagues: { ...raw } as Record<string, PlaguePhase>,
+  };
+}
+
 function encounterRows(
   db: BattleDb,
   table: string,
@@ -735,11 +747,18 @@ function completedExtension(state: RuntimeBattleState): TuxemonExtensionState {
   const kennel = [...state.ext.kennel];
   let ext = clone(state.ext);
   let nextMonsterId = state.ext.nextMonsterId;
+  const plagueByIid = { ...state.ext.plagueByIid };
+  for (const monster of state.battle.parties.flat()) {
+    if (!monster.iid) continue;
+    if (Object.keys(monster.plagues).length === 0) delete plagueByIid[monster.iid];
+    else plagueByIid[monster.iid] = { ...monster.plagues };
+  }
   if (state.battle.capturedUid !== null) {
     const captured = getMonster(state.battle, state.battle.capturedUid);
     const allocated = nextCapturedIid({ ...state.ext, nextMonsterId });
     nextMonsterId = allocated[1];
     const snapshot = capturedSnapshot(captured, allocated[0]);
+    if (Object.keys(captured.plagues).length > 0) plagueByIid[allocated[0]] = { ...captured.plagues };
     if (party.length < PARTY_LIMIT) party.push(snapshot);
     else if (kennel.length < KENNEL_LIMIT) kennel.push(snapshot);
     ext = registerCaughtMonster(ext, captured.slug);
@@ -761,6 +780,7 @@ function completedExtension(state: RuntimeBattleState): TuxemonExtensionState {
     runAttempts: state.battle.runAttempts,
     history,
     nextMonsterId,
+    plagueByIid,
   };
 }
 
@@ -1026,7 +1046,8 @@ export function createTuxemonBattleRules(source: BattleDbSource, enums: Variable
         let enemy: SpawnedMonsterSnapshot[];
         let kind: "trainer" | "wild";
         let startedExt = clone(ext);
-        let playerParty: SpawnedMonsterSnapshot[] = ext.party;
+        let playerParty: SpawnedMonsterSnapshot[] = ext.party.map((snapshot) =>
+          withBattlePlagues(snapshot, ext.plagueByIid));
         let spectatorInfo: SpectatorInfo | null = null;
 
         if (setup.kind === "trainer") {
@@ -1061,7 +1082,9 @@ export function createTuxemonBattleRules(source: BattleDbSource, enums: Variable
               moneyModifier: member.moneyModifier ?? 0,
             });
           }
-          enemy = persistedParty.map((member) => enemySnapshot(db, rulesDb, rng, member));
+          enemy = persistedParty.map((member) => withBattlePlagues(
+            enemySnapshot(db, rulesDb, rng, member), ext.plagueByIid,
+          ));
           if (setup.fieldSize === 2 && ext.party.length + enemy.length < 3) {
             release();
             return null;
@@ -1126,8 +1149,12 @@ export function createTuxemonBattleRules(source: BattleDbSource, enums: Variable
             release();
             return null;
           }
-          const fighterSnapshots = fighterParty.map((member) => enemySnapshot(db, rulesDb, rng, member));
-          const foeSnapshots = foeParty.map((member) => enemySnapshot(db, rulesDb, rng, member));
+          const fighterSnapshots = fighterParty.map((member) => withBattlePlagues(
+            enemySnapshot(db, rulesDb, rng, member), ext.plagueByIid,
+          ));
+          const foeSnapshots = foeParty.map((member) => withBattlePlagues(
+            enemySnapshot(db, rulesDb, rng, member), ext.plagueByIid,
+          ));
           if (!legalParty(fighterSnapshots) || !legalParty(foeSnapshots)) {
             release();
             return null;
@@ -1199,6 +1226,9 @@ export function createTuxemonBattleRules(source: BattleDbSource, enums: Variable
         const techniqueSlugs = new Set(battle.parties.flat().flatMap((monster) => [
           monster.fallback,
           ...monster.moves.map((move) => move.slug),
+          ...Object.entries(monster.plagues)
+            .filter(([slug, phase]) => phase === "infected" && slug in db.techniques)
+            .map(([slug]) => slug),
         ]));
         const techniques = Object.fromEntries([...techniqueSlugs].map((slug) => {
           const technique = db.techniques[slug]!;

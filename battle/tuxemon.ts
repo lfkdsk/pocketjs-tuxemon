@@ -14,6 +14,7 @@ import {
 import { calculateDefeatExperience, giveExperience } from "./progression.ts";
 import { applyStatModifier, calculateBaseStats, combatStat, monsterFromSnapshot, pythonRound } from "./stats.ts";
 import { weatherDamageFactor } from "./weather-modifiers.ts";
+import type { BattlePlagueRow } from "../importer/battle-schema.ts";
 import {
   STAT_NAMES,
   type BattleMonster,
@@ -91,6 +92,7 @@ function battleDraft(state: TuxemonBattleState): TuxemonBattleState {
     trainingPoints: { ...value.trainingPoints },
     moves: value.moves.map(move => ({ ...move })),
     status: value.status ? { ...value.status, appliedEffects: [...value.status.appliedEffects] } : null,
+    plagues: { ...value.plagues },
   });
   return {
     ...state,
@@ -393,57 +395,149 @@ function usableMoves(
   );
 }
 
+type PlagueAttempt = "infected" | "minor_effect" | "resisted" | "immune" | "already_has" | "unknown";
+
+function plagueTargetEligible(
+  db: TuxemonBattleDb,
+  plague: BattlePlagueRow,
+  target: BattleMonster,
+): boolean {
+  if (plague.weightRange && (target.weight < plague.weightRange[0] || target.weight > plague.weightRange[1])) return false;
+  if (plague.heightRange && (target.height < plague.heightRange[0] || target.height > plague.heightRange[1])) return false;
+  if (Object.keys(plague.typeWeights).length > 0
+    && target.types.reduce((sum, slug) => sum + (plague.typeWeights[slug] ?? 0), 0) === 0) return false;
+  if (Object.keys(plague.shapeWeights).length > 0
+    && (plague.shapeWeights[db.monster[target.slug]?.shape ?? ""] ?? 0) === 0) return false;
+  return true;
+}
+
+function attemptPlagueInfection(
+  db: TuxemonBattleDb,
+  state: TuxemonBattleState,
+  target: BattleMonster,
+  slug: string,
+): PlagueAttempt {
+  const current = target.plagues[slug];
+  if (current === "infected" || current === "carrier") return "already_has";
+  const plague = db.plague?.[slug];
+  if (!plague) return "unknown";
+  if (current === "inoculated" || current === "recovered" || !plagueTargetEligible(db, plague, target)) return "immune";
+
+  const typeWeight = Object.keys(plague.typeWeights).length > 0
+    ? target.types.reduce((sum, type) => sum + (plague.typeWeights[type] ?? 0), 0)
+    : 1;
+  const shapeWeight = Object.keys(plague.shapeWeights).length > 0
+    ? plague.shapeWeights[db.monster[target.slug]?.shape ?? ""] ?? 0
+    : 1;
+  let resistance = 1;
+  for (const type of target.types) resistance *= plague.resistanceModifiers.types[type] ?? 1;
+  resistance *= plague.resistanceModifiers.shapes[db.monster[target.slug]?.shape ?? ""] ?? 1;
+  if (target.status) resistance *= plague.resistanceModifiers.statuses[target.status.slug] ?? 1;
+  if (nextRandom(state) < plague.spreadness * typeWeight * shapeWeight * resistance) {
+    target.plagues[slug] = "infected";
+    return "infected";
+  }
+  return plague.messages.minorEffect ? "minor_effect" : "resisted";
+}
+
+function applyPlagueEffect(
+  db: TuxemonBattleDb,
+  state: TuxemonBattleState,
+  target: BattleMonster,
+  slug: string,
+): boolean {
+  const attempt = attemptPlagueInfection(db, state, target, slug);
+  const success = attempt === "infected";
+  const cure = db.plague?.[slug]?.cure;
+  if ((target.plagues[slug] === "infected" || target.plagues[slug] === "carrier")
+    && cure && nextRandom(state) < cure.chance) {
+    target.plagues[slug] = "recovered";
+  }
+  return success;
+}
+
+function mostSevereInfection(db: TuxemonBattleDb, monster: BattleMonster): string | null {
+  let chosen: string | null = null;
+  let spreadness = -Infinity;
+  for (const [slug, phase] of Object.entries(monster.plagues)) {
+    const row = db.plague?.[slug];
+    if (phase !== "infected" || !row || row.spreadness <= spreadness) continue;
+    chosen = slug;
+    spreadness = row.spreadness;
+  }
+  return chosen;
+}
+
 function applyPreChecking(
   db: TuxemonBattleDb,
   state: TuxemonBattleState,
   user: BattleMonster,
   target: BattleMonster,
   selected: { moveIndex?: number; slug: string },
-): { moveIndex?: number; slug: string } {
+): { moveIndex?: number; slug: string; plaguePrechecked?: string } {
   const status = user.status;
-  if (!status) return selected;
-  const effect = db.status[status.slug].effects.find((candidate) =>
-    ["charmed", "confused", "flinching", "noddingoff", "wild"].includes(candidate.type),
-  );
-  if (!effect) return selected;
-  const p = effect.parameters;
-  let replacements: Array<{ moveIndex?: number; slug: string }> = [];
-  if (effect.type === "charmed") {
-    if (nextRandom(state) > Number(p[0])) {
-      const tech = db.technique[selected.slug];
-      if (tech.target.enemy_monster || tech.target.enemy_team || tech.target.enemy_trainer) {
-        state.hitRolls[String(user.uid)] = 1.1;
+  let checked = selected;
+  if (status) {
+    const effect = db.status[status.slug].effects.find((candidate) =>
+      ["charmed", "confused", "flinching", "noddingoff", "wild"].includes(candidate.type),
+    );
+    if (effect) {
+      const p = effect.parameters;
+      let replacements: Array<{ moveIndex?: number; slug: string }> = [];
+      if (effect.type === "charmed") {
+        if (nextRandom(state) > Number(p[0])) {
+          const tech = db.technique[selected.slug];
+          if (tech.target.enemy_monster || tech.target.enemy_team || tech.target.enemy_trainer) {
+            state.hitRolls[String(user.uid)] = 1.1;
+          }
+        }
+      } else if (effect.type === "confused") {
+        user.isConfused = nextRandom(state) < Number(p[0]);
+        if (user.isConfused) {
+          const available = user.moves.flatMap((move, moveIndex) => {
+            const tech = db.technique[move.slug];
+            return move.cooldown === 0 && !tech.effects.some((rule) =>
+              rule.type === "give" && rule.parameters.includes("confused"),
+            ) ? [{ moveIndex, slug: move.slug }] : [];
+          });
+          if (available.length > 0) replacements = [randomChoice(state, available)];
+          else replacements = [{ slug: db.status[status.slug].on_tech_use ?? "empty" }];
+        }
+      } else if (effect.type === "flinching") {
+        if (nextRandom(state) > Number(p[0])) {
+          replacements = [{ slug: db.status[status.slug].on_tech_use ?? "empty" }];
+          status.uses++;
+          if (status.uses >= 1) clearStatus(db, user);
+        }
+      } else if (effect.type === "noddingoff") {
+        replacements = [{ slug: db.status[status.slug].on_tech_use ?? "empty" }];
+      } else if (effect.type === "wild") {
+        if (nextRandom(state) < Number(p[0])) {
+          replacements = [{ slug: db.status[status.slug].on_tech_use ?? "empty" }];
+          user.currentHp = Math.max(0, user.currentHp - Math.trunc(user.base.hp / Number(p[1])));
+        }
       }
-    }
-  } else if (effect.type === "confused") {
-    user.isConfused = nextRandom(state) < Number(p[0]);
-    if (user.isConfused) {
-      const available = user.moves.flatMap((move, moveIndex) => {
-        const tech = db.technique[move.slug];
-        return move.cooldown === 0 && !tech.effects.some((rule) =>
-          rule.type === "give" && rule.parameters.includes("confused"),
-        ) ? [{ moveIndex, slug: move.slug }] : [];
-      });
-      if (available.length > 0) replacements = [randomChoice(state, available)];
-      else replacements = [{ slug: db.status[status.slug].on_tech_use ?? "empty" }];
-    }
-  } else if (effect.type === "flinching") {
-    if (nextRandom(state) > Number(p[0])) {
-      replacements = [{ slug: db.status[status.slug].on_tech_use ?? "empty" }];
-      status.uses++;
-      if (status.uses >= 1) clearStatus(db, user);
-    }
-  } else if (effect.type === "noddingoff") {
-    replacements = [{ slug: db.status[status.slug].on_tech_use ?? "empty" }];
-  } else if (effect.type === "wild") {
-    if (nextRandom(state) < Number(p[0])) {
-      replacements = [{ slug: db.status[status.slug].on_tech_use ?? "empty" }];
-      user.currentHp = Math.max(0, user.currentHp - Math.trunc(user.base.hp / Number(p[1])));
+      // CombatSession.pre_checking performs a second random.choice even though
+      // every current status plugin returns at most one replacement.
+      if (replacements.length > 0) checked = randomChoice(state, replacements);
     }
   }
-  // CombatSession.pre_checking performs a second random.choice even though
-  // every current status plugin returns at most one replacement.
-  return replacements.length > 0 ? randomChoice(state, replacements) : selected;
+
+  // Upstream calls the same-named plague technique once during pre-checking
+  // and substitutes it only when that call successfully infects the target.
+  // The normal perform phase then calls the substituted technique again; the
+  // second call observes `already_has`, which is intentionally preserved.
+  const technique = db.technique[checked.slug];
+  if (technique && (technique.target.enemy_monster || technique.target.enemy_team || technique.target.enemy_trainer)) {
+    const slug = mostSevereInfection(db, user);
+    const effect = slug && db.technique[slug]?.effects.find((candidate) =>
+      candidate.type === "plague" && candidate.parameters[0] === slug
+    );
+    if (slug && effect && applyPlagueEffect(db, state, target, slug)) {
+      return { slug, plaguePrechecked: slug };
+    }
+  }
+  return checked;
 }
 
 function applyPerformTechniqueStatus(
@@ -1343,6 +1437,13 @@ function performTechnique(
         result.shouldTackle = true;
         break;
       }
+      case "plague": {
+        const slug = parameters[0];
+        const success = slug ? applyPlagueEffect(db, state, target, slug) : false;
+        setHit(success);
+        result.success ||= success;
+        break;
+      }
       case "empty":
         setHit(technique.accuracy >= hitRoll);
         result.success ||= result.hit;
@@ -1385,6 +1486,12 @@ function performTechnique(
     hp: partyHp(state),
     statuses: partyStatuses(state),
     ...(action.parkFlavor ? { parkFlavor: action.parkFlavor } : {}),
+    ...(action.plaguePrechecked ? {
+      plague: {
+        slug: action.plaguePrechecked,
+        phase: target.plagues[action.plaguePrechecked] ?? null,
+      },
+    } : {}),
   });
 }
 
@@ -1726,6 +1833,7 @@ function makeRules(db: TuxemonBattleDb): BattleCoreRules<BattleMonster, TuxemonB
       target: selected.target.uid,
       ref: checked.slug,
       ...(checked.moveIndex === undefined ? {} : { moveIndex: checked.moveIndex }),
+      ...(checked.plaguePrechecked === undefined ? {} : { plaguePrechecked: checked.plaguePrechecked }),
     };
   }
 
