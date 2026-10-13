@@ -465,11 +465,13 @@ future battle-data or rules change that alters replay semantics must advance
 the tape version.
 
 An agent side may carry persistent `team` records. `validateTeam` and battle
-creation replay each acquisition, level, move, TM and training-item event,
-then recompute stats and enforce the supplied level, size and ban rules;
-claimed derived values are never trusted. Ownership is a caller boundary:
-services must load these records from authenticated storage for that player,
-not accept an agent's inline provenance as proof of ownership.
+creation replay each acquisition, experience award, derived level and move,
+TM, training item and experience item, then recompute stats and enforce the
+supplied level, size and ban rules; claimed derived values are never trusted.
+Expedition records include a canonical provenance checksum so accidental or
+partial edits are rejected. The checksum is not a signature. Ownership is a
+caller boundary: services must load these records from authenticated storage
+for that player, not accept an agent's inline provenance as proof of ownership.
 
 The deterministic CLI example plays a random legal-action agent against the
 normal AI and prints one JSON object containing `tape`, `result`, and
@@ -478,6 +480,66 @@ normal AI and prints one JSON object containing `tape`, `result`, and
 ```sh
 bun run arena:demo
 bun run arena:demo -- --seed=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+```
+
+## Server-stepped expeditions
+
+`battle/expedition.ts` is a deterministic acquisition and training reducer for
+programs and agents. The service keeps the authoritative `Expedition` value,
+sends only `observeExpedition(expedition)` to the player, and accepts one
+value-equal member of `legalExpeditionActions(expedition)` at a time:
+
+```ts
+import {
+  applyExpeditionAction,
+  createExpedition,
+  legalExpeditionActions,
+  observeExpedition,
+} from "./battle/expedition.ts";
+
+let expedition = createExpedition({
+  seed: "0123456789abcdef".repeat(4),
+  rules: { cycle: "ranked", stepBudget: 40 },
+});
+
+const observation = observeExpedition(expedition);
+const action = legalExpeditionActions(expedition)
+  .find((candidate) => candidate.type === "explore")!;
+const applied = applyExpeditionAction(expedition, action);
+if (!applied.ok) throw new Error(applied.error);
+expedition = applied.expedition;
+console.log(observation.area, observeExpedition(expedition).encounter);
+```
+
+Travel and exploration use a connected eight-area Spyder route network and
+the imported encounter rows for the active area. Encounters support manual or
+automatic Arena combat, capture devices through the production capture
+formula, and fleeing. Outside encounters, legal actions cover real item
+effects and move eligibility, authored shop prices and finite stock, healing,
+travel and voluntary completion. Battle experience, level thresholds,
+level-up moves, TMs and training items append exact step-numbered provenance;
+`validateTeam` rebuilds the resulting monster before it can enter Arena.
+
+Every accepted action consumes one step and advances its sequence exactly
+once. Repeating an old sequence or skipping ahead is rejected without changing
+the state. Inventory and money ledgers are checked after every transition, and
+the observation omits the seed, RNG cursor, future encounter, ledgers and
+provenance. There is intentionally no expedition restore, rewind or replay API.
+The service must keep the full state private and commit each accepted result
+atomically; as with Arena team ownership, client-supplied state is not trusted.
+
+`cycle: "ranked"` always starts from the configured fixed initial state.
+`cycle: "persistent"` may start a fresh budget from an ended persistent state;
+the service supplies the prior authoritative value through `continuation`, and
+can lower or retain a configured level cap but cannot accept an invalid team.
+
+The end-to-end CLI chooses a deterministic random legal policy, validates its
+final team, enters a normal Arena match, validates the battle tape, and prints
+one JSON recording:
+
+```sh
+bun run expedition:demo
+bun run expedition:demo -- --seed=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
 ```
 
 The Web build adds `replay.html`, whose battle code and pak are separate from
@@ -509,6 +571,7 @@ bun tools/desktop.ts --build-only  # prepare the desktop bundle, runtime-data si
 bun run desktop         # play on the desktop host
 bun run web             # build the web version into dist/web
 bun run arena:demo      # play a deterministic random agent vs normal AI match
+bun run expedition:demo # acquire/train a team, validate it, then enter Arena
 bun run verify:web:arena # replay a tape and check controls, privacy and pixels in Chrome
 bun run verify:web:audio # stream three imported tracks in headless Chrome
 bunx tsc --noEmit       # typecheck
