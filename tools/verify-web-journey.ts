@@ -37,7 +37,9 @@ rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
 const journey = JSON.parse(readFileSync(join(ROOT, "data/g6-journey.json"), "utf8"));
 const goldens = JSON.parse(readFileSync(join(ROOT, "data/g6-goldens.json"), "utf8"));
-const DENSITY_DIALOG_FRAME = 1612;
+// The fidelity recording inserts 129 frames before Paper Town; preserve the
+// same completed Gold Pass dialog that the pre-fidelity tape captured at 1612.
+const DENSITY_DIALOG_FRAME = 1741;
 const densityDialog = decodePng(new Uint8Array(readFileSync(
   join(ROOT, "tests/goldens/web-density-paper-dialog.2x.png"),
 )));
