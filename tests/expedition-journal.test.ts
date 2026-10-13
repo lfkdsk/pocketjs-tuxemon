@@ -364,6 +364,68 @@ describe("public expedition journal v1", () => {
     expect(validateExpeditionJournal(longName).ok).toBe(false);
   }, 30_000);
 
+  test("rejects an otherwise valid journal whose encoded UTF-8 exceeds 64 MiB", () => {
+    const stepBudget = 8_000;
+    const expedition = createExpedition({
+      seed: SEED,
+      rules: { cycle: "ranked", stepBudget },
+    });
+    const initial = observeExpedition(expedition);
+    const alternatingNames = [
+      String.fromCharCode(0).repeat(700),
+      String.fromCharCode(1).repeat(700),
+    ];
+    let previous = initial;
+    const entries: ExpeditionJournal["entries"] = [];
+
+    for (let index = 0; index < stepBudget; index++) {
+      const step = index + 1;
+      const name = alternatingNames[index % alternatingNames.length]!;
+      const observation: ExpeditionObservation = {
+        ...previous,
+        remainingSteps: stepBudget - step,
+        nextAction: initial.nextAction + step,
+        team: previous.team.map((member, memberIndex) => memberIndex === 0
+          ? { ...member, species: { ...member.species, en_US: name, zh_CN: name } }
+          : member),
+      };
+      entries.push({
+        step,
+        action: { type: "explore", sequence: initial.nextAction + index },
+        observation: step % EXPEDITION_JOURNAL_CHECKPOINT_INTERVAL === 0
+          ? { kind: "full", value: observation }
+          : {
+              kind: "delta",
+              changes: [
+                { path: ["nextAction"], value: observation.nextAction },
+                { path: ["remainingSteps"], value: observation.remainingSteps },
+                { path: ["team", 0, "species", "en_US"], value: name },
+                { path: ["team", 0, "species", "zh_CN"], value: name },
+              ],
+            },
+      });
+      previous = observation;
+    }
+
+    const oversized: ExpeditionJournal = {
+      format: EXPEDITION_JOURNAL_FORMAT,
+      rules: {
+        cycle: expedition.rules.cycle,
+        stepBudget,
+        levelCap: expedition.rules.levelCap,
+        startingArea: expedition.area,
+      },
+      initialObservation: initial,
+      entries,
+    };
+    const encodedBytes = new TextEncoder().encode(JSON.stringify(oversized)).byteLength;
+    expect(encodedBytes).toBeGreaterThan(MAX_EXPEDITION_JOURNAL_BYTES);
+    expect(validateExpeditionJournal(oversized)).toEqual({
+      ok: false,
+      error: expect.stringContaining(`${MAX_EXPEDITION_JOURNAL_BYTES}-byte limit`),
+    });
+  }, 30_000);
+
   test("malformed fuzz, exotic objects, cycles, sparse arrays, and accessors never throw", () => {
     const random = lcg(0xdecafbad);
     for (let index = 0; index < 2_000; index++) {
