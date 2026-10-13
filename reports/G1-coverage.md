@@ -11,7 +11,7 @@ When conversion discards a whole event, every source rule in it is Dropped.
 
 | Kind | Kinds | Uses | Native | Degraded | Placeholder | Dropped | S1 T1 baseline |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Actions | 98 | 13617 | 13375 | 30 | 0 | 212 | 6431 / 6246 (47.23% / 45.9%) |
+| Actions | 98 | 13617 | 13377 | 30 | 0 | 210 | 6431 / 6246 (47.23% / 45.9%) |
 | Conditions | 64 | 8663 | 8452 | 21 | 0 | 190 | 4782 / 4591 (55.20% / 53.0%) |
 
 The S1 acceptance baselines are 6,246 action uses (45.9%) and 4,591
@@ -21,10 +21,10 @@ Degraded count toward them. This import records 6431
 (55.20%), respectively: 185 above
 for actions and 191 above for conditions. The old
 type-table Native figure was 5,448 / 13,617 (40.0%); conversion-path accounting
-supersedes it with 13375 / 13617
+supersedes it with 13377 / 13617
 (98.2%). “Executable”
 (native + degraded + deliberate P1 placeholder) is
-98.4% for actions and
+98.5% for actions and
 97.8% for conditions.
 
 Definitions:
@@ -558,7 +558,7 @@ four-neighbour BFS with fixed tie-breaking selects the nearest walkable cell:
 | Action | `fadeout_music` | 1 | 0 | 0 | 0 | 1 |
 | Action | `format_variable` | 10 | 0 | 0 | 0 | 10 |
 | Action | `get_party_monster` | 9 | 0 | 0 | 0 | 9 |
-| Action | `get_pending_moves` | 0 | 0 | 0 | 2 | 2 |
+| Action | `get_pending_moves` | 1 | 0 | 0 | 1 | 2 |
 | Action | `get_player_monster` | 17 | 0 | 0 | 0 | 17 |
 | Action | `info` | 1 | 0 | 0 | 0 | 1 |
 | Action | `load_yaml` | 7 | 0 | 0 | 0 | 7 |
@@ -585,7 +585,7 @@ four-neighbour BFS with fixed tie-breaking selects the nearest walkable cell:
 | Action | `remove_monster` | 5 | 0 | 0 | 0 | 5 |
 | Action | `remove_npc` | 224 | 0 | 0 | 0 | 224 |
 | Action | `remove_step_tracker` | 5 | 0 | 0 | 0 | 5 |
-| Action | `remove_tech` | 0 | 0 | 0 | 2 | 2 |
+| Action | `remove_tech` | 1 | 0 | 0 | 1 | 2 |
 | Action | `rename_monster` | 2 | 0 | 0 | 0 | 2 |
 | Action | `rename_player` | 5 | 0 | 0 | 0 | 5 |
 | Action | `screen_transition` | 25 | 0 | 0 | 0 | 25 |

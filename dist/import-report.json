@@ -284,9 +284,9 @@
  "schemaErrors": [],
  "audioQoaPending": [],
  "byFate": {
-  "T1": 38178,
+  "T1": 38376,
   "T1-lowered": 1780,
-  "T4-dropped": 1419,
+  "T4-dropped": 1221,
   "T2-dropped": 195,
   "structural": 793,
   "T3-dropped": 1
@@ -563,10 +563,10 @@
    "note": "tux.get_party_monsters dumps the party iids into iid_slot_* variables (upstream opens no menu)"
   },
   {
-   "key": "act:get_pending_moves:T4-dropped",
-   "fate": "T4-dropped",
+   "key": "act:get_pending_moves:T1",
+   "fate": "T1",
    "count": 99,
-   "note": "presentation / meta"
+   "note": "non-cancellable live move menu for the first player monster over the move cap"
   },
   {
    "key": "act:get_player_monster(rename):T1",
@@ -719,10 +719,10 @@
    "note": "tux.remove_step_tracker deletes the saved tracker (missing tracker is a no-op)"
   },
   {
-   "key": "act:remove_tech:T4-dropped",
-   "fate": "T4-dropped",
+   "key": "act:remove_tech:T1",
+   "fate": "T1",
    "count": 99,
-   "note": "presentation / meta"
+   "note": "atomically handled by the preceding pending-move resolver on the same live monster"
   },
   {
    "key": "act:rename_monster:T1",
@@ -1124,7 +1124,7 @@
    "key": "cond:is check_max_tech:T1",
    "fate": "T1",
    "count": 179,
-   "note": "tux.check_max_tech flags a monster past its species move cap (matching-list side effect unconsumed: only reader is the unmodelled get_pending_moves combat-menu flow)"
+   "note": "tux.check_max_tech flags a monster past its species move cap; pending-move choices query the same live party order"
   },
   {
    "key": "cond:is check_party_parameter:T1",
@@ -5130,12 +5130,12 @@
    "summary": {
     "types": 98,
     "uses": 13617,
-    "native": 13375,
+    "native": 13377,
     "degraded": 30,
     "placeholder": 0,
-    "dropped": 212,
+    "dropped": 210,
     "nativePercent": 98.2,
-    "executablePercent": 98.4,
+    "executablePercent": 98.5,
     "tier1": {
      "uses": 6431,
      "percent": 47.23,
@@ -5613,13 +5613,15 @@
     {
      "type": "get_pending_moves",
      "total": 2,
-     "native": 0,
+     "native": 1,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 2,
+     "dropped": 1,
      "reasons": {
+      "native": [
+       "non-cancellable live move menu for the first player monster over the move cap"
+      ],
       "dropped": [
-       "presentation / meta",
        "fixed-false guard (is current_state: combat/menu/teleporter states do not run map fibers in the kit) prevents the source event from starting"
       ]
      }
@@ -6000,13 +6002,15 @@
     {
      "type": "remove_tech",
      "total": 2,
-     "native": 0,
+     "native": 1,
      "degraded": 0,
      "placeholder": 0,
-     "dropped": 2,
+     "dropped": 1,
      "reasons": {
+      "native": [
+       "atomically handled by the preceding pending-move resolver on the same live monster"
+      ],
       "dropped": [
-       "presentation / meta",
        "fixed-false guard (is current_state: combat/menu/teleporter states do not run map fibers in the kit) prevents the source event from starting"
       ]
      }
@@ -6806,7 +6810,7 @@
      "dropped": 1,
      "reasons": {
       "native": [
-       "tux.check_max_tech flags a monster past its species move cap (matching-list side effect unconsumed: only reader is the unmodelled get_pending_moves combat-menu flow)"
+       "tux.check_max_tech flags a monster past its species move cap; pending-move choices query the same live party order"
       ],
       "dropped": [
        "fixed-false guard (is current_state: combat/menu/teleporter states do not run map fibers in the kit) prevents the source event from starting"
