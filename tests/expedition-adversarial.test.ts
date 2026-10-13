@@ -451,6 +451,40 @@ describe("expedition provenance adversarial regressions", () => {
     expect(JSON.stringify(expedition)).toBe(before);
   });
 
+  test("action accessors and bounded-envelope violations are rejected without observation or mutation", () => {
+    const expedition = starterExpedition();
+    const before = JSON.stringify(expedition);
+    let getterReads = 0;
+    const accessor = { sequence: expedition.nextAction } as Record<string, unknown>;
+    Object.defineProperty(accessor, "type", {
+      enumerable: true,
+      get() {
+        getterReads++;
+        expedition.money++;
+        return "end";
+      },
+    });
+
+    const oversized: Record<string, unknown> = { type: "end", sequence: expedition.nextAction };
+    for (let index = 0; index < 32; index++) oversized[`extra${index}`] = index;
+    const deep: Record<string, unknown> = { type: "end", sequence: expedition.nextAction };
+    let cursor = deep;
+    for (let index = 0; index < 16; index++) {
+      const child: Record<string, unknown> = {};
+      cursor.extra = child;
+      cursor = child;
+    }
+
+    for (const malformed of [accessor, oversized, deep]) {
+      let result: ReturnType<typeof applyExpeditionAction> | undefined;
+      expect(() => { result = applyExpeditionAction(expedition, malformed); }).not.toThrow();
+      expect(result).toMatchObject({ ok: false, error: "ILLEGAL_ACTION" });
+      expect(result?.expedition).toBe(expedition);
+      expect(JSON.stringify(expedition)).toBe(before);
+    }
+    expect(getterReads).toBe(0);
+  });
+
   test("rules cannot be rewritten to conceal money, inventory, or step-budget tampering", () => {
     const cases: Array<{
       label: string;

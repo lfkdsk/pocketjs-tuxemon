@@ -286,6 +286,7 @@ describe("Arena expeditions", () => {
       rules: {
         cycle: "persistent",
         stepBudget: 5,
+        levelCap: 20,
         initialMoney: 777,
         initialItems: { raise_melee: 1 },
       },
@@ -295,7 +296,7 @@ describe("Arena expeditions", () => {
     const previousTeam = JSON.parse(JSON.stringify(persistent.team)) as ArenaTeamRecord[];
     const continued = createExpedition({
       seed: NEXT_SEED,
-      rules: { cycle: "persistent", stepBudget: 7, continuation: persistent },
+      rules: { cycle: "persistent", stepBudget: 7, levelCap: 20, continuation: persistent },
     });
     expect(continued.run).toBe(2);
     expect(continued.team).toEqual(previousTeam);
@@ -314,6 +315,16 @@ describe("Arena expeditions", () => {
       requiredKind: "expedition",
     })).toEqual({ ok: true, errors: [] });
     expect(checkExpeditionConservation(continued)).toEqual([]);
+    const lowered = createExpedition({
+      seed: "3".repeat(64),
+      rules: { cycle: "persistent", stepBudget: 7, levelCap: 10, continuation: persistent },
+    });
+    expect(lowered.rules.levelCap).toBe(10);
+    expect(checkExpeditionConservation(lowered)).toEqual([]);
+    expect(() => createExpedition({
+      seed: "4".repeat(64),
+      rules: { cycle: "persistent", stepBudget: 7, levelCap: 21, continuation: persistent },
+    })).toThrow("persistent continuation cannot raise the level cap");
     expect(() => createExpedition({
       seed: NEXT_SEED,
       rules: { cycle: "persistent", stepBudget: 7, continuation: createExpedition({

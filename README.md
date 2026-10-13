@@ -538,15 +538,18 @@ not advertised as a legal expedition action.
 
 Every accepted action consumes one step and advances its sequence exactly
 once. Repeating an old sequence or skipping ahead is rejected without changing
-the state. Before and after every transition the reducer checks one exact,
-bounded canonical-JSON envelope: version, rules, area, terminal state, action
-budget, RNG cursor/draw count, contiguous provenance sequence, cross-team root
+the state. Before any action field is read, the reducer copies it through a
+small depth-, node-, key- and string-bounded plain-data envelope; accessors,
+hidden fields, symbols, cycles and oversized inputs are rejected. Before and
+after every transition the reducer checks one exact, bounded canonical-JSON
+state envelope: version, rules, area, terminal state, action budget, RNG
+cursor/draw count, contiguous provenance sequence, cross-team root
 transactions, shop/heal receipts, and inventory/money conservation. The
 observation omits the seed, RNG cursor, future encounter, ledgers and
-provenance. There is intentionally no expedition restore, rewind or replay API.
-These checks detect malformed and partially rewritten state; they are not a
-cryptographic authenticator. The service must keep the full state private in
-authenticated storage and commit each accepted result atomically. Client-
+provenance. There is intentionally no expedition restore, rewind or replay
+API. These checks detect malformed and partially rewritten state; they are not
+a cryptographic authenticator. The service must keep the full state private
+in authenticated storage and commit each accepted result atomically. Client-
 supplied state is never trusted.
 
 `cycle: "ranked"` always starts from the configured fixed initial state.

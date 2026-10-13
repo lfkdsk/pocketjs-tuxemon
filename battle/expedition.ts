@@ -250,6 +250,11 @@ const EXPEDITION_STATE_KEYS = [
   "remainingSteps", "runStartAction", "nextAction", "nextEventSeq", "rng", "rngDraws",
   "shopPurchases", "ledger", "encounter", "ended", "endReason",
 ] as const;
+const MAX_ACTION_DEPTH = 8;
+const MAX_ACTION_NODES = 64;
+const MAX_ACTION_KEYS = 16;
+const MAX_ACTION_STRING_LENGTH = 256;
+const MAX_ACTION_STRING_UNITS = 2_048;
 
 function clone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
@@ -305,6 +310,104 @@ function isCanonicalJsonShape(
     return true;
   } finally {
     ancestors.delete(value);
+  }
+}
+
+interface SanitizedAction {
+  ok: boolean;
+  value?: unknown;
+  sequence: number | null;
+}
+
+/** Copy one untrusted action into a small data-only envelope before the
+ * reducer reads any field. Actions arrive as JSON, so executable accessors,
+ * hidden fields and exotic prototypes are never meaningful input. The
+ * dedicated limits also keep a large/deep request from being compared with
+ * every advertised action. */
+function sanitizeExpeditionAction(value: unknown): SanitizedAction {
+  const rootSequence = (() => {
+    try {
+      if (!isRecord(value) || Object.getPrototypeOf(value) !== Object.prototype) return null;
+      const descriptor = Object.getOwnPropertyDescriptor(value, "sequence");
+      return descriptor && "value" in descriptor && Number.isSafeInteger(descriptor.value)
+        ? descriptor.value as number
+        : null;
+    } catch {
+      return null;
+    }
+  })();
+  const budget = { nodes: MAX_ACTION_NODES, stringUnits: MAX_ACTION_STRING_UNITS };
+
+  const copy = (entry: unknown, depth: number): { ok: true; value: unknown } | { ok: false } => {
+    if (--budget.nodes < 0 || depth > MAX_ACTION_DEPTH) return { ok: false };
+    if (entry === null || typeof entry === "boolean") return { ok: true, value: entry };
+    if (typeof entry === "number") {
+      return Number.isFinite(entry) ? { ok: true, value: entry } : { ok: false };
+    }
+    if (typeof entry === "string") {
+      if (entry.length > MAX_ACTION_STRING_LENGTH) return { ok: false };
+      budget.stringUnits -= entry.length;
+      return budget.stringUnits >= 0 ? { ok: true, value: entry } : { ok: false };
+    }
+    if (typeof entry !== "object") return { ok: false };
+
+    if (Array.isArray(entry)) {
+      if (Object.getPrototypeOf(entry) !== Array.prototype || entry.length > MAX_ACTION_KEYS) {
+        return { ok: false };
+      }
+      const result: unknown[] = [];
+      for (let index = 0; index < entry.length; index++) {
+        const descriptor = Object.getOwnPropertyDescriptor(entry, String(index));
+        if (!descriptor || descriptor.enumerable !== true || !("value" in descriptor)) {
+          return { ok: false };
+        }
+        const child = copy(descriptor.value, depth + 1);
+        if (!child.ok) return child;
+        result.push(child.value);
+      }
+      const ownKeys = Reflect.ownKeys(entry);
+      if (ownKeys.length !== entry.length + 1 || ownKeys.some((key) =>
+        typeof key !== "string" || (key !== "length" && !/^(0|[1-9][0-9]*)$/.test(key))
+      )) return { ok: false };
+      return { ok: true, value: result };
+    }
+
+    const prototype = Object.getPrototypeOf(entry);
+    if (prototype !== Object.prototype) return { ok: false };
+    const keys: string[] = [];
+    for (const key in entry) {
+      if (!Object.hasOwn(entry, key)) continue;
+      if (keys.length >= MAX_ACTION_KEYS || key.length > MAX_ACTION_STRING_LENGTH) {
+        return { ok: false };
+      }
+      budget.stringUnits -= key.length;
+      if (budget.stringUnits < 0) return { ok: false };
+      keys.push(key);
+    }
+    const ownKeys = Reflect.ownKeys(entry);
+    if (ownKeys.length !== keys.length || ownKeys.some((key) => typeof key !== "string")) {
+      return { ok: false };
+    }
+    const result = Object.create(null) as Record<string, unknown>;
+    for (const key of keys) {
+      const descriptor = Object.getOwnPropertyDescriptor(entry, key);
+      if (!descriptor || descriptor.enumerable !== true || !("value" in descriptor)) {
+        return { ok: false };
+      }
+      const child = copy(descriptor.value, depth + 1);
+      if (!child.ok) return child;
+      result[key] = child.value;
+    }
+    return { ok: true, value: result };
+  };
+
+  try {
+    const sanitized = copy(value, 0);
+    return sanitized.ok
+      ? { ok: true, value: sanitized.value, sequence: rootSequence }
+      : { ok: false, sequence: rootSequence };
+  } catch {
+    return { ok: false, sequence: rootSequence };
   }
 }
 
@@ -413,6 +516,9 @@ function continuedState(seed: string, rules: NormalizedExpeditionRules, previous
   if (previous.seed === seed) throw new Error("persistent continuation requires a fresh seed");
   const validation = checkExpeditionConservation(previous);
   if (validation.length > 0) throw new Error(`cannot continue corrupt expedition: ${validation.join("; ")}`);
+  if (rules.levelCap > previous.rules.levelCap) {
+    throw new Error("persistent continuation cannot raise the level cap");
+  }
   for (const record of previous.team) {
     const checked = buildValidatedArenaTeam([record], { minSize: 1, maxSize: 1, levelCap: rules.levelCap });
     if (checked.length !== 1) throw new Error("continued team is invalid");
@@ -1235,19 +1341,23 @@ export function applyExpeditionAction(expedition: Expedition, value: unknown): E
     return { ok: false, expedition, error: "CORRUPT_STATE" };
   }
   if (expedition.ended) return { ok: false, expedition, error: "EXPEDITION_OVER" };
-  let sequence: number | null;
-  try {
-    sequence = actionSequence(value);
-  } catch {
-    return { ok: false, expedition, error: "INVALID_ACTION" };
+  const sanitized = sanitizeExpeditionAction(value);
+  if (!sanitized.ok) {
+    return {
+      ok: false,
+      expedition,
+      error: sanitized.sequence === null ? "INVALID_ACTION" : "ILLEGAL_ACTION",
+    };
   }
+  const safeValue = sanitized.value;
+  const sequence = actionSequence(safeValue);
   if (sequence !== null && sequence < expedition.nextAction) {
     return { ok: false, expedition, error: "STALE_ACTION" };
   }
   if (sequence !== null && sequence > expedition.nextAction) {
     return { ok: false, expedition, error: "OUT_OF_ORDER" };
   }
-  if (!isRecord(value)) return { ok: false, expedition, error: "INVALID_ACTION" };
+  if (!isRecord(safeValue)) return { ok: false, expedition, error: "INVALID_ACTION" };
   let legal: ExpeditionAction[];
   try {
     legal = legalExpeditionActions(expedition);
@@ -1256,7 +1366,7 @@ export function applyExpeditionAction(expedition: Expedition, value: unknown): E
   }
   let action: ExpeditionAction | undefined;
   try {
-    action = legal.find((candidate) => exactJsonEqual(candidate, value));
+    action = legal.find((candidate) => exactJsonEqual(candidate, safeValue));
   } catch {
     return { ok: false, expedition, error: "INVALID_ACTION" };
   }
