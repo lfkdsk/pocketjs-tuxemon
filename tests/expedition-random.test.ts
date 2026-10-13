@@ -15,6 +15,8 @@ import { validateTeam } from "../battle/arena-team.ts";
 import { canonicalJson } from "../vendor/pocket-rpgkit/src/engine/save.ts";
 
 const CORPUS_RUNS = 1_000;
+const PERSISTENT_CHAINS = 100;
+const PERSISTENT_RUNS_PER_CHAIN = 3;
 const FUZZ_CASES = 1_000;
 const CORPUS_RANDOM_SEED = 0x6a09_e667;
 const FUZZ_RANDOM_SEED = 0xbb67_ae85;
@@ -24,6 +26,9 @@ interface CorpusSummary {
   totalSteps: number;
   actions: Record<string, number>;
   endings: Record<string, number>;
+  continuations: number;
+  defeatedContinuations: number;
+  maxRun: number;
 }
 
 function mulberry32(seed: number): () => number {
@@ -129,19 +134,20 @@ function runCorpus(): CorpusSummary {
   const actions: Record<string, number> = {};
   const endings: Record<string, number> = {};
   let totalSteps = 0;
+  let completedRuns = 0;
+  let continuations = 0;
+  let defeatedContinuations = 0;
+  let maxRun = 1;
 
-  for (let run = 0; run < CORPUS_RUNS; run++) {
-    let expedition = createExpedition({
-      seed: expeditionSeed(run),
-      rules: { cycle: "ranked", stepBudget: 6, levelCap: 20 },
-    });
-    assertState(expedition, `run ${run}:initial`);
+  const finish = (initial: Expedition, label: string): Expedition => {
+    let expedition = initial;
+    assertState(expedition, `${label}:initial`);
 
     // Every corpus member crosses the pre-explore disclosure boundary once;
     // the remaining choices are driven entirely by the fixed harness RNG.
     const first = legalExpeditionActions(expedition).find((action) => action.type === "explore");
-    if (!first) throw new Error(`run ${run}: initial explore was not legal`);
-    expedition = applyLegal(expedition, first, `run ${run}:step 0`);
+    if (!first) throw new Error(`${label}: initial explore was not legal`);
+    expedition = applyLegal(expedition, first, `${label}:step 0`);
     actions.explore = (actions.explore ?? 0) + 1;
     totalSteps++;
 
@@ -149,7 +155,7 @@ function runCorpus(): CorpusSummary {
     while (!expedition.ended) {
       const legal = legalExpeditionActions(expedition);
       const action = chooseAction(legal, random, localStep);
-      expedition = applyLegal(expedition, action, `run ${run}:step ${localStep}`);
+      expedition = applyLegal(expedition, action, `${label}:step ${localStep}`);
       const key = actionKey(action);
       actions[key] = (actions[key] ?? 0) + 1;
       totalSteps++;
@@ -160,10 +166,57 @@ function runCorpus(): CorpusSummary {
     const bytes = canonicalJson(expedition);
     hasher.update(`${bytes.length}:`);
     hasher.update(bytes);
+    completedRuns++;
+    maxRun = Math.max(maxRun, expedition.run);
+    return expedition;
+  };
+
+  const persistentRuns = PERSISTENT_CHAINS * PERSISTENT_RUNS_PER_CHAIN;
+  for (let index = 0; index < CORPUS_RUNS - persistentRuns; index++) {
+    finish(createExpedition({
+      seed: expeditionSeed(index),
+      rules: { cycle: "ranked", stepBudget: 6, levelCap: 20 },
+    }), `ranked ${index}`);
   }
 
-  hasher.update(canonicalJson({ totalSteps, actions, endings }));
-  return { digest: hasher.digest("hex"), totalSteps, actions, endings };
+  let seedIndex = CORPUS_RUNS - persistentRuns;
+  for (let chain = 0; chain < PERSISTENT_CHAINS; chain++) {
+    let expedition = createExpedition({
+      seed: expeditionSeed(seedIndex++),
+      rules: {
+        cycle: "persistent",
+        stepBudget: 6,
+        levelCap: 20,
+        starter: { species: "rockitten", level: 1 },
+      },
+    });
+    for (let cycle = 0; cycle < PERSISTENT_RUNS_PER_CHAIN; cycle++) {
+      if (cycle > 0) {
+        if (expedition.endReason === "defeated") defeatedContinuations++;
+        expedition = createExpedition({
+          seed: expeditionSeed(seedIndex++),
+          rules: { cycle: "persistent", stepBudget: 6, levelCap: 20, continuation: expedition },
+        });
+        continuations++;
+        assertState(expedition, `persistent ${chain}.${cycle}:continued`);
+      }
+      expedition = finish(expedition, `persistent ${chain}.${cycle}`);
+    }
+  }
+
+  if (completedRuns !== CORPUS_RUNS || seedIndex !== CORPUS_RUNS) {
+    throw new Error(`random corpus accounting mismatch: runs=${completedRuns}, seeds=${seedIndex}`);
+  }
+  hasher.update(canonicalJson({ totalSteps, actions, endings, continuations, defeatedContinuations, maxRun }));
+  return {
+    digest: hasher.digest("hex"),
+    totalSteps,
+    actions,
+    endings,
+    continuations,
+    defeatedContinuations,
+    maxRun,
+  };
 }
 
 function clone<T>(value: T): T {
@@ -214,7 +267,7 @@ function malformedAction(
 }
 
 describe("expedition randomized state machine", () => {
-  test("1,000 fixed-seed legal expeditions preserve invariants and disclosure boundaries", () => {
+  test("1,000 fixed-seed legal expeditions include persistent defeat recovery and preserve invariants", () => {
     const summary = runCorpus();
     expect((summary.endings.budget ?? 0) + (summary.endings.defeated ?? 0) +
       (summary.endings.voluntary ?? 0)).toBe(CORPUS_RUNS);
@@ -222,7 +275,10 @@ describe("expedition randomized state machine", () => {
     expect(summary.actions["battle:manual"]).toBeGreaterThan(0);
     expect(summary.actions["battle:auto"]).toBeGreaterThan(0);
     expect(summary.actions.catch).toBeGreaterThan(0);
-    expect(summary.digest).toBe("12f22dd9410321bc6f97fb7bc4c621d4fe5d7f52580acc7bb18646859f63e3ec");
+    expect(summary.continuations).toBe(200);
+    expect(summary.defeatedContinuations).toBeGreaterThan(0);
+    expect(summary.maxRun).toBe(PERSISTENT_RUNS_PER_CHAIN);
+    expect(summary.digest).toBe("7d26eef5d9fef71152913af225acc5b9c3288c73cca7c4a049886cde184871bf");
   }, 15_000);
 
   test("1,000 malformed and illegal JSON-like actions never throw or mutate authoritative bytes", () => {

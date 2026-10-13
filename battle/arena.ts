@@ -314,7 +314,12 @@ function team(
   teamRules: ArenaTeamRules | undefined,
 ) {
   if (config.kind === "agent" && "team" in config) {
-    return buildValidatedArenaTeam(config.team, teamRules ?? DEFAULT_ARENA_TEAM_RULES);
+    const rebuilt = buildValidatedArenaTeam(config.team, teamRules ?? DEFAULT_ARENA_TEAM_RULES);
+    // Arena matches validate progression but do not themselves persist XP.
+    // Expedition battles opt back into each record's validated acquisition
+    // multiplier after constructing the shared Arena session.
+    for (const monster of rebuilt) monster.experienceModifier = 0;
+    return rebuilt;
   }
   const selected = recipe(config);
   const rng: RngState = { rng: domainSeed(seed, `team:${side}`), rngDraws: 0 };

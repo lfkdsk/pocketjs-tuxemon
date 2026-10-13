@@ -44,6 +44,9 @@ export interface ArenaExpeditionOrigin {
   area: string;
   /** Global expedition action ordinal. The issued starter is step zero. */
   step: number;
+  /** Wild encounter XP rate retained after capture. Older records omit this
+   * field and keep the historical 1x reconstruction behavior. */
+  experienceModifier?: number;
   capture: ArenaExpeditionCaptureResult;
 }
 
@@ -200,6 +203,20 @@ function expeditionProvenanceHash(provenance: readonly ArenaProvenanceEvent[]): 
   ));
 }
 
+function originExperienceModifier(origin: ArenaExpeditionOrigin | null | undefined): number {
+  if (!origin) return 0;
+  return origin.capture.result === "caught" ? origin.experienceModifier ?? 1 : 1;
+}
+
+/** Reapply the acquisition XP rate only in progression-bearing expedition
+ * battles. Callers must validate the record before trusting this projection. */
+export function arenaTeamExperienceModifier(record: ArenaTeamRecord): number {
+  const acquisition = record.provenance[0];
+  return acquisition?.type === "acquire"
+    ? originExperienceModifier(acquisition.origin)
+    : 0;
+}
+
 function stringSet(
   value: unknown,
   label: string,
@@ -315,11 +332,12 @@ function applyExperience(
   levelCap: number,
 ): ProgressionAudit {
   const currentExperience = snapshot.totalExperience ?? levelFloor(snapshot.level);
-  if (!Number.isSafeInteger(amount) || amount <= 0 ||
-      !Number.isSafeInteger(currentExperience + amount)) {
+  const effectiveAmount = Math.trunc(amount * (snapshot.experienceModifier ?? 1));
+  if (!Number.isSafeInteger(amount) || amount <= 0 || !Number.isSafeInteger(effectiveAmount) ||
+      effectiveAmount <= 0 || !Number.isSafeInteger(currentExperience + effectiveAmount)) {
     throw new Error("experience amount must be a positive safe integer");
   }
-  snapshot.totalExperience = currentExperience + amount;
+  snapshot.totalExperience = currentExperience + effectiveAmount;
   const oldLevel = snapshot.level;
   while (snapshot.level < levelCap && snapshot.totalExperience >= levelFloor(snapshot.level + 1)) {
     snapshot.level++;
@@ -505,7 +523,7 @@ function expeditionOrigin(
   label: string,
   errors: string[],
 ): ArenaExpeditionOrigin | null {
-  if (!isRecord(value) || !exactObject(value, ["kind", "area", "step", "capture"], [
+  if (!isRecord(value) || !exactObject(value, ["kind", "area", "step", "experienceModifier", "capture"], [
     "kind", "area", "step", "capture",
   ]) || value.kind !== "expedition" || typeof value.area !== "string" ||
       !Object.hasOwn(SOURCE_DB.encounters, value.area) || !validStep(value.step) ||
@@ -515,7 +533,8 @@ function expeditionOrigin(
   }
   const capture = value.capture;
   if (capture.result === "starter") {
-    if (!exactObject(capture, ["result"], ["result"]) || value.step !== 0) {
+    if (!exactObject(capture, ["result"], ["result"]) || value.step !== 0 ||
+        value.experienceModifier !== undefined) {
       errors.push(`${label} starter origin must be issued at step zero`);
       return null;
     }
@@ -538,9 +557,16 @@ function expeditionOrigin(
       errors.push(`${label} caught origin names a non-capture item`);
       return null;
     }
+    const hasModifier = Object.hasOwn(value, "experienceModifier");
+    const modifier = value.experienceModifier;
+    if (hasModifier && (typeof modifier !== "number" || !Number.isFinite(modifier) || modifier <= 0)) {
+      errors.push(`${label}.experienceModifier must be a positive finite encounter multiplier`);
+      return null;
+    }
     const rows = SOURCE_DB.encounters[value.area]!.monsters;
-    if (!rows.some((row) => row.monster === species && level >= row.level[0] && level <= row.level[1])) {
-      errors.push(`${label} species and level do not occur in the recorded area`);
+    if (!rows.some((row) => row.monster === species && level >= row.level[0] && level <= row.level[1] &&
+        (!hasModifier || row.experienceModifier === modifier))) {
+      errors.push(`${label} species, level, and experience modifier do not occur in the recorded area`);
       return null;
     }
   } else {
@@ -764,6 +790,9 @@ function rebuildTeam(records: unknown, rulesValue: unknown, compareClaims = true
     }
     if (rawRecord.kind === "legacy" && first.origin !== undefined) {
       errors.push(`${prefix}.kind legacy cannot contain an expedition origin`);
+    }
+    if (origin) {
+      snapshot.experienceModifier = originExperienceModifier(origin);
     }
     if (origin?.capture.result === "caught") {
       const item = RULES_DB.item[origin.capture.item]!;

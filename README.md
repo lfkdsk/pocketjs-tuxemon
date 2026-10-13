@@ -528,7 +528,11 @@ max-level rewards are retained. Use
 before it can enter Arena.
 
 A caught monster keeps the generated individual, capture-time HP, actual
-device, captured acquisition type and capture-time persistent condition.
+device, captured acquisition type, capture-time persistent condition and the
+wild encounter's experience-rate modifier. New provenance binds that modifier
+to a real row in the recorded encounter table and uses it for later battle and
+item experience. Records written before that field existed remain valid and
+retain their historical 1x rate; they are not silently reinterpreted.
 Capture-device refunds and all five warm-taste balls follow the production
 capture transaction; mutable burn/poison state then travels separately from
 immutable acquisition provenance and can be cleared by real restore/heal
@@ -556,11 +560,16 @@ supplied state is never trusted.
 `cycle: "persistent"` may start a fresh budget from an ended persistent state;
 the service supplies the prior authoritative value through `continuation` with
 a fresh seed, and can lower or retain a configured level cap but cannot accept
-an invalid team.
+an invalid team. A voluntary or budget ending carries current HP and persistent
+status forward. A defeated continuation follows Tuxemon's blackout recovery:
+the party is fully healed, persistent status is cleared, the current abstract
+region is retained because expeditions have no tile-level faint point, and no
+money or item penalty is invented.
 
-The end-to-end CLI chooses a deterministic random legal policy, validates its
-final team, enters a normal Arena match, validates the battle tape, and prints
-one JSON recording:
+The end-to-end CLI chooses a deterministic random legal policy. When its first
+cycle is defeated, it derives a fresh seed and runs a second persistent cycle,
+then validates the final team, enters a normal Arena match, validates the
+battle tape, and prints one JSON recording with both cycle summaries:
 
 ```sh
 bun run expedition:demo

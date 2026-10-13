@@ -82,6 +82,15 @@ describe("Arena persistent team validation", () => {
     const snapshot = buildValidatedArenaTeam([record], { levelCap: 20 })[0]!;
     expect(snapshot.totalExperience).toBe(501);
     expect(snapshot.trainingPoints?.melee).toBe(50);
+    expect(snapshot.experienceModifier).toBe(1);
+
+    const arena = createArenaBattle({
+      seed: BATTLE_SEED,
+      format: "single",
+      sides: [{ kind: "agent", team: [record] }, { kind: "ai", difficulty: "beginner" }],
+      teamRules: { levelCap: 20 },
+    });
+    expect(arena.core.parties[0][0]!.experienceModifier).toBe(0);
 
     const changedXp = clone(record);
     const xp = changedXp.provenance[2];

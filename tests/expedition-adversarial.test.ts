@@ -95,7 +95,10 @@ describe("expedition provenance adversarial regressions", () => {
     expect(captured.provenance[0]).toMatchObject({
       seq: encounter.acquireSeq,
       seed: encounter.acquireSeed,
-      origin: { capture: { result: "caught", item: "tuxeball", success: true, shakes: 4, status: null } },
+      origin: {
+        experienceModifier: 3,
+        capture: { result: "caught", item: "tuxeball", success: true, shakes: 4, status: null },
+      },
     });
     expect({
       iid: rebuilt.iid,
@@ -113,6 +116,7 @@ describe("expedition provenance adversarial regressions", () => {
       moves: rebuilt.moves,
       types: rebuilt.types,
       totalExperience: rebuilt.totalExperience,
+      experienceModifier: rebuilt.experienceModifier,
       bond: rebuilt.bond,
       trainingPoints: rebuilt.trainingPoints,
     }).toEqual({
@@ -131,6 +135,7 @@ describe("expedition provenance adversarial regressions", () => {
       moves: target.moves.map(({ slug }) => slug),
       types: target.types,
       totalExperience: target.totalExperience,
+      experienceModifier: target.experienceModifier,
       bond: target.bond,
       trainingPoints: target.trainingPoints,
     });

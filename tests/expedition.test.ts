@@ -2,6 +2,12 @@ import { describe, expect, test } from "bun:test";
 
 import { validateTeam, type ArenaTeamRecord } from "../battle/arena.ts";
 import {
+  arenaTeamRecordFromProvenance,
+  appendArenaItem,
+  buildValidatedArenaTeam,
+  type ArenaProvenanceEvent,
+} from "../battle/arena-team.ts";
+import {
   applyExpeditionAction,
   checkExpeditionConservation,
   createExpedition,
@@ -217,7 +223,7 @@ describe("Arena expeditions", () => {
   test("a real generated encounter can be captured and produces a validated team record", () => {
     let expedition = createExpedition({
       seed: FIRST_THROW_CAPTURE_SEED,
-      rules: { cycle: "persistent", stepBudget: 10, initialItems: { tuxeball: 5 } },
+      rules: { cycle: "persistent", stepBudget: 10, initialItems: { tuxeball: 5, tea: 1 } },
     });
     expedition = apply(expedition, action(expedition, "explore"));
     expect(observeExpedition(expedition).encounter?.species.slug).toBe("pairagrin");
@@ -236,9 +242,78 @@ describe("Arena expeditions", () => {
         kind: "expedition",
         area: "spyder_route1",
         step: 2,
+        experienceModifier: 3,
         capture: { result: "caught", item: "tuxeball", success: true },
       },
     });
+    expect(buildValidatedArenaTeam([acquired], { levelCap: expedition.rules.levelCap })[0]!
+      .experienceModifier).toBe(3);
+
+    // Records created before the encounter multiplier was added remain valid
+    // and retain their historical 1x reconstruction rather than being silently
+    // reinterpreted as newly captured 3x records.
+    const legacyProvenance = JSON.parse(JSON.stringify(acquired.provenance)) as ArenaProvenanceEvent[];
+    const legacyAcquire = legacyProvenance[0];
+    if (legacyAcquire?.type !== "acquire" || !legacyAcquire.origin) {
+      throw new Error("captured provenance fixture missing");
+    }
+    delete legacyAcquire.origin.experienceModifier;
+    const legacyRecord = arenaTeamRecordFromProvenance(acquired.species, legacyProvenance, {
+      levelCap: expedition.rules.levelCap,
+    });
+    expect(validateTeam([legacyRecord], { levelCap: expedition.rules.levelCap })).toEqual({
+      ok: true,
+      errors: [],
+    });
+    expect(buildValidatedArenaTeam([legacyRecord], { levelCap: expedition.rules.levelCap })[0]!
+      .experienceModifier).toBe(1);
+    const legacyWithExperience = appendArenaItem(legacyRecord, {
+      type: "item",
+      item: "tea",
+      step: 3,
+    }, legacyRecord.provenance.at(-1)!.seq + 1, { levelCap: expedition.rules.levelCap }).record;
+    expect(legacyWithExperience.experience).toBe(legacyRecord.experience! + 500);
+    expect(validateTeam([legacyWithExperience], { levelCap: expedition.rules.levelCap })).toEqual({
+      ok: true,
+      errors: [],
+    });
+
+    const invalidProvenance = JSON.parse(JSON.stringify(acquired.provenance)) as ArenaProvenanceEvent[];
+    const invalidAcquire = invalidProvenance[0];
+    if (invalidAcquire?.type !== "acquire" || !invalidAcquire.origin) {
+      throw new Error("captured provenance fixture missing");
+    }
+    invalidAcquire.origin.experienceModifier = 1;
+    expect(() => arenaTeamRecordFromProvenance(acquired.species, invalidProvenance, {
+      levelCap: expedition.rules.levelCap,
+    })).toThrow("species, level, and experience modifier");
+
+    const beforeExperience = acquired.experience!;
+    expedition = apply(expedition, legalExpeditionActions(expedition).find((candidate) =>
+      candidate.type === "useItem" && candidate.item === "tea" && candidate.target === 1
+    )!);
+    expect(expedition.team[1]!.experience).toBe(beforeExperience + 1_500);
+
+    // Select only the captured member for the next encounter. This exercises
+    // the battle-construction seam as well as provenance reconstruction.
+    expedition.partyHp[0] = 0;
+    expect(checkExpeditionConservation(expedition)).toEqual([]);
+    expedition = apply(expedition, action(expedition, "explore"));
+    expect(expedition.encounter!.battle.core.parties[0]).toHaveLength(1);
+    expect(expedition.encounter!.battle.core.parties[0][0]).toMatchObject({
+      slug: "pairagrin",
+      experienceModifier: 3,
+    });
+    const beforeBattleExperience = expedition.team[1]!.experience!;
+    expedition = apply(expedition, legalExpeditionActions(expedition).find((candidate) =>
+      candidate.type === "battle" && candidate.mode === "auto"
+    )!);
+    const battleExperience = [...expedition.team[1]!.provenance].reverse().find((event) =>
+      event.type === "experience" && event.source.kind === "battle"
+    );
+    if (battleExperience?.type !== "experience") throw new Error("battle experience fixture missing");
+    expect(battleExperience.amount).toBe(12);
+    expect(expedition.team[1]!.experience).toBe(beforeBattleExperience + battleExperience.amount * 3);
     expect(validateTeam(expedition.team, {
       levelCap: expedition.rules.levelCap,
       requiredKind: "expedition",
@@ -332,5 +407,72 @@ describe("Arena expeditions", () => {
         rules: { cycle: "persistent", stepBudget: 2 },
       }) },
     })).toThrow("requires an ended persistent expedition");
+  });
+
+  test("a defeated persistent expedition recovers into an actionable continuation", () => {
+    let defeated = createExpedition({
+      seed: "1".padStart(64, "0"),
+      rules: {
+        cycle: "persistent",
+        stepBudget: 6,
+        starter: { species: "rockitten", level: 1 },
+      },
+    });
+    defeated = apply(defeated, legalExpeditionActions(defeated).find((candidate) =>
+      candidate.type === "travel" && candidate.area === "spyder_route2"
+    )!);
+    defeated = apply(defeated, action(defeated, "explore"));
+    defeated = apply(defeated, legalExpeditionActions(defeated).find((candidate) =>
+      candidate.type === "battle" && candidate.mode === "auto"
+    )!);
+    expect(defeated.endReason).toBe("defeated");
+    expect(defeated.partyHp).toEqual([0]);
+
+    // A persistent condition is legal on a fainted member and must be cleared
+    // by the same recovery boundary that restores HP.
+    defeated.partyStatus[0] = "poison";
+    expect(checkExpeditionConservation(defeated)).toEqual([]);
+    const previousTeam = JSON.parse(JSON.stringify(defeated.team)) as ArenaTeamRecord[];
+    const previousInventory = JSON.parse(JSON.stringify(defeated.inventory)) as Record<string, number>;
+    const previousMoney = defeated.money;
+    const continued = createExpedition({
+      seed: "2".padStart(64, "0"),
+      rules: { cycle: "persistent", stepBudget: 6, levelCap: 50, continuation: defeated },
+    });
+
+    expect(continued.run).toBe(2);
+    expect(continued.area).toBe("spyder_route2");
+    expect(continued.team).toEqual(previousTeam);
+    expect(continued.inventory).toEqual(previousInventory);
+    expect(continued.money).toBe(previousMoney);
+    expect(continued.nextAction).toBe(defeated.nextAction);
+    expect(continued.nextEventSeq).toBe(defeated.nextEventSeq);
+    expect(continued.partyStatus).toEqual([null]);
+    expect(observeExpedition(continued).team.every(({ hp }) => hp.current === hp.max)).toBe(true);
+    expect(checkExpeditionConservation(continued)).toEqual([]);
+
+    const traveled = apply(continued, action(continued, "travel"));
+    expect(traveled.ended).toBe(false);
+    const stopped = apply(continued, action(continued, "end"));
+    expect(stopped).toMatchObject({ ended: true, endReason: "voluntary" });
+
+    // Recovery is defeat-specific: a wounded voluntary ending carries its HP.
+    let wounded = createExpedition({
+      seed: "1".padStart(64, "0"),
+      rules: { cycle: "persistent", stepBudget: 40 },
+    });
+    wounded = apply(wounded, action(wounded, "explore"));
+    wounded = apply(wounded, legalExpeditionActions(wounded).find((candidate) =>
+      candidate.type === "battle" && candidate.mode === "auto"
+    )!);
+    expect(wounded.ended).toBe(false);
+    expect(wounded.partyHp[0]).toBeGreaterThan(0);
+    expect(wounded.partyHp[0]).toBeLessThan(observeExpedition(wounded).team[0]!.hp.max);
+    wounded = apply(wounded, action(wounded, "end"));
+    const woundedContinuation = createExpedition({
+      seed: "3".padStart(64, "0"),
+      rules: { cycle: "persistent", stepBudget: 6, continuation: wounded },
+    });
+    expect(woundedContinuation.partyHp).toEqual(wounded.partyHp);
   });
 });

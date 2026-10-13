@@ -16,6 +16,7 @@ import { utf8Encode } from "../vendor/pocket-rpgkit/src/engine/save.ts";
 import {
   MAX_ARENA_PROVENANCE_EVENTS,
   arenaTeamRecordFromProvenance,
+  arenaTeamExperienceModifier,
   appendArenaExperience,
   appendArenaItem,
   buildValidatedArenaTeam,
@@ -525,15 +526,22 @@ function continuedState(seed: string, rules: NormalizedExpeditionRules, previous
   }
   const inventory = clone(previous.inventory);
   const money = previous.money;
+  const team = clone(previous.team);
+  const recovering = previous.endReason === "defeated";
   return {
     v: EXPEDITION_VERSION,
     seed,
     run: previous.run + 1,
     rules,
+    // Tuxemon heals a defeated party and clears status at its configured faint
+    // point without charging money. Expeditions do not model tile-level faint
+    // points, so recovery keeps the current abstract region.
     area: previous.area,
-    team: clone(previous.team),
-    partyHp: previous.partyHp.map((hp, index) => Math.min(hp, maxHp(previous.team[index]!, rules.levelCap))),
-    partyStatus: clone(previous.partyStatus),
+    team,
+    partyHp: recovering
+      ? team.map((record) => maxHp(record, rules.levelCap))
+      : previous.partyHp.map((hp, index) => Math.min(hp, maxHp(team[index]!, rules.levelCap))),
+    partyStatus: recovering ? team.map(() => null) : clone(previous.partyStatus),
     inventory,
     money,
     remainingSteps: rules.stepBudget,
@@ -1095,10 +1103,10 @@ function selectEncounter(expedition: Expedition): ExpeditionEncounter {
     sides: [{ kind: "agent", team }, { kind: "agent", team: [enemy] }],
     teamRules: { minSize: 1, maxSize: MAX_EXPEDITION_TEAM, levelCap: expedition.rules.levelCap },
   });
-  for (const monster of battle.core.parties[0]) monster.experienceModifier = 1;
   battle.core.parties[1][0]!.experienceModifier = row.experienceModifier;
   for (const [battleIndex, expeditionIndex] of partyIndices.entries()) {
     const monster = battle.core.parties[0][battleIndex]!;
+    monster.experienceModifier = arenaTeamExperienceModifier(expedition.team[expeditionIndex]!);
     monster.currentHp = expedition.partyHp[expeditionIndex]!;
     const status = expedition.partyStatus[expeditionIndex]!;
     monster.status = status === null ? null : {
@@ -1258,6 +1266,7 @@ function applyCapture(expedition: Expedition, item: string): void {
       kind: "expedition",
       area: encounter.area,
       step: expedition.nextAction,
+      experienceModifier: encounter.experienceModifier,
       capture: { result: "caught", item, success: true, shakes: roll.shakes, status: persistentStatus },
     },
   }];

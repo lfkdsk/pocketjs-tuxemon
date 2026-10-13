@@ -61,14 +61,44 @@ let expedition = createExpedition({
   },
 });
 const expeditionActions: ExpeditionAction[] = [];
+const expeditionCycles: Array<{
+  run: number;
+  actions: ExpeditionAction[];
+  observation: ReturnType<typeof observeExpedition>;
+}> = [];
 
-while (!expedition.ended) {
-  const actions = legalExpeditionActions(expedition);
-  const action = chooseExpeditionAction(actions, expeditionRandom);
-  const applied = applyExpeditionAction(expedition, action);
-  if (!applied.ok) throw new Error(`expedition demo: action rejected: ${applied.error}`);
-  expeditionActions.push(action);
-  expedition = applied.expedition;
+for (let cycle = 0; cycle < 2; cycle++) {
+  const cycleActions: ExpeditionAction[] = [];
+  while (!expedition.ended) {
+    const actions = legalExpeditionActions(expedition);
+    const action = chooseExpeditionAction(actions, expeditionRandom);
+    const applied = applyExpeditionAction(expedition, action);
+    if (!applied.ok) throw new Error(`expedition demo: action rejected: ${applied.error}`);
+    cycleActions.push(action);
+    expeditionActions.push(action);
+    expedition = applied.expedition;
+  }
+  expeditionCycles.push({
+    run: expedition.run,
+    actions: cycleActions,
+    observation: observeExpedition(expedition),
+  });
+  if (cycle > 0 || expedition.endReason !== "defeated") break;
+
+  expedition = createExpedition({
+    seed: sha256Bytes(utf8Encode(`pocket-tuxemon/expedition-demo/continuation/v1\n${seed}\n`)),
+    rules: {
+      cycle: "persistent",
+      stepBudget: 32,
+      levelCap: expedition.rules.levelCap,
+      startingArea: expedition.rules.startingArea,
+      continuation: expedition,
+    },
+  });
+  const continuedConservation = checkExpeditionConservation(expedition);
+  if (continuedConservation.length > 0) {
+    throw new Error(`expedition demo: continuation conservation failed: ${continuedConservation.join("; ")}`);
+  }
 }
 
 const conservation = checkExpeditionConservation(expedition);
@@ -111,6 +141,7 @@ validateBattleTape(recording);
 console.log(JSON.stringify({
   format: "pocket-tuxemon/expedition-demo/v1",
   expedition: {
+    cycles: expeditionCycles,
     actions: expeditionActions,
     observation: observeExpedition(expedition),
     team: expedition.team,

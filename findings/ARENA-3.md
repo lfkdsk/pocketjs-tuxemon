@@ -64,8 +64,9 @@ parallel economy.
 
 Expedition team records are explicitly classified separately from legacy
 Arena records. Their acquisition event binds the generated individual seed,
-species, level, area, accepted action step, capture device, result, shakes and
-capture-time persistent status. Every later experience, level, move-learning
+species, level, area, accepted action step, capture device, result, shakes,
+capture-time persistent status and, for newly captured records, the encounter
+experience-rate modifier. Every later experience, level, move-learning
 and item event has one globally increasing sequence and its accepted action
 step. Battle receipts additionally bind the area, opponent species and level,
 experience modifier, participant count, opponent acquisition identity and
@@ -98,10 +99,11 @@ be reused.
 Ranked rules always create the configured fixed initial state and cannot take
 a continuation. Persistent rules may continue only an ended persistent state
 with no live encounter and a fresh seed. The new run retains the authenticated
-team, current HP/status, inventory, money and global sequences, receives a
-fresh fixed budget and RNG stream, and may retain or lower—but not raise—the
-previous level cap. The continued team is rebuilt under that cap before the
-new run is accepted.
+team, inventory, money and global sequences, receives a fresh fixed budget and
+RNG stream, and may retain or lower—but not raise—the previous level cap.
+Voluntary and budget endings also retain current HP/status; a defeated
+continuation instead restores the party and clears status. The continued team
+is rebuilt under that cap before the new run is accepted.
 
 ## Demo and public documentation
 

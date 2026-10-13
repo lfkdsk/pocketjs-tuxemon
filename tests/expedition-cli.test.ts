@@ -11,14 +11,18 @@ import {
   type ArenaTeamRecord,
 } from "../battle/arena.ts";
 
-const SEED = "0123456789abcdef".repeat(4);
 const ROOT = new URL("..", import.meta.url).pathname;
 
 interface DemoOutput {
   format: string;
   expedition: {
+    cycles: Array<{
+      run: number;
+      actions: unknown[];
+      observation: { status: string; result: { reason?: string } | null };
+    }>;
     actions: unknown[];
-    observation: { status: string; result: unknown };
+    observation: { run: number; status: string; result: unknown };
     team: ArenaTeamRecord[];
   };
   arena: {
@@ -28,23 +32,30 @@ interface DemoOutput {
   };
 }
 
-function run(seed: string) {
+function run(seed?: string) {
   return Bun.spawnSync({
-    cmd: [process.execPath, "run", "expedition:demo", "--", `--seed=${seed}`],
+    cmd: [
+      process.execPath,
+      "run",
+      "expedition:demo",
+      ...(seed === undefined ? [] : ["--", `--seed=${seed}`]),
+    ],
     cwd: ROOT,
     stdout: "pipe",
     stderr: "pipe",
   });
 }
 
-function expectedScriptPrefix(seed: string): string {
-  return `$ bun tools/expedition-demo.ts "--seed=${seed}"\n`;
+function expectedScriptPrefix(seed?: string): string {
+  return seed === undefined
+    ? "$ bun tools/expedition-demo.ts\n"
+    : `$ bun tools/expedition-demo.ts "--seed=${seed}"\n`;
 }
 
 describe("expedition demo CLI", () => {
   test("is byte-deterministic and carries its validated team into a replayable Arena battle", () => {
-    const first = run(SEED);
-    const second = run(SEED);
+    const first = run();
+    const second = run();
     const firstStdout = first.stdout.toString();
     const secondStdout = second.stdout.toString();
     const firstStderr = first.stderr.toString();
@@ -52,7 +63,7 @@ describe("expedition demo CLI", () => {
 
     expect(first.exitCode, firstStderr).toBe(0);
     expect(second.exitCode, secondStderr).toBe(0);
-    expect(["", expectedScriptPrefix(SEED)]).toContain(firstStderr);
+    expect(["", expectedScriptPrefix()]).toContain(firstStderr);
     expect(secondStderr).toBe(firstStderr);
     expect(firstStdout.length).toBeGreaterThan(0);
     expect(secondStdout).toBe(firstStdout);
@@ -62,7 +73,18 @@ describe("expedition demo CLI", () => {
     if (!output) return;
     expect(output.format).toBe("pocket-tuxemon/expedition-demo/v1");
     expect(output.expedition.actions.length).toBeGreaterThan(0);
+    expect(output.expedition.cycles).toHaveLength(2);
+    expect(output.expedition.cycles[0]).toMatchObject({
+      run: 1,
+      observation: { status: "ended", result: { reason: "defeated" } },
+    });
+    expect(output.expedition.cycles[1]).toMatchObject({
+      run: 2,
+      observation: { status: "ended" },
+    });
+    expect(output.expedition.cycles[1]!.actions.length).toBeGreaterThan(0);
     expect(output.expedition.observation).toMatchObject({
+      run: 2,
       status: "ended",
       result: { reason: expect.any(String) },
     });
