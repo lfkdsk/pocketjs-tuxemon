@@ -26,7 +26,7 @@ summary:
   the north end of Route 3, Route 4 and Flower City to the Captain's return
   in the Mansion and on through Candy Town, the hospital cure and Omnichannel
   Radio Tower broadcast, then across Routes E and B to the Data Center and
-  Kernel's defeat — the complete 206,822-frame Spyder mainline at 60 Hz,
+  Kernel's defeat — the complete 230,322-frame Spyder mainline at 60 Hz,
   driven by
   deterministic autoplay tapes — and every imported input lock is executed
   to its unlock. On the 67 placed outdoor maps, the streamed renderer paints
@@ -47,14 +47,14 @@ summary:
   textures are imported from Tuxemon's YAML, and `battle/` is a pure
   reducer whose results match Tuxemon's own Python engine on 8,560 recorded
   battles; monsters spawn draw-for-draw like Tuxemon's. The mainline is
-  played for real end to end: the autoplay tapes fight 212 player battles
+  played for real end to end: the autoplay tapes fight 216 player battles
   (111 on the Route 3 mainline — 22 trainer + 89 wild — 16 on the
-  Captain-return continuation — 10 trainer + 6 wild — and 56 on the way to
-  the hospital cure — 50 trainer + 6 wild — and 14 through Omnichannel and
-  the Radio Tower — 13 trainer + 1 wild — and 15 on the Kernel quest —
-  12 trainer + 3 wild), and every trainer
+  Captain-return continuation — 10 trainer + 6 wild — and 57 on the way to
+  the hospital cure — 50 trainer + 7 wild — and 15 through Omnichannel and
+  the Radio Tower — 13 trainer + 2 wild — and 17 on the Kernel quest —
+  12 trainer + 5 wild), and every trainer
   battle enters Battle Processing and ends `won` with its `battle_outcome`
-  written back. The frozen 32-minute 60 Hz tape (115,842 frames / 32 min 10 s)
+  written back. The frozen 32-minute 60 Hz tape (116,107 frames / 32 min 15 s)
   replays byte-identical at 60, 30 and 20 Hz, and both failure paths are
   verified — the first loss against Billie, and a later loss on Route 3
   with the faint-point teleport, the heal-before-leaving block and the
@@ -400,7 +400,7 @@ not a crash. Chapter snapshots and the nibble-dictionary tape are packed into
 the pak and read on demand, so the JS bundle keeps only a tiny chapter index;
 the tape is decoded once, on the first chapter selection, and every chapter
 plays a window of it. The committed chapter pack and all twenty thumbnails are
-rebaked against the current 206,822-frame recording; every chapter envelope
+rebaked against the current 230,322-frame recording; every chapter envelope
 passes decode, map-aware restore and suffix replay to the production terminal.
 `bun tools/verify-web-demo.ts` drives all of the above in headless Chrome,
 including a 600-frame autoplay that must reach a state byte-identical to a
@@ -693,7 +693,7 @@ then compare the completed session with a fresh production replay:
 bun run verify:psp:emu          # builds nothing; runs the already-built .prx
 ```
 
-The complete GB6+J1+J2+J3+J4 mainline (206,822 frames) runs under
+The complete GB6+J1+J2+J3+J4 mainline (230,322 frames) runs under
 PPSSPPHeadless as 28 bounded chapter-to-chapter segments: the no-argument
 retained-evidence gate (`bun tools/psp-mainline.ts verify`) reports 28/28
 PASS with no exemptions, each segment's receipt bound to its plan entry by
