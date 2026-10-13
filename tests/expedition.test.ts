@@ -91,9 +91,10 @@ describe("Arena expeditions", () => {
     });
     const initial = observeExpedition(expedition);
     expect(keys(initial)).toEqual([
-      "area", "backpack", "cycle", "destinations", "encounter", "money", "nextAction",
-      "remainingSteps", "result", "run", "shop", "status", "team", "v",
+      "area", "backpack", "cycle", "destinations", "encounter", "lastTransition", "money",
+      "nextAction", "remainingSteps", "result", "run", "shop", "status", "team", "v",
     ]);
+    expect(initial.lastTransition).toBeNull();
     expect(keys(initial.area)).toEqual(["id", "name"]);
     expect(keys(initial.destinations[0]!)).toEqual(["id", "name"]);
     expect(keys(initial.team[0]!)).toEqual(["experience", "hp", "level", "moves", "slot", "species", "status"]);
@@ -338,6 +339,16 @@ describe("Arena expeditions", () => {
     expect(expedition.encounter).toBeNull();
     expect(expedition.team[0]!.experience).toBeGreaterThan(beforeExperience);
     expect(expedition.team[0]!.provenance.some((event) => event.type === "experience")).toBe(true);
+    const transition = observeExpedition(expedition).lastTransition;
+    expect(transition).toMatchObject({ type: "battle", mode: "auto" });
+    if (transition?.type !== "battle") throw new Error("auto battle transition fixture missing");
+    expect(transition.turns.length).toBeGreaterThan(0);
+    expect(transition.turns.at(-1)!.observation.result).toMatchObject({ winner: 0 });
+    expect(transition.turns.map(({ observation }) => observation.turn)).toEqual(
+      transition.turns.map((_, index) => index + 1),
+    );
+    expect(collectKeys(transition).has("seed")).toBe(false);
+    expect(collectKeys(transition).has("rng")).toBe(false);
     expect(validateTeam(expedition.team, {
       levelCap: expedition.rules.levelCap,
       requiredKind: "expedition",

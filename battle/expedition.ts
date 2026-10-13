@@ -24,6 +24,8 @@ import {
   type ArenaTeamRecord,
 } from "./arena-team.ts";
 import {
+  ARENA_MAX_TURNS,
+  ARENA_VERSION,
   createArenaBattle,
   defaultAction as defaultArenaAction,
   isOver as arenaIsOver,
@@ -125,6 +127,9 @@ export interface Expedition {
   shopPurchases: Record<string, number>;
   ledger: ExpeditionLedger;
   encounter: ExpeditionEncounter | null;
+  /** Public, post-resolution detail which a state snapshot cannot otherwise
+   * retain (capture shakes and resolved battle decision windows). */
+  lastTransition: ExpeditionPublicTransition | null;
   ended: boolean;
   endReason: ExpeditionEndReason | null;
 }
@@ -153,6 +158,35 @@ export type ExpeditionError =
 export type ExpeditionApplyResult =
   | { ok: true; expedition: Expedition }
   | { ok: false; expedition: Expedition; error: ExpeditionError };
+
+export interface ExpeditionPublicName {
+  slug: string;
+  en_US: string;
+  zh_CN: string;
+}
+
+export interface ExpeditionPublicBattleTurn {
+  playerAction: ArenaAction;
+  opponentAction: ArenaAction;
+  /** The player's ordinary public Arena projection after this decision
+   * window. It contains no battle seed, policy cursor, or hidden reserves. */
+  observation: ArenaObservation;
+}
+
+export type ExpeditionPublicTransition =
+  | {
+    type: "battle";
+    mode: "manual" | "auto";
+    turns: ExpeditionPublicBattleTurn[];
+  }
+  | {
+    type: "capture";
+    item: ExpeditionPublicName;
+    species: ExpeditionPublicName;
+    success: boolean;
+    shakes: number;
+    consumed: boolean;
+  };
 
 export interface ExpeditionObservation {
   v: typeof EXPEDITION_VERSION;
@@ -185,6 +219,7 @@ export interface ExpeditionObservation {
     id: string;
     goods: Array<{ item: string; en_US: string; zh_CN: string; price: number; remaining: number | null }>;
   };
+  lastTransition: ExpeditionPublicTransition | null;
   result: null | { reason: ExpeditionEndReason };
 }
 
@@ -249,7 +284,7 @@ const PROVENANCE_EVENT_RESERVE = 256;
 const EXPEDITION_STATE_KEYS = [
   "v", "seed", "run", "rules", "area", "team", "partyHp", "partyStatus", "inventory", "money",
   "remainingSteps", "runStartAction", "nextAction", "nextEventSeq", "rng", "rngDraws",
-  "shopPurchases", "ledger", "encounter", "ended", "endReason",
+  "shopPurchases", "ledger", "encounter", "lastTransition", "ended", "endReason",
 ] as const;
 const MAX_ACTION_DEPTH = 8;
 const MAX_ACTION_NODES = 64;
@@ -453,6 +488,14 @@ function displayName(table: BattleDb, kind: "monster" | "technique" | "item", sl
   return table.items[slug]?.name ?? slug;
 }
 
+function publicName(kind: "monster" | "item", slug: string): ExpeditionPublicName {
+  return {
+    slug,
+    en_US: displayName(SOURCE_DB, kind, slug),
+    zh_CN: displayName(ZH_DB, kind, slug),
+  };
+}
+
 function normalizedRules(value: ExpeditionRules): NormalizedExpeditionRules {
   if (!isRecord(value) || (value.cycle !== "ranked" && value.cycle !== "persistent")) {
     throw new Error("expedition rules require cycle 'ranked' or 'persistent'");
@@ -561,6 +604,7 @@ function continuedState(seed: string, rules: NormalizedExpeditionRules, previous
       healingServices: {},
     },
     encounter: null,
+    lastTransition: null,
     ended: false,
     endReason: null,
   };
@@ -602,6 +646,7 @@ export function createExpedition(config: { seed: string; rules: ExpeditionRules 
       healingServices: {},
     },
     encounter: null,
+    lastTransition: null,
     ended: false,
     endReason: null,
   };
@@ -821,8 +866,106 @@ export function observeExpedition(expedition: Expedition): ExpeditionObservation
     nextAction: expedition.nextAction,
     encounter: visibleEncounter,
     shop: observationShop(expedition),
+    lastTransition: clone(expedition.lastTransition),
     result: expedition.endReason ? { reason: expedition.endReason } : null,
   };
+}
+
+function validPublicName(value: unknown, kind: "monster" | "item"): value is ExpeditionPublicName {
+  if (!isRecord(value) || !exactOwnKeys(value, ["slug", "en_US", "zh_CN"]) ||
+      typeof value.slug !== "string" || typeof value.en_US !== "string" || typeof value.zh_CN !== "string") {
+    return false;
+  }
+  const table = kind === "monster" ? SOURCE_DB.monsters : SOURCE_DB.items;
+  return Object.hasOwn(table, value.slug) &&
+    value.en_US === displayName(SOURCE_DB, kind, value.slug) &&
+    value.zh_CN === displayName(ZH_DB, kind, value.slug);
+}
+
+function validArenaActionShape(value: unknown): value is ArenaAction {
+  if (!isRecord(value) || typeof value.type !== "string") return false;
+  if (value.type === "move") {
+    return exactOwnKeys(value, Object.hasOwn(value, "target") ? ["type", "slot", "target"] : ["type", "slot"]) &&
+      Number.isSafeInteger(value.slot) && (value.slot as number) >= 0 && (value.slot as number) <= 3 &&
+      (!Object.hasOwn(value, "target") || Number.isSafeInteger(value.target));
+  }
+  if (value.type === "swap") {
+    return exactOwnKeys(value, ["type", "party"]) && Number.isSafeInteger(value.party) &&
+      (value.party as number) >= 0 && (value.party as number) < MAX_EXPEDITION_TEAM;
+  }
+  if (value.type === "item") {
+    return exactOwnKeys(value, Object.hasOwn(value, "target") ? ["type", "item", "target"] : ["type", "item"]) &&
+      typeof value.item === "string" &&
+      (!Object.hasOwn(value, "target") || Number.isSafeInteger(value.target));
+  }
+  return value.type === "run" && exactOwnKeys(value, ["type"]);
+}
+
+const PUBLIC_ARENA_OBSERVATION_KEYS = [
+  "v", "side", "format", "turn", "round", "deadlineTicks", "actingParty", "own", "opponent",
+  "legalActions", "result",
+] as const;
+
+function hasPrivateTransitionKey(value: unknown): boolean {
+  if (Array.isArray(value)) return value.some(hasPrivateTransitionKey);
+  if (!isRecord(value)) return false;
+  return Object.entries(value).some(([key, entry]) =>
+    ["seed", "rng", "rngDraws", "ledger", "provenance", "acquireSeed", "acquireSeq", "partyIndices"]
+      .includes(key) || hasPrivateTransitionKey(entry)
+  );
+}
+
+function publicTransitionErrors(expedition: Expedition): string[] {
+  const transition = expedition.lastTransition;
+  if (transition === null) return [];
+  if (!isRecord(transition) || hasPrivateTransitionKey(transition)) {
+    return ["public transition shape is invalid"];
+  }
+  if (transition.type === "capture") {
+    if (!exactOwnKeys(transition, ["type", "item", "species", "success", "shakes", "consumed"]) ||
+        !validPublicName(transition.item, "item") || !validPublicName(transition.species, "monster") ||
+        typeof transition.success !== "boolean" || typeof transition.consumed !== "boolean" ||
+        !Number.isSafeInteger(transition.shakes) || (transition.shakes as number) < 1 ||
+        (transition.shakes as number) > RULES_DB.capture.total_shakes ||
+        (transition.success && transition.shakes !== RULES_DB.capture.total_shakes)) {
+      return ["public capture transition is invalid"];
+    }
+    if (transition.success) {
+      const acquired = expedition.team.find((record) => {
+        const event = record.provenance[0];
+        return event?.type === "acquire" && event.origin?.capture.result === "caught" &&
+          event.origin.step === expedition.nextAction - 1;
+      });
+      const event = acquired?.provenance[0];
+      if (!acquired || event?.type !== "acquire" || event.origin?.capture.result !== "caught" ||
+          acquired.species !== transition.species.slug || event.origin.capture.item !== transition.item.slug ||
+          event.origin.capture.shakes !== transition.shakes) {
+        return ["public capture transition does not match acquisition provenance"];
+      }
+    }
+    return [];
+  }
+  if (transition.type !== "battle" ||
+      !exactOwnKeys(transition, ["type", "mode", "turns"]) ||
+      (transition.mode !== "manual" && transition.mode !== "auto") ||
+      !Array.isArray(transition.turns) || transition.turns.length < 1 ||
+      transition.turns.length > ARENA_MAX_TURNS ||
+      (transition.mode === "manual" && transition.turns.length !== 1)) {
+    return ["public battle transition is invalid"];
+  }
+  let previousTurn: number | null = null;
+  for (const turn of transition.turns) {
+    if (!isRecord(turn) || !exactOwnKeys(turn, ["playerAction", "opponentAction", "observation"]) ||
+        !validArenaActionShape(turn.playerAction) || !validArenaActionShape(turn.opponentAction) ||
+        !isRecord(turn.observation) || !exactOwnKeys(turn.observation, PUBLIC_ARENA_OBSERVATION_KEYS) ||
+        turn.observation.v !== ARENA_VERSION || turn.observation.side !== 0 ||
+        !Number.isSafeInteger(turn.observation.turn) ||
+        (previousTurn !== null && turn.observation.turn !== previousTurn + 1)) {
+      return ["public battle transition turn is invalid"];
+    }
+    previousTurn = turn.observation.turn as number;
+  }
+  return [];
 }
 
 function count(table: Record<string, number>, key: string): number {
@@ -944,6 +1087,7 @@ function checkExpeditionConservationInner(expedition: Expedition): string[] {
       (expedition.remainingSteps === 0 && !expedition.ended)) {
     errors.push("terminal expedition state is inconsistent");
   }
+  errors.push(...publicTransitionErrors(expedition));
   if (expedition.encounter !== null) {
     const encounter = expedition.encounter;
     if (!exactOwnKeys(encounter as unknown as Record<string, unknown>, [
@@ -1220,35 +1364,63 @@ function settleBattle(expedition: Expedition): void {
   }
 }
 
-function applyBattle(expedition: Expedition, action: Extract<ExpeditionAction, { type: "battle" }>): void {
+function resolvePublicBattleTurn(
+  battle: ArenaBattle,
+  playerAction: ArenaAction,
+): { battle: ArenaBattle; turn: ExpeditionPublicBattleTurn } {
+  const player = submitArena(battle, 0, playerAction);
+  if (!player.ok) throw new Error(`advertised battle action was rejected: ${player.error}`);
+  const opponentAction = defaultArenaAction(player.battle, 1);
+  const opponent = submitArena(player.battle, 1, opponentAction);
+  if (!opponent.ok) throw new Error(`wild battle policy was rejected: ${opponent.error}`);
+  return {
+    battle: opponent.battle,
+    turn: {
+      playerAction: clone(playerAction),
+      opponentAction: clone(opponentAction),
+      observation: observeArena(opponent.battle, 0),
+    },
+  };
+}
+
+function applyBattle(
+  expedition: Expedition,
+  action: Extract<ExpeditionAction, { type: "battle" }>,
+): ExpeditionPublicTransition {
   const encounter = expedition.encounter!;
+  const turns: ExpeditionPublicBattleTurn[] = [];
   if (action.mode === "manual") {
-    const player = submitArena(encounter.battle, 0, action.action);
-    if (!player.ok) throw new Error(`advertised battle action was rejected: ${player.error}`);
-    const opponent = submitArena(player.battle, 1, defaultArenaAction(player.battle, 1));
-    if (!opponent.ok) throw new Error(`wild battle policy was rejected: ${opponent.error}`);
-    encounter.battle = opponent.battle;
+    const resolved = resolvePublicBattleTurn(encounter.battle, action.action);
+    encounter.battle = resolved.battle;
+    turns.push(resolved.turn);
   } else {
     let battle = encounter.battle;
     while (!arenaIsOver(battle)) {
-      const player = submitArena(battle, 0, defaultArenaAction(battle, 0));
-      if (!player.ok) throw new Error(`automatic battle action was rejected: ${player.error}`);
-      const opponent = submitArena(player.battle, 1, defaultArenaAction(player.battle, 1));
-      if (!opponent.ok) throw new Error(`wild battle policy was rejected: ${opponent.error}`);
-      battle = opponent.battle;
+      const resolved = resolvePublicBattleTurn(battle, defaultArenaAction(battle, 0));
+      battle = resolved.battle;
+      turns.push(resolved.turn);
     }
     encounter.battle = battle;
   }
   settleBattle(expedition);
+  return { type: "battle", mode: action.mode, turns };
 }
 
-function applyCapture(expedition: Expedition, item: string): void {
+function applyCapture(expedition: Expedition, item: string): ExpeditionPublicTransition {
   const encounter = expedition.encounter!;
   const target = encounter.battle.core.parties[1][0]!;
   const resolution = resolveCaptureAttempt(RULES_DB, encounter.battle.core, item, target);
   const roll = resolution.roll;
   if (resolution.consumeItem) consumeItem(expedition, item);
-  if (!roll.success) return;
+  const transition: ExpeditionPublicTransition = {
+    type: "capture",
+    item: publicName("item", item),
+    species: publicName("monster", encounter.species),
+    success: roll.success,
+    shakes: roll.shakes,
+    consumed: resolution.consumeItem,
+  };
+  if (!roll.success) return transition;
   if (encounter.acquireSeq !== expedition.nextEventSeq) {
     throw new Error("capture acquisition sequence no longer matches its encounter");
   }
@@ -1278,6 +1450,7 @@ function applyCapture(expedition: Expedition, item: string): void {
   expedition.partyHp.push(Math.min(target.currentHp, maxHp(record, expedition.rules.levelCap)));
   expedition.partyStatus.push(persistentStatus);
   expedition.encounter = null;
+  return transition;
 }
 
 function healWithItem(expedition: Expedition, item: string, target: number): void {
@@ -1311,11 +1484,12 @@ function applyItem(expedition: Expedition, item: string, target: number, forget?
 }
 
 function applyLegalAction(expedition: Expedition, action: ExpeditionAction): void {
+  expedition.lastTransition = null;
   switch (action.type) {
     case "travel": expedition.area = action.area; break;
     case "explore": expedition.encounter = selectEncounter(expedition); break;
-    case "battle": applyBattle(expedition, action); break;
-    case "catch": applyCapture(expedition, action.item); break;
+    case "battle": expedition.lastTransition = applyBattle(expedition, action); break;
+    case "catch": expedition.lastTransition = applyCapture(expedition, action.item); break;
     case "flee": settleBattle(expedition); expedition.encounter = null; break;
     case "useItem": applyItem(expedition, action.item, action.target); break;
     case "learnMove": applyItem(expedition, action.item, action.target, action.forget); break;

@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
 import {
+  EXPEDITION_JOURNAL_CHECKPOINT_INTERVAL,
   EXPEDITION_JOURNAL_FORMAT,
   MAX_EXPEDITION_JOURNAL_BYTES,
   MAX_EXPEDITION_JOURNAL_ENTRIES,
@@ -9,6 +10,7 @@ import {
   validateExpeditionJournal,
   type ExpeditionJournal,
   type ExpeditionJournalPublicRules,
+  type ValidatedExpeditionJournal,
 } from "../battle/expedition-journal.ts";
 import {
   applyExpeditionAction,
@@ -59,6 +61,25 @@ function append(
   };
 }
 
+function expanded(journal: unknown): ValidatedExpeditionJournal {
+  const checked = validateExpeditionJournal(journal);
+  if (!checked.ok) throw new Error(`expected a valid journal: ${checked.error}`);
+  return checked.journal;
+}
+
+function replaceEncodedObservation(
+  journal: ExpeditionJournal,
+  index: number,
+  mutate: (observation: any) => void,
+): void {
+  const observation = clone(expanded(journal).entries[index]!.observation) as any;
+  mutate(observation);
+  const entry = journal.entries[index]!;
+  entry.observation = entry.step % EXPEDITION_JOURNAL_CHECKPOINT_INTERVAL === 0
+    ? { kind: "full", value: observation }
+    : { kind: "delta", changes: [{ path: [], value: observation }] };
+}
+
 function allKeys(value: unknown, output = new Set<string>()): Set<string> {
   if (Array.isArray(value)) {
     for (const entry of value) allKeys(entry, output);
@@ -97,7 +118,7 @@ function randomJson(random: () => number, depth: number): unknown {
 }
 
 describe("public expedition journal v1", () => {
-  test("starts and appends immutable full public observations with exact continuity", () => {
+  test("starts and appends immutable compact observations with exact continuity", () => {
     let expedition = createExpedition({
       seed: SEED,
       rules: { cycle: "ranked", stepBudget: 8 },
@@ -119,11 +140,10 @@ describe("public expedition journal v1", () => {
       seed: SEED,
       rules: { cycle: "ranked", stepBudget: 8 },
     })), initial))).toBe(emptyBytes);
-    expect(journal.entries[0]).toEqual({
-      step: 1,
-      action: explore,
-      observation: observeExpedition(expedition),
-    });
+    expect(journal.entries[0]!.step).toBe(1);
+    expect(journal.entries[0]!.action).toEqual(explore);
+    expect(journal.entries[0]!.observation.kind).toBe("delta");
+    expect(expanded(journal).entries[0]!.observation).toEqual(observeExpedition(expedition));
 
     const battle = legalExpeditionActions(expedition).find((action) =>
       action.type === "battle" && action.mode === "auto");
@@ -132,9 +152,11 @@ describe("public expedition journal v1", () => {
     ({ expedition, journal } = append(expedition, journal, battle));
     expect(prior.entries).toHaveLength(1);
     expect(journal.entries[1]!.step).toBe(2);
-    expect(journal.entries[1]!.action.sequence).toBe(prior.entries[0]!.observation.nextAction);
-    expect(journal.entries[1]!.observation.nextAction).toBe(journal.entries[1]!.action.sequence + 1);
-    expect(validateExpeditionJournal(journal)).toEqual({ ok: true, journal });
+    expect(journal.entries[1]!.action.sequence)
+      .toBe(expanded(prior).entries[0]!.observation.nextAction);
+    const checked = expanded(journal);
+    expect(checked.entries[1]!.observation.nextAction).toBe(journal.entries[1]!.action.sequence + 1);
+    expect(checked.entries[1]!.observation).toEqual(observeExpedition(expedition));
 
     const forbidden = [
       "seed", "rng", "rngDraws", "provenance", "ledger", "nextEventSeq",
@@ -164,8 +186,8 @@ describe("public expedition journal v1", () => {
       { type: "shop", shop: "spyder_cotton_scoop", item: "potion", quantity: 1 },
       { type: "end" },
     ];
+    let previous = journal.initialObservation;
     for (const [index, body] of actionBodies.entries()) {
-      const previous = index === 0 ? journal.initialObservation : journal.entries.at(-1)!.observation;
       const action = { ...body, sequence: previous.nextAction } as ExpeditionAction;
       const observation: ExpeditionObservation = {
         ...clone(previous),
@@ -177,9 +199,35 @@ describe("public expedition journal v1", () => {
       (action as { sequence: number }).sequence = 999;
       observation.money = 999;
       expect(journal.entries[index]!.action.sequence).toBe(previous.nextAction);
-      expect(journal.entries[index]!.observation.money).not.toBe(999);
+      previous = expanded(journal).entries[index]!.observation;
+      expect(previous.money).not.toBe(999);
     }
     expect(validateExpeditionJournal(journal).ok).toBe(true);
+  });
+
+  test("emits full checkpoints and resumes appends from a JSON round trip", () => {
+    let expedition = createExpedition({
+      seed: SEED,
+      rules: { cycle: "ranked", stepBudget: 66, startingArea: "spyder_citypark" },
+    });
+    let journal = startExpeditionJournal(publicRules(expedition), observeExpedition(expedition));
+    const expected: ExpeditionObservation[] = [];
+    for (let index = 0; index < 65; index++) {
+      const action = legalExpeditionActions(expedition).find((candidate) => candidate.type === "travel");
+      if (!action) throw new Error("expected a connected travel action");
+      ({ expedition, journal } = append(expedition, journal, action));
+      expected.push(observeExpedition(expedition));
+      if (index === 63) journal = clone(journal);
+    }
+
+    expect(journal.entries[62]!.observation.kind).toBe("delta");
+    expect(journal.entries[63]!.observation.kind).toBe("full");
+    expect(journal.entries[64]!.observation.kind).toBe("delta");
+    expect(Object.isFrozen(journal)).toBe(true);
+    expect(Object.isFrozen(journal.entries)).toBe(true);
+    expect(Object.isFrozen(journal.entries[64]!.observation)).toBe(true);
+    expect(expanded(journal).entries.map((entry) => canonicalJson(entry.observation)))
+      .toEqual(expected.map(canonicalJson));
   });
 
   test("rejects extra fields at every public boundary, including nested battle state", () => {
@@ -188,7 +236,7 @@ describe("public expedition journal v1", () => {
     const explore = legalExpeditionActions(expedition).find((action) => action.type === "explore");
     if (!explore) throw new Error("expected explore action");
     ({ expedition, journal } = append(expedition, journal, explore));
-    expect(journal.entries[0]!.observation.encounter).not.toBeNull();
+    expect(expanded(journal).entries[0]!.observation.encounter).not.toBeNull();
 
     const mutations: Array<(value: any) => void> = [
       (value) => { value.seed = SEED; },
@@ -196,13 +244,22 @@ describe("public expedition journal v1", () => {
       (value) => { value.initialObservation.team[0].species.provenance = []; },
       (value) => { value.entries[0].ledger = {}; },
       (value) => { value.entries[0].action.rng = 0; },
-      (value) => { value.entries[0].observation.nextEventSeq = 2; },
-      (value) => { value.entries[0].observation.encounter.battle.pending = [null, null]; },
-      (value) => { value.entries[0].observation.encounter.battle.own.party[0].base.seed = "hidden"; },
     ];
     for (const mutate of mutations) {
       const changed = clone(journal);
       mutate(changed);
+      const checked = validateExpeditionJournal(changed);
+      expect(checked.ok, checked.ok ? "unexpectedly accepted" : checked.error).toBe(false);
+    }
+
+    const observationMutations: Array<(value: any) => void> = [
+      (value) => { value.nextEventSeq = 2; },
+      (value) => { value.encounter.battle.pending = [null, null]; },
+      (value) => { value.encounter.battle.own.party[0].base.seed = "hidden"; },
+    ];
+    for (const mutate of observationMutations) {
+      const changed = clone(journal);
+      replaceEncodedObservation(changed, 0, mutate);
       const checked = validateExpeditionJournal(changed);
       expect(checked.ok, checked.ok ? "unexpectedly accepted" : checked.error).toBe(false);
     }
@@ -220,42 +277,68 @@ describe("public expedition journal v1", () => {
     );
     expect(validateExpeditionJournal(valid).ok).toBe(true);
 
-    const cases = [
+    const envelopeCases = [
       (value: any) => { value.entries[0].step = 2; },
       (value: any) => { value.entries[0].action.sequence++; },
-      (value: any) => { value.entries[0].observation.nextAction++; },
-      (value: any) => { value.entries[0].observation.remainingSteps++; },
-      (value: any) => { value.entries[0].observation.run++; },
       (value: any) => { value.entries.push(clone(value.entries[0])); value.entries[1].step = 2; },
     ];
-    for (const mutate of cases) {
+    for (const mutate of envelopeCases) {
       const changed = clone(valid);
       mutate(changed);
+      expect(validateExpeditionJournal(changed).ok).toBe(false);
+    }
+    const observationCases = [
+      (value: any) => { value.nextAction++; },
+      (value: any) => { value.remainingSteps++; },
+      (value: any) => { value.run++; },
+    ];
+    for (const mutate of observationCases) {
+      const changed = clone(valid);
+      replaceEncodedObservation(changed, 0, mutate);
       expect(validateExpeditionJournal(changed).ok).toBe(false);
     }
     expect(() => appendExpeditionJournal(valid, { type: "end", sequence: ended.nextAction }, observeExpedition(ended)))
       .toThrow();
   });
 
-  test("bounds a maximum-budget full-observation journal and rejects entries beyond the engine cap", () => {
+  test("bounds a maximum-budget compact journal and rejects entries beyond the engine cap", () => {
     const expedition = createExpedition({
       seed: SEED,
       rules: { cycle: "ranked", stepBudget: MAX_EXPEDITION_JOURNAL_ENTRIES, startingArea: "spyder_citypark" },
     });
     const initial = observeExpedition(expedition);
-    const entries = Array.from({ length: MAX_EXPEDITION_JOURNAL_ENTRIES }, (_, index) => ({
-      step: index + 1,
-      action: { type: "explore", sequence: initial.nextAction + index } as ExpeditionAction,
-      observation: {
+    const entries: ExpeditionJournal["entries"] = Array.from(
+      { length: MAX_EXPEDITION_JOURNAL_ENTRIES },
+      (_, index) => {
+        const step = index + 1;
+        const observation: ExpeditionObservation = {
         ...initial,
         nextAction: initial.nextAction + index + 1,
         remainingSteps: MAX_EXPEDITION_JOURNAL_ENTRIES - index - 1,
         ...(index === MAX_EXPEDITION_JOURNAL_ENTRIES - 1
           ? { status: "ended" as const, result: { reason: "budget" as const } }
           : {}),
+        };
+        const changes = [
+          { path: ["nextAction"], value: observation.nextAction },
+          { path: ["remainingSteps"], value: observation.remainingSteps },
+          ...(step === MAX_EXPEDITION_JOURNAL_ENTRIES
+            ? [
+              { path: ["result"], value: observation.result },
+              { path: ["status"], value: observation.status },
+            ]
+            : []),
+        ];
+        return {
+          step,
+          action: { type: "explore", sequence: initial.nextAction + index } as ExpeditionAction,
+          observation: step % EXPEDITION_JOURNAL_CHECKPOINT_INTERVAL === 0
+            ? { kind: "full", value: observation }
+            : { kind: "delta", changes },
+        };
       },
-    }));
-    const atLimit = {
+    );
+    const atLimit: ExpeditionJournal = {
       format: EXPEDITION_JOURNAL_FORMAT,
       rules: publicRules(expedition),
       initialObservation: initial,
@@ -264,9 +347,11 @@ describe("public expedition journal v1", () => {
     const checked = validateExpeditionJournal(atLimit);
     expect(checked.ok, checked.ok ? undefined : checked.error).toBe(true);
     if (!checked.ok) return;
-    const bytes = new TextEncoder().encode(JSON.stringify(checked.journal)).byteLength;
+    const bytes = new TextEncoder().encode(JSON.stringify(atLimit)).byteLength;
     expect(bytes).toBeLessThanOrEqual(MAX_EXPEDITION_JOURNAL_BYTES);
     expect(checked.journal.entries).toHaveLength(MAX_EXPEDITION_JOURNAL_ENTRIES);
+    expect(atLimit.entries[62]!.observation.kind).toBe("delta");
+    expect(atLimit.entries[63]!.observation.kind).toBe("full");
 
     const tooMany = { ...atLimit, entries: [...entries, entries.at(-1)!] };
     expect(validateExpeditionJournal(tooMany)).toEqual({

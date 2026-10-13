@@ -86,6 +86,15 @@ describe("expedition provenance adversarial regressions", () => {
     expect({ slug: target.slug, level: target.level }).toEqual({ slug: "pairagrin", level: 2 });
     expedition = apply(expedition, legalAction(expedition, "catch"));
 
+    expect(observeExpedition(expedition).lastTransition).toMatchObject({
+      type: "capture",
+      item: { slug: "tuxeball" },
+      species: { slug: "pairagrin" },
+      success: true,
+      shakes: 4,
+      consumed: true,
+    });
+
     const captured = expedition.team[1]!;
     const rebuilt = buildValidatedArenaTeam([captured], {
       minSize: 1,
@@ -156,6 +165,13 @@ describe("expedition provenance adversarial regressions", () => {
     if (!manual) throw new Error("expected the deterministic damaging manual action");
     expedition = apply(expedition, manual);
 
+    const manualTransition = observeExpedition(expedition).lastTransition;
+    expect(manualTransition).toMatchObject({ type: "battle", mode: "manual" });
+    if (manualTransition?.type !== "battle") throw new Error("manual battle transition fixture missing");
+    expect(manualTransition.turns).toHaveLength(1);
+    expect(manualTransition.turns[0]!.playerAction).toMatchObject({ type: "move", slot: 0 });
+    expect(manualTransition.turns[0]!.observation.turn).toBe(1);
+
     const target = expedition.encounter?.battle.core.parties[1][0];
     expect(target).toMatchObject({ slug: "aardorn", level: 2, currentHp: 27 });
     if (!target) return;
@@ -224,6 +240,14 @@ describe("expedition provenance adversarial regressions", () => {
     expect(hardened.encounter).not.toBeNull();
     expect(hardened.inventory.tuxeball_hardened).toBe(1);
     expect(hardened.ledger.consumedItems.tuxeball_hardened ?? 0).toBe(0);
+    expect(observeExpedition(hardened).lastTransition).toMatchObject({
+      type: "capture",
+      item: { slug: "tuxeball_hardened" },
+      species: { slug: "aardorn" },
+      success: false,
+      shakes: 4,
+      consumed: false,
+    });
     expect(checkExpeditionConservation(hardened)).toEqual([]);
 
     for (const [item, tasteWarm] of [

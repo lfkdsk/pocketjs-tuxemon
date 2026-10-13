@@ -6,10 +6,11 @@
  * record, not an authoritative state snapshot and not proof that the actions
  * were accepted by a particular service.
  *
- * Version 1 uses full observations. The expedition reducer admits at most
- * 10,000 actions, and an accepted encoded journal is additionally capped at
- * 64 MiB. Keeping full frames makes consumers and validation unambiguous while
- * those two limits put a hard bound on storage and parsing work.
+ * Version 1 stores a full initial observation, deterministic sparse changes,
+ * and a full checkpoint every 64 accepted actions. Validation reconstructs
+ * every complete observation before returning it. The expedition reducer
+ * admits at most 10,000 actions, and an encoded journal is additionally capped
+ * at 64 MiB.
  */
 
 import {
@@ -32,13 +33,17 @@ import {
 export const EXPEDITION_JOURNAL_FORMAT = "pocket-tuxemon/expedition-journal/v1" as const;
 export const MAX_EXPEDITION_JOURNAL_ENTRIES = MAX_EXPEDITION_STEPS;
 export const MAX_EXPEDITION_JOURNAL_BYTES = 64 * 1024 * 1024;
+export const EXPEDITION_JOURNAL_CHECKPOINT_INTERVAL = 64;
 
 const MAX_STRING_LENGTH = 1_024;
 const MAX_TOTAL_STRING_UNITS = 32 * 1024 * 1024;
 const MAX_TOTAL_NODES = 4_000_000;
 const MAX_OBSERVATION_COLLECTION = 512;
+const MAX_DELTA_CHANGES = 4_096;
+const MAX_DELTA_PATH_DEPTH = 24;
 const MAX_LEVEL = 100;
 const STAT_KEYS = ["armour", "dodge", "hp", "melee", "ranged", "speed"] as const;
+const JOURNAL_BYTE_LENGTH = new WeakMap<object, number>();
 
 export interface ExpeditionJournalPublicRules {
   cycle: ExpeditionCycle;
@@ -47,11 +52,23 @@ export interface ExpeditionJournalPublicRules {
   startingArea: string;
 }
 
+export type ExpeditionJournalJson = null | boolean | number | string |
+  ExpeditionJournalJson[] | { [key: string]: ExpeditionJournalJson };
+
+export interface ExpeditionJournalChange {
+  path: Array<string | number>;
+  value: ExpeditionJournalJson;
+}
+
+export type ExpeditionJournalObservation =
+  | { kind: "full"; value: ExpeditionObservation }
+  | { kind: "delta"; changes: ExpeditionJournalChange[] };
+
 export interface ExpeditionJournalEntry {
   /** One-based index within this journal, independent of account-wide action sequence. */
   step: number;
   action: ExpeditionAction;
-  observation: ExpeditionObservation;
+  observation: ExpeditionJournalObservation;
 }
 
 export interface ExpeditionJournal {
@@ -61,8 +78,22 @@ export interface ExpeditionJournal {
   entries: ExpeditionJournalEntry[];
 }
 
+export interface ValidatedExpeditionJournalEntry {
+  step: number;
+  action: ExpeditionAction;
+  /** Fully reconstructed and strictly validated public observation. */
+  observation: ExpeditionObservation;
+}
+
+export interface ValidatedExpeditionJournal {
+  format: typeof EXPEDITION_JOURNAL_FORMAT;
+  rules: ExpeditionJournalPublicRules;
+  initialObservation: ExpeditionObservation;
+  entries: ValidatedExpeditionJournalEntry[];
+}
+
 export type ExpeditionJournalValidation =
-  | { ok: true; journal: ExpeditionJournal }
+  | { ok: true; journal: ValidatedExpeditionJournal }
   | { ok: false; error: string };
 
 export class ExpeditionJournalError extends Error {
@@ -168,6 +199,165 @@ function nullableText(value: unknown, path: string, budget: DecodeBudget): strin
     return null;
   }
   return textValue(value, path, budget, false);
+}
+
+function jsonValue(
+  value: unknown,
+  path: string,
+  budget: DecodeBudget,
+  depth = 0,
+): ExpeditionJournalJson {
+  if (depth > MAX_DELTA_PATH_DEPTH) fail(`${path}: JSON value is too deep`);
+  if (value === null || typeof value === "boolean") {
+    consumeNode(budget, path);
+    return value;
+  }
+  if (typeof value === "string") return textValue(value, path, budget);
+  if (typeof value === "number") {
+    consumeNode(budget, path);
+    if (!Number.isFinite(value)) fail(`${path}: expected a finite JSON number`);
+    return value;
+  }
+  if (Array.isArray(value)) {
+    return exactArray(value, MAX_OBSERVATION_COLLECTION, path, budget)
+      .map((entry, index) => jsonValue(entry, `${path}[${index}]`, budget, depth + 1));
+  }
+  consumeNode(budget, path);
+  if (value === null || typeof value !== "object" || Object.getPrototypeOf(value) !== Object.prototype) {
+    fail(`${path}: expected a plain JSON object`);
+  }
+  const keys = Reflect.ownKeys(value);
+  if (keys.length > MAX_OBSERVATION_COLLECTION || keys.some((key) => typeof key !== "string")) {
+    fail(`${path}: JSON object has invalid keys`);
+  }
+  const output: Record<string, ExpeditionJournalJson> = {};
+  for (const key of (keys as string[]).sort()) {
+    if (key.length > MAX_STRING_LENGTH) fail(`${path}: JSON key is too long`);
+    budget.stringUnits -= key.length;
+    if (budget.stringUnits < 0) fail(`${path}: journal exceeds the total string limit`);
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    if (!descriptor || descriptor.enumerable !== true || !("value" in descriptor)) {
+      fail(`${path}.${key}: expected an enumerable data property`);
+    }
+    output[key] = jsonValue(descriptor.value, `${path}.${key}`, budget, depth + 1);
+  }
+  return output;
+}
+
+function cloneJson<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value)) as T;
+}
+
+function deepFreezeJson<T>(value: T): T {
+  if (value !== null && typeof value === "object" && !Object.isFrozen(value)) {
+    for (const entry of Object.values(value as Record<string, unknown>)) deepFreezeJson(entry);
+    Object.freeze(value);
+  }
+  return value;
+}
+
+function sameJson(left: unknown, right: unknown): boolean {
+  if (left === right) return true;
+  if (left === null || right === null || typeof left !== "object" || typeof right !== "object") return false;
+  if (Array.isArray(left) || Array.isArray(right)) {
+    return Array.isArray(left) && Array.isArray(right) && left.length === right.length &&
+      left.every((entry, index) => sameJson(entry, right[index]));
+  }
+  const leftKeys = Object.keys(left as Record<string, unknown>).sort();
+  const rightKeys = Object.keys(right as Record<string, unknown>).sort();
+  return leftKeys.length === rightKeys.length && leftKeys.every((key, index) =>
+    key === rightKeys[index] && sameJson(
+      (left as Record<string, unknown>)[key],
+      (right as Record<string, unknown>)[key],
+    )
+  );
+}
+
+function observationChanges(
+  before: unknown,
+  after: unknown,
+  path: Array<string | number> = [],
+  output: ExpeditionJournalChange[] = [],
+): ExpeditionJournalChange[] {
+  if (sameJson(before, after)) return output;
+  if (Array.isArray(before) && Array.isArray(after) && before.length === after.length) {
+    for (let index = 0; index < after.length; index++) {
+      observationChanges(before[index], after[index], [...path, index], output);
+    }
+    return output;
+  }
+  if (before !== null && after !== null && typeof before === "object" && typeof after === "object" &&
+      !Array.isArray(before) && !Array.isArray(after)) {
+    const beforeKeys = Object.keys(before as Record<string, unknown>).sort();
+    const afterKeys = Object.keys(after as Record<string, unknown>).sort();
+    if (beforeKeys.length === afterKeys.length && beforeKeys.every((key, index) => key === afterKeys[index])) {
+      for (const key of afterKeys) {
+        observationChanges(
+          (before as Record<string, unknown>)[key],
+          (after as Record<string, unknown>)[key],
+          [...path, key],
+          output,
+        );
+      }
+      return output;
+    }
+  }
+  output.push({ path: [...path], value: cloneJson(after) as ExpeditionJournalJson });
+  return output;
+}
+
+function applyObservationChanges(
+  before: ExpeditionObservation,
+  changes: readonly ExpeditionJournalChange[],
+  path: string,
+): unknown {
+  let output: unknown = cloneJson(before);
+  for (const [changeIndex, change] of changes.entries()) {
+    if (change.path.length === 0) {
+      output = cloneJson(change.value);
+      continue;
+    }
+    let parent: unknown = output;
+    for (const [segmentIndex, segment] of change.path.slice(0, -1).entries()) {
+      if (typeof segment === "number") {
+        if (!Array.isArray(parent) || segment < 0 || segment >= parent.length) {
+          fail(`${path}.changes[${changeIndex}].path[${segmentIndex}]: path does not exist`);
+        }
+        parent = parent[segment];
+      } else {
+        if (parent === null || typeof parent !== "object" || Array.isArray(parent) ||
+            !Object.hasOwn(parent, segment)) {
+          fail(`${path}.changes[${changeIndex}].path[${segmentIndex}]: path does not exist`);
+        }
+        parent = (parent as Record<string, unknown>)[segment];
+      }
+    }
+    const final = change.path.at(-1)!;
+    if (typeof final === "number") {
+      if (!Array.isArray(parent) || final < 0 || final >= parent.length) {
+        fail(`${path}.changes[${changeIndex}].path: target does not exist`);
+      }
+      parent[final] = cloneJson(change.value);
+    } else {
+      if (parent === null || typeof parent !== "object" || Array.isArray(parent) ||
+          !Object.hasOwn(parent, final)) {
+        fail(`${path}.changes[${changeIndex}].path: target does not exist`);
+      }
+      (parent as Record<string, unknown>)[final] = cloneJson(change.value);
+    }
+  }
+  return output;
+}
+
+function encodeObservation(
+  step: number,
+  before: ExpeditionObservation,
+  after: ExpeditionObservation,
+): ExpeditionJournalObservation {
+  if (step % EXPEDITION_JOURNAL_CHECKPOINT_INTERVAL === 0) {
+    return { kind: "full", value: cloneJson(after) };
+  }
+  return { kind: "delta", changes: observationChanges(before, after) };
 }
 
 function localizedName(value: unknown, path: string, budget: DecodeBudget): { en_US: string; zh_CN: string } {
@@ -465,10 +655,65 @@ function arenaObservation(value: unknown, path: string, budget: DecodeBudget): A
   };
 }
 
+function publicTransition(
+  value: unknown,
+  path: string,
+  budget: DecodeBudget,
+): ExpeditionObservation["lastTransition"] {
+  if (value === null) {
+    consumeNode(budget, path);
+    return null;
+  }
+  const envelope = exactObject(value, ["type"], path, budget, [
+    "mode", "turns", "item", "species", "success", "shakes", "consumed",
+  ]);
+  const type = textValue(envelope.type, `${path}.type`, budget, false);
+  if (type === "capture") {
+    const source = exactObject(value,
+      ["type", "item", "species", "success", "shakes", "consumed"], path, budget);
+    const success = bool(source.success, `${path}.success`, budget);
+    const shakes = integer(source.shakes, 1, 4, `${path}.shakes`, budget);
+    if (success && shakes !== 4) fail(`${path}.shakes: successful capture requires four shakes`);
+    return {
+      type,
+      item: expeditionName(source.item, `${path}.item`, budget),
+      species: expeditionName(source.species, `${path}.species`, budget),
+      success,
+      shakes,
+      consumed: bool(source.consumed, `${path}.consumed`, budget),
+    };
+  }
+  if (type !== "battle") fail(`${path}.type: unknown public transition`);
+  const source = exactObject(value, ["type", "mode", "turns"], path, budget);
+  if (source.mode !== "manual" && source.mode !== "auto") fail(`${path}.mode: invalid battle mode`);
+  consumeNode(budget, `${path}.mode`);
+  const turnsSource = exactArray(source.turns, ARENA_MAX_TURNS, `${path}.turns`, budget);
+  if (turnsSource.length === 0 || (source.mode === "manual" && turnsSource.length !== 1)) {
+    fail(`${path}.turns: invalid resolved battle turn count`);
+  }
+  let previousTurn: number | null = null;
+  const turns = turnsSource.map((entry, index) => {
+    const turn = exactObject(entry, ["playerAction", "opponentAction", "observation"],
+      `${path}.turns[${index}]`, budget);
+    const observation = arenaObservation(turn.observation, `${path}.turns[${index}].observation`, budget);
+    if (observation.side !== 0) fail(`${path}.turns[${index}].observation.side: expected player side`);
+    if (previousTurn !== null && observation.turn !== previousTurn + 1) {
+      fail(`${path}.turns[${index}].observation.turn: expected a consecutive Arena turn`);
+    }
+    previousTurn = observation.turn;
+    return {
+      playerAction: arenaAction(turn.playerAction, `${path}.turns[${index}].playerAction`, budget),
+      opponentAction: arenaAction(turn.opponentAction, `${path}.turns[${index}].opponentAction`, budget),
+      observation,
+    };
+  });
+  return { type, mode: source.mode, turns };
+}
+
 function expeditionObservation(value: unknown, path: string, budget: DecodeBudget): ExpeditionObservation {
   const source = exactObject(value, [
     "v", "cycle", "run", "status", "area", "destinations", "team", "backpack", "money",
-    "remainingSteps", "nextAction", "encounter", "shop", "result",
+    "remainingSteps", "nextAction", "encounter", "shop", "lastTransition", "result",
   ], path, budget);
   if (source.v !== EXPEDITION_VERSION) fail(`${path}.v: expected expedition version ${EXPEDITION_VERSION}`);
   consumeNode(budget, `${path}.v`);
@@ -604,6 +849,7 @@ function expeditionObservation(value: unknown, path: string, budget: DecodeBudge
     nextAction: integer(source.nextAction, 1, Number.MAX_SAFE_INTEGER, `${path}.nextAction`, budget),
     encounter,
     shop,
+    lastTransition: publicTransition(source.lastTransition, `${path}.lastTransition`, budget),
     result,
   };
 }
@@ -622,7 +868,78 @@ function publicRules(value: unknown, path: string, budget: DecodeBudget): Expedi
   };
 }
 
-function decodeJournal(value: unknown): ExpeditionJournal {
+function decodeObservationEncoding(
+  value: unknown,
+  step: number,
+  previous: ExpeditionObservation,
+  path: string,
+  budget: DecodeBudget,
+): { encoded: ExpeditionJournalObservation; observation: ExpeditionObservation } {
+  const checkpoint = step % EXPEDITION_JOURNAL_CHECKPOINT_INTERVAL === 0;
+  const envelope = exactObject(value, ["kind"], path, budget, ["value", "changes"]);
+  if (checkpoint) {
+    if (envelope.kind !== "full") fail(`${path}.kind: step ${step} requires a full checkpoint`);
+    const source = exactObject(value, ["kind", "value"], path, budget);
+    consumeNode(budget, `${path}.kind`);
+    const observation = expeditionObservation(source.value, `${path}.value`, budget);
+    return { encoded: { kind: "full", value: observation }, observation };
+  }
+  if (envelope.kind !== "delta") fail(`${path}.kind: step ${step} requires a delta`);
+  const source = exactObject(value, ["kind", "changes"], path, budget);
+  consumeNode(budget, `${path}.kind`);
+  const changesSource = exactArray(source.changes, MAX_DELTA_CHANGES, `${path}.changes`, budget);
+  if (changesSource.length === 0) fail(`${path}.changes: observation delta must not be empty`);
+  const changes = changesSource.map((entry, index): ExpeditionJournalChange => {
+    const changePath = `${path}.changes[${index}]`;
+    const change = exactObject(entry, ["path", "value"], changePath, budget);
+    const segments = exactArray(change.path, MAX_DELTA_PATH_DEPTH, `${changePath}.path`, budget);
+    const decodedPath = segments.map((segment, segmentIndex) => {
+      if (typeof segment === "string") {
+        return textValue(segment, `${changePath}.path[${segmentIndex}]`, budget, false);
+      }
+      return integer(segment, 0, MAX_OBSERVATION_COLLECTION - 1,
+        `${changePath}.path[${segmentIndex}]`, budget);
+    });
+    return {
+      path: decodedPath,
+      value: jsonValue(change.value, `${changePath}.value`, budget),
+    };
+  });
+  const reconstructed = applyObservationChanges(previous, changes, path);
+  const observation = expeditionObservation(reconstructed, `${path}.reconstructed`, budget);
+  const canonical = observationChanges(previous, observation);
+  if (!sameJson(canonical, changes)) fail(`${path}.changes: delta is not canonical`);
+  return { encoded: { kind: "delta", changes }, observation };
+}
+
+interface DecodedJournal {
+  encoded: ExpeditionJournal;
+  expanded: ValidatedExpeditionJournal;
+}
+
+function assertContinuity(
+  initialObservation: ExpeditionObservation,
+  previous: ExpeditionObservation,
+  action: ExpeditionAction,
+  observation: ExpeditionObservation,
+  path: string,
+): void {
+  if (previous.status !== "active") fail(`${path}: entries cannot follow a terminal observation`);
+  if (action.sequence !== previous.nextAction) {
+    fail(`${path}.action.sequence: expected ${previous.nextAction}`);
+  }
+  if (observation.nextAction !== action.sequence + 1) {
+    fail(`${path}.observation.nextAction: expected ${action.sequence + 1}`);
+  }
+  if (observation.cycle !== initialObservation.cycle || observation.run !== initialObservation.run) {
+    fail(`${path}.observation: cycle and run must remain constant`);
+  }
+  if (observation.remainingSteps !== previous.remainingSteps - 1) {
+    fail(`${path}.observation.remainingSteps: expected ${previous.remainingSteps - 1}`);
+  }
+}
+
+function decodeJournal(value: unknown): DecodedJournal {
   const budget: DecodeBudget = { nodes: MAX_TOTAL_NODES, stringUnits: MAX_TOTAL_STRING_UNITS };
   const source = exactObject(value, ["format", "rules", "initialObservation", "entries"], "$", budget);
   if (source.format !== EXPEDITION_JOURNAL_FORMAT) {
@@ -644,45 +961,45 @@ function decodeJournal(value: unknown): ExpeditionJournal {
 
   const entriesSource = exactArray(source.entries, MAX_EXPEDITION_JOURNAL_ENTRIES, "$.entries", budget);
   let previous = initialObservation;
-  const entries = entriesSource.map((entry, index): ExpeditionJournalEntry => {
+  const encodedEntries: ExpeditionJournalEntry[] = [];
+  const expandedEntries: ValidatedExpeditionJournalEntry[] = [];
+  for (const [index, entry] of entriesSource.entries()) {
     const path = `$.entries[${index}]`;
     const row = exactObject(entry, ["step", "action", "observation"], path, budget);
     const step = integer(row.step, 1, MAX_EXPEDITION_JOURNAL_ENTRIES, `${path}.step`, budget);
     if (step !== index + 1) fail(`${path}.step: expected ${index + 1}`);
-    if (previous.status !== "active") fail(`${path}: entries cannot follow a terminal observation`);
     const action = expeditionAction(row.action, `${path}.action`, budget);
-    if (action.sequence !== previous.nextAction) {
-      fail(`${path}.action.sequence: expected ${previous.nextAction}`);
-    }
-    const observation = expeditionObservation(row.observation, `${path}.observation`, budget);
-    if (observation.nextAction !== action.sequence + 1) {
-      fail(`${path}.observation.nextAction: expected ${action.sequence + 1}`);
-    }
-    if (observation.cycle !== initialObservation.cycle || observation.run !== initialObservation.run) {
-      fail(`${path}.observation: cycle and run must remain constant`);
-    }
-    if (observation.remainingSteps !== previous.remainingSteps - 1) {
-      fail(`${path}.observation.remainingSteps: expected ${previous.remainingSteps - 1}`);
-    }
+    const decoded = decodeObservationEncoding(row.observation, step, previous, `${path}.observation`, budget);
+    const observation = decoded.observation;
+    assertContinuity(initialObservation, previous, action, observation, path);
     previous = observation;
-    return { step, action, observation };
-  });
-  const journal: ExpeditionJournal = {
+    encodedEntries.push({ step, action, observation: decoded.encoded });
+    expandedEntries.push({ step, action, observation });
+  }
+  const encoded: ExpeditionJournal = {
     format: EXPEDITION_JOURNAL_FORMAT,
     rules,
     initialObservation,
-    entries,
+    entries: encodedEntries,
   };
-  const bytes = new TextEncoder().encode(JSON.stringify(journal)).byteLength;
+  const bytes = new TextEncoder().encode(JSON.stringify(encoded)).byteLength;
   if (bytes > MAX_EXPEDITION_JOURNAL_BYTES) {
     fail(`$: encoded journal exceeds the ${MAX_EXPEDITION_JOURNAL_BYTES}-byte limit`);
   }
-  return journal;
+  return {
+    encoded,
+    expanded: {
+      format: EXPEDITION_JOURNAL_FORMAT,
+      rules,
+      initialObservation,
+      entries: expandedEntries,
+    },
+  };
 }
 
 export function validateExpeditionJournal(value: unknown): ExpeditionJournalValidation {
   try {
-    return { ok: true, journal: decodeJournal(value) };
+    return { ok: true, journal: decodeJournal(value).expanded };
   } catch (error) {
     return { ok: false, error: error instanceof Error ? error.message : String(error) };
   }
@@ -699,7 +1016,48 @@ export function startExpeditionJournal(
     entries: [],
   });
   if (!checked.ok) throw new ExpeditionJournalError(checked.error);
-  return checked.journal;
+  const journal = deepFreezeJson(decodeJournal({
+    format: EXPEDITION_JOURNAL_FORMAT,
+    rules: rulesPublic,
+    initialObservation,
+    entries: [],
+  }).encoded);
+  JOURNAL_BYTE_LENGTH.set(journal, new TextEncoder().encode(JSON.stringify(journal)).byteLength);
+  return journal;
+}
+
+function appendPreviousObservation(journal: ExpeditionJournal): ExpeditionObservation {
+  const entryCount = journal.entries.length;
+  if (entryCount === 0) return cloneJson(journal.initialObservation);
+  const checkpointStep = Math.floor(entryCount / EXPEDITION_JOURNAL_CHECKPOINT_INTERVAL) *
+    EXPEDITION_JOURNAL_CHECKPOINT_INTERVAL;
+  let previous: ExpeditionObservation;
+  let startIndex: number;
+  if (checkpointStep > 0) {
+    const checkpoint = journal.entries[checkpointStep - 1];
+    if (!checkpoint || checkpoint.observation.kind !== "full") {
+      fail(`$.entries[${checkpointStep - 1}].observation: missing checkpoint`);
+    }
+    previous = cloneJson(checkpoint.observation.value);
+    startIndex = checkpointStep;
+  } else {
+    previous = cloneJson(journal.initialObservation);
+    startIndex = 0;
+  }
+  const budget: DecodeBudget = { nodes: MAX_TOTAL_NODES, stringUnits: MAX_TOTAL_STRING_UNITS };
+  previous = expeditionObservation(previous, "$.appendBase", budget);
+  for (let index = startIndex; index < entryCount; index++) {
+    const entry = journal.entries[index]!;
+    const decoded = decodeObservationEncoding(
+      entry.observation,
+      entry.step,
+      previous,
+      `$.entries[${index}].observation`,
+      budget,
+    );
+    previous = decoded.observation;
+  }
+  return previous;
 }
 
 export function appendExpeditionJournal(
@@ -707,13 +1065,42 @@ export function appendExpeditionJournal(
   action: ExpeditionAction,
   observationAfter: ExpeditionObservation,
 ): ExpeditionJournal {
-  const checked = validateExpeditionJournal({
-    ...journal,
-    entries: [
-      ...journal.entries,
-      { step: journal.entries.length + 1, action, observation: observationAfter },
-    ],
+  let base = journal;
+  let currentBytes = JOURNAL_BYTE_LENGTH.get(journal);
+  if (currentBytes === undefined) {
+    base = deepFreezeJson(decodeJournal(journal).encoded);
+    currentBytes = new TextEncoder().encode(JSON.stringify(base)).byteLength;
+    JOURNAL_BYTE_LENGTH.set(base, currentBytes);
+  }
+  if (base.entries.length >= MAX_EXPEDITION_JOURNAL_ENTRIES) {
+    throw new ExpeditionJournalError("journal cannot accept another entry");
+  }
+  const previous = appendPreviousObservation(base);
+  const budget: DecodeBudget = { nodes: MAX_TOTAL_NODES, stringUnits: MAX_TOTAL_STRING_UNITS };
+  const normalizedAction = expeditionAction(action, "$.append.action", budget);
+  const normalizedObservation = expeditionObservation(observationAfter, "$.append.observation", budget);
+  const step = base.entries.length + 1;
+  assertContinuity(base.initialObservation, previous, normalizedAction, normalizedObservation, "$.append");
+  const entry = deepFreezeJson<ExpeditionJournalEntry>({
+    step,
+    action: normalizedAction,
+    observation: encodeObservation(step, previous, normalizedObservation),
   });
-  if (!checked.ok) throw new ExpeditionJournalError(checked.error);
-  return checked.journal;
+  const next = Object.freeze({
+    format: EXPEDITION_JOURNAL_FORMAT,
+    rules: base.rules,
+    initialObservation: base.initialObservation,
+    entries: Object.freeze([
+      ...base.entries,
+      entry,
+    ]),
+  }) as unknown as ExpeditionJournal;
+  const encoder = new TextEncoder();
+  const bytes = currentBytes + encoder.encode(JSON.stringify(entry)).byteLength +
+    (base.entries.length === 0 ? 0 : 1);
+  if (bytes > MAX_EXPEDITION_JOURNAL_BYTES) {
+    throw new ExpeditionJournalError(`encoded journal exceeds the ${MAX_EXPEDITION_JOURNAL_BYTES}-byte limit`);
+  }
+  JOURNAL_BYTE_LENGTH.set(next, bytes);
+  return next;
 }
