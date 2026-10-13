@@ -384,6 +384,50 @@ describe("language-neutral projection", () => {
     expect(neutralDigest(mk("Yes", 1))).toBe(neutralDigest(mk("是", 1)));
     expect(neutralDigest(mk("Yes", 1))).not.toBe(neutralDigest(mk("Yes", 2)));
   });
+
+  test("pending-move choices lose result prose but keep their destination variables", () => {
+    const mk = (templates: [string, string], messageVariable: string): SessionState => stateWithProg([
+      {
+        op: "extChoice",
+        call: "tux.pending_moves",
+        args: {
+          variable: "v.chosen_tech",
+          message: {
+            variable: messageVariable,
+            noLearnTemplate: templates[0],
+            replacedTemplate: templates[1],
+          },
+        },
+        prompt: "",
+        cancel: false,
+        write: null,
+      },
+    ]);
+    const english = mk(["Decided not to learn {tech}.", "{old} replaced with {new}."], "v.message");
+    const chinese = mk(["决定不学习 {tech}。", "{old} 已替换为 {new}。"], "v.message");
+    expect(neutralDigest(english)).toBe(neutralDigest(chinese));
+    expect(neutralDiff(english, chinese)).toEqual([]);
+    expect(neutralDigest(chinese)).not.toBe(neutralDigest(mk(
+      ["决定不学习 {tech}。", "{old} 已替换为 {new}。"],
+      "v.other",
+    )));
+  });
+
+  test("pending-move result scratch text is language-only but story variables are not", () => {
+    const mk = (message: string, story: number): SessionState => {
+      const state = stateWithProg([]) as SessionState & {
+        sw: { variables: Record<string, string | number> };
+      };
+      state.sw = { variables: { "v.pending_move.message": message, "v.story": story } } as never;
+      state.interp.sw = structuredClone(state.sw) as never;
+      return state;
+    };
+    const english = mk("Hibernate replaced with Chameleon.", 7);
+    const chinese = mk("冬眠 已替换为 变色龙。", 7);
+    expect(neutralDigest(english)).toBe(neutralDigest(chinese));
+    expect(neutralDiff(english, chinese)).toEqual([]);
+    expect(neutralDigest(chinese)).not.toBe(neutralDigest(mk("冬眠 已替换为 变色龙。", 8)));
+  });
 });
 
 describe("committed zh_CN demo data", () => {

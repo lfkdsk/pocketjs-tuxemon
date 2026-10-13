@@ -121,6 +121,7 @@ export function productionPaginatorIdentity(root: string): PaginatorIdentity {
  *    choices.texts                 the option labels (branches stay programs)
  *    extChoice.prompt               the option prompt
  *    extChoice.args.options[].label enum option labels (tux.enum_choice)
+ *    extChoice.args.message.*Template pending-move result text
  *    scene.args.title               name-input / monster-picker titles
  *    scene.args.labels              scene UI label maps (pc, daycare, shop)
  *    scene.args.boxNames            storage box names (tux.pc)
@@ -139,6 +140,9 @@ const LANGUAGE_OP_FIELDS: Readonly<Record<string, readonly string[]>> = {
  *  pcScene, daycareScene, monsterShopScene and the nameInput/monsterPicker/
  *  trade cases). */
 const SCENE_LANGUAGE_ARGS = new Set(["title", "labels", "boxNames", "message"]);
+/** Scratch variables whose persisted value is localized presentation text,
+ * not a story decision. Both SessionState.sw and interp.sw carry the bank. */
+const LANGUAGE_VARIABLES = new Set(["v.pending_move.message"]);
 
 /** A scene's args without its localized fields. */
 function neutralSceneArgs(args: unknown): unknown {
@@ -152,9 +156,9 @@ function neutralSceneArgs(args: unknown): unknown {
   return out;
 }
 
-/** An extChoice's args without the enum options' localized labels: the
- *  option key and the enum code it writes are behavior. */
-function neutralExtChoiceArgs(args: unknown): unknown {
+/** An extChoice's args without its explicitly localized payload. Enum option
+ *  keys/codes and pending-move destination variables remain behavior. */
+function neutralExtChoiceArgs(call: unknown, args: unknown): unknown {
   if (!args || typeof args !== "object" || Array.isArray(args)) return withoutWords(args);
   const record = args as Record<string, unknown>;
   const out: Record<string, unknown> = {};
@@ -168,6 +172,16 @@ function neutralExtChoiceArgs(args: unknown): unknown {
         }
         return withoutWords(option);
       });
+      continue;
+    }
+    if (call === "tux.pending_moves" && key === "message" && record[key]
+      && typeof record[key] === "object" && !Array.isArray(record[key])) {
+      const message: Record<string, unknown> = {};
+      for (const messageKey of Object.keys(record[key] as Record<string, unknown>)) {
+        if (messageKey === "noLearnTemplate" || messageKey === "replacedTemplate") continue;
+        message[messageKey] = withoutWords((record[key] as Record<string, unknown>)[messageKey]);
+      }
+      out[key] = message;
       continue;
     }
     out[key] = withoutWords(record[key]);
@@ -244,9 +258,10 @@ export function neutralState(state: SessionState): unknown {
 const TIMED_FIBER_MODES = new Set(["wait", "screenWait", "animWait", "text"]);
 
 /** A deep copy with the programs' localized payload cleared (see
- *  LANGUAGE_OP_FIELDS), and without a fiber's `since` clock while its mode
- *  never reads it (a page turned on another frame leaves a different, dead
- *  value behind once the box closes). Instruction payloads are emptied in
+ *  LANGUAGE_OP_FIELDS), localized scratch-variable values, and a fiber's
+ *  `since` clock while its mode never reads it (a page turned on another
+ *  frame leaves a different, dead value behind once the box closes).
+ *  Instruction payloads are emptied in
  *  place (`lines`/`texts` to [], `prompt` to "") so the compared shape stays
  *  the compiled one: a program that only changed words then matches, while a
  *  different op, jump target or transfer still differs. */
@@ -258,6 +273,7 @@ export function withoutWords(value: unknown): unknown {
     const languageFields = typeof record.op === "string" ? LANGUAGE_OP_FIELDS[record.op] : undefined;
     const out: Record<string, unknown> = {};
     for (const key of Object.keys(record)) {
+      if (LANGUAGE_VARIABLES.has(key)) continue;
       if (deadClock && key === "since") continue;
       if (languageFields?.includes(key)) {
         out[key] = key === "prompt" ? "" : [];
@@ -268,7 +284,7 @@ export function withoutWords(value: unknown): unknown {
         continue;
       }
       if (key === "args" && record.op === "extChoice") {
-        out[key] = neutralExtChoiceArgs(record[key]);
+        out[key] = neutralExtChoiceArgs(record.call, record[key]);
         continue;
       }
       out[key] = withoutWords(record[key]);
