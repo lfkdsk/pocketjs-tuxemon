@@ -199,6 +199,15 @@ baseline 255.898 and 252.014 ms, candidate 254.630 and 260.557 ms. These red
 samples are retained; neither build established the absolute 250 ms gate in
 that window.
 
+A final unrelaxed retry used the same ABBA order and default limits, pinned to
+CPU 30 with shared-host load 4.38 at entry. The candidate passed all eight
+samples: 244.007, 249.005, 239.458, and 241.111 ms at 480x272; 247.390,
+239.728, 233.578, and 238.257 ms at 960x544. The baseline passed six samples
+(246.742, 241.548, 249.184, 249.818, 247.994, and 249.529 ms) but stopped its
+first slot after a 251.123 ms 960x544 outlier. Thus the candidate establishes
+8/8 absolute startup passes under the normal 250 ms limit; the aggregate
+shell still exits nonzero because the retained baseline outlier is real.
+
 The same ABBA order then ran two fresh processes per viewport in each slot,
 with only the startup abort relaxed to 5 seconds so all 16 samples could be
 retained. The 50 ms frame budget stayed active. All processes exited zero,
