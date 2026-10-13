@@ -190,6 +190,7 @@ const MALICIOUS_JSON = JSON.stringify({
   ...JSON.parse(INLINE_JSON),
   script: "globalThis.__expeditionReplayExecuted = true",
 });
+const MALFORMED_JSON = `${INLINE_JSON}<script>globalThis.__expeditionReplayExecuted = true</script>`;
 
 const server = Bun.serve({
   port: 0,
@@ -200,6 +201,7 @@ const server = Bun.serve({
       [`/${GAME}/expedition-journal.json`]: MAIN_JSON,
       [`/${GAME}/edge-budget.json`]: BUDGET_JSON,
       [`/${GAME}/edge-defeat.json`]: DEFEAT_JSON,
+      [`/${GAME}/malformed-journal.json`]: MALFORMED_JSON,
     };
     if (fixtures[url.pathname]) {
       return new Response(fixtures[url.pathname], { headers: { "content-type": "application/json" } });
@@ -432,6 +434,27 @@ check(
   malicious.executed === false && malicious.status === "error" &&
     malicious.message.startsWith("Could not load journal"),
   JSON.stringify(malicious),
+);
+
+await send("Page.navigate", {
+  url: `${base}expedition-replay.html?lang=en&expeditionReplay=malformed-journal.json`,
+});
+await waitFor("visible malformed-JSON error", `globalThis.__pocketExpeditionReplay?.state().status === "error"`);
+const malformed = await evaluate<any>(`({
+  executed: globalThis.__expeditionReplayExecuted,
+  state: globalThis.__pocketExpeditionReplay.state(),
+  observation: globalThis.__pocketExpeditionReplay.observation(),
+  message: document.getElementById("expedition-replay-status")?.textContent,
+  playDisabled: document.getElementById("expedition-replay-play")?.disabled,
+  stepDisabled: document.getElementById("expedition-replay-step")?.disabled,
+})`);
+check(
+  "malformed JSON is rejected without script execution or playable state",
+  malformed.executed === false && malformed.state.status === "error" &&
+    malformed.state.error.includes("source is not valid JSON") && malformed.observation === null &&
+    malformed.message.includes("source is not valid JSON") &&
+    malformed.playDisabled === true && malformed.stepDisabled === true,
+  JSON.stringify(malformed),
 );
 
 // Visual edge fixture: long names, a full team, empty backpack, capture card,

@@ -1,7 +1,7 @@
 // Build Pocket Tuxemon's static web site and keep the audio credits readable
 // beside the downloadable game. The same file also travels inside the pak.
 
-import { copyFileSync } from "node:fs";
+import { copyFileSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { minifyRuntimeBundle } from "./runtime-bundle.ts";
 
@@ -28,6 +28,12 @@ const bundle = minifyRuntimeBundle(
 );
 console.log(`runtime bundle: ${bundle.before} -> ${bundle.after} bytes`);
 const gameDir = join(root, "dist", "web", "pocket-tuxemon");
+const ordinaryBundlePath = join(gameDir, "pocket-tuxemon.js");
+const ordinaryPakPath = join(gameDir, "pocket-tuxemon.pak");
+// This is the completed ordinary build before either optional replay entry is
+// compiled. Keep its bytes so the same Web job proves entry-graph isolation.
+const ordinaryBundleBytes = readFileSync(ordinaryBundlePath);
+const ordinaryPakBytes = readFileSync(ordinaryPakPath);
 await run([
   process.execPath,
   join(root, "vendor", "pocket-rpgkit", "vendor", "pocketjs", "tools", "build.ts"),
@@ -130,6 +136,16 @@ await Bun.write(
     '<section class="info">',
     '<p class="arena-replay-entry"><a href="replay.html">Battle replay / 对战回放</a> · <a href="expedition-replay.html">Expedition replay / 远征回放</a></p>\n<section class="info">',
   ),
+);
+if (!ordinaryBundleBytes.equals(readFileSync(ordinaryBundlePath))) {
+  throw new Error("web: replay entries changed the ordinary game JavaScript bundle");
+}
+if (!ordinaryPakBytes.equals(readFileSync(ordinaryPakPath))) {
+  throw new Error("web: replay entries changed the ordinary game asset pak");
+}
+console.log(
+  `ordinary replay isolation: ${ordinaryBundleBytes.byteLength} JS bytes and ` +
+  `${ordinaryPakBytes.byteLength} pak bytes unchanged`,
 );
 copyFileSync(
   join(root, "licenses", "AUDIO-ATTRIBUTIONS.md"),

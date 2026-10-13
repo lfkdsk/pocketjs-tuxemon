@@ -280,7 +280,6 @@ describe("public expedition journal v1", () => {
     const envelopeCases = [
       (value: any) => { value.entries[0].step = 2; },
       (value: any) => { value.entries[0].action.sequence++; },
-      (value: any) => { value.entries.push(clone(value.entries[0])); value.entries[1].step = 2; },
     ];
     for (const mutate of envelopeCases) {
       const changed = clone(valid);
@@ -297,8 +296,34 @@ describe("public expedition journal v1", () => {
       replaceEncodedObservation(changed, 0, mutate);
       expect(validateExpeditionJournal(changed).ok).toBe(false);
     }
-    expect(() => appendExpeditionJournal(valid, { type: "end", sequence: ended.nextAction }, observeExpedition(ended)))
-      .toThrow();
+    const terminal = observeExpedition(ended);
+    const postTerminal: ExpeditionObservation = {
+      ...clone(terminal),
+      remainingSteps: terminal.remainingSteps - 1,
+      nextAction: terminal.nextAction + 1,
+    };
+    const postTerminalAction: ExpeditionAction = { type: "end", sequence: terminal.nextAction };
+    const validBytes = canonicalJson(valid);
+    expect(() => appendExpeditionJournal(valid, postTerminalAction, postTerminal))
+      .toThrow("entries cannot follow a terminal observation");
+    expect(canonicalJson(valid)).toBe(validBytes);
+
+    const forgedPostTerminal = clone(valid);
+    forgedPostTerminal.entries.push({
+      step: 2,
+      action: postTerminalAction,
+      observation: {
+        kind: "delta",
+        changes: [
+          { path: ["nextAction"], value: postTerminal.nextAction },
+          { path: ["remainingSteps"], value: postTerminal.remainingSteps },
+        ],
+      },
+    });
+    expect(validateExpeditionJournal(forgedPostTerminal)).toEqual({
+      ok: false,
+      error: expect.stringContaining("entries cannot follow a terminal observation"),
+    });
   });
 
   test("bounds a maximum-budget compact journal and rejects entries beyond the engine cap", () => {
