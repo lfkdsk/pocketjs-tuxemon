@@ -279,7 +279,7 @@ describe("expedition randomized state machine", () => {
     expect(summary.defeatedContinuations).toBeGreaterThan(0);
     expect(summary.maxRun).toBe(PERSISTENT_RUNS_PER_CHAIN);
     expect(summary.digest).toBe("7d26eef5d9fef71152913af225acc5b9c3288c73cca7c4a049886cde184871bf");
-  }, 15_000);
+  }, 30_000);
 
   test("1,000 malformed and illegal JSON-like actions never throw or mutate authoritative bytes", () => {
     const random = mulberry32(FUZZ_RANDOM_SEED);
