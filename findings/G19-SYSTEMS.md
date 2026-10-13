@@ -15,8 +15,8 @@ The complete census contains exactly 32 shared YAML files at the pinned
 upstream `mods/` root: 13 are Done, five are Partial, and 14 are Missing. A
 Missing row is either sample/test data, has no campaign grant or action, or is
 internally inconsistent upstream. No Missing row is a player-visible reachable
-Spyder flow. The two concrete reachable gaps found while following the root
-systems into their actions and states are now complete:
+Spyder flow. This task completed the two highest-player-visibility reachable
+gaps selected while following the root systems into their actions and states:
 
 - Spyder Bite plague phases now participate in real battle pre-checks,
   resistance, deterministic spread, narration and post-battle persistence.
@@ -24,10 +24,22 @@ systems into their actions and states are now complete:
   one atomic, bilingual choice instead of exposing a list that could not safely
   remove the selected move.
 
-Both use imported campaign data. They are covered at 480x272 and 960x544 in
-English and Chinese, retain the established keyboard/controller/touch choice
-surface, and have mutation-sensitive tests. No fabricated launcher was added
-for an upstream system that the campaign cannot open.
+One lower-visibility reachable parity gap remains explicitly Partial: eight
+optional shipped double battles can present multiple active targets, while the
+port makes a seeded legal move-target choice without importing
+`ai_opponent.yaml` weighting. The canonical maintained journey triggers none
+of those battles, and upstream's later random action selection normally
+overwrites the weighted target unless it needs a fallback move. This was
+deferred under the specification's player-visibility priority rather than
+classified as unreachable.
+
+Both completed paths use imported campaign data. They are covered at 480x272
+and 960x544 in English and Chinese and have mutation-sensitive tests. The
+pending-move modal uses the established keyboard/controller direction and
+confirm path; a touchscreen operates the same button masks through the Web
+player's virtual controls, while individual choice rows are not direct tap
+targets. No fabricated launcher was added for a system that the campaign
+cannot open.
 
 ## Component upgrade and compatibility
 
@@ -98,7 +110,7 @@ corresponding row in the maintained [feature status](../docs/status.md#upstream-
 | Root config | Upstream entry | Spyder reachability | Port status |
 | --- | --- | --- | --- |
 | `ai_items.yaml` | `tuxemon/ai/ai.py:115`; item choice in `tuxemon/ai/decision_strategy.py:110` | AI is battle-reachable, but no trainer owns the configured Potion; the only three-argument trainer grant is a Wood Berry. | [Missing](../docs/status.md#audit-ai-items): the dormant row is not imported. |
-| `ai_opponent.yaml` | `tuxemon/ai/ai.py:115`; `tuxemon/ai/opponent_evaluator.py:41` | Its real `default` row matters only when an AI has multiple opposing active targets; no maintained journey depends on that distinction. | [Partial](../docs/status.md#audit-ai-opponent): seeded AI selects legal moves and targets, without this weighting policy. |
+| `ai_opponent.yaml` | `tuxemon/ai/ai.py:115`; `tuxemon/ai/opponent_evaluator.py:41` | Eight optional shipped `start_double_battle` calls can present multiple active targets; the canonical maintained journey triggers none of them. Upstream normally overwrites the weighted target during its later random legal-action choice, so the observable distinction is concentrated in no-valid-action fallback turns. | [Partial](../docs/status.md#audit-ai-opponent): seeded AI selects legal moves and targets, without this weighting policy. |
 | `ai_techniques.yaml` | `tuxemon/ai/ai.py:115`; lookup in `tuxemon/ai/decision_strategy.py:59` | Its only key is literal sample `slug`, matching no imported monster or technique owner. | [Missing](../docs/status.md#audit-ai-techniques): sample-only override. |
 | `ai_trainers.yaml` | `tuxemon/ai/ai.py:115`; trainer rules in `tuxemon/ai/decision_strategy.py:245` | Literal `character_slug`/`monster_slug` keys match no trainer, and the nested sample HP range is malformed for its consumer. | [Missing](../docs/status.md#audit-ai-trainers): sample-only and unusable. |
 | `capture_devices.yaml` | `tuxemon/database/rules.py:191`; `tuxemon/formula.py:446` | Direct: Cotton Scoop grants five Tuxeballs at `mods/tuxemon/maps/spyder_cotton_scoop.tmx:53`; shops sell base and specialized devices. | [Done](../docs/status.md#audit-capture-devices): imported modifiers drive production capture. |
@@ -191,8 +203,9 @@ changed between upstream's `get_pending_moves` and `remove_tech` actions.
 The result writes both the upstream choice variable and localized report text.
 English replacement produces “Frighten replaced with Lineage.”; the Chinese
 decline path produces “决定不学习 血统。”. The established non-cancellable choice
-surface provides keyboard/controller navigation and scaled touch rows at both
-viewports. Four new pending-choice goldens cover both languages and resolutions;
+surface provides keyboard/controller navigation; touchscreen players use the
+Web player's virtual direction and confirm controls rather than direct row
+taps. Four new pending-choice goldens cover both languages and resolutions;
 semantic tests pin every key, visible row, selected newest row and panel pixels.
 
 The source contains two action pairs: the Spyder shared page is native, while
@@ -280,11 +293,13 @@ its authored 480x272 playfield centred inside the larger surface.
 
 The plague interaction itself is automatic battle behavior and uses the normal
 battle acknowledgement surface. Pending moves use the shared choice modal:
-direction/confirm from keyboard and controller and scaled tap regions all feed
-the same reducer action. The full browser gates exercised the actual built UI,
-not a fixture-only renderer. Both sets of screenshots were inspected at 3x;
-the bilingual lines, selected move, full-width narration, sprites and map
-backgrounds are visually intact.
+keyboard/controller direction and confirm plus the Web player's touchscreen
+virtual controls feed the same button-mask and reducer path; individual rows
+are not direct tap regions. The screenshots come from the production bundle,
+and the browser gates exercise that built UI rather than a fixture-only
+renderer. Both sets of screenshots were inspected at 3x; the bilingual lines,
+selected move, full-width narration, sprites and map backgrounds are visually
+intact.
 
 ## Final gates
 
@@ -296,15 +311,15 @@ All final commands used the pinned Tuxemon source and the upgraded component.
 | wasm, production build and TypeScript | `build:wasm`, `build`, `bunx tsc --noEmit` all exit 0 |
 | localization | `check:l10n` and exhaustive CJK subset checks pass |
 | five CI test partitions | 55 + 12 + 22 + 719 + 673 = 1,481 pass, 0 fail |
-| environment-conditioned tests | all nine browser-conditioned bodies rerun under their enabling environment and pass; zero bodies remain unexecuted |
-| maintained journeys | all five mainlines, golden sync, both defeat/recovery tapes, 331 lock pages/336 checks, all-map freeze scan, 20 chapter suffixes, both language tapes/demos, five save resumes, preview coverage and built-world replay pass |
+| environment-conditioned tests | all six browser-conditioned bodies plus their three always-on helpers rerun under the enabling environment and pass; zero bodies remain unexecuted |
+| maintained journeys | all five mainlines, golden sync, both defeat/recovery tapes, 338 lock pages/343 checks, all-map freeze scan, 20 chapter suffixes, both language tapes/demos, five save resumes, preview coverage and built-world replay pass |
 | Web | production site builds; Chrome English journey, Chinese opening, bilingual demo, Arena and real-audio gates all pass |
 | PSP | segment snapshots regenerated; full package and CI-exact `build:psp --skip-assets` pass |
 | component QuickJS | all eight cases improve by 2.23-7.86%; zero +3% regressions |
 | production cold QuickJS | 40 valid processes, exact terminal hash, 50 ms frame gate intact; all six reported metrics improve by 1.95-3.73% |
 
-The full PSP artifacts are `EBOOT.PBP` 5,869,760 bytes,
-`pocket-tuxemon.prx` 5,869,428 bytes and `assets.pak` 67,705,552 bytes. The
+The full PSP artifacts are `EBOOT.PBP` 5,869,772 bytes,
+`pocket-tuxemon.prx` 5,869,440 bytes and `assets.pak` 67,705,552 bytes. The
 current task rebuilt both package modes and regenerated all segment snapshots.
 The retained 28-segment PPSSPPHeadless receipts predate this tape refresh, so a
 fresh full emulator campaign remains a release operation and is not represented
@@ -319,6 +334,96 @@ commits use the configured public author, English subjects and no co-author
 footer. `bun.lock` is unchanged, `git diff --check` is clean, and the public
 diff contains no local filesystem path or private service address.
 
-subagent 使用：6 个 / 分别普查根配置、核对 states/actions、追踪战役可达性、审阅移植状态缺口、评估组件升级风险、核对门禁与测试；主代理复核并整合所有结论 / 并行只读普查明显节省了时间
+## Delivery re-verification
+
+This delivery pass started from implementation commit
+`7b597e1fa9e6ca9c38f50e5e57ce56419a09917b` and fetched the public game
+remote again after all gates. `origin/main` remains
+`3bcba8860c5bb7f635ab81eba080ba53de0b783e`, an ancestor of the delivery
+commit, so no rebase was required. No feature code was added during this pass.
+
+The three specification items have direct commit and test coverage:
+
+| Specification item | Delivered commits and evidence |
+| --- | --- |
+| Component upgrade | `2dab06d6` pins Pocket RPG Kit `310934f9`; PocketJS remains `862040bd`, the schema identity remains `a59ec3e0...`, the component consumer guard passes, and five production save/resume points complete. |
+| Complete upstream-system census | `a9bfad65` adds the 32-row audit and `7b597e1f` closes the report/status mapping. The recount is 13 Done, five Partial and 14 Missing. The eight optional double battles exposing deferred `ai_opponent.yaml` parity are now explicitly classified as reachable and Partial. |
+| Highest-visibility reachable gaps | Plague behavior is implemented by `eb880a98` and covered by `4153a5b1`, `tests/plague-battle.test.ts` and `tests/plague-battle-visual.test.ts`. Atomic pending-move replacement is implemented by `928ffbe7` and covered by `1e23c5d3` and `tests/pending-moves-real-map.test.ts`. Both retain the focused red mutants recorded above. |
+
+The component remote advanced after the original implementation was frozen.
+Those later commits include another performance/runtime series; incorporating
+them would be a new component upgrade rather than verification of this
+delivery. This no-feature pass therefore deliberately retains and validates
+the specified `310934f9` pin.
+
+### Re-run gates
+
+All commands used the pinned Tuxemon source. The final local results are:
+
+| Gate | Re-verification result |
+| --- | --- |
+| Prepare and generated data | Public-registry frozen install passes; production and wasm builds pass (wasm 360,011 bytes); eight PSP segment snapshots are generated; two imports leave no tracked diff; the 5,077-file determinism gate covers 68,957,895 bytes at SHA-256 `981c8c86e87e3664533dbe1e9fe91f2df6f7e323e4b5318dbb7a741aa0a255bc`. |
+| Static and localization | `bunx tsc --noEmit` exits 0; all 11 localization checks pass; the CJK subset covers all 2,644 required fallback characters. |
+| Full and partitioned tests | The native full suite is 1,481 pass, six environment-conditioned skips and zero failures across 176 files and 258,958 assertions. The exact five CI partitions are 55 + 12 + 22 + 719 + 673 = 1,481 pass and zero failures. Re-running the six skipped bodies under the browser condition, together with their three always-on helpers, is 9 pass and zero failures; no test body remains unexecuted. |
+| Journey matrix | All 16 workflow entries pass. The five mainlines end at 230,322 combined frames and terminal SHA-256 `1977c1b0...`; 11 golden checkpoints synchronize; both defeat/recovery tapes pass; 338 lock pages execute 343 commands/checks with zero unresolved/error outcomes; all 263 maps have zero permanent locks or fibers; 20 chapter suffixes, both language demos, five save resumes, 21 preview states and the 242-checkpoint built-world replay pass. |
+| Web | The production site builds. English journey, Chinese opening (13/13 assertions and 22 screenshots), bilingual demo, Arena replay and real streamed audio all pass with zero browser console errors. The documented `verify:web:zh` alias passes independently. |
+| PSP | The pinned toolchain bootstrap validates; the CI-exact `build:psp --skip-assets` and the complete `build:psp` both exit 0. Final files are `EBOOT.PBP` 5,869,772 bytes, `pocket-tuxemon.prx` 5,869,440 bytes and `assets.pak` 67,705,552 bytes. |
+| Visual review | All 12 new plague/pending-move goldens were opened at their original 480x272 and 960x544 sizes in both languages. No frame is blank or clipped, localized glyphs remain intact, and the semantic pixel assertions pass. |
+
+GitHub runs the PSP and test jobs in separate checkouts. During the local
+job-by-job reproduction, running PSP bootstrap and then the browser-conditioned
+tests in the same checkout temporarily introduced a second Solid installation;
+the browser tests correctly failed with missing mirror nodes and altered
+pixels. Restoring the frozen root workspace layout removed the duplicate, and
+the exact combined browser command then completed 9 pass and zero failures.
+The failed diagnostic is retained in the raw log rather than hidden.
+
+### Performance re-verification
+
+The component benchmark used three baseline-candidate-candidate-baseline
+windows on CPU 7, 2,000 iterations per slot and nine internal samples. The
+paired-median +3% guard passes all eight consumers:
+
+| Consumer | New pin vs old pin |
+| --- | ---: |
+| `sunstoneIdle` | -8.237666% |
+| `sunstoneWalk` | -5.619239% |
+| `sunstoneControlWalk` | -4.194416% |
+| `streamedRoam` | -8.212230% |
+| `battleScene` | -2.140540% |
+| `sunstoneIdleImmutable` | -5.496977% |
+| `sunstoneControlWalkImmutable` | -4.110762% |
+| `battleSceneImmutable` | +1.200433% |
+
+The production cold check used the same compiled QuickJS host for both sides
+and three complete ABBA windows. Each of the 12 slots launched five fresh
+processes at each viewport: 120 boots, 120 frame budgets and 120 canonical
+state checks. All states matched `7f5a73f7...`; the largest first-frame CPU
+sample was 3.176 ms against the unchanged 50 ms limit. Because the first
+window's 960x544 CPU result was noisy, no sample was discarded: the decision
+uses the median of all six forward/reverse paired deltas.
+
+| Viewport | Metric | Baseline average | Candidate average | Paired median delta |
+| --- | --- | ---: | ---: | ---: |
+| 480x272 | host boot | 240.255 ms | 239.351 ms | +0.190% |
+| 480x272 | startup to first frame | 243.150 ms | 242.141 ms | +0.123% |
+| 480x272 | first-frame CPU | 2.557 ms | 2.500 ms | -2.148% |
+| 960x544 | host boot | 240.134 ms | 238.199 ms | -0.304% |
+| 960x544 | startup to first frame | 242.926 ms | 241.006 ms | -0.308% |
+| 960x544 | first-frame CPU | 2.510 ms | 2.515 ms | -0.257% |
+
+The largest paired median is +0.190%, so the production cold path is
+statistically flat while every frame remains far inside its hard budget.
+
+### Final hygiene
+
+The final fetch still requires no rebase. All 19 implementation commits use
+`lfkdsk <lfkdsk@gmail.com>`, English subjects and no co-author footer. There
+are zero merge commits. The root lockfile remains byte-identical at SHA-256
+`8ccfa9937302846daca5f829c3ef706f1cfa7d3e521c2fad9076842f6ab306e2`;
+both nested submodules are clean; `git diff --check` passes; and the public
+diff contains no local path, task identifier or private service address.
+
+subagent 使用：本轮交付复核 4 个 / 分别核对规格与提交、功能测试与变异辨识力、报告与功能状态、CI 命令清单；原实现轮 6 个 / 普查根配置、states/actions、可达性、移植缺口、组件风险和门禁 / 并行只读核对节省了时间，所有重门禁与性能测量由主代理串行复跑
 
 PASS
