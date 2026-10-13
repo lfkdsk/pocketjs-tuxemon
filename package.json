@@ -80,6 +80,7 @@
     "goldens:gpc:zh": "bun tools/update-gpc-zh-goldens.ts",
     "goldens:radio": "bun tools/update-radio-goldens.ts",
     "goldens:park": "bun tools/update-park-goldens.ts",
+    "goldens:plague": "bun tools/update-plague-goldens.ts",
     "bench:g6:quickjs": "bash tools/bench-g6-quickjs.sh",
     "bench:features:quickjs": "G6_FEATURE_MODES_ONLY=1 bash tools/bench-g6-quickjs.sh",
     "bench:gb6:quickjs": "bash tools/bench-gb6-quickjs.sh",

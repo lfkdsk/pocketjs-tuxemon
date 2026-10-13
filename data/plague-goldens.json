@@ -1,0 +1,101 @@
+{
+  "format": "pocket-tuxemon/plague-goldens/v1",
+  "frames": [
+    {
+      "lang": "en_US",
+      "case": "sneeze",
+      "width": 480,
+      "height": 272,
+      "file": "plague-sneeze.480x272.png",
+      "seed": 1,
+      "eventIndex": 5,
+      "eventTicks": 0,
+      "rgbaFnv1a": "419dc144",
+      "pngSha256": "b6edd4d552de810032866942bf37966e01415e8d34fcd2b6ce807b980949f09c"
+    },
+    {
+      "lang": "en_US",
+      "case": "infected",
+      "width": 480,
+      "height": 272,
+      "file": "plague-infected.480x272.png",
+      "seed": 1,
+      "eventIndex": 5,
+      "eventTicks": 34,
+      "rgbaFnv1a": "764c585a",
+      "pngSha256": "46b764798f3e34b6b89a222f104119ede99ebdf12029013036e609b2918fe462"
+    },
+    {
+      "lang": "en_US",
+      "case": "sneeze",
+      "width": 960,
+      "height": 544,
+      "file": "plague-sneeze.960x544.png",
+      "seed": 1,
+      "eventIndex": 5,
+      "eventTicks": 0,
+      "rgbaFnv1a": "e31d7bd9",
+      "pngSha256": "7c6c8bd94219a9e1047a85fe35ec66e3c893f4bf7c3d58df31237d933e84de4d"
+    },
+    {
+      "lang": "en_US",
+      "case": "infected",
+      "width": 960,
+      "height": 544,
+      "file": "plague-infected.960x544.png",
+      "seed": 1,
+      "eventIndex": 5,
+      "eventTicks": 34,
+      "rgbaFnv1a": "8b2b8759",
+      "pngSha256": "318f837b1c0007a3ab44075aecdb10798409fa6e99939aeb53ea31fdf35ef7d8"
+    },
+    {
+      "lang": "zh_CN",
+      "case": "sneeze",
+      "width": 480,
+      "height": 272,
+      "file": "plague-sneeze.zh.480x272.png",
+      "seed": 1,
+      "eventIndex": 5,
+      "eventTicks": 0,
+      "rgbaFnv1a": "4335a98c",
+      "pngSha256": "8e76279266fc870b54adccdca54b5e3583c162a9ed483d8ba800ae92fc9a7d35"
+    },
+    {
+      "lang": "zh_CN",
+      "case": "infected",
+      "width": 480,
+      "height": 272,
+      "file": "plague-infected.zh.480x272.png",
+      "seed": 1,
+      "eventIndex": 5,
+      "eventTicks": 34,
+      "rgbaFnv1a": "89a5756d",
+      "pngSha256": "4ba37ea4d73656e5f8416d917b8c9c2c0abd24f9f18a87d837953aa1dda78887"
+    },
+    {
+      "lang": "zh_CN",
+      "case": "sneeze",
+      "width": 960,
+      "height": 544,
+      "file": "plague-sneeze.zh.960x544.png",
+      "seed": 1,
+      "eventIndex": 5,
+      "eventTicks": 0,
+      "rgbaFnv1a": "ac9b7b93",
+      "pngSha256": "700aec2a7a7ff4d3c37b10be79d163ad66f7a899b9de2ba4288daeea89d43714"
+    },
+    {
+      "lang": "zh_CN",
+      "case": "infected",
+      "width": 960,
+      "height": 544,
+      "file": "plague-infected.zh.960x544.png",
+      "seed": 1,
+      "eventIndex": 5,
+      "eventTicks": 34,
+      "rgbaFnv1a": "88de8c3e",
+      "pngSha256": "4eb1cf407a5ff2b24d76e28095501bd0bae2e2dbe80e0606f8b8394f5dfa153f"
+    }
+  ]
+}
