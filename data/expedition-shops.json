@@ -1,0 +1,465 @@
+{
+ "format": "pocket-tuxemon/expedition-shops/v1",
+ "shops": {
+  "cotton_scoop": {
+   "items": [
+    {
+     "item": "potion",
+     "price": 20,
+     "sellPrice": 5
+    },
+    {
+     "item": "revive",
+     "price": 100,
+     "sellPrice": 20
+    },
+    {
+     "item": "tuxeball",
+     "price": 50,
+     "sellPrice": 10
+    }
+   ]
+  },
+  "leather_scoop": {
+   "items": [
+    {
+     "item": "potion",
+     "price": 20,
+     "sellPrice": 5
+    },
+    {
+     "item": "revive",
+     "price": 100,
+     "sellPrice": 20
+    },
+    {
+     "item": "tuxeball",
+     "price": 50,
+     "sellPrice": 10
+    }
+   ]
+  },
+  "spyder_candy_scoop": {
+   "items": [
+    {
+     "item": "cureall",
+     "price": 1500,
+     "sellPrice": 750
+    },
+    {
+     "item": "imperial_potion",
+     "price": 1000,
+     "sellPrice": 500
+    },
+    {
+     "item": "mega_potion",
+     "price": 500,
+     "sellPrice": 250
+    },
+    {
+     "item": "revive",
+     "price": 1000,
+     "sellPrice": 500
+    },
+    {
+     "item": "tuxeball_diurnal",
+     "price": 300,
+     "sellPrice": 150,
+     "variables": [
+      {
+       "key": "daytime",
+       "value": "true"
+      }
+     ]
+    },
+    {
+     "item": "tuxeball_majestic",
+     "price": 600,
+     "sellPrice": 300
+    },
+    {
+     "item": "tuxeball_nocturnal",
+     "price": 300,
+     "sellPrice": 150,
+     "variables": [
+      {
+       "key": "daytime",
+       "value": "false"
+      }
+     ]
+    }
+   ]
+  },
+  "spyder_candy_tech": {
+   "items": [
+    {
+     "item": "lucky_bamboo",
+     "price": 2000,
+     "sellPrice": 1000
+    },
+    {
+     "item": "peace_lily",
+     "price": 2000,
+     "sellPrice": 1000
+    },
+    {
+     "item": "tm_acid",
+     "price": 2000,
+     "sellPrice": 400,
+     "stock": 1
+    },
+    {
+     "item": "tm_frostbite",
+     "price": 2000,
+     "sellPrice": 400,
+     "stock": 1
+    },
+    {
+     "item": "tm_supernova",
+     "price": 2000,
+     "sellPrice": 400,
+     "stock": 1
+    },
+    {
+     "item": "tm_vorpal",
+     "price": 2000,
+     "sellPrice": 400,
+     "stock": 1
+    }
+   ]
+  },
+  "spyder_cotton_scoop": {
+   "items": [
+    {
+     "item": "escape_key",
+     "price": 600,
+     "sellPrice": 300
+    },
+    {
+     "item": "potion",
+     "price": 100,
+     "sellPrice": 50
+    },
+    {
+     "item": "repellent",
+     "price": 100,
+     "sellPrice": 50
+    },
+    {
+     "item": "restoration",
+     "price": 400,
+     "sellPrice": 200
+    },
+    {
+     "item": "tuxeball",
+     "price": 100,
+     "sellPrice": 50
+    }
+   ]
+  },
+  "spyder_cotton_tech": {
+   "items": [
+    {
+     "item": "miaow_milk",
+     "price": 2000,
+     "sellPrice": 400
+    },
+    {
+     "item": "ox_stick",
+     "price": 2000,
+     "sellPrice": 400
+    },
+    {
+     "item": "pyramidion",
+     "price": 2000,
+     "sellPrice": 400
+    },
+    {
+     "item": "tm_avalanche",
+     "price": 2000,
+     "sellPrice": 400,
+     "stock": 1
+    },
+    {
+     "item": "tm_blossom",
+     "price": 1000,
+     "sellPrice": 200,
+     "stock": 1
+    }
+   ]
+  },
+  "spyder_flower_petshop": {
+   "items": []
+  },
+  "spyder_flower_scoop": {
+   "items": [
+    {
+     "item": "cureall",
+     "price": 1500,
+     "sellPrice": 750
+    },
+    {
+     "item": "escape_key",
+     "price": 600,
+     "sellPrice": 300
+    },
+    {
+     "item": "repellent",
+     "price": 100,
+     "sellPrice": 50
+    },
+    {
+     "item": "restoration",
+     "price": 400,
+     "sellPrice": 200
+    },
+    {
+     "item": "revive",
+     "price": 1000,
+     "sellPrice": 500
+    },
+    {
+     "item": "super_potion",
+     "price": 300,
+     "sellPrice": 150
+    },
+    {
+     "item": "tuxeball_diurnal",
+     "price": 300,
+     "sellPrice": 150,
+     "variables": [
+      {
+       "key": "daytime",
+       "value": "true"
+      }
+     ]
+    },
+    {
+     "item": "tuxeball_lavish",
+     "price": 300,
+     "sellPrice": 150
+    },
+    {
+     "item": "tuxeball_majestic",
+     "price": 600,
+     "sellPrice": 300
+    },
+    {
+     "item": "tuxeball_nocturnal",
+     "price": 300,
+     "sellPrice": 150,
+     "variables": [
+      {
+       "key": "daytime",
+       "value": "false"
+      }
+     ]
+    }
+   ]
+  },
+  "spyder_flower_tech": {
+   "items": [
+    {
+     "item": "flintstone",
+     "price": 2000,
+     "sellPrice": 1000
+    },
+    {
+     "item": "thunderstone",
+     "price": 2000,
+     "sellPrice": 1000
+    }
+   ]
+  },
+  "spyder_leather_scoop": {
+   "items": [
+    {
+     "item": "escape_key",
+     "price": 600,
+     "sellPrice": 300
+    },
+    {
+     "item": "potion",
+     "price": 100,
+     "sellPrice": 50
+    },
+    {
+     "item": "repellent",
+     "price": 100,
+     "sellPrice": 50
+    },
+    {
+     "item": "restoration",
+     "price": 400,
+     "sellPrice": 200
+    },
+    {
+     "item": "revive",
+     "price": 1000,
+     "sellPrice": 500
+    },
+    {
+     "item": "super_potion",
+     "price": 300,
+     "sellPrice": 150
+    },
+    {
+     "item": "tuxeball",
+     "price": 100,
+     "sellPrice": 50
+    },
+    {
+     "item": "tuxeball_lavish",
+     "price": 300,
+     "sellPrice": 150
+    }
+   ]
+  },
+  "spyder_leather_tech": {
+   "items": [
+    {
+     "item": "stovepipe",
+     "price": 2000,
+     "sellPrice": 1000
+    },
+    {
+     "item": "tectonic_drill",
+     "price": 2000,
+     "sellPrice": 1000
+    }
+   ]
+  },
+  "spyder_timber_scoop": {
+   "items": [
+    {
+     "item": "boost_armour",
+     "price": 550,
+     "sellPrice": 275
+    },
+    {
+     "item": "boost_dodge",
+     "price": 550,
+     "sellPrice": 275
+    },
+    {
+     "item": "boost_melee",
+     "price": 550,
+     "sellPrice": 275
+    },
+    {
+     "item": "boost_ranged",
+     "price": 550,
+     "sellPrice": 275
+    },
+    {
+     "item": "boost_speed",
+     "price": 550,
+     "sellPrice": 275
+    },
+    {
+     "item": "cureall",
+     "price": 1500,
+     "sellPrice": 750
+    },
+    {
+     "item": "escape_key",
+     "price": 600,
+     "sellPrice": 300
+    },
+    {
+     "item": "raise_armour",
+     "price": 10000,
+     "sellPrice": 5000
+    },
+    {
+     "item": "raise_dodge",
+     "price": 10000,
+     "sellPrice": 5000
+    },
+    {
+     "item": "raise_hp",
+     "price": 10000,
+     "sellPrice": 5000
+    },
+    {
+     "item": "raise_melee",
+     "price": 10000,
+     "sellPrice": 5000
+    },
+    {
+     "item": "raise_ranged",
+     "price": 10000,
+     "sellPrice": 5000
+    },
+    {
+     "item": "raise_speed",
+     "price": 10000,
+     "sellPrice": 5000
+    },
+    {
+     "item": "repellent",
+     "price": 100,
+     "sellPrice": 50
+    },
+    {
+     "item": "restoration",
+     "price": 400,
+     "sellPrice": 200
+    },
+    {
+     "item": "revive",
+     "price": 1000,
+     "sellPrice": 500
+    },
+    {
+     "item": "super_potion",
+     "price": 300,
+     "sellPrice": 150
+    },
+    {
+     "item": "tuxeball_lavish",
+     "price": 300,
+     "sellPrice": 150
+    },
+    {
+     "item": "tuxeball_majestic",
+     "price": 600,
+     "sellPrice": 300
+    }
+   ]
+  },
+  "spyder_timber_tech": {
+   "items": [
+    {
+     "item": "sea_girdle",
+     "price": 2000,
+     "sellPrice": 1000
+    },
+    {
+     "item": "sweet_sand",
+     "price": 2000,
+     "sellPrice": 1000
+    }
+   ]
+  },
+  "tuxe_mart_taba": {
+   "items": [
+    {
+     "item": "potion",
+     "price": 20,
+     "sellPrice": 5
+    },
+    {
+     "item": "revive",
+     "price": 100,
+     "sellPrice": 20
+    },
+    {
+     "item": "tuxeball",
+     "price": 50,
+     "sellPrice": 10
+    }
+   ]
+  }
+ }
+}

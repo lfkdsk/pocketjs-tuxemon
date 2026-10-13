@@ -28,6 +28,7 @@ import { buildDemoData, buildEnDemoData, buildZhDemoData, demoIndexSource } from
 import { splitGameProjectMaps } from "./importer/map-shards.ts";
 import { buildPreviewCoverage, tuxemonPreviewSessionOptions } from "./importer/preview-coverage.ts";
 import { featureModesRuntimeData, loadFeatureModes } from "./importer/feature-modes.ts";
+import { importExpeditionShops } from "./importer/expedition-shops.ts";
 import monthNames from "./data/month-names.json";
 
 // Tests and determinism checks can cook into a disposable root without
@@ -39,6 +40,26 @@ const sourceRoot = process.env.TUXEMON_SRC ?? DEFAULT_TUXEMON_SRC;
 mkdirSync(DIST, { recursive: true });
 mkdirSync(join(ROOT, "data"), { recursive: true });
 mkdirSync(join(ROOT, "reports"), { recursive: true });
+
+// Headless expeditions buy from the authored economy purchase prices. Keep a
+// small standalone projection so the server API never mistakes an item's
+// intrinsic resale cost for a particular shop's price.
+const expeditionShops = importExpeditionShops(sourceRoot);
+writeFileSync(join(ROOT, "data/expedition-shops.json"), jsonBytes({
+  format: "pocket-tuxemon/expedition-shops/v1",
+  shops: Object.fromEntries(expeditionShops.map((shop) => [shop.slug, {
+    items: shop.items.map((item) => ({
+      item: item.slug,
+      price: item.price,
+      sellPrice: item.cost,
+      ...(item.stock === undefined ? {} : { stock: item.stock }),
+      ...(item.variables === undefined ? {} : { variables: item.variables.map(({ key, value }) => ({
+        key,
+        value: String(value),
+      })) }),
+    })),
+  }])),
+}));
 
 const terrain = writeTerrain({ outputRoot: ROOT });
 const imported = buildProject(
