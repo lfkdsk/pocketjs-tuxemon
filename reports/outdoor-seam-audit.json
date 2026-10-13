@@ -1,0 +1,5242 @@
+{
+  "format": "pocket-tuxemon/outdoor-seam-audit/v1",
+  "sourceRevision": "9e6258ff726b786040a267e8bdbbf037b560285e",
+  "topologyHash": "c681c230fe432bbbf8809fe11a5bbc42fc8eb4f62c2ec1a6be141fd0c35f2143",
+  "counts": {
+    "outdoorToOutdoorPortalActions": 348,
+    "rawCoordinatePreservingPortalIds": 258,
+    "runtimeSeamlessPortalIds": 292,
+    "partialPortalIds": 34,
+    "partialSeamlessCells": 137,
+    "partialLegacyCells": 0,
+    "whollyLegacyPortalIds": 56,
+    "whollyLegacyByCategory": {
+      "portal-only": 5,
+      "linked-gap": 19,
+      "rejected-contact": 4,
+      "outdoor-nonseam-or-story": 28
+    },
+    "directionOnlySeamsWithoutPortalActions": 10
+  },
+  "partial": [
+    {
+      "portalId": "classic_aerolume_city:tmx:classic_aerolume_city.tmx:285:a0",
+      "category": "lane-mapped-fixed-destination",
+      "reason": "fixed-destination-continuous-lanes",
+      "movementCapability": null,
+      "source": {
+        "map": "classic_aerolume_city",
+        "event": "Teleport to Route6",
+        "objectId": 285,
+        "rect": {
+          "x": 39,
+          "y": 1,
+          "width": 1,
+          "height": 3
+        },
+        "cells": [
+          {
+            "x": 39,
+            "y": 1
+          },
+          {
+            "x": 39,
+            "y": 2
+          },
+          {
+            "x": 39,
+            "y": 3
+          }
+        ],
+        "touchingSides": [
+          "east"
+        ],
+        "facingGuard": "right",
+        "trailingFace": "right"
+      },
+      "target": {
+        "map": "classic_route_6",
+        "x": 0,
+        "y": 2
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 39,
+            "y": 1
+          },
+          "target": {
+            "x": 0,
+            "y": 1
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 39,
+            "y": 2
+          },
+          "target": {
+            "x": 0,
+            "y": 2
+          },
+          "authored": true
+        },
+        {
+          "source": {
+            "x": 39,
+            "y": 3
+          },
+          "target": {
+            "x": 0,
+            "y": 3
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe: the maps sit edge to edge and every lane passes the terrain proof, so each lane lands on its own coordinate-continuous neighbour cell instead of the authored funnel landing"
+    },
+    {
+      "portalId": "classic_aerolume_city:tmx:classic_aerolume_city.tmx:286:a0",
+      "category": "lane-mapped-fixed-destination",
+      "reason": "fixed-destination-continuous-lanes",
+      "movementCapability": null,
+      "source": {
+        "map": "classic_aerolume_city",
+        "event": "Teleport to Route5",
+        "objectId": 286,
+        "rect": {
+          "x": 0,
+          "y": 16,
+          "width": 1,
+          "height": 3
+        },
+        "cells": [
+          {
+            "x": 0,
+            "y": 16
+          },
+          {
+            "x": 0,
+            "y": 17
+          },
+          {
+            "x": 0,
+            "y": 18
+          }
+        ],
+        "touchingSides": [
+          "west"
+        ],
+        "facingGuard": "left",
+        "trailingFace": "left"
+      },
+      "target": {
+        "map": "classic_route_5",
+        "x": 39,
+        "y": 17
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 0,
+            "y": 16
+          },
+          "target": {
+            "x": 39,
+            "y": 16
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 0,
+            "y": 17
+          },
+          "target": {
+            "x": 39,
+            "y": 17
+          },
+          "authored": true
+        },
+        {
+          "source": {
+            "x": 0,
+            "y": 18
+          },
+          "target": {
+            "x": 39,
+            "y": 18
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe: the maps sit edge to edge and every lane passes the terrain proof, so each lane lands on its own coordinate-continuous neighbour cell instead of the authored funnel landing"
+    },
+    {
+      "portalId": "classic_hearthrock_city:tmx:classic_hearthrock_city.tmx:300:a0",
+      "category": "lane-mapped-fixed-destination",
+      "reason": "fixed-destination-continuous-lanes",
+      "movementCapability": null,
+      "source": {
+        "map": "classic_hearthrock_city",
+        "event": "Teleport to Route1",
+        "objectId": 300,
+        "rect": {
+          "x": 32,
+          "y": 0,
+          "width": 3,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 32,
+            "y": 0
+          },
+          {
+            "x": 33,
+            "y": 0
+          },
+          {
+            "x": 34,
+            "y": 0
+          }
+        ],
+        "touchingSides": [
+          "north"
+        ],
+        "facingGuard": "up",
+        "trailingFace": "up"
+      },
+      "target": {
+        "map": "classic_route_1",
+        "x": 33,
+        "y": 19
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 32,
+            "y": 0
+          },
+          "target": {
+            "x": 32,
+            "y": 19
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 33,
+            "y": 0
+          },
+          "target": {
+            "x": 33,
+            "y": 19
+          },
+          "authored": true
+        },
+        {
+          "source": {
+            "x": 34,
+            "y": 0
+          },
+          "target": {
+            "x": 34,
+            "y": 19
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe: the maps sit edge to edge and every lane passes the terrain proof, so each lane lands on its own coordinate-continuous neighbour cell instead of the authored funnel landing"
+    },
+    {
+      "portalId": "classic_hearthrock_city:tmx:classic_hearthrock_city.tmx:301:a0",
+      "category": "lane-mapped-fixed-destination",
+      "reason": "fixed-destination-continuous-lanes",
+      "movementCapability": null,
+      "source": {
+        "map": "classic_hearthrock_city",
+        "event": "Teleport to Route8",
+        "objectId": 301,
+        "rect": {
+          "x": 39,
+          "y": 15,
+          "width": 1,
+          "height": 3
+        },
+        "cells": [
+          {
+            "x": 39,
+            "y": 15
+          },
+          {
+            "x": 39,
+            "y": 16
+          },
+          {
+            "x": 39,
+            "y": 17
+          }
+        ],
+        "touchingSides": [
+          "east"
+        ],
+        "facingGuard": "right",
+        "trailingFace": "right"
+      },
+      "target": {
+        "map": "classic_route_8",
+        "x": 0,
+        "y": 16
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 39,
+            "y": 15
+          },
+          "target": {
+            "x": 0,
+            "y": 15
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 39,
+            "y": 16
+          },
+          "target": {
+            "x": 0,
+            "y": 16
+          },
+          "authored": true
+        },
+        {
+          "source": {
+            "x": 39,
+            "y": 17
+          },
+          "target": {
+            "x": 0,
+            "y": 17
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe: the maps sit edge to edge and every lane passes the terrain proof, so each lane lands on its own coordinate-continuous neighbour cell instead of the authored funnel landing"
+    },
+    {
+      "portalId": "classic_route_1:tmx:classic_route_1.tmx:293:a0",
+      "category": "lane-mapped-fixed-destination",
+      "reason": "fixed-destination-continuous-lanes",
+      "movementCapability": null,
+      "source": {
+        "map": "classic_route_1",
+        "event": "Teleport to Hearthrock",
+        "objectId": 293,
+        "rect": {
+          "x": 32,
+          "y": 19,
+          "width": 3,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 32,
+            "y": 19
+          },
+          {
+            "x": 33,
+            "y": 19
+          },
+          {
+            "x": 34,
+            "y": 19
+          }
+        ],
+        "touchingSides": [
+          "south"
+        ],
+        "facingGuard": "down",
+        "trailingFace": "down"
+      },
+      "target": {
+        "map": "classic_hearthrock_city",
+        "x": 33,
+        "y": 0
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 32,
+            "y": 19
+          },
+          "target": {
+            "x": 32,
+            "y": 0
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 33,
+            "y": 19
+          },
+          "target": {
+            "x": 33,
+            "y": 0
+          },
+          "authored": true
+        },
+        {
+          "source": {
+            "x": 34,
+            "y": 19
+          },
+          "target": {
+            "x": 34,
+            "y": 0
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe: the maps sit edge to edge and every lane passes the terrain proof, so each lane lands on its own coordinate-continuous neighbour cell instead of the authored funnel landing"
+    },
+    {
+      "portalId": "classic_route_1:tmx:classic_route_1.tmx:294:a0",
+      "category": "lane-mapped-fixed-destination",
+      "reason": "fixed-destination-continuous-lanes",
+      "movementCapability": null,
+      "source": {
+        "map": "classic_route_1",
+        "event": "Teleport to Steamshore",
+        "objectId": 294,
+        "rect": {
+          "x": 5,
+          "y": 0,
+          "width": 3,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 5,
+            "y": 0
+          },
+          {
+            "x": 6,
+            "y": 0
+          },
+          {
+            "x": 7,
+            "y": 0
+          }
+        ],
+        "touchingSides": [
+          "north"
+        ],
+        "facingGuard": "up",
+        "trailingFace": "up"
+      },
+      "target": {
+        "map": "classic_steamshore_city",
+        "x": 6,
+        "y": 19
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 5,
+            "y": 0
+          },
+          "target": {
+            "x": 5,
+            "y": 19
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 6,
+            "y": 0
+          },
+          "target": {
+            "x": 6,
+            "y": 19
+          },
+          "authored": true
+        },
+        {
+          "source": {
+            "x": 7,
+            "y": 0
+          },
+          "target": {
+            "x": 7,
+            "y": 19
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe: the maps sit edge to edge and every lane passes the terrain proof, so each lane lands on its own coordinate-continuous neighbour cell instead of the authored funnel landing"
+    },
+    {
+      "portalId": "classic_route_2:tmx:classic_route_2.tmx:286:a0",
+      "category": "lane-mapped-fixed-destination",
+      "reason": "fixed-destination-continuous-lanes",
+      "movementCapability": null,
+      "source": {
+        "map": "classic_route_2",
+        "event": "Teleport to Thornwood",
+        "objectId": 286,
+        "rect": {
+          "x": 39,
+          "y": 16,
+          "width": 1,
+          "height": 3
+        },
+        "cells": [
+          {
+            "x": 39,
+            "y": 16
+          },
+          {
+            "x": 39,
+            "y": 17
+          },
+          {
+            "x": 39,
+            "y": 18
+          }
+        ],
+        "touchingSides": [
+          "east"
+        ],
+        "facingGuard": "right",
+        "trailingFace": "right"
+      },
+      "target": {
+        "map": "classic_thornwood_city",
+        "x": 0,
+        "y": 17
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 39,
+            "y": 16
+          },
+          "target": {
+            "x": 0,
+            "y": 16
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 39,
+            "y": 17
+          },
+          "target": {
+            "x": 0,
+            "y": 17
+          },
+          "authored": true
+        },
+        {
+          "source": {
+            "x": 39,
+            "y": 18
+          },
+          "target": {
+            "x": 0,
+            "y": 18
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe: the maps sit edge to edge and every lane passes the terrain proof, so each lane lands on its own coordinate-continuous neighbour cell instead of the authored funnel landing"
+    },
+    {
+      "portalId": "classic_route_3:tmx:classic_route_3.tmx:285:a0",
+      "category": "surf-capability-lanes",
+      "reason": "surf-continuous-lanes",
+      "movementCapability": "surf",
+      "source": {
+        "map": "classic_route_3",
+        "event": "Teleport to Route4",
+        "objectId": 285,
+        "rect": {
+          "x": 16,
+          "y": 0,
+          "width": 8,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 16,
+            "y": 0
+          },
+          {
+            "x": 17,
+            "y": 0
+          },
+          {
+            "x": 18,
+            "y": 0
+          },
+          {
+            "x": 19,
+            "y": 0
+          },
+          {
+            "x": 20,
+            "y": 0
+          },
+          {
+            "x": 21,
+            "y": 0
+          },
+          {
+            "x": 22,
+            "y": 0
+          },
+          {
+            "x": 23,
+            "y": 0
+          }
+        ],
+        "touchingSides": [
+          "north"
+        ],
+        "facingGuard": "up",
+        "trailingFace": "up"
+      },
+      "target": {
+        "map": "classic_route_4",
+        "x": 20,
+        "y": 0
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 16,
+            "y": 0
+          },
+          "target": {
+            "x": 16,
+            "y": 19
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 17,
+            "y": 0
+          },
+          "target": {
+            "x": 17,
+            "y": 19
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 18,
+            "y": 0
+          },
+          "target": {
+            "x": 18,
+            "y": 19
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 19,
+            "y": 0
+          },
+          "target": {
+            "x": 19,
+            "y": 19
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 20,
+            "y": 0
+          },
+          "target": {
+            "x": 20,
+            "y": 19
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 21,
+            "y": 0
+          },
+          "target": {
+            "x": 21,
+            "y": 19
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 22,
+            "y": 0
+          },
+          "target": {
+            "x": 22,
+            "y": 19
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 23,
+            "y": 0
+          },
+          "target": {
+            "x": 23,
+            "y": 19
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe while Surf-capable: every lane is Surf water on both sides and the maps sit edge to edge; the trusted opening capability gates the atomic crossing and relaxes only target solidity, while every lane lands on its coordinate-continuous neighbour cell"
+    },
+    {
+      "portalId": "classic_route_3:tmx:classic_route_3.tmx:286:a0",
+      "category": "lane-mapped-fixed-destination",
+      "reason": "fixed-destination-continuous-lanes",
+      "movementCapability": null,
+      "source": {
+        "map": "classic_route_3",
+        "event": "Teleport to Thornwood",
+        "objectId": 286,
+        "rect": {
+          "x": 16,
+          "y": 19,
+          "width": 3,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 16,
+            "y": 19
+          },
+          {
+            "x": 17,
+            "y": 19
+          },
+          {
+            "x": 18,
+            "y": 19
+          }
+        ],
+        "touchingSides": [
+          "south"
+        ],
+        "facingGuard": "down",
+        "trailingFace": "down"
+      },
+      "target": {
+        "map": "classic_thornwood_city",
+        "x": 17,
+        "y": 0
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 16,
+            "y": 19
+          },
+          "target": {
+            "x": 16,
+            "y": 0
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 17,
+            "y": 19
+          },
+          "target": {
+            "x": 17,
+            "y": 0
+          },
+          "authored": true
+        },
+        {
+          "source": {
+            "x": 18,
+            "y": 19
+          },
+          "target": {
+            "x": 18,
+            "y": 0
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe: the maps sit edge to edge and every lane passes the terrain proof, so each lane lands on its own coordinate-continuous neighbour cell instead of the authored funnel landing"
+    },
+    {
+      "portalId": "classic_route_4:tmx:classic_route_4.tmx:285:a0",
+      "category": "surf-capability-lanes",
+      "reason": "surf-continuous-lanes",
+      "movementCapability": "surf",
+      "source": {
+        "map": "classic_route_4",
+        "event": "Teleport to Stormpeak",
+        "objectId": 285,
+        "rect": {
+          "x": 15,
+          "y": 0,
+          "width": 7,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 15,
+            "y": 0
+          },
+          {
+            "x": 16,
+            "y": 0
+          },
+          {
+            "x": 17,
+            "y": 0
+          },
+          {
+            "x": 18,
+            "y": 0
+          },
+          {
+            "x": 19,
+            "y": 0
+          },
+          {
+            "x": 20,
+            "y": 0
+          },
+          {
+            "x": 21,
+            "y": 0
+          }
+        ],
+        "touchingSides": [
+          "north"
+        ],
+        "facingGuard": "up",
+        "trailingFace": "up"
+      },
+      "target": {
+        "map": "classic_stormpeak_city",
+        "x": 18,
+        "y": 19
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 15,
+            "y": 0
+          },
+          "target": {
+            "x": 15,
+            "y": 19
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 16,
+            "y": 0
+          },
+          "target": {
+            "x": 16,
+            "y": 19
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 17,
+            "y": 0
+          },
+          "target": {
+            "x": 17,
+            "y": 19
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 18,
+            "y": 0
+          },
+          "target": {
+            "x": 18,
+            "y": 19
+          },
+          "authored": true
+        },
+        {
+          "source": {
+            "x": 19,
+            "y": 0
+          },
+          "target": {
+            "x": 19,
+            "y": 19
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 20,
+            "y": 0
+          },
+          "target": {
+            "x": 20,
+            "y": 19
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 21,
+            "y": 0
+          },
+          "target": {
+            "x": 21,
+            "y": 19
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe while Surf-capable: every lane is Surf water on both sides and the maps sit edge to edge; the trusted opening capability gates the atomic crossing and relaxes only target solidity, while every lane lands on its coordinate-continuous neighbour cell"
+    },
+    {
+      "portalId": "classic_route_4:tmx:classic_route_4.tmx:286:a0",
+      "category": "surf-capability-lanes",
+      "reason": "surf-continuous-lanes",
+      "movementCapability": "surf",
+      "source": {
+        "map": "classic_route_4",
+        "event": "Teleport to Route3",
+        "objectId": 286,
+        "rect": {
+          "x": 16,
+          "y": 19,
+          "width": 8,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 16,
+            "y": 19
+          },
+          {
+            "x": 17,
+            "y": 19
+          },
+          {
+            "x": 18,
+            "y": 19
+          },
+          {
+            "x": 19,
+            "y": 19
+          },
+          {
+            "x": 20,
+            "y": 19
+          },
+          {
+            "x": 21,
+            "y": 19
+          },
+          {
+            "x": 22,
+            "y": 19
+          },
+          {
+            "x": 23,
+            "y": 19
+          }
+        ],
+        "touchingSides": [
+          "south"
+        ],
+        "facingGuard": "down",
+        "trailingFace": "down"
+      },
+      "target": {
+        "map": "classic_route_3",
+        "x": 20,
+        "y": 19
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 16,
+            "y": 19
+          },
+          "target": {
+            "x": 16,
+            "y": 0
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 17,
+            "y": 19
+          },
+          "target": {
+            "x": 17,
+            "y": 0
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 18,
+            "y": 19
+          },
+          "target": {
+            "x": 18,
+            "y": 0
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 19,
+            "y": 19
+          },
+          "target": {
+            "x": 19,
+            "y": 0
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 20,
+            "y": 19
+          },
+          "target": {
+            "x": 20,
+            "y": 0
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 21,
+            "y": 19
+          },
+          "target": {
+            "x": 21,
+            "y": 0
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 22,
+            "y": 19
+          },
+          "target": {
+            "x": 22,
+            "y": 0
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 23,
+            "y": 19
+          },
+          "target": {
+            "x": 23,
+            "y": 0
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe while Surf-capable: every lane is Surf water on both sides and the maps sit edge to edge; the trusted opening capability gates the atomic crossing and relaxes only target solidity, while every lane lands on its coordinate-continuous neighbour cell"
+    },
+    {
+      "portalId": "classic_route_5:tmx:classic_route_5.tmx:285:a0",
+      "category": "lane-mapped-fixed-destination",
+      "reason": "fixed-destination-continuous-lanes",
+      "movementCapability": null,
+      "source": {
+        "map": "classic_route_5",
+        "event": "Teleport to Thornwood",
+        "objectId": 285,
+        "rect": {
+          "x": 0,
+          "y": 1,
+          "width": 1,
+          "height": 3
+        },
+        "cells": [
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 2
+          },
+          {
+            "x": 0,
+            "y": 3
+          }
+        ],
+        "touchingSides": [
+          "west"
+        ],
+        "facingGuard": "left",
+        "trailingFace": "left"
+      },
+      "target": {
+        "map": "classic_thornwood_city",
+        "x": 39,
+        "y": 2
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 0,
+            "y": 1
+          },
+          "target": {
+            "x": 39,
+            "y": 1
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 0,
+            "y": 2
+          },
+          "target": {
+            "x": 39,
+            "y": 2
+          },
+          "authored": true
+        },
+        {
+          "source": {
+            "x": 0,
+            "y": 3
+          },
+          "target": {
+            "x": 39,
+            "y": 3
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe: the maps sit edge to edge and every lane passes the terrain proof, so each lane lands on its own coordinate-continuous neighbour cell instead of the authored funnel landing"
+    },
+    {
+      "portalId": "classic_route_5:tmx:classic_route_5.tmx:286:a0",
+      "category": "lane-mapped-fixed-destination",
+      "reason": "fixed-destination-continuous-lanes",
+      "movementCapability": null,
+      "source": {
+        "map": "classic_route_5",
+        "event": "Teleport to Aerolume",
+        "objectId": 286,
+        "rect": {
+          "x": 39,
+          "y": 16,
+          "width": 1,
+          "height": 3
+        },
+        "cells": [
+          {
+            "x": 39,
+            "y": 16
+          },
+          {
+            "x": 39,
+            "y": 17
+          },
+          {
+            "x": 39,
+            "y": 18
+          }
+        ],
+        "touchingSides": [
+          "east"
+        ],
+        "facingGuard": "right",
+        "trailingFace": "right"
+      },
+      "target": {
+        "map": "classic_aerolume_city",
+        "x": 0,
+        "y": 17
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 39,
+            "y": 16
+          },
+          "target": {
+            "x": 0,
+            "y": 16
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 39,
+            "y": 17
+          },
+          "target": {
+            "x": 0,
+            "y": 17
+          },
+          "authored": true
+        },
+        {
+          "source": {
+            "x": 39,
+            "y": 18
+          },
+          "target": {
+            "x": 0,
+            "y": 18
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe: the maps sit edge to edge and every lane passes the terrain proof, so each lane lands on its own coordinate-continuous neighbour cell instead of the authored funnel landing"
+    },
+    {
+      "portalId": "classic_route_6:tmx:classic_route_6.tmx:285:a0",
+      "category": "lane-mapped-fixed-destination",
+      "reason": "fixed-destination-continuous-lanes",
+      "movementCapability": null,
+      "source": {
+        "map": "classic_route_6",
+        "event": "Teleport to Umbrastar",
+        "objectId": 285,
+        "rect": {
+          "x": 39,
+          "y": 16,
+          "width": 1,
+          "height": 3
+        },
+        "cells": [
+          {
+            "x": 39,
+            "y": 16
+          },
+          {
+            "x": 39,
+            "y": 17
+          },
+          {
+            "x": 39,
+            "y": 18
+          }
+        ],
+        "touchingSides": [
+          "east"
+        ],
+        "facingGuard": "right",
+        "trailingFace": "right"
+      },
+      "target": {
+        "map": "classic_umbrastar_city",
+        "x": 0,
+        "y": 17
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 39,
+            "y": 16
+          },
+          "target": {
+            "x": 0,
+            "y": 16
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 39,
+            "y": 17
+          },
+          "target": {
+            "x": 0,
+            "y": 17
+          },
+          "authored": true
+        },
+        {
+          "source": {
+            "x": 39,
+            "y": 18
+          },
+          "target": {
+            "x": 0,
+            "y": 18
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe: the maps sit edge to edge and every lane passes the terrain proof, so each lane lands on its own coordinate-continuous neighbour cell instead of the authored funnel landing"
+    },
+    {
+      "portalId": "classic_route_6:tmx:classic_route_6.tmx:286:a0",
+      "category": "lane-mapped-fixed-destination",
+      "reason": "fixed-destination-continuous-lanes",
+      "movementCapability": null,
+      "source": {
+        "map": "classic_route_6",
+        "event": "Teleport to Aerolume",
+        "objectId": 286,
+        "rect": {
+          "x": 0,
+          "y": 1,
+          "width": 1,
+          "height": 3
+        },
+        "cells": [
+          {
+            "x": 0,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 2
+          },
+          {
+            "x": 0,
+            "y": 3
+          }
+        ],
+        "touchingSides": [
+          "west"
+        ],
+        "facingGuard": "left",
+        "trailingFace": "left"
+      },
+      "target": {
+        "map": "classic_aerolume_city",
+        "x": 39,
+        "y": 2
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 0,
+            "y": 1
+          },
+          "target": {
+            "x": 39,
+            "y": 1
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 0,
+            "y": 2
+          },
+          "target": {
+            "x": 39,
+            "y": 2
+          },
+          "authored": true
+        },
+        {
+          "source": {
+            "x": 0,
+            "y": 3
+          },
+          "target": {
+            "x": 39,
+            "y": 3
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe: the maps sit edge to edge and every lane passes the terrain proof, so each lane lands on its own coordinate-continuous neighbour cell instead of the authored funnel landing"
+    },
+    {
+      "portalId": "classic_route_7:tmx:classic_route_7.tmx:285:a0",
+      "category": "lane-mapped-fixed-destination",
+      "reason": "fixed-destination-continuous-lanes",
+      "movementCapability": null,
+      "source": {
+        "map": "classic_route_7",
+        "event": "Teleport to Valorhold",
+        "objectId": 285,
+        "rect": {
+          "x": 2,
+          "y": 19,
+          "width": 3,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 2,
+            "y": 19
+          },
+          {
+            "x": 3,
+            "y": 19
+          },
+          {
+            "x": 4,
+            "y": 19
+          }
+        ],
+        "touchingSides": [
+          "south"
+        ],
+        "facingGuard": "down",
+        "trailingFace": "down"
+      },
+      "target": {
+        "map": "classic_valorhold_city",
+        "x": 3,
+        "y": 0
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 2,
+            "y": 19
+          },
+          "target": {
+            "x": 2,
+            "y": 0
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 3,
+            "y": 19
+          },
+          "target": {
+            "x": 3,
+            "y": 0
+          },
+          "authored": true
+        },
+        {
+          "source": {
+            "x": 4,
+            "y": 19
+          },
+          "target": {
+            "x": 4,
+            "y": 0
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe: the maps sit edge to edge and every lane passes the terrain proof, so each lane lands on its own coordinate-continuous neighbour cell instead of the authored funnel landing"
+    },
+    {
+      "portalId": "classic_route_7:tmx:classic_route_7.tmx:286:a0",
+      "category": "lane-mapped-fixed-destination",
+      "reason": "fixed-destination-continuous-lanes",
+      "movementCapability": null,
+      "source": {
+        "map": "classic_route_7",
+        "event": "Teleport to Thornwood",
+        "objectId": 286,
+        "rect": {
+          "x": 35,
+          "y": 0,
+          "width": 3,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 35,
+            "y": 0
+          },
+          {
+            "x": 36,
+            "y": 0
+          },
+          {
+            "x": 37,
+            "y": 0
+          }
+        ],
+        "touchingSides": [
+          "north"
+        ],
+        "facingGuard": "up",
+        "trailingFace": "up"
+      },
+      "target": {
+        "map": "classic_thornwood_city",
+        "x": 36,
+        "y": 19
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 35,
+            "y": 0
+          },
+          "target": {
+            "x": 35,
+            "y": 19
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 36,
+            "y": 0
+          },
+          "target": {
+            "x": 36,
+            "y": 19
+          },
+          "authored": true
+        },
+        {
+          "source": {
+            "x": 37,
+            "y": 0
+          },
+          "target": {
+            "x": 37,
+            "y": 19
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe: the maps sit edge to edge and every lane passes the terrain proof, so each lane lands on its own coordinate-continuous neighbour cell instead of the authored funnel landing"
+    },
+    {
+      "portalId": "classic_route_8:tmx:classic_route_8.tmx:285:a0",
+      "category": "lane-mapped-fixed-destination",
+      "reason": "fixed-destination-continuous-lanes",
+      "movementCapability": null,
+      "source": {
+        "map": "classic_route_8",
+        "event": "Teleport to Hearthrock",
+        "objectId": 285,
+        "rect": {
+          "x": 0,
+          "y": 15,
+          "width": 1,
+          "height": 3
+        },
+        "cells": [
+          {
+            "x": 0,
+            "y": 15
+          },
+          {
+            "x": 0,
+            "y": 16
+          },
+          {
+            "x": 0,
+            "y": 17
+          }
+        ],
+        "touchingSides": [
+          "west"
+        ],
+        "facingGuard": "left",
+        "trailingFace": "left"
+      },
+      "target": {
+        "map": "classic_hearthrock_city",
+        "x": 39,
+        "y": 16
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 0,
+            "y": 15
+          },
+          "target": {
+            "x": 39,
+            "y": 15
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 0,
+            "y": 16
+          },
+          "target": {
+            "x": 39,
+            "y": 16
+          },
+          "authored": true
+        },
+        {
+          "source": {
+            "x": 0,
+            "y": 17
+          },
+          "target": {
+            "x": 39,
+            "y": 17
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe: the maps sit edge to edge and every lane passes the terrain proof, so each lane lands on its own coordinate-continuous neighbour cell instead of the authored funnel landing"
+    },
+    {
+      "portalId": "classic_route_8:tmx:classic_route_8.tmx:286:a0",
+      "category": "lane-mapped-fixed-destination",
+      "reason": "fixed-destination-continuous-lanes",
+      "movementCapability": null,
+      "source": {
+        "map": "classic_route_8",
+        "event": "Teleport to Valorhold",
+        "objectId": 286,
+        "rect": {
+          "x": 39,
+          "y": 16,
+          "width": 1,
+          "height": 3
+        },
+        "cells": [
+          {
+            "x": 39,
+            "y": 16
+          },
+          {
+            "x": 39,
+            "y": 17
+          },
+          {
+            "x": 39,
+            "y": 18
+          }
+        ],
+        "touchingSides": [
+          "east"
+        ],
+        "facingGuard": "right",
+        "trailingFace": "right"
+      },
+      "target": {
+        "map": "classic_valorhold_city",
+        "x": 0,
+        "y": 17
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 39,
+            "y": 16
+          },
+          "target": {
+            "x": 0,
+            "y": 16
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 39,
+            "y": 17
+          },
+          "target": {
+            "x": 0,
+            "y": 17
+          },
+          "authored": true
+        },
+        {
+          "source": {
+            "x": 39,
+            "y": 18
+          },
+          "target": {
+            "x": 0,
+            "y": 18
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe: the maps sit edge to edge and every lane passes the terrain proof, so each lane lands on its own coordinate-continuous neighbour cell instead of the authored funnel landing"
+    },
+    {
+      "portalId": "classic_steamshore_city:tmx:classic_steamshore_city.tmx:286:a0",
+      "category": "lane-mapped-fixed-destination",
+      "reason": "fixed-destination-continuous-lanes",
+      "movementCapability": null,
+      "source": {
+        "map": "classic_steamshore_city",
+        "event": "Teleport to Route1",
+        "objectId": 286,
+        "rect": {
+          "x": 5,
+          "y": 19,
+          "width": 3,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 5,
+            "y": 19
+          },
+          {
+            "x": 6,
+            "y": 19
+          },
+          {
+            "x": 7,
+            "y": 19
+          }
+        ],
+        "touchingSides": [
+          "south"
+        ],
+        "facingGuard": "down",
+        "trailingFace": "down"
+      },
+      "target": {
+        "map": "classic_route_1",
+        "x": 6,
+        "y": 0
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 5,
+            "y": 19
+          },
+          "target": {
+            "x": 5,
+            "y": 0
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 6,
+            "y": 19
+          },
+          "target": {
+            "x": 6,
+            "y": 0
+          },
+          "authored": true
+        },
+        {
+          "source": {
+            "x": 7,
+            "y": 19
+          },
+          "target": {
+            "x": 7,
+            "y": 0
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe: the maps sit edge to edge and every lane passes the terrain proof, so each lane lands on its own coordinate-continuous neighbour cell instead of the authored funnel landing"
+    },
+    {
+      "portalId": "classic_steamshore_city:tmx:classic_steamshore_city.tmx:287:a0",
+      "category": "lane-mapped-fixed-destination",
+      "reason": "fixed-destination-continuous-lanes",
+      "movementCapability": null,
+      "source": {
+        "map": "classic_steamshore_city",
+        "event": "Teleport to Route2",
+        "objectId": 287,
+        "rect": {
+          "x": 39,
+          "y": 2,
+          "width": 1,
+          "height": 3
+        },
+        "cells": [
+          {
+            "x": 39,
+            "y": 2
+          },
+          {
+            "x": 39,
+            "y": 3
+          },
+          {
+            "x": 39,
+            "y": 4
+          }
+        ],
+        "touchingSides": [
+          "east"
+        ],
+        "facingGuard": "right",
+        "trailingFace": "right"
+      },
+      "target": {
+        "map": "classic_route_2",
+        "x": 0,
+        "y": 3
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 39,
+            "y": 2
+          },
+          "target": {
+            "x": 0,
+            "y": 2
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 39,
+            "y": 3
+          },
+          "target": {
+            "x": 0,
+            "y": 3
+          },
+          "authored": true
+        },
+        {
+          "source": {
+            "x": 39,
+            "y": 4
+          },
+          "target": {
+            "x": 0,
+            "y": 4
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe: the maps sit edge to edge and every lane passes the terrain proof, so each lane lands on its own coordinate-continuous neighbour cell instead of the authored funnel landing"
+    },
+    {
+      "portalId": "classic_stormpeak_city:tmx:classic_stormpeak_city.tmx:290:a0",
+      "category": "surf-capability-lanes",
+      "reason": "surf-continuous-lanes",
+      "movementCapability": "surf",
+      "source": {
+        "map": "classic_stormpeak_city",
+        "event": "Teleport to Route4",
+        "objectId": 290,
+        "rect": {
+          "x": 15,
+          "y": 19,
+          "width": 7,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 15,
+            "y": 19
+          },
+          {
+            "x": 16,
+            "y": 19
+          },
+          {
+            "x": 17,
+            "y": 19
+          },
+          {
+            "x": 18,
+            "y": 19
+          },
+          {
+            "x": 19,
+            "y": 19
+          },
+          {
+            "x": 20,
+            "y": 19
+          },
+          {
+            "x": 21,
+            "y": 19
+          }
+        ],
+        "touchingSides": [
+          "south"
+        ],
+        "facingGuard": "down",
+        "trailingFace": "down"
+      },
+      "target": {
+        "map": "classic_route_4",
+        "x": 18,
+        "y": 0
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 15,
+            "y": 19
+          },
+          "target": {
+            "x": 15,
+            "y": 0
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 16,
+            "y": 19
+          },
+          "target": {
+            "x": 16,
+            "y": 0
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 17,
+            "y": 19
+          },
+          "target": {
+            "x": 17,
+            "y": 0
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 18,
+            "y": 19
+          },
+          "target": {
+            "x": 18,
+            "y": 0
+          },
+          "authored": true
+        },
+        {
+          "source": {
+            "x": 19,
+            "y": 19
+          },
+          "target": {
+            "x": 19,
+            "y": 0
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 20,
+            "y": 19
+          },
+          "target": {
+            "x": 20,
+            "y": 0
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 21,
+            "y": 19
+          },
+          "target": {
+            "x": 21,
+            "y": 0
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe while Surf-capable: every lane is Surf water on both sides and the maps sit edge to edge; the trusted opening capability gates the atomic crossing and relaxes only target solidity, while every lane lands on its coordinate-continuous neighbour cell"
+    },
+    {
+      "portalId": "classic_thornwood_city:tmx:classic_thornwood_city.tmx:285:a0",
+      "category": "lane-mapped-fixed-destination",
+      "reason": "fixed-destination-continuous-lanes",
+      "movementCapability": null,
+      "source": {
+        "map": "classic_thornwood_city",
+        "event": "Teleport to Route2",
+        "objectId": 285,
+        "rect": {
+          "x": 0,
+          "y": 16,
+          "width": 1,
+          "height": 3
+        },
+        "cells": [
+          {
+            "x": 0,
+            "y": 16
+          },
+          {
+            "x": 0,
+            "y": 17
+          },
+          {
+            "x": 0,
+            "y": 18
+          }
+        ],
+        "touchingSides": [
+          "west"
+        ],
+        "facingGuard": "left",
+        "trailingFace": "left"
+      },
+      "target": {
+        "map": "classic_route_2",
+        "x": 39,
+        "y": 17
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 0,
+            "y": 16
+          },
+          "target": {
+            "x": 39,
+            "y": 16
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 0,
+            "y": 17
+          },
+          "target": {
+            "x": 39,
+            "y": 17
+          },
+          "authored": true
+        },
+        {
+          "source": {
+            "x": 0,
+            "y": 18
+          },
+          "target": {
+            "x": 39,
+            "y": 18
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe: the maps sit edge to edge and every lane passes the terrain proof, so each lane lands on its own coordinate-continuous neighbour cell instead of the authored funnel landing"
+    },
+    {
+      "portalId": "classic_thornwood_city:tmx:classic_thornwood_city.tmx:286:a0",
+      "category": "lane-mapped-fixed-destination",
+      "reason": "fixed-destination-continuous-lanes",
+      "movementCapability": null,
+      "source": {
+        "map": "classic_thornwood_city",
+        "event": "Teleport to Route5",
+        "objectId": 286,
+        "rect": {
+          "x": 39,
+          "y": 1,
+          "width": 1,
+          "height": 3
+        },
+        "cells": [
+          {
+            "x": 39,
+            "y": 1
+          },
+          {
+            "x": 39,
+            "y": 2
+          },
+          {
+            "x": 39,
+            "y": 3
+          }
+        ],
+        "touchingSides": [
+          "east"
+        ],
+        "facingGuard": "right",
+        "trailingFace": "right"
+      },
+      "target": {
+        "map": "classic_route_5",
+        "x": 0,
+        "y": 2
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 39,
+            "y": 1
+          },
+          "target": {
+            "x": 0,
+            "y": 1
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 39,
+            "y": 2
+          },
+          "target": {
+            "x": 0,
+            "y": 2
+          },
+          "authored": true
+        },
+        {
+          "source": {
+            "x": 39,
+            "y": 3
+          },
+          "target": {
+            "x": 0,
+            "y": 3
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe: the maps sit edge to edge and every lane passes the terrain proof, so each lane lands on its own coordinate-continuous neighbour cell instead of the authored funnel landing"
+    },
+    {
+      "portalId": "classic_thornwood_city:tmx:classic_thornwood_city.tmx:287:a0",
+      "category": "lane-mapped-fixed-destination",
+      "reason": "fixed-destination-continuous-lanes",
+      "movementCapability": null,
+      "source": {
+        "map": "classic_thornwood_city",
+        "event": "Teleport to Route7",
+        "objectId": 287,
+        "rect": {
+          "x": 35,
+          "y": 19,
+          "width": 3,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 35,
+            "y": 19
+          },
+          {
+            "x": 36,
+            "y": 19
+          },
+          {
+            "x": 37,
+            "y": 19
+          }
+        ],
+        "touchingSides": [
+          "south"
+        ],
+        "facingGuard": "down",
+        "trailingFace": "down"
+      },
+      "target": {
+        "map": "classic_route_7",
+        "x": 36,
+        "y": 0
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 35,
+            "y": 19
+          },
+          "target": {
+            "x": 35,
+            "y": 0
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 36,
+            "y": 19
+          },
+          "target": {
+            "x": 36,
+            "y": 0
+          },
+          "authored": true
+        },
+        {
+          "source": {
+            "x": 37,
+            "y": 19
+          },
+          "target": {
+            "x": 37,
+            "y": 0
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe: the maps sit edge to edge and every lane passes the terrain proof, so each lane lands on its own coordinate-continuous neighbour cell instead of the authored funnel landing"
+    },
+    {
+      "portalId": "classic_thornwood_city:tmx:classic_thornwood_city.tmx:288:a0",
+      "category": "lane-mapped-fixed-destination",
+      "reason": "fixed-destination-continuous-lanes",
+      "movementCapability": null,
+      "source": {
+        "map": "classic_thornwood_city",
+        "event": "Teleport to Route3",
+        "objectId": 288,
+        "rect": {
+          "x": 16,
+          "y": 0,
+          "width": 3,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 16,
+            "y": 0
+          },
+          {
+            "x": 17,
+            "y": 0
+          },
+          {
+            "x": 18,
+            "y": 0
+          }
+        ],
+        "touchingSides": [
+          "north"
+        ],
+        "facingGuard": "up",
+        "trailingFace": "up"
+      },
+      "target": {
+        "map": "classic_route_3",
+        "x": 17,
+        "y": 19
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 16,
+            "y": 0
+          },
+          "target": {
+            "x": 16,
+            "y": 19
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 17,
+            "y": 0
+          },
+          "target": {
+            "x": 17,
+            "y": 19
+          },
+          "authored": true
+        },
+        {
+          "source": {
+            "x": 18,
+            "y": 0
+          },
+          "target": {
+            "x": 18,
+            "y": 19
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe: the maps sit edge to edge and every lane passes the terrain proof, so each lane lands on its own coordinate-continuous neighbour cell instead of the authored funnel landing"
+    },
+    {
+      "portalId": "classic_umbrastar_city:tmx:classic_umbrastar_city.tmx:285:a0",
+      "category": "lane-mapped-fixed-destination",
+      "reason": "fixed-destination-continuous-lanes",
+      "movementCapability": null,
+      "source": {
+        "map": "classic_umbrastar_city",
+        "event": "Teleport to Route6",
+        "objectId": 285,
+        "rect": {
+          "x": 0,
+          "y": 16,
+          "width": 1,
+          "height": 3
+        },
+        "cells": [
+          {
+            "x": 0,
+            "y": 16
+          },
+          {
+            "x": 0,
+            "y": 17
+          },
+          {
+            "x": 0,
+            "y": 18
+          }
+        ],
+        "touchingSides": [
+          "west"
+        ],
+        "facingGuard": "left",
+        "trailingFace": "left"
+      },
+      "target": {
+        "map": "classic_route_6",
+        "x": 39,
+        "y": 17
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 0,
+            "y": 16
+          },
+          "target": {
+            "x": 39,
+            "y": 16
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 0,
+            "y": 17
+          },
+          "target": {
+            "x": 39,
+            "y": 17
+          },
+          "authored": true
+        },
+        {
+          "source": {
+            "x": 0,
+            "y": 18
+          },
+          "target": {
+            "x": 39,
+            "y": 18
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe: the maps sit edge to edge and every lane passes the terrain proof, so each lane lands on its own coordinate-continuous neighbour cell instead of the authored funnel landing"
+    },
+    {
+      "portalId": "classic_valorhold_city:tmx:classic_valorhold_city.tmx:285:a0",
+      "category": "lane-mapped-fixed-destination",
+      "reason": "fixed-destination-continuous-lanes",
+      "movementCapability": null,
+      "source": {
+        "map": "classic_valorhold_city",
+        "event": "Teleport to Route8",
+        "objectId": 285,
+        "rect": {
+          "x": 0,
+          "y": 16,
+          "width": 1,
+          "height": 3
+        },
+        "cells": [
+          {
+            "x": 0,
+            "y": 16
+          },
+          {
+            "x": 0,
+            "y": 17
+          },
+          {
+            "x": 0,
+            "y": 18
+          }
+        ],
+        "touchingSides": [
+          "west"
+        ],
+        "facingGuard": "left",
+        "trailingFace": "left"
+      },
+      "target": {
+        "map": "classic_route_8",
+        "x": 39,
+        "y": 17
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 0,
+            "y": 16
+          },
+          "target": {
+            "x": 39,
+            "y": 16
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 0,
+            "y": 17
+          },
+          "target": {
+            "x": 39,
+            "y": 17
+          },
+          "authored": true
+        },
+        {
+          "source": {
+            "x": 0,
+            "y": 18
+          },
+          "target": {
+            "x": 39,
+            "y": 18
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe: the maps sit edge to edge and every lane passes the terrain proof, so each lane lands on its own coordinate-continuous neighbour cell instead of the authored funnel landing"
+    },
+    {
+      "portalId": "classic_valorhold_city:tmx:classic_valorhold_city.tmx:286:a0",
+      "category": "lane-mapped-fixed-destination",
+      "reason": "fixed-destination-continuous-lanes",
+      "movementCapability": null,
+      "source": {
+        "map": "classic_valorhold_city",
+        "event": "Teleport to Route7",
+        "objectId": 286,
+        "rect": {
+          "x": 2,
+          "y": 0,
+          "width": 3,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 2,
+            "y": 0
+          },
+          {
+            "x": 3,
+            "y": 0
+          },
+          {
+            "x": 4,
+            "y": 0
+          }
+        ],
+        "touchingSides": [
+          "north"
+        ],
+        "facingGuard": "up",
+        "trailingFace": "up"
+      },
+      "target": {
+        "map": "classic_route_7",
+        "x": 3,
+        "y": 19
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 2,
+            "y": 0
+          },
+          "target": {
+            "x": 2,
+            "y": 19
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 3,
+            "y": 0
+          },
+          "target": {
+            "x": 3,
+            "y": 19
+          },
+          "authored": true
+        },
+        {
+          "source": {
+            "x": 4,
+            "y": 0
+          },
+          "target": {
+            "x": 4,
+            "y": 19
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe: the maps sit edge to edge and every lane passes the terrain proof, so each lane lands on its own coordinate-continuous neighbour cell instead of the authored funnel landing"
+    },
+    {
+      "portalId": "spyder_candy_town:tmx:spyder_candy_town.tmx:100:a0",
+      "category": "surf-capability-lanes",
+      "reason": "surf-continuous-lanes",
+      "movementCapability": "surf",
+      "source": {
+        "map": "spyder_candy_town",
+        "event": "Teleport to Sea Route",
+        "objectId": 100,
+        "rect": {
+          "x": 39,
+          "y": 28,
+          "width": 1,
+          "height": 8
+        },
+        "cells": [
+          {
+            "x": 39,
+            "y": 28
+          },
+          {
+            "x": 39,
+            "y": 29
+          },
+          {
+            "x": 39,
+            "y": 30
+          },
+          {
+            "x": 39,
+            "y": 31
+          },
+          {
+            "x": 39,
+            "y": 32
+          },
+          {
+            "x": 39,
+            "y": 33
+          },
+          {
+            "x": 39,
+            "y": 34
+          },
+          {
+            "x": 39,
+            "y": 35
+          }
+        ],
+        "touchingSides": [
+          "east"
+        ],
+        "facingGuard": "right",
+        "trailingFace": "right"
+      },
+      "target": {
+        "map": "spyder_routec",
+        "x": 0,
+        "y": 8
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 39,
+            "y": 28
+          },
+          "target": {
+            "x": 0,
+            "y": 8
+          },
+          "authored": true
+        },
+        {
+          "source": {
+            "x": 39,
+            "y": 29
+          },
+          "target": {
+            "x": 0,
+            "y": 9
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 39,
+            "y": 30
+          },
+          "target": {
+            "x": 0,
+            "y": 10
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 39,
+            "y": 31
+          },
+          "target": {
+            "x": 0,
+            "y": 11
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 39,
+            "y": 32
+          },
+          "target": {
+            "x": 0,
+            "y": 12
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 39,
+            "y": 33
+          },
+          "target": {
+            "x": 0,
+            "y": 13
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 39,
+            "y": 34
+          },
+          "target": {
+            "x": 0,
+            "y": 14
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 39,
+            "y": 35
+          },
+          "target": {
+            "x": 0,
+            "y": 15
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe while Surf-capable: every lane is Surf water on both sides and the maps sit edge to edge; the trusted opening capability gates the atomic crossing and relaxes only target solidity, while every lane lands on its coordinate-continuous neighbour cell"
+    },
+    {
+      "portalId": "spyder_paper_town:tmx:spyder_paper_town.tmx:217:a0",
+      "category": "surf-capability-lanes",
+      "reason": "surf-continuous-lanes",
+      "movementCapability": "surf",
+      "source": {
+        "map": "spyder_paper_town",
+        "event": "Teleport to Sea Route",
+        "objectId": 217,
+        "rect": {
+          "x": 0,
+          "y": 14,
+          "width": 1,
+          "height": 4
+        },
+        "cells": [
+          {
+            "x": 0,
+            "y": 14
+          },
+          {
+            "x": 0,
+            "y": 15
+          },
+          {
+            "x": 0,
+            "y": 16
+          },
+          {
+            "x": 0,
+            "y": 17
+          }
+        ],
+        "touchingSides": [
+          "west"
+        ],
+        "facingGuard": "left",
+        "trailingFace": "left"
+      },
+      "target": {
+        "map": "spyder_routec",
+        "x": 39,
+        "y": 35
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 0,
+            "y": 14
+          },
+          "target": {
+            "x": 39,
+            "y": 34
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 0,
+            "y": 15
+          },
+          "target": {
+            "x": 39,
+            "y": 35
+          },
+          "authored": true
+        },
+        {
+          "source": {
+            "x": 0,
+            "y": 16
+          },
+          "target": {
+            "x": 39,
+            "y": 36
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 0,
+            "y": 17
+          },
+          "target": {
+            "x": 39,
+            "y": 37
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe while Surf-capable: every lane is Surf water on both sides and the maps sit edge to edge; the trusted opening capability gates the atomic crossing and relaxes only target solidity, while every lane lands on its coordinate-continuous neighbour cell"
+    },
+    {
+      "portalId": "spyder_routec:tmx:spyder_routec.tmx:155:a0",
+      "category": "surf-capability-lanes",
+      "reason": "surf-continuous-lanes",
+      "movementCapability": "surf",
+      "source": {
+        "map": "spyder_routec",
+        "event": "Teleport to Candy Town",
+        "objectId": 155,
+        "rect": {
+          "x": 0,
+          "y": 8,
+          "width": 1,
+          "height": 8
+        },
+        "cells": [
+          {
+            "x": 0,
+            "y": 8
+          },
+          {
+            "x": 0,
+            "y": 9
+          },
+          {
+            "x": 0,
+            "y": 10
+          },
+          {
+            "x": 0,
+            "y": 11
+          },
+          {
+            "x": 0,
+            "y": 12
+          },
+          {
+            "x": 0,
+            "y": 13
+          },
+          {
+            "x": 0,
+            "y": 14
+          },
+          {
+            "x": 0,
+            "y": 15
+          }
+        ],
+        "touchingSides": [
+          "west"
+        ],
+        "facingGuard": "left",
+        "trailingFace": "left"
+      },
+      "target": {
+        "map": "spyder_candy_town",
+        "x": 39,
+        "y": 28
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 0,
+            "y": 8
+          },
+          "target": {
+            "x": 39,
+            "y": 28
+          },
+          "authored": true
+        },
+        {
+          "source": {
+            "x": 0,
+            "y": 9
+          },
+          "target": {
+            "x": 39,
+            "y": 29
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 0,
+            "y": 10
+          },
+          "target": {
+            "x": 39,
+            "y": 30
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 0,
+            "y": 11
+          },
+          "target": {
+            "x": 39,
+            "y": 31
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 0,
+            "y": 12
+          },
+          "target": {
+            "x": 39,
+            "y": 32
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 0,
+            "y": 13
+          },
+          "target": {
+            "x": 39,
+            "y": 33
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 0,
+            "y": 14
+          },
+          "target": {
+            "x": 39,
+            "y": 34
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 0,
+            "y": 15
+          },
+          "target": {
+            "x": 39,
+            "y": 35
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe while Surf-capable: every lane is Surf water on both sides and the maps sit edge to edge; the trusted opening capability gates the atomic crossing and relaxes only target solidity, while every lane lands on its coordinate-continuous neighbour cell"
+    },
+    {
+      "portalId": "spyder_routec:tmx:spyder_routec.tmx:156:a0",
+      "category": "surf-capability-lanes",
+      "reason": "surf-continuous-lanes",
+      "movementCapability": "surf",
+      "source": {
+        "map": "spyder_routec",
+        "event": "Teleport to Paper Town",
+        "objectId": 156,
+        "rect": {
+          "x": 39,
+          "y": 34,
+          "width": 1,
+          "height": 4
+        },
+        "cells": [
+          {
+            "x": 39,
+            "y": 34
+          },
+          {
+            "x": 39,
+            "y": 35
+          },
+          {
+            "x": 39,
+            "y": 36
+          },
+          {
+            "x": 39,
+            "y": 37
+          }
+        ],
+        "touchingSides": [
+          "east"
+        ],
+        "facingGuard": "right",
+        "trailingFace": "right"
+      },
+      "target": {
+        "map": "spyder_paper_town",
+        "x": 0,
+        "y": 15
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 39,
+            "y": 34
+          },
+          "target": {
+            "x": 0,
+            "y": 14
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 39,
+            "y": 35
+          },
+          "target": {
+            "x": 0,
+            "y": 15
+          },
+          "authored": true
+        },
+        {
+          "source": {
+            "x": 39,
+            "y": 36
+          },
+          "target": {
+            "x": 0,
+            "y": 16
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 39,
+            "y": 37
+          },
+          "target": {
+            "x": 0,
+            "y": 17
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe while Surf-capable: every lane is Surf water on both sides and the maps sit edge to edge; the trusted opening capability gates the atomic crossing and relaxes only target solidity, while every lane lands on its coordinate-continuous neighbour cell"
+    },
+    {
+      "portalId": "spyder_routec:tmx:spyder_routec.tmx:275:a0",
+      "category": "surf-capability-lanes",
+      "reason": "surf-continuous-lanes",
+      "movementCapability": "surf",
+      "source": {
+        "map": "spyder_routec",
+        "event": "Teleport to Candy Port",
+        "objectId": 275,
+        "rect": {
+          "x": 0,
+          "y": 30,
+          "width": 1,
+          "height": 8
+        },
+        "cells": [
+          {
+            "x": 0,
+            "y": 30
+          },
+          {
+            "x": 0,
+            "y": 31
+          },
+          {
+            "x": 0,
+            "y": 32
+          },
+          {
+            "x": 0,
+            "y": 33
+          },
+          {
+            "x": 0,
+            "y": 34
+          },
+          {
+            "x": 0,
+            "y": 35
+          },
+          {
+            "x": 0,
+            "y": 36
+          },
+          {
+            "x": 0,
+            "y": 37
+          }
+        ],
+        "touchingSides": [
+          "west"
+        ],
+        "facingGuard": "left",
+        "trailingFace": "left"
+      },
+      "target": {
+        "map": "spyder_candy_port",
+        "x": 39,
+        "y": 15
+      },
+      "seamlessLanes": [
+        {
+          "source": {
+            "x": 0,
+            "y": 30
+          },
+          "target": {
+            "x": 39,
+            "y": 10
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 0,
+            "y": 31
+          },
+          "target": {
+            "x": 39,
+            "y": 11
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 0,
+            "y": 32
+          },
+          "target": {
+            "x": 39,
+            "y": 12
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 0,
+            "y": 33
+          },
+          "target": {
+            "x": 39,
+            "y": 13
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 0,
+            "y": 34
+          },
+          "target": {
+            "x": 39,
+            "y": 14
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 0,
+            "y": 35
+          },
+          "target": {
+            "x": 39,
+            "y": 15
+          },
+          "authored": true
+        },
+        {
+          "source": {
+            "x": 0,
+            "y": 36
+          },
+          "target": {
+            "x": 39,
+            "y": 16
+          },
+          "authored": false
+        },
+        {
+          "source": {
+            "x": 0,
+            "y": 37
+          },
+          "target": {
+            "x": 39,
+            "y": 17
+          },
+          "authored": false
+        }
+      ],
+      "legacyCells": [],
+      "assessment": "safe while Surf-capable: every lane is Surf water on both sides and the maps sit edge to edge; the trusted opening capability gates the atomic crossing and relaxes only target solidity, while every lane lands on its coordinate-continuous neighbour cell"
+    }
+  ],
+  "whollyLegacy": [
+    {
+      "portalId": "classic_route_2:tmx:classic_route_2.tmx:285:a0",
+      "category": "portal-only",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "classic_route_2",
+        "event": "Teleport to Steamshore",
+        "objectId": 285,
+        "rect": {
+          "x": 0,
+          "y": 2,
+          "width": 1,
+          "height": 3
+        },
+        "cells": [
+          {
+            "x": 0,
+            "y": 2
+          },
+          {
+            "x": 0,
+            "y": 3
+          },
+          {
+            "x": 0,
+            "y": 4
+          }
+        ],
+        "touchingSides": [
+          "west"
+        ],
+        "facingGuard": "right",
+        "trailingFace": "right"
+      },
+      "target": {
+        "map": "classic_steamshore_city",
+        "x": 39,
+        "y": 3
+      },
+      "topologyIssues": [
+        "fixed-destination"
+      ],
+      "assessment": "keep fade: all three ground lanes are geometrically passable, but this west-edge event guards and faces right into Classic Route 2; promoting it would invent the un-authored outward-left trigger"
+    },
+    {
+      "portalId": "dryadsgrove:tmx:dryadsgrove.tmx:43:a0",
+      "category": "linked-gap",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "dryadsgrove",
+        "event": "Teleport to Taba",
+        "objectId": 43,
+        "rect": {
+          "x": 5,
+          "y": 19,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 5,
+            "y": 19
+          }
+        ],
+        "touchingSides": [
+          "south"
+        ],
+        "facingGuard": "down",
+        "trailingFace": null
+      },
+      "target": {
+        "map": "taba_town",
+        "x": 59,
+        "y": 0
+      },
+      "topologyReason": "5 portal(s) connect maps without a positive-length shared edge (tile gap x=0, y=40); retain teleport semantics.",
+      "assessment": "keep fade: the south/north Surf mouths are 40 tiles apart; aligning their authored lanes would move Taba Town into a large overlap with Route 1, which seamless-v1 forbids"
+    },
+    {
+      "portalId": "dryadsgrove:tmx:dryadsgrove.tmx:44:a0",
+      "category": "linked-gap",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "dryadsgrove",
+        "event": "Teleport to Taba",
+        "objectId": 44,
+        "rect": {
+          "x": 6,
+          "y": 19,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 6,
+            "y": 19
+          }
+        ],
+        "touchingSides": [
+          "south"
+        ],
+        "facingGuard": "down",
+        "trailingFace": null
+      },
+      "target": {
+        "map": "taba_town",
+        "x": 59,
+        "y": 0
+      },
+      "topologyReason": "5 portal(s) connect maps without a positive-length shared edge (tile gap x=0, y=40); retain teleport semantics.",
+      "assessment": "keep fade: the south/north Surf mouths are 40 tiles apart; aligning their authored lanes would move Taba Town into a large overlap with Route 1, which seamless-v1 forbids"
+    },
+    {
+      "portalId": "dryadsgrove:tmx:dryadsgrove.tmx:45:a0",
+      "category": "linked-gap",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "dryadsgrove",
+        "event": "Teleport to Leather Town",
+        "objectId": 45,
+        "rect": {
+          "x": 35,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 35,
+            "y": 0
+          }
+        ],
+        "touchingSides": [
+          "north"
+        ],
+        "facingGuard": "up",
+        "trailingFace": "left"
+      },
+      "target": {
+        "map": "leather_town",
+        "x": 39,
+        "y": 33
+      },
+      "topologyReason": "4 portal(s) connect maps without a positive-length shared edge (tile gap x=0, y=0); retain teleport semantics.",
+      "assessment": "keep fade: the map rectangles meet only at one corner and the portals turn between Dryad's north edge and Leather Town's east edge; no translation can make those perpendicular sides one physical seam"
+    },
+    {
+      "portalId": "dryadsgrove:tmx:dryadsgrove.tmx:46:a0",
+      "category": "linked-gap",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "dryadsgrove",
+        "event": "Teleport to Leather Town",
+        "objectId": 46,
+        "rect": {
+          "x": 36,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 36,
+            "y": 0
+          }
+        ],
+        "touchingSides": [
+          "north"
+        ],
+        "facingGuard": "up",
+        "trailingFace": "left"
+      },
+      "target": {
+        "map": "leather_town",
+        "x": 39,
+        "y": 32
+      },
+      "topologyReason": "4 portal(s) connect maps without a positive-length shared edge (tile gap x=0, y=0); retain teleport semantics.",
+      "assessment": "keep fade: the map rectangles meet only at one corner and the portals turn between Dryad's north edge and Leather Town's east edge; no translation can make those perpendicular sides one physical seam"
+    },
+    {
+      "portalId": "flower_city:tmx:flower_city.tmx:203:a0",
+      "category": "outdoor-nonseam-or-story",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "flower_city",
+        "event": "Teleport to Route 5",
+        "objectId": 203,
+        "rect": {
+          "x": 37,
+          "y": 16,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 37,
+            "y": 16
+          }
+        ],
+        "touchingSides": [],
+        "facingGuard": "right",
+        "trailingFace": "right"
+      },
+      "target": {
+        "map": "route5",
+        "x": 0,
+        "y": 15
+      },
+      "assessment": "keep fade: Flower City object 203 triggers at interior cell (37,16) facing two collision columns; object 201 at the true east-edge opening (39,15) already supplies the coordinate-preserving Route 5 seam"
+    },
+    {
+      "portalId": "flower_city:tmx:flower_city.tmx:220:a0",
+      "category": "linked-gap",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "flower_city",
+        "event": "Teleport to Leather Town",
+        "objectId": 220,
+        "rect": {
+          "x": 14,
+          "y": 39,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 14,
+            "y": 39
+          }
+        ],
+        "touchingSides": [
+          "south"
+        ],
+        "facingGuard": "down",
+        "trailingFace": "left"
+      },
+      "target": {
+        "map": "leather_town",
+        "x": 39,
+        "y": 5
+      },
+      "topologyReason": "5 portal(s) connect maps without a positive-length shared edge (tile gap x=0, y=41); retain teleport semantics.",
+      "assessment": "keep fade: the maps have a 41-tile vertical gap and the portals turn between Flower City's south edge and Leather Town's east edge; the reverse authored target (59,0) is also outside Flower City's 40-tile width"
+    },
+    {
+      "portalId": "flower_city:tmx:flower_city.tmx:221:a0",
+      "category": "linked-gap",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "flower_city",
+        "event": "Teleport to Leather Town",
+        "objectId": 221,
+        "rect": {
+          "x": 12,
+          "y": 39,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 12,
+            "y": 39
+          }
+        ],
+        "touchingSides": [
+          "south"
+        ],
+        "facingGuard": "down",
+        "trailingFace": "left"
+      },
+      "target": {
+        "map": "leather_town",
+        "x": 39,
+        "y": 4
+      },
+      "topologyReason": "5 portal(s) connect maps without a positive-length shared edge (tile gap x=0, y=41); retain teleport semantics.",
+      "assessment": "keep fade: the maps have a 41-tile vertical gap and the portals turn between Flower City's south edge and Leather Town's east edge; the reverse authored target (59,0) is also outside Flower City's 40-tile width"
+    },
+    {
+      "portalId": "flower_city:tmx:flower_city.tmx:222:a0",
+      "category": "linked-gap",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "flower_city",
+        "event": "Teleport to Timber Town",
+        "objectId": 222,
+        "rect": {
+          "x": 39,
+          "y": 32,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 39,
+            "y": 32
+          }
+        ],
+        "touchingSides": [
+          "east"
+        ],
+        "facingGuard": "right",
+        "trailingFace": "up"
+      },
+      "target": {
+        "map": "timber_town",
+        "x": 33,
+        "y": 39
+      },
+      "topologyReason": "5 portal(s) connect maps without a positive-length shared edge (tile gap x=40, y=0); retain teleport semantics.",
+      "assessment": "keep fade: the maps have a 40-tile horizontal gap and the portals turn between Flower City's east edge and Timber Town's south edge; this needs a rotating corner transfer, not an axis-aligned seam"
+    },
+    {
+      "portalId": "flower_city:tmx:flower_city.tmx:223:a0",
+      "category": "linked-gap",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "flower_city",
+        "event": "Teleport to Timber Town",
+        "objectId": 223,
+        "rect": {
+          "x": 39,
+          "y": 34,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 39,
+            "y": 34
+          }
+        ],
+        "touchingSides": [
+          "east"
+        ],
+        "facingGuard": "right",
+        "trailingFace": "up"
+      },
+      "target": {
+        "map": "timber_town",
+        "x": 34,
+        "y": 39
+      },
+      "topologyReason": "5 portal(s) connect maps without a positive-length shared edge (tile gap x=40, y=0); retain teleport semantics.",
+      "assessment": "keep fade: the maps have a 40-tile horizontal gap and the portals turn between Flower City's east edge and Timber Town's south edge; this needs a rotating corner transfer, not an axis-aligned seam"
+    },
+    {
+      "portalId": "flower_city:tmx:flower_city.tmx:224:a0",
+      "category": "linked-gap",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "flower_city",
+        "event": "Teleport to Leather Town",
+        "objectId": 224,
+        "rect": {
+          "x": 13,
+          "y": 39,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 13,
+            "y": 39
+          }
+        ],
+        "touchingSides": [
+          "south"
+        ],
+        "facingGuard": "down",
+        "trailingFace": "left"
+      },
+      "target": {
+        "map": "leather_town",
+        "x": 39,
+        "y": 4
+      },
+      "topologyReason": "5 portal(s) connect maps without a positive-length shared edge (tile gap x=0, y=41); retain teleport semantics.",
+      "assessment": "keep fade: the maps have a 41-tile vertical gap and the portals turn between Flower City's south edge and Leather Town's east edge; the reverse authored target (59,0) is also outside Flower City's 40-tile width"
+    },
+    {
+      "portalId": "flower_city:tmx:flower_city.tmx:225:a0",
+      "category": "linked-gap",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "flower_city",
+        "event": "Teleport to Timber Town",
+        "objectId": 225,
+        "rect": {
+          "x": 39,
+          "y": 33,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 39,
+            "y": 33
+          }
+        ],
+        "touchingSides": [
+          "east"
+        ],
+        "facingGuard": "right",
+        "trailingFace": "up"
+      },
+      "target": {
+        "map": "timber_town",
+        "x": 33,
+        "y": 39
+      },
+      "topologyReason": "5 portal(s) connect maps without a positive-length shared edge (tile gap x=40, y=0); retain teleport semantics.",
+      "assessment": "keep fade: the maps have a 40-tile horizontal gap and the portals turn between Flower City's east edge and Timber Town's south edge; this needs a rotating corner transfer, not an axis-aligned seam"
+    },
+    {
+      "portalId": "leather_town:tmx:leather_town.tmx:103:a0",
+      "category": "linked-gap",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "leather_town",
+        "event": "Teleport to Dryad's Grove",
+        "objectId": 103,
+        "rect": {
+          "x": 39,
+          "y": 32,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 39,
+            "y": 32
+          }
+        ],
+        "touchingSides": [
+          "east"
+        ],
+        "facingGuard": "right",
+        "trailingFace": "down"
+      },
+      "target": {
+        "map": "dryadsgrove",
+        "x": 35,
+        "y": 0
+      },
+      "topologyReason": "4 portal(s) connect maps without a positive-length shared edge (tile gap x=0, y=0); retain teleport semantics.",
+      "assessment": "keep fade: the map rectangles meet only at one corner and the portals turn between Dryad's north edge and Leather Town's east edge; no translation can make those perpendicular sides one physical seam"
+    },
+    {
+      "portalId": "leather_town:tmx:leather_town.tmx:104:a0",
+      "category": "linked-gap",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "leather_town",
+        "event": "Teleport to Dryad's Grove",
+        "objectId": 104,
+        "rect": {
+          "x": 39,
+          "y": 33,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 39,
+            "y": 33
+          }
+        ],
+        "touchingSides": [
+          "east"
+        ],
+        "facingGuard": "right",
+        "trailingFace": "down"
+      },
+      "target": {
+        "map": "dryadsgrove",
+        "x": 36,
+        "y": 0
+      },
+      "topologyReason": "4 portal(s) connect maps without a positive-length shared edge (tile gap x=0, y=0); retain teleport semantics.",
+      "assessment": "keep fade: the map rectangles meet only at one corner and the portals turn between Dryad's north edge and Leather Town's east edge; no translation can make those perpendicular sides one physical seam"
+    },
+    {
+      "portalId": "leather_town:tmx:leather_town.tmx:105:a0",
+      "category": "linked-gap",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "leather_town",
+        "event": "Teleport to Flower City",
+        "objectId": 105,
+        "rect": {
+          "x": 39,
+          "y": 4,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 39,
+            "y": 4
+          }
+        ],
+        "touchingSides": [
+          "east"
+        ],
+        "facingGuard": "right",
+        "trailingFace": "up"
+      },
+      "target": {
+        "map": "flower_city",
+        "x": 59,
+        "y": 0
+      },
+      "topologyReason": "5 portal(s) connect maps without a positive-length shared edge (tile gap x=0, y=41); retain teleport semantics.",
+      "assessment": "keep fade: the maps have a 41-tile vertical gap and the portals turn between Flower City's south edge and Leather Town's east edge; the reverse authored target (59,0) is also outside Flower City's 40-tile width"
+    },
+    {
+      "portalId": "leather_town:tmx:leather_town.tmx:106:a0",
+      "category": "linked-gap",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "leather_town",
+        "event": "Teleport to Flower City",
+        "objectId": 106,
+        "rect": {
+          "x": 39,
+          "y": 5,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 39,
+            "y": 5
+          }
+        ],
+        "touchingSides": [
+          "east"
+        ],
+        "facingGuard": "right",
+        "trailingFace": "up"
+      },
+      "target": {
+        "map": "flower_city",
+        "x": 59,
+        "y": 0
+      },
+      "topologyReason": "5 portal(s) connect maps without a positive-length shared edge (tile gap x=0, y=41); retain teleport semantics.",
+      "assessment": "keep fade: the maps have a 41-tile vertical gap and the portals turn between Flower City's south edge and Leather Town's east edge; the reverse authored target (59,0) is also outside Flower City's 40-tile width"
+    },
+    {
+      "portalId": "route1_sanglorian:tmx:route1_sanglorian.tmx:129:a0",
+      "category": "portal-only",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "route1_sanglorian",
+        "event": "Teleport to Route1",
+        "objectId": 129,
+        "rect": {
+          "x": 26,
+          "y": 19,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 26,
+            "y": 19
+          }
+        ],
+        "touchingSides": [
+          "south"
+        ],
+        "facingGuard": "down",
+        "trailingFace": "down"
+      },
+      "target": {
+        "map": "route1",
+        "x": 34,
+        "y": 4
+      },
+      "topologyIssues": [
+        "wrong-target-edge"
+      ],
+      "assessment": "keep fade: Sanglorian south-edge lane x=26 is tangent-aligned, but its authored Route 1 landing (34,4) skips four solid preview rows; the physical neighbour is the blocked north-edge cell (34,0)"
+    },
+    {
+      "portalId": "route1_sanglorian:tmx:route1_sanglorian.tmx:130:a0",
+      "category": "portal-only",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "route1_sanglorian",
+        "event": "Teleport to Route1",
+        "objectId": 130,
+        "rect": {
+          "x": 25,
+          "y": 19,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 25,
+            "y": 19
+          }
+        ],
+        "touchingSides": [
+          "south"
+        ],
+        "facingGuard": "down",
+        "trailingFace": "down"
+      },
+      "target": {
+        "map": "route1",
+        "x": 33,
+        "y": 4
+      },
+      "topologyIssues": [
+        "wrong-target-edge"
+      ],
+      "assessment": "keep fade: Sanglorian south-edge lane x=25 is tangent-aligned, but its authored Route 1 landing (33,4) skips four solid preview rows; the physical neighbour is the blocked north-edge cell (33,0)"
+    },
+    {
+      "portalId": "route1_sanglorian:tmx:route1_sanglorian.tmx:160:a0",
+      "category": "portal-only",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "route1_sanglorian",
+        "event": "Teleport to Route1",
+        "objectId": 160,
+        "rect": {
+          "x": 24,
+          "y": 19,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 24,
+            "y": 19
+          }
+        ],
+        "touchingSides": [
+          "south"
+        ],
+        "facingGuard": "down",
+        "trailingFace": "down"
+      },
+      "target": {
+        "map": "route1",
+        "x": 32,
+        "y": 4
+      },
+      "topologyIssues": [
+        "wrong-target-edge"
+      ],
+      "assessment": "keep fade: Sanglorian south-edge lane x=24 is tangent-aligned, but its authored Route 1 landing (32,4) skips four solid preview rows; the physical neighbour is the blocked north-edge cell (32,0)"
+    },
+    {
+      "portalId": "route1:tmx:route1.tmx:23:a0",
+      "category": "rejected-contact",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "route1",
+        "event": "Teleport to map1 (upper)",
+        "objectId": 23,
+        "rect": {
+          "x": 50,
+          "y": 11,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 50,
+            "y": 11
+          }
+        ],
+        "touchingSides": [],
+        "facingGuard": "right",
+        "trailingFace": null
+      },
+      "target": {
+        "map": "taba_town",
+        "x": 8,
+        "y": 11
+      },
+      "topologyReason": "4 portal(s) connect the maps away from their shared east/west edge; retain them as portals.",
+      "assessment": "keep fade: Route 1 and Taba Town touch east/west, but both portal lanes sit eight tiles inside reciprocal preview strips; making the cells adjacent requires a forbidden 16-column map overlap across authored collision walls"
+    },
+    {
+      "portalId": "route1:tmx:route1.tmx:25:a0",
+      "category": "rejected-contact",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "route1",
+        "event": "Teleport to map1 (lower)",
+        "objectId": 25,
+        "rect": {
+          "x": 50,
+          "y": 12,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 50,
+            "y": 12
+          }
+        ],
+        "touchingSides": [],
+        "facingGuard": "right",
+        "trailingFace": null
+      },
+      "target": {
+        "map": "taba_town",
+        "x": 8,
+        "y": 12
+      },
+      "topologyReason": "4 portal(s) connect the maps away from their shared east/west edge; retain them as portals.",
+      "assessment": "keep fade: Route 1 and Taba Town touch east/west, but both portal lanes sit eight tiles inside reciprocal preview strips; making the cells adjacent requires a forbidden 16-column map overlap across authored collision walls"
+    },
+    {
+      "portalId": "route1:tmx:route1.tmx:32:a0",
+      "category": "outdoor-nonseam-or-story",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "route1",
+        "event": "Teleport to route1a",
+        "objectId": 32,
+        "rect": {
+          "x": 33,
+          "y": 4,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 33,
+            "y": 4
+          }
+        ],
+        "touchingSides": [],
+        "facingGuard": "up",
+        "trailingFace": null
+      },
+      "target": {
+        "map": "route1_sanglorian",
+        "x": 25,
+        "y": 19
+      },
+      "assessment": "keep fade: route1 (33,4) -> route1_sanglorian (25,19) uses Route 1 row 4 behind four solid preview rows; seamless-v1 can cross the physical north/south edge only, not a four-row virtual overlap"
+    },
+    {
+      "portalId": "route1:tmx:route1.tmx:85:a0",
+      "category": "outdoor-nonseam-or-story",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "route1",
+        "event": "Teleport to route1a",
+        "objectId": 85,
+        "rect": {
+          "x": 32,
+          "y": 4,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 32,
+            "y": 4
+          }
+        ],
+        "touchingSides": [],
+        "facingGuard": "up",
+        "trailingFace": "up"
+      },
+      "target": {
+        "map": "route1_sanglorian",
+        "x": 24,
+        "y": 19
+      },
+      "assessment": "keep fade: route1 (32,4) -> route1_sanglorian (24,19) uses Route 1 row 4 behind four solid preview rows; seamless-v1 can cross the physical north/south edge only, not a four-row virtual overlap"
+    },
+    {
+      "portalId": "route1:tmx:route1.tmx:86:a0",
+      "category": "outdoor-nonseam-or-story",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "route1",
+        "event": "Teleport to route1a",
+        "objectId": 86,
+        "rect": {
+          "x": 34,
+          "y": 4,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 34,
+            "y": 4
+          }
+        ],
+        "touchingSides": [],
+        "facingGuard": "up",
+        "trailingFace": "up"
+      },
+      "target": {
+        "map": "route1_sanglorian",
+        "x": 26,
+        "y": 19
+      },
+      "assessment": "keep fade: route1 (34,4) -> route1_sanglorian (26,19) uses Route 1 row 4 behind four solid preview rows; seamless-v1 can cross the physical north/south edge only, not a four-row virtual overlap"
+    },
+    {
+      "portalId": "routea:tmx:routea.tmx:45:a0",
+      "category": "portal-only",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "routea",
+        "event": "Teleport to Flower City",
+        "objectId": 45,
+        "rect": {
+          "x": 13,
+          "y": 39,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 13,
+            "y": 39
+          }
+        ],
+        "touchingSides": [
+          "south"
+        ],
+        "facingGuard": "down",
+        "trailingFace": "down"
+      },
+      "target": {
+        "map": "flower_city",
+        "x": 12,
+        "y": 0
+      },
+      "topologyIssues": [
+        "offset-mismatch"
+      ],
+      "assessment": "keep fade: Route A lane (13,39) should continue to Flower City (13,0), but the authored landing changes x to 12 and both continuous edge cells are non-Surf collision; adjacent objects 44 and 56 are the real seamless channel"
+    },
+    {
+      "portalId": "spyder_flower_city:tmx:spyder_flower_city.tmx:460:a2",
+      "category": "outdoor-nonseam-or-story",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "spyder_flower_city",
+        "event": "Destination - Flower",
+        "objectId": 460,
+        "rect": {
+          "x": 11,
+          "y": 31,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 11,
+            "y": 31
+          }
+        ],
+        "touchingSides": [],
+        "facingGuard": null,
+        "trailingFace": null
+      },
+      "target": {
+        "map": "spyder_flower_city",
+        "x": 17,
+        "y": 30
+      },
+      "assessment": "keep fade: interior river-captain destination dispatch rivergoto:flower_city clears rivergoto and teleports spyder_flower_city (11,31) -> spyder_flower_city (17,30); it is choice-driven story travel, not an outward edge crossing"
+    },
+    {
+      "portalId": "spyder_flower_city:tmx:spyder_flower_city.tmx:461:a1",
+      "category": "outdoor-nonseam-or-story",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "spyder_flower_city",
+        "event": "Destination - Leather",
+        "objectId": 461,
+        "rect": {
+          "x": 10,
+          "y": 32,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 10,
+            "y": 32
+          }
+        ],
+        "touchingSides": [],
+        "facingGuard": null,
+        "trailingFace": "right"
+      },
+      "target": {
+        "map": "spyder_leather_town",
+        "x": 17,
+        "y": 19
+      },
+      "assessment": "keep fade: interior river-captain destination dispatch rivergoto:leather_town clears rivergoto and teleports spyder_flower_city (10,32) -> spyder_leather_town (17,19); it is choice-driven story travel, not an outward edge crossing"
+    },
+    {
+      "portalId": "spyder_flower_city:tmx:spyder_flower_city.tmx:462:a1",
+      "category": "outdoor-nonseam-or-story",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "spyder_flower_city",
+        "event": "Destination - Paper",
+        "objectId": 462,
+        "rect": {
+          "x": 9,
+          "y": 31,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 9,
+            "y": 31
+          }
+        ],
+        "touchingSides": [],
+        "facingGuard": null,
+        "trailingFace": "up"
+      },
+      "target": {
+        "map": "spyder_paper_town",
+        "x": 4,
+        "y": 13
+      },
+      "assessment": "keep fade: interior river-captain destination dispatch rivergoto:paper_town clears rivergoto and teleports spyder_flower_city (9,31) -> spyder_paper_town (4,13); it is choice-driven story travel, not an outward edge crossing"
+    },
+    {
+      "portalId": "spyder_flower_city:tmx:spyder_flower_city.tmx:463:a1",
+      "category": "outdoor-nonseam-or-story",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "spyder_flower_city",
+        "event": "Destination - Timber",
+        "objectId": 463,
+        "rect": {
+          "x": 8,
+          "y": 32,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 8,
+            "y": 32
+          }
+        ],
+        "touchingSides": [],
+        "facingGuard": null,
+        "trailingFace": "up"
+      },
+      "target": {
+        "map": "spyder_timber_town",
+        "x": 8,
+        "y": 21
+      },
+      "assessment": "keep fade: interior river-captain destination dispatch rivergoto:timber_town clears rivergoto and teleports spyder_flower_city (8,32) -> spyder_timber_town (8,21); it is choice-driven story travel, not an outward edge crossing"
+    },
+    {
+      "portalId": "spyder_flower_city:tmx:spyder_flower_city.tmx:464:a1",
+      "category": "outdoor-nonseam-or-story",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "spyder_flower_city",
+        "event": "Destination - Candy",
+        "objectId": 464,
+        "rect": {
+          "x": 7,
+          "y": 31,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 7,
+            "y": 31
+          }
+        ],
+        "touchingSides": [],
+        "facingGuard": null,
+        "trailingFace": "down"
+      },
+      "target": {
+        "map": "spyder_candy_port",
+        "x": 37,
+        "y": 12
+      },
+      "assessment": "keep fade: interior river-captain destination dispatch rivergoto:candy_port clears rivergoto and teleports spyder_flower_city (7,31) -> spyder_candy_port (37,12); it is choice-driven story travel, not an outward edge crossing"
+    },
+    {
+      "portalId": "spyder_leather_town:tmx:spyder_leather_town.tmx:290:a2",
+      "category": "outdoor-nonseam-or-story",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "spyder_leather_town",
+        "event": "Destination - Flower",
+        "objectId": 290,
+        "rect": {
+          "x": 14,
+          "y": 17,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 14,
+            "y": 17
+          }
+        ],
+        "touchingSides": [],
+        "facingGuard": null,
+        "trailingFace": null
+      },
+      "target": {
+        "map": "spyder_flower_city",
+        "x": 17,
+        "y": 30
+      },
+      "assessment": "keep fade: interior river-captain destination dispatch rivergoto:flower_city clears rivergoto and teleports spyder_leather_town (14,17) -> spyder_flower_city (17,30); it is choice-driven story travel, not an outward edge crossing"
+    },
+    {
+      "portalId": "spyder_leather_town:tmx:spyder_leather_town.tmx:291:a1",
+      "category": "outdoor-nonseam-or-story",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "spyder_leather_town",
+        "event": "Destination - Leather",
+        "objectId": 291,
+        "rect": {
+          "x": 13,
+          "y": 18,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 13,
+            "y": 18
+          }
+        ],
+        "touchingSides": [],
+        "facingGuard": null,
+        "trailingFace": "right"
+      },
+      "target": {
+        "map": "spyder_leather_town",
+        "x": 17,
+        "y": 19
+      },
+      "assessment": "keep fade: interior river-captain destination dispatch rivergoto:leather_town clears rivergoto and teleports spyder_leather_town (13,18) -> spyder_leather_town (17,19); it is choice-driven story travel, not an outward edge crossing"
+    },
+    {
+      "portalId": "spyder_leather_town:tmx:spyder_leather_town.tmx:292:a1",
+      "category": "outdoor-nonseam-or-story",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "spyder_leather_town",
+        "event": "Destination - Paper",
+        "objectId": 292,
+        "rect": {
+          "x": 12,
+          "y": 17,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 12,
+            "y": 17
+          }
+        ],
+        "touchingSides": [],
+        "facingGuard": null,
+        "trailingFace": "up"
+      },
+      "target": {
+        "map": "spyder_paper_town",
+        "x": 4,
+        "y": 13
+      },
+      "assessment": "keep fade: interior river-captain destination dispatch rivergoto:paper_town clears rivergoto and teleports spyder_leather_town (12,17) -> spyder_paper_town (4,13); it is choice-driven story travel, not an outward edge crossing"
+    },
+    {
+      "portalId": "spyder_leather_town:tmx:spyder_leather_town.tmx:294:a1",
+      "category": "outdoor-nonseam-or-story",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "spyder_leather_town",
+        "event": "Destination - Timber",
+        "objectId": 294,
+        "rect": {
+          "x": 11,
+          "y": 18,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 11,
+            "y": 18
+          }
+        ],
+        "touchingSides": [],
+        "facingGuard": null,
+        "trailingFace": "up"
+      },
+      "target": {
+        "map": "spyder_timber_town",
+        "x": 8,
+        "y": 21
+      },
+      "assessment": "keep fade: interior river-captain destination dispatch rivergoto:timber_town clears rivergoto and teleports spyder_leather_town (11,18) -> spyder_timber_town (8,21); it is choice-driven story travel, not an outward edge crossing"
+    },
+    {
+      "portalId": "spyder_leather_town:tmx:spyder_leather_town.tmx:295:a1",
+      "category": "outdoor-nonseam-or-story",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "spyder_leather_town",
+        "event": "Destination - Candy",
+        "objectId": 295,
+        "rect": {
+          "x": 10,
+          "y": 17,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 10,
+            "y": 17
+          }
+        ],
+        "touchingSides": [],
+        "facingGuard": null,
+        "trailingFace": "down"
+      },
+      "target": {
+        "map": "spyder_candy_port",
+        "x": 37,
+        "y": 12
+      },
+      "assessment": "keep fade: interior river-captain destination dispatch rivergoto:candy_port clears rivergoto and teleports spyder_leather_town (10,17) -> spyder_candy_port (37,12); it is choice-driven story travel, not an outward edge crossing"
+    },
+    {
+      "portalId": "spyder_paper_town:tmx:spyder_paper_town.tmx:206:a2",
+      "category": "outdoor-nonseam-or-story",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "spyder_paper_town",
+        "event": "Destination - Flower",
+        "objectId": 206,
+        "rect": {
+          "x": 13,
+          "y": 16,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 13,
+            "y": 16
+          }
+        ],
+        "touchingSides": [],
+        "facingGuard": null,
+        "trailingFace": null
+      },
+      "target": {
+        "map": "spyder_flower_city",
+        "x": 17,
+        "y": 30
+      },
+      "assessment": "keep fade: interior river-captain destination dispatch rivergoto:flower_city clears rivergoto and teleports spyder_paper_town (13,16) -> spyder_flower_city (17,30); it is choice-driven story travel, not an outward edge crossing"
+    },
+    {
+      "portalId": "spyder_paper_town:tmx:spyder_paper_town.tmx:207:a1",
+      "category": "outdoor-nonseam-or-story",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "spyder_paper_town",
+        "event": "Destination - Leather",
+        "objectId": 207,
+        "rect": {
+          "x": 14,
+          "y": 16,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 14,
+            "y": 16
+          }
+        ],
+        "touchingSides": [],
+        "facingGuard": null,
+        "trailingFace": "right"
+      },
+      "target": {
+        "map": "spyder_leather_town",
+        "x": 17,
+        "y": 19
+      },
+      "assessment": "keep fade: interior river-captain destination dispatch rivergoto:leather_town clears rivergoto and teleports spyder_paper_town (14,16) -> spyder_leather_town (17,19); it is choice-driven story travel, not an outward edge crossing"
+    },
+    {
+      "portalId": "spyder_paper_town:tmx:spyder_paper_town.tmx:208:a1",
+      "category": "outdoor-nonseam-or-story",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "spyder_paper_town",
+        "event": "Destination - Paper",
+        "objectId": 208,
+        "rect": {
+          "x": 12,
+          "y": 16,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 12,
+            "y": 16
+          }
+        ],
+        "touchingSides": [],
+        "facingGuard": null,
+        "trailingFace": "up"
+      },
+      "target": {
+        "map": "spyder_paper_town",
+        "x": 4,
+        "y": 13
+      },
+      "assessment": "keep fade: interior river-captain destination dispatch rivergoto:paper_town clears rivergoto and teleports spyder_paper_town (12,16) -> spyder_paper_town (4,13); it is choice-driven story travel, not an outward edge crossing"
+    },
+    {
+      "portalId": "spyder_paper_town:tmx:spyder_paper_town.tmx:209:a1",
+      "category": "outdoor-nonseam-or-story",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "spyder_paper_town",
+        "event": "Destination - Candy",
+        "objectId": 209,
+        "rect": {
+          "x": 12,
+          "y": 15,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 12,
+            "y": 15
+          }
+        ],
+        "touchingSides": [],
+        "facingGuard": null,
+        "trailingFace": "down"
+      },
+      "target": {
+        "map": "spyder_candy_port",
+        "x": 37,
+        "y": 12
+      },
+      "assessment": "keep fade: interior river-captain destination dispatch rivergoto:candy_port clears rivergoto and teleports spyder_paper_town (12,15) -> spyder_candy_port (37,12); it is choice-driven story travel, not an outward edge crossing"
+    },
+    {
+      "portalId": "spyder_paper_town:tmx:spyder_paper_town.tmx:212:a1",
+      "category": "outdoor-nonseam-or-story",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "spyder_paper_town",
+        "event": "Destination - Timber",
+        "objectId": 212,
+        "rect": {
+          "x": 15,
+          "y": 16,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 15,
+            "y": 16
+          }
+        ],
+        "touchingSides": [],
+        "facingGuard": null,
+        "trailingFace": "up"
+      },
+      "target": {
+        "map": "spyder_timber_town",
+        "x": 8,
+        "y": 21
+      },
+      "assessment": "keep fade: interior river-captain destination dispatch rivergoto:timber_town clears rivergoto and teleports spyder_paper_town (15,16) -> spyder_timber_town (8,21); it is choice-driven story travel, not an outward edge crossing"
+    },
+    {
+      "portalId": "spyder_timber_town:tmx:spyder_timber_town.tmx:346:a2",
+      "category": "outdoor-nonseam-or-story",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "spyder_timber_town",
+        "event": "Destination - Flower",
+        "objectId": 346,
+        "rect": {
+          "x": 8,
+          "y": 17,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 8,
+            "y": 17
+          }
+        ],
+        "touchingSides": [],
+        "facingGuard": null,
+        "trailingFace": null
+      },
+      "target": {
+        "map": "spyder_flower_city",
+        "x": 17,
+        "y": 30
+      },
+      "assessment": "keep fade: interior river-captain destination dispatch rivergoto:flower_city clears rivergoto and teleports spyder_timber_town (8,17) -> spyder_flower_city (17,30); it is choice-driven story travel, not an outward edge crossing"
+    },
+    {
+      "portalId": "spyder_timber_town:tmx:spyder_timber_town.tmx:347:a1",
+      "category": "outdoor-nonseam-or-story",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "spyder_timber_town",
+        "event": "Destination - Leather",
+        "objectId": 347,
+        "rect": {
+          "x": 7,
+          "y": 18,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 7,
+            "y": 18
+          }
+        ],
+        "touchingSides": [],
+        "facingGuard": null,
+        "trailingFace": "right"
+      },
+      "target": {
+        "map": "spyder_leather_town",
+        "x": 17,
+        "y": 19
+      },
+      "assessment": "keep fade: interior river-captain destination dispatch rivergoto:leather_town clears rivergoto and teleports spyder_timber_town (7,18) -> spyder_leather_town (17,19); it is choice-driven story travel, not an outward edge crossing"
+    },
+    {
+      "portalId": "spyder_timber_town:tmx:spyder_timber_town.tmx:348:a1",
+      "category": "outdoor-nonseam-or-story",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "spyder_timber_town",
+        "event": "Destination - Paper",
+        "objectId": 348,
+        "rect": {
+          "x": 6,
+          "y": 17,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 6,
+            "y": 17
+          }
+        ],
+        "touchingSides": [],
+        "facingGuard": null,
+        "trailingFace": "up"
+      },
+      "target": {
+        "map": "spyder_paper_town",
+        "x": 4,
+        "y": 13
+      },
+      "assessment": "keep fade: interior river-captain destination dispatch rivergoto:paper_town clears rivergoto and teleports spyder_timber_town (6,17) -> spyder_paper_town (4,13); it is choice-driven story travel, not an outward edge crossing"
+    },
+    {
+      "portalId": "spyder_timber_town:tmx:spyder_timber_town.tmx:350:a1",
+      "category": "outdoor-nonseam-or-story",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "spyder_timber_town",
+        "event": "Destination - Candy",
+        "objectId": 350,
+        "rect": {
+          "x": 4,
+          "y": 17,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 4,
+            "y": 17
+          }
+        ],
+        "touchingSides": [],
+        "facingGuard": null,
+        "trailingFace": "down"
+      },
+      "target": {
+        "map": "spyder_candy_port",
+        "x": 37,
+        "y": 12
+      },
+      "assessment": "keep fade: interior river-captain destination dispatch rivergoto:candy_port clears rivergoto and teleports spyder_timber_town (4,17) -> spyder_candy_port (37,12); it is choice-driven story travel, not an outward edge crossing"
+    },
+    {
+      "portalId": "spyder_timber_town:tmx:spyder_timber_town.tmx:356:a1",
+      "category": "outdoor-nonseam-or-story",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "spyder_timber_town",
+        "event": "Destination - Timber",
+        "objectId": 356,
+        "rect": {
+          "x": 5,
+          "y": 18,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 5,
+            "y": 18
+          }
+        ],
+        "touchingSides": [],
+        "facingGuard": null,
+        "trailingFace": "up"
+      },
+      "target": {
+        "map": "spyder_timber_town",
+        "x": 8,
+        "y": 21
+      },
+      "assessment": "keep fade: interior river-captain destination dispatch rivergoto:timber_town clears rivergoto and teleports spyder_timber_town (5,18) -> spyder_timber_town (8,21); it is choice-driven story travel, not an outward edge crossing"
+    },
+    {
+      "portalId": "taba_town:tmx:taba_town.tmx:196:a0",
+      "category": "linked-gap",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "taba_town",
+        "event": "Teleport to Dryadsgrove",
+        "objectId": 196,
+        "rect": {
+          "x": 58,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 58,
+            "y": 0
+          }
+        ],
+        "touchingSides": [
+          "north"
+        ],
+        "facingGuard": "up",
+        "trailingFace": null
+      },
+      "target": {
+        "map": "dryadsgrove",
+        "x": 5,
+        "y": 19
+      },
+      "topologyReason": "5 portal(s) connect maps without a positive-length shared edge (tile gap x=0, y=40); retain teleport semantics.",
+      "assessment": "keep fade: the south/north Surf mouths are 40 tiles apart; aligning their authored lanes would move Taba Town into a large overlap with Route 1, which seamless-v1 forbids"
+    },
+    {
+      "portalId": "taba_town:tmx:taba_town.tmx:197:a0",
+      "category": "linked-gap",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "taba_town",
+        "event": "Teleport to Dryadsgrove",
+        "objectId": 197,
+        "rect": {
+          "x": 59,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 59,
+            "y": 0
+          }
+        ],
+        "touchingSides": [
+          "north"
+        ],
+        "facingGuard": "up",
+        "trailingFace": null
+      },
+      "target": {
+        "map": "dryadsgrove",
+        "x": 5,
+        "y": 19
+      },
+      "topologyReason": "5 portal(s) connect maps without a positive-length shared edge (tile gap x=0, y=40); retain teleport semantics.",
+      "assessment": "keep fade: the south/north Surf mouths are 40 tiles apart; aligning their authored lanes would move Taba Town into a large overlap with Route 1, which seamless-v1 forbids"
+    },
+    {
+      "portalId": "taba_town:tmx:taba_town.tmx:198:a0",
+      "category": "linked-gap",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "taba_town",
+        "event": "Teleport to Dryadsgrove",
+        "objectId": 198,
+        "rect": {
+          "x": 60,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 60,
+            "y": 0
+          }
+        ],
+        "touchingSides": [
+          "north"
+        ],
+        "facingGuard": "up",
+        "trailingFace": null
+      },
+      "target": {
+        "map": "dryadsgrove",
+        "x": 6,
+        "y": 19
+      },
+      "topologyReason": "5 portal(s) connect maps without a positive-length shared edge (tile gap x=0, y=40); retain teleport semantics.",
+      "assessment": "keep fade: the south/north Surf mouths are 40 tiles apart; aligning their authored lanes would move Taba Town into a large overlap with Route 1, which seamless-v1 forbids"
+    },
+    {
+      "portalId": "taba_town:tmx:taba_town.tmx:80:a0",
+      "category": "rejected-contact",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "taba_town",
+        "event": "Teleport to Route 1",
+        "objectId": 80,
+        "rect": {
+          "x": 8,
+          "y": 11,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 8,
+            "y": 11
+          }
+        ],
+        "touchingSides": [],
+        "facingGuard": "left",
+        "trailingFace": null
+      },
+      "target": {
+        "map": "route1",
+        "x": 50,
+        "y": 11
+      },
+      "topologyReason": "4 portal(s) connect the maps away from their shared east/west edge; retain them as portals.",
+      "assessment": "keep fade: Route 1 and Taba Town touch east/west, but both portal lanes sit eight tiles inside reciprocal preview strips; making the cells adjacent requires a forbidden 16-column map overlap across authored collision walls"
+    },
+    {
+      "portalId": "taba_town:tmx:taba_town.tmx:81:a0",
+      "category": "rejected-contact",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "taba_town",
+        "event": "Teleport to Route 1",
+        "objectId": 81,
+        "rect": {
+          "x": 8,
+          "y": 12,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 8,
+            "y": 12
+          }
+        ],
+        "touchingSides": [],
+        "facingGuard": "left",
+        "trailingFace": null
+      },
+      "target": {
+        "map": "route1",
+        "x": 50,
+        "y": 12
+      },
+      "topologyReason": "4 portal(s) connect the maps away from their shared east/west edge; retain them as portals.",
+      "assessment": "keep fade: Route 1 and Taba Town touch east/west, but both portal lanes sit eight tiles inside reciprocal preview strips; making the cells adjacent requires a forbidden 16-column map overlap across authored collision walls"
+    },
+    {
+      "portalId": "timber_town:tmx:timber_town.tmx:199:a0",
+      "category": "linked-gap",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "timber_town",
+        "event": "Teleport to Flower City",
+        "objectId": 199,
+        "rect": {
+          "x": 34,
+          "y": 39,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 34,
+            "y": 39
+          }
+        ],
+        "touchingSides": [
+          "south"
+        ],
+        "facingGuard": "down",
+        "trailingFace": "left"
+      },
+      "target": {
+        "map": "flower_city",
+        "x": 39,
+        "y": 33
+      },
+      "topologyReason": "5 portal(s) connect maps without a positive-length shared edge (tile gap x=40, y=0); retain teleport semantics.",
+      "assessment": "keep fade: the maps have a 40-tile horizontal gap and the portals turn between Flower City's east edge and Timber Town's south edge; this needs a rotating corner transfer, not an axis-aligned seam"
+    },
+    {
+      "portalId": "timber_town:tmx:timber_town.tmx:201:a0",
+      "category": "linked-gap",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "timber_town",
+        "event": "Teleport to Flower City",
+        "objectId": 201,
+        "rect": {
+          "x": 33,
+          "y": 39,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 33,
+            "y": 39
+          }
+        ],
+        "touchingSides": [
+          "south"
+        ],
+        "facingGuard": "down",
+        "trailingFace": "left"
+      },
+      "target": {
+        "map": "flower_city",
+        "x": 39,
+        "y": 33
+      },
+      "topologyReason": "5 portal(s) connect maps without a positive-length shared edge (tile gap x=40, y=0); retain teleport semantics.",
+      "assessment": "keep fade: the maps have a 40-tile horizontal gap and the portals turn between Flower City's east edge and Timber Town's south edge; this needs a rotating corner transfer, not an axis-aligned seam"
+    },
+    {
+      "portalId": "timber_town:tmx:timber_town.tmx:202:a0",
+      "category": "outdoor-nonseam-or-story",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "timber_town",
+        "event": "Teleport to Tunnel",
+        "objectId": 202,
+        "rect": {
+          "x": 14,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 14,
+            "y": 0
+          }
+        ],
+        "touchingSides": [
+          "north"
+        ],
+        "facingGuard": "up",
+        "trailingFace": "right"
+      },
+      "target": {
+        "map": "tunnel",
+        "x": 0,
+        "y": 35
+      },
+      "assessment": "keep fade: timber_town (14,0) -> tunnel (0,35) turns between Timber Town's north edge and Tunnel's west edge on Surf water; the separate south/north road seam is already seamless, while this perpendicular river bend is not"
+    },
+    {
+      "portalId": "timber_town:tmx:timber_town.tmx:204:a0",
+      "category": "outdoor-nonseam-or-story",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "timber_town",
+        "event": "Teleport to Tunnel",
+        "objectId": 204,
+        "rect": {
+          "x": 15,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 15,
+            "y": 0
+          }
+        ],
+        "touchingSides": [
+          "north"
+        ],
+        "facingGuard": "up",
+        "trailingFace": "right"
+      },
+      "target": {
+        "map": "tunnel",
+        "x": 0,
+        "y": 36
+      },
+      "assessment": "keep fade: timber_town (15,0) -> tunnel (0,36) turns between Timber Town's north edge and Tunnel's west edge on Surf water; the separate south/north road seam is already seamless, while this perpendicular river bend is not"
+    },
+    {
+      "portalId": "tunnel:tmx:tunnel.tmx:109:a0",
+      "category": "outdoor-nonseam-or-story",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "tunnel",
+        "event": "Teleport to Timber Town",
+        "objectId": 109,
+        "rect": {
+          "x": 0,
+          "y": 35,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 0,
+            "y": 35
+          }
+        ],
+        "touchingSides": [
+          "west"
+        ],
+        "facingGuard": "left",
+        "trailingFace": "down"
+      },
+      "target": {
+        "map": "timber_town",
+        "x": 14,
+        "y": 0
+      },
+      "assessment": "keep fade: tunnel (0,35) -> timber_town (14,0) turns between Timber Town's north edge and Tunnel's west edge on Surf water; the separate south/north road seam is already seamless, while this perpendicular river bend is not"
+    },
+    {
+      "portalId": "tunnel:tmx:tunnel.tmx:111:a0",
+      "category": "outdoor-nonseam-or-story",
+      "recommendation": "keep-fade",
+      "source": {
+        "map": "tunnel",
+        "event": "Teleport to Timber Town",
+        "objectId": 111,
+        "rect": {
+          "x": 0,
+          "y": 36,
+          "width": 1,
+          "height": 1
+        },
+        "cells": [
+          {
+            "x": 0,
+            "y": 36
+          }
+        ],
+        "touchingSides": [
+          "west"
+        ],
+        "facingGuard": "left",
+        "trailingFace": "down"
+      },
+      "target": {
+        "map": "timber_town",
+        "x": 15,
+        "y": 0
+      },
+      "assessment": "keep fade: tunnel (0,36) -> timber_town (15,0) turns between Timber Town's north edge and Tunnel's west edge on Surf water; the separate south/north road seam is already seamless, while this perpendicular river bend is not"
+    }
+  ],
+  "directionOnly": [
+    {
+      "worldId": "eclipse",
+      "source": {
+        "map": "eclipse_crystal_town",
+        "side": "east",
+        "span": {
+          "start": 0,
+          "end": 20
+        }
+      },
+      "target": {
+        "map": "eclipse_lion_mountain_low",
+        "side": "west",
+        "span": {
+          "start": 0,
+          "end": 20
+        }
+      },
+      "assessment": "not a legacy fade: no transition_teleport portal exists; direct crossing would require a new eventless edge-trigger policy"
+    },
+    {
+      "worldId": "eclipse",
+      "source": {
+        "map": "eclipse_crystal_town",
+        "side": "south",
+        "span": {
+          "start": 0,
+          "end": 40
+        }
+      },
+      "target": {
+        "map": "eclipse_route7",
+        "side": "north",
+        "span": {
+          "start": 0,
+          "end": 40
+        }
+      },
+      "assessment": "not a legacy fade: no transition_teleport portal exists; direct crossing would require a new eventless edge-trigger policy"
+    },
+    {
+      "worldId": "eclipse",
+      "source": {
+        "map": "eclipse_lion_mountain_high",
+        "side": "south",
+        "span": {
+          "start": 0,
+          "end": 40
+        }
+      },
+      "target": {
+        "map": "eclipse_lion_mountain_middle",
+        "side": "north",
+        "span": {
+          "start": 0,
+          "end": 40
+        }
+      },
+      "assessment": "not a legacy fade: no transition_teleport portal exists; direct crossing would require a new eventless edge-trigger policy"
+    },
+    {
+      "worldId": "eclipse",
+      "source": {
+        "map": "eclipse_lion_mountain_high",
+        "side": "east",
+        "span": {
+          "start": 0,
+          "end": 20
+        }
+      },
+      "target": {
+        "map": "eclipse_obsidian_town",
+        "side": "west",
+        "span": {
+          "start": 0,
+          "end": 20
+        }
+      },
+      "assessment": "not a legacy fade: no transition_teleport portal exists; direct crossing would require a new eventless edge-trigger policy"
+    },
+    {
+      "worldId": "eclipse",
+      "source": {
+        "map": "eclipse_lion_mountain_low",
+        "side": "north",
+        "span": {
+          "start": 0,
+          "end": 40
+        }
+      },
+      "target": {
+        "map": "eclipse_lion_mountain_middle",
+        "side": "south",
+        "span": {
+          "start": 0,
+          "end": 40
+        }
+      },
+      "assessment": "not a legacy fade: no transition_teleport portal exists; direct crossing would require a new eventless edge-trigger policy"
+    },
+    {
+      "worldId": "eclipse",
+      "source": {
+        "map": "eclipse_lion_mountain_low",
+        "side": "south",
+        "span": {
+          "start": 0,
+          "end": 40
+        }
+      },
+      "target": {
+        "map": "eclipse_park",
+        "side": "north",
+        "span": {
+          "start": 0,
+          "end": 40
+        }
+      },
+      "assessment": "not a legacy fade: no transition_teleport portal exists; direct crossing would require a new eventless edge-trigger policy"
+    },
+    {
+      "worldId": "eclipse",
+      "source": {
+        "map": "eclipse_park_south",
+        "side": "north",
+        "span": {
+          "start": 0,
+          "end": 20
+        }
+      },
+      "target": {
+        "map": "eclipse_route7",
+        "side": "south",
+        "span": {
+          "start": 20,
+          "end": 40
+        }
+      },
+      "assessment": "not a legacy fade: no transition_teleport portal exists; direct crossing would require a new eventless edge-trigger policy"
+    },
+    {
+      "worldId": "eclipse",
+      "source": {
+        "map": "eclipse_park",
+        "side": "south",
+        "span": {
+          "start": 0,
+          "end": 40
+        }
+      },
+      "target": {
+        "map": "eclipse_park_south",
+        "side": "north",
+        "span": {
+          "start": 20,
+          "end": 60
+        }
+      },
+      "assessment": "not a legacy fade: no transition_teleport portal exists; direct crossing would require a new eventless edge-trigger policy"
+    },
+    {
+      "worldId": "eclipse",
+      "source": {
+        "map": "eclipse_park",
+        "side": "west",
+        "span": {
+          "start": 0,
+          "end": 40
+        }
+      },
+      "target": {
+        "map": "eclipse_route7",
+        "side": "east",
+        "span": {
+          "start": 0,
+          "end": 40
+        }
+      },
+      "assessment": "not a legacy fade: no transition_teleport portal exists; direct crossing would require a new eventless edge-trigger policy"
+    },
+    {
+      "worldId": "spyder",
+      "source": {
+        "map": "spyder_diamond_hill",
+        "side": "north",
+        "span": {
+          "start": 0,
+          "end": 20
+        }
+      },
+      "target": {
+        "map": "spyder_tunnel",
+        "side": "south",
+        "span": {
+          "start": 0,
+          "end": 20
+        }
+      },
+      "assessment": "not a legacy fade: no transition_teleport portal exists; direct crossing would require a new eventless edge-trigger policy"
+    }
+  ]
+}

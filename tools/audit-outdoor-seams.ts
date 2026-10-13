@@ -89,17 +89,21 @@ function targetShape(portal: Readonly<WorldPortal>) {
 }
 
 /** Every source cell and its continuous target cell are Surf water. */
-function surfOnly(portal: Readonly<WorldPortal>, opening: Readonly<WorldSeamOpening>): boolean {
-  const sourceWater = surfable(portal.sourceMap);
-  const targetWater = surfable(portal.targetMap);
-  const sourceWidth = mapsById.get(portal.sourceMap)!.width;
-  const targetWidth = mapsById.get(portal.targetMap)!.width;
+function surfOnly(
+  portal: Readonly<WorldPortal>,
+  opening: Readonly<WorldSeamOpening>,
+  audit: Readonly<AuditContext>,
+): boolean {
+  const sourceWater = audit.surfable(portal.sourceMap);
+  const targetWater = audit.surfable(portal.targetMap);
+  const sourceWidth = audit.mapsById.get(portal.sourceMap)!.width;
+  const targetWidth = audit.mapsById.get(portal.targetMap)!.width;
   const offset = opening.expectedTargetSpan.start - opening.sourceSpan.start;
   return cells(portal).every((cell) => {
     const tangent = opening.sourceSide === "north" || opening.sourceSide === "south" ? cell.x : cell.y;
     const target = tangent + offset;
     const targetCell = opening.targetSide === "north" ? { x: target, y: 0 }
-      : opening.targetSide === "south" ? { x: target, y: mapsById.get(portal.targetMap)!.height - 1 }
+      : opening.targetSide === "south" ? { x: target, y: audit.mapsById.get(portal.targetMap)!.height - 1 }
       : opening.targetSide === "west" ? { x: 0, y: target }
       : { x: targetWidth - 1, y: target };
     return sourceWater.has(cell.y * sourceWidth + cell.x) &&
@@ -107,24 +111,98 @@ function surfOnly(portal: Readonly<WorldPortal>, opening: Readonly<WorldSeamOpen
   });
 }
 
+interface AuditContext {
+  mapsById: ReadonlyMap<string, TuxMap>;
+  surfable(mapId: string): Set<number>;
+}
+
+const pairKey = (a: string, b: string): string => [a, b].sort().join("/");
+
+function endpoint(portal: Readonly<WorldPortal>): string {
+  return `${portal.sourceMap} (${portal.source.x},${portal.source.y}) -> ` +
+    `${portal.targetMap} (${portal.target.x},${portal.target.y})`;
+}
+
+function riverDestinationVariable(source: Readonly<SourcePortal>, portal: Readonly<WorldPortal>): string | null {
+  const destination = source.event.conds.find((condition) =>
+    condition.op === "is" && condition.type === "variable_set" &&
+    condition.args[0]?.startsWith("rivergoto:")
+  )?.args[0];
+  const clearsDispatch = source.event.acts.slice(0, source.actionIndex).some((action) =>
+    action.type === "set_variable" && action.args[0] === "rivergoto:nothing"
+  );
+  return source.event.name.startsWith("Destination - ") &&
+      portal.touchingSides.length === 0 && destination && clearsDispatch
+    ? destination
+    : null;
+}
+
+function linkedGapAssessment(portal: Readonly<WorldPortal>): string {
+  switch (pairKey(portal.sourceMap, portal.targetMap)) {
+    case "dryadsgrove/taba_town":
+      return "keep fade: the south/north Surf mouths are 40 tiles apart; aligning their authored lanes would move Taba Town into a large overlap with Route 1, which seamless-v1 forbids";
+    case "dryadsgrove/leather_town":
+      return "keep fade: the map rectangles meet only at one corner and the portals turn between Dryad's north edge and Leather Town's east edge; no translation can make those perpendicular sides one physical seam";
+    case "flower_city/leather_town":
+      return "keep fade: the maps have a 41-tile vertical gap and the portals turn between Flower City's south edge and Leather Town's east edge; the reverse authored target (59,0) is also outside Flower City's 40-tile width";
+    case "flower_city/timber_town":
+      return "keep fade: the maps have a 40-tile horizontal gap and the portals turn between Flower City's east edge and Timber Town's south edge; this needs a rotating corner transfer, not an axis-aligned seam";
+    default:
+      return fail(`${portal.id}: linked gap has no specific assessment`);
+  }
+}
+
+function rejectedContactAssessment(portal: Readonly<WorldPortal>): string {
+  if (pairKey(portal.sourceMap, portal.targetMap) !== "route1/taba_town") {
+    return fail(`${portal.id}: rejected contact has no specific assessment`);
+  }
+  return "keep fade: Route 1 and Taba Town touch east/west, but both portal lanes sit eight tiles inside reciprocal preview strips; making the cells adjacent requires a forbidden 16-column map overlap across authored collision walls";
+}
+
+function storyAssessment(portal: Readonly<WorldPortal>, source: Readonly<SourcePortal>): string {
+  const riverDestination = riverDestinationVariable(source, portal);
+  if (riverDestination) {
+    return `keep fade: interior river-captain destination dispatch ${riverDestination} clears rivergoto and teleports ${endpoint(portal)}; it is choice-driven story travel, not an outward edge crossing`;
+  }
+  switch (pairKey(portal.sourceMap, portal.targetMap)) {
+    case "route1/route1_sanglorian":
+      return `keep fade: ${endpoint(portal)} uses Route 1 row 4 behind four solid preview rows; seamless-v1 can cross the physical north/south edge only, not a four-row virtual overlap`;
+    case "timber_town/tunnel":
+      return `keep fade: ${endpoint(portal)} turns between Timber Town's north edge and Tunnel's west edge on Surf water; the separate south/north road seam is already seamless, while this perpendicular river bend is not`;
+    case "flower_city/route5":
+      if (portal.objectId === 203) {
+        return "keep fade: Flower City object 203 triggers at interior cell (37,16) facing two collision columns; object 201 at the true east-edge opening (39,15) already supplies the coordinate-preserving Route 5 seam";
+      }
+      break;
+  }
+  return fail(`${portal.id}: story/non-seam portal has no specific assessment`);
+}
+
 function portalOnlyAssessment(
   portal: Readonly<WorldPortal>,
   opening: Readonly<WorldSeamOpening>,
   source: Readonly<SourcePortal>,
+  audit: Readonly<AuditContext>,
 ): string {
   const guard = source.event.conds.find((condition) =>
     condition.op === "is" && condition.type === "char_facing" && condition.args[0] === "player"
   )?.args[1];
   if (portal.sourceMap === "classic_route_2" && portal.touchingSides.includes("west") && guard === "right") {
-    return "unsafe: the west-edge event requires/faces right, so it is not an outward physical crossing and its source intent is ambiguous";
+    return "keep fade: all three ground lanes are geometrically passable, but this west-edge event guards and faces right into Classic Route 2; promoting it would invent the un-authored outward-left trigger";
   }
-  const water = surfOnly(portal, opening);
+  if (portal.sourceMap === "route1_sanglorian") {
+    return `keep fade: Sanglorian south-edge lane x=${portal.source.x} is tangent-aligned, but its authored Route 1 landing (${portal.target.x},${portal.target.y}) skips four solid preview rows; the physical neighbour is the blocked north-edge cell (${portal.target.x},0)`;
+  }
+  if (portal.sourceMap === "routea" && portal.objectId === 45) {
+    return "keep fade: Route A lane (13,39) should continue to Flower City (13,0), but the authored landing changes x to 12 and both continuous edge cells are non-Surf collision; adjacent objects 44 and 56 are the real seamless channel";
+  }
+  const water = surfOnly(portal, opening, audit);
   if (opening.issues.includes("wrong-target-edge")) {
     return "unsafe: the authored destination is inside the target or on its same-side edge, not the adjacent opposite edge" +
       (water ? "; every lane is also Surf water on both sides" : "");
   }
   if (water) {
-    return "unsafe: every lane is Surf water on both sides; the runtime proves a crossing against immutable terrain, where water stays solid until a map visit opens it, so a seamless surf crossing needs a kit-level surface-aware proof";
+    return "keep fade: every continuous lane is Surf water, but this opening did not pass the current whole-span Surf surface/exit/entry promotion proof; do not bypass the trusted movement-capability gate";
   }
   if (opening.issues.includes("offset-mismatch")) {
     return "unsafe: the authored destination changes the tangent coordinate, so a direct crossing would change placement semantics";
@@ -132,7 +210,7 @@ function portalOnlyAssessment(
   if (opening.issues.includes("fixed-destination")) {
     return "unsafe: no generated coordinate-aligned lane passed the simple outward-walk and passability proof";
   }
-  return "unsafe: the topology classified this opening as portal-only";
+  return fail(`${portal.id}: portal-only opening has no specific assessment`);
 }
 
 function contactFor(
@@ -150,6 +228,7 @@ const maps = loadAllMaps();
 const mapsById = new Map(maps.map((map) => [map.slug, map] as const));
 const surfaceLabels = importTerrainSurfaceLabels(maps.map((map) => map.slug));
 const surfable = (mapId: string): Set<number> => new Set(surfaceLabels[mapId]?.surfable ?? []);
+const audit = { mapsById, surfable };
 const sources = sourcePortals(maps);
 const { index } = buildOutdoorWorldIndex(maps);
 const imported = buildProject(availableMapIds(), G6_IMPORT_OPTIONS);
@@ -206,15 +285,27 @@ const whollyLegacy = portals.filter((portal) =>
 ).map((portal) => {
   const source = sources.get(portal.id) ?? fail(`${portal.id}: missing source event`);
   const opening = openingById.get(portal.id);
+  const riverDestination = riverDestinationVariable(source, portal);
+  if (riverDestination) {
+    return {
+      portalId: portal.id,
+      category: "outdoor-nonseam-or-story" as const,
+      recommendation: "keep-fade" as const,
+      source: sourceShape(portal, source),
+      target: targetShape(portal),
+      assessment: storyAssessment(portal, source),
+    };
+  }
   if (portalOnlyIds.has(portal.id)) {
     if (!opening) fail(`${portal.id}: portal-only id has no opening`);
     return {
       portalId: portal.id,
       category: "portal-only" as const,
+      recommendation: "keep-fade" as const,
       source: sourceShape(portal, source),
       target: targetShape(portal),
       topologyIssues: [...opening.issues],
-      assessment: portalOnlyAssessment(portal, opening, source),
+      assessment: portalOnlyAssessment(portal, opening, source, audit),
     };
   }
   if (gapIds.has(portal.id)) {
@@ -222,10 +313,11 @@ const whollyLegacy = portals.filter((portal) =>
     return {
       portalId: portal.id,
       category: "linked-gap" as const,
+      recommendation: "keep-fade" as const,
       source: sourceShape(portal, source),
       target: targetShape(portal),
       topologyReason: contact?.reason ?? "gap",
-      assessment: "unsafe: the authored world placements have a gap, so the maps cannot be juxtaposed without changing geometry",
+      assessment: linkedGapAssessment(portal),
     };
   }
   if (rejectedIds.has(portal.id)) {
@@ -233,18 +325,20 @@ const whollyLegacy = portals.filter((portal) =>
     return {
       portalId: portal.id,
       category: "rejected-contact" as const,
+      recommendation: "keep-fade" as const,
       source: sourceShape(portal, source),
       target: targetShape(portal),
       topologyReason: contact?.reason ?? "rejected contact",
-      assessment: "unsafe: the apparent edge contact was rejected by the topology proof; direct crossing would invent unsupported adjacency",
+      assessment: rejectedContactAssessment(portal),
     };
   }
   return {
     portalId: portal.id,
     category: "outdoor-nonseam-or-story" as const,
+    recommendation: "keep-fade" as const,
     source: sourceShape(portal, source),
     target: targetShape(portal),
-    assessment: "unsafe: no accepted adjacent world seam connects these endpoints, so the authored outdoor transfer retains story/portal semantics",
+    assessment: storyAssessment(portal, source),
   };
 });
 
@@ -277,9 +371,9 @@ expectCount("partial seamless cells", handoff.partialSeamlessCells, 137);
 expectCount("partial legacy cells", handoff.partialLegacyCells, 0);
 expectCount("wholly legacy portal ids", whollyLegacy.length, 56);
 expectCount("legacy portal-only", whollyLegacyByCategory["portal-only"], 5);
-expectCount("legacy linked gaps", whollyLegacyByCategory["linked-gap"], 33);
+expectCount("legacy linked gaps", whollyLegacyByCategory["linked-gap"], 19);
 expectCount("legacy rejected contacts", whollyLegacyByCategory["rejected-contact"], 4);
-expectCount("legacy story/nonseam", whollyLegacyByCategory["outdoor-nonseam-or-story"], 14);
+expectCount("legacy story/nonseam", whollyLegacyByCategory["outdoor-nonseam-or-story"], 28);
 expectCount("direction-only seams", directionOnly.length, 10);
 
 const report = {
@@ -302,10 +396,21 @@ const report = {
   directionOnly,
 };
 
-mkdirSync(join(ROOT, "reports"), { recursive: true });
-writeFileSync(OUTPUT, `${JSON.stringify(report, null, 2)}\n`);
-console.log(
-  `outdoor seam audit: ${portals.length} portal actions; ${handoff.enabledTransfers} runtime seamless ids; ` +
-  `${partial.length} partial (${handoff.partialLegacyCells} legacy cells); ${whollyLegacy.length} wholly legacy; ` +
-  `${directionOnly.length} direction-only seams -> ${OUTPUT}`,
-);
+export function buildOutdoorSeamAuditReport(): typeof report {
+  return report;
+}
+
+export type OutdoorSeamAuditReport = ReturnType<typeof buildOutdoorSeamAuditReport>;
+
+if (import.meta.main) {
+  const report = buildOutdoorSeamAuditReport();
+  mkdirSync(join(ROOT, "reports"), { recursive: true });
+  writeFileSync(OUTPUT, `${JSON.stringify(report, null, 2)}\n`);
+  console.log(
+    `outdoor seam audit: ${report.counts.outdoorToOutdoorPortalActions} portal actions; ` +
+    `${report.counts.runtimeSeamlessPortalIds} runtime seamless ids; ` +
+    `${report.counts.partialPortalIds} partial (${report.counts.partialLegacyCells} legacy cells); ` +
+    `${report.counts.whollyLegacyPortalIds} wholly legacy; ` +
+    `${report.counts.directionOnlySeamsWithoutPortalActions} direction-only seams -> ${OUTPUT}`,
+  );
+}
