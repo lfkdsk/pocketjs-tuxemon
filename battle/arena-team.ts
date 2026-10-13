@@ -15,6 +15,7 @@ import { initialTuxemonExtensionState } from "./extension.ts";
 import { battleDbToTuxemonBattleDb } from "./from-battle-db.ts";
 import { spawnMonster } from "./spawn.ts";
 import { calculateBaseStats } from "./stats.ts";
+import { calculateDefeatExperience } from "./progression.ts";
 import {
   STAT_NAMES,
   type SpawnedMonsterSnapshot,
@@ -28,6 +29,21 @@ export interface ArenaAcquireEvent {
   seed: string;
   species: string;
   level: number;
+  /** Present on server-created expedition records. Legacy Arena records omit
+   * this object and retain their original v1 reconstruction semantics. */
+  origin?: ArenaExpeditionOrigin;
+}
+
+export type ArenaExpeditionCaptureResult =
+  | { result: "starter" }
+  | { result: "caught"; item: string; success: true; shakes: number };
+
+export interface ArenaExpeditionOrigin {
+  kind: "expedition";
+  area: string;
+  /** Global expedition action ordinal. The issued starter is step zero. */
+  step: number;
+  capture: ArenaExpeditionCaptureResult;
 }
 
 export interface ArenaLevelEvent {
@@ -35,6 +51,8 @@ export interface ArenaLevelEvent {
   type: "level";
   /** Every event advances exactly one level. */
   level: number;
+  /** Expedition progression emits this as an audit of the preceding XP. */
+  step?: number;
 }
 
 export interface ArenaLearnEvent {
@@ -43,6 +61,8 @@ export interface ArenaLearnEvent {
   move: string;
   /** Required when the four-move limit has already been reached. */
   forget?: string;
+  /** Expedition progression emits this as an audit of XP/TM learning. */
+  step?: number;
 }
 
 export interface ArenaItemEvent {
@@ -51,10 +71,29 @@ export interface ArenaItemEvent {
   item: string;
   /** Move replaced by a TM, when necessary. */
   forget?: string;
+  step?: number;
+}
+
+export interface ArenaExperienceEvent {
+  seq: number;
+  type: "experience";
+  step: number;
+  amount: number;
+  source:
+    | {
+      kind: "battle";
+      area: string;
+      species: string;
+      level: number;
+      experienceModifier: number;
+      participants: number;
+    }
+    | { kind: "item"; item: string };
 }
 
 export type ArenaProvenanceEvent =
   | ArenaAcquireEvent
+  | ArenaExperienceEvent
   | ArenaLevelEvent
   | ArenaLearnEvent
   | ArenaItemEvent;
@@ -63,6 +102,9 @@ export interface ArenaTeamRecord {
   species: string;
   level: number;
   moves: string[];
+  /** Required on expedition records so partial progress between levels is
+   * caller-visible and checked against the complete event log. */
+  experience?: number;
   provenance: ArenaProvenanceEvent[];
 }
 
@@ -198,7 +240,16 @@ function normalizeRules(value: unknown, errors: string[]): NormalizedTeamRules {
   };
 }
 
-function recalculate(snapshot: SpawnedMonsterSnapshot, level = snapshot.level): void {
+function levelFloor(level: number): number {
+  const experience = SOURCE_DB.rules.experience.groups.default!;
+  return Math.trunc(experience.multiplier * level ** experience.experienceCoefficient);
+}
+
+function recalculate(
+  snapshot: SpawnedMonsterSnapshot,
+  level = snapshot.level,
+  resetExperience = false,
+): void {
   snapshot.level = level;
   snapshot.base = calculateBaseStats(
     RULES_DB,
@@ -210,10 +261,57 @@ function recalculate(snapshot: SpawnedMonsterSnapshot, level = snapshot.level): 
     snapshot.trainingPoints,
   );
   snapshot.currentHp = snapshot.base.hp;
-  const experience = SOURCE_DB.rules.experience.groups.default!;
-  snapshot.totalExperience = Math.trunc(
-    experience.multiplier * level ** experience.experienceCoefficient,
-  );
+  if (resetExperience) snapshot.totalExperience = levelFloor(level);
+}
+
+interface ProgressionAudit {
+  levels: number[];
+  learns: Array<{ move: string; forget?: string }>;
+}
+
+/** Apply the same level thresholds and default first-slot move replacement as
+ * the production progression reducer, while retaining partial experience for
+ * the persistent Arena record. */
+function applyExperience(
+  snapshot: SpawnedMonsterSnapshot,
+  amount: number,
+  levelCap: number,
+): ProgressionAudit {
+  const currentExperience = snapshot.totalExperience ?? levelFloor(snapshot.level);
+  if (!Number.isSafeInteger(amount) || amount <= 0 ||
+      !Number.isSafeInteger(currentExperience + amount)) {
+    throw new Error("experience amount must be a positive safe integer");
+  }
+  snapshot.totalExperience = currentExperience + amount;
+  const oldLevel = snapshot.level;
+  while (snapshot.level < levelCap && snapshot.totalExperience >= levelFloor(snapshot.level + 1)) {
+    snapshot.level++;
+  }
+  const levels = Array.from({ length: snapshot.level - oldLevel }, (_, index) => oldLevel + index + 1);
+  if (levels.length > 0) recalculate(snapshot, snapshot.level);
+
+  const schedule = RULES_DB.monster[snapshot.slug]!.moveset;
+  const learned: string[] = [];
+  for (const entry of schedule) {
+    if (entry.level_learned <= oldLevel || entry.level_learned > snapshot.level) continue;
+    const first = schedule.find((candidate) => candidate.technique === entry.technique)!;
+    if (first.learning_method !== "level_up" || first.level_learned > snapshot.level ||
+        (first.evolution_stage_learned !== undefined && first.evolution_stage_learned !== snapshot.stage) ||
+        snapshot.moves.includes(entry.technique)) continue;
+    snapshot.moves.push(entry.technique);
+    learned.push(entry.technique);
+  }
+  const forgotten: string[] = [];
+  while (snapshot.moves.length > SOURCE_DB.rules.maxMoves) {
+    forgotten.push(snapshot.moves.shift()!);
+  }
+  return {
+    levels,
+    learns: learned.map((move, index) => ({
+      move,
+      ...(forgotten[index] === undefined ? {} : { forget: forgotten[index] }),
+    })),
+  };
 }
 
 function learnMove(
@@ -263,43 +361,69 @@ function applyItem(
   rules: NormalizedTeamRules,
   label: string,
   errors: string[],
-): void {
+  expedition: boolean,
+): { learns: Array<{ move: string; forget?: string }>; experienceItem: string | null } {
   if (
     typeof itemSlug !== "string" ||
     !Object.hasOwn(SOURCE_DB.items, itemSlug) ||
     !Object.hasOwn(RULES_DB.item, itemSlug)
   ) {
     errors.push(`${label} names an unknown item`);
-    return;
+    return { learns: [], experienceItem: null };
   }
+  const item = RULES_DB.item[itemSlug]!;
+  const persistent = item.effects.some((effect) => effect.type === "give_tp" || effect.type === "learn_tm");
   const extension = { ...initialTuxemonExtensionState(), party: [clone(snapshot)] };
-  const eligibility = worldItemTargetEligibility(
-    SOURCE_DB,
-    extension,
-    createSwitchState({ items: { [itemSlug]: 1 } }),
-    itemSlug,
-    0,
-  );
-  if (!eligibility.eligible) {
-    errors.push(`${label} cannot apply item '${itemSlug}' to this monster`);
-    return;
+  if (persistent) {
+    const eligibility = worldItemTargetEligibility(
+      SOURCE_DB,
+      extension,
+      createSwitchState({ items: { [itemSlug]: 1 } }),
+      itemSlug,
+      0,
+    );
+    if (!eligibility.eligible) {
+      errors.push(`${label} cannot apply item '${itemSlug}' to this monster`);
+      return { learns: [], experienceItem: null };
+    }
   }
   if (rules.bannedItems.has(itemSlug)) {
     errors.push(`${label} uses banned item '${itemSlug}'`);
-    return;
+    return { learns: [], experienceItem: null };
   }
-  const item = RULES_DB.item[itemSlug]!;
+  const allowed = expedition
+    ? new Set(["give_tp", "learn_tm", "gain_xp", "heal", "restore"])
+    : new Set(["give_tp", "learn_tm"]);
   if (item.effects.length === 0 || item.effects.some((effect) =>
-    effect.type !== "give_tp" && effect.type !== "learn_tm"
+    !allowed.has(effect.type)
   )) {
     errors.push(`${label} item '${itemSlug}' has no supported persistent Arena effect`);
-    return;
+    return { learns: [], experienceItem: null };
   }
+  const hasTm = item.effects.some((effect) => effect.type === "learn_tm");
+  if (!hasTm && forget !== undefined) {
+    errors.push(`${label} cannot forget a move for non-TM item '${itemSlug}'`);
+    return { learns: [], experienceItem: null };
+  }
+  const learns: Array<{ move: string; forget?: string }> = [];
+  let experienceItem: string | null = null;
   for (const effect of item.effects) {
     if (effect.type === "learn_tm") {
-      learnMove(snapshot, effect.parameters[0], forget, label, errors);
+      const before = errors.length;
+      const move = effect.parameters[0];
+      if (learnMove(snapshot, move, forget, label, errors) && errors.length === before) {
+        learns.push({
+          move: move!,
+          ...(forget === undefined ? {} : { forget: forget as string }),
+        });
+      }
       continue;
     }
+    if (effect.type === "gain_xp") {
+      experienceItem = itemSlug;
+      continue;
+    }
+    if (effect.type === "heal" || effect.type === "restore") continue;
     const stat = effect.parameters[0];
     if (!STAT_NAMES.includes(stat as StatName)) {
       errors.push(`${label} item '${itemSlug}' has an invalid training stat`);
@@ -324,6 +448,7 @@ function applyItem(
     training[stat as StatName]! += grant;
     recalculate(snapshot);
   }
+  return { learns, experienceItem };
 }
 
 interface RebuiltTeam {
@@ -331,7 +456,119 @@ interface RebuiltTeam {
   snapshots: SpawnedMonsterSnapshot[];
 }
 
-function rebuildTeam(records: unknown, rulesValue: unknown): RebuiltTeam {
+function validStep(value: unknown): value is number {
+  return Number.isSafeInteger(value) && (value as number) >= 0;
+}
+
+function expeditionOrigin(
+  value: unknown,
+  species: string,
+  level: number,
+  label: string,
+  errors: string[],
+): ArenaExpeditionOrigin | null {
+  if (!isRecord(value) || !exactObject(value, ["kind", "area", "step", "capture"], [
+    "kind", "area", "step", "capture",
+  ]) || value.kind !== "expedition" || typeof value.area !== "string" ||
+      !Object.hasOwn(SOURCE_DB.encounters, value.area) || !validStep(value.step) ||
+      !isRecord(value.capture)) {
+    errors.push(`${label} must be a valid expedition origin`);
+    return null;
+  }
+  const capture = value.capture;
+  if (capture.result === "starter") {
+    if (!exactObject(capture, ["result"], ["result"]) || value.step !== 0) {
+      errors.push(`${label} starter origin must be issued at step zero`);
+      return null;
+    }
+  } else if (capture.result === "caught") {
+    if (!exactObject(capture, ["result", "item", "success", "shakes"], [
+      "result", "item", "success", "shakes",
+    ]) || typeof capture.item !== "string" || capture.success !== true ||
+        !Number.isSafeInteger(capture.shakes) || (capture.shakes as number) < 1 ||
+        (capture.shakes as number) > Number(RULES_DB.capture.total_shakes) || value.step === 0) {
+      errors.push(`${label} caught origin has an invalid capture result`);
+      return null;
+    }
+    const item = RULES_DB.item[capture.item];
+    if (!item || !item.effects.some((effect) =>
+      effect.type === "capture" || effect.type === "capture_combined"
+    )) {
+      errors.push(`${label} caught origin names a non-capture item`);
+      return null;
+    }
+    const rows = SOURCE_DB.encounters[value.area]!.monsters;
+    if (!rows.some((row) => row.monster === species && level >= row.level[0] && level <= row.level[1])) {
+      errors.push(`${label} species and level do not occur in the recorded area`);
+      return null;
+    }
+  } else {
+    errors.push(`${label} capture result is unknown`);
+    return null;
+  }
+  return clone(value as unknown as ArenaExpeditionOrigin);
+}
+
+function experienceSourceAmount(
+  snapshot: SpawnedMonsterSnapshot,
+  value: unknown,
+  label: string,
+  errors: string[],
+): number | null {
+  if (!isRecord(value) || typeof value.kind !== "string") {
+    errors.push(`${label} has an invalid source`);
+    return null;
+  }
+  if (value.kind === "item" && exactObject(value, ["kind", "item"], ["kind", "item"])) {
+    if (typeof value.item !== "string" || !Object.hasOwn(RULES_DB.item, value.item)) {
+      errors.push(`${label} names an unknown experience item`);
+      return null;
+    }
+    const effects = RULES_DB.item[value.item]!.effects.filter((effect) => effect.type === "gain_xp");
+    const amount = effects.reduce((sum, effect) => sum + Number(effect.parameters[0] ?? 0), 0);
+    if (!Number.isSafeInteger(amount) || amount <= 0) {
+      errors.push(`${label} item has no positive experience effect`);
+      return null;
+    }
+    return amount;
+  }
+  if (value.kind === "battle" && exactObject(value, [
+    "kind", "area", "species", "level", "experienceModifier", "participants",
+  ], ["kind", "area", "species", "level", "experienceModifier", "participants"])) {
+    if (typeof value.area !== "string" || !Object.hasOwn(SOURCE_DB.encounters, value.area) ||
+        typeof value.species !== "string" || !Object.hasOwn(SOURCE_DB.monsters, value.species) ||
+        !Number.isSafeInteger(value.level) || (value.level as number) <= 0 ||
+        typeof value.experienceModifier !== "number" || !Number.isFinite(value.experienceModifier) ||
+        value.experienceModifier <= 0 || !Number.isSafeInteger(value.participants) ||
+        (value.participants as number) <= 0 || (value.participants as number) > 6) {
+      errors.push(`${label} has invalid battle reward fields`);
+      return null;
+    }
+    const row = SOURCE_DB.encounters[value.area]!.monsters.find((candidate) =>
+      candidate.monster === value.species && (value.level as number) >= candidate.level[0] &&
+      (value.level as number) <= candidate.level[1] &&
+      candidate.experienceModifier === value.experienceModifier
+    );
+    if (!row) {
+      errors.push(`${label} does not match a real encounter row`);
+      return null;
+    }
+    return calculateDefeatExperience(
+      RULES_DB,
+      {
+        level: value.level as number,
+        totalExperience: levelFloor(value.level as number),
+        experienceModifier: value.experienceModifier,
+      },
+      { level: snapshot.level, acquisition: "captured" },
+      value.participants as number,
+    );
+  }
+  errors.push(`${label} has an unknown source or fields`);
+  return null;
+}
+
+function rebuildTeam(records: unknown, rulesValue: unknown, compareClaims = true): RebuiltTeam {
   const errors: string[] = [];
   const rules = normalizeRules(rulesValue, errors);
   if (!Array.isArray(records)) {
@@ -346,10 +583,10 @@ function rebuildTeam(records: unknown, rulesValue: unknown): RebuiltTeam {
   const snapshots: SpawnedMonsterSnapshot[] = [];
   for (const [recordIndex, rawRecord] of records.entries()) {
     const prefix = `team[${recordIndex}]`;
-    if (!isRecord(rawRecord) || !exactObject(rawRecord, ["species", "level", "moves", "provenance"], [
+    if (!isRecord(rawRecord) || !exactObject(rawRecord, ["species", "level", "moves", "experience", "provenance"], [
       "species", "level", "moves", "provenance",
     ])) {
-      errors.push(`${prefix} must contain only species, level, moves, and provenance`);
+      errors.push(`${prefix} must contain only species, level, moves, optional experience, and provenance`);
       continue;
     }
     if (typeof rawRecord.species !== "string" || !Object.hasOwn(SOURCE_DB.monsters, rawRecord.species)) {
@@ -372,7 +609,7 @@ function rebuildTeam(records: unknown, rulesValue: unknown): RebuiltTeam {
     }
     const first = rawRecord.provenance[0];
     if (!isRecord(first) || first.type !== "acquire" || !exactObject(first,
-      ["seq", "type", "seed", "species", "level"], ["seq", "type", "seed", "species", "level"])) {
+      ["seq", "type", "seed", "species", "level", "origin"], ["seq", "type", "seed", "species", "level"])) {
       errors.push(`${prefix}.provenance[0] must be an acquire event`);
       continue;
     }
@@ -399,7 +636,22 @@ function rebuildTeam(records: unknown, rulesValue: unknown): RebuiltTeam {
       first.level as number,
       { iid: `arena-team-${first.seq}`, experienceModifier: 0, moneyModifier: 0 },
     );
+    const origin = first.origin === undefined
+      ? null
+      : expeditionOrigin(
+        first.origin,
+        rawRecord.species,
+        first.level as number,
+        `${prefix}.provenance[0].origin`,
+        errors,
+      );
     let previousSeq = first.seq as number;
+    let previousStep = origin?.step ?? 0;
+    let expectedAudits: Array<
+      | { type: "level"; level: number; step: number }
+      | { type: "learn"; move: string; forget?: string; step: number }
+    > = [];
+    let pendingExperienceItem: { item: string; step: number } | null = null;
     for (let eventIndex = 1; eventIndex < rawRecord.provenance.length; eventIndex++) {
       const rawEvent = rawRecord.provenance[eventIndex];
       const label = `${prefix}.provenance[${eventIndex}]`;
@@ -411,34 +663,144 @@ function rebuildTeam(records: unknown, rulesValue: unknown): RebuiltTeam {
       }
       previousSeq = rawEvent.seq as number;
       sequences.add(previousSeq);
-      if (rawEvent.type === "level" && exactObject(rawEvent, ["seq", "type", "level"], ["seq", "type", "level"])) {
+
+      const eventStep = rawEvent.step;
+      if (origin) {
+        if (!validStep(eventStep) || (eventStep as number) < previousStep) {
+          errors.push(`${label}.step must be a nondecreasing expedition step`);
+          continue;
+        }
+        previousStep = eventStep as number;
+      } else if (eventStep !== undefined) {
+        errors.push(`${label}.step requires an expedition acquisition`);
+        continue;
+      }
+
+      if (expectedAudits.length > 0) {
+        const expected = expectedAudits.shift()!;
+        if (expected.type === "level" && rawEvent.type === "level" && exactObject(
+          rawEvent, ["seq", "type", "level", "step"], ["seq", "type", "level", "step"],
+        ) && rawEvent.level === expected.level && rawEvent.step === expected.step) {
+          continue;
+        }
+        if (expected.type === "learn" && rawEvent.type === "learn" && exactObject(
+          rawEvent, ["seq", "type", "move", "forget", "step"], ["seq", "type", "move", "step"],
+        ) && rawEvent.move === expected.move && rawEvent.forget === expected.forget &&
+            rawEvent.step === expected.step) {
+          continue;
+        }
+        errors.push(`${label} does not match the derived ${expected.type} audit`);
+        continue;
+      }
+      if (pendingExperienceItem && rawEvent.type !== "experience") {
+        errors.push(`${label} must settle experience item '${pendingExperienceItem.item}' first`);
+        continue;
+      }
+
+      if (rawEvent.type === "experience" && exactObject(
+        rawEvent, ["seq", "type", "step", "amount", "source"], ["seq", "type", "step", "amount", "source"],
+      )) {
+        if (!origin) {
+          errors.push(`${label} requires an expedition acquisition`);
+          continue;
+        }
+        const expectedAmount = experienceSourceAmount(snapshot, rawEvent.source, `${label}.source`, errors);
+        if (!Number.isSafeInteger(rawEvent.amount) || (rawEvent.amount as number) <= 0 ||
+            expectedAmount === null || rawEvent.amount !== expectedAmount) {
+          errors.push(`${label}.amount does not match its real game-data source`);
+          continue;
+        }
+        if (pendingExperienceItem) {
+          const source = isRecord(rawEvent.source) ? rawEvent.source : {};
+          if (source.kind !== "item" || source.item !== pendingExperienceItem.item ||
+              rawEvent.step !== pendingExperienceItem.step) {
+            errors.push(`${label} does not settle the preceding experience item`);
+            continue;
+          }
+          pendingExperienceItem = null;
+        } else if (isRecord(rawEvent.source) && rawEvent.source.kind === "item") {
+          errors.push(`${label} has no preceding item consumption`);
+          continue;
+        }
+        try {
+          const progression = applyExperience(snapshot, rawEvent.amount as number, rules.levelCap);
+          expectedAudits = [
+            ...progression.levels.map((level) => ({
+              type: "level" as const,
+              level,
+              step: rawEvent.step as number,
+            })),
+            ...progression.learns.map((learn) => ({
+              type: "learn" as const,
+              ...learn,
+              step: rawEvent.step as number,
+            })),
+          ];
+        } catch (error) {
+          errors.push(`${label}: ${error instanceof Error ? error.message : String(error)}`);
+        }
+      } else if (rawEvent.type === "level" && exactObject(
+        rawEvent, ["seq", "type", "level"], ["seq", "type", "level"],
+      )) {
+        if (origin) {
+          errors.push(`${label} is not caused by a preceding experience event`);
+          continue;
+        }
         if (!Number.isSafeInteger(rawEvent.level) || rawEvent.level !== snapshot.level + 1 ||
             (rawEvent.level as number) > rules.levelCap) {
           errors.push(`${label} must advance exactly one level without exceeding levelCap`);
-        } else recalculate(snapshot, rawEvent.level as number);
+        } else recalculate(snapshot, rawEvent.level as number, true);
       } else if (rawEvent.type === "learn" && exactObject(
         rawEvent, ["seq", "type", "move", "forget"], ["seq", "type", "move"],
       )) {
+        if (origin) {
+          errors.push(`${label} is not caused by a preceding progression event`);
+          continue;
+        }
         if (typeof rawEvent.move !== "string" || !moveIsLevelEligible(snapshot, rawEvent.move)) {
           errors.push(`${label} move is not level-eligible for this species`);
         } else learnMove(snapshot, rawEvent.move, rawEvent.forget, label, errors);
       } else if (rawEvent.type === "item" && exactObject(
-        rawEvent, ["seq", "type", "item", "forget"], ["seq", "type", "item"],
+        rawEvent, ["seq", "type", "item", "forget", "step"],
+        origin ? ["seq", "type", "item", "step"] : ["seq", "type", "item"],
       )) {
-        applyItem(snapshot, rawEvent.item, rawEvent.forget, rules, label, errors);
+        const applied = applyItem(snapshot, rawEvent.item, rawEvent.forget, rules, label, errors, origin !== null);
+        if (origin) {
+          expectedAudits = applied.learns.map((learn) => ({
+            type: "learn" as const,
+            ...learn,
+            step: rawEvent.step as number,
+          }));
+          if (applied.experienceItem) {
+            pendingExperienceItem = { item: applied.experienceItem, step: rawEvent.step as number };
+          }
+        }
       } else {
         errors.push(`${label} has an unknown type or fields`);
       }
+    }
+    if (expectedAudits.length > 0) {
+      errors.push(`${prefix}.provenance is missing ${expectedAudits.length} derived progression audit(s)`);
+    }
+    if (pendingExperienceItem) {
+      errors.push(`${prefix}.provenance does not settle experience item '${pendingExperienceItem.item}'`);
     }
     if (rules.bannedSpecies.has(snapshot.slug)) errors.push(`${prefix} uses banned species '${snapshot.slug}'`);
     for (const move of snapshot.moves) {
       if (rules.bannedMoves.has(move)) errors.push(`${prefix} uses banned move '${move}'`);
     }
-    if (rawRecord.level !== snapshot.level) {
+    if (compareClaims && rawRecord.level !== snapshot.level) {
       errors.push(`${prefix}.level does not match the provenance-derived level ${snapshot.level}`);
     }
-    if (JSON.stringify(rawRecord.moves) !== JSON.stringify(snapshot.moves)) {
+    if (compareClaims && JSON.stringify(rawRecord.moves) !== JSON.stringify(snapshot.moves)) {
       errors.push(`${prefix}.moves do not match the provenance-derived move list`);
+    }
+    if (compareClaims && origin && (!Number.isSafeInteger(rawRecord.experience) ||
+        rawRecord.experience !== snapshot.totalExperience)) {
+      errors.push(`${prefix}.experience does not match the provenance-derived total ${snapshot.totalExperience}`);
+    } else if (compareClaims && rawRecord.experience !== undefined &&
+        rawRecord.experience !== snapshot.totalExperience) {
+      errors.push(`${prefix}.experience does not match the provenance-derived total ${snapshot.totalExperience}`);
     }
     if (rules.uniformLevel !== null) recalculate(snapshot, rules.uniformLevel);
     snapshots.push(snapshot);
@@ -459,6 +821,40 @@ export function validateTeamRules(rules: unknown): ArenaTeamValidation {
   const errors: string[] = [];
   normalizeRules(rules, errors);
   return errors.length === 0 ? { ok: true, errors: [] } : { ok: false, errors };
+}
+
+/** Materialize the caller-visible claims from a validated provenance log.
+ * Expedition reducers use this after appending authoritative events; external
+ * callers should still use validateTeam on records loaded from their own
+ * authenticated storage. */
+export function arenaTeamRecordFromProvenance(
+  species: string,
+  provenance: ArenaProvenanceEvent[],
+  rules: ArenaTeamRules = {},
+): ArenaTeamRecord {
+  const rebuilt = rebuildTeam([{
+    species,
+    level: 1,
+    moves: [],
+    experience: 0,
+    provenance: clone(provenance),
+  }], {
+    ...rules,
+    minSize: 1,
+    maxSize: 1,
+    uniformLevel: null,
+  }, false);
+  if (rebuilt.errors.length > 0 || rebuilt.snapshots.length !== 1) {
+    throw new Error(`arena provenance rejected: ${rebuilt.errors.join("; ")}`);
+  }
+  const snapshot = rebuilt.snapshots[0]!;
+  return {
+    species: snapshot.slug,
+    level: snapshot.level,
+    moves: [...snapshot.moves],
+    experience: snapshot.totalExperience,
+    provenance: clone(provenance),
+  };
 }
 
 /** Internal construction seam used by createArenaBattle after the same full

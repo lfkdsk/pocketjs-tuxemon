@@ -13,7 +13,11 @@ import {
   validateTeam,
   type ArenaTeamRecord,
 } from "../battle/arena.ts";
-import { buildValidatedArenaTeam } from "../battle/arena-team.ts";
+import {
+  arenaTeamRecordFromProvenance,
+  buildValidatedArenaTeam,
+  type ArenaProvenanceEvent,
+} from "../battle/arena-team.ts";
 
 const BATTLE_SEED = "0123456789abcdef".repeat(4);
 const ACQUIRE_SEED = "fedcba9876543210".repeat(4);
@@ -38,6 +42,59 @@ function clone<T>(value: T): T {
 }
 
 describe("Arena persistent team validation", () => {
+  test("reconstructs expedition XP, derived levels and moves without losing partial experience", () => {
+    const provenance: ArenaProvenanceEvent[] = [
+      {
+        seq: 1,
+        type: "acquire",
+        seed: ACQUIRE_SEED,
+        species: "rockitten",
+        level: 1,
+        origin: {
+          kind: "expedition",
+          area: "spyder_route1",
+          step: 0,
+          capture: { result: "starter" },
+        },
+      },
+      { seq: 2, type: "item", item: "tea", step: 1 },
+      { seq: 3, type: "experience", step: 1, amount: 500, source: { kind: "item", item: "tea" } },
+      ...Array.from({ length: 6 }, (_, index): ArenaProvenanceEvent => ({
+        seq: index + 4,
+        type: "level",
+        level: index + 2,
+        step: 1,
+      })),
+      { seq: 10, type: "learn", move: "mudslide", step: 1 },
+      { seq: 11, type: "learn", move: "assault", step: 1 },
+      { seq: 12, type: "item", item: "raise_melee", step: 2 },
+    ];
+    const record = arenaTeamRecordFromProvenance("rockitten", provenance, { levelCap: 20 });
+    expect(record).toMatchObject({
+      level: 7,
+      experience: 501,
+      moves: ["ram", "boulder", "mudslide", "assault"],
+    });
+    expect(validateTeam([record], { levelCap: 20 })).toEqual({ ok: true, errors: [] });
+    const snapshot = buildValidatedArenaTeam([record], { levelCap: 20 })[0]!;
+    expect(snapshot.totalExperience).toBe(501);
+    expect(snapshot.trainingPoints?.melee).toBe(50);
+
+    const changedXp = clone(record);
+    const xp = changedXp.provenance[2];
+    if (xp?.type !== "experience") throw new Error("experience fixture missing");
+    xp.amount++;
+    expect(validateTeam([changedXp], { levelCap: 20 }).ok).toBe(false);
+
+    const missingAudit = clone(record);
+    missingAudit.provenance.splice(4, 1);
+    expect(validateTeam([missingAudit], { levelCap: 20 }).ok).toBe(false);
+
+    const changedClaim = clone(record);
+    changedClaim.experience!++;
+    expect(validateTeam([changedClaim], { levelCap: 20 }).ok).toBe(false);
+  });
+
   test("rebuilds a valid team from provenance and round-trips it through the battle tape", () => {
     const team = [rockitten()];
     expect(validateTeam(team)).toEqual({ ok: true, errors: [] });
