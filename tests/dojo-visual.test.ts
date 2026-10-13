@@ -109,12 +109,14 @@ const EXPECTED: Record<DojoLang, Record<DojoVisualCase, string[]>> = {
     learned: ["Rockitten learned technique Ram!"],
     devolve: ["Return to which form?", "Aardorn"],
     taste: ["Aardart's Cold Taste changed from Dry to Mild!"],
+    pending: ["Forget which technique?", "Frighten", "Buzz", "Blade", "Lineage"],
   },
   zh_CN: {
     forget: ["要遗忘哪个招式？", "岩石护罩", "泥石流", "突击", "霹雳弹"],
     learned: ["小岩猫 学会了招式 猛撞！"],
     devolve: ["要退回到哪种形态？", "阿尔多恩"],
     taste: ["阿尔达特的冷味从干涩变成了温和！"],
+    pending: ["要遗忘哪个招式？", "恐吓", "嗡嗡", "叶之刃", "血统"],
   },
 };
 
@@ -152,6 +154,28 @@ describe("Spyder Dojo production screens", () => {
                 y1: capture.height - 118,
               }, light)).toBeGreaterThanOrEqual(120);
             }
+          } else if (visualCase === "pending") {
+            // The first move has scrolled away: the first visible old move is
+            // still white while the fifth/newest move is selected in yellow.
+            // Chinese needs a lower count because each label has two glyphs.
+            expect(count(capture, {
+              x0: capture.width - 255,
+              y0: capture.height - 175,
+              x1: capture.width - 190,
+              y1: capture.height - 162,
+            }, light)).toBeGreaterThanOrEqual(lang === "zh_CN" ? 40 : 100);
+            expect(count(capture, {
+              x0: capture.width - 255,
+              y0: capture.height - 132,
+              x1: capture.width - 190,
+              y1: capture.height - 122,
+            }, yellow)).toBeGreaterThanOrEqual(lang === "zh_CN" ? 25 : 60);
+            expect(capture.modal).toMatchObject({
+              kind: "choices",
+              index: 4,
+              cancellable: false,
+              keys: ["bullet", "frighten", "buzz", "blade", "lineage"],
+            });
           } else {
             // Measure only the first text row (not the map or box chrome),
             // prove its ending word/glyph is inked, and prove it did not wrap.

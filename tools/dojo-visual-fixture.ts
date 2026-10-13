@@ -1,8 +1,7 @@
-// Production-bundle fixture for the Spyder Dojo services. A real snapshot is
-// created beside a Dojo NPC (party, money and the "already introduced" flag),
-// restored through the shipped boot overlay in English or Chinese, and the
-// imported talk events are driven with the controller until the selection
-// menu or the result box is on screen.
+// Production-bundle fixture for the Spyder Dojo services and the campaign's
+// post-evolution pending-move menu. A real snapshot is restored through the
+// shipped boot overlay in English or Chinese, then imported events are driven
+// with the controller until the selection menu or result box is on screen.
 
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
@@ -41,8 +40,9 @@ export const DOJO_VISUAL_VIEWPORTS = [
 export const DOJO_VISUAL_LANGS = ["en_US", "zh_CN"] as const;
 export type DojoLang = typeof DOJO_VISUAL_LANGS[number];
 /** forget: Xiang's forget menu; learned: Xiang's result box; devolve: a
- *  student's form menu; taste: Zhu's taste report. */
-export const DOJO_VISUAL_CASES = ["forget", "learned", "devolve", "taste"] as const;
+ *  student's form menu; taste: Zhu's taste report; pending: the real global
+ *  Check Max Moves event after an evolution appends a fifth move. */
+export const DOJO_VISUAL_CASES = ["forget", "learned", "devolve", "taste", "pending"] as const;
 export type DojoVisualCase = typeof DOJO_VISUAL_CASES[number];
 
 export function dojoGoldenFile(
@@ -58,31 +58,45 @@ function code(name: string, value: string): number {
   return (TUXEMON_VARIABLE_ENUMS[name] as readonly string[]).indexOf(value) + 1;
 }
 
-const NPC: Record<DojoVisualCase, { x: number; y: number; flag?: string }> = {
-  forget: { x: 21, y: 3, flag: "xiangfirsttime" },
-  learned: { x: 21, y: 3, flag: "xiangfirsttime" },
-  devolve: { x: 4, y: 6 },
-  taste: { x: 16, y: 3, flag: "zhufirsttime" },
+const SETUP: Record<DojoVisualCase, { map: string; x: number; y: number; flag?: string }> = {
+  forget: { map: "spyder_dojo1", x: 21, y: 3, flag: "xiangfirsttime" },
+  learned: { map: "spyder_dojo1", x: 21, y: 3, flag: "xiangfirsttime" },
+  devolve: { map: "spyder_dojo1", x: 4, y: 6 },
+  taste: { map: "spyder_dojo1", x: 16, y: 3, flag: "zhufirsttime" },
+  // The imported transfer target is a save-restorable floor tile. The map's
+  // decorative border at (1,1) can boot directly, but restore correctly
+  // rejects it as non-standable.
+  pending: { map: "spyder_greenwash_greenhouse", x: 1, y: 7 },
 };
 
 function bootSnapshot(lang: DojoLang, visualCase: DojoVisualCase): string {
   const file = lang === "zh_CN" ? "dist/project.zh_CN.json" : "dist/project.json";
   const project = JSON.parse(readFileSync(join(ROOT, file), "utf8")) as Project;
-  const npc = NPC[visualCase];
-  project.start = { map: "spyder_dojo1", x: npc.x, y: npc.y, dir: "up" } as Project["start"];
+  const setup = SETUP[visualCase];
+  project.start = { map: setup.map, x: setup.x, y: setup.y, dir: "up" } as Project["start"];
   const options = mainlineSessionOptions(project, undefined, lang === "zh_CN" ? TUXEMON_SESSION_OPTIONS_ZH : {});
   const session = createSession(project, 60, options);
   const rules = battleDbToTuxemonBattleDb(TUXEMON_BATTLE_DB);
-  const party = visualCase === "devolve"
+  const party = visualCase === "pending"
+    ? [spawnMonster(TUXEMON_BATTLE_DB, rules, { rng: 71, rngDraws: 0 }, "puparmor", 16, { iid: "pending-visual" })]
+    : visualCase === "devolve"
     ? [spawnMonster(TUXEMON_BATTLE_DB, rules, { rng: 11, rngDraws: 0 }, "aardart", 20, { iid: "dojo-visual" })]
     : visualCase === "taste"
       ? [spawnMonster(TUXEMON_BATTLE_DB, rules, { rng: 5, rngDraws: 0 }, "aardart", 20, { iid: "dojo-visual" })]
       : [spawnMonster(TUXEMON_BATTLE_DB, rules, { rng: 11, rngDraws: 0 }, "rockitten", 20, { iid: "dojo-visual" })];
-  const variables = npc.flag ? { [`v.${npc.flag}`]: code(npc.flag, "yes") } : {};
+  if (visualCase === "pending") {
+    party[0]!.moves = ["bullet", "frighten", "buzz", "blade", "lineage"];
+  }
+  const variables = setup.flag ? { [`v.${setup.flag}`]: code(setup.flag, "yes") } : {};
   const ext = packTuxemonExtensionState({ ...initialTuxemonExtensionState(), party });
   let state = startSession(project, session, createSwitchState({ variables }), ext);
   state.sw.gold = 1000;
-  for (let frame = 0; frame < 60; frame++) state = stepSession(session, state, { buttons: 0 });
+  // Take this snapshot before the first reducer tick so the production
+  // bundle must run the real imported parallel page after restoring it,
+  // rather than merely restoring an already-open move menu.
+  if (visualCase !== "pending") {
+    for (let frame = 0; frame < 60; frame++) state = stepSession(session, state, { buttons: 0 });
+  }
   const snapshot = createAutosaveSessionSnapshot(session, state, 0);
   if (!snapshot) throw new Error("dojo visual fixture: could not create the resumable Dojo snapshot");
   return JSON.stringify(snapshot);
@@ -168,7 +182,9 @@ export async function captureDojo(
       __pocketTuxemonBootSnapshot: bootSnapshot(lang, visualCase),
     }, undefined, viewport);
     pump(world, 4);
-    if (live().mapId !== "spyder_dojo1") throw new Error("dojo visual fixture: boot snapshot did not restore in the Dojo");
+    if (live().mapId !== SETUP[visualCase].map) {
+      throw new Error("dojo visual fixture: boot snapshot did not restore on the expected map");
+    }
     const forgetPrompt = lang === "zh_CN" ? "要遗忘哪个招式？" : "Forget which technique?";
     const formPrompt = lang === "zh_CN" ? "要退回到哪种形态？" : "Return to which form?";
     switch (visualCase) {
@@ -184,6 +200,14 @@ export async function captureDojo(
         break;
       case "taste":
         drive(world, [0, 0, 0], isText((text) => text.includes(lang === "zh_CN" ? "冷味从" : "Cold Taste changed")));
+        break;
+      case "pending":
+        drive(world, [], isChoice((modal) => modal.prompt === forgetPrompt && modal.cancellable === false));
+        // Five moves use the production four-row scrolling window. Put the
+        // newest move on the selected bottom row so the screenshot proves
+        // both dynamic scrolling and the decline-to-learn option are visible.
+        for (let row = 0; row < 4; row++) press(world, BTN_DOWN);
+        pump(world, 10);
         break;
     }
     return {

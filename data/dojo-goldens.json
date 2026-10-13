@@ -74,6 +74,24 @@
       "pngSha256": "a27e83d385c3fd9a020b8f963438fb3b18d78e3d1402b2b04eab2984de900008"
     },
     {
+      "lang": "en_US",
+      "case": "pending",
+      "width": 480,
+      "height": 272,
+      "file": "dojo-pending.480x272.png",
+      "rgbaFnv1a": "98ea5728",
+      "pngSha256": "4bcd343cf29e158f93481d912c2bf7508740c842d919fc8973e829fb7e61a4d8"
+    },
+    {
+      "lang": "en_US",
+      "case": "pending",
+      "width": 960,
+      "height": 544,
+      "file": "dojo-pending.960x544.png",
+      "rgbaFnv1a": "95128e12",
+      "pngSha256": "8385fb3c26f8358326d778f3612b79d706f9d5d735c41b6b50e9c4e58c7a2f4a"
+    },
+    {
       "lang": "zh_CN",
       "case": "forget",
       "width": 480,
@@ -144,6 +162,24 @@
       "file": "dojo-taste.zh.960x544.png",
       "rgbaFnv1a": "4d3f3971",
       "pngSha256": "e18cdef4a9db4fd38168f80c572d9ef8f8be0bb3b6a9b4fdbdf922ff9b2a93e1"
+    },
+    {
+      "lang": "zh_CN",
+      "case": "pending",
+      "width": 480,
+      "height": 272,
+      "file": "dojo-pending.zh.480x272.png",
+      "rgbaFnv1a": "a896fb4a",
+      "pngSha256": "ebd69a2ffb8a671d4409fee5d73729ce9989589fce37ceaa36ab39d2ba9c75a8"
+    },
+    {
+      "lang": "zh_CN",
+      "case": "pending",
+      "width": 960,
+      "height": 544,
+      "file": "dojo-pending.zh.960x544.png",
+      "rgbaFnv1a": "0d8f63f8",
+      "pngSha256": "97bbcfdbce7d3b8b5c0e4eff79af7ff22404ff46c408e23733f76d9c5610fdac"
     }
   ]
 }
