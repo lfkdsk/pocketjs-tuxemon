@@ -491,6 +491,24 @@ describe("public expedition journal v1", () => {
     }
   }, 30_000);
 
+  test("accepts forged but schema-consistent observations without applying game rules", () => {
+    const expedition = createExpedition({
+      seed: SEED,
+      rules: { cycle: "ranked", stepBudget: 2 },
+    });
+    const initial = observeExpedition(expedition);
+    const journal = startExpeditionJournal(publicRules(expedition), initial);
+    const action = legalExpeditionActions(expedition).find((candidate) => candidate.type === "travel")!;
+    const actual = observeExpedition(apply(expedition, action));
+    const forged = clone(actual);
+    forged.team[0]!.level++;
+
+    const forgedJournal = appendExpeditionJournal(journal, action, forged);
+    const checked = validateExpeditionJournal(forgedJournal);
+    expect(forged.team[0]!.level).toBe(actual.team[0]!.level + 1);
+    expect(checked.ok, checked.ok ? undefined : checked.error).toBe(true);
+  });
+
   test("identical public continuation prefixes neither expose nor determine a fresh seed", () => {
     let previous = createExpedition({
       seed: SEED,
@@ -502,26 +520,48 @@ describe("public expedition journal v1", () => {
       seed,
       rules: { cycle: "persistent", stepBudget: 3, continuation: previous },
     });
-    let left = continuation("1".padStart(64, "0"));
-    const leftPrefix = startExpeditionJournal(publicRules(left), observeExpedition(left));
-    let right: Expedition | undefined;
+    const leftStart = continuation("1".padStart(64, "0"));
+    const leftInitial = observeExpedition(leftStart);
+    const leftPrefix = startExpeditionJournal(publicRules(leftStart), leftInitial);
+    const leftAfter = apply(leftStart,
+      legalExpeditionActions(leftStart).find((action) => action.type === "explore")!);
+    let rightStart: Expedition | undefined;
+    let rightAfter: Expedition | undefined;
     for (let candidate = 2; candidate < 100; candidate++) {
       const possible = continuation(candidate.toString(16).padStart(64, "0"));
-      const leftAfter = apply(left, legalExpeditionActions(left).find((action) => action.type === "explore")!);
-      const rightAfter = apply(possible,
+      const possibleAfter = apply(possible,
         legalExpeditionActions(possible).find((action) => action.type === "explore")!);
       const leftEncounter = observeExpedition(leftAfter).encounter;
-      const rightEncounter = observeExpedition(rightAfter).encounter;
+      const rightEncounter = observeExpedition(possibleAfter).encounter;
       if (canonicalJson(leftEncounter) !== canonicalJson(rightEncounter)) {
-        left = leftAfter;
-        right = rightAfter;
+        rightStart = possible;
+        rightAfter = possibleAfter;
         break;
       }
     }
-    if (!right) throw new Error("expected two fresh seeds to produce different encounters");
-    const rightPrefix = startExpeditionJournal(publicRules(right), leftPrefix.initialObservation);
+    if (!rightStart || !rightAfter) throw new Error("expected two fresh seeds to produce different encounters");
+    const rightInitial = observeExpedition(rightStart);
+    expect(rightStart.seed).not.toBe(leftStart.seed);
+    expect(rightInitial.v).toBe(leftInitial.v);
+    expect(rightInitial.cycle).toBe(leftInitial.cycle);
+    expect(rightInitial.run).toBe(leftInitial.run);
+    expect(rightInitial.status).toBe(leftInitial.status);
+    expect(rightInitial.area).toEqual(leftInitial.area);
+    expect(rightInitial.destinations).toEqual(leftInitial.destinations);
+    expect(rightInitial.team).toEqual(leftInitial.team);
+    expect(rightInitial.backpack).toEqual(leftInitial.backpack);
+    expect(rightInitial.money).toBe(leftInitial.money);
+    expect(rightInitial.remainingSteps).toBe(leftInitial.remainingSteps);
+    expect(rightInitial.nextAction).toBe(leftInitial.nextAction);
+    expect(rightInitial.encounter).toEqual(leftInitial.encounter);
+    expect(rightInitial.shop).toEqual(leftInitial.shop);
+    expect(rightInitial.lastTransition).toEqual(leftInitial.lastTransition);
+    expect(rightInitial.result).toEqual(leftInitial.result);
+
+    const rightPrefix = startExpeditionJournal(publicRules(rightStart), rightInitial);
     expect(canonicalJson(rightPrefix)).toBe(canonicalJson(leftPrefix));
-    expect(canonicalJson(observeExpedition(right).encounter)).not.toBe(canonicalJson(observeExpedition(left).encounter));
+    expect(canonicalJson(observeExpedition(rightAfter).encounter))
+      .not.toBe(canonicalJson(observeExpedition(leftAfter).encounter));
     expect(allKeys(leftPrefix).has("seed")).toBe(false);
   });
 });

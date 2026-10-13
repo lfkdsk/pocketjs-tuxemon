@@ -525,7 +525,11 @@ Arena's reward result supplies the complete damage-contributor divisor and
 each living winner's real experience, training points and bond gain; zero-XP
 max-level rewards are retained. Use
 `validateTeam(team, { requiredKind: "expedition" })` to rebuild the result
-before it can enter Arena.
+before it can enter Arena. The configured level cap applies to both persistent
+party records and generated wild opponents because both enter the same
+validated Arena battle. An area whose encounter rows all start above that cap
+still permits travel and voluntary completion but does not advertise an
+exploration action it cannot resolve.
 
 A caught monster keeps the generated individual, capture-time HP, actual
 device, captured acquisition type, capture-time persistent condition and the
@@ -577,19 +581,26 @@ observation in full, canonical sparse changes thereafter, and a full checkpoint
 every 64 actions. `validateExpeditionJournal` strictly rejects unknown fields,
 versions, gaps, non-canonical deltas and action/observation sequence mismatches;
 on success it returns every entry with its complete observation reconstructed.
-`startExpeditionJournal` and `appendExpeditionJournal` create immutable encoded
-journals. The hard limits are 10,000 entries and 64 MiB of encoded UTF-8 JSON.
+It validates only the bounded presentation format, linkage, delta
+reconstruction and size limits; it does not replay or enforce game rules. A
+forged but internally consistent observation—for example, a monster level that
+rises without a legal reward—can pass format validation. Journal credibility
+therefore comes from the service that publishes it, not from the format
+validator. `startExpeditionJournal` and `appendExpeditionJournal` create
+immutable encoded journals. The hard limits are 10,000 entries and 64 MiB of
+encoded UTF-8 JSON.
 
-The journal contains only accepted public actions and fields already returned
-by `observeExpedition`. In particular it has no seed, RNG state, provenance,
-private ledger, future encounter or hidden battle reserve. Resolved captures
-add a bounded public receipt (device, monster, shake count and outcome), while
-resolved battles add the public post-turn Arena observations needed to show
-moves and HP changes. A journal is therefore safe to publish as a spectator
-record, but it is not an authoritative save or proof that a service accepted
-the actions. Persistent continuation still requires the service's private
-ended state and a fresh seed; future encounters come from that new seed, not
-from the published journal.
+A journal emitted from accepted service transitions contains only public
+actions and fields already returned by `observeExpedition`. In particular it
+has no seed, RNG state, provenance, private ledger, future encounter or hidden
+battle reserve. Resolved captures add a bounded public receipt (device,
+monster, shake count and outcome), while resolved battles add the public
+post-turn Arena observations needed to show moves and HP changes. Such a
+journal is safe to publish as a spectator record, but it is not an
+authoritative save or proof that a service accepted the actions. Persistent
+continuation still requires the service's private ended state and a fresh
+seed; future encounters come from that new seed, not from the published
+journal.
 
 The end-to-end CLI chooses a deterministic random legal policy. When its first
 cycle is defeated, it derives a fresh seed and runs a second persistent cycle,
