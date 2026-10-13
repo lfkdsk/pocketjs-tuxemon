@@ -15,6 +15,11 @@ import {
 } from "../battle/arena.ts";
 import { nextRandom, type RngState } from "../battle/core.ts";
 import {
+  appendExpeditionJournal,
+  startExpeditionJournal,
+  type ExpeditionJournal,
+} from "../battle/expedition-journal.ts";
+import {
   applyExpeditionAction,
   checkExpeditionConservation,
   createExpedition,
@@ -28,6 +33,9 @@ import { utf8Encode } from "../vendor/pocket-rpgkit/src/engine/save.ts";
 const DEFAULT_SEED = "0123456789abcdef".repeat(4);
 const seedFlag = process.argv.find((argument) => argument.startsWith("--seed="));
 const seed = seedFlag?.slice("--seed=".length) ?? DEFAULT_SEED;
+const journalOutFlag = process.argv.find((argument) => argument.startsWith("--journal-out="));
+const journalOut = journalOutFlag?.slice("--journal-out=".length);
+if (journalOutFlag && !journalOut) throw new Error("expedition demo: --journal-out requires a path");
 
 function randomStream(domain: string): RngState {
   const digest = sha256Bytes(utf8Encode(
@@ -65,10 +73,17 @@ const expeditionCycles: Array<{
   run: number;
   actions: ExpeditionAction[];
   observation: ReturnType<typeof observeExpedition>;
+  journal: ExpeditionJournal;
 }> = [];
 
 for (let cycle = 0; cycle < 2; cycle++) {
   const cycleActions: ExpeditionAction[] = [];
+  let journal = startExpeditionJournal({
+    cycle: expedition.rules.cycle,
+    stepBudget: expedition.rules.stepBudget,
+    levelCap: expedition.rules.levelCap,
+    startingArea: expedition.area,
+  }, observeExpedition(expedition));
   while (!expedition.ended) {
     const actions = legalExpeditionActions(expedition);
     const action = chooseExpeditionAction(actions, expeditionRandom);
@@ -77,11 +92,13 @@ for (let cycle = 0; cycle < 2; cycle++) {
     cycleActions.push(action);
     expeditionActions.push(action);
     expedition = applied.expedition;
+    journal = appendExpeditionJournal(journal, action, observeExpedition(expedition));
   }
   expeditionCycles.push({
     run: expedition.run,
     actions: cycleActions,
     observation: observeExpedition(expedition),
+    journal,
   });
   if (cycle > 0 || expedition.endReason !== "defeated") break;
 
@@ -138,6 +155,11 @@ while (!arenaIsOver(battle)) {
 
 const recording = arenaTape(battle);
 validateBattleTape(recording);
+if (journalOut) {
+  const journal = expeditionCycles.at(-1)?.journal;
+  if (!journal) throw new Error("expedition demo: no journal was produced");
+  await Bun.write(journalOut, `${JSON.stringify(journal, null, 2)}\n`);
+}
 console.log(JSON.stringify({
   format: "pocket-tuxemon/expedition-demo/v1",
   expedition: {

@@ -1,4 +1,6 @@
 import { describe, expect, test } from "bun:test";
+import { mkdirSync, readFileSync, rmSync } from "node:fs";
+import { join } from "node:path";
 
 import {
   isOver,
@@ -10,6 +12,8 @@ import {
   type ArenaResult,
   type ArenaTeamRecord,
 } from "../battle/arena.ts";
+import { validateExpeditionJournal, type ExpeditionJournal } from "../battle/expedition-journal.ts";
+import type { ExpeditionObservation } from "../battle/expedition.ts";
 
 const ROOT = new URL("..", import.meta.url).pathname;
 
@@ -19,7 +23,8 @@ interface DemoOutput {
     cycles: Array<{
       run: number;
       actions: unknown[];
-      observation: { status: string; result: { reason?: string } | null };
+      observation: ExpeditionObservation;
+      journal: ExpeditionJournal;
     }>;
     actions: unknown[];
     observation: { run: number; status: string; result: unknown };
@@ -32,13 +37,17 @@ interface DemoOutput {
   };
 }
 
-function run(seed?: string) {
+function run(seed?: string, journalOut?: string) {
   return Bun.spawnSync({
     cmd: [
       process.execPath,
       "run",
       "expedition:demo",
-      ...(seed === undefined ? [] : ["--", `--seed=${seed}`]),
+      ...(seed === undefined && journalOut === undefined ? [] : [
+        "--",
+        ...(seed === undefined ? [] : [`--seed=${seed}`]),
+        ...(journalOut === undefined ? [] : [`--journal-out=${journalOut}`]),
+      ]),
     ],
     cwd: ROOT,
     stdout: "pipe",
@@ -83,6 +92,14 @@ describe("expedition demo CLI", () => {
       observation: { status: "ended" },
     });
     expect(output.expedition.cycles[1]!.actions.length).toBeGreaterThan(0);
+    for (const cycle of output.expedition.cycles) {
+      const checkedJournal = validateExpeditionJournal(cycle.journal);
+      expect(checkedJournal.ok, checkedJournal.ok ? undefined : checkedJournal.error).toBe(true);
+      if (checkedJournal.ok) {
+        expect(checkedJournal.journal.entries).toHaveLength(cycle.actions.length);
+        expect(checkedJournal.journal.entries.at(-1)?.observation).toEqual(cycle.observation);
+      }
+    }
     expect(output.expedition.observation).toMatchObject({
       run: 2,
       status: "ended",
@@ -108,6 +125,24 @@ describe("expedition demo CLI", () => {
     expect(result(replayed)).toEqual(output.arena.result);
     expect(output.arena.stateHash).toMatch(/^[0-9a-f]{64}$/);
     expect(stateHash(replayed)).toBe(output.arena.stateHash);
+  }, 30_000);
+
+  test("writes the final run as a directly replayable journal file", () => {
+    const outputDir = join(ROOT, "dist", "test-expedition-demo-journal");
+    const outputPath = join(outputDir, "journal.json");
+    rmSync(outputDir, { recursive: true, force: true });
+    mkdirSync(outputDir, { recursive: true });
+    try {
+      const completed = run(undefined, outputPath);
+      expect(completed.exitCode, completed.stderr.toString()).toBe(0);
+      const document = JSON.parse(readFileSync(outputPath, "utf8"));
+      const checked = validateExpeditionJournal(document);
+      expect(checked.ok, checked.ok ? undefined : checked.error).toBe(true);
+      const stdout = JSON.parse(completed.stdout.toString()) as DemoOutput;
+      expect(document).toEqual(stdout.expedition.cycles.at(-1)!.journal);
+    } finally {
+      rmSync(outputDir, { recursive: true, force: true });
+    }
   }, 30_000);
 
   test("rejects an invalid seed without emitting a partial JSON document", () => {
