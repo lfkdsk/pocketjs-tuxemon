@@ -2,7 +2,7 @@
   "format": "pocket-tuxemon/gb6-mainline/v1",
   "worldTraversal": "seamless-v1",
   "hz": 60,
-  "frames": 115955,
+  "frames": 116107,
   "terminalMapFrame": 31,
   "map": "spyder_route3",
   "position": [
@@ -113816,6 +113816,54 @@
     0,
     8192,
     0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
     0,
     8192,
     0,
@@ -114320,6 +114368,110 @@
     8192,
     0,
     8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    8192,
+    0,
+    64,
     0,
     8192,
     0,
@@ -116977,7 +117129,7 @@
     },
     {
       "name": "wayfarer_inn2",
-      "frame": 113855,
+      "frame": 113903,
       "map": "spyder_wayfarer_inn2",
       "position": [
         5,
@@ -116986,7 +117138,7 @@
     },
     {
       "name": "wayfarer_inn1",
-      "frame": 114538,
+      "frame": 114690,
       "map": "spyder_wayfarer_inn1",
       "position": [
         11,
@@ -116995,7 +117147,7 @@
     },
     {
       "name": "route3",
-      "frame": 115106,
+      "frame": 115258,
       "map": "spyder_route3",
       "position": [
         2,
@@ -117004,7 +117156,7 @@
     },
     {
       "name": "wayfarer_inn1",
-      "frame": 115434,
+      "frame": 115586,
       "map": "spyder_wayfarer_inn1",
       "position": [
         11,
@@ -117013,7 +117165,7 @@
     },
     {
       "name": "wayfarer_inn2",
-      "frame": 115479,
+      "frame": 115631,
       "map": "spyder_wayfarer_inn2",
       "position": [
         9,
@@ -117022,7 +117174,7 @@
     },
     {
       "name": "wayfarer_inn1",
-      "frame": 115732,
+      "frame": 115884,
       "map": "spyder_wayfarer_inn1",
       "position": [
         3,
@@ -117031,7 +117183,7 @@
     },
     {
       "name": "route3",
-      "frame": 115914,
+      "frame": 116066,
       "map": "spyder_route3",
       "position": [
         4,
@@ -117040,7 +117192,7 @@
     },
     {
       "name": "route-3-end",
-      "frame": 115954,
+      "frame": 116106,
       "map": "spyder_route3",
       "position": [
         4,
@@ -125397,7 +125549,7 @@
           "level": 12
         }
       ],
-      "endFrame": 113806,
+      "endFrame": 113854,
       "turns": 2,
       "outcome": "won",
       "after": [
@@ -125442,7 +125594,7 @@
     {
       "opponent": "spyder_wayfarer1_bravo",
       "kind": "trainer",
-      "startFrame": 114047,
+      "startFrame": 114095,
       "before": [
         {
           "slug": "arthrobolt",
@@ -125491,14 +125643,14 @@
           "level": 12
         }
       ],
-      "endFrame": 114457,
-      "turns": 2,
+      "endFrame": 114609,
+      "turns": 3,
       "outcome": "won",
       "after": [
         {
           "slug": "arthrobolt",
           "level": 32,
-          "hp": 169,
+          "hp": 159,
           "maxHp": 169
         },
         {
@@ -125536,12 +125688,12 @@
     {
       "opponent": "spyder_wayfarer1_victor",
       "kind": "trainer",
-      "startFrame": 114577,
+      "startFrame": 114729,
       "before": [
         {
           "slug": "arthrobolt",
           "level": 32,
-          "hp": 169,
+          "hp": 159,
           "maxHp": 169
         },
         {
@@ -125581,14 +125733,14 @@
           "level": 14
         }
       ],
-      "endFrame": 115073,
+      "endFrame": 115225,
       "turns": 3,
       "outcome": "won",
       "after": [
         {
           "slug": "arthrobolt",
           "level": 32,
-          "hp": 154,
+          "hp": 144,
           "maxHp": 169
         },
         {
@@ -125626,12 +125778,12 @@
     {
       "opponent": "spyder_route3_qqq",
       "kind": "trainer",
-      "startFrame": 115137,
+      "startFrame": 115289,
       "before": [
         {
           "slug": "arthrobolt",
           "level": 32,
-          "hp": 154,
+          "hp": 144,
           "maxHp": 169
         },
         {
@@ -125671,14 +125823,14 @@
           "level": 16
         }
       ],
-      "endFrame": 115383,
+      "endFrame": 115535,
       "turns": 1,
       "outcome": "won",
       "after": [
         {
           "slug": "arthrobolt",
           "level": 33,
-          "hp": 158,
+          "hp": 148,
           "maxHp": 173
         },
         {
@@ -125723,6 +125875,6 @@
     "shaftscheme": 1,
     "zoolanderWon": true
   },
-  "terminalStateSha256": "d798436d562b725318008097901a65adfec8816db3a7582cca0c583d0f430290",
-  "tapeSha256": "0bc1a177e95bab4f1bd88596689b833940c28e3a48556088142c1151232becf7"
+  "terminalStateSha256": "748f84174b32011c4419588650a41d6c57c31c79d3f9e772fcc72b25c3bf9b80",
+  "tapeSha256": "0b7a167a2c25e56eff0944e54985922d316c654245c34764a460dd981098aeb6"
 }

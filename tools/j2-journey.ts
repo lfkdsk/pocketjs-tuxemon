@@ -320,6 +320,18 @@ export function runJ2Journey(): J2JourneyResult {
   driver.expect("Landrace opened the tunnel", numeric(driver.state, "v.scooplandrace") !== 0);
   enterFromEdge(driver, 11, 3, BTN_BITS.RIGHT, "spyder_timber_town");
 
+  // Landrace and the quarantine-floor trainers can leave the party too weak
+  // for the lower-tunnel gauntlet. Return to the real Timber Center before
+  // entering it; the nurse restores HP without clearing persistent plagues.
+  driver.goTo(8, 6);
+  driver.settle();
+  driver.expect("re-entered Timber Center", driver.state.mapId === "spyder_timber_center");
+  healAtCenter(driver, "Timber Center after Landrace");
+  driver.goTo(6, 9);
+  driver.goTo(6, 10);
+  driver.settle();
+  driver.expect("left Timber Center after Landrace", driver.state.mapId === "spyder_timber_town");
+
   enterFromEdge(driver, 14, 39, BTN_BITS.DOWN, "spyder_tunnel");
   enterFromEdge(driver, 12, 2, BTN_BITS.UP, "spyder_tunnel_below");
   // This stair checks DOWN inside its commands rather than in the page
@@ -363,6 +375,22 @@ export function runJ2Journey(): J2JourneyResult {
   driver.expect("left Candy Center", driver.state.mapId === "spyder_candy_town");
   // Looten's guard intentionally blocks the main door until after the win.
   // Follow the upstream alternate entrance through the eastern greenhouse.
+  enterFromEdge(driver, 30, 21, BTN_BITS.UP, "spyder_greenwash_greenhouse");
+  enterFromEdge(driver, 0, 7, BTN_BITS.LEFT, "spyder_greenwash");
+  enterFromEdge(driver, 2, 3, BTN_BITS.UP, "spyder_greenwash_level2");
+  enterFromEdge(driver, 2, 27, BTN_BITS.DOWN, "spyder_greenwash");
+  // The alternate route is itself a long trainer gauntlet. Heal after
+  // clearing it, then retrace the now-defeated route: the direct Greenwash
+  // door stays guarded until Looten loses, so it cannot be the return path.
+  enterFromEdge(driver, 5, 31, BTN_BITS.DOWN, "spyder_candy_town");
+  driver.goTo(14, 34);
+  driver.settle();
+  driver.expect("returned to Candy Center before Looten", driver.state.mapId === "spyder_candy_center");
+  healAtCenter(driver, "Candy Center before Looten");
+  driver.goTo(6, 9);
+  driver.goTo(6, 10);
+  driver.settle();
+  driver.expect("left Candy Center before Looten", driver.state.mapId === "spyder_candy_town");
   enterFromEdge(driver, 30, 21, BTN_BITS.UP, "spyder_greenwash_greenhouse");
   enterFromEdge(driver, 0, 7, BTN_BITS.LEFT, "spyder_greenwash");
   enterFromEdge(driver, 2, 3, BTN_BITS.UP, "spyder_greenwash_level2");
