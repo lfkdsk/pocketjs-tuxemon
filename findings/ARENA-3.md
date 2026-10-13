@@ -239,3 +239,144 @@ final rebase and the ordinary game terminal states did not change.
 subagent 使用：3 个 / 分别复核验收矩阵与 action 边界、做道具守恒变异、做来历校验变异 / 并行静态审查与隔离变异节省了时间
 
 PASS
+
+## Defeat-continuation and capture-rate follow-up
+
+The follow-up was tested at implementation commit `ef908c5f` against current
+main `4fcdfb64`. The review's blocking defeated-continuation deadlock is fixed,
+and captured monsters now retain the encounter row's experience-rate modifier.
+
+### Defeat recovery
+
+Tuxemon's faint teleport returns the player to the configured faint point and,
+when healing is requested, invokes both `set_monster_health` and
+`set_monster_status` (`tuxemon/event/actions/teleport_faint.py:60-85`). With no
+arguments those operations restore every party member to maximum HP and clear
+every status (`set_monster_health.py:47-53`,
+`set_monster_status.py:44-59`). That path contains no money or item charge.
+
+The expedition abstraction has areas but no tile-level faint point, so a
+defeated persistent continuation now keeps its current area, team, inventory,
+money, provenance and global sequence, while restoring every member to full HP
+and clearing persistent status. Voluntary and budget continuations still carry
+their actual HP and status. This gives the new run a valid non-terminal state
+without inventing a location or economic penalty (`battle/expedition.ts:513-566`).
+
+The regression drives a real level-one party through a losing battle, adds a
+persistent poison condition at the legal defeated boundary, continues, checks
+full recovery and all carried state, then proves both travel and voluntary end
+are accepted. It also proves that a wounded voluntary continuation is not
+healed (`tests/expedition.test.ts:412-477`). The default CLI now records the
+first defeated cycle and deterministically derives a fresh seed for a second
+cycle (`tools/expedition-demo.ts:75-104`); its observed result is run 1
+`defeated` after 29 actions, followed by an actionable run 2 ending by budget
+after 32 actions.
+
+### Captured-monster experience rate
+
+Upstream constructs the wild monster and assigns the selected encounter row's
+`exp_req_mod` (`tuxemon/event/actions/random_encounter.py:83-86`). Successful
+capture then moves that same monster object into the player's party without
+resetting the field (`tuxemon/core/effects/capture.py:76-92`), and subsequent
+experience is multiplied by the retained modifier
+(`tuxemon/monster/experience.py:150-166`). The imported Spyder encounter used
+by the focused test has a 3x modifier.
+
+New caught provenance therefore records the row's exact
+`experienceModifier`, validates it against a real species/level/area row, and
+reapplies it when reconstructing expedition battles
+(`battle/expedition.ts:1100-1129`, `1245-1279`;
+`battle/arena-team.ts:206-217`, `560-570`, `780-806`). The focused regression
+proves 3x reconstruction, Tea changing experience by 1,500 rather than 500,
+the next real battle applying 3x, and a forged 1x row being rejected
+(`tests/expedition.test.ts:223-321`). Records written before the additive field
+remain valid at their historical 1x rate rather than being silently
+reinterpreted from today's encounter table. Ordinary Arena custom teams remain
+explicitly 0x, so old replay semantics do not change
+(`tests/arena-team.test.ts:74-99`).
+
+### Regression and mutation evidence
+
+The five focused files pass 44 tests with 613 assertions and no failures. The
+fixed-seed corpus now consists of 700 ranked runs plus 100 three-run persistent
+lineages: 1,000 completed expeditions, exactly 200 continuations, at least one
+defeated continuation, conservation and provenance validation after every
+step, and digest
+`7d26eef5d9fef71152913af225acc5b9c3288c73cca7c4a049886cde184871bf`
+(`tests/expedition-random.test.ts:131-218`, `270-282`). The malformed-action
+corpus also completes 1,000 cases without throwing or changing authoritative
+bytes.
+
+Two mutations were made only in isolated worktrees and then removed:
+
+- Removing defeated recovery produced 3 failures and 10 passes: the focused
+  status/recovery assertion, default CLI continuation, and persistent random
+  corpus all detected the defect.
+- Forcing captured expedition monsters back to 1x produced 3 failures and 39
+  passes: the focused rebuild, exact capture snapshot, and random-corpus digest
+  all detected the defect.
+
+### Acceptance gates
+
+| Gate | Result |
+| --- | --- |
+| `bun run build`, `bun run build:wasm`, `bunx tsc --noEmit` | PASS, each exited 0 |
+| Two ordinary imports | PASS, no tracked diff after either run |
+| Isolated import determinism | PASS, 5,076 files, 68,792,835 bytes, SHA-256 `2754867f0f944b6a0aaee0e2c04fa2a958903efe2abc07e5822e74f0a8e814f8` |
+| `check:l10n`, `check:cjk` | PASS, 11/11 catalogs and all 2,643 declared CJK characters covered |
+| Five exact CI test shards | PASS, 54 + 12 + 22 + 709 + 660 tests, 0 failures, each command exited 0 |
+| Full `bun run test` body | 1,457 pass, 6 browser-conditioned skips, 0 fail, 258,452 assertions across 171 files; the wrapper retained a handle after printing the complete 460.41 s summary |
+| Browser-condition supplements | PASS, 9 + 6 tests, 0 fail; all six native conditional bodies executed, leaving zero unexecuted bodies |
+| Focused expedition/team/CLI suite | PASS, 44 tests, 613 assertions, 0 fail |
+| All 16 CI journey matrix commands | PASS; J4 terminal SHA-256 `faf682412dce51dc620b25f28c7c73049bd96f4bb3ee44a6dbc7394c0bdba665` |
+| Web build plus five Chrome gates | PASS, 0 console errors |
+| `build:psp --skip-assets` and full `build:psp` | PASS; full package: EBOOT 5,845,400 B, pak 67,633,344 B, PRX 5,845,068 B |
+
+The monolithic test runner's post-summary open handle is not counted as an
+exit-code proof; the five CI shards cover the same 171 native test files and
+all exited zero, and the browser-conditioned supplements execute every
+otherwise skipped body. No maintained journey, golden, or generated import
+artifact differs from the reviewed expedition branch.
+
+### QuickJS cold-start comparison
+
+Main and candidate each built their own matching desktop bundle. The harness
+source SHA-256 and PocketJS revision were identical, so both measurements used
+the same byte-identical compiled QuickJS host. A live one-frame `[0]` fixture
+at `spyder_bedroom` reproduced canonical state
+`7f5a73f780c13c25e168769241853b9e4b02fd62011704342fc7297b79ad7db8`
+on both builds and both viewports. The candidate also passed a direct strict
+250 ms preflight at 244.489 ms (480x272) and 241.954 ms (960x544).
+
+The complete comparison used 40 fresh processes pinned to CPU 30 in
+main/candidate/candidate/main order, five processes per viewport per slot. CPU
+30 was 93.98% idle in the five-second pre-window. To retain every sample, only
+the startup abort was raised to 1,000 ms; the real 50 ms frame budget and state
+check remained enabled. One main and one candidate 480x272 sample were just
+over the ordinary limit (250.246 and 250.168 ms), and are retained rather than
+relabeled.
+
+| Viewport | Main startup median | Candidate startup median | Delta | Main first-frame median | Candidate first-frame median | Delta |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 480x272 | 245.488 ms | 244.035 ms | -0.592% | 2.715 ms | 2.642 ms | -2.689% |
+| 960x544 | 245.421 ms | 244.685 ms | -0.300% | 2.694 ms | 2.604 ms | -3.359% |
+
+All 40 processes exited zero, reached the same canonical state, and stayed
+below the 50 ms production-frame limit. Startup and first-frame CPU therefore
+show no regression; the candidate adds one QuickJS object (27,665 versus
+27,664). The ordinary app bundle changed from SHA-256 `92147c88...` to
+`0ff9071c...`; pak, project shell and map-manifest hashes are identical.
+
+### Final repository state
+
+After refreshing `origin/main`, the tested implementation commit was 12
+commits ahead and 0 behind; this report adds one documentation-only commit, so
+no rebase is required. `bun.lock` is unchanged, `git diff
+--check` is clean, no merge commit is present, and every branch commit has the
+required author with an English subject and no co-author footer. The public
+diff contains no local path, private host, company-only term, credential marker
+or work-tracking identifier.
+
+subagent 使用：3 个 / F1 上游语义、F2 捕获经验兼容、CI 与验收矩阵 / 并行审查节省了时间
+
+PASS
