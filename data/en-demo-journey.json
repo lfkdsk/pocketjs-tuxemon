@@ -4,40 +4,40 @@
   "hz": 60,
   "worldTraversal": "seamless-v1",
   "source": {
-    "chaptersSha256": "f15d3083e5495d7f502a94c2bae056f327adfb1d8c679c8dcb4fafa6ec1ad732",
+    "chaptersSha256": "66cf272ccae2a9c7b010b4ce70a885f1f3ee00d8a01ec35eabc14f2ec9f2ab17",
     "tape": {
       "gb6": {
         "file": "data/gb6-mainline-journey.json",
-        "frames": 115955,
-        "tapeSha256": "0bc1a177e95bab4f1bd88596689b833940c28e3a48556088142c1151232becf7",
+        "frames": 116107,
+        "tapeSha256": "0b7a167a2c25e56eff0944e54985922d316c654245c34764a460dd981098aeb6",
         "worldTraversal": "seamless-v1"
       },
       "j1": {
         "file": "data/j1-captainreturns-journey.json",
-        "frames": 12876,
-        "tapeSha256": "1641dae719a5444de89543c2ea2783cca6992fd684a794b06bf5063c3479f676",
+        "frames": 12854,
+        "tapeSha256": "d7282347b46580d7a774d18a2caaf8a39a7969d0bc340f2fb7c8dc734ff4995b",
         "worldTraversal": "seamless-v1"
       },
       "j2": {
         "file": "data/j2-hospitalcure-journey.json",
-        "frames": 51407,
-        "tapeSha256": "0d672b532b8d0aba7cd7d1edc413f4e3c48fbb0f4254d3b4c4865317a81a4afd",
+        "frames": 64794,
+        "tapeSha256": "08024a9a8e295d258bb4eccd6e8894f9bab6cf918dd8f700040d2323121b592f",
         "worldTraversal": "seamless-v1"
       },
       "j3": {
         "file": "data/j3-omnichannelradioannounce-journey.json",
-        "frames": 13102,
-        "tapeSha256": "24818f3678fffa2eb65c870e930a1becfc4dd73bdee1d4cd3e4e0ee0cfe6fd58",
+        "frames": 17990,
+        "tapeSha256": "5631b3dc31824607b61a997ffbdc87566c60b035e48a7374f580dfa7f7024cfa",
         "worldTraversal": "seamless-v1"
       },
       "j4": {
         "file": "data/j4-kernelquestdone-journey.json",
-        "frames": 13595,
-        "tapeSha256": "30196f252c542b9ec2d20c66e1da982a7c81fa756cd3d790402d6d2bc3711e3f",
+        "frames": 18577,
+        "tapeSha256": "5d00026972a62c1652497b7e9de9707909ae9f4953411a25f04b34bc447ded8a",
         "worldTraversal": "seamless-v1"
       },
-      "frames": 206935,
-      "sha256": "10b303618118323384be152fb348593ff2518fb4d2c69dfe3dbe6631a5eec82b"
+      "frames": 230322,
+      "sha256": "0c421cae53d0f78f3536e4194c55dfa48bf17a10db28c6b66ae13db5be77fcbb"
     }
   },
   "paginator": {
@@ -47,19 +47,19 @@
     "fallbacks": [
       "fonts/NotoSansCJKsc-subset.otf"
     ],
-    "fontSha256": "888a7f6e80bc1ed3b4f38e2050e97e5a61e5b9acf544356fc6e496a0ad7867eb",
-    "charsetSha256": "91e7b0c432e2925bd744fb599997c2cf67ab1f66457a69eefea4e09eb0047277"
+    "fontSha256": "dbff8fb349305b97aece5d69d90e6adc5bd4d3168f8b13cacefdc9c464e9c2d3",
+    "charsetSha256": "48b069a20fb9e66c59199b28100105eabe78fcb8ff9d53445747e8f42aa6fc87"
   },
-  "frames": 206935,
-  "tapeSha256": "10b303618118323384be152fb348593ff2518fb4d2c69dfe3dbe6631a5eec82b",
+  "frames": 230322,
+  "tapeSha256": "0c421cae53d0f78f3536e4194c55dfa48bf17a10db28c6b66ae13db5be77fcbb",
   "insertions": [],
   "dialogs": {
-    "textBoxes": 645,
+    "textBoxes": 657,
     "pagedBoxes": 2,
     "insertedBoxes": 0,
     "insertedFrames": 0,
     "insertedConfirms": 0,
-    "neutralChecks": 721
+    "neutralChecks": 738
   },
   "terminal": {
     "summary": {
@@ -69,7 +69,7 @@
         4
       ],
       "facing": 3,
-      "gold": 67773,
+      "gold": 63095,
       "items": {
         "aardant": 1,
         "app_map": 1,
@@ -78,7 +78,6 @@
         "fishing_rod": 1,
         "friendship_scroll": 1,
         "nu_phone": 1,
-        "potion": 1,
         "sledgehammer": 1,
         "spyder_pass": 1,
         "surfboard": 1,
@@ -89,15 +88,15 @@
         "tm_shadow_boxing": 1
       },
       "party": [
-        "arthrobolt:100",
         "aardart:19",
-        "cataspike:4",
+        "puparmor:16",
         "axolightl:4",
         "cardiling:4",
-        "pawsand:12"
+        "pawsand:100",
+        "arthrobolt:92"
       ],
-      "storySha256": "076586407513305744e782c68db73004805e1055779abfb44a91bf0ee8d2e1f1"
+      "storySha256": "fde1ff63af05ae1120365da0354daea360d89b653743d75e10e9315387d36650"
     },
-    "neutralSha256": "590edbb96006c58de3a64df79ab0aafb02a41858679f8cb7be27453f396b7c40"
+    "neutralSha256": "099d5a49f4e5a4682af1b16e8d274feebf59f038977da3423fe68583a3fc3c77"
   }
 }
