@@ -237,5 +237,6 @@ export function battleDbToTuxemonBattleDb(db: BattleDb): TuxemonBattleDb {
         }]),
       ),
     },
+    opponent_targeting: db.rules.opponentTargeting,
   };
 }

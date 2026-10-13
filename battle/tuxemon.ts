@@ -1814,7 +1814,42 @@ function makeRules(db: TuxemonBattleDb): BattleCoreRules<BattleMonster, TuxemonB
     ));
     let selected: { moveIndex?: number; slug: string; target: BattleMonster };
     if (candidates.length === 0) {
-      selected = { slug: user.fallback, target: targets[0]! };
+      // Upstream evaluates the opponent before selecting a move. A later
+      // random legal (move,target) choice normally overwrites that result;
+      // only fallback selection retains it. The evaluator itself is active
+      // only for trainer doubles and resolves ties in stable field order.
+      let target = targets[0]!;
+      if (state.kind === "trainer" && state.fieldSize === 2) {
+        const owner = getSide(state, uid) === 1 ? state.opponent : "default";
+        const rule = db.opponent_targeting?.[owner] ?? db.opponent_targeting?.default;
+        if (rule) {
+          let bestScore = Number.NEGATIVE_INFINITY;
+          for (const candidate of targets) {
+            const hpRatio = candidate.base.hp > 0
+              ? Math.min(candidate.currentHp / candidate.base.hp, 1)
+              : 0;
+            let score = hpRatio * rule.healthWeight
+              + candidate.base.armour * rule.armourWeight
+              + candidate.base.dodge * rule.dodgeWeight
+              + candidate.base.melee * rule.meleeWeight
+              + candidate.base.ranged * rule.rangedWeight
+              + candidate.base.speed * rule.speedWeight;
+            if (candidate.status) {
+              score += (rule.statusEffects[candidate.status.slug] ?? 0) * rule.statusEffectsWeight;
+            }
+            const difference = candidate.level - user.level;
+            if (rule.levelDifferenceThreshold !== 0 && rule.levelDifferenceWeight !== 0
+              && Math.abs(difference) >= rule.levelDifferenceThreshold) {
+              score += difference * rule.levelDifferenceWeight;
+            }
+            if (score > bestScore) {
+              bestScore = score;
+              target = candidate;
+            }
+          }
+        }
+      }
+      selected = { slug: user.fallback, target };
       if (policy === "ai") selected = randomChoice(state, [selected]);
     } else if (policy === "ai") selected = randomChoice(state, candidates);
     else selected = candidates[Math.max(0, choice) % candidates.length]!;

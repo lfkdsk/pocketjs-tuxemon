@@ -162,6 +162,32 @@ describe("GB1 battle database", () => {
           reliable: { user: { stat: "level", weight: 1 }, target: { stat: "resist", weight: 1 } },
         },
       },
+      opponentTargeting: {
+        default: {
+          healthWeight: 1,
+          armourWeight: 1,
+          dodgeWeight: 1,
+          meleeWeight: 1,
+          rangedWeight: 1,
+          speedWeight: 1,
+          statusEffectsWeight: 1,
+          statusEffects: { poisoned: 1 },
+          levelDifferenceThreshold: 5,
+          levelDifferenceWeight: 0.3,
+        },
+        character_slug: {
+          healthWeight: 1,
+          armourWeight: 0,
+          dodgeWeight: 0,
+          meleeWeight: 0,
+          rangedWeight: 0,
+          speedWeight: 0,
+          statusEffectsWeight: 0,
+          statusEffects: {},
+          levelDifferenceThreshold: 0,
+          levelDifferenceWeight: 0,
+        },
+      },
     });
     expect(validated.shapes.hunter).toEqual({ armour: 4, dodge: 8, hp: 5, melee: 8, ranged: 4, speed: 7 });
     expect(validated.monsters.rockitten).toMatchObject({

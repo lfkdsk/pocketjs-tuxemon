@@ -34,6 +34,7 @@ import {
   type BattleMusicSet,
   type JournalMonsterIndexEntry,
   type BattlePlugin,
+  type BattleOpponentTargetRule,
   type BattleRangeRule,
   type BattleRuntimeIndexEntry,
   type BattleRuntimeShell,
@@ -529,6 +530,29 @@ function battleMusicCatalog(tables: Tables): BattleMusicCatalog {
     npcOverrides[slug] = parseBattleMusicSet(override, `npc ${slug}`, musicSlugs, packaged);
   }
   return { environments, npcOverrides };
+}
+
+/** Normalize every owner profile from the root AI target table. Missing
+ * dataclass fields have the same zero/empty defaults used by
+ * OpponentEvaluator.calculate_score. */
+function opponentTargetingTable(sourceRoot: string): Record<string, BattleOpponentTargetRule> {
+  const rules = object(object(readYaml(join(sourceRoot, "mods/ai_opponent.yaml"))).rules);
+  return Object.fromEntries(sortedKeys(rules).map((slug) => {
+    const raw = object(rules[slug]);
+    return [slug, {
+      healthWeight: number(raw.health_weight),
+      armourWeight: number(raw.armour_weight),
+      dodgeWeight: number(raw.dodge_weight),
+      meleeWeight: number(raw.melee_weight),
+      rangedWeight: number(raw.ranged_weight),
+      speedWeight: number(raw.speed_weight),
+      statusEffectsWeight: number(raw.status_effects_weight),
+      statusEffects: Object.fromEntries(sortedKeys(object(raw.status_effects))
+        .map((status) => [status, number(object(raw.status_effects)[status])])),
+      levelDifferenceThreshold: number(raw.level_difference_threshold),
+      levelDifferenceWeight: number(raw.level_difference_weight),
+    }];
+  }));
 }
 
 function arg(rule: Rule, index: number, fallback = ""): string {
@@ -1638,6 +1662,7 @@ export function writeBattleArtifacts(options: BattleImportOptions): BattleBuild 
   const monsterConfig = object(readYaml(join(sourceRoot, "mods/config_monster.yaml")));
   const combatConfig = object(readYaml(join(sourceRoot, "mods/config_combat.yaml")));
   const rawRangeMap = object(readYaml(join(sourceRoot, "mods/range_map.yaml")));
+  const opponentTargeting = opponentTargetingTable(sourceRoot);
   const captureConfig = object(readYaml(join(sourceRoot, "mods/config_capture.yaml")));
   const rawCaptureDevices = object(readYaml(join(sourceRoot, "mods/capture_devices.yaml")));
   const selectedCapture = new Set([...selection.items].filter((slug) => tables.item[slug]?.category === "capture"));
@@ -1729,6 +1754,7 @@ export function writeBattleArtifacts(options: BattleImportOptions): BattleBuild 
         affinityMultiplierRange: [number(list(combatConfig.multiplier_range)[0], 0.25), number(list(combatConfig.multiplier_range)[1], 4)],
         rangeMap,
       },
+      opponentTargeting,
       capture: captureConfig,
       captureDevices,
     },

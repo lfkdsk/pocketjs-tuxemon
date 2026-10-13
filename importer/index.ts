@@ -130,6 +130,17 @@ export function coverageMarkdown(
   const partyMonster = actions.rows.find((row) => row.type === "get_party_monster");
   const playerMonster = actions.rows.find((row) => row.type === "get_player_monster");
   const choiceMonster = actions.rows.find((row) => row.type === "choice_monster");
+  const doubleBattle = actions.rows.find((row) => row.type === "start_double_battle");
+  const doubleBattleSection = doubleBattle ? `
+## Double-battle opponent targeting
+
+All ${doubleBattle.total} authored \`start_double_battle\` uses are Native. Their
+trainer AI imports \`mods/ai_opponent.yaml\`: opponent scores select the target
+when no ordinary move/target pair is legal and the fallback move is used.
+When at least one ordinary pair is legal, upstream's later seeded choice over
+the complete pair list replaces the score-selected target, and the port keeps
+that behavior.
+` : "";
   const worldRows = report.world.worlds.map((world) =>
     `| ${world.worldId} | ${world.outdoorMaps} / ${world.sourceMembers} | ${world.bboxTiles.width}×${world.bboxTiles.height} | ${world.geometricContacts} | ${world.acceptedSeams} | ${world.coordinatePreservingSeams} / ${world.mixedHandoffSeams} / ${world.portalOnlySeams} / ${world.directionOnlySeams} | ${world.rejectedGeometricContacts} | ${world.rejectedGaps} | ${world.dimensionCorrections} | ${world.componentSizes.join(" + ")} |`
   ).join("\n");
@@ -210,6 +221,8 @@ Definitions:
 - **Dropped**: no equivalent output, including rules inside an event that the
   converter proves cannot start or otherwise omits. Per-disposition reasons are
   retained in \`dist/import-report.json\`.
+
+${doubleBattleSection}
 
 ## Externally materialized feature programs
 

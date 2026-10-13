@@ -163,6 +163,34 @@
     }
    }
   },
+  "opponentTargeting": {
+   "character_slug": {
+    "healthWeight": 1,
+    "armourWeight": 0,
+    "dodgeWeight": 0,
+    "meleeWeight": 0,
+    "rangedWeight": 0,
+    "speedWeight": 0,
+    "statusEffectsWeight": 0,
+    "statusEffects": {},
+    "levelDifferenceThreshold": 0,
+    "levelDifferenceWeight": 0
+   },
+   "default": {
+    "healthWeight": 1,
+    "armourWeight": 1,
+    "dodgeWeight": 1,
+    "meleeWeight": 1,
+    "rangedWeight": 1,
+    "speedWeight": 1,
+    "statusEffectsWeight": 1,
+    "statusEffects": {
+     "poisoned": 1
+    },
+    "levelDifferenceThreshold": 5,
+    "levelDifferenceWeight": 0.3
+   }
+  },
   "capture": {
    "total_shakes": 4,
    "shake_constant": 524325,

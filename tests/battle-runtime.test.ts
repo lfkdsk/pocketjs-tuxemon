@@ -982,6 +982,70 @@ describe("Tuxemon BattleRules adapter", () => {
     expect(decision?.target).toBe(state.battle.field[1]);
   });
 
+  test("retains imported opponent weighting only for trainer-double fallback targets", () => {
+    const weak = crafted("nut", 5, "weighted-player-a", 71, {
+      base: { hp: 20, armour: 1, dodge: 1, melee: 1, ranged: 1, speed: 1 },
+      currentHp: 4,
+    });
+    const strong = crafted("rockitten", 15, "weighted-player-b", 72, {
+      base: { hp: 100, armour: 20, dodge: 15, melee: 30, ranged: 25, speed: 10 },
+      currentHp: 90,
+    });
+    const fallbackEnemy = (iid: string, seed: number) => crafted("memnomnom", 5, iid, seed, {
+      moves: [],
+    });
+    const start = (kind: "trainer" | "wild") => createBattle(RULE_DB, {
+      seed: 730,
+      kind,
+      opponent: OPPONENT,
+      fieldSize: 2,
+      player: [weak, strong],
+      enemy: [fallbackEnemy(`${kind}-enemy-a`, 73), fallbackEnemy(`${kind}-enemy-b`, 74)],
+    });
+
+    const trainer = start("trainer");
+    const trainerTargets = trainer.events.filter((event) => event.type === "decision" && event.side === 1)
+      .map((event) => event.target);
+    expect(trainerTargets).toEqual([trainer.parties[0][1]!.uid, trainer.parties[0][1]!.uid]);
+
+    // OpponentEvaluator returns an equal score outside trainer battles, so
+    // Python max() keeps the first active target even in this synthetic wild
+    // double. This guard prevents broadening the imported policy.
+    const wild = start("wild");
+    const wildTargets = wild.events.filter((event) => event.type === "decision" && event.side === 1)
+      .map((event) => event.target);
+    expect(wildTargets).toEqual([wild.parties[0][0]!.uid, wild.parties[0][0]!.uid]);
+  });
+
+  test("keeps uniform legal move-target selection after opponent scoring is overwritten", () => {
+    const weak = crafted("nut", 5, "random-player-a", 81, {
+      base: { hp: 20, armour: 1, dodge: 1, melee: 1, ranged: 1, speed: 1 },
+      currentHp: 4,
+    });
+    const strong = crafted("rockitten", 15, "random-player-b", 82, {
+      base: { hp: 100, armour: 20, dodge: 15, melee: 30, ranged: 25, speed: 10 },
+      currentHp: 90,
+    });
+    const observed = new Set<number>();
+    for (let seed = 1; seed <= 32; seed++) {
+      const battle = createBattle(RULE_DB, {
+        seed,
+        kind: "trainer",
+        opponent: OPPONENT,
+        fieldSize: 2,
+        player: [weak, strong],
+        enemy: [crafted("memnomnom", 5, `random-enemy-${seed}`, 80 + seed, { moves: ["ram"] })],
+      });
+      const decision = battle.events.find((event) => event.type === "decision" && event.side === 1);
+      if (decision?.type === "decision" && typeof decision.target === "number") {
+        observed.add(decision.target);
+      }
+    }
+    // ai_opponent.yaml's second target has the larger score, but upstream's
+    // later random choice spans the full legal (move,target) product.
+    expect(observed).toEqual(new Set([1, 2]));
+  });
+
   test("exposes item, capture, run, and swap choices with cancelable target menus", () => {
     const active = monster("nut", 20, "txmn-player-a", 31);
     active.currentHp = active.currentHp! - 1;

@@ -27,7 +27,7 @@
   "textureBytes": 30922008,
   "encodedBytes": 2780624,
   "residentBytes": 16214784,
-  "pakBytes": 4491072,
+  "pakBytes": 4491680,
   "maxWidth": 512,
   "maxHeight": 512,
   "quantization": {
@@ -127,8 +127,8 @@
    }
   }
  },
- "battleDbBytes": 1651378,
- "runtimeDbBytes": 1512847,
+ "battleDbBytes": 1651996,
+ "runtimeDbBytes": 1513465,
  "pakKey": "game:battle-db",
  "battleMusic": {
   "environmentSets": 40,
@@ -143,7 +143,7 @@
   "invalidReferencePolicy": "reject-like-upstream-music-properties"
  },
  "battleRepository": {
-  "shellBytes": 238996,
+  "shellBytes": 239614,
   "entries": 816,
   "entryBytes": 1190077
  }

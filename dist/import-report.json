@@ -878,7 +878,7 @@
    "key": "act:start_double_battle:T1",
    "fate": "T1",
    "count": 8,
-   "note": "Battle Processing with 4 folded trainer monsters"
+   "note": "Battle Processing with 4 folded trainer monsters; imported opponent weighting selects fallback targets"
   },
   {
    "key": "act:teleport_faint:T1",
@@ -6360,8 +6360,8 @@
      "dropped": 0,
      "reasons": {
       "native": [
-       "Battle Processing with 4 folded trainer monsters",
-       "Battle Processing with 2 folded trainer monsters"
+       "Battle Processing with 4 folded trainer monsters; imported opponent weighting selects fallback targets",
+       "Battle Processing with 2 folded trainer monsters; imported opponent weighting selects fallback targets"
       ]
      }
     },

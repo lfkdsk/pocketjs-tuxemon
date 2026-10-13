@@ -7,7 +7,11 @@ import type {
   BattlePhase,
   PendingBattleAction,
 } from "./core.ts";
-import type { BattlePlagueRow, WeatherRow } from "../importer/battle-schema.ts";
+import type {
+  BattleOpponentTargetRule,
+  BattlePlagueRow,
+  WeatherRow,
+} from "../importer/battle-schema.ts";
 
 export const STAT_NAMES = ["armour", "dodge", "hp", "melee", "ranged", "speed"] as const;
 export type StatName = (typeof STAT_NAMES)[number];
@@ -220,6 +224,9 @@ export interface TuxemonBattleDb {
       experience_coefficient: number;
     }>;
   };
+  /** Optional for pre-target-policy fixtures; generated databases always
+   * carry the imported `ai_opponent.yaml` profiles. */
+  opponent_targeting?: Record<string, BattleOpponentTargetRule>;
 }
 
 export interface BattleMove {

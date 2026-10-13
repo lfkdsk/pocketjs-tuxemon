@@ -11,6 +11,23 @@ export interface BattleRangeRule {
   target: { stat: BattleFormulaStat; weight: number };
 }
 
+/** One normalized `mods/ai_opponent.yaml` target-scoring profile. Upstream
+ * evaluates this profile for trainer doubles before move selection; its
+ * later legal-action choice replaces that target unless the monster must use
+ * a fallback move. */
+export interface BattleOpponentTargetRule {
+  healthWeight: number;
+  armourWeight: number;
+  dodgeWeight: number;
+  meleeWeight: number;
+  rangedWeight: number;
+  speedWeight: number;
+  statusEffectsWeight: number;
+  statusEffects: Record<string, number>;
+  levelDifferenceThreshold: number;
+  levelDifferenceWeight: number;
+}
+
 export interface BattlePlugin {
   type: string;
   parameters?: unknown[];
@@ -157,6 +174,7 @@ export interface BattleDb {
       affinityMultiplierRange: [number, number];
       rangeMap: Record<string, BattleRangeRule>;
     };
+    opponentTargeting: Record<string, BattleOpponentTargetRule>;
     capture: Record<string, unknown>;
     captureDevices: Record<string, unknown>;
   };
@@ -543,6 +561,22 @@ export function validateBattleDb(value: unknown, pakKeys?: ReadonlySet<string>):
     assert(formulaStats.has(rule.target.stat), `damage range ${range} has invalid target stat`);
     assert(Number.isFinite(rule.user.weight) && rule.user.weight > 0, `damage range ${range} has invalid user weight`);
     assert(Number.isFinite(rule.target.weight) && rule.target.weight > 0, `damage range ${range} has invalid target weight`);
+  }
+  assert(isRecord(db.rules.opponentTargeting), "opponentTargeting rules must be present");
+  assert("default" in db.rules.opponentTargeting, "opponentTargeting rules require the default profile");
+  for (const [slug, rule] of Object.entries(db.rules.opponentTargeting)) {
+    assert(isRecord(rule), `opponentTargeting ${slug} must be an object`);
+    for (const key of [
+      "healthWeight", "armourWeight", "dodgeWeight", "meleeWeight", "rangedWeight",
+      "speedWeight", "statusEffectsWeight", "levelDifferenceThreshold", "levelDifferenceWeight",
+    ] as const) {
+      assert(Number.isFinite(rule[key]), `opponentTargeting ${slug}.${key} must be finite`);
+    }
+    assert(rule.levelDifferenceThreshold >= 0, `opponentTargeting ${slug} has a negative level threshold`);
+    assert(isRecord(rule.statusEffects), `opponentTargeting ${slug}.statusEffects must be an object`);
+    for (const [status, score] of Object.entries(rule.statusEffects)) {
+      assert(status.length > 0 && Number.isFinite(score), `opponentTargeting ${slug} has an invalid status score`);
+    }
   }
 
   for (const [slug, monster] of Object.entries(db.monsters)) {

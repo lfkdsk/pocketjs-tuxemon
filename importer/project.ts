@@ -3443,9 +3443,12 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         const opponent = playerOpponent(g);
         if (ctx.options.battle && opponent) {
           const party = foldedParties.parties.get(i) ?? [];
-          noteAction(a, a.type, "T1", party.length
+          const partySource = party.length
             ? `Battle Processing with ${party.length} folded trainer monsters`
-            : "Battle Processing with extension-staged trainer party");
+            : "Battle Processing with extension-staged trainer party";
+          noteAction(a, a.type, "T1", a.type === "start_double_battle"
+            ? `${partySource}; imported opponent weighting selects fallback targets`
+            : partySource);
           out.push({
             op: "battle",
             setup: {

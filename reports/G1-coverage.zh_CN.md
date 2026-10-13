@@ -37,6 +37,17 @@ Definitions:
   converter proves cannot start or otherwise omits. Per-disposition reasons are
   retained in `dist/import-report.json`.
 
+
+## Double-battle opponent targeting
+
+All 8 authored `start_double_battle` uses are Native. Their
+trainer AI imports `mods/ai_opponent.yaml`: opponent scores select the target
+when no ordinary move/target pair is legal and the fallback move is used.
+When at least one ordinary pair is legal, upstream's later seeded choice over
+the complete pair list replaces the score-selected target, and the port keeps
+that behavior.
+
+
 ## Externally materialized feature programs
 
 These source events execute in a validated feature runtime outside the map
