@@ -593,6 +593,7 @@ describe("Tuxemon party extension", () => {
 describe("KC1 party choice and removal", () => {
   const extensions = createTuxemonExtensions(DB);
   const partyChoice = extensions.choices!["tux.party_monsters"]!;
+  const pendingMoves = extensions.choices!["tux.pending_moves"]!;
 
   function partyExt(entries: Array<{ species: string; level: number }>): JsonValue {
     const { state } = run(entries.map((entry) => ({
@@ -705,6 +706,69 @@ describe("KC1 party choice and removal", () => {
     const ext = tuxemonExtensionState(state.ext, DB);
     expect(ext.npcParties.spyder_nimrod_argon).toEqual([]);
     expect(ext.party).toHaveLength(0);
+  });
+
+  test("pending_moves removes the selected old move and reports the newest replacement", () => {
+    const base = tuxemonExtensionState(partyExt([{ species: "rockitten", level: 5 }]), DB);
+    const moves = ["ram", "acid", "adamantine", "air_chain", "altitude"];
+    const ext = packTuxemonExtensionState({
+      ...base,
+      party: [{ ...base.party[0]!, moves }],
+    });
+    const args = {
+      variable: "v.chosen_tech",
+      message: {
+        variable: "v.pending_move.message",
+        noLearnTemplate: "Decided not to learn {tech}.",
+        replacedTemplate: "{old} replaced with {new}.",
+      },
+    };
+
+    expect(pendingMoves.options(readContext(ext), args)).toEqual([
+      { key: "ram", label: "Ram" },
+      { key: "acid", label: "Acid" },
+      { key: "adamantine", label: "Adamantine" },
+      { key: "air_chain", label: "Air Chain" },
+      { key: "altitude", label: "Altitude" },
+    ]);
+    const selected = pendingMoves.resolve!(commandContext(ext), args, {
+      kind: "select", index: 1, key: "acid", data: null,
+    })!;
+    // Mutation guard: pop(), shift(), or deleting the newest move all fail
+    // this exact-order assertion even though the party would be back at four.
+    expect(tuxemonExtensionState(selected.ext!, DB).party[0]!.moves).toEqual([
+      "ram", "adamantine", "air_chain", "altitude",
+    ]);
+    expect(selected.writes).toEqual({
+      "v.chosen_tech": "acid",
+      "v.pending_move.message": "Acid replaced with Altitude.",
+    });
+  });
+
+  test("pending_moves treats selecting the newest move as declining to learn it", () => {
+    const base = tuxemonExtensionState(partyExt([{ species: "rockitten", level: 5 }]), DB);
+    const ext = packTuxemonExtensionState({
+      ...base,
+      party: [{
+        ...base.party[0]!,
+        moves: ["ram", "acid", "adamantine", "air_chain", "altitude"],
+      }],
+    });
+    const args = {
+      variable: "v.chosen_tech",
+      message: {
+        variable: "v.pending_move.message",
+        noLearnTemplate: "Decided not to learn {tech}.",
+        replacedTemplate: "{old} replaced with {new}.",
+      },
+    };
+    const selected = pendingMoves.resolve!(commandContext(ext), args, {
+      kind: "select", index: 4, key: "altitude", data: null,
+    })!;
+    expect(tuxemonExtensionState(selected.ext!, DB).party[0]!.moves).toEqual([
+      "ram", "acid", "adamantine", "air_chain",
+    ]);
+    expect(selected.writes?.["v.pending_move.message"]).toBe("Decided not to learn Altitude.");
   });
 
   test("an empty party list opens through the displaced branch and cancel resolves", () => {

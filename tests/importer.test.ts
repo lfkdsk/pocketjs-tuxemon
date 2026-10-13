@@ -1108,6 +1108,47 @@ test("an unfiltered get_player_monster is non-cancellable", () => {
   expect(unfiltered?.cancel).toBeUndefined();
 });
 
+test("the real Spyder max-move event atomically replaces a live move", () => {
+  const result = buildProject(["spyder_greenwash_greenhouse"], { extChoice: true, battle: true });
+  const map = result.project.maps.find((candidate) => candidate.id === "spyder_greenwash_greenhouse")!;
+  const event = map.events?.find((candidate) => candidate.id === "e037_check_max_moves");
+  expect(event).toBeDefined();
+  const nodes = objectNodes({ maps: [{ events: [event] }] });
+  const choice = nodes.find((node) =>
+    node.op === "extChoice" && (node as { call?: string }).call === "tux.pending_moves"
+  ) as {
+    op?: string;
+    call?: string;
+    cancel?: boolean;
+    prompt?: string;
+    args?: {
+      variable?: string;
+      message?: { variable?: string; noLearnTemplate?: string; replacedTemplate?: string };
+    };
+  } | undefined;
+  expect(choice).toEqual({
+    op: "extChoice",
+    call: "tux.pending_moves",
+    args: {
+      variable: "v.chosen_tech",
+      message: {
+        variable: "v.pending_move.message",
+        noLearnTemplate: "Decided not to learn {tech}.",
+        replacedTemplate: "{old} replaced with {new}.",
+      },
+    },
+    prompt: "Forget which technique?",
+    cancel: false,
+  });
+  expect(nodes.some((node) =>
+    node.op === "ext" && (node as { call?: string }).call === "tux.remove_tech"
+  )).toBeFalse();
+  expect(result.report.coverage.actions.rows.find((row) => row.type === "get_pending_moves"))
+    .toMatchObject({ total: 2, native: 1, dropped: 1 });
+  expect(result.report.coverage.actions.rows.find((row) => row.type === "remove_tech"))
+    .toMatchObject({ total: 2, native: 1, dropped: 1 });
+});
+
 test("choice_monster becomes authored choices whose rows show the monster menu face", () => {
   const result = buildProject(["spyder_paper_scoop", "manhattan_beach"], { extChoice: true, battle: true });
   const nodes = objectNodes(result.project);

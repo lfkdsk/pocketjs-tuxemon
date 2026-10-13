@@ -1937,6 +1937,89 @@ function dojoChoices(
   };
 }
 
+/** Upstream's post-evolution move screen operates on the first player
+ * monster that exceeds the configured move cap. Selecting the newest move
+ * declines it; selecting an older move forgets that move and keeps the new
+ * one. The source event follows get_pending_moves immediately with
+ * remove_tech, so the resolver applies both steps atomically to the exact
+ * live monster that supplied the rows. */
+function pendingMovesChoice(
+  source: BattleDbSource,
+  names: DojoNames,
+): NonNullable<ExtensionOptions["choices"]>[string] {
+  const call = "tux.pending_moves";
+  const target = (context: ExtensionReadContext) => {
+    const state = currentExtensionState(context.ext);
+    const maxMoves = resolveBattleDb(source).rules.maxMoves;
+    const monster = state.party.find((candidate) => candidate.moves.length > maxMoves);
+    return monster ? { state, monster } : null;
+  };
+  const messageArgs = (args: Record<string, unknown>) => {
+    const message = record(args.message);
+    if (!message || !nonEmptyString(message.variable)
+      || !nonEmptyString(message.noLearnTemplate)
+      || !nonEmptyString(message.replacedTemplate)) {
+      throw new Error(`${call}: message must carry variable, noLearnTemplate and replacedTemplate`);
+    }
+    return {
+      variable: message.variable,
+      noLearnTemplate: message.noLearnTemplate,
+      replacedTemplate: message.replacedTemplate,
+    };
+  };
+  const format = (template: string, fields: Readonly<Record<string, string>>): string =>
+    template.replace(/\{([a-z_]+)\}/g, (token, field: string) => fields[field] ?? token);
+
+  return {
+    options(context, value) {
+      const args = argsRecord(value, call);
+      variableArg(args, "variable", call);
+      messageArgs(args);
+      const found = target(context);
+      if (!found) return [];
+      return [...new Set(found.monster.moves)].map((slug) => ({
+        key: slug,
+        label: names.technique(slug),
+      }));
+    },
+    resolve(context, value, result) {
+      if (result.kind === "cancel") throw new Error(`${call}: the move choice cannot be cancelled`);
+      const args = argsRecord(value, call);
+      const variable = variableArg(args, "variable", call);
+      const message = messageArgs(args);
+      if (variable === message.variable) {
+        throw new Error(`${call}: choice and message variables must be distinct`);
+      }
+      const found = target(context);
+      if (!found) throw new Error(`${call}: no player monster exceeds the move cap`);
+      const index = found.monster.moves.indexOf(result.key);
+      if (index < 0) {
+        throw new Error(`${call}: selected technique '${result.key}' is not on the live target`);
+      }
+      const newest = found.monster.moves.at(-1)!;
+      const moves = found.monster.moves.slice();
+      moves.splice(index, 1);
+      const declined = index === found.monster.moves.length - 1;
+      const text = declined
+        ? format(message.noLearnTemplate, { tech: names.technique(newest) })
+        : format(message.replacedTemplate, {
+            old: names.technique(result.key),
+            new: names.technique(newest),
+          });
+      return {
+        ext: json(replacePartyMonster(found.state, found.monster.iid!, {
+          ...found.monster,
+          moves,
+        })),
+        writes: {
+          [variable]: result.key,
+          [message.variable]: text,
+        },
+      };
+    },
+  };
+}
+
 function applyRelearn(
   source: BattleDbSource,
   names: DojoNames,
@@ -3905,6 +3988,7 @@ export function createTuxemonExtensions(
     choices: {
       "tux.party_monsters": partyMonstersChoice(source, names),
       "tux.enum_choice": enumChoiceHandler(),
+      "tux.pending_moves": pendingMovesChoice(source, names),
       ...dojoChoices(source, names, campaignMonsters),
     },
     codec: {

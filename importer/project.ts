@@ -1279,6 +1279,7 @@ function code(name: string, value: string): number {
  *  forgotten and the localized result sentence shown with {v:}. */
 const DOJO_FORGET_VARIABLE = "v.dojo.forget";
 const DOJO_MESSAGE_VARIABLE = "v.dojo.message";
+const PENDING_MOVE_MESSAGE_VARIABLE = "v.pending_move.message";
 
 // ---------------------------------------------------------------------------
 // conditions -> clauses
@@ -1756,13 +1757,10 @@ function clauses(
       return K(false);
     case "check_max_tech":
       if (options.battle) {
-        // Upstream also stores the matching monster list in
-        // event_data["check_max_tech"], but its only reader is
-        // get_pending_moves (the combat-menu move-replacement flow), which
-        // is not modelled, and both corpus use sites are guarded by
-        // MainCombatMenuState (also unmodelled). The side effect is
-        // therefore provably unconsumed, so the boolean is Native.
-        noteCondition(c, `${c.op} check_max_tech`, "T1", "tux.check_max_tech flags a monster past its species move cap (matching-list side effect unconsumed: only reader is the unmodelled get_pending_moves combat-menu flow)");
+        // get_pending_moves recomputes the same ordered matching party list
+        // from live state when its menu opens, replacing upstream's transient
+        // event_data side channel with a reducer-pure query.
+        noteCondition(c, `${c.op} check_max_tech`, "T1", "tux.check_max_tech flags a monster past its species move cap; pending-move choices query the same live party order");
         return [{ k: "ext", call: "tux.check_max_tech", args: {
           character: a[0] ?? "player", ...(a[1] ? { number: Number(a[1]) } : {}), negate: not,
         } }];
@@ -2004,6 +2002,28 @@ function dojoReport(key: string, fields: Readonly<Record<string, string>> = {}):
       op: "if",
       if: { kind: "ext", call: "tux.variable_text", args: { variable: DOJO_MESSAGE_VARIABLE } },
       then: [{ op: "text", lines: [`{v:${DOJO_MESSAGE_VARIABLE}}`] }],
+    },
+  };
+}
+
+function pendingMoveReport(): { message: JsonValue; show: Command } {
+  dialogLookupKeys.add("tech_no_learn");
+  dialogLookupKeys.add("tech_replaced");
+  const noLearnTemplate = po.get("tech_no_learn");
+  const replacedTemplate = po.get("tech_replaced");
+  if (noLearnTemplate === undefined || replacedTemplate === undefined) {
+    throw new Error("pending-move report templates are absent from the catalog");
+  }
+  return {
+    message: {
+      variable: PENDING_MOVE_MESSAGE_VARIABLE,
+      noLearnTemplate,
+      replacedTemplate,
+    },
+    show: {
+      op: "if",
+      if: { kind: "ext", call: "tux.variable_text", args: { variable: PENDING_MOVE_MESSAGE_VARIABLE } },
+      then: [{ op: "text", lines: [`{v:${PENDING_MOVE_MESSAGE_VARIABLE}}`] }],
     },
   };
 }
@@ -4038,6 +4058,36 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         }
         break;
       }
+      case "get_pending_moves": {
+        const variable = g[0];
+        const remove = acts[i + 1];
+        if (!ctx.options.battle || !ctx.options.extChoice || !variable
+          || remove?.type !== "remove_tech" || remove.args[0] !== variable) {
+          noteAction(a, a.type, "T3-dropped", ctx.options.battle
+            ? "requires extChoice and an immediately following remove_tech for the same variable"
+            : "monster/combat subsystem (P2)");
+          break;
+        }
+        const report = pendingMoveReport();
+        noteAction(a, a.type, "T1", "non-cancellable live move menu for the first player monster over the move cap");
+        noteAction(remove, remove.type, "T1", "atomically handled by the preceding pending-move resolver on the same live monster");
+        out.push(
+          { op: "variable", id: PENDING_MOVE_MESSAGE_VARIABLE, set: { op: "set", value: 0 } },
+          command({
+            op: "extChoice",
+            call: "tux.pending_moves",
+            args: { variable: varId(variable), message: report.message },
+            prompt: IMPORT_UI[activeLang].dojoForgetPrompt,
+            cancel: false,
+          }),
+          report.show,
+        );
+        i++;
+        break;
+      }
+      case "remove_tech":
+        noteAction(a, a.type, "T3-dropped", "requires an immediately preceding get_pending_moves for the same variable");
+        break;
       case "rename_monster":
         if (ctx.options.battle && g[0] && acts[i - 1]?.type === "get_player_monster"
           && acts[i - 1]?.args[0] === g[0]) {
