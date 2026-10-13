@@ -1,0 +1,237 @@
+{
+  "format": "pocket-tuxemon/double-battle-goldens/v1",
+  "frames": [
+    {
+      "lang": "en_US",
+      "case": "route5",
+      "width": 480,
+      "height": 272,
+      "file": "double-route5.480x272.png",
+      "map": "spyder_route5",
+      "opponent": "spyder_route5_tryphaena",
+      "player": {
+        "x": 19,
+        "y": 5
+      },
+      "enemy": [
+        {
+          "slug": "miaownolith",
+          "level": 24
+        },
+        {
+          "slug": "criniotherme",
+          "level": 22
+        }
+      ],
+      "rgbaFnv1a": "dfa1485a",
+      "pngSha256": "9320374ef0b1f351b804d8df91811cb32784b4adda55653f560313046097c2f9"
+    },
+    {
+      "lang": "en_US",
+      "case": "route5",
+      "width": 960,
+      "height": 544,
+      "file": "double-route5.960x544.png",
+      "map": "spyder_route5",
+      "opponent": "spyder_route5_tryphaena",
+      "player": {
+        "x": 19,
+        "y": 5
+      },
+      "enemy": [
+        {
+          "slug": "miaownolith",
+          "level": 24
+        },
+        {
+          "slug": "criniotherme",
+          "level": 22
+        }
+      ],
+      "rgbaFnv1a": "78221861",
+      "pngSha256": "d210c5afb5308f8be18e6c0f42e979b58a85bbafdb19acdf84e291e15300f814"
+    },
+    {
+      "lang": "en_US",
+      "case": "dragonscave",
+      "width": 480,
+      "height": 272,
+      "file": "double-dragonscave.480x272.png",
+      "map": "spyder_dragonscave",
+      "opponent": "spyder_dragonscave_ray",
+      "player": {
+        "x": 16,
+        "y": 5
+      },
+      "enemy": [
+        {
+          "slug": "ghosteeth",
+          "level": 45
+        },
+        {
+          "slug": "embazook",
+          "level": 45
+        },
+        {
+          "slug": "arthrobolt",
+          "level": 45
+        },
+        {
+          "slug": "hydrone",
+          "level": 45
+        }
+      ],
+      "rgbaFnv1a": "2ac6b2a9",
+      "pngSha256": "4167957a9c140f72d156a92ee3a84fede9ee924556aacf03b692f9ed3543257e"
+    },
+    {
+      "lang": "en_US",
+      "case": "dragonscave",
+      "width": 960,
+      "height": 544,
+      "file": "double-dragonscave.960x544.png",
+      "map": "spyder_dragonscave",
+      "opponent": "spyder_dragonscave_ray",
+      "player": {
+        "x": 16,
+        "y": 5
+      },
+      "enemy": [
+        {
+          "slug": "ghosteeth",
+          "level": 45
+        },
+        {
+          "slug": "embazook",
+          "level": 45
+        },
+        {
+          "slug": "arthrobolt",
+          "level": 45
+        },
+        {
+          "slug": "hydrone",
+          "level": 45
+        }
+      ],
+      "rgbaFnv1a": "d57947f3",
+      "pngSha256": "76bec317377bb138408d3b02ef7b9bd3fded9cfc56614690995a1850c5d91781"
+    },
+    {
+      "lang": "zh_CN",
+      "case": "route5",
+      "width": 480,
+      "height": 272,
+      "file": "double-route5.zh.480x272.png",
+      "map": "spyder_route5",
+      "opponent": "spyder_route5_tryphaena",
+      "player": {
+        "x": 19,
+        "y": 5
+      },
+      "enemy": [
+        {
+          "slug": "miaownolith",
+          "level": 24
+        },
+        {
+          "slug": "criniotherme",
+          "level": 22
+        }
+      ],
+      "rgbaFnv1a": "711fac50",
+      "pngSha256": "f714e4c0b2862ca1a4d9486bf8dc50be168d1d51c8186625a2dcd8b092c5fc7b"
+    },
+    {
+      "lang": "zh_CN",
+      "case": "route5",
+      "width": 960,
+      "height": 544,
+      "file": "double-route5.zh.960x544.png",
+      "map": "spyder_route5",
+      "opponent": "spyder_route5_tryphaena",
+      "player": {
+        "x": 19,
+        "y": 5
+      },
+      "enemy": [
+        {
+          "slug": "miaownolith",
+          "level": 24
+        },
+        {
+          "slug": "criniotherme",
+          "level": 22
+        }
+      ],
+      "rgbaFnv1a": "e09bbb4f",
+      "pngSha256": "655151655c435618fbfdf0b9752e9862121260c73133c6a55793d98e002f68ef"
+    },
+    {
+      "lang": "zh_CN",
+      "case": "dragonscave",
+      "width": 480,
+      "height": 272,
+      "file": "double-dragonscave.zh.480x272.png",
+      "map": "spyder_dragonscave",
+      "opponent": "spyder_dragonscave_ray",
+      "player": {
+        "x": 16,
+        "y": 5
+      },
+      "enemy": [
+        {
+          "slug": "ghosteeth",
+          "level": 45
+        },
+        {
+          "slug": "embazook",
+          "level": 45
+        },
+        {
+          "slug": "arthrobolt",
+          "level": 45
+        },
+        {
+          "slug": "hydrone",
+          "level": 45
+        }
+      ],
+      "rgbaFnv1a": "ebd27ce2",
+      "pngSha256": "0c180fb723441209efc7de1d6dac1c2b2dab9104071b50d60798fedcba659a6f"
+    },
+    {
+      "lang": "zh_CN",
+      "case": "dragonscave",
+      "width": 960,
+      "height": 544,
+      "file": "double-dragonscave.zh.960x544.png",
+      "map": "spyder_dragonscave",
+      "opponent": "spyder_dragonscave_ray",
+      "player": {
+        "x": 16,
+        "y": 5
+      },
+      "enemy": [
+        {
+          "slug": "ghosteeth",
+          "level": 45
+        },
+        {
+          "slug": "embazook",
+          "level": 45
+        },
+        {
+          "slug": "arthrobolt",
+          "level": 45
+        },
+        {
+          "slug": "hydrone",
+          "level": 45
+        }
+      ],
+      "rgbaFnv1a": "06659563",
+      "pngSha256": "bc145c2287e5650c995444457421297d66acda78b2997b20add54058696ce2f3"
+    }
+  ]
+}
