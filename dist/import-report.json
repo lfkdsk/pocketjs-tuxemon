@@ -284,25 +284,25 @@
  "schemaErrors": [],
  "audioQoaPending": [],
  "byFate": {
-  "T1": 38172,
-  "T3-dropped": 2,
-  "T1-lowered": 1785,
+  "T1": 38178,
+  "T1-lowered": 1780,
   "T4-dropped": 1419,
   "T2-dropped": 195,
-  "structural": 793
+  "structural": 793,
+  "T3-dropped": 1
  },
  "rows": [
   {
    "key": "act:access_pc:T1",
    "fate": "T1",
    "count": 16,
-   "note": "campaign storage, item locker, and the upstream Multiplayer not-implemented placeholder are complete"
+   "note": "target character's saved party, monster boxes, bag and item Locker plus Multiplayer placeholder"
   },
   {
-   "key": "act:add_item(npc):T3-dropped",
-   "fate": "T3-dropped",
+   "key": "act:add_item(npc):T1-lowered",
+   "fate": "T1-lowered",
    "count": 1,
-   "note": "NPC bags are combat-only"
+   "note": "saved live-NPC bag and Locker; trainer battle item AI remains degraded"
   },
   {
    "key": "act:add_item:T1",
@@ -512,7 +512,7 @@
    "key": "act:create_kennel:T1",
    "fate": "T1",
    "count": 99,
-   "note": "tux.create_kennel adds a saved player box (hidden flag, capacity)"
+   "note": "tux.create_kennel adds a saved box to the live target character"
   },
   {
    "key": "act:create_npc:T1",
@@ -620,7 +620,7 @@
    "key": "act:open_journal:T1-lowered",
    "fate": "T1-lowered",
    "count": 14,
-   "note": "read-only tux.journal scene with compact imported details"
+   "note": "read-only player journal preview preserves forced reveal and single-entry navigation, with compact imported details"
   },
   {
    "key": "act:open_shop:T1",
@@ -704,7 +704,7 @@
    "key": "act:remove_monster:T1",
    "fate": "T1",
    "count": 109,
-   "note": "tux.remove_monster deletes the iid from its owner (player party/kennel or NPC party)"
+   "note": "tux.remove_monster deletes the iid from its live owner (player party/Kennel/named boxes or NPC party)"
   },
   {
    "key": "act:remove_npc:T1",
@@ -782,7 +782,7 @@
    "key": "act:set_kennel_visible:T1",
    "fate": "T1",
    "count": 198,
-   "note": "tux.set_kennel_visible toggles a saved player box"
+   "note": "tux.set_kennel_visible toggles the live target character's saved box"
   },
   {
    "key": "act:set_layer:T1",
@@ -857,10 +857,10 @@
    "note": "surfable boundary pages preserve the shared Spyder item, choice, movement, appearance, and dismount flow"
   },
   {
-   "key": "act:set_tuxepedia:T1-lowered",
-   "fate": "T1-lowered",
+   "key": "act:set_tuxepedia:T1",
+   "fate": "T1",
    "count": 6,
-   "note": "persistent seen/caught status; repeat counters and NPC journals are not retained"
+   "note": "per-character saved journal status and repeat counters, including entry removal"
   },
   {
    "key": "act:set_variable:T1",
@@ -1172,7 +1172,7 @@
    "key": "cond:is has_kennel:T1",
    "fate": "T1",
    "count": 2,
-   "note": "tux.has_kennel counts one saved player box; a missing box fails both forms"
+   "note": "tux.has_kennel counts one live target character's saved box; a missing box fails both forms"
   },
   {
    "key": "cond:is has_monster:T1",
@@ -1184,13 +1184,13 @@
    "key": "cond:is has_tuxepedia:T1",
    "fate": "T1",
    "count": 1,
-   "note": "tux.has_tuxepedia reads saved player seen/caught state"
+   "note": "tux.has_tuxepedia reads the live character's saved journal state"
   },
   {
    "key": "cond:is kennel:T1",
    "fate": "T1",
    "count": 198,
-   "note": "tux.kennel reads the saved player boxes"
+   "note": "tux.kennel reads the live target character's saved boxes"
   },
   {
    "key": "cond:is location_inside:T1",
@@ -1358,13 +1358,13 @@
    "key": "cond:not has_tuxepedia:T1",
    "fate": "T1",
    "count": 1,
-   "note": "tux.has_tuxepedia reads saved player seen/caught state"
+   "note": "tux.has_tuxepedia reads the live character's saved journal state"
   },
   {
    "key": "cond:not kennel:T1",
    "fate": "T1",
    "count": 99,
-   "note": "tux.kennel reads the saved player boxes"
+   "note": "tux.kennel reads the live target character's saved boxes"
   },
   {
    "key": "cond:not location_inside:T1",
@@ -5130,15 +5130,15 @@
    "summary": {
     "types": 98,
     "uses": 13617,
-    "native": 13369,
-    "degraded": 35,
+    "native": 13375,
+    "degraded": 30,
     "placeholder": 0,
-    "dropped": 213,
+    "dropped": 212,
     "nativePercent": 98.2,
     "executablePercent": 98.4,
     "tier1": {
-     "uses": 6430,
-     "percent": 47.22,
+     "uses": 6431,
+     "percent": 47.23,
      "requiredUses": 6246,
      "requiredPercent": 45.9,
      "meetsBaseline": true
@@ -5154,7 +5154,7 @@
      "dropped": 0,
      "reasons": {
       "native": [
-       "campaign storage, item locker, and the upstream Multiplayer not-implemented placeholder are complete"
+       "target character's saved party, monster boxes, bag and item Locker plus Multiplayer placeholder"
       ]
      }
     },
@@ -5162,15 +5162,15 @@
      "type": "add_item",
      "total": 118,
      "native": 117,
-     "degraded": 0,
+     "degraded": 1,
      "placeholder": 0,
-     "dropped": 1,
+     "dropped": 0,
      "reasons": {
       "native": [
        "session item add/sub"
       ],
-      "dropped": [
-       "NPC bags are combat-only"
+      "degraded": [
+       "saved live-NPC bag and Locker; trainer battle item AI remains degraded"
       ]
      }
     },
@@ -5510,7 +5510,7 @@
      "dropped": 0,
      "reasons": {
       "native": [
-       "tux.create_kennel adds a saved player box (hidden flag, capacity)"
+       "tux.create_kennel adds a saved box to the live target character"
       ]
      }
     },
@@ -5739,7 +5739,7 @@
      "dropped": 0,
      "reasons": {
       "degraded": [
-       "read-only tux.journal scene with compact imported details"
+       "read-only player journal preview preserves forced reveal and single-entry navigation, with compact imported details"
       ]
      }
     },
@@ -5967,7 +5967,7 @@
      "dropped": 0,
      "reasons": {
       "native": [
-       "tux.remove_monster deletes the iid from its owner (player party/kennel or NPC party)"
+       "tux.remove_monster deletes the iid from its live owner (player party/Kennel/named boxes or NPC party)"
       ]
      }
     },
@@ -6139,7 +6139,7 @@
      "dropped": 0,
      "reasons": {
       "native": [
-       "tux.set_kennel_visible toggles a saved player box"
+       "tux.set_kennel_visible toggles the live target character's saved box"
       ]
      }
     },
@@ -6298,13 +6298,13 @@
     {
      "type": "set_tuxepedia",
      "total": 6,
-     "native": 0,
-     "degraded": 6,
+     "native": 6,
+     "degraded": 0,
      "placeholder": 0,
      "dropped": 0,
      "reasons": {
-      "degraded": [
-       "persistent seen/caught status; repeat counters and NPC journals are not retained"
+      "native": [
+       "per-character saved journal status and repeat counters, including entry removal"
       ]
      }
     },
@@ -6907,7 +6907,7 @@
      "dropped": 0,
      "reasons": {
       "native": [
-       "tux.has_kennel counts one saved player box; a missing box fails both forms"
+       "tux.has_kennel counts one live target character's saved box; a missing box fails both forms"
       ]
      }
     },
@@ -6933,7 +6933,7 @@
      "dropped": 0,
      "reasons": {
       "native": [
-       "tux.has_tuxepedia reads saved player seen/caught state"
+       "tux.has_tuxepedia reads the live character's saved journal state"
       ]
      }
     },
@@ -6946,7 +6946,7 @@
      "dropped": 0,
      "reasons": {
       "native": [
-       "tux.kennel reads the saved player boxes"
+       "tux.kennel reads the live target character's saved boxes"
       ]
      }
     },
@@ -7311,7 +7311,7 @@
      "dropped": 0,
      "reasons": {
       "native": [
-       "tux.has_tuxepedia reads saved player seen/caught state"
+       "tux.has_tuxepedia reads the live character's saved journal state"
       ]
      }
     },
@@ -7324,7 +7324,7 @@
      "dropped": 0,
      "reasons": {
       "native": [
-       "tux.kennel reads the saved player boxes"
+       "tux.kennel reads the live target character's saved boxes"
       ]
      }
     },

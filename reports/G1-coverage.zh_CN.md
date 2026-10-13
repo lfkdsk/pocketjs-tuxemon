@@ -11,17 +11,17 @@ When conversion discards a whole event, every source rule in it is Dropped.
 
 | Kind | Kinds | Uses | Native | Degraded | Placeholder | Dropped | S1 T1 baseline |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Actions | 98 | 13617 | 13369 | 35 | 0 | 213 | 6430 / 6246 (47.22% / 45.9%) |
+| Actions | 98 | 13617 | 13375 | 30 | 0 | 212 | 6431 / 6246 (47.23% / 45.9%) |
 | Conditions | 64 | 8663 | 8452 | 21 | 0 | 190 | 4782 / 4591 (55.20% / 53.0%) |
 
 The S1 acceptance baselines are 6,246 action uses (45.9%) and 4,591
 condition uses (53.0%). Only T1 source types whose disposition is Native or
-Degraded count toward them. This import records 6430
-(47.22%) and 4782
-(55.20%), respectively: 184 above
+Degraded count toward them. This import records 6431
+(47.23%) and 4782
+(55.20%), respectively: 185 above
 for actions and 191 above for conditions. The old
 type-table Native figure was 5,448 / 13,617 (40.0%); conversion-path accounting
-supersedes it with 13369 / 13617
+supersedes it with 13375 / 13617
 (98.2%). “Executable”
 (native + degraded + deliberate P1 placeholder) is
 98.4% for actions and
@@ -93,19 +93,22 @@ show the monster's static menu-face icon beside its translated name (upstream's
 animated 24 px menu faces are baked to one 16 px frame, a visual downgrade).
 `choice_npc` is Native: a choice box whose rows show each
 appearance's front walker frame as an icon, beside the shared label and the
-option's own name. `remove_monster` deletes an iid
-from its owner. An NPC's party lives as long as the NPC, as upstream: it is
-cleared when the NPC is created afresh (every map entry) or removed, and
-battle-time monsters stay in it until then. All
+option's own name. `remove_monster` deletes an iid from the player party,
+main Kennel or a named player box, then from an on-map NPC party; saved
+off-map NPCs are deliberately not searchable. An NPC's party and owned
+journal/boxes/items live as long as that NPC, as upstream: non-persistent
+state is cleared on map transfer or explicit removal, persistent state is
+retained while off-map, and battle-time monsters stay in it until then. All
 9 executable
 `get_party_monster` uses are Native: NPC trainer parties are staged live
 (not folded into the battle setup) when an event inspects or mutates them,
 so `iid_slot_*` always has a party to read. Scripted `trading` runs the `tux.trade` scene,
 which replaces the sent monster in its party slot with a freshly spawned
 monster at the same level and records it as caught. `access_pc` opens the
-`tux.pc` storage scene (monster boxes plus the item locker: deposit,
-withdraw with a quantity picker, and disband, followed by upstream's
-Multiplayer not-implemented placeholder); `create_kennel`,
+`tux.pc` storage scene for any live character's party, monster boxes, bag
+and item Locker (deposit, withdraw with a quantity picker, and disband),
+followed by upstream's Multiplayer not-implemented placeholder. The authored
+NPC `add_item` seeds that same saved per-owner bag. `create_kennel`,
 `set_kennel_visible`, `kennel` and
 `has_kennel` read and write the same saved boxes. All eight authored
 `quarantine` calls are Native: they move infected monsters between the party
@@ -519,7 +522,7 @@ four-neighbour BFS with fixed tie-breaking selects the nearest walkable cell:
 | Kind | Source type | Native | Degraded | Placeholder | Dropped | Total |
 |---|---|---:|---:|---:|---:|---:|
 | Action | `access_pc` | 10 | 0 | 0 | 0 | 10 |
-| Action | `add_item` | 117 | 0 | 0 | 1 | 118 |
+| Action | `add_item` | 117 | 1 | 0 | 0 | 118 |
 | Action | `add_monster` | 792 | 0 | 0 | 0 | 792 |
 | Action | `add_step_tracker` | 3 | 0 | 0 | 0 | 3 |
 | Action | `add_tech` | 12 | 0 | 0 | 0 | 12 |
@@ -600,7 +603,7 @@ four-neighbour BFS with fixed tie-breaking selects the nearest walkable cell:
 | Action | `set_step_tracker_milestone_shown` | 3 | 0 | 0 | 0 | 3 |
 | Action | `set_teleport_faint` | 29 | 0 | 0 | 0 | 29 |
 | Action | `set_template` | 22 | 2 | 0 | 0 | 24 |
-| Action | `set_tuxepedia` | 0 | 6 | 0 | 0 | 6 |
+| Action | `set_tuxepedia` | 6 | 0 | 0 | 0 | 6 |
 | Action | `set_variable` | 714 | 0 | 0 | 1 | 715 |
 | Action | `start_battle` | 331 | 0 | 0 | 0 | 331 |
 | Action | `start_double_battle` | 8 | 0 | 0 | 0 | 8 |

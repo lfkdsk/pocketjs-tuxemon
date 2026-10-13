@@ -152,6 +152,15 @@ export interface TuxemonExtensionState {
   /** Seen-only Tuxepedia entries. Caught species live in `caught` instead. */
   seen: string[];
   caught: string[];
+  /** Sparse counters for player entries whose values no longer match the
+   * implicit first-registration baseline. Keeping first entries in the
+   * historical seen/caught arrays preserves old saves while repeated
+   * sightings and catches retain upstream's per-entry counters. */
+  tuxepediaEntries?: Record<string, TuxepediaEntry>;
+  /** Every NPC owns an independent Tuxepedia upstream. Non-persistent NPC
+   * journals are discarded with the NPC; persistent journals survive in
+   * this sparse table while the NPC is off-map and therefore unaddressable. */
+  npcTuxepedia?: Record<string, Record<string, TuxepediaEntry>>;
   /** Upstream keeps failed escape attempts on the player between battles. */
   runAttempts: number;
   npcParties: Record<string, PendingMonster[]>;
@@ -175,6 +184,10 @@ export interface TuxemonExtensionState {
   /** Sparse named boxes other than the main Kennel, in creation order
    *  (for example the story's hidden "quarantine" box). */
   boxes?: Record<string, MonsterBox>;
+  /** Saved monster boxes owned by named NPCs. NPC parties are staged as
+   * PendingMonster records, so their boxes retain the same representation
+   * until a battle snapshot is materialized. */
+  npcBoxes?: Record<string, Record<string, NpcMonsterBox>>;
   /** Sparse monster-shop sales per `<economy>:<slug>` stock label. */
   shopSold?: Record<string, number>;
   /** Sparse PC item locker: saved item stacks keyed by item slug, matching
@@ -182,6 +195,9 @@ export interface TuxemonExtensionState {
    *  the "Locker" item box on the first PC visit; it holds at most
    *  LOCKER_LIMIT distinct item types. */
   itemLocker?: Record<string, number>;
+  /** Sparse independent bag and Locker state for named NPCs. Upstream gives
+   * every NPC both stores and routes `add_item` to the named live owner. */
+  npcItems?: Record<string, NpcItemStorage>;
   /** Sparse two-slot daycare, created on first deposit. */
   daycare?: DaycareExtensionState;
   /** Sparse per-character step trackers (character -> tracker id). */
@@ -196,6 +212,23 @@ export interface MonsterBox {
   hidden: boolean;
   capacity: number;
   monsters: SpawnedMonsterSnapshot[];
+}
+
+export interface NpcMonsterBox {
+  hidden: boolean;
+  capacity: number;
+  monsters: PendingMonster[];
+}
+
+export interface NpcItemStorage {
+  bag: Record<string, number>;
+  locker: Record<string, number>;
+}
+
+export interface TuxepediaEntry {
+  status: "seen" | "caught";
+  appearanceCount: number;
+  caughtCount: number;
 }
 
 export const KENNEL_BOX = "Kennel";
@@ -384,6 +417,38 @@ function pendingProblem(value: unknown, label: string, db?: BattleDb): string | 
   if (pending.moves !== undefined && (!Array.isArray(pending.moves)
     || !pending.moves.every((move) => nonEmptyString(move) && (!db || move in db.techniques)))) {
     return `${label}.moves must list imported technique slugs`;
+  }
+  return null;
+}
+
+function tuxepediaEntryProblem(value: unknown, label: string): string | null {
+  const entry = record(value);
+  if (!entry || (entry.status !== "seen" && entry.status !== "caught")) {
+    return `${label}.status must be seen or caught`;
+  }
+  if (!safeInteger(entry.appearanceCount) || entry.appearanceCount < 1) {
+    return `${label}.appearanceCount must be a positive safe integer`;
+  }
+  if (!safeInteger(entry.caughtCount) || entry.caughtCount < 0 ||
+      entry.caughtCount > entry.appearanceCount) {
+    return `${label}.caughtCount must be between zero and appearanceCount`;
+  }
+  return null;
+}
+
+function itemStacksProblem(
+  value: unknown,
+  label: string,
+  maxKinds: number,
+): string | null {
+  const stacks = record(value);
+  if (!stacks) return `${label} must be an object`;
+  if (Object.keys(stacks).length > maxKinds) return `${label} must contain at most ${maxKinds} item types`;
+  for (const [slug, quantity] of Object.entries(stacks)) {
+    if (!nonEmptyString(slug)) return `${label} must use non-empty item slugs`;
+    if (!safeInteger(quantity) || quantity < 1 || quantity > LOCKER_ITEM_CAP) {
+      return `${label}.${slug} must be an integer between 1 and ${LOCKER_ITEM_CAP}`;
+    }
   }
   return null;
 }
@@ -654,7 +719,7 @@ function tuxemonStateProblem(
     for (const [id, rawBox] of Object.entries(boxes)) {
       const box = record(rawBox);
       if (!nonEmptyString(id) || id === KENNEL_BOX || !box || typeof box.hidden !== "boolean"
-        || !safeInteger(box.capacity) || box.capacity < 1 || box.capacity > KENNEL_LIMIT
+        || !safeInteger(box.capacity) || box.capacity < 0
         || !Array.isArray(box.monsters) || box.monsters.length > box.capacity) {
         return `boxes.${id} is invalid`;
       }
@@ -677,6 +742,18 @@ function tuxemonStateProblem(
       if (!nonEmptyString(slug) || !safeInteger(quantity) || quantity < 1 || quantity > LOCKER_ITEM_CAP) {
         return `itemLocker.${slug} must be an integer between 1 and ${LOCKER_ITEM_CAP}`;
       }
+    }
+  }
+  if (state.npcItems !== undefined) {
+    const owners = record(state.npcItems);
+    if (!owners) return "npcItems must be an object";
+    for (const [character, rawStorage] of Object.entries(owners)) {
+      const storage = record(rawStorage);
+      if (!nonEmptyString(character) || !storage) return `npcItems.${character} must be an object`;
+      const bagProblem = itemStacksProblem(storage.bag, `npcItems.${character}.bag`, LOCKER_ITEM_CAP);
+      if (bagProblem) return bagProblem;
+      const lockerProblem = itemStacksProblem(storage.locker, `npcItems.${character}.locker`, LOCKER_LIMIT);
+      if (lockerProblem) return lockerProblem;
     }
   }
   if (state.daycare !== undefined) {
@@ -727,6 +804,36 @@ function tuxemonStateProblem(
     if (seen.some((slug) => !(slug in db.monsters))) return "seen must name imported monsters";
     if (caught.some((slug) => !(slug in db.monsters))) return "caught must name imported monsters";
   }
+  if (state.tuxepediaEntries !== undefined) {
+    const entries = record(state.tuxepediaEntries);
+    if (!entries) return "tuxepediaEntries must be an object";
+    for (const [slug, value] of Object.entries(entries)) {
+      if (!nonEmptyString(slug) || (db && !(slug in db.monsters))) {
+        return `tuxepediaEntries.${slug} must name an imported monster`;
+      }
+      const problem = tuxepediaEntryProblem(value, `tuxepediaEntries.${slug}`);
+      if (problem) return problem;
+      const status = (value as TuxepediaEntry).status;
+      if (status === "seen" ? !seen.includes(slug) : !caught.includes(slug)) {
+        return `tuxepediaEntries.${slug}.status must match seen/caught`;
+      }
+    }
+  }
+  if (state.npcTuxepedia !== undefined) {
+    const journals = record(state.npcTuxepedia);
+    if (!journals) return "npcTuxepedia must be an object";
+    for (const [character, rawEntries] of Object.entries(journals)) {
+      const entries = record(rawEntries);
+      if (!nonEmptyString(character) || !entries) return `npcTuxepedia.${character} must be an object`;
+      for (const [slug, value] of Object.entries(entries)) {
+        if (!nonEmptyString(slug) || (db && !(slug in db.monsters))) {
+          return `npcTuxepedia.${character}.${slug} must name an imported monster`;
+        }
+        const problem = tuxepediaEntryProblem(value, `npcTuxepedia.${character}.${slug}`);
+        if (problem) return problem;
+      }
+    }
+  }
   if (!safeInteger(state.runAttempts) || state.runAttempts < 0) {
     return "runAttempts must be a non-negative safe integer";
   }
@@ -742,6 +849,29 @@ function tuxemonStateProblem(
       const iid = (values[index] as PendingMonster).iid;
       if (identities.has(iid)) return `duplicate monster iid ${iid}`;
       identities.add(iid);
+    }
+  }
+  if (state.npcBoxes !== undefined) {
+    const owners = record(state.npcBoxes);
+    if (!owners) return "npcBoxes must be an object";
+    for (const [character, rawBoxes] of Object.entries(owners)) {
+      const boxes = record(rawBoxes);
+      if (!nonEmptyString(character) || !boxes) return `npcBoxes.${character} must be an object`;
+      for (const [id, rawBox] of Object.entries(boxes)) {
+        const box = record(rawBox);
+        if (!nonEmptyString(id) || !box || typeof box.hidden !== "boolean" ||
+            !safeInteger(box.capacity) || box.capacity < 0 || !Array.isArray(box.monsters) ||
+            box.monsters.length > box.capacity) {
+          return `npcBoxes.${character}.${id} is invalid`;
+        }
+        for (let index = 0; index < box.monsters.length; index++) {
+          const problem = pendingProblem(box.monsters[index], `npcBoxes.${character}.${id}[${index}]`, db);
+          if (problem) return problem;
+          const iid = (box.monsters[index] as PendingMonster).iid;
+          if (identities.has(iid)) return `duplicate monster iid ${iid}`;
+          identities.add(iid);
+        }
+      }
     }
   }
   if (!Array.isArray(state.history)) return "history must be an array";
@@ -1023,6 +1153,19 @@ function argsRecord(value: JsonValue, call: string): Record<string, unknown> {
   return args;
 }
 
+/** Importer-owned presence variables mirror BaseClient.get_npc: named NPCs
+ * are addressable only while their live map entity exists. Persistent NPC
+ * state may remain saved after a transfer, but its local presence variable
+ * resets and therefore cannot be queried until the NPC is placed again. */
+export function tuxemonCharacterOnMap(
+  context: Pick<ExtensionReadContext, "variables">,
+  character: string,
+): boolean {
+  if (character === "player") return true;
+  const safe = character.replace(/[^A-Za-z0-9_.-]/g, "_");
+  return context.variables[`local.npc.${safe}`] === 1;
+}
+
 function nextIid(state: TuxemonExtensionState): [string, number] {
   return nextMonsterIid(state.nextMonsterId);
 }
@@ -1035,26 +1178,128 @@ export function nextMonsterIid(nextMonsterId: number): [string, number] {
   return [`txmn-${nextMonsterId.toString(36).padStart(6, "0")}`, nextMonsterId + 1];
 }
 
+function playerTuxepediaEntry(
+  state: Readonly<TuxemonExtensionState>,
+  slug: string,
+): TuxepediaEntry | undefined {
+  const explicit = state.tuxepediaEntries?.[slug];
+  if (explicit) return explicit;
+  // Upstream's first MonsterEntry(CAUGHT) keeps the dataclass default
+  // caught_count=0; only a later seen -> caught transition increments it.
+  if (state.caught.includes(slug)) return { status: "caught", appearanceCount: 1, caughtCount: 0 };
+  if (state.seen.includes(slug)) return { status: "seen", appearanceCount: 1, caughtCount: 0 };
+  return undefined;
+}
+
+/** Read one character's saved journal entry, expanding the player's compact
+ * first-registration baseline on demand. */
+export function tuxepediaEntryFor(
+  state: Readonly<TuxemonExtensionState>,
+  character: string,
+  slug: string,
+): TuxepediaEntry | undefined {
+  return character === "player"
+    ? playerTuxepediaEntry(state, slug)
+    : state.npcTuxepedia?.[character]?.[slug];
+}
+
+function advanceTuxepediaEntry(
+  current: Readonly<TuxepediaEntry>,
+  status: "seen" | "caught",
+): TuxepediaEntry {
+  // Upstream refuses to weaken caught to seen and does not count that call.
+  if (current.status === "caught" && status === "seen") return current as TuxepediaEntry;
+  return {
+    status,
+    appearanceCount: current.appearanceCount + 1,
+    caughtCount: current.caughtCount + (status === "caught" && current.status !== "caught" ? 1 : 0),
+  };
+}
+
+function registerPlayerTuxepedia(
+  state: TuxemonExtensionState,
+  slug: string,
+  status: "seen" | "caught",
+): TuxemonExtensionState {
+  const current = playerTuxepediaEntry(state, slug);
+  if (current?.status === "caught" && status === "seen") return state;
+  const seen = status === "seen"
+    ? current ? state.seen : [...state.seen, slug]
+    : state.seen.includes(slug) ? state.seen.filter((candidate) => candidate !== slug) : state.seen;
+  const caught = status === "caught" && !state.caught.includes(slug)
+    ? [...state.caught, slug]
+    : state.caught;
+  // A first registration is represented entirely by the legacy arrays.
+  // Only repeated/transitioned entries pay for the sparse counter object.
+  if (!current) return { ...state, seen, caught };
+  const entry = advanceTuxepediaEntry(current, status);
+  return {
+    ...state,
+    seen,
+    caught,
+    tuxepediaEntries: { ...state.tuxepediaEntries, [slug]: entry },
+  };
+}
+
+function setCharacterTuxepedia(
+  state: TuxemonExtensionState,
+  character: string,
+  slug: string,
+  status: "unseen" | "seen" | "caught",
+): TuxemonExtensionState {
+  if (character === "player") {
+    if (status !== "unseen") return registerPlayerTuxepedia(state, slug, status);
+    const seen = state.seen.filter((candidate) => candidate !== slug);
+    const caught = state.caught.filter((candidate) => candidate !== slug);
+    if (seen.length === state.seen.length && caught.length === state.caught.length &&
+        !state.tuxepediaEntries?.[slug]) return state;
+    const tuxepediaEntries = { ...state.tuxepediaEntries };
+    delete tuxepediaEntries[slug];
+    return {
+      ...state,
+      seen,
+      caught,
+      tuxepediaEntries: Object.keys(tuxepediaEntries).length ? tuxepediaEntries : undefined,
+    };
+  }
+  const journal = state.npcTuxepedia?.[character] ?? {};
+  if (status === "unseen") {
+    if (!journal[slug]) return state;
+    const nextJournal = { ...journal };
+    delete nextJournal[slug];
+    const npcTuxepedia = { ...state.npcTuxepedia };
+    if (Object.keys(nextJournal).length) npcTuxepedia[character] = nextJournal;
+    else delete npcTuxepedia[character];
+    return { ...state, npcTuxepedia: Object.keys(npcTuxepedia).length ? npcTuxepedia : undefined };
+  }
+  const current = journal[slug];
+  if (current?.status === "caught" && status === "seen") return state;
+  const entry = current
+    ? advanceTuxepediaEntry(current, status)
+    : { status, appearanceCount: 1, caughtCount: 0 };
+  return {
+    ...state,
+    npcTuxepedia: {
+      ...state.npcTuxepedia,
+      [character]: { ...journal, [slug]: entry },
+    },
+  };
+}
+
 /** Register a sighting without weakening an existing caught entry. */
 export function registerSeenMonster(
   state: TuxemonExtensionState,
   slug: string,
 ): TuxemonExtensionState {
-  if (state.caught.includes(slug) || state.seen.includes(slug)) return state;
-  return { ...state, seen: [...state.seen, slug] };
+  return registerPlayerTuxepedia(state, slug, "seen");
 }
 
-/** Register ownership monotonically: caught wins over seen-only. */
+/** Register ownership monotonically while retaining appearance/catch counts. */
 export function registerCaughtMonster(
   state: TuxemonExtensionState,
   slug: string,
 ): TuxemonExtensionState {
-  const seen = state.seen.includes(slug)
-    ? state.seen.filter((candidate) => candidate !== slug)
-    : state.seen;
-  const caught = state.caught.includes(slug) ? state.caught : [...state.caught, slug];
-  if (seen === state.seen && caught === state.caught) return state;
-  return { ...state, seen, caught };
+  return registerPlayerTuxepedia(state, slug, "caught");
 }
 
 function resolveSpecies(
@@ -1434,20 +1679,19 @@ function tuxepediaCommand(source: BattleDbSource) {
     const character = args.character === undefined ? "player" : args.character;
     if (!nonEmptyString(character)) throw new Error("tux.set_tuxepedia: character must be a string");
     if (!nonEmptyString(args.species)) throw new Error("tux.set_tuxepedia: species must be a string");
+    // Upstream resolves named targets through get_npc() before validating
+    // status/species. Saved off-map NPCs therefore make the action stop.
+    if (!tuxemonCharacterOnMap(context, character)) return;
     const db = resolveBattleDb(source);
-    if (!(args.species in db.monsters)) {
-      throw new Error(`tux.set_tuxepedia: unknown monster '${args.species}'`);
-    }
     if (args.status !== "seen" && args.status !== "caught" && args.status !== "unseen") {
       throw new Error("tux.set_tuxepedia: status must be unseen, seen, or caught");
     }
+    if (!(args.species in db.monsters)) {
+      throw new Error(`tux.set_tuxepedia: unknown monster '${args.species}'`);
+    }
     const current = currentExtensionState(context.ext);
-    if (character !== "player" || args.status === "unseen") return { ext: json(current) };
-    return {
-      ext: json(args.status === "caught"
-        ? registerCaughtMonster(current, args.species)
-        : registerSeenMonster(current, args.species)),
-    };
+    const next = setCharacterTuxepedia(current, character, args.species, args.status);
+    return next === current ? undefined : { ext: json(next) };
   };
 }
 
@@ -1891,11 +2135,9 @@ function partyMatchCondition(source: BattleDbSource) {
   };
 }
 
-/** KC1: remove_monster. The variable holds a monster iid (written by
- *  get_player_monster's resolver, get_party_monsters or add_monster).
- *  Upstream looks the iid up globally and removes it from its owner, which
- *  may be an NPC: search the player party, then the kennel, then every NPC
- *  party. A missing iid is a no-op, matching upstream's logged stop. */
+/** remove_monster. The project-level generic contract searches every player
+ *  monster container, then live on-map NPC parties. Saved persistent NPCs
+ *  deliberately stay invisible while off-map. A missing iid is a no-op. */
 function removeMonsterCommand() {
   return (context: ExtensionCommandContext, value: JsonValue) => {
     const args = argsRecord(value, "tux.remove_monster");
@@ -1903,34 +2145,46 @@ function removeMonsterCommand() {
     const iid = context.variables[args.variable];
     if (typeof iid !== "string" || iid.length === 0) return;
     const current = currentExtensionState(context.ext);
+    const withoutMonsterMetadata = (state: TuxemonExtensionState): TuxemonExtensionState => {
+      if (!Object.hasOwn(state.plagueByIid, iid)) return state;
+      const plagueByIid = { ...state.plagueByIid };
+      delete plagueByIid[iid];
+      return { ...state, plagueByIid };
+    };
     const party = current.party.filter((monster) => monster.iid !== iid);
     if (party.length !== current.party.length) {
-      return { ext: json({ ...current, party }) };
+      return { ext: json(withoutMonsterMetadata({ ...current, party })) };
     }
     const kennel = current.kennel.filter((monster) => monster.iid !== iid);
     if (kennel.length !== current.kennel.length) {
-      return { ext: json({ ...current, kennel, kennelBox: true }) };
+      return { ext: json(withoutMonsterMetadata({ ...current, kennel, kennelBox: true })) };
     }
     for (const [id, box] of Object.entries(current.boxes ?? {})) {
       const monsters = box.monsters.filter((monster) => monster.iid !== iid);
       if (monsters.length !== box.monsters.length) {
-        return { ext: json({ ...current, boxes: { ...current.boxes, [id]: { ...box, monsters } } }) };
+        return { ext: json(withoutMonsterMetadata({
+          ...current,
+          boxes: { ...current.boxes, [id]: { ...box, monsters } },
+        })) };
       }
     }
     for (const [character, monsters] of Object.entries(current.npcParties)) {
+      if (!tuxemonCharacterOnMap(context, character)) continue;
       const next = monsters.filter((monster) => monster.iid !== iid);
       if (next.length !== monsters.length) {
-        return { ext: json({ ...current, npcParties: { ...current.npcParties, [character]: next } }) };
+        return { ext: json(withoutMonsterMetadata({
+          ...current,
+          npcParties: { ...current.npcParties, [character]: next },
+        })) };
       }
     }
   };
 }
 
-/** An NPC's party lives as long as the NPC. Upstream builds a fresh NPC on
- *  every `create_npc` (all non-persistent NPCs are dropped on each map
- *  transition) and discards it on `remove_npc`; the importer calls this at
- *  both points, and `tux.clear_npc_parties` drops every other NPC's party
- *  on map entry, so a later visit never inherits an earlier visit's party. */
+/** An NPC's owned party/journal/boxes/items live as long as that NPC. The importer
+ * calls this for fresh non-persistent `create_npc` instances and every
+ * explicit `remove_npc`; `tux.clear_npc_parties` handles map transitions
+ * while retaining the configured persistent characters. */
 function clearNpcPartyCommand() {
   return (context: ExtensionCommandContext, value: JsonValue) => {
     const args = argsRecord(value, "tux.clear_npc_party");
@@ -1938,10 +2192,34 @@ function clearNpcPartyCommand() {
       throw new Error("tux.clear_npc_party: character must name an NPC");
     }
     const current = currentExtensionState(context.ext);
-    if (!Object.hasOwn(current.npcParties, args.character)) return;
+    // Preserve the historical party-only path (and its allocations) for the
+    // common case where no generic NPC-owned state has ever been created.
+    if (current.npcBoxes === undefined && current.npcTuxepedia === undefined && current.npcItems === undefined) {
+      if (!Object.hasOwn(current.npcParties, args.character)) return;
+      const npcParties = { ...current.npcParties };
+      delete npcParties[args.character];
+      return { ext: json({ ...current, npcParties }) };
+    }
+    const hasParty = Object.hasOwn(current.npcParties, args.character);
+    const hasBoxes = Object.hasOwn(current.npcBoxes ?? {}, args.character);
+    const hasJournal = Object.hasOwn(current.npcTuxepedia ?? {}, args.character);
+    const hasItems = Object.hasOwn(current.npcItems ?? {}, args.character);
+    if (!hasParty && !hasBoxes && !hasJournal && !hasItems) return;
     const npcParties = { ...current.npcParties };
+    const npcBoxes = { ...current.npcBoxes };
+    const npcTuxepedia = { ...current.npcTuxepedia };
+    const npcItems = { ...current.npcItems };
     delete npcParties[args.character];
-    return { ext: json({ ...current, npcParties }) };
+    delete npcBoxes[args.character];
+    delete npcTuxepedia[args.character];
+    delete npcItems[args.character];
+    return { ext: json({
+      ...current,
+      npcParties,
+      npcBoxes: Object.keys(npcBoxes).length ? npcBoxes : undefined,
+      npcTuxepedia: Object.keys(npcTuxepedia).length ? npcTuxepedia : undefined,
+      npcItems: Object.keys(npcItems).length ? npcItems : undefined,
+    }) };
   };
 }
 
@@ -1957,13 +2235,49 @@ function clearNpcPartiesCommand() {
       throw new Error("tux.clear_npc_parties: keep must list NPC slugs");
     }
     const current = currentExtensionState(context.ext);
-    const characters = Object.keys(current.npcParties);
-    if (characters.every((character) => keep.includes(character))) return;
-    const npcParties: typeof current.npcParties = {};
-    for (const character of characters) {
-      if (keep.includes(character)) npcParties[character] = current.npcParties[character]!;
+    // Most saves never create NPC-owned journals or boxes. Keep their map
+    // transfer mutation on the former allocation-minimal party-only path.
+    if (current.npcBoxes === undefined && current.npcTuxepedia === undefined && current.npcItems === undefined) {
+      const characters = Object.keys(current.npcParties);
+      if (characters.every((character) => keep.includes(character))) return;
+      const npcParties: typeof current.npcParties = {};
+      for (const character of characters) {
+        if (keep.includes(character)) npcParties[character] = current.npcParties[character]!;
+      }
+      return { ext: json({ ...current, npcParties }) };
     }
-    return { ext: json({ ...current, npcParties }) };
+    const characters = new Set([
+      ...Object.keys(current.npcParties),
+      ...Object.keys(current.npcBoxes ?? {}),
+      ...Object.keys(current.npcTuxepedia ?? {}),
+      ...Object.keys(current.npcItems ?? {}),
+    ]);
+    if ([...characters].every((character) => keep.includes(character))) return;
+    const npcParties: typeof current.npcParties = {};
+    const npcBoxes: NonNullable<typeof current.npcBoxes> = {};
+    const npcTuxepedia: NonNullable<typeof current.npcTuxepedia> = {};
+    const npcItems: NonNullable<typeof current.npcItems> = {};
+    for (const character of characters) {
+      if (keep.includes(character) && current.npcParties[character]) {
+        npcParties[character] = current.npcParties[character]!;
+      }
+      if (keep.includes(character) && current.npcBoxes?.[character]) {
+        npcBoxes[character] = current.npcBoxes[character]!;
+      }
+      if (keep.includes(character) && current.npcTuxepedia?.[character]) {
+        npcTuxepedia[character] = current.npcTuxepedia[character]!;
+      }
+      if (keep.includes(character) && current.npcItems?.[character]) {
+        npcItems[character] = current.npcItems[character]!;
+      }
+    }
+    return { ext: json({
+      ...current,
+      npcParties,
+      npcBoxes: Object.keys(npcBoxes).length ? npcBoxes : undefined,
+      npcTuxepedia: Object.keys(npcTuxepedia).length ? npcTuxepedia : undefined,
+      npcItems: Object.keys(npcItems).length ? npcItems : undefined,
+    }) };
   };
 }
 
@@ -1977,6 +2291,9 @@ function getPartyMonstersCommand() {
     if (!nonEmptyString(character)) {
       throw new Error("tux.get_party_monsters: character must be a string");
     }
+    if (!tuxemonCharacterOnMap(context, character)) {
+      throw new Error(`tux.get_party_monsters: NPC '${character}' not found`);
+    }
     const state = currentExtensionState(context.ext);
     const monsters = character === "player" ? state.party : (state.npcParties[character] ?? []);
     const writes: Record<string, string> = {};
@@ -1987,20 +2304,34 @@ function getPartyMonstersCommand() {
   };
 }
 
-/** create_kennel: player boxes only (no source map gives an NPC a box).
- *  An existing box is left untouched, exactly like upstream. */
+/** create_kennel: every live character owns an independent saved box table.
+ * An existing box is left untouched, exactly like upstream. */
 function createKennelCommand() {
   return (context: ExtensionCommandContext, value: JsonValue) => {
     const args = argsRecord(value, "tux.create_kennel");
     if (!nonEmptyString(args.character) || !nonEmptyString(args.kennel)) {
       throw new Error("tux.create_kennel: character and kennel must be strings");
     }
-    if (args.character !== "player") return;
+    if (!tuxemonCharacterOnMap(context, args.character)) return;
     const capacity = args.capacity === undefined ? KENNEL_LIMIT : args.capacity;
-    if (!safeInteger(capacity) || capacity < 1 || capacity > KENNEL_LIMIT) {
-      throw new Error(`tux.create_kennel: capacity must be 1..${KENNEL_LIMIT}`);
+    if (!safeInteger(capacity) || capacity < 0) {
+      throw new Error("tux.create_kennel: capacity must be a non-negative safe integer");
     }
     const current = currentExtensionState(context.ext);
+    if (args.character !== "player") {
+      const ownerBoxes = current.npcBoxes?.[args.character] ?? {};
+      if (ownerBoxes[args.kennel]) return;
+      return { ext: json({
+        ...current,
+        npcBoxes: {
+          ...current.npcBoxes,
+          [args.character]: {
+            ...ownerBoxes,
+            [args.kennel]: { hidden: args.hidden === true, capacity, monsters: [] },
+          },
+        },
+      }) };
+    }
     if (args.kennel === KENNEL_BOX) {
       return kennelExists(current) ? undefined : { ext: json({ ...current, kennelBox: true }) };
     }
@@ -2012,21 +2343,82 @@ function createKennelCommand() {
   };
 }
 
-/** set_kennel_visible: a missing box is a silent no-op; the importer folds
- *  the upstream ValueError for the main Kennel out of the event. */
+/** set_kennel_visible: a missing box is a silent no-op; the protected main
+ * Kennel raises exactly as the upstream action does for a live character. */
 function setKennelVisibleCommand() {
   return (context: ExtensionCommandContext, value: JsonValue) => {
     const args = argsRecord(value, "tux.set_kennel_visible");
     if (!nonEmptyString(args.character) || !nonEmptyString(args.kennel) || typeof args.visible !== "boolean") {
       throw new Error("tux.set_kennel_visible: character, kennel and visible are required");
     }
-    if (args.character !== "player" || args.kennel === KENNEL_BOX) return;
+    if (!tuxemonCharacterOnMap(context, args.character)) return;
+    if (args.kennel === KENNEL_BOX) {
+      throw new Error(`${KENNEL_BOX} cannot be made invisible.`);
+    }
     const current = currentExtensionState(context.ext);
+    if (args.character !== "player") {
+      const ownerBoxes = current.npcBoxes?.[args.character];
+      const box = ownerBoxes?.[args.kennel];
+      if (!box || box.hidden === !args.visible) return;
+      return { ext: json({
+        ...current,
+        npcBoxes: {
+          ...current.npcBoxes,
+          [args.character]: { ...ownerBoxes, [args.kennel]: { ...box, hidden: !args.visible } },
+        },
+      }) };
+    }
     const box = current.boxes?.[args.kennel];
     if (!box || box.hidden === !args.visible) return;
     return { ext: json({
       ...current,
       boxes: { ...current.boxes, [args.kennel]: { ...box, hidden: !args.visible } },
+    }) };
+  };
+}
+
+/** Named `add_item`: upstream resolves the live owner, then mutates that
+ * character's independent bag (overflowing a new kind into Locker once the
+ * bag has 99 kinds). The kit uses compact slug/count stacks, capped like the
+ * player backpack and Locker. */
+function addNpcItemCommand() {
+  return (context: ExtensionCommandContext, value: JsonValue) => {
+    const args = argsRecord(value, "tux.add_npc_item");
+    if (!nonEmptyString(args.character) || args.character === "player" || !nonEmptyString(args.item)
+      || !safeInteger(args.quantity) || args.quantity === 0) {
+      throw new Error("tux.add_npc_item: named character, item and non-zero integer quantity are required");
+    }
+    if (!tuxemonCharacterOnMap(context, args.character)) {
+      throw new Error(`tux.add_npc_item: NPC '${args.character}' not found`);
+    }
+    const current = currentExtensionState(context.ext);
+    const saved = current.npcItems?.[args.character];
+    const bag = { ...(saved?.bag ?? {}) };
+    const locker = { ...(saved?.locker ?? {}) };
+    const quantity = Math.max(-LOCKER_ITEM_CAP, Math.min(LOCKER_ITEM_CAP, args.quantity));
+    if (bag[args.item] !== undefined) {
+      // BagHandler.remove_item refuses an insufficient withdrawal instead of
+      // clamping the stack to zero.
+      if (quantity < 0 && bag[args.item]! < -quantity) return;
+      const next = Math.max(0, Math.min(LOCKER_ITEM_CAP, bag[args.item]! + quantity));
+      if (next === bag[args.item]) return;
+      if (next === 0) delete bag[args.item];
+      else bag[args.item] = next;
+    } else if (quantity < 0) {
+      return;
+    } else if (Object.keys(bag).length < LOCKER_ITEM_CAP) {
+      bag[args.item] = quantity;
+    } else if (locker[args.item] !== undefined || Object.keys(locker).length < LOCKER_LIMIT) {
+      locker[args.item] = Math.min(LOCKER_ITEM_CAP, (locker[args.item] ?? 0) + quantity);
+    } else {
+      return;
+    }
+    return { ext: json({
+      ...current,
+      npcItems: {
+        ...current.npcItems,
+        [args.character]: { bag, locker },
+      },
     }) };
   };
 }
@@ -2148,12 +2540,20 @@ function stepTrackerCondition(context: ExtensionReadContext, value: JsonValue): 
   return negate(milestonePending(current.stepTrackers, character, tracker, milestone), args);
 }
 
-function boxOf(
+function playerBoxOf(
   state: Readonly<TuxemonExtensionState>,
   id: string,
 ): { hidden: boolean; monsters: readonly SpawnedMonsterSnapshot[] } | null {
   if (id === KENNEL_BOX) return kennelExists(state) ? { hidden: false, monsters: state.kennel } : null;
   return state.boxes?.[id] ?? null;
+}
+
+function characterBoxOf(
+  state: Readonly<TuxemonExtensionState>,
+  character: string,
+  id: string,
+): { hidden: boolean; monsters: readonly (SpawnedMonsterSnapshot | PendingMonster)[] } | null {
+  return character === "player" ? playerBoxOf(state, id) : state.npcBoxes?.[character]?.[id] ?? null;
 }
 
 /** KC1: choice_monster/choice_npc. The importer bakes the static option list
@@ -3269,6 +3669,7 @@ export function createTuxemonExtensions(
       "tux.info": infoCommand(),
       "tux.create_kennel": createKennelCommand(),
       "tux.set_kennel_visible": setKennelVisibleCommand(),
+      "tux.add_npc_item": addNpcItemCommand(),
       "tux.player_step": playerStepCommand(source),
       "tux.add_step_tracker": addStepTrackerCommand(),
       "tux.remove_step_tracker": removeStepTrackerCommand(),
@@ -3373,12 +3774,13 @@ export function createTuxemonExtensions(
       },
       "tux.has_tuxepedia": (context, value) => {
         const args = argsRecord(value, "tux.has_tuxepedia");
-        if (args.character !== "player" || !nonEmptyString(args.species)
+        if (!nonEmptyString(args.character) || !nonEmptyString(args.species)
           || (args.status !== "seen" && args.status !== "caught")) return false;
+        // Upstream raises for a missing character, so condition evaluation
+        // fails both the positive and negative forms.
+        if (!tuxemonCharacterOnMap(context, args.character)) return false;
         const state = currentExtensionState(context.ext);
-        const registered = args.status === "seen"
-          ? state.seen.includes(args.species)
-          : state.caught.includes(args.species);
+        const registered = tuxepediaEntryFor(state, args.character, args.species)?.status === args.status;
         return negate(registered, args);
       },
       "tux.char_healed": (context, value) => {
@@ -3476,8 +3878,8 @@ export function createTuxemonExtensions(
       "tux.kennel": (context, value) => {
         const args = argsRecord(value, "tux.kennel");
         if (!nonEmptyString(args.character) || !nonEmptyString(args.kennel)) return negate(false, args);
-        const box = args.character === "player"
-          ? boxOf(currentExtensionState(context.ext), args.kennel)
+        const box = tuxemonCharacterOnMap(context, args.character)
+          ? characterBoxOf(currentExtensionState(context.ext), args.character, args.kennel)
           : null;
         const result = box !== null && (args.option === "exist"
           || (args.option === "visible" && !box.hidden)
@@ -3492,8 +3894,10 @@ export function createTuxemonExtensions(
         if (!nonEmptyString(args.character) || !nonEmptyString(args.kennel) || !safeInteger(args.value)) {
           return false;
         }
-        if (args.character !== "player") return false;
-        const box = boxOf(currentExtensionState(context.ext), args.kennel);
+        // A missing character returns false upstream, so `not` inverts it.
+        // A missing box raises and therefore fails both forms below.
+        if (!tuxemonCharacterOnMap(context, args.character)) return negate(false, args);
+        const box = characterBoxOf(currentExtensionState(context.ext), args.character, args.kennel);
         if (box === null) return false;
         return negate(compare(args.operator, box.monsters.length, args.value), args);
       },

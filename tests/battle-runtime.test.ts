@@ -652,11 +652,16 @@ describe("Tuxemon BattleRules adapter", () => {
       random: () => 0,
     });
     const getParty = extensions.commands!["tux.get_party_monsters"]!;
-    const written = getParty(commandContext(started!.ext), { character: "spyder_nimrod_argon" });
+    const written = getParty(commandContext(started!.ext, {
+      "local.npc.spyder_nimrod_argon": 1,
+    }), { character: "spyder_nimrod_argon" });
     expect(written?.writes).toEqual({ "v.iid_slot_0": iid });
 
     const remove = extensions.commands!["tux.remove_monster"]!;
-    const removed = remove(commandContext(started!.ext, { "v.iid_slot_0": iid }), { variable: "v.iid_slot_0" });
+    const removed = remove(commandContext(started!.ext, {
+      "local.npc.spyder_nimrod_argon": 1,
+      "v.iid_slot_0": iid,
+    }), { variable: "v.iid_slot_0" });
     expect(removed).not.toBeUndefined();
     const afterRemoval = tuxemonExtensionState(removed!.ext!, DB);
     expect(afterRemoval.npcParties.spyder_nimrod_argon).toEqual([]);

@@ -1604,15 +1604,15 @@ function clauses(
       noteCondition(c, `${c.op} has_monster`, "T3-placeholder", "switch mon.<slug> set by add_monster");
       return [{ k: "sw", id: `mon.${a[1]}`, on: !not }];
     case "has_tuxepedia":
-      if (options.battle && a[0] === "player" && a[1]
+      if (options.battle && a[0] && a[1]
         && (a[2] === "seen" || a[2] === "caught")) {
-        noteCondition(c, `${c.op} has_tuxepedia`, "T1", "tux.has_tuxepedia reads saved player seen/caught state");
+        noteCondition(c, `${c.op} has_tuxepedia`, "T1", "tux.has_tuxepedia reads the live character's saved journal state");
         return [{ k: "ext", call: "tux.has_tuxepedia", args: {
-          character: "player", species: a[1], status: a[2], negate: not,
+          character: a[0], species: a[1], status: a[2], negate: not,
         } }];
       }
-      noteCondition(c, `${c.op} has_tuxepedia`, "T2-dropped", "only the player's seen/caught Tuxepedia state is imported");
-      return K(false, `${c.op} has_tuxepedia: only the player's seen/caught Tuxepedia state is imported`);
+      noteCondition(c, `${c.op} has_tuxepedia`, "T2-dropped", "malformed journal query");
+      return K(false, `${c.op} has_tuxepedia: malformed journal query`);
     case "char_healed":
       if (options.battle && a[0] === "player") {
         noteCondition(c, `${c.op} char_healed`, "T1", "tux.char_healed reads every saved player monster's current/max HP");
@@ -1720,7 +1720,7 @@ function clauses(
       return K(false);
     case "kennel":
       if (options.battle && a[0] && a[1] && ["visible", "hidden", "exist"].includes(a[2] ?? "")) {
-        noteCondition(c, `${c.op} kennel`, "T1", "tux.kennel reads the saved player boxes");
+        noteCondition(c, `${c.op} kennel`, "T1", "tux.kennel reads the live target character's saved boxes");
         return [{ k: "ext", call: "tux.kennel", args: {
           character: a[0], kennel: a[1], option: a[2]!, negate: not,
         } }];
@@ -1729,7 +1729,7 @@ function clauses(
       return K(false);
     case "has_kennel":
       if (options.battle && a[0] && a[1] && a[2] && /^\d+$/.test(a[3] ?? "")) {
-        noteCondition(c, `${c.op} has_kennel`, "T1", "tux.has_kennel counts one saved player box; a missing box fails both forms");
+        noteCondition(c, `${c.op} has_kennel`, "T1", "tux.has_kennel counts one live target character's saved box; a missing box fails both forms");
         return [{ k: "ext", call: "tux.has_kennel", args: {
           character: a[0], kennel: a[1], operator: a[2], value: Number(a[3]), negate: not,
         } }];
@@ -2501,13 +2501,14 @@ const parseFlag = (value: string | undefined): boolean =>
 /** Box display names come from the translated box id (upstream T.translate). */
 const STORAGE_BOX_IDS = ["Kennel", "quarantine"];
 
-function pcScene(): Command {
+function pcScene(character = "player"): Command {
   const boxNames: Record<string, JsonValue> = {};
   for (const id of STORAGE_BOX_IDS) boxNames[id] = poText(id, id)!;
   return {
     op: "scene",
     id: "tux.pc",
     args: {
+      ...(character === "player" ? {} : { character }),
       labels: labelArgs({
         pickUp: poText("menu_storage"),
         dropOff: poText("menu_dropoff"),
@@ -3140,12 +3141,20 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         break;
       }
       case "add_item": {
-        if (g[2] && g[2] !== "player") { noteAction(a, "add_item(npc)", "T3-dropped", "NPC bags are combat-only"); break; }
         const q = g[1] ? Number(g[1]) : 1;
         if (!q) { noteAction(a, "add_item(zero)", "T4-dropped", "zero quantity is a no-op"); break; }
-        noteAction(a, a.type, "T1", "session item add/sub");
         ensureItem(g[0]!);
         const amount = Math.min(99, Math.abs(q)) * (q > 0 ? 1 : -1);
+        if (g[2] && g[2] !== "player") {
+          if (ctx.options.battle) {
+            noteAction(a, "add_item(npc)", "T1-lowered", "saved live-NPC bag and Locker; trainer battle item AI remains degraded");
+            out.push({ op: "ext", call: "tux.add_npc_item", args: {
+              character: g[2], item: g[0]!, quantity: amount,
+            } });
+          } else noteAction(a, "add_item(npc)", "T3-dropped", "monster/combat subsystem (P2)");
+          break;
+        }
+        noteAction(a, a.type, "T1", "session item add/sub");
         out.push({ op: "item", item: g[0]!, set: amount > 0 ? "add" : "sub", count: Math.abs(amount) });
         break;
       }
@@ -3184,9 +3193,11 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
             ? "local.npc.<slug> = 1 plus K1 place"
             : "local.npc.<slug> = 1 (spawn position other than the event's is T2 place)",
         );
-        if (ctx.options.battle) {
+        if (ctx.options.battle && !PERSISTENT_NPCS.includes(g[0]!)) {
           // Upstream create_npc is a no-op for an NPC already on the map;
-          // otherwise it builds a fresh NPC whose party starts empty.
+          // otherwise it builds a fresh non-persistent NPC whose owned party,
+          // journal and boxes start empty. Persistent NPC state survives a
+          // map transfer and becomes addressable again when the NPC is placed.
           out.push({
             op: "if",
             if: { kind: "variable", id: npcVar(g[0]!), op: "==", value: 0 },
@@ -3546,7 +3557,7 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         break;
       case "remove_monster":
         if (ctx.options.battle) {
-          noteAction(a, a.type, "T1", "tux.remove_monster deletes the iid from its owner (player party/kennel or NPC party)");
+          noteAction(a, a.type, "T1", "tux.remove_monster deletes the iid from its live owner (player party/Kennel/named boxes or NPC party)");
           out.push({ op: "ext", call: "tux.remove_monster", args: { variable: varId(g[0]!) } });
         } else {
           noteAction(a, a.type, "T3-placeholder", "sys.party_size -= 1 when non-empty");
@@ -3893,7 +3904,7 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         break;
       case "set_tuxepedia":
         if (ctx.options.battle && g[0] && g[1] && g[2]) {
-          noteAction(a, a.type, "T1-lowered", "persistent seen/caught status; repeat counters and NPC journals are not retained");
+          noteAction(a, a.type, "T1", "per-character saved journal status and repeat counters, including entry removal");
           out.push({
             op: "ext",
             call: "tux.set_tuxepedia",
@@ -3913,7 +3924,7 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         break;
       case "open_journal":
         if (ctx.options.battle && g[0]) {
-          noteAction(a, a.type, "T1-lowered", "read-only tux.journal scene with compact imported details");
+          noteAction(a, a.type, "T1-lowered", "read-only player journal preview preserves forced reveal and single-entry navigation, with compact imported details");
           out.push({ op: "scene", id: "tux.journal", args: { monster: g[0], reveal: true } });
         } else noteAction(a, a.type, "T3-dropped", "monster subsystem or target unavailable");
         break;
@@ -4251,33 +4262,33 @@ function convertActions(acts: readonly Rule[], ctx: Ctx): Command[] {
         out.push({ op: "autosave" });
         break;
       case "access_pc":
-        if (ctx.options.battle && g[0] === "player") {
-          noteAction(a, a.type, "T1", "campaign storage, item locker, and the upstream Multiplayer not-implemented placeholder are complete");
-          out.push(pcScene());
-        } else noteAction(a, a.type, "T3-dropped", ctx.options.battle ? "PC storage is modelled for the player only" : "monster/combat subsystem (P2)");
+        if (ctx.options.battle && g[0]) {
+          noteAction(a, a.type, "T1", "target character's saved party, monster boxes, bag and item Locker plus Multiplayer placeholder");
+          out.push(pcScene(g[0]));
+        } else noteAction(a, a.type, "T3-dropped", "monster/combat subsystem or target character unavailable");
         break;
       case "create_kennel":
-        if (ctx.options.battle && g[0] === "player" && g[1]
-          && (g[3] === undefined || /^[1-9]\d*$/.test(g[3]))) {
-          noteAction(a, a.type, "T1", "tux.create_kennel adds a saved player box (hidden flag, capacity)");
+        if (ctx.options.battle && g[0] && g[1]
+          && (g[3] === undefined || (/^-?(?:0|[1-9]\d*)$/.test(g[3])
+            && Number.isSafeInteger(Number(g[3]))))) {
+          noteAction(a, a.type, "T1", "tux.create_kennel adds a saved box to the live target character");
           out.push({ op: "ext", call: "tux.create_kennel", args: {
-            character: "player",
+            character: g[0],
             kennel: g[1],
             hidden: parseFlag(g[2]),
-            ...(g[3] === undefined ? {} : { capacity: Math.min(30, Number(g[3])) }),
+            ...(g[3] === undefined ? {} : { capacity: Math.max(0, Number(g[3])) }),
           } });
-        } else noteAction(a, a.type, "T3-dropped", ctx.options.battle ? "boxes are modelled for the player only" : "monster/combat subsystem (P2)");
+        } else noteAction(a, a.type, "T3-dropped", ctx.options.battle ? "malformed target, box id, or capacity" : "monster/combat subsystem (P2)");
         break;
       case "set_kennel_visible":
-        // Upstream raises for the main Kennel; that call can never succeed.
-        if (ctx.options.battle && g[0] === "player" && g[1] && g[1] !== "Kennel") {
-          noteAction(a, a.type, "T1", "tux.set_kennel_visible toggles a saved player box");
+        if (ctx.options.battle && g[0] && g[1]) {
+          noteAction(a, a.type, "T1", "tux.set_kennel_visible toggles the live target character's saved box");
           out.push({ op: "ext", call: "tux.set_kennel_visible", args: {
-            character: "player",
+            character: g[0],
             kennel: g[1],
             visible: parseFlag(g[2]),
           } });
-        } else noteAction(a, a.type, "T3-dropped", ctx.options.battle ? "boxes are modelled for the player only; the main Kennel cannot be hidden" : "monster/combat subsystem (P2)");
+        } else noteAction(a, a.type, "T3-dropped", ctx.options.battle ? "missing target character or box id" : "monster/combat subsystem (P2)");
         break;
       case "trading":
         if (ctx.options.battle && g[0] && g[1] && monsterSlugs.has(g[1])) {

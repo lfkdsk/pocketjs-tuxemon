@@ -1528,8 +1528,8 @@ test("G6 lowers Tuxemon rename and journal actions to registered scenes", () => 
   const rows = result.report.coverage.actions.rows;
   expect(rows.find((row) => row.type === "rename_player")).toMatchObject({ native: 3, degraded: 0, dropped: 2 });
   expect(rows.find((row) => row.type === "rename_monster")).toMatchObject({ native: 1, dropped: 1 });
-  expect(rows.find((row) => row.type === "open_journal")).toMatchObject({ degraded: 3, dropped: 11 });
-  expect(rows.find((row) => row.type === "set_tuxepedia")).toMatchObject({ degraded: 6, dropped: 0 });
+  expect(rows.find((row) => row.type === "open_journal")).toMatchObject({ native: 0, degraded: 3, dropped: 11 });
+  expect(rows.find((row) => row.type === "set_tuxepedia")).toMatchObject({ native: 6, degraded: 0, dropped: 0 });
   expect(rows.find((row) => row.type === "get_player_monster")).toMatchObject({ native: 1, degraded: 0, dropped: 16 });
 });
 

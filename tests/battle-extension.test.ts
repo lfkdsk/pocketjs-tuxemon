@@ -683,7 +683,7 @@ describe("KC1 party choice and removal", () => {
       { op: "ext" as const, call: "tux.add_monster", args: { species: "nut", level: 7, character: "spyder_nimrod_argon" } },
       { op: "ext" as const, call: "tux.add_monster", args: { species: "agnite", level: 8, character: "spyder_nimrod_argon" } },
       { op: "ext" as const, call: "tux.get_party_monsters", args: { character: "spyder_nimrod_argon" } },
-    ]);
+    ], undefined, { "local.npc.spyder_nimrod_argon": 1 });
     expect(state.sw.variables["v.iid_slot_0"]).toBe("txmn-000001");
     expect(state.sw.variables["v.iid_slot_1"]).toBe("txmn-000002");
   });
@@ -701,7 +701,7 @@ describe("KC1 party choice and removal", () => {
       { op: "ext" as const, call: "tux.add_monster", args: { species: "nut", level: 7, character: "spyder_nimrod_argon" } },
       { op: "ext" as const, call: "tux.get_party_monsters", args: { character: "spyder_nimrod_argon" } },
       { op: "ext" as const, call: "tux.remove_monster", args: { variable: "v.iid_slot_0" } },
-    ]);
+    ], undefined, { "local.npc.spyder_nimrod_argon": 1 });
     const ext = tuxemonExtensionState(state.ext, DB);
     expect(ext.npcParties.spyder_nimrod_argon).toEqual([]);
     expect(ext.party).toHaveLength(0);

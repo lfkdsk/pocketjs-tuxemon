@@ -814,7 +814,7 @@ describe("COV-B imported NPC trainer parties (B1 integration)", () => {
     const commands = extCommandsOf(event).filter((command) =>
       command.call !== "tux.clear_npc_party" && command.call !== "tux.set_monster_health"
       && command.call !== "tux.set_monster_status");
-    const result = run(commands);
+    const result = run(commands, undefined, { "local.npc.spyder_dojo_iroh": 1 });
     const state = tuxemonExtensionState(result.state.ext, DB);
     const party = state.npcParties["spyder_dojo_iroh"]!;
     expect(party).toHaveLength(5);
@@ -839,7 +839,7 @@ describe("COV-B imported NPC trainer parties (B1 integration)", () => {
       { op: "ext", call: "tux.set_environment", args: { environment: "grass" } },
       ...staging,
     ];
-    const result = run(commands);
+    const result = run(commands, undefined, { "local.npc.spyder_dojo_iroh": 1 });
     const ext = result.state.ext as JsonValue;
     const rules = createTuxemonBattleRules(DB, TUXEMON_VARIABLE_ENUMS);
     const started = rules.start(ext, {
@@ -878,7 +878,7 @@ describe("COV-B NPC monster health and status (B1)", () => {
       { op: "ext", call: "tux.set_monster_health", args: { variable: "v.iid_slot_0", health: { kind: "fraction", value: 0.5 } } },
       { op: "ext", call: "tux.set_monster_status", args: { variable: "v.iid_slot_0", status: "poison" } },
     ];
-    const state = stateOf(run(commands));
+    const state = stateOf(run(commands, undefined, { "local.npc.gym_brad": 1 }));
     const member = state.npcParties["gym_brad"]![0]!;
     expect(member.health).toEqual({ kind: "fraction", value: 0.5 });
     expect(member.status).toBe("poison");
@@ -893,7 +893,7 @@ describe("COV-B NPC monster health and status (B1)", () => {
       { op: "ext", call: "tux.set_monster_health", args: { variable: "v.iid_slot_0", health: { kind: "fraction", value: 0.5 } } },
       { op: "ext", call: "tux.set_monster_status", args: { variable: "v.iid_slot_0", status: "poison" } },
     ];
-    const result = run(commands);
+    const result = run(commands, undefined, { "local.npc.gym_brad": 1 });
     const ext = result.state.ext as JsonValue;
     const rules = createTuxemonBattleRules(DB, TUXEMON_VARIABLE_ENUMS);
     const started = rules.start(ext, {
@@ -927,7 +927,7 @@ describe("COV-B NPC monster health and status (B1)", () => {
       { op: "ext", call: "tux.set_monster_health", args: { variable: "v.iid_slot_0" } },
       { op: "ext", call: "tux.set_monster_status", args: { variable: "v.iid_slot_0" } },
     ];
-    const state = stateOf(run(commands));
+    const state = stateOf(run(commands, undefined, { "local.npc.gym_chad": 1 }));
     const member = state.npcParties["gym_chad"]![0]!;
     expect(member.health).toEqual({ kind: "full", value: 1 });
     expect(member.status).toBeNull();

@@ -267,19 +267,22 @@ show the monster's static menu-face icon beside its translated name (upstream's
 animated 24 px menu faces are baked to one 16 px frame, a visual downgrade).
 \`choice_npc\` is Native: a choice box whose rows show each
 appearance's front walker frame as an icon, beside the shared label and the
-option's own name. \`remove_monster\` deletes an iid
-from its owner. An NPC's party lives as long as the NPC, as upstream: it is
-cleared when the NPC is created afresh (every map entry) or removed, and
-battle-time monsters stay in it until then. All
+option's own name. \`remove_monster\` deletes an iid from the player party,
+main Kennel or a named player box, then from an on-map NPC party; saved
+off-map NPCs are deliberately not searchable. An NPC's party and owned
+journal/boxes/items live as long as that NPC, as upstream: non-persistent
+state is cleared on map transfer or explicit removal, persistent state is
+retained while off-map, and battle-time monsters stay in it until then. All
 ${(partyMonster?.native ?? 0) + (partyMonster?.degraded ?? 0)} executable
 \`get_party_monster\` uses are Native: NPC trainer parties are staged live
 (not folded into the battle setup) when an event inspects or mutates them,
 so \`iid_slot_*\` always has a party to read. Scripted \`trading\` runs the \`tux.trade\` scene,
 which replaces the sent monster in its party slot with a freshly spawned
 monster at the same level and records it as caught. \`access_pc\` opens the
-\`tux.pc\` storage scene (monster boxes plus the item locker: deposit,
-withdraw with a quantity picker, and disband, followed by upstream's
-Multiplayer not-implemented placeholder); \`create_kennel\`,
+\`tux.pc\` storage scene for any live character's party, monster boxes, bag
+and item Locker (deposit, withdraw with a quantity picker, and disband),
+followed by upstream's Multiplayer not-implemented placeholder. The authored
+NPC \`add_item\` seeds that same saved per-owner bag. \`create_kennel\`,
 \`set_kennel_visible\`, \`kennel\` and
 \`has_kennel\` read and write the same saved boxes. All eight authored
 \`quarantine\` calls are Native: they move infected monsters between the party

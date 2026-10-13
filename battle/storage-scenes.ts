@@ -19,10 +19,13 @@ import {
   packTuxemonExtensionState,
   registerCaughtMonster,
   resolveBattleDb,
+  tuxemonCharacterOnMap,
   tuxemonExtensionState,
   type BattleDbSource,
   type GameLang,
   type MonsterBox,
+  type NpcMonsterBox,
+  type PendingMonster,
   type TuxemonExtensionState,
 } from "./extension.ts";
 import { battleDbToTuxemonBattleDb } from "./from-battle-db.ts";
@@ -77,10 +80,6 @@ function seededRandom(seed: number): { random: () => number; cursor: () => numbe
     },
     cursor: () => cursor,
   };
-}
-
-function monsterLabel(monster: SpawnedMonsterSnapshot, names: Names): string {
-  return monster.nickname ?? names(monster.slug);
 }
 
 // ---------------------------------------------------------------------------
@@ -225,6 +224,10 @@ export type PcPhase =
 
 export interface PcSceneState {
   kind: "pc";
+  /** Character whose independent party/boxes this terminal is editing.
+   * Absent in saves made before per-character PC storage; those restore as
+   * the historical player terminal. */
+  character?: string;
   base: JsonValue;
   labels: PcLabels;
   monsters: Record<string, StorageMonsterRow>;
@@ -244,7 +247,8 @@ export interface PcSceneState {
   // --- Item locker draft (committed atomically on Log Off) ---
   /** Locker stacks, keyed by item slug. Upstream "Locker" item box. */
   locker: Record<string, number>;
-  /** Backpack draft, seeded from the session bag and committed on Log Off. */
+  /** Owner's bag draft, seeded from the session bag for the player or the
+   * named NPC's saved bag, then committed atomically on Log Off. */
   bag: Record<string, number>;
   /** Item display names from the project catalog (slug -> name). */
   itemNames: Record<string, string>;
@@ -258,7 +262,8 @@ export interface PcSceneState {
   quantity: number;
   quantityMax: number;
   quantityMode: "take" | "disband" | "deposit";
-  /** Set once the backpack draft diverges from the session bag. */
+  /** Set once the bag draft diverges; only the player completion publishes
+   * a session-item replacement because NPC bags live in extension state. */
   bagDirty: boolean;
 }
 
@@ -394,14 +399,17 @@ function boxLabel(id: string, labels: Readonly<Record<string, JsonValue>>): stri
   return text(labels[id], id);
 }
 
-function storageRow(monster: SpawnedMonsterSnapshot, names: Names): StorageMonsterRow {
+function storageRow(monster: SpawnedMonsterSnapshot | PendingMonster, names: Names): StorageMonsterRow {
+  const spawned = "base" in monster ? monster : null;
   return {
     iid: monster.iid!,
     slug: monster.slug,
-    label: monsterLabel(monster, names),
+    label: monster.nickname ?? names(monster.slug),
     level: monster.level,
-    hp: monster.currentHp ?? monster.base.hp,
-    maxHp: monster.base.hp,
+    // Staged trainer monsters have no randomized stat snapshot until battle.
+    // Treat them as conscious in PC menus; storage never materializes stats.
+    hp: spawned ? spawned.currentHp ?? spawned.base.hp : 1,
+    maxHp: spawned ? spawned.base.hp : 1,
   };
 }
 
@@ -697,6 +705,35 @@ function pcStep(state: PcSceneState, input: Readonly<SceneInput>): void {
 
 function pcCommit(state: Readonly<PcSceneState>): JsonValue {
   const base = tuxemonExtensionState(state.base);
+  const character = state.character ?? "player";
+  if (character !== "player") {
+    const byIid = new Map<string, PendingMonster>();
+    for (const monster of base.npcParties[character] ?? []) byIid.set(monster.iid, monster);
+    for (const box of Object.values(base.npcBoxes?.[character] ?? {})) {
+      for (const monster of box.monsters) byIid.set(monster.iid, monster);
+    }
+    const resolve = (iids: readonly string[]) => iids.map((iid) => byIid.get(iid)!);
+    const boxes: Record<string, NpcMonsterBox> = {};
+    for (const box of state.boxes) {
+      boxes[box.id] = {
+        hidden: box.hidden,
+        capacity: box.capacity,
+        monsters: resolve(box.monsters),
+      };
+    }
+    const npcItems = { ...base.npcItems };
+    if (Object.keys(state.bag).length > 0 || Object.keys(state.locker).length > 0) {
+      npcItems[character] = { bag: { ...state.bag }, locker: { ...state.locker } };
+    } else {
+      delete npcItems[character];
+    }
+    return packTuxemonExtensionState({
+      ...base,
+      npcParties: { ...base.npcParties, [character]: resolve(state.party) },
+      npcBoxes: { ...base.npcBoxes, [character]: boxes },
+      npcItems: Object.keys(npcItems).length > 0 ? npcItems : undefined,
+    });
+  }
   const byIid = new Map<string, SpawnedMonsterSnapshot>();
   for (const monster of base.party) byIid.set(monster.iid!, monster);
   for (const monster of base.kennel) byIid.set(monster.iid!, monster);
@@ -727,25 +764,46 @@ function pcRules(names: Names, lang: GameLang = "en_US"): SceneRules {
   return {
     start(ext, rawArgs, _seed, context: ExtensionReadContext) {
       const args = record(rawArgs);
+      const character = typeof args.character === "string" && args.character.length > 0
+        ? args.character
+        : "player";
+      if (!tuxemonCharacterOnMap(context, character)) return null;
       const labels = pcLabels(args.labels, lang);
       const boxNames = record(args.boxNames);
       const current = tuxemonExtensionState(ext);
       // Opening a PC creates the main Kennel box (upstream PCState.__init__).
-      const opened = current.kennelBox === true ? ext : packTuxemonExtensionState({ ...current, kennelBox: true });
+      let opened = ext;
+      if (character === "player" && current.kennelBox !== true) {
+        opened = packTuxemonExtensionState({ ...current, kennelBox: true });
+      } else if (character !== "player" && !current.npcBoxes?.[character]?.[KENNEL_BOX]) {
+        opened = packTuxemonExtensionState({
+          ...current,
+          npcBoxes: {
+            ...current.npcBoxes,
+            [character]: {
+              ...(current.npcBoxes?.[character] ?? {}),
+              [KENNEL_BOX]: { hidden: false, capacity: KENNEL_LIMIT, monsters: [] },
+            },
+          },
+        });
+      }
+      const openedState = tuxemonExtensionState(opened);
       const monsters: Record<string, StorageMonsterRow> = {};
-      const register = (list: readonly SpawnedMonsterSnapshot[]) => list.map((monster) => {
+      const register = (list: readonly (SpawnedMonsterSnapshot | PendingMonster)[]) => list.map((monster) => {
         monsters[monster.iid!] = storageRow(monster, names);
         return monster.iid!;
       });
-      const party = register(current.party);
-      const boxes: StorageBoxRow[] = [{
-        id: KENNEL_BOX,
-        label: boxLabel(KENNEL_BOX, boxNames),
-        hidden: false,
-        capacity: KENNEL_LIMIT,
-        monsters: register(current.kennel),
-      }];
-      for (const [id, box] of Object.entries(current.boxes ?? {})) {
+      const party = register(character === "player"
+        ? openedState.party
+        : openedState.npcParties[character] ?? []);
+      const sourceBoxes: Record<string, MonsterBox | NpcMonsterBox> = character === "player"
+        ? {
+          [KENNEL_BOX]: { hidden: false, capacity: KENNEL_LIMIT, monsters: openedState.kennel },
+          ...(openedState.boxes ?? {}),
+        }
+        : openedState.npcBoxes?.[character] ?? {};
+      const boxes: StorageBoxRow[] = [];
+      for (const [id, box] of Object.entries(sourceBoxes)) {
         boxes.push({
           id,
           label: boxLabel(id, boxNames),
@@ -754,11 +812,15 @@ function pcRules(names: Names, lang: GameLang = "en_US"): SceneRules {
           monsters: register(box.monsters),
         });
       }
-      // Upstream PCState also creates the "Locker" item box on open. The
-      // locker is sparse here (an empty box is invisible in menus), so it
-      // only persists once the player stores something.
-      const locker: Record<string, number> = { ...(current.itemLocker ?? {}) };
-      const bag: Record<string, number> = { ...context.items };
+      // Upstream PCState creates an independent "Locker" for every target.
+      // Empty boxes stay sparse because they are invisible in the menu.
+      const npcItems = openedState.npcItems?.[character];
+      const locker: Record<string, number> = character === "player"
+        ? { ...(openedState.itemLocker ?? {}) }
+        : { ...(npcItems?.locker ?? {}) };
+      const bag: Record<string, number> = character === "player"
+        ? { ...context.items }
+        : { ...(npcItems?.bag ?? {}) };
       const itemNames: Record<string, string> = {};
       for (const item of context.itemCatalog ?? []) itemNames[item.id] = item.name;
       const notStorable = Array.isArray(args.notStorable)
@@ -766,6 +828,7 @@ function pcRules(names: Names, lang: GameLang = "en_US"): SceneRules {
         : [];
       const state: PcSceneState = {
         kind: "pc",
+        character,
         base: opened,
         labels,
         monsters,
@@ -806,7 +869,7 @@ function pcRules(names: Names, lang: GameLang = "en_US"): SceneRules {
       const completion: SceneCompletion = { ext: pcCommit(state) };
       // The kit normalizes the backpack replacement (maxKinds/maxPerItem);
       // the take flow already clamped quantities so nothing is discarded.
-      if (state.bagDirty) completion.items = { ...state.bag };
+      if ((state.character ?? "player") === "player" && state.bagDirty) completion.items = { ...state.bag };
       return completion;
     },
   };
