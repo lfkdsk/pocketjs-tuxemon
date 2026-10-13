@@ -225,12 +225,12 @@ relative conclusion does not relabel the retained absolute-limit failures.
 
 ## Repository hygiene
 
-The implementation is split across nine linear commits. Every commit uses
+The functional implementation is split across nine linear commits, followed
+by documentation and hygiene commits. Every commit uses
 `lfkdsk <lfkdsk@gmail.com>`, has an English project-style subject, and has no
 co-author or AI trailer. `bun.lock` is unchanged, both submodules remain clean,
 and the public diff contains no machine path, private service, company term,
-credential, or task identifier. The final worktree was clean before this
-report was added.
+credential, or task identifier. The final worktree is clean.
 
 subagent 使用：0 个 / 本轮按会话限制未启用子代理 / 无并行代理节省
 

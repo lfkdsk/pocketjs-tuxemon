@@ -810,4 +810,3 @@ export function replay(value: unknown): ArenaBattle {
 export function stateHash(battle: ArenaBattle): string {
   return sha256Bytes(utf8Encode(canonicalJson(battle)));
 }
-
