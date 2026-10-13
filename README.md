@@ -551,10 +551,10 @@ cursor/draw count, contiguous provenance sequence, cross-team root
 transactions, shop/heal receipts, and inventory/money conservation. The
 observation omits the seed, RNG cursor, future encounter, ledgers and
 provenance. There is intentionally no expedition restore, rewind or replay
-API. These checks detect malformed and partially rewritten state; they are not
-a cryptographic authenticator. The service must keep the full state private
-in authenticated storage and commit each accepted result atomically. Client-
-supplied state is never trusted.
+API for the authoritative state. These checks detect malformed and partially
+rewritten state; they are not a cryptographic authenticator. The service must
+keep the full state private in authenticated storage and commit each accepted
+result atomically. Client-supplied state is never trusted.
 
 `cycle: "ranked"` always starts from the configured fixed initial state.
 `cycle: "persistent"` may start a fresh budget from an ended persistent state;
@@ -566,6 +566,31 @@ the party is fully healed, persistent status is cleared, the current abstract
 region is retained because expeditions have no tile-level faint point, and no
 money or item penalty is invented.
 
+### Public expedition journals and replay
+
+`battle/expedition-journal.ts` defines the strict, seedless
+`pocket-tuxemon/expedition-journal/v1` presentation format. Its public rules
+contain only the cycle, step budget, level cap and starting area. A journal then
+stores the initial `observeExpedition` result and one `{ step, action,
+observation }` entry for every accepted action. Version 1 encodes the first
+observation in full, canonical sparse changes thereafter, and a full checkpoint
+every 64 actions. `validateExpeditionJournal` strictly rejects unknown fields,
+versions, gaps, non-canonical deltas and action/observation sequence mismatches;
+on success it returns every entry with its complete observation reconstructed.
+`startExpeditionJournal` and `appendExpeditionJournal` create immutable encoded
+journals. The hard limits are 10,000 entries and 64 MiB of encoded UTF-8 JSON.
+
+The journal contains only accepted public actions and fields already returned
+by `observeExpedition`. In particular it has no seed, RNG state, provenance,
+private ledger, future encounter or hidden battle reserve. Resolved captures
+add a bounded public receipt (device, monster, shake count and outcome), while
+resolved battles add the public post-turn Arena observations needed to show
+moves and HP changes. A journal is therefore safe to publish as a spectator
+record, but it is not an authoritative save or proof that a service accepted
+the actions. Persistent continuation still requires the service's private
+ended state and a fresh seed; future encounters come from that new seed, not
+from the published journal.
+
 The end-to-end CLI chooses a deterministic random legal policy. When its first
 cycle is defeated, it derives a fresh seed and runs a second persistent cycle,
 then validates the final team, enters a normal Arena match, validates the
@@ -574,7 +599,31 @@ battle tape, and prints one JSON recording with both cycle summaries:
 ```sh
 bun run expedition:demo
 bun run expedition:demo -- --seed=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+bun run expedition:demo -- --journal-out=expedition-journal.json
 ```
+
+`--journal-out` writes the final expedition cycle as a directly replayable
+journal. The printed demo recording also includes the journal for every cycle.
+
+The Web build adds `expedition-replay.html` as a separate entry and pak; the
+ordinary game startup does not request either. Give it a journal through
+`expeditionReplay`:
+
+```text
+expedition-replay.html?expeditionReplay=expeditions/example.json
+expedition-replay.html?lang=zh&expeditionReplay=expeditions/example.json
+expedition-replay.html?expeditionReplay=https%3A%2F%2Fexample.org%2Fexpedition.json&expeditionReplayExternal=1
+```
+
+The English/Chinese page draws the eight-area route and travelled path, the
+current exploration, capture, battle, shop, healing, item or move event, and
+the current team, bag, money and remaining steps. Automatic battle actions
+expand into their recorded public turns. Controls provide play/pause, one-frame
+steps, timeline seeking and 1×/2×/4× playback. The source may be a bounded
+`data:application/json` value, a same-origin relative HTTP(S) path, or an
+explicitly enabled cross-origin HTTPS URL. External requests omit credentials;
+redirects, MIME type, UTF-8, the 64 MiB limit and the complete journal schema
+are checked before playback. Journal fields are data, never HTML or script.
 
 The Web build adds `replay.html`, whose battle code and pak are separate from
 the ordinary game startup. Give it a tape through `battleReplay`:
@@ -607,6 +656,7 @@ bun run web             # build the web version into dist/web
 bun run arena:demo      # play a deterministic random agent vs normal AI match
 bun run expedition:demo # acquire/train a team, validate it, then enter Arena
 bun run verify:web:arena # replay a tape and check controls, privacy and pixels in Chrome
+bun run verify:web:expedition # replay a journal and check controls, terminal state and pixels
 bun run verify:web:audio # stream three imported tracks in headless Chrome
 bunx tsc --noEmit       # typecheck
 bun run test            # the test suite (build first for the pixel replays)
