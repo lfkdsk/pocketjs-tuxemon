@@ -745,6 +745,17 @@ function legalItemActions(expedition: Expedition): ExpeditionAction[] {
   return result;
 }
 
+function eligibleEncounterPool(area: string, levelCap: number) {
+  const rows = SOURCE_DB.encounters[area]!.monsters.filter((row) =>
+    row.level[0] <= levelCap &&
+    row.variables.every(({ key, value }) => key === "daytime" && value === "true")
+  );
+  const total = rows.reduce((sum, row) => sum + row.weight, 0);
+  return rows.length > 0 && Number.isFinite(total) && total > 0
+    ? { rows, total }
+    : null;
+}
+
 export function legalExpeditionActions(expedition: Expedition): ExpeditionAction[] {
   if (expedition.ended || expedition.remainingSteps <= 0) return [];
   const sequence = expedition.nextAction;
@@ -775,7 +786,9 @@ export function legalExpeditionActions(expedition: Expedition): ExpeditionAction
   if (expedition.partyHp.some((hp) => hp > 0) && expedition.team.every((record, index) =>
     expedition.partyHp[index]! <= 0 ||
     record.provenance.length <= MAX_ARENA_PROVENANCE_EVENTS - PROVENANCE_EVENT_RESERVE
-  )) actions.push({ type: "explore", sequence });
+  ) && eligibleEncounterPool(expedition.area, expedition.rules.levelCap) !== null) {
+    actions.push({ type: "explore", sequence });
+  }
   actions.push(...legalItemActions(expedition));
   const shop = AREAS[expedition.area]!.shop;
   if (shop) {
@@ -1214,16 +1227,13 @@ export function checkExpeditionConservation(value: unknown): string[] {
 }
 
 function selectEncounter(expedition: Expedition): ExpeditionEncounter {
-  const table = SOURCE_DB.encounters[expedition.area]!;
-  const rows = table.monsters.filter((row) => row.level[0] <= expedition.rules.levelCap &&
-    row.variables.every(({ key, value }) => key === "daytime" && value === "true"));
-  const total = rows.reduce((sum, row) => sum + row.weight, 0);
-  if (rows.length === 0 || !Number.isFinite(total) || total <= 0) {
+  const pool = eligibleEncounterPool(expedition.area, expedition.rules.levelCap);
+  if (pool === null) {
     throw new Error(`expedition area '${expedition.area}' has no eligible encounter rows`);
   }
-  let roll = nextRandom(expedition) * total;
-  let row = rows.at(-1)!;
-  for (const candidate of rows) {
+  let roll = nextRandom(expedition) * pool.total;
+  let row = pool.rows.at(-1)!;
+  for (const candidate of pool.rows) {
     roll -= candidate.weight;
     if (roll < 0) {
       row = candidate;

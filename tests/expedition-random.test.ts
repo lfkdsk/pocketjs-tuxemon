@@ -1,6 +1,8 @@
 import { describe, expect, test } from "bun:test";
 
+import battleDbJson from "../data/battle-db.json";
 import {
+  EXPEDITION_AREAS,
   MAX_EXPEDITION_TEAM,
   applyExpeditionAction,
   checkExpeditionConservation,
@@ -12,6 +14,7 @@ import {
   type ExpeditionObservation,
 } from "../battle/expedition.ts";
 import { validateTeam } from "../battle/arena-team.ts";
+import { validateBattleDb } from "../importer/battle-schema.ts";
 import { canonicalJson } from "../vendor/pocket-rpgkit/src/engine/save.ts";
 
 const CORPUS_RUNS = 1_000;
@@ -20,6 +23,21 @@ const PERSISTENT_RUNS_PER_CHAIN = 3;
 const FUZZ_CASES = 1_000;
 const CORPUS_RANDOM_SEED = 0x6a09_e667;
 const FUZZ_RANDOM_SEED = 0xbb67_ae85;
+const ADVERTISED_ACTION_RUNS = 2_000;
+const ADVERTISED_ACTION_RANDOM_SEED = 0x3c6e_f372;
+const BATTLE_DB = validateBattleDb(battleDbJson);
+const EXPEDITION_AREA_IDS = Object.keys(EXPEDITION_AREAS).sort();
+const MAX_LEVEL_CAP = BATTLE_DB.rules.levelRange[1];
+const LEVEL_CAP_BOUNDARIES = [...new Set([
+  1,
+  MAX_LEVEL_CAP,
+  ...EXPEDITION_AREA_IDS.flatMap((area) => {
+    const minimum = Math.min(...BATTLE_DB.encounters[area]!.monsters
+      .filter((row) => row.variables.every(({ key, value }) => key === "daytime" && value === "true"))
+      .map((row) => row.level[0]));
+    return [Math.max(1, minimum - 1), minimum, Math.min(MAX_LEVEL_CAP, minimum + 1)];
+  }),
+])].sort((left, right) => left - right);
 
 interface CorpusSummary {
   digest: string;
@@ -75,6 +93,7 @@ function assertState(expedition: Expedition, at: string): ExpeditionObservation 
     minSize: 1,
     maxSize: MAX_EXPEDITION_TEAM,
     levelCap: expedition.rules.levelCap,
+    requiredKind: "expedition",
   });
   if (!validation.ok) throw new Error(`${at}: team failed validation: ${validation.errors.join("; ")}`);
 
@@ -267,6 +286,113 @@ function malformedAction(
 }
 
 describe("expedition randomized state machine", () => {
+  test("2,000 advertised-action expeditions preserve invariants across level-cap boundaries", () => {
+    const random = mulberry32(ADVERTISED_ACTION_RANDOM_SEED);
+    const boundaryMatrix = EXPEDITION_AREA_IDS.flatMap((area) =>
+      LEVEL_CAP_BOUNDARIES.map((levelCap) => ({ area, levelCap }))
+    );
+    const coveredAreas = new Set<string>();
+    const coveredCaps = new Set<number>();
+    let ranked = 0;
+    let persistentKept = 0;
+    let persistentLowered = 0;
+    let acceptedActions = 0;
+    let corruptStates = 0;
+
+    for (let run = 0; run < ADVERTISED_ACTION_RUNS; run++) {
+      const boundary = run < boundaryMatrix.length
+        ? boundaryMatrix[run]!
+        : {
+            area: pick(EXPEDITION_AREA_IDS, random),
+            levelCap: pick(LEVEL_CAP_BOUNDARIES, random),
+          };
+      const stepBudget = 1 + Math.floor(random() * 6);
+      const starter = { species: "rockitten", level: Math.min(5, boundary.levelCap) };
+      const mode = run % 3;
+      let expedition: Expedition;
+
+      if (mode === 0) {
+        expedition = createExpedition({
+          seed: expeditionSeed(10_000 + run * 2),
+          rules: {
+            cycle: "ranked",
+            stepBudget,
+            levelCap: boundary.levelCap,
+            startingArea: boundary.area,
+            starter,
+          },
+        });
+        ranked++;
+      } else {
+        const previousCap = mode === 1 || boundary.levelCap === MAX_LEVEL_CAP
+          ? boundary.levelCap
+          : Math.min(MAX_LEVEL_CAP, boundary.levelCap + 1 + Math.floor(random() * 5));
+        let previous = createExpedition({
+          seed: expeditionSeed(10_000 + run * 2),
+          rules: {
+            cycle: "persistent",
+            stepBudget: 1,
+            levelCap: previousCap,
+            startingArea: boundary.area,
+            starter,
+          },
+        });
+        const end = legalExpeditionActions(previous).find((action) => action.type === "end");
+        if (!end) throw new Error(`run ${run}: persistent setup has no end action`);
+        const ended = applyExpeditionAction(previous, end);
+        if (!ended.ok) throw new Error(`run ${run}: persistent setup end failed as ${ended.error}`);
+        previous = ended.expedition;
+        assertState(previous, `advertised ${run}:previous`);
+        expedition = createExpedition({
+          seed: expeditionSeed(10_001 + run * 2),
+          rules: {
+            cycle: "persistent",
+            stepBudget,
+            levelCap: boundary.levelCap,
+            starter,
+            continuation: previous,
+          },
+        });
+        if (previousCap === boundary.levelCap) persistentKept++;
+        else persistentLowered++;
+      }
+
+      coveredAreas.add(expedition.area);
+      coveredCaps.add(expedition.rules.levelCap);
+      assertState(expedition, `advertised ${run}:initial`);
+      if (run < boundaryMatrix.length) {
+        for (const action of legalExpeditionActions(expedition)) {
+          applyLegal(expedition, action, `advertised ${run}:boundary probe ${actionKey(action)}`);
+        }
+      }
+      while (!expedition.ended) {
+        const legal = legalExpeditionActions(expedition);
+        if (legal.length === 0) throw new Error(`advertised ${run}: active state has no legal action`);
+        const action = pick(legal, random);
+        const before = canonicalJson(expedition);
+        const applied = applyExpeditionAction(expedition, action);
+        if (!applied.ok) {
+          if (applied.error === "CORRUPT_STATE") corruptStates++;
+          throw new Error(`advertised ${run}: legal ${action.type} failed as ${applied.error}`);
+        }
+        if (canonicalJson(expedition) !== before) {
+          throw new Error(`advertised ${run}: reducer mutated its input`);
+        }
+        expedition = applied.expedition;
+        acceptedActions++;
+        assertState(expedition, `advertised ${run}:action ${acceptedActions}`);
+      }
+    }
+
+    expect(corruptStates).toBe(0);
+    expect(coveredAreas).toEqual(new Set(EXPEDITION_AREA_IDS));
+    expect(coveredCaps).toEqual(new Set(LEVEL_CAP_BOUNDARIES));
+    expect(ranked).toBeGreaterThan(0);
+    expect(persistentKept).toBeGreaterThan(0);
+    expect(persistentLowered).toBeGreaterThan(0);
+    expect(acceptedActions).toBeGreaterThanOrEqual(ADVERTISED_ACTION_RUNS);
+  }, 60_000);
+
   test("1,000 fixed-seed legal expeditions include persistent defeat recovery and preserve invariants", () => {
     const summary = runCorpus();
     expect((summary.endings.budget ?? 0) + (summary.endings.defeated ?? 0) +
