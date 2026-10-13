@@ -236,12 +236,12 @@ describe("J2 Greenwash and hospital location goldens", () => {
     expect(manifest.frames.map(({ name, map, frame, mergedFrame, width, height }) =>
       [name, map, frame, mergedFrame, width, height]
     )).toEqual([
-      ["aardant-acquired", "spyder_greenwash", 49_973, 178_804, 480, 272],
-      ["hospital-password", "spyder_candy_hospital2", 50_608, 179_439, 480, 272],
-      ["hospital-cure", "spyder_candy_hospital3", 51_406, 180_237, 480, 272],
-      ["aardant-acquired", "spyder_greenwash", 49_973, 178_804, 960, 544],
-      ["hospital-password", "spyder_candy_hospital2", 50_608, 179_439, 960, 544],
-      ["hospital-cure", "spyder_candy_hospital3", 51_406, 180_237, 960, 544],
+      ["aardant-acquired", "spyder_greenwash", 63_360, 192_321, 480, 272],
+      ["hospital-password", "spyder_candy_hospital2", 63_995, 192_956, 480, 272],
+      ["hospital-cure", "spyder_candy_hospital3", 64_793, 193_754, 480, 272],
+      ["aardant-acquired", "spyder_greenwash", 63_360, 192_321, 960, 544],
+      ["hospital-password", "spyder_candy_hospital2", 63_995, 192_956, 960, 544],
+      ["hospital-cure", "spyder_candy_hospital3", 64_793, 193_754, 960, 544],
     ]);
   });
 
