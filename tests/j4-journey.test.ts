@@ -74,7 +74,7 @@ test("J4 freezes the authored route, story stages, and complete Kernel epilogue"
     "kernel-defeated",
   ]);
   expect(j4.steps.map((step) => step.frame)).toEqual([
-    -1, 1226, 1870, 2974, 5119, 8611, 8781, 10972, 12672, 13594,
+    -1, 1226, 1870, 3488, 7359, 11737, 11907, 15298, 17398, 18576,
   ]);
   expect(j4.steps[0]).toMatchObject({
     map: "spyder_radiotower",
@@ -141,12 +141,12 @@ test("J4 freezes the authored route, story stages, and complete Kernel epilogue"
 });
 
 test("J4 wins every required fight and no wrong-answer Blasdoor", () => {
-  expect(j4.battles).toHaveLength(15);
+  expect(j4.battles).toHaveLength(17);
   expect(j4.battles.every((battle) => battle.outcome === "won")).toBeTrue();
   expect(j4.battles.filter((battle) => battle.kind === "trainer")).toHaveLength(12);
-  expect(j4.battles.filter((battle) => battle.kind === "wild")).toHaveLength(3);
+  expect(j4.battles.filter((battle) => battle.kind === "wild")).toHaveLength(5);
   expect(j4.battles.filter((battle) => battle.kind === "wild").map((battle) => battle.opponent))
-    .toEqual(["wild:pythwire", "wild:sockeserp", "wild:kernel"]);
+    .toEqual(["wild:aardorn", "wild:aardorn", "wild:pythwire", "wild:sockeserp", "wild:kernel"]);
   expect(j4.battles.filter((battle) => battle.kind === "trainer").map((battle) => battle.opponent))
     .toEqual([
       "spyder_routee_calliope",
@@ -167,9 +167,9 @@ test("J4 wins every required fight and no wrong-answer Blasdoor", () => {
     expect.objectContaining({
       kind: "wild",
       enemy: [{ slug: "kernel", level: 50 }],
-      turns: 1,
+      turns: 2,
       outcome: "won",
     }),
   ]);
-  expect(j4.party[0]).toMatchObject({ slug: "arthrobolt", level: 100, hp: 474, maxHp: 474 });
+  expect(j4.party.at(-1)).toMatchObject({ slug: "arthrobolt", level: 92, hp: 374, maxHp: 439 });
 });

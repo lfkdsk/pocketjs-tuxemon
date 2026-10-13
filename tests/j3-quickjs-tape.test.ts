@@ -8,13 +8,13 @@ describe("J3 QuickJS continuation tape", () => {
     const tape = buildJ3QuickjsTape();
     expect(tape.format).toBe("pocket-tuxemon/j3-quickjs/v1");
     expect(tape.worldTraversal).toBe("seamless-v1");
-    expect(tape.frames).toBe(13_113);
+    expect(tape.frames).toBe(18_001);
     expect(tape.frames).toBe(tape.masks.length);
     expect(tape.tapeSha256)
       .toBe(createHash("sha256").update(JSON.stringify(tape.masks)).digest("hex"));
     expect(tape.maps[0]).toEqual({ frame: 0, map: "spyder_candy_hospital3" });
     expect(tape.maps.at(-1)).toMatchObject({ map: "spyder_radiotower" });
-    expect(tape.battles).toHaveLength(14);
+    expect(tape.battles).toHaveLength(15);
     expect(tape.battles[0]).toMatchObject({ opponent: "spyder_billie", startFrame: 97 });
     expect(tape.battles.at(-1)).toMatchObject({
       opponent: "spyder_omnichannel_beaverbrook",
@@ -24,6 +24,6 @@ describe("J3 QuickJS continuation tape", () => {
     // the calendar variables refreshed on map entry, the persisted step total,
     // and the map BGM clock.
     expect(tape.terminalStateSha256)
-      .toBe("f09b9a1ed07449addbe411d973e1494bb3537a0b34d58b3f4f01979965edbc17");
+      .toBe("49307027321e7f51ab1a8c81e48ca615cd70d636c289f4170e63fc408b1774bf");
   });
 });

@@ -136,7 +136,7 @@ describe("boot-snapshot overlay", () => {
     const runtime = createBootSnapshotOverlay().create(host);
     runtime.step(0, 0);
 
-    const spec = resolveSegment(ROOT, "radio-broadcast", 193340);
+    const spec = resolveSegment(ROOT, "radio-broadcast", 211745);
     let state = getState();
     let previous = radio.held >>> 0;
     for (const mask of spec.suffix) {
@@ -148,7 +148,7 @@ describe("boot-snapshot overlay", () => {
     // variables refreshed on map entry, the persisted step total, and the map
     // BGM clock.
     expect(sha256(canonicalJson(state)))
-      .toBe("f09b9a1ed07449addbe411d973e1494bb3537a0b34d58b3f4f01979965edbc17");
-    expect(state.frame).toBe(193340);
+      .toBe("49307027321e7f51ab1a8c81e48ca615cd70d636c289f4170e63fc408b1774bf");
+    expect(state.frame).toBe(211745);
   });
 });

@@ -8,16 +8,16 @@ describe("J4 QuickJS continuation tape", () => {
     const tape = buildJ4QuickjsTape();
     expect(tape.format).toBe("pocket-tuxemon/j4-quickjs/v1");
     expect(tape.worldTraversal).toBe("seamless-v1");
-    expect(tape.frames).toBe(13_618);
+    expect(tape.frames).toBe(18_600);
     expect(tape.frames).toBe(tape.masks.length);
     expect(tape.tapeSha256)
       .toBe(createHash("sha256").update(JSON.stringify(tape.masks)).digest("hex"));
     expect(tape.maps[0]).toEqual({ frame: 0, map: "spyder_radiotower" });
     expect(tape.maps.at(-1)).toMatchObject({ map: "spyder_datacenter" });
-    expect(tape.battles).toHaveLength(15);
-    expect(tape.battles[0]).toMatchObject({ opponent: "spyder_routee_calliope" });
+    expect(tape.battles).toHaveLength(17);
+    expect(tape.battles[0]).toMatchObject({ opponent: "wild:aardorn" });
     expect(tape.battles.filter((battle) => battle.kind === "wild").map((battle) => battle.opponent))
-      .toEqual(["wild:pythwire", "wild:sockeserp", "wild:kernel"]);
+      .toEqual(["wild:aardorn", "wild:aardorn", "wild:pythwire", "wild:sockeserp", "wild:kernel"]);
     expect(tape.battles.at(-1)).toMatchObject({
       opponent: "wild:kernel",
       outcome: "won",
@@ -26,6 +26,6 @@ describe("J4 QuickJS continuation tape", () => {
     // the calendar variables refreshed on map entry, the persisted step total,
     // and the map BGM clock.
     expect(tape.terminalStateSha256)
-      .toBe("faf682412dce51dc620b25f28c7c73049bd96f4bb3ee44a6dbc7394c0bdba665");
+      .toBe("1977c1b0f3bd1bba2c4e5ad82332599c4fc72f0acd84d9437868976fbfb5c736");
   });
 });
