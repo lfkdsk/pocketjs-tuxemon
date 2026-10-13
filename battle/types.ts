@@ -347,6 +347,9 @@ export type PlayerPolicy = "first" | "cycle";
 
 export interface RewardEvent {
   loser: number;
+  /** Full damage-contributor set retained only by headless Arena battles so
+   * external progression can reproduce the real participant divisor. */
+  participants?: number[];
   winners: Array<{
     uid: number;
     experience: number;

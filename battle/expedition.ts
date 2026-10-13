@@ -12,8 +12,9 @@ import expeditionShopsJson from "../data/expedition-shops.json";
 import { validateBattleDb, type BattleDb } from "../importer/battle-schema.ts";
 import { createSwitchState } from "../vendor/pocket-rpgkit/src/engine/interpreter.ts";
 import { sha256Bytes } from "../vendor/pocket-rpgkit/src/engine/map-repository.ts";
-import { canonicalJson, utf8Encode } from "../vendor/pocket-rpgkit/src/engine/save.ts";
+import { utf8Encode } from "../vendor/pocket-rpgkit/src/engine/save.ts";
 import {
+  MAX_ARENA_PROVENANCE_EVENTS,
   arenaTeamRecordFromProvenance,
   appendArenaExperience,
   appendArenaItem,
@@ -34,7 +35,10 @@ import {
 import { nextRandom, randomIntInclusive, type RngState } from "./core.ts";
 import { initialTuxemonExtensionState } from "./extension.ts";
 import { battleDbToTuxemonBattleDb } from "./from-battle-db.ts";
-import { attemptCapture, canUseBattleItem, defeatExperienceAwards } from "./tuxemon.ts";
+import {
+  canUseBattleItem,
+  resolveCaptureAttempt,
+} from "./tuxemon.ts";
 import { worldItemTargetEligibility } from "./world-items.ts";
 
 export const EXPEDITION_VERSION = 1 as const;
@@ -80,6 +84,7 @@ interface ExpeditionLedger {
   baseMoney: number;
   earnedMoney: number;
   spentMoney: number;
+  healingServices: Record<string, number>;
 }
 
 interface ExpeditionEncounter {
@@ -88,6 +93,7 @@ interface ExpeditionEncounter {
   level: number;
   experienceModifier: number;
   acquireSeed: string;
+  acquireSeq: number;
   partyIndices: number[];
   battle: ArenaBattle;
 }
@@ -101,9 +107,14 @@ export interface Expedition {
   area: string;
   team: ArenaTeamRecord[];
   partyHp: number[];
+  /** Current cross-encounter statuses; acquisition provenance remains an
+   * immutable audit and is not reused as mutable condition state. */
+  partyStatus: Array<string | null>;
   inventory: Record<string, number>;
   money: number;
   remainingSteps: number;
+  /** Action sequence at this run's full-budget boundary. */
+  runStartAction: number;
   /** Nonce required on the next submitted action. */
   nextAction: number;
   /** Globally unique provenance sequence allocated by this account/run chain. */
@@ -155,6 +166,7 @@ export interface ExpeditionObservation {
     level: number;
     experience: number;
     hp: { current: number; max: number };
+    status: string | null;
     moves: Array<{ slug: string; en_US: string; zh_CN: string }>;
   }>;
   backpack: Array<{ item: string; en_US: string; zh_CN: string; quantity: number }>;
@@ -232,6 +244,12 @@ export const EXPEDITION_AREAS: Readonly<Record<string, Readonly<ExpeditionArea>>
 );
 
 const DEFAULT_ITEMS = Object.freeze({ tuxeball: 5, potion: 2 });
+const PROVENANCE_EVENT_RESERVE = 256;
+const EXPEDITION_STATE_KEYS = [
+  "v", "seed", "run", "rules", "area", "team", "partyHp", "partyStatus", "inventory", "money",
+  "remainingSteps", "runStartAction", "nextAction", "nextEventSeq", "rng", "rngDraws",
+  "shopPurchases", "ledger", "encounter", "ended", "endReason",
+] as const;
 
 function clone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
@@ -239,6 +257,82 @@ function clone<T>(value: T): T {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function exactOwnKeys(value: Record<string, unknown>, expected: readonly string[]): boolean {
+  const keys = Reflect.ownKeys(value);
+  return keys.length === expected.length && keys.every((key) =>
+    typeof key === "string" && expected.includes(key)
+  );
+}
+
+/** Reject values that cannot make one bounded, unambiguous JSON document.
+ * This also keeps getters, hidden fields, symbols, inherited bags, cycles,
+ * sparse arrays, and non-finite numbers away from the authoritative reducer. */
+function isCanonicalJsonShape(
+  value: unknown,
+  ancestors = new Set<object>(),
+  budget = { remaining: 10_000_000 },
+  depth = 0,
+): boolean {
+  if (--budget.remaining < 0 || depth > 128) return false;
+  if (value === null || typeof value === "string" || typeof value === "boolean") return true;
+  if (typeof value === "number") return Number.isFinite(value);
+  if (typeof value !== "object") return false;
+  if (ancestors.has(value)) return false;
+  ancestors.add(value);
+  try {
+    if (Array.isArray(value)) {
+      if (Object.getPrototypeOf(value) !== Array.prototype) return false;
+      const keys = Reflect.ownKeys(value);
+      if (keys.some((key) => typeof key !== "string") || keys.length !== value.length + 1 ||
+          keys.at(-1) !== "length") return false;
+      for (let index = 0; index < value.length; index++) {
+        const descriptor = Object.getOwnPropertyDescriptor(value, String(index));
+        if (!descriptor || descriptor.enumerable !== true || !("value" in descriptor) ||
+            !isCanonicalJsonShape(descriptor.value, ancestors, budget, depth + 1)) return false;
+      }
+      return true;
+    }
+    const prototype = Object.getPrototypeOf(value);
+    if (prototype !== Object.prototype && prototype !== null) return false;
+    for (const key of Reflect.ownKeys(value)) {
+      if (typeof key !== "string") return false;
+      const descriptor = Object.getOwnPropertyDescriptor(value, key);
+      if (!descriptor || descriptor.enumerable !== true || !("value" in descriptor) ||
+          !isCanonicalJsonShape(descriptor.value, ancestors, budget, depth + 1)) return false;
+    }
+    return true;
+  } finally {
+    ancestors.delete(value);
+  }
+}
+
+function exactJsonEqual(expected: unknown, actual: unknown, seen = new Set<object>()): boolean {
+  if (expected === null || actual === null || typeof expected !== "object" || typeof actual !== "object") {
+    return expected === actual;
+  }
+  if (seen.has(actual as object)) return false;
+  seen.add(actual as object);
+  if (Array.isArray(expected) || Array.isArray(actual)) {
+    if (!Array.isArray(expected) || !Array.isArray(actual) || expected.length !== actual.length) return false;
+    const expectedKeys = Reflect.ownKeys(expected);
+    const actualKeys = Reflect.ownKeys(actual);
+    if (actualKeys.some((key) => typeof key !== "string") ||
+        expectedKeys.map(String).sort().join("\0") !== actualKeys.map(String).sort().join("\0")) return false;
+    return expected.every((entry, index) => exactJsonEqual(entry, actual[index], seen));
+  }
+  const expectedKeys = Reflect.ownKeys(expected).map(String).sort();
+  const actualOwnKeys = Reflect.ownKeys(actual);
+  if (actualOwnKeys.some((key) => typeof key !== "string")) return false;
+  const actualKeys = actualOwnKeys.map(String).sort();
+  if (expectedKeys.length !== actualKeys.length ||
+      expectedKeys.some((key, index) => key !== actualKeys[index])) return false;
+  return expectedKeys.every((key) => exactJsonEqual(
+    (expected as Record<string, unknown>)[key],
+    (actual as Record<string, unknown>)[key],
+    seen,
+  ));
 }
 
 function domainHex(seed: string, domain: string): string {
@@ -333,9 +427,11 @@ function continuedState(seed: string, rules: NormalizedExpeditionRules, previous
     area: previous.area,
     team: clone(previous.team),
     partyHp: previous.partyHp.map((hp, index) => Math.min(hp, maxHp(previous.team[index]!, rules.levelCap))),
+    partyStatus: clone(previous.partyStatus),
     inventory,
     money,
     remainingSteps: rules.stepBudget,
+    runStartAction: previous.nextAction,
     nextAction: previous.nextAction,
     nextEventSeq: previous.nextEventSeq,
     rng: domainCursor(seed, "encounters"),
@@ -348,6 +444,7 @@ function continuedState(seed: string, rules: NormalizedExpeditionRules, previous
       baseMoney: money,
       earnedMoney: 0,
       spentMoney: 0,
+      healingServices: {},
     },
     encounter: null,
     ended: false,
@@ -371,9 +468,11 @@ export function createExpedition(config: { seed: string; rules: ExpeditionRules 
     area: rules.startingArea,
     team,
     partyHp: [maxHp(team[0]!, rules.levelCap)],
+    partyStatus: [null],
     inventory,
     money: rules.initialMoney,
     remainingSteps: rules.stepBudget,
+    runStartAction: 1,
     nextAction: 1,
     nextEventSeq: 2,
     rng: domainCursor(config.seed, "encounters"),
@@ -386,6 +485,7 @@ export function createExpedition(config: { seed: string; rules: ExpeditionRules 
       baseMoney: rules.initialMoney,
       earnedMoney: 0,
       spentMoney: 0,
+      healingServices: {},
     },
     encounter: null,
     ended: false,
@@ -433,7 +533,7 @@ function itemEligible(expedition: Expedition, item: string, target: number): boo
   })[0];
   if (!monster) return false;
   monster.currentHp = expedition.partyHp[target]!;
-  if (monster.currentHp === 0) monster.status = "faint";
+  monster.status = monster.currentHp === 0 ? "faint" : expedition.partyStatus[target]!;
   return worldItemTargetEligibility(
     SOURCE_DB,
     { ...initialTuxemonExtensionState(), party: [monster] },
@@ -447,6 +547,8 @@ function captureEligible(expedition: Expedition, item: string): boolean {
   const encounter = expedition.encounter;
   const target = encounter?.battle.core.parties[1][0];
   if (!encounter || !target) return false;
+  const config = RULES_DB.capture_devices.items[item];
+  if (config?.capdev_effects?.some((effect) => effect.target_attribute === "level")) return false;
   return canUseBattleItem(
     RULES_DB,
     {
@@ -466,6 +568,7 @@ function legalItemActions(expedition: Expedition): ExpeditionAction[] {
     if ((expedition.inventory[item] ?? 0) <= 0) continue;
     const move = itemMove(item);
     for (const [target, record] of expedition.team.entries()) {
+      if (record.provenance.length > MAX_ARENA_PROVENANCE_EVENTS - PROVENANCE_EVENT_RESERVE) continue;
       if (!itemEligible(expedition, item, target)) continue;
       if (move && !record.moves.includes(move)) {
         if (record.moves.length < SOURCE_DB.rules.maxMoves) {
@@ -510,7 +613,10 @@ export function legalExpeditionActions(expedition: Expedition): ExpeditionAction
   for (const area of AREAS[expedition.area]!.connections) {
     actions.push({ type: "travel", area, sequence });
   }
-  if (expedition.partyHp.some((hp) => hp > 0)) actions.push({ type: "explore", sequence });
+  if (expedition.partyHp.some((hp) => hp > 0) && expedition.team.every((record, index) =>
+    expedition.partyHp[index]! <= 0 ||
+    record.provenance.length <= MAX_ARENA_PROVENANCE_EVENTS - PROVENANCE_EVENT_RESERVE
+  )) actions.push({ type: "explore", sequence });
   actions.push(...legalItemActions(expedition));
   const shop = AREAS[expedition.area]!.shop;
   if (shop) {
@@ -580,6 +686,7 @@ export function observeExpedition(expedition: Expedition): ExpeditionObservation
       level: record.level,
       experience: record.experience ?? 0,
       hp: { current: expedition.partyHp[slot]!, max: maxHp(record, expedition.rules.levelCap) },
+      status: expedition.partyStatus[slot]!,
       moves: record.moves.map((slug) => ({
         slug,
         en_US: displayName(SOURCE_DB, "technique", slug),
@@ -608,8 +715,25 @@ function count(table: Record<string, number>, key: string): number {
   return table[key] ?? 0;
 }
 
-export function checkExpeditionConservation(expedition: Expedition): string[] {
+function checkExpeditionConservationInner(expedition: Expedition): string[] {
   const errors: string[] = [];
+  if (expedition.v !== EXPEDITION_VERSION) errors.push("expedition version is invalid");
+  if (!Number.isSafeInteger(expedition.run) || expedition.run < 1 ||
+      (expedition.rules?.cycle === "ranked" && expedition.run !== 1)) {
+    errors.push("expedition run is invalid");
+  }
+  if (!HEX_SEED.test(expedition.seed)) errors.push("expedition seed is invalid");
+  if (!Object.hasOwn(AREAS, expedition.area)) errors.push("expedition area is invalid");
+  try {
+    const normalized = normalizedRules(expedition.rules as ExpeditionRules);
+    if (!exactJsonEqual(normalized, expedition.rules)) errors.push("expedition rules are not canonical");
+  } catch {
+    errors.push("expedition rules are invalid");
+  }
+  if (!exactOwnKeys(expedition.ledger as unknown as Record<string, unknown>, [
+    "baseItems", "purchasedItems", "consumedItems", "baseMoney", "earnedMoney", "spentMoney",
+    "healingServices",
+  ])) errors.push("expedition ledger shape is invalid");
   const validCountTable = (table: Record<string, number>, label: string): void => {
     for (const [item, quantity] of Object.entries(table)) {
       if (!Object.hasOwn(SOURCE_DB.items, item) || !Number.isSafeInteger(quantity) || quantity < 0) {
@@ -621,6 +745,20 @@ export function checkExpeditionConservation(expedition: Expedition): string[] {
   validCountTable(expedition.ledger.baseItems, "base item ledger");
   validCountTable(expedition.ledger.purchasedItems, "purchased item ledger");
   validCountTable(expedition.ledger.consumedItems, "consumed item ledger");
+  if (expedition.run === 1) {
+    const initialItems = new Set([
+      ...Object.keys(expedition.rules.initialItems),
+      ...Object.keys(expedition.ledger.baseItems),
+    ]);
+    for (const item of initialItems) {
+      if (count(expedition.rules.initialItems, item) !== count(expedition.ledger.baseItems, item)) {
+        errors.push(`run-one base inventory does not match rules for '${item}'`);
+      }
+    }
+    if (expedition.ledger.baseMoney !== expedition.rules.initialMoney) {
+      errors.push("run-one base money does not match rules");
+    }
+  }
   const items = new Set([
     ...Object.keys(expedition.ledger.baseItems),
     ...Object.keys(expedition.ledger.purchasedItems),
@@ -634,37 +772,187 @@ export function checkExpeditionConservation(expedition: Expedition): string[] {
       errors.push(`inventory conservation failed for '${item}'`);
     }
   }
+  const purchasedByItem: Record<string, number> = {};
+  let authoredSpend = 0;
+  for (const [key, quantity] of Object.entries(expedition.shopPurchases)) {
+    const separator = key.indexOf(":");
+    const shop = separator < 0 ? "" : key.slice(0, separator);
+    const item = separator < 0 ? "" : key.slice(separator + 1);
+    const good = SHOP_CATALOG.shops[shop]?.items.find((candidate) => candidate.item === item);
+    if (!good || !Number.isSafeInteger(quantity) || quantity < 0 ||
+        (good.stock !== undefined && quantity > good.stock)) {
+      errors.push(`shop purchase ledger has an invalid entry for '${key}'`);
+      continue;
+    }
+    purchasedByItem[item] = count(purchasedByItem, item) + quantity;
+    authoredSpend += good.price * quantity;
+  }
+  for (const item of new Set([
+    ...Object.keys(purchasedByItem),
+    ...Object.keys(expedition.ledger.purchasedItems),
+  ])) {
+    if (count(purchasedByItem, item) !== count(expedition.ledger.purchasedItems, item)) {
+      errors.push(`purchased item ledger does not match shop receipts for '${item}'`);
+    }
+  }
+  for (const [shop, quantity] of Object.entries(expedition.ledger.healingServices)) {
+    const potion = SHOP_CATALOG.shops[shop]?.items.find((good) => good.item === "potion");
+    if (!potion || !Number.isSafeInteger(quantity) || quantity < 0) {
+      errors.push(`healing service ledger has an invalid entry for '${shop}'`);
+      continue;
+    }
+    authoredSpend += potion.price * quantity;
+  }
+  if (expedition.ledger.spentMoney !== authoredSpend) errors.push("money spend does not match authored receipts");
+  if (expedition.ledger.earnedMoney !== 0) errors.push("wild expeditions cannot mint money");
   const expectedMoney = expedition.ledger.baseMoney + expedition.ledger.earnedMoney - expedition.ledger.spentMoney;
   if (![expedition.ledger.baseMoney, expedition.ledger.earnedMoney, expedition.ledger.spentMoney, expedition.money]
       .every((value) => Number.isSafeInteger(value) && value >= 0) ||
       expectedMoney < 0 || expedition.money !== expectedMoney) errors.push("money conservation failed");
-  if (!Number.isSafeInteger(expedition.remainingSteps) || expedition.remainingSteps < 0 ||
-      expedition.remainingSteps > expedition.rules.stepBudget) errors.push("step budget is out of range");
+  const usedSteps = expedition.nextAction - expedition.runStartAction;
+  if (!Number.isSafeInteger(expedition.runStartAction) || expedition.runStartAction < 1 ||
+      (expedition.run === 1 && expedition.runStartAction !== 1) ||
+      (expedition.run > 1 && expedition.runStartAction <= 1) ||
+      !Number.isSafeInteger(expedition.nextAction) || usedSteps < 0 || usedSteps > expedition.rules.stepBudget ||
+      !Number.isSafeInteger(expedition.remainingSteps) ||
+      expedition.remainingSteps !== expedition.rules.stepBudget - usedSteps) {
+    errors.push("step budget is out of range");
+  }
+  const validEndReason = expedition.endReason === null || expedition.endReason === "voluntary" ||
+    expedition.endReason === "budget" || expedition.endReason === "defeated";
+  const allFainted = expedition.partyHp.length > 0 && expedition.partyHp.every((hp) => hp <= 0);
+  if (!validEndReason || typeof expedition.ended !== "boolean" ||
+      (expedition.ended && expedition.endReason === null) ||
+      (!expedition.ended && expedition.endReason !== null) ||
+      (expedition.ended && expedition.encounter !== null) ||
+      (expedition.endReason === "budget" && expedition.remainingSteps !== 0) ||
+      (expedition.endReason === "defeated") !== allFainted ||
+      (expedition.remainingSteps === 0 && !expedition.ended)) {
+    errors.push("terminal expedition state is inconsistent");
+  }
+  if (expedition.encounter !== null) {
+    const encounter = expedition.encounter;
+    if (!exactOwnKeys(encounter as unknown as Record<string, unknown>, [
+      "area", "species", "level", "experienceModifier", "acquireSeed", "acquireSeq",
+      "partyIndices", "battle",
+    ])) errors.push("expedition encounter shape is invalid");
+    const row = Object.hasOwn(SOURCE_DB.encounters, encounter.area)
+      ? SOURCE_DB.encounters[encounter.area]!.monsters.find((candidate) =>
+        candidate.monster === encounter.species && encounter.level >= candidate.level[0] &&
+        encounter.level <= candidate.level[1] && candidate.experienceModifier === encounter.experienceModifier
+      )
+      : undefined;
+    if (encounter.area !== expedition.area || !row || !HEX_SEED.test(encounter.acquireSeed) ||
+        encounter.acquireSeq !== expedition.nextEventSeq || !Array.isArray(encounter.partyIndices) ||
+        encounter.partyIndices.length === 0 || new Set(encounter.partyIndices).size !== encounter.partyIndices.length ||
+        encounter.partyIndices.some((index) => !Number.isSafeInteger(index) || index < 0 ||
+          index >= expedition.team.length) || arenaIsOver(encounter.battle)) {
+      errors.push("expedition encounter is invalid");
+    }
+  }
   if (expedition.partyHp.length !== expedition.team.length) errors.push("party health does not match team size");
+  if (!Array.isArray(expedition.partyStatus) || expedition.partyStatus.length !== expedition.team.length ||
+      expedition.partyStatus.some((status) => status !== null &&
+        (typeof status !== "string" || !Object.hasOwn(RULES_DB.status, status) ||
+          RULES_DB.status[status]!.behaviors?.persists_after_combat !== true))) {
+    errors.push("party status does not match persistent team conditions");
+  }
   if (expedition.team.length < 1 || expedition.team.length > MAX_EXPEDITION_TEAM) errors.push("team size is invalid");
   try {
+    if (expedition.team.some((record) => record.kind !== "expedition")) {
+      errors.push("expedition team contains a non-expedition record");
+    }
     buildValidatedArenaTeam(expedition.team, {
       minSize: 1,
       maxSize: MAX_EXPEDITION_TEAM,
       levelCap: expedition.rules.levelCap,
+      requiredKind: "expedition",
     });
     for (const [index, hp] of expedition.partyHp.entries()) {
       if (!Number.isSafeInteger(hp) || hp < 0 || hp > maxHp(expedition.team[index]!, expedition.rules.levelCap)) {
         errors.push(`party health is invalid at slot ${index}`);
       }
     }
+
+    const sequences = expedition.team.flatMap((record) => record.provenance.map((event) => event.seq))
+      .sort((left, right) => left - right);
+    if (sequences.some((sequence, index) => sequence !== index + 1) ||
+        !Number.isSafeInteger(expedition.nextEventSeq) || expedition.nextEventSeq !== sequences.length + 1) {
+      errors.push("next provenance sequence is invalid");
+    }
+
+    type RootTransaction = { kind: "item" | "capture" | "battle"; key: string };
+    const roots = new Map<number, RootTransaction[]>();
+    const currentConsumedRoots: Record<string, number> = {};
+    const addRoot = (step: number, transaction: RootTransaction, item?: string): void => {
+      if (!Number.isSafeInteger(step) || step < 1 || step >= expedition.nextAction) {
+        errors.push(`provenance transaction step ${step} is outside the accepted action prefix`);
+        return;
+      }
+      const entries = roots.get(step) ?? [];
+      entries.push(transaction);
+      roots.set(step, entries);
+      if (item && step >= expedition.runStartAction) {
+        currentConsumedRoots[item] = count(currentConsumedRoots, item) + 1;
+      }
+    };
+    for (const record of expedition.team) {
+      const acquire = record.provenance[0];
+      if (acquire?.type === "acquire" && acquire.origin?.capture.result === "caught") {
+        addRoot(acquire.origin.step, { kind: "capture", key: acquire.origin.capture.item },
+          acquire.origin.capture.item);
+      }
+      for (const event of record.provenance.slice(1)) {
+        if (event.type === "item" && event.step !== undefined) {
+          addRoot(event.step, { kind: "item", key: event.item }, event.item);
+        } else if (event.type === "experience" && event.source.kind === "battle") {
+          const { trainingPoints: _trainingPoints, ...receipt } = event.source;
+          addRoot(event.step, { kind: "battle", key: JSON.stringify(receipt) });
+        }
+      }
+    }
+    for (const [step, transactions] of roots) {
+      const first = transactions[0]!;
+      if (first.kind === "battle") {
+        if (transactions.some((transaction) => transaction.kind !== "battle" || transaction.key !== first.key)) {
+          errors.push(`provenance step ${step} mixes unrelated battle transactions`);
+        }
+      } else if (transactions.length !== 1) {
+        errors.push(`provenance step ${step} contains more than one item or capture transaction`);
+      }
+    }
+    for (const [item, quantity] of Object.entries(currentConsumedRoots)) {
+      if (quantity > count(expedition.ledger.consumedItems, item)) {
+        errors.push(`provenance item receipts exceed consumed inventory for '${item}'`);
+      }
+    }
   } catch {
     errors.push("team provenance is invalid");
   }
-  const maximumSequence = expedition.team.reduce((maximum, record) =>
-    Math.max(maximum, ...record.provenance.map((event) => event.seq)), 0);
-  if (!Number.isSafeInteger(expedition.nextEventSeq) || expedition.nextEventSeq <= maximumSequence) {
-    errors.push("next provenance sequence is invalid");
-  }
-  if (!Number.isSafeInteger(expedition.nextAction) || expedition.nextAction < 1) {
-    errors.push("next action sequence is invalid");
+  if (!HEX_SEED.test(expedition.seed) || !Number.isSafeInteger(expedition.rngDraws) || expedition.rngDraws < 0 ||
+      !Number.isSafeInteger(expedition.rng) || expedition.rng < 0 || expedition.rng > 0xffff_ffff) {
+    errors.push("expedition RNG state is invalid");
+  } else {
+    const expectedRng = (domainCursor(expedition.seed, "encounters") +
+      Math.imul(expedition.rngDraws, 0x6d2b_79f5)) >>> 0;
+    if (expedition.rng !== expectedRng) errors.push("expedition RNG cursor does not match its draw count");
   }
   return errors;
+}
+
+/** Total corruption check for the server-owned JSON state. Coordinated edits
+ * still require authenticated storage; this function proves internal game
+ * conservation and rejects malformed or partially rewritten envelopes. */
+export function checkExpeditionConservation(value: unknown): string[] {
+  try {
+    if (!isCanonicalJsonShape(value) || !isRecord(value) ||
+        !exactOwnKeys(value, EXPEDITION_STATE_KEYS)) {
+      return ["expedition state must be one exact bounded canonical JSON envelope"];
+    }
+    return checkExpeditionConservationInner(value as unknown as Expedition);
+  } catch {
+    return ["expedition state is malformed"];
+  }
 }
 
 function selectEncounter(expedition: Expedition): ExpeditionEncounter {
@@ -687,7 +975,7 @@ function selectEncounter(expedition: Expedition): ExpeditionEncounter {
   const level = randomIntInclusive(expedition, row.level[0], Math.min(row.level[1], expedition.rules.levelCap));
   const acquireSeed = domainHex(expedition.seed, `wild:${expedition.nextAction}:${expedition.rngDraws}`);
   const enemy = arenaTeamRecordFromProvenance(row.monster, [{
-    seq: 1,
+    seq: expedition.nextEventSeq,
     type: "acquire",
     seed: acquireSeed,
     species: row.monster,
@@ -701,8 +989,20 @@ function selectEncounter(expedition: Expedition): ExpeditionEncounter {
     sides: [{ kind: "agent", team }, { kind: "agent", team: [enemy] }],
     teamRules: { minSize: 1, maxSize: MAX_EXPEDITION_TEAM, levelCap: expedition.rules.levelCap },
   });
+  for (const monster of battle.core.parties[0]) monster.experienceModifier = 1;
+  battle.core.parties[1][0]!.experienceModifier = row.experienceModifier;
   for (const [battleIndex, expeditionIndex] of partyIndices.entries()) {
-    battle.core.parties[0][battleIndex]!.currentHp = expedition.partyHp[expeditionIndex]!;
+    const monster = battle.core.parties[0][battleIndex]!;
+    monster.currentHp = expedition.partyHp[expeditionIndex]!;
+    const status = expedition.partyStatus[expeditionIndex]!;
+    monster.status = status === null ? null : {
+      slug: status,
+      turn: (RULES_DB.status[status]!.duration ?? 0) > 0 ? 1 : 0,
+      stack: 1,
+      uses: 0,
+      linked: null,
+      appliedEffects: [],
+    };
   }
   return {
     area: expedition.area,
@@ -710,6 +1010,7 @@ function selectEncounter(expedition: Expedition): ExpeditionEncounter {
     level,
     experienceModifier: row.experienceModifier,
     acquireSeed,
+    acquireSeq: expedition.nextEventSeq,
     partyIndices,
     battle,
   };
@@ -728,39 +1029,45 @@ function spendMoney(expedition: Expedition, amount: number): void {
   expedition.ledger.spentMoney += amount;
 }
 
-function updateHealthAfterRecord(
+function updateHealthAfterItem(
   expedition: Expedition,
   target: number,
+  item: string,
   before: ArenaTeamRecord,
   after: ArenaTeamRecord,
 ): void {
   const oldMax = maxHp(before, expedition.rules.levelCap);
   const newMax = maxHp(after, expedition.rules.levelCap);
-  expedition.partyHp[target] = Math.min(newMax, expedition.partyHp[target]! + Math.max(0, newMax - oldMax));
+  const grantsExperience = RULES_DB.item[item]!.effects.some((effect) => effect.type === "gain_xp");
+  expedition.partyHp[target] = Math.min(
+    newMax,
+    expedition.partyHp[target]! + (grantsExperience ? Math.max(0, newMax - oldMax) : 0),
+  );
 }
 
 function settleBattle(expedition: Expedition): void {
   const encounter = expedition.encounter!;
   const battle = encounter.battle;
   for (const [battleIndex, expeditionIndex] of encounter.partyIndices.entries()) {
-    expedition.partyHp[expeditionIndex] = Math.max(0, battle.core.parties[0][battleIndex]?.currentHp ?? 0);
+    const monster = battle.core.parties[0][battleIndex];
+    expedition.partyHp[expeditionIndex] = Math.max(0, monster?.currentHp ?? 0);
+    const status = monster?.status?.slug ?? null;
+    expedition.partyStatus[expeditionIndex] = status !== null &&
+      RULES_DB.status[status]?.behaviors?.persists_after_combat === true
+      ? status
+      : null;
   }
   if (!arenaIsOver(battle)) return;
   if (battle.terminal?.winner === 0) {
-    const loser = clone(battle.core.parties[1][0]!);
-    loser.experienceModifier = encounter.experienceModifier;
     const reward = battle.core.rewards.at(-1);
-    const participants = reward?.winners.map(({ uid }) => uid) ?? [];
+    const participants = reward?.participants ?? reward?.winners.map(({ uid }) => uid) ?? [];
     if (participants.length > 0) {
-      const rewardState = clone(battle.core);
-      rewardState.parties[1][0] = loser;
-      rewardState.damageByDefender[String(loser.uid)] = [...participants];
-      const awards = defeatExperienceAwards(RULES_DB, rewardState, loser);
-      for (const uid of participants) {
+      for (const winner of reward?.winners ?? []) {
+        const uid = winner.uid;
         const battleIndex = battle.core.parties[0].findIndex((monster) => monster.uid === uid);
         const target = encounter.partyIndices[battleIndex];
-        const amount = awards.get(uid) ?? 0;
-        if (target === undefined || amount <= 0) continue;
+        const amount = winner.experience;
+        if (target === undefined) continue;
         const before = expedition.team[target]!;
         const appended = appendArenaExperience(before, {
           type: "experience",
@@ -773,11 +1080,22 @@ function settleBattle(expedition: Expedition): void {
             level: encounter.level,
             experienceModifier: encounter.experienceModifier,
             participants: participants.length,
+            opponentSeed: encounter.acquireSeed,
+            opponentSeq: encounter.acquireSeq,
+            trainingPoints: [...winner.trainingPoints],
           },
         }, expedition.nextEventSeq, { levelCap: expedition.rules.levelCap });
         expedition.team[target] = appended.record;
         expedition.nextEventSeq = appended.nextSeq;
-        updateHealthAfterRecord(expedition, target, before, appended.record);
+        const battleWinner = battle.core.parties[0][battleIndex];
+        if (battleWinner) {
+          const persistedMax = maxHp(appended.record, expedition.rules.levelCap);
+          const excessBattleHp = Math.max(0, battleWinner.base.hp - persistedMax);
+          expedition.partyHp[target] = Math.min(
+            persistedMax,
+            Math.max(0, expedition.partyHp[target]! - excessBattleHp),
+          );
+        }
       }
     }
   }
@@ -813,11 +1131,19 @@ function applyBattle(expedition: Expedition, action: Extract<ExpeditionAction, {
 function applyCapture(expedition: Expedition, item: string): void {
   const encounter = expedition.encounter!;
   const target = encounter.battle.core.parties[1][0]!;
-  const roll = attemptCapture(RULES_DB, encounter.battle.core, item, target);
-  consumeItem(expedition, item);
+  const resolution = resolveCaptureAttempt(RULES_DB, encounter.battle.core, item, target);
+  const roll = resolution.roll;
+  if (resolution.consumeItem) consumeItem(expedition, item);
   if (!roll.success) return;
+  if (encounter.acquireSeq !== expedition.nextEventSeq) {
+    throw new Error("capture acquisition sequence no longer matches its encounter");
+  }
+  const persistentStatus = target.status &&
+    RULES_DB.status[target.status.slug]?.behaviors?.persists_after_combat === true
+    ? target.status.slug
+    : null;
   const provenance: ArenaProvenanceEvent[] = [{
-    seq: expedition.nextEventSeq++,
+    seq: encounter.acquireSeq,
     type: "acquire",
     seed: encounter.acquireSeed,
     species: encounter.species,
@@ -826,14 +1152,16 @@ function applyCapture(expedition: Expedition, item: string): void {
       kind: "expedition",
       area: encounter.area,
       step: expedition.nextAction,
-      capture: { result: "caught", item, success: true, shakes: roll.shakes },
+      capture: { result: "caught", item, success: true, shakes: roll.shakes, status: persistentStatus },
     },
   }];
   const record = arenaTeamRecordFromProvenance(encounter.species, provenance, {
     levelCap: expedition.rules.levelCap,
   });
+  expedition.nextEventSeq++;
   expedition.team.push(record);
-  expedition.partyHp.push(maxHp(record, expedition.rules.levelCap));
+  expedition.partyHp.push(Math.min(target.currentHp, maxHp(record, expedition.rules.levelCap)));
+  expedition.partyStatus.push(persistentStatus);
   expedition.encounter = null;
 }
 
@@ -841,6 +1169,10 @@ function healWithItem(expedition: Expedition, item: string, target: number): voi
   const maximum = maxHp(expedition.team[target]!, expedition.rules.levelCap);
   let hp = expedition.partyHp[target]!;
   for (const effect of RULES_DB.item[item]!.effects) {
+    if (effect.type === "restore") {
+      expedition.partyStatus[target] = null;
+      continue;
+    }
     if (effect.type !== "heal") continue;
     const amount = Number(effect.parameters[0] ?? 0);
     hp += effect.parameters[1] === "percentage" ? Math.trunc(maximum * amount) : Math.trunc(amount);
@@ -859,7 +1191,7 @@ function applyItem(expedition: Expedition, item: string, target: number, forget?
   consumeItem(expedition, item);
   expedition.team[target] = appended.record;
   expedition.nextEventSeq = appended.nextSeq;
-  updateHealthAfterRecord(expedition, target, before, appended.record);
+  updateHealthAfterItem(expedition, target, item, before, appended.record);
   healWithItem(expedition, item, target);
 }
 
@@ -869,14 +1201,16 @@ function applyLegalAction(expedition: Expedition, action: ExpeditionAction): voi
     case "explore": expedition.encounter = selectEncounter(expedition); break;
     case "battle": applyBattle(expedition, action); break;
     case "catch": applyCapture(expedition, action.item); break;
-    case "flee": expedition.encounter = null; break;
+    case "flee": settleBattle(expedition); expedition.encounter = null; break;
     case "useItem": applyItem(expedition, action.item, action.target); break;
     case "learnMove": applyItem(expedition, action.item, action.target, action.forget); break;
     case "heal": {
       const shop = AREAS[expedition.area]!.shop!;
       const potion = SHOP_CATALOG.shops[shop]!.items.find((good) => good.item === "potion")!;
       spendMoney(expedition, potion.price);
+      expedition.ledger.healingServices[shop] = count(expedition.ledger.healingServices, shop) + 1;
       expedition.partyHp = expedition.team.map((record) => maxHp(record, expedition.rules.levelCap));
+      expedition.partyStatus = expedition.team.map(() => null);
       break;
     }
     case "shop": {
@@ -901,7 +1235,12 @@ export function applyExpeditionAction(expedition: Expedition, value: unknown): E
     return { ok: false, expedition, error: "CORRUPT_STATE" };
   }
   if (expedition.ended) return { ok: false, expedition, error: "EXPEDITION_OVER" };
-  const sequence = actionSequence(value);
+  let sequence: number | null;
+  try {
+    sequence = actionSequence(value);
+  } catch {
+    return { ok: false, expedition, error: "INVALID_ACTION" };
+  }
   if (sequence !== null && sequence < expedition.nextAction) {
     return { ok: false, expedition, error: "STALE_ACTION" };
   }
@@ -909,17 +1248,21 @@ export function applyExpeditionAction(expedition: Expedition, value: unknown): E
     return { ok: false, expedition, error: "OUT_OF_ORDER" };
   }
   if (!isRecord(value)) return { ok: false, expedition, error: "INVALID_ACTION" };
-  const legal = legalExpeditionActions(expedition);
-  let encoded: string;
+  let legal: ExpeditionAction[];
   try {
-    encoded = canonicalJson(value);
+    legal = legalExpeditionActions(expedition);
+  } catch {
+    return { ok: false, expedition, error: "CORRUPT_STATE" };
+  }
+  let action: ExpeditionAction | undefined;
+  try {
+    action = legal.find((candidate) => exactJsonEqual(candidate, value));
   } catch {
     return { ok: false, expedition, error: "INVALID_ACTION" };
   }
-  const action = legal.find((candidate) => canonicalJson(candidate) === encoded);
   if (!action) return { ok: false, expedition, error: sequence === null ? "INVALID_ACTION" : "ILLEGAL_ACTION" };
-  const next = clone(expedition);
   try {
+    const next = clone(expedition);
     applyLegalAction(next, action);
     next.remainingSteps--;
     next.nextAction++;

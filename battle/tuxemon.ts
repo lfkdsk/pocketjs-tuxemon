@@ -802,7 +802,10 @@ function changeInventory(state: TuxemonBattleState, slug: string, amount: number
   state.inventory[slug] = Math.max(0, (state.inventory[slug] ?? 0) + amount);
 }
 
-function applyCaptureDeviceEffects(config: DbCaptureDevice, target: BattleMonster): void {
+export function applyCaptureDeviceEffects(
+  config: DbCaptureDevice,
+  target: Pick<BattleMonster, "level" | "tasteWarm">,
+): void {
   for (const effect of config.capdev_effects ?? []) {
     if (effect.target_attribute === "level") {
       // Tuxemon 9e6258ff attempts to assign Monster.level, a read-only
@@ -822,6 +825,33 @@ function applyCaptureDeviceEffects(config: DbCaptureDevice, target: BattleMonste
   }
 }
 
+export interface CaptureResolution {
+  roll: CaptureAttemptResult;
+  /** Net production inventory result represented for an external ledger. */
+  consumeItem: boolean;
+}
+
+/** Shared roll/effect/persistence transaction used by production battles and
+ * server-stepped expeditions. Metadata and battle termination remain caller
+ * concerns, but an effect failure happens before any inventory deduction. */
+export function resolveCaptureAttempt(
+  db: TuxemonBattleDb,
+  state: TuxemonBattleState,
+  itemSlug: string,
+  target: BattleMonster,
+): CaptureResolution {
+  const item = db.item[itemSlug];
+  if (!item) throw new Error(`battle: unknown item '${itemSlug}'`);
+  const roll = attemptCapture(db, state, itemSlug, target);
+  const combined = item.effects.some((effect) => effect.type === "capture_combined");
+  const config = db.capture_devices.items[item.slug];
+  if (roll.success && !combined && config) applyCaptureDeviceEffects(config, target);
+  const persistent = !combined && config && (
+    roll.success ? config.capdev_persistent_on_success : config.capdev_persistent_on_failure
+  );
+  return { roll, consumeItem: item.consumable && !persistent };
+}
+
 function performCapture(
   db: TuxemonBattleDb,
   state: TuxemonBattleState,
@@ -830,15 +860,9 @@ function performCapture(
 ): void {
   const item = db.item[action.ref];
   const target = getMonster(state, action.target);
-  const roll = attemptCapture(db, state, action.ref, target);
-  const combined = item.effects.some((effect) => effect.type === "capture_combined");
-  const config = db.capture_devices.items[item.slug];
-  if (!combined && config) {
-    if (roll.success && config.capdev_persistent_on_success) changeInventory(state, item.slug, 1);
-    if (!roll.success && config.capdev_persistent_on_failure) changeInventory(state, item.slug, 1);
-    if (roll.success) applyCaptureDeviceEffects(config, target);
-  }
-  if (item.consumable) changeInventory(state, item.slug, -1);
+  const resolution = resolveCaptureAttempt(db, state, action.ref, target);
+  const roll = resolution.roll;
+  if (resolution.consumeItem) changeInventory(state, item.slug, -1);
   state.events.push({
     type: "capture",
     turn: state.turn,
@@ -1490,6 +1514,11 @@ function awardDefeat(db: TuxemonBattleDb, state: TuxemonBattleState, loser: Batt
   );
   const reward = {
     loser: loser.uid,
+    ...(state.opponent === "arena" ? {
+      participants: participants
+        .filter((monster) => getSide(state, monster.uid) === 0)
+        .map((monster) => monster.uid),
+    } : {}),
     winners: [] as TuxemonBattleState["rewards"][number]["winners"],
     prize: 0,
   };

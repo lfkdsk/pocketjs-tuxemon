@@ -222,7 +222,7 @@ describe("expedition randomized state machine", () => {
     expect(summary.actions["battle:manual"]).toBeGreaterThan(0);
     expect(summary.actions["battle:auto"]).toBeGreaterThan(0);
     expect(summary.actions.catch).toBeGreaterThan(0);
-    expect(summary.digest).toBe("9da6fbe34312862cd9fa9144d8a4ef54978bfae30b0f0ecb7b32f068ea51e006");
+    expect(summary.digest).toBe("12f22dd9410321bc6f97fb7bc4c621d4fe5d7f52580acc7bb18646859f63e3ec");
   }, 15_000);
 
   test("1,000 malformed and illegal JSON-like actions never throw or mutate authoritative bytes", () => {

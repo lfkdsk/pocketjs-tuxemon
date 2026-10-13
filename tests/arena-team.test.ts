@@ -14,6 +14,7 @@ import {
   type ArenaTeamRecord,
 } from "../battle/arena.ts";
 import {
+  MAX_ARENA_PROVENANCE_EVENTS,
   arenaTeamRecordFromProvenance,
   buildValidatedArenaTeam,
   type ArenaProvenanceEvent,
@@ -24,6 +25,7 @@ const ACQUIRE_SEED = "fedcba9876543210".repeat(4);
 
 function rockitten(seq = 1): ArenaTeamRecord {
   return {
+    kind: "legacy",
     species: "rockitten",
     level: 10,
     moves: ["ram", "boulder", "mudslide", "assault"],
@@ -135,6 +137,7 @@ describe("Arena persistent team validation", () => {
 
   test("replays level, legal move, TM, and training-item events before deriving stats", () => {
     const learned: ArenaTeamRecord = {
+      kind: "legacy",
       species: "rockitten",
       level: 4,
       moves: ["ram", "boulder", "mudslide", "acid"],
@@ -189,6 +192,7 @@ describe("Arena persistent team validation", () => {
     expect(validateTeam([restricted]).ok).toBe(false);
 
     const early: ArenaTeamRecord = {
+      kind: "legacy",
       species: "rockitten",
       level: 4,
       moves: ["ram", "mudslide"],
@@ -278,8 +282,14 @@ describe("Arena persistent team validation", () => {
     moves.moves = Array.from({ length: 100_000 }, () => "ram");
     expect(validateTeam([moves]).ok).toBe(false);
     const provenance = rockitten() as unknown as Record<string, unknown>;
-    provenance.provenance = Array.from({ length: 1_025 }, (_, seq) => ({ seq: seq + 1, type: "level", level: 11 }));
-    expect(validateTeam([provenance]).ok).toBe(false);
+    provenance.provenance = Array.from({ length: MAX_ARENA_PROVENANCE_EVENTS + 1 }, (_, seq) => ({
+      seq: seq + 1,
+      type: "level",
+      level: 11,
+    }));
+    const oversized = validateTeam([provenance]);
+    expect(oversized.ok).toBe(false);
+    if (!oversized.ok) expect(oversized.errors.join(" ")).toContain(String(MAX_ARENA_PROVENANCE_EVENTS));
   });
 
   test("freezes exported defaults and replays a terminal custom-team tape", () => {

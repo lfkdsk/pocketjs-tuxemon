@@ -16,6 +16,7 @@ import { battleDbToTuxemonBattleDb } from "./from-battle-db.ts";
 import { spawnMonster } from "./spawn.ts";
 import { calculateBaseStats } from "./stats.ts";
 import { calculateDefeatExperience } from "./progression.ts";
+import { applyCaptureDeviceEffects } from "./tuxemon.ts";
 import {
   STAT_NAMES,
   type SpawnedMonsterSnapshot,
@@ -36,7 +37,7 @@ export interface ArenaAcquireEvent {
 
 export type ArenaExpeditionCaptureResult =
   | { result: "starter" }
-  | { result: "caught"; item: string; success: true; shakes: number };
+  | { result: "caught"; item: string; success: true; shakes: number; status: string | null };
 
 export interface ArenaExpeditionOrigin {
   kind: "expedition";
@@ -87,6 +88,9 @@ export interface ArenaExperienceEvent {
       level: number;
       experienceModifier: number;
       participants: number;
+      opponentSeed: string;
+      opponentSeq: number;
+      trainingPoints: StatName[];
     }
     | { kind: "item"; item: string };
 }
@@ -99,12 +103,17 @@ export type ArenaProvenanceEvent =
   | ArenaItemEvent;
 
 export interface ArenaTeamRecord {
+  /** Explicit mode prevents an expedition record from silently falling back
+   * to the less strict legacy reconstruction contract. */
+  kind: "legacy" | "expedition";
   species: string;
   level: number;
   moves: string[];
   /** Required on expedition records so partial progress between levels is
    * caller-visible and checked against the complete event log. */
   experience?: number;
+  /** Bond is part of real battle progression even though it is not a stat. */
+  bond?: number;
   /** Integrity checksum for server-created expedition provenance. This is not
    * an ownership signature; authenticated storage remains the trust boundary. */
   provenanceHash?: string;
@@ -120,6 +129,9 @@ export interface ArenaTeamRules {
   bannedSpecies?: readonly string[];
   bannedMoves?: readonly string[];
   bannedItems?: readonly string[];
+  /** Select the authenticated storage class when callers know whether a team
+   * must come from expeditions or the legacy Arena constructor. */
+  requiredKind?: ArenaTeamRecord["kind"] | null;
 }
 
 interface NormalizedTeamRules {
@@ -130,6 +142,7 @@ interface NormalizedTeamRules {
   bannedSpecies: Set<string>;
   bannedMoves: Set<string>;
   bannedItems: Set<string>;
+  requiredKind: ArenaTeamRecord["kind"] | null;
 }
 
 export type ArenaTeamValidation =
@@ -140,7 +153,7 @@ const SOURCE_DB = validateBattleDb(battleDbJson);
 const RULES_DB = battleDbToTuxemonBattleDb(SOURCE_DB);
 const HEX_SEED = /^[0-9a-fA-F]{64}$/;
 const LOWER_HEX = /^[0-9a-f]{64}$/;
-const MAX_PROVENANCE_EVENTS = 1_024;
+export const MAX_ARENA_PROVENANCE_EVENTS = 65_536;
 
 export const DEFAULT_ARENA_TEAM_RULES: Readonly<Required<ArenaTeamRules>> = Object.freeze({
   minSize: 1,
@@ -150,6 +163,7 @@ export const DEFAULT_ARENA_TEAM_RULES: Readonly<Required<ArenaTeamRules>> = Obje
   bannedSpecies: Object.freeze([] as string[]),
   bannedMoves: Object.freeze([] as string[]),
   bannedItems: Object.freeze([] as string[]),
+  requiredKind: null,
 });
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -160,8 +174,15 @@ function exactObject(
   allowed: readonly string[],
   required: readonly string[],
 ): boolean {
+  const prototype = Object.getPrototypeOf(value);
+  if (prototype !== Object.prototype && prototype !== null) return false;
   const keys = new Set(allowed);
-  return Object.keys(value).every((key) => keys.has(key)) && required.every((key) => key in value);
+  const ownKeys = Reflect.ownKeys(value);
+  if (ownKeys.some((key) => typeof key !== "string")) return false;
+  return ownKeys.every((key) => {
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    return keys.has(key as string) && descriptor?.enumerable === true && "value" in descriptor;
+  }) && required.every((key) => Object.hasOwn(value, key));
 }
 
 function clone<T>(value: T): T {
@@ -199,6 +220,7 @@ function normalizeRules(value: unknown, errors: string[]): NormalizedTeamRules {
   const input = value === undefined ? {} : value;
   if (!isRecord(input) || !exactObject(input, [
     "minSize", "maxSize", "levelCap", "uniformLevel", "bannedSpecies", "bannedMoves", "bannedItems",
+    "requiredKind",
   ], [])) {
     errors.push("team rules must contain only documented fields");
   }
@@ -224,6 +246,10 @@ function normalizeRules(value: unknown, errors: string[]): NormalizedTeamRules {
       uniformLevel < SOURCE_DB.rules.levelRange[0] || uniformLevel > levelCap)) {
     errors.push(`team rules uniformLevel must be null or ${SOURCE_DB.rules.levelRange[0]}..levelCap`);
   }
+  const requiredKind = source.requiredKind ?? DEFAULT_ARENA_TEAM_RULES.requiredKind;
+  if (requiredKind !== null && requiredKind !== "legacy" && requiredKind !== "expedition") {
+    errors.push("team rules requiredKind must be null, 'legacy', or 'expedition'");
+  }
   return {
     minSize,
     maxSize,
@@ -247,6 +273,7 @@ function normalizeRules(value: unknown, errors: string[]): NormalizedTeamRules {
       (slug) => Object.hasOwn(SOURCE_DB.items, slug),
       errors,
     ),
+    requiredKind: requiredKind === "legacy" || requiredKind === "expedition" ? requiredKind : null,
   };
 }
 
@@ -315,11 +342,12 @@ function applyExperience(
   while (snapshot.moves.length > SOURCE_DB.rules.maxMoves) {
     forgotten.push(snapshot.moves.shift()!);
   }
+  const forgetOffset = learned.length - forgotten.length;
   return {
     levels,
     learns: learned.map((move, index) => ({
       move,
-      ...(forgotten[index] === undefined ? {} : { forget: forgotten[index] }),
+      ...(index < forgetOffset ? {} : { forget: forgotten[index - forgetOffset]! }),
     })),
   };
 }
@@ -492,11 +520,14 @@ function expeditionOrigin(
       return null;
     }
   } else if (capture.result === "caught") {
-    if (!exactObject(capture, ["result", "item", "success", "shakes"], [
-      "result", "item", "success", "shakes",
+    if (!exactObject(capture, ["result", "item", "success", "shakes", "status"], [
+      "result", "item", "success", "shakes", "status",
     ]) || typeof capture.item !== "string" || capture.success !== true ||
         !Number.isSafeInteger(capture.shakes) || (capture.shakes as number) < 1 ||
-        (capture.shakes as number) > Number(RULES_DB.capture.total_shakes) || value.step === 0) {
+        capture.shakes !== Number(RULES_DB.capture.total_shakes) || value.step === 0 ||
+        (capture.status !== null && (typeof capture.status !== "string" ||
+          !Object.hasOwn(RULES_DB.status, capture.status) ||
+          RULES_DB.status[capture.status]!.behaviors?.persists_after_combat !== true))) {
       errors.push(`${label} caught origin has an invalid capture result`);
       return null;
     }
@@ -519,12 +550,18 @@ function expeditionOrigin(
   return clone(value as unknown as ArenaExpeditionOrigin);
 }
 
-function experienceSourceAmount(
+interface ExperienceSourceReward {
+  amount: number;
+  trainingPoints: StatName[];
+  bond: number;
+}
+
+function experienceSourceReward(
   snapshot: SpawnedMonsterSnapshot,
   value: unknown,
   label: string,
   errors: string[],
-): number | null {
+): ExperienceSourceReward | null {
   if (!isRecord(value) || typeof value.kind !== "string") {
     errors.push(`${label} has an invalid source`);
     return null;
@@ -540,17 +577,25 @@ function experienceSourceAmount(
       errors.push(`${label} item has no positive experience effect`);
       return null;
     }
-    return amount;
+    return { amount, trainingPoints: [], bond: 0 };
   }
   if (value.kind === "battle" && exactObject(value, [
     "kind", "area", "species", "level", "experienceModifier", "participants",
-  ], ["kind", "area", "species", "level", "experienceModifier", "participants"])) {
+    "opponentSeed", "opponentSeq", "trainingPoints",
+  ], [
+    "kind", "area", "species", "level", "experienceModifier", "participants",
+    "opponentSeed", "opponentSeq", "trainingPoints",
+  ])) {
     if (typeof value.area !== "string" || !Object.hasOwn(SOURCE_DB.encounters, value.area) ||
         typeof value.species !== "string" || !Object.hasOwn(SOURCE_DB.monsters, value.species) ||
         !Number.isSafeInteger(value.level) || (value.level as number) <= 0 ||
         typeof value.experienceModifier !== "number" || !Number.isFinite(value.experienceModifier) ||
         value.experienceModifier <= 0 || !Number.isSafeInteger(value.participants) ||
-        (value.participants as number) <= 0 || (value.participants as number) > 6) {
+        (value.participants as number) <= 0 || (value.participants as number) > 6 ||
+        typeof value.opponentSeed !== "string" || !HEX_SEED.test(value.opponentSeed) ||
+        !Number.isSafeInteger(value.opponentSeq) || (value.opponentSeq as number) < 1 ||
+        !Array.isArray(value.trainingPoints) || value.trainingPoints.some((stat) =>
+          typeof stat !== "string" || !STAT_NAMES.includes(stat as StatName))) {
       errors.push(`${label} has invalid battle reward fields`);
       return null;
     }
@@ -563,7 +608,33 @@ function experienceSourceAmount(
       errors.push(`${label} does not match a real encounter row`);
       return null;
     }
-    return calculateDefeatExperience(
+    const opponentRng: RngState = {
+      rng: recordSeed(value.opponentSeed, value.opponentSeq as number),
+      rngDraws: 0,
+    };
+    const opponent = spawnMonster(
+      SOURCE_DB,
+      RULES_DB,
+      opponentRng,
+      value.species,
+      value.level as number,
+      { experienceModifier: value.experienceModifier, moneyModifier: 0 },
+    );
+    const trainingPoints: StatName[] = [];
+    const training = clone(snapshot.trainingPoints!);
+    for (const stat of STAT_NAMES) {
+      if (opponent.base[stat] <= snapshot.base[stat]) continue;
+      const total = STAT_NAMES.reduce((sum, name) => sum + training[name]!, 0);
+      if (total >= SOURCE_DB.rules.trainingPoints.maxTotal ||
+          training[stat]! >= SOURCE_DB.rules.trainingPoints.maxPerStat) continue;
+      training[stat]!++;
+      trainingPoints.push(stat);
+    }
+    if (JSON.stringify(value.trainingPoints) !== JSON.stringify(trainingPoints)) {
+      errors.push(`${label}.trainingPoints does not match the real battle reward`);
+      return null;
+    }
+    const amount = calculateDefeatExperience(
       RULES_DB,
       {
         level: value.level as number,
@@ -573,9 +644,32 @@ function experienceSourceAmount(
       { level: snapshot.level, acquisition: "captured" },
       value.participants as number,
     );
+    return { amount, trainingPoints, bond: 3 };
   }
   errors.push(`${label} has an unknown source or fields`);
   return null;
+}
+
+function applyExperienceSourceReward(
+  snapshot: SpawnedMonsterSnapshot,
+  reward: ExperienceSourceReward,
+): void {
+  if (reward.trainingPoints.length > 0) {
+    for (const stat of reward.trainingPoints) snapshot.trainingPoints![stat]!++;
+    recalculate(snapshot);
+  }
+  snapshot.bond = Math.min(100, (snapshot.bond ?? 25) + reward.bond);
+}
+
+function applyRewardProgression(
+  snapshot: SpawnedMonsterSnapshot,
+  reward: ExperienceSourceReward,
+  levelCap: number,
+): ProgressionAudit {
+  applyExperienceSourceReward(snapshot, reward);
+  return reward.amount === 0
+    ? { levels: [], learns: [] }
+    : applyExperience(snapshot, reward.amount, levelCap);
 }
 
 function rebuildTeam(records: unknown, rulesValue: unknown, compareClaims = true): RebuiltTeam {
@@ -594,11 +688,19 @@ function rebuildTeam(records: unknown, rulesValue: unknown, compareClaims = true
   for (const [recordIndex, rawRecord] of records.entries()) {
     const prefix = `team[${recordIndex}]`;
     if (!isRecord(rawRecord) || !exactObject(rawRecord, [
-      "species", "level", "moves", "experience", "provenanceHash", "provenance",
+      "kind", "species", "level", "moves", "experience", "bond", "provenanceHash", "provenance",
     ], [
-      "species", "level", "moves", "provenance",
+      "kind", "species", "level", "moves", "provenance",
     ])) {
-      errors.push(`${prefix} must contain only species, level, moves, optional experience, provenanceHash, and provenance`);
+      errors.push(`${prefix} must contain only kind, species, level, moves, optional experience, bond, provenanceHash, and provenance`);
+      continue;
+    }
+    if (rawRecord.kind !== "legacy" && rawRecord.kind !== "expedition") {
+      errors.push(`${prefix}.kind must be 'legacy' or 'expedition'`);
+      continue;
+    }
+    if (rules.requiredKind !== null && rawRecord.kind !== rules.requiredKind) {
+      errors.push(`${prefix}.kind must be '${rules.requiredKind}' for this storage class`);
       continue;
     }
     if (typeof rawRecord.species !== "string" || !Object.hasOwn(SOURCE_DB.monsters, rawRecord.species)) {
@@ -615,8 +717,8 @@ function rebuildTeam(records: unknown, rulesValue: unknown, compareClaims = true
       continue;
     }
     if (!Array.isArray(rawRecord.provenance) || rawRecord.provenance.length === 0 ||
-        rawRecord.provenance.length > MAX_PROVENANCE_EVENTS) {
-      errors.push(`${prefix}.provenance must contain 1..${MAX_PROVENANCE_EVENTS} events`);
+        rawRecord.provenance.length > MAX_ARENA_PROVENANCE_EVENTS) {
+      errors.push(`${prefix}.provenance must contain 1..${MAX_ARENA_PROVENANCE_EVENTS} events`);
       continue;
     }
     const first = rawRecord.provenance[0];
@@ -657,6 +759,29 @@ function rebuildTeam(records: unknown, rulesValue: unknown, compareClaims = true
         `${prefix}.provenance[0].origin`,
         errors,
       );
+    if (rawRecord.kind === "expedition" && !origin) {
+      errors.push(`${prefix}.kind expedition requires an expedition origin`);
+    }
+    if (rawRecord.kind === "legacy" && first.origin !== undefined) {
+      errors.push(`${prefix}.kind legacy cannot contain an expedition origin`);
+    }
+    if (origin?.capture.result === "caught") {
+      const item = RULES_DB.item[origin.capture.item]!;
+      const combined = item.effects.some((effect) => effect.type === "capture_combined");
+      const config = RULES_DB.capture_devices.items[origin.capture.item];
+      snapshot.acquisition = "captured";
+      snapshot.captureDevice = origin.capture.item;
+      snapshot.bond = 25;
+      if (!combined && config) {
+        try {
+          applyCaptureDeviceEffects(config, snapshot);
+        } catch (error) {
+          errors.push(`${prefix}.provenance[0].origin capture effect failed: ${
+            error instanceof Error ? error.message : String(error)
+          }`);
+        }
+      }
+    }
     if (compareClaims && origin) {
       const expectedHash = expeditionProvenanceHash(rawRecord.provenance as ArenaProvenanceEvent[]);
       if (typeof rawRecord.provenanceHash !== "string" || !LOWER_HEX.test(rawRecord.provenanceHash) ||
@@ -668,6 +793,7 @@ function rebuildTeam(records: unknown, rulesValue: unknown, compareClaims = true
     }
     let previousSeq = first.seq as number;
     let previousStep = origin?.step ?? 0;
+    let previousRootStep = origin?.step ?? 0;
     let expectedAudits: Array<
       | { type: "level"; level: number; step: number }
       | { type: "learn"; move: string; forget?: string; step: number }
@@ -725,9 +851,14 @@ function rebuildTeam(records: unknown, rulesValue: unknown, compareClaims = true
           errors.push(`${label} requires an expedition acquisition`);
           continue;
         }
-        const expectedAmount = experienceSourceAmount(snapshot, rawEvent.source, `${label}.source`, errors);
-        if (!Number.isSafeInteger(rawEvent.amount) || (rawEvent.amount as number) <= 0 ||
-            expectedAmount === null || rawEvent.amount !== expectedAmount) {
+        const settlesExperienceItem = pendingExperienceItem !== null;
+        if (!settlesExperienceItem && (rawEvent.step as number) <= previousRootStep) {
+          errors.push(`${label}.step must be newer than the preceding expedition transaction`);
+          continue;
+        }
+        const reward = experienceSourceReward(snapshot, rawEvent.source, `${label}.source`, errors);
+        if (!Number.isSafeInteger(rawEvent.amount) || (rawEvent.amount as number) < 0 ||
+            reward === null || rawEvent.amount !== reward.amount) {
           errors.push(`${label}.amount does not match its real game-data source`);
           continue;
         }
@@ -743,8 +874,9 @@ function rebuildTeam(records: unknown, rulesValue: unknown, compareClaims = true
           errors.push(`${label} has no preceding item consumption`);
           continue;
         }
+        if (!settlesExperienceItem) previousRootStep = rawEvent.step as number;
         try {
-          const progression = applyExperience(snapshot, rawEvent.amount as number, rules.levelCap);
+          const progression = applyRewardProgression(snapshot, reward, rules.levelCap);
           expectedAudits = [
             ...progression.levels.map((level) => ({
               type: "level" as const,
@@ -785,8 +917,13 @@ function rebuildTeam(records: unknown, rulesValue: unknown, compareClaims = true
         rawEvent, ["seq", "type", "item", "forget", "step"],
         origin ? ["seq", "type", "item", "step"] : ["seq", "type", "item"],
       )) {
+        if (origin && (rawEvent.step as number) <= previousRootStep) {
+          errors.push(`${label}.step must be newer than the preceding expedition transaction`);
+          continue;
+        }
         const applied = applyItem(snapshot, rawEvent.item, rawEvent.forget, rules, label, errors, origin !== null);
         if (origin) {
+          previousRootStep = rawEvent.step as number;
           expectedAudits = applied.learns.map((learn) => ({
             type: "learn" as const,
             ...learn,
@@ -823,6 +960,11 @@ function rebuildTeam(records: unknown, rulesValue: unknown, compareClaims = true
         rawRecord.experience !== snapshot.totalExperience) {
       errors.push(`${prefix}.experience does not match the provenance-derived total ${snapshot.totalExperience}`);
     }
+    if (compareClaims && origin && (!Number.isSafeInteger(rawRecord.bond) || rawRecord.bond !== snapshot.bond)) {
+      errors.push(`${prefix}.bond does not match the provenance-derived bond ${snapshot.bond}`);
+    } else if (compareClaims && !origin && rawRecord.bond !== undefined) {
+      errors.push(`${prefix}.bond is only valid for expedition records`);
+    }
     if (rules.uniformLevel !== null) recalculate(snapshot, rules.uniformLevel);
     snapshots.push(snapshot);
   }
@@ -831,10 +973,14 @@ function rebuildTeam(records: unknown, rulesValue: unknown, compareClaims = true
 
 /** Validate without trusting any record-carried combat value. */
 export function validateTeam(records: unknown, rules: ArenaTeamRules = {}): ArenaTeamValidation {
-  const rebuilt = rebuildTeam(records, rules);
-  return rebuilt.errors.length === 0
-    ? { ok: true, errors: [] }
-    : { ok: false, errors: rebuilt.errors };
+  try {
+    const rebuilt = rebuildTeam(records, rules);
+    return rebuilt.errors.length === 0
+      ? { ok: true, errors: [] }
+      : { ok: false, errors: rebuilt.errors };
+  } catch {
+    return { ok: false, errors: ["team must be bounded canonical JSON"] };
+  }
 }
 
 /** Validate the match rule object independently before accepting a config. */
@@ -854,6 +1000,7 @@ export function arenaTeamRecordFromProvenance(
   rules: ArenaTeamRules = {},
 ): ArenaTeamRecord {
   const rebuilt = rebuildTeam([{
+    kind: provenance[0]?.type === "acquire" && provenance[0].origin !== undefined ? "expedition" : "legacy",
     species,
     level: 1,
     moves: [],
@@ -871,10 +1018,12 @@ export function arenaTeamRecordFromProvenance(
   const snapshot = rebuilt.snapshots[0]!;
   const expedition = provenance[0]?.type === "acquire" && provenance[0].origin !== undefined;
   return {
+    kind: expedition ? "expedition" : "legacy",
     species: snapshot.slug,
     level: snapshot.level,
     moves: [...snapshot.moves],
     experience: snapshot.totalExperience,
+    ...(expedition ? { bond: snapshot.bond } : {}),
     ...(expedition ? { provenanceHash: expeditionProvenanceHash(provenance) } : {}),
     provenance: clone(provenance),
   };
@@ -913,12 +1062,12 @@ export function appendArenaExperience(
 ): ArenaProvenanceAppendResult {
   const { snapshot, provenance } = checkedAppendStart(record, firstSeq, rules);
   const errors: string[] = [];
-  const amount = experienceSourceAmount(snapshot, event.source, "experience source", errors);
-  if (amount === null || amount !== event.amount || errors.length > 0) {
+  const reward = experienceSourceReward(snapshot, event.source, "experience source", errors);
+  if (reward === null || reward.amount !== event.amount || errors.length > 0) {
     throw new Error(`arena experience rejected: ${errors.join("; ") || "amount does not match source"}`);
   }
   const normalized = normalizeRules({ ...rules, minSize: 1, maxSize: 1, uniformLevel: null }, errors);
-  const progression = applyExperience(snapshot, amount, normalized.levelCap);
+  const progression = applyRewardProgression(snapshot, reward, normalized.levelCap);
   let seq = firstSeq;
   provenance.push({ ...clone(event), seq: seq++ });
   for (const level of progression.levels) {
@@ -953,12 +1102,12 @@ export function appendArenaItem(
   }
   if (applied.experienceItem) {
     const source = { kind: "item" as const, item: applied.experienceItem };
-    const amount = experienceSourceAmount(snapshot, source, "experience item", errors);
-    if (amount === null || errors.length > 0) {
+    const reward = experienceSourceReward(snapshot, source, "experience item", errors);
+    if (reward === null || errors.length > 0) {
       throw new Error(`arena item rejected: ${errors.join("; ")}`);
     }
-    const progression = applyExperience(snapshot, amount, normalized.levelCap);
-    provenance.push({ seq: seq++, type: "experience", step: event.step, amount, source });
+    const progression = applyRewardProgression(snapshot, reward, normalized.levelCap);
+    provenance.push({ seq: seq++, type: "experience", step: event.step, amount: reward.amount, source });
     for (const level of progression.levels) {
       provenance.push({ seq: seq++, type: "level", level, step: event.step });
     }

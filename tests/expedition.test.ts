@@ -90,7 +90,7 @@ describe("Arena expeditions", () => {
     ]);
     expect(keys(initial.area)).toEqual(["id", "name"]);
     expect(keys(initial.destinations[0]!)).toEqual(["id", "name"]);
-    expect(keys(initial.team[0]!)).toEqual(["experience", "hp", "level", "moves", "slot", "species"]);
+    expect(keys(initial.team[0]!)).toEqual(["experience", "hp", "level", "moves", "slot", "species", "status"]);
     expect(keys(initial.team[0]!.species)).toEqual(["en_US", "slug", "zh_CN"]);
     expect(keys(initial.team[0]!.hp)).toEqual(["current", "max"]);
     expect(keys(initial.team[0]!.moves[0]!)).toEqual(["en_US", "slug", "zh_CN"]);
@@ -292,6 +292,7 @@ describe("Arena expeditions", () => {
     expect(continued.team).toEqual(previousTeam);
     expect(continued.team).not.toBe(persistent.team);
     expect(continued.partyHp).toEqual(persistent.partyHp);
+    expect(continued.partyStatus).toEqual(persistent.partyStatus);
     expect(continued.inventory).toEqual(persistent.inventory);
     expect(continued.money).toBe(persistent.money);
     expect(continued.remainingSteps).toBe(7);
