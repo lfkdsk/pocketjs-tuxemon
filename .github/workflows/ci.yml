@@ -191,6 +191,8 @@ jobs:
         run: bun run verify:web:arena
       - name: Play an expedition journal in headless Chrome
         run: bun run verify:web:expedition
+      - name: Trigger imported double battles by keyboard and touch
+        run: bun run verify:web:doubles
       - name: Play three imported music tracks in headless Chrome
         run: bun run verify:web:audio
       - name: Keep the web site
