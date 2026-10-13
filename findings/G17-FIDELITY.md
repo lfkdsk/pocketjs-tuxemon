@@ -1,9 +1,14 @@
 # G17 fidelity: immediate scripted motion and backdrop stacks
 
 Base game commit: `4520e7f8`  
-Pinned RPG Kit commit: `189a6f0dd2c4642fcff6fcecdd02d8e4a5985091`
+Initial RPG Kit commit: `189a6f0dd2c4642fcff6fcecdd02d8e4a5985091`
+Final RPG Kit commit: `afbde1c529f3f96ac4551f5f2a19da101f2d3a6c`
 
-## Verdict
+The initial BLOCKED verdict below is retained as the diagnosis that motivated
+the component fix. The continuation results at the end supersede it and carry
+the final verdict.
+
+## Initial verdict (superseded)
 
 The game-side integration is implemented, imported globally, documented, and
 recorded, but the branch cannot honestly pass its cold suite. A real imported
@@ -216,4 +221,151 @@ the uncompleted browser, journey, Web, and PSP gates.
 
 Subagent 使用：3 / 分别核对上游与导入语义、存档和录带迁移、画面与 CI 契约；只读并行核对提前暴露了重复背景所有权和派生契约，节省了时间
 
-BLOCKED
+## Continuation: component fix and final acceptance
+
+### Dependency upgrade and blocker closure
+
+The RPG Kit pin is now `afbde1c529f3f96ac4551f5f2a19da101f2d3a6c`,
+the four-commit K-TUX-2 stack. Its immediate event-route tail derives the
+first-step configuration from the newly installed route speed instead of the
+base session speed. The focused component suite passed 12/12 tests with 71
+assertions. The original real imported Christie reproduction then passed all
+8 tests: the first pixel is now the authored 9 tiles/s displacement, so no
+game-side tolerance or degradation was added.
+
+Two complete imports were byte-identical and left no tracked diff. The
+determinism inventory is 5,076 files, 68,792,835 bytes, SHA-256
+`2754867f0f944b6a0aaee0e2c04fa2a958903efe2abc07e5822e74f0a8e814f8`.
+The root repository, RPG Kit submodule, and nested PocketJS submodule remained
+clean after import, bootstrap, desktop/Web builds, and both PSP builds; no
+`bun.lock` changed.
+
+### Chinese smoke tape and Web-density checkpoint
+
+The Chinese smoke tape was re-recorded with the project tool after the
+fidelity tape's 129-frame insertion. It now has 3,318 frames rather than
+3,189, and its file SHA-256 is
+`a36b64771aa4ab172050d378681d7516f0fbd0c9460018086e41125646ade44a`.
+Regenerating the Chinese UI manifest and all 18 PNGs produced byte-identical
+files. The focused visual suite passed 3/3 tests and 162 assertions; the Web
+Chinese run passed all 13 checks, captured 22 screenshots, and reported zero
+console errors.
+
+The Paper Town density dialog moved from frame 1,612 to 1,741, exactly the
+same +129 offset. A reducer scan found the complete dialog at frames
+1,739-1,741; frame 1,741 was selected rather than blessing the blank old
+checkpoint. The regenerated 2x PNG has raw SHA-256
+`b448c3bc380357286e897536a0e057b4345f0454a1f72af3b77cf0d75d792577`.
+The Web verifier ends that checkpoint at `spyder_paper_town@(24,13)`, reports
+zero map mismatches and 3,591 native text-density mismatches as expected, and
+computes physical-RGBA SHA-256
+`f6b59d25f60a9ef21e0efc7b989c9933ee133238156519b118d3a54edc5f96c8`.
+
+Both Chinese battle-status viewports and the English Paper Town density frame
+were opened at 3x. The 480x272 and 960x544 Chinese frames are populated,
+legible, and unclipped; the English dialog is present, readable, and aligned
+over the expected map rather than being a blank self-consistent golden.
+
+### Exact terminal-state comparison
+
+The previous summary's phrase "only timeline identity" was too broad. A new
+recursive decode found exactly six differing leaves between the old and new
+full-mainline terminal states:
+
+| Leaf | Old | New |
+| --- | ---: | ---: |
+| `frame` | 206,822 | 206,935 |
+| `ext.clock.refTick` | 104,785 | 104,898 |
+| `ext.clock.subMinuteTicks` | 385 | 498 |
+| `interp.moveControls.player.routeStopped` | `false` | `true` |
+| `interp.sw.steps` | 8,073 | 8,071 |
+| `sw.steps` | 8,073 | 8,071 |
+
+The old state SHA-256 is
+`59645ed2633892775f935cd88d1a00003ff93886896ee939973ba23a9fc0ee2e`;
+the new state SHA-256 is
+`faf682412dce51dc620b25f28c7c73049bd96f4bb3ee44a6dbc7394c0bdba665`.
+Every other leaf matches. Both states end at `spyder_datacenter@(7,4)`, facing
+right, with 67,773 gold, the same 16 item quantities, the same six party
+members and levels, and story SHA-256
+`076586407513305744e782c68db73004805e1055779abfb44a91bf0ee8d2e1f1`.
+The differences are therefore the intended timing/movement observation, not
+a story, party, inventory, or economy change.
+
+### Cold gates and local CI reproduction
+
+All commands used `TUXEMON_SRC=/var/tmp/tuxemon-src`. The exact local CI job
+commands and the additional common gates completed as follows:
+
+| Gate | Result |
+| --- | --- |
+| `bun run import` twice | pass; identical 5,076-file tree and no diff |
+| `bun run build` | pass; desktop pak 81,094,560 B |
+| `bun run build:wasm` | pass |
+| `bunx tsc --noEmit` | pass, exit 0 |
+| determinism / l10n / CJK | pass; 11/11 localization checks and all 2,643 CJK characters covered |
+| CI importer shard | 54 pass, 0 fail |
+| CI repository/golden shard | 12 pass, 0 fail |
+| CI locks/battle/terrain shard | 22 pass, 0 fail |
+| CI rest a-l shard | 642 pass, 0 fail; two browser-conditioned cases intentionally skipped in the native realm |
+| CI rest m-z shard | 660 pass, 0 fail; four browser-conditioned cases intentionally skipped in the native realm |
+| explicit `--conditions=browser` supplement | 9 pass, 0 fail, 0 skip; all six native-realm skips executed |
+| journey matrix | all 16 rows pass: GB6, J1-J4, golden sync, both losses, locks, frozen maps, chapters, zh tape/demo, en demo, save, preview coverage, bootworld replay |
+| Web CI job | build, English journey, Chinese opening, demo controls, and three-track audio all pass |
+| PSP CI job | bootstrap and exact `build:psp --skip-assets` command pass |
+| full `bun run build:psp` | pass; 76,080,832 B pak, 2,239,482 B finalized runtime, EBOOT produced |
+
+The five native test shards naturally report six conditional skips because
+they are not running in a browser realm. The explicit browser-conditioned run
+executes those cases successfully, so the combined gate has zero failures and
+zero unexecuted tests rather than hiding the six behind a skip count.
+
+The final journey pins are GB6 115,955, J1 128,831, J2 180,238, J3 193,340,
+and J4 206,935. The first-loss path ends at frame 3,394 with SHA-256
+`873c0e9d21dfaf0a730f11ce49f205c258940a0fef723eadcc0aa476c9690072`;
+the later-loss path ends at frame 68,197 with SHA-256
+`7155591fac608f95322615ac5b902e7565966e53d9ea297a5f3d964356f475e2`.
+
+### QuickJS performance rerun
+
+The shipping release QuickJS host was pinned to one CPU with no subagent work
+running. An initial CPU-9 window was rejected after `mpstat` showed that CPU
+81.61% busy and one candidate leg had 99 frames above 25 ms while its repeat
+had only two. The accepted CPU-12 window used B3 -> C3 -> C4 -> B4, full
+framebuffer sampling on every frame, and a 5-second startup override only to
+retain all interleaved diagnostic samples. The two-run means are:
+
+| Viewport / metric | Base mean | Candidate mean | Delta |
+| --- | ---: | ---: | ---: |
+| 480x272 walking | 2.696 ms | 2.741 ms | +1.69% |
+| 480x272 map switch | 1.238 ms | 1.232 ms | -0.57% |
+| 480x272 all frames | 1.554 ms | 1.558 ms | +0.26% |
+| 960x544 walking | 2.680 ms | 2.691 ms | +0.39% |
+| 960x544 map switch | 1.259 ms | 1.249 ms | -0.79% |
+| 960x544 all frames | 1.591 ms | 1.570 ms | -1.35% |
+
+The worst regression is +1.69%, below the 3% limit. Every accepted
+interleaved leg completed with the correct terminal hash; base is
+`85b0f9da13877c70255b929a1a68edf7c26cb2e1c24e40847e63822d4537fc44`
+and candidate is
+`2ae4650cc8be15cd1f794b9440f79903220bd745f3725af020619490dbd1eba9`.
+No measured production frame exceeded the 50 ms gate.
+
+A separate candidate run without a startup override passed the strict 250 ms
+gate at both viewports:
+
+| Viewport | Startup to first paint | Max sampled production frame |
+| --- | ---: | ---: |
+| 480x272 | 243.033 ms | 26.492 ms |
+| 960x544 | 248.251 ms | 34.956 ms |
+
+The common specification's one-frame fixture path no longer exists and its
+literal expected hash `a5e82c...` is stale. The equivalent one-frame fixture
+produces `7f5a73f780c13c25e168769241853b9e4b02fd62011704342fc7297b79ad7db8`
+on both current main and this branch at both viewports. Strict passing samples
+were 246.585 ms / 238.353 ms for the candidate and 248.582 ms / 241.197 ms
+for main. This is a stale external pin, not a branch state divergence.
+
+Subagent 使用：4 / 分别核对组件修复与上游语义、生成产物和导入确定性、终端状态与录带、CI 与画面门禁；四路只读核对并行完成，提前锁定剩余三项且节省了时间
+
+PASS
