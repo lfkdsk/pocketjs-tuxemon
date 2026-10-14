@@ -13,6 +13,10 @@ import { existsSync, readFileSync, rmSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { FIXED_INITIAL_CIVIL_TIME } from "../battle/time-weather.ts";
 import { registerCleanup, spawnHeadlessChrome } from "./headless-chrome.ts";
+import {
+  WEB_CHUNK_AWARE_STEP_EXPRESSION,
+  WEB_CHUNK_AWARE_STEP_SOURCE,
+} from "./web-chunk-step.ts";
 
 const ROOT = resolve(import.meta.dir, "..");
 const SITE = resolve(ROOT, "dist/web");
@@ -171,6 +175,7 @@ await send("Page.addScriptToEvaluateOnNewDocument", {
         __musicAudioValue = wrapped;
       }
     });
+    ${WEB_CHUNK_AWARE_STEP_SOURCE}
   `,
 });
 
@@ -195,7 +200,7 @@ async function stepUntil(label: string, expression: string, timeoutMs = 20_000):
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     if (await evaluate<boolean>(expression).catch(() => false)) return;
-    await evaluate(`globalThis.__pocketPlayer?.step()`).catch(() => undefined);
+    await evaluate(WEB_CHUNK_AWARE_STEP_EXPRESSION).catch(() => undefined);
     await sleep(20);
   }
   throw new Error(`verify-web-audio: timeout waiting for ${label}`);
@@ -247,7 +252,7 @@ for (const track of TRACKS) {
       candidate.contextId === context!.contextId && /worklet/i.test(String(candidate.nodeType))
     );
     if (context && worklet) break;
-    await evaluate(`globalThis.__pocketPlayer?.step()`).catch(() => undefined);
+    await evaluate(WEB_CHUNK_AWARE_STEP_EXPRESSION).catch(() => undefined);
     await sleep(20);
   }
 
@@ -324,7 +329,7 @@ const lifecycle = await evaluate<{
   for (let frame = 1; frame < masks.length; frame++) {
     const before = snap();
     p.buttons = () => masks[frame];
-    p.step();
+    await globalThis.__pocketTestStep();
     const state = globalThis.__rpgSessionState;
     const id = state.interp.audio?.bgm?.id ?? null;
     if (id !== previousId && wanted.has(id)) {

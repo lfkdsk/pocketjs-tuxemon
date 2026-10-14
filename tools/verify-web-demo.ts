@@ -41,6 +41,10 @@ import { readInlineProject } from "./generated-project.ts";
 import { journeyWorldTraversal } from "./gb6-journey.ts";
 import { productionPaginator } from "./zh-tape.ts";
 import { registerCleanup, spawnHeadlessChrome } from "./headless-chrome.ts";
+import {
+  WEB_CHUNK_AWARE_STEP_EXPRESSION,
+  WEB_CHUNK_AWARE_STEP_SOURCE,
+} from "./web-chunk-step.ts";
 
 const ROOT = resolve(import.meta.dir, "..");
 const SITE = resolve(ROOT, "dist/web");
@@ -253,7 +257,8 @@ await send("Runtime.enable");
 await send("Page.enable");
 await send("Page.addScriptToEvaluateOnNewDocument", {
   source: `globalThis.__pocketTuxemonInitialCivilTime = ${JSON.stringify(FIXED_INITIAL_CIVIL_TIME)};
-window.requestAnimationFrame = () => 0; window.cancelAnimationFrame = () => {};`,
+window.requestAnimationFrame = () => 0; window.cancelAnimationFrame = () => {};
+${WEB_CHUNK_AWARE_STEP_SOURCE}`,
 });
 
 const base = `http://127.0.0.1:${server.port}/pocket-tuxemon/`;
@@ -273,7 +278,7 @@ const waitFor = async (label: string, expression: string, timeoutMs = 15000) => 
     if (ok) return;
     // The rAF loop is frozen, so advance the host one frame per poll: a
     // queued chapter jump/warp applies on the next host frame.
-    await evaluate(`globalThis.__pocketPlayer && globalThis.__pocketPlayer.step()`).catch(() => {});
+    await evaluate(WEB_CHUNK_AWARE_STEP_EXPRESSION).catch(() => {});
     await Bun.sleep(50);
   }
   throw new Error(`timeout waiting for ${label}`);
@@ -282,7 +287,7 @@ const boot = async (query = "") => {
   await send("Page.navigate", { url: base + query });
   await waitFor("boot", `!!(globalThis.__pocketPlayer && globalThis.__pocketPlayer.state === "running" && globalThis.__rpgkitDemo && globalThis.__rpgSessionState)`);
   // Let the fresh world settle a few frames.
-  for (let i = 0; i < 10; i++) await evaluate(`globalThis.__pocketPlayer.step()`);
+  for (let i = 0; i < 10; i++) await evaluate(WEB_CHUNK_AWARE_STEP_EXPRESSION);
 };
 const stateOf = () => `({ map: __rpgSessionState.mapId, x: __rpgSessionState.move.tx, y: __rpgSessionState.move.ty, frame: __rpgSessionState.frame })`;
 
@@ -375,7 +380,7 @@ for (const [chapterId, wantMap] of chapterClicks) {
   await evaluate(`document.querySelector('[data-demo-chapter="${chapterId}"]').click()`);
   await waitFor(`chapter ${chapterId}`, `__rpgSessionState.mapId === ${JSON.stringify(wantMap)} &&
     document.querySelector('[data-demo-chapter="${chapterId}"]').getAttribute("aria-current") === "true"`);
-  for (let i = 0; i < 5; i++) await evaluate(`globalThis.__pocketPlayer.step()`);
+  for (let i = 0; i < 5; i++) await evaluate(WEB_CHUNK_AWARE_STEP_EXPRESSION);
   const after = await evaluate(stateOf());
   const noReload = await evaluate(`globalThis.__demoSentinel && globalThis.__demoSentinel.player === globalThis.__pocketPlayer`);
   const onlyOne = await evaluate(`[...document.querySelectorAll('[data-demo-chapter][aria-current="true"]')].length === 1`);
@@ -450,7 +455,7 @@ await boot(`?chapter=not-a-real-chapter`);
   // open the world folds zero reducer frames, which is detectable: stepping
   // the host must not advance the global frame.
   const beforeFrame = await evaluate(`globalThis.__rpgSessionState.frame`);
-  for (let i = 0; i < 30; i++) await evaluate(`globalThis.__pocketPlayer.step()`);
+  for (let i = 0; i < 30; i++) await evaluate(WEB_CHUNK_AWARE_STEP_EXPRESSION);
   const afterFrame = await evaluate(`globalThis.__rpgSessionState.frame`);
   const s2 = await evaluate(stateOf());
   check("invalid ?chapter= opens the error menu (zero frames fold)", afterFrame === beforeFrame,
@@ -469,7 +474,7 @@ await boot(`?autoplay=${AUTO_CHAPTER}&speed=1`);
   // Pacing holds mean this can take more host frames than source frames.
   let stepped = 0;
   while (stepped < 6000) {
-    await evaluate(`globalThis.__pocketPlayer.step()`);
+    await evaluate(WEB_CHUNK_AWARE_STEP_EXPRESSION);
     stepped++;
     const f = await evaluate(`globalThis.__rpgSessionState.frame`);
     if (f >= target) break;
@@ -514,7 +519,7 @@ for (const [fromId, toId, wantMap] of EN_DEMO_CHAPTERS) {
   await boot(`?autoplay=${fromId}&speed=1`);
   let stepped = 0;
   while (stepped < 120000) {
-    await evaluate(`globalThis.__pocketPlayer.step()`);
+    await evaluate(WEB_CHUNK_AWARE_STEP_EXPRESSION);
     stepped++;
     const f = await evaluate(`globalThis.__rpgSessionState.frame`);
     if (f >= expected.frame) break;
@@ -581,7 +586,7 @@ for (const [chapterId] of ZH_CHAPTERS) {
   await boot(`?lang=zh&autoplay=${chapterId}&speed=1`);
   let stepped = 0;
   while (stepped < AUTO_FRAMES * 20) {
-    await evaluate(`globalThis.__pocketPlayer.step()`);
+    await evaluate(WEB_CHUNK_AWARE_STEP_EXPRESSION);
     stepped++;
     const probe = await evaluate(`({ frame: __rpgSessionState.frame,
       text: !!(__rpgSessionState.interp.modal && __rpgSessionState.interp.modal.kind === "text"),

@@ -21,6 +21,7 @@ import { join, resolve } from "node:path";
 import { FIXED_INITIAL_CIVIL_TIME } from "../battle/time-weather.ts";
 import { encodePNG } from "../vendor/pocket-rpgkit/vendor/pocketjs/tests/png.ts";
 import { registerCleanup, spawnHeadlessChrome } from "./headless-chrome.ts";
+import { WEB_CHUNK_AWARE_STEP_SOURCE } from "./web-chunk-step.ts";
 
 const ROOT = resolve(import.meta.dir, "..");
 const SITE = resolve(ROOT, "dist/web");
@@ -82,7 +83,8 @@ await send("Runtime.enable");
 await send("Page.enable");
 await send("Page.addScriptToEvaluateOnNewDocument", {
   source: `globalThis.__pocketTuxemonInitialCivilTime = ${JSON.stringify(FIXED_INITIAL_CIVIL_TIME)};
-window.requestAnimationFrame = () => 0; window.cancelAnimationFrame = () => {};`,
+window.requestAnimationFrame = () => 0; window.cancelAnimationFrame = () => {};
+${WEB_CHUNK_AWARE_STEP_SOURCE}`,
 });
 await send("Page.navigate", { url: `http://127.0.0.1:${server.port}/pocket-tuxemon/?lang=zh` });
 for (let i = 0; i < 600; i++) {
@@ -156,7 +158,7 @@ const driveResult = await evaluate(`(async () => {
     // Apply the tape's input for this frame.
     const mask = masks[frame];
     p.buttons = () => mask;
-    p.step();
+    await globalThis.__pocketTestStep();
     out.frames++;
     const s = readState();
     const modal = s && s.interp ? s.interp.modal : null;

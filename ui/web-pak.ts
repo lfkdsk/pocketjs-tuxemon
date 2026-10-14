@@ -16,6 +16,8 @@ export interface BrowserPakChunks {
   ready(key: string): boolean;
   prepare(key: string): Promise<void>;
   prefetch(key: string): Promise<void>;
+  /** Hold the current host/core frame while GameView retries a map acquire. */
+  setFrameBlocked?(blocked: boolean): void;
   stats(): BrowserPakStats;
 }
 

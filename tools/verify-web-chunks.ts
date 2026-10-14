@@ -230,6 +230,10 @@ async function drive(
         while (p.pakChunks?.blocking) await sleep(1);
         const advanced = p.step();
         if (advanced) return;
+        if (!p.pakChunks?.blocking && p.frameBlocked) {
+          await sleep(0);
+          continue;
+        }
         if (!p.pakChunks?.blocking) throw new Error("chunk verifier step stopped without a blocker");
         out.blocks++;
         for (const id of p.pakChunks.stats().blocking) {

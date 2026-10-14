@@ -21,6 +21,7 @@ import { join, resolve } from "node:path";
 import { FIXED_INITIAL_CIVIL_TIME } from "../battle/time-weather.ts";
 import { decodePng } from "../vendor/pocket-rpgkit/vendor/pocketjs/framework/compiler/pak.ts";
 import { registerCleanup, spawnHeadlessChrome } from "./headless-chrome.ts";
+import { WEB_CHUNK_AWARE_STEP_SOURCE } from "./web-chunk-step.ts";
 
 const ROOT = resolve(import.meta.dir, "..");
 const SITE = resolve(ROOT, "dist/web");
@@ -96,7 +97,8 @@ await send("Page.enable");
 await send("Page.addScriptToEvaluateOnNewDocument", {
   source: `globalThis.__pocketTuxemonInitialCivilTime = ${JSON.stringify(FIXED_INITIAL_CIVIL_TIME)};
 globalThis.__pocketTuxemonShowTitle = true;
-window.requestAnimationFrame = () => 0; window.cancelAnimationFrame = () => {};`,
+window.requestAnimationFrame = () => 0; window.cancelAnimationFrame = () => {};
+${WEB_CHUNK_AWARE_STEP_SOURCE}`,
 });
 const t0 = performance.now();
 await send("Page.navigate", { url: `http://127.0.0.1:${server.port}/pocket-tuxemon/` });
@@ -205,7 +207,7 @@ const result = await evaluate(`(async () => {
   for (let frame = 1; frame < masks.length; frame++) {
     const mask = masks[frame];
     p.buttons = () => mask;
-    p.step();
+    await globalThis.__pocketTestStep();
     out.frames++;
     if (marks.has(frame)) snap(frame);
     if (frame === ${DENSITY_DIALOG_FRAME}) {

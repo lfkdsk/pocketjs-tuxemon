@@ -20,6 +20,10 @@ import { join, resolve } from "node:path";
 
 import { FIXED_INITIAL_CIVIL_TIME } from "../battle/time-weather.ts";
 import { registerCleanup, spawnHeadlessChrome } from "./headless-chrome.ts";
+import {
+  WEB_CHUNK_AWARE_STEP_EXPRESSION,
+  WEB_CHUNK_AWARE_STEP_SOURCE,
+} from "./web-chunk-step.ts";
 
 const ROOT = resolve(import.meta.dir, "..");
 const SITE = resolve(ROOT, "dist/web");
@@ -86,7 +90,8 @@ await send("Page.enable");
 await send("Page.addScriptToEvaluateOnNewDocument", {
   source: `globalThis.__pocketTuxemonInitialCivilTime = ${JSON.stringify(FIXED_INITIAL_CIVIL_TIME)};
 window.requestAnimationFrame = () => 0; window.cancelAnimationFrame = () => {};
-localStorage.setItem(${JSON.stringify(LANG_STORAGE)}, "zh");`,
+localStorage.setItem(${JSON.stringify(LANG_STORAGE)}, "zh");
+${WEB_CHUNK_AWARE_STEP_SOURCE}`,
 });
 
 const base = `http://127.0.0.1:${server.port}/${GAME}/`;
@@ -101,7 +106,7 @@ const waitFor = async (label: string, expression: string, timeoutMs = 20000) => 
   while (Date.now() < deadline) {
     const ok = await evaluate(expression).catch(() => false);
     if (ok) return;
-    await evaluate(`globalThis.__pocketPlayer && globalThis.__pocketPlayer.step()`).catch(() => {});
+    await evaluate(WEB_CHUNK_AWARE_STEP_EXPRESSION).catch(() => {});
     await Bun.sleep(50);
   }
   throw new Error(`timeout waiting for ${label}`);
@@ -109,7 +114,7 @@ const waitFor = async (label: string, expression: string, timeoutMs = 20000) => 
 const boot = async (query = "") => {
   await send("Page.navigate", { url: base + query });
   await waitFor("boot", `!!(globalThis.__pocketPlayer && globalThis.__pocketPlayer.state === "running" && globalThis.__rpgkitDemo && globalThis.__rpgSessionState)`);
-  for (let i = 0; i < 10; i++) await evaluate(`globalThis.__pocketPlayer.step()`);
+  for (let i = 0; i < 10; i++) await evaluate(WEB_CHUNK_AWARE_STEP_EXPRESSION);
 };
 
 let failures = 0;
@@ -148,7 +153,7 @@ check("chapter click keeps the page English", (await pageLang()) === "en" && (aw
 
 await send("Page.navigate", { url: base + search });
 await waitFor("reload", `!!(globalThis.__pocketPlayer && globalThis.__pocketPlayer.state === "running" && __rpgSessionState.mapId === "spyder_paper_town")`);
-for (let i = 0; i < 10; i++) await evaluate(`globalThis.__pocketPlayer.step()`);
+for (let i = 0; i < 10; i++) await evaluate(WEB_CHUNK_AWARE_STEP_EXPRESSION);
 check("refresh after the chapter click stays English", (await pageLang()) === "en", await locationSearch());
 
 await evaluate(`document.querySelector('[data-demo-speed="2"]').click()`);
@@ -157,7 +162,7 @@ search = await locationSearch();
 check("autoplay click keeps the deep-link language", search.includes("lang=en") && search.includes("autoplay=") && search.includes("speed=2"), search);
 await send("Page.navigate", { url: base + search });
 await waitFor("reload after autoplay", `!!(globalThis.__pocketPlayer && globalThis.__pocketPlayer.state === "running")`);
-for (let i = 0; i < 10; i++) await evaluate(`globalThis.__pocketPlayer.step()`);
+for (let i = 0; i < 10; i++) await evaluate(WEB_CHUNK_AWARE_STEP_EXPRESSION);
 check("refresh after the autoplay click stays English", (await pageLang()) === "en", await locationSearch());
 
 // --- 2. The controls table follows the page language ------------------------
@@ -173,7 +178,7 @@ check("English controls table has no Chinese", englishTableHasZh === false, Stri
 
 await evaluate(`document.querySelector('[data-lang-code="zh"]').click()`);
 await waitFor("switch to Chinese", `document.documentElement.lang === "zh" && globalThis.__pocketPlayer && globalThis.__pocketPlayer.state === "running"`);
-for (let i = 0; i < 30; i++) await evaluate(`globalThis.__pocketPlayer.step()`);
+for (let i = 0; i < 30; i++) await evaluate(WEB_CHUNK_AWARE_STEP_EXPRESSION);
 check("switching to Chinese reboots the page and game", (await pageLang()) === "zh" && (await fullscreenLabel()) === "全屏",
   `lang=${await pageLang()} fullscreen=${await fullscreenLabel()}`);
 check("Chinese controls table shows only Chinese actions",
@@ -208,12 +213,12 @@ for (const [chapterId, mapId] of ZH_CHAPTER_JUMPS) {
 // advance one session frame per step(), so poll until the frame lands.
 await send("Page.navigate", { url: base + "?autoplay=bedroom&speed=1" });
 await waitFor("zh autoplay boot", `__rpgkitDemo && __rpgkitDemo.current() && __rpgkitDemo.current().speed === 1 && globalThis.__pocketPlayer && globalThis.__pocketPlayer.state === "running"`);
-for (let i = 0; i < 10; i++) await evaluate(`globalThis.__pocketPlayer.step()`);
+for (let i = 0; i < 10; i++) await evaluate(WEB_CHUNK_AWARE_STEP_EXPRESSION);
 const frameBefore = (await evaluate(`__rpgSessionState.frame`)) as number;
 const target = frameBefore + 600;
 let stepped = 0;
 while (stepped < 12000) {
-  await evaluate(`globalThis.__pocketPlayer.step()`);
+  await evaluate(WEB_CHUNK_AWARE_STEP_EXPRESSION);
   stepped++;
   if ((await evaluate(`__rpgSessionState.frame`)) as number >= target) break;
 }
@@ -259,7 +264,7 @@ writeFileSync(join(OUT, "landing-zh-3x.png"), Buffer.from(landingShot.data, "bas
 
 await send("Page.navigate", { url: base + "?lang=zh" });
 await waitFor("player zh", `document.documentElement.lang === "zh" && globalThis.__pocketPlayer && globalThis.__pocketPlayer.state === "running"`);
-for (let i = 0; i < 120; i++) await evaluate(`globalThis.__pocketPlayer.step()`);
+for (let i = 0; i < 120; i++) await evaluate(WEB_CHUNK_AWARE_STEP_EXPRESSION);
 await paint();
 const playerShot = await send("Page.captureScreenshot", { format: "png" });
 writeFileSync(join(OUT, "player-zh-3x.png"), Buffer.from(playerShot.data, "base64"));
