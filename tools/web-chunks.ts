@@ -77,7 +77,21 @@ export interface WebPakBuildOptions {
 
 interface ProjectShellAudio {
   audio?: Record<string, string>;
+  tileSize?: number;
+  worldLayout?: {
+    components: Array<{
+      placements: Array<{
+        mapId: string;
+        originTileX: number;
+        originTileY: number;
+        width: number;
+        height: number;
+      }>;
+    }>;
+  };
 }
+
+const WEB_VIEWPORT = { w: 480, h: 272 } as const;
 
 const sha256 = (bytes: Uint8Array): string =>
   createHash("sha256").update(bytes).digest("hex");
@@ -134,6 +148,47 @@ function mapAudioDependencies(
       if (chunk) required.add(chunk);
     }
     dependencies.set(mapId, [...required].sort());
+  }
+  return dependencies;
+}
+
+/**
+ * Conservative presentation working set for a placed map. Any placement
+ * within one Web viewport of the active placement can become visible while
+ * the camera follows the player or settles at a component edge. Those
+ * TILESET chunks must be resident before the reducer publishes the map: the
+ * synchronous renderer treats a missing TILESET as transparent and cannot
+ * let background-network timing decide which pixels a recorded frame sees.
+ */
+function mapVisualDependencies(
+  project: ProjectShellAudio,
+  mapIds: ReadonlySet<string>,
+): Map<string, string[]> {
+  const tileSize = project.tileSize ?? 16;
+  if (!Number.isSafeInteger(tileSize) || tileSize < 1) {
+    throw new Error(`web chunks: project tileSize must be a positive integer, got ${tileSize}`);
+  }
+  const dependencies = new Map<string, string[]>();
+  for (const component of project.worldLayout?.components ?? []) {
+    for (const active of component.placements) {
+      if (!mapIds.has(active.mapId)) continue;
+      const left = active.originTileX * tileSize - WEB_VIEWPORT.w;
+      const top = active.originTileY * tileSize - WEB_VIEWPORT.h;
+      const right = (active.originTileX + active.width) * tileSize + WEB_VIEWPORT.w;
+      const bottom = (active.originTileY + active.height) * tileSize + WEB_VIEWPORT.h;
+      const visible = component.placements.flatMap((candidate) => {
+        if (!mapIds.has(candidate.mapId)) return [];
+        const candidateLeft = candidate.originTileX * tileSize;
+        const candidateTop = candidate.originTileY * tileSize;
+        const candidateRight = (candidate.originTileX + candidate.width) * tileSize;
+        const candidateBottom = (candidate.originTileY + candidate.height) * tileSize;
+        return candidateLeft < right && candidateRight > left &&
+            candidateTop < bottom && candidateBottom > top
+          ? [candidate.mapId]
+          : [];
+      });
+      dependencies.set(active.mapId, [...new Set(visible)].sort());
+    }
   }
   return dependencies;
 }
@@ -229,8 +284,13 @@ export function buildWebPakChunks(options: WebPakBuildOptions): WebPakBuildResul
   const idsByLength = [...mapIds].sort((a, b) => b.length - a.length || a.localeCompare(b));
   const project = JSON.parse(readFileSync(options.projectShellPath, "utf8")) as ProjectShellAudio;
   const audio = project.audio ?? {};
+  const placedMaps = new Set(
+    project.worldLayout?.components.flatMap((component) =>
+      component.placements.map((placement) => placement.mapId)) ?? [],
+  );
 
   const mapGroups = new Map<string, PakBlob[]>();
+  const visualGroups = new Map<string, PakBlob[]>();
   const audioGroups = new Map<string, PakBlob[]>();
   const startupEntries: PakBlob[] = [];
   const deferredEntries: PakBlob[] = [];
@@ -247,9 +307,10 @@ export function buildWebPakChunks(options: WebPakBuildOptions): WebPakBuildResul
     const tileMap = mapTileId(entry.key, idsByLength);
     const mapId = entryMap ?? tileMap;
     if (mapId && !WEB_STARTUP_MAPS.has(mapId)) {
-      const group = mapGroups.get(mapId) ?? [];
+      const groups = tileMap && placedMaps.has(mapId) ? visualGroups : mapGroups;
+      const group = groups.get(mapId) ?? [];
       group.push(entry);
-      mapGroups.set(mapId, group);
+      groups.set(mapId, group);
       deferredEntries.push(entry);
     } else if (audioChunkByKey.has(entry.key)) {
       deferredEntries.push(entry);
@@ -290,6 +351,7 @@ export function buildWebPakChunks(options: WebPakBuildOptions): WebPakBuildResul
   mkdirSync(chunksDir, { recursive: true });
   const startup = writeCompressedPak(chunksDir, "startup", startupEntries).asset;
   const dependencies = mapAudioDependencies(entries, audio, audioChunkByKey);
+  const visualDependencies = mapVisualDependencies(project, mapIdSet);
   const chunks: WebPakChunk[] = [];
   for (const mapId of [...mapGroups.keys()].sort(mapOrder)) {
     const written = writeCompressedPak(chunksDir, `map-${mapId}`, mapGroups.get(mapId)!);
@@ -298,8 +360,24 @@ export function buildWebPakChunks(options: WebPakBuildOptions): WebPakBuildResul
       ...written.asset,
       entries: written.entries,
       background: true,
-      requires: dependencies.get(mapId) ?? [],
+      requires: [
+        ...(visualDependencies.get(mapId) ?? [])
+          .filter((candidate) => visualGroups.has(candidate))
+          .map((candidate) => `visual:${candidate}`),
+        ...(dependencies.get(mapId) ?? []),
+      ].sort(),
     });
+    const visuals = visualGroups.get(mapId);
+    if (visuals) {
+      const visual = writeCompressedPak(chunksDir, `visual-${mapId}`, visuals);
+      chunks.push({
+        id: `visual:${mapId}`,
+        ...visual.asset,
+        entries: visual.entries,
+        background: true,
+        requires: [],
+      });
+    }
   }
   for (const [id, group] of [...audioGroups].sort(([a], [b]) => a.localeCompare(b))) {
     const safeId = id.slice("audio:".length).replace(/[^a-zA-Z0-9._-]+/g, "-");
@@ -343,6 +421,7 @@ export function buildWebPakChunks(options: WebPakBuildOptions): WebPakBuildResul
       entries: deferredEntries.length,
       chunks: chunks.length,
       mapChunks: mapGroups.size,
+      visualChunks: visualGroups.size,
       audioChunks: audioGroups.size,
       bytes: chunkBytes,
       unpackedBytes: chunks.reduce((sum, chunk) => sum + chunk.unpackedBytes, 0),

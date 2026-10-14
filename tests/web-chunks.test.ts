@@ -37,13 +37,25 @@ describe("Web pak partition", () => {
         { key: "maps/spyder_downstairs.rkm", dtype: 0, data: bytes('{"id":"spyder_downstairs","music":"music_town"}') },
         { key: "maps-zh/spyder_downstairs.rkm", dtype: 0, data: bytes('{"id":"spyder_downstairs"}') },
         { key: "ui:tile.tuxemon-spyder_downstairs-ground-0", dtype: 0, data: bytes("downstairs") },
+        { key: "maps/spyder_routec.rkm", dtype: 0, data: bytes('{"id":"spyder_routec"}') },
+        { key: "maps-zh/spyder_routec.rkm", dtype: 0, data: bytes('{"id":"spyder_routec"}') },
+        { key: "ui:tile.tuxemon-spyder_routec-ground-0", dtype: 0, data: bytes("routec") },
         { key: "audio:qoa.music/music_home.qoa", dtype: 0, data: bytes("home") },
         { key: "audio:qoa.music/music_town.qoa", dtype: 0, data: bytes("town") },
       ]));
       writeFileSync(shellPath, JSON.stringify({
+        tileSize: 16,
         audio: {
           music_home: "audio:qoa.music/music_home.qoa",
           music_town: "audio:qoa.music/music_town.qoa",
+        },
+        worldLayout: {
+          components: [{
+            placements: [
+              { mapId: "spyder_downstairs", originTileX: 0, originTileY: 0, width: 9, height: 7 },
+              { mapId: "spyder_routec", originTileX: 9, originTileY: 0, width: 40, height: 20 },
+            ],
+          }],
         },
       }));
 
@@ -56,19 +68,25 @@ describe("Web pak partition", () => {
 
       const manifest = JSON.parse(readFileSync(first.manifestPath, "utf8")) as WebPakManifest;
       expect(manifest.format).toBe("pocket-pak-chunks/v1");
-      expect(manifest.chunks).toHaveLength(2);
+      expect(manifest.chunks).toHaveLength(5);
       for (const asset of [manifest.startup, ...manifest.chunks]) {
         expect(asset.file).toContain(asset.sha256);
         expect(readFileSync(join(outA, asset.file)).byteLength).toBe(asset.bytes);
       }
       const map = manifest.chunks.find((chunk) => chunk.id === "map:spyder_downstairs")!;
+      const visual = manifest.chunks.find((chunk) => chunk.id === "visual:spyder_downstairs")!;
       const audio = manifest.chunks.find((chunk) => chunk.id.startsWith("audio:"))!;
       expect(map.entries).toEqual([
         "maps-zh/spyder_downstairs.rkm",
         "maps/spyder_downstairs.rkm",
-        "ui:tile.tuxemon-spyder_downstairs-ground-0",
       ]);
-      expect(map.requires).toEqual([audio.id]);
+      expect(map.requires).toEqual([
+        audio.id,
+        "visual:spyder_downstairs",
+        "visual:spyder_routec",
+      ]);
+      expect(visual.entries).toEqual(["ui:tile.tuxemon-spyder_downstairs-ground-0"]);
+      expect(visual.requires).toEqual([]);
       expect(audio.entries).toEqual(["audio:qoa.music/music_town.qoa"]);
 
       const startup = unpack(gunzipSync(readFileSync(join(outA, manifest.startup.file))));
