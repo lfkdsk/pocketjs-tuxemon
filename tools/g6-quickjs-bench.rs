@@ -2582,10 +2582,6 @@ mod g6_quickjs_bench {
             .ok()
             .and_then(|value| value.parse().ok())
             .unwrap_or(250.0);
-        assert!(
-            first_paint_ms <= startup_limit_ms,
-            "startup viewport={viewport} exceeded the {startup_limit_ms:.3} ms startup-to-first-paint budget: {first_paint_ms:.3} ms",
-        );
         if std::env::var("G6_STARTUP_ONLY").as_deref() == Ok("1") {
             if let Ok(path) = std::env::var("G6_STATE_OUT") {
                 let state_text = bench.string("JSON.stringify(globalThis.__rpgSessionState)");
@@ -2596,8 +2592,18 @@ mod g6_quickjs_bench {
                 std::env::var("G6_LANG").unwrap_or_else(|_| "en_US".into()),
                 std::env::var("G6_SHOW_TITLE").as_deref() == Ok("1"),
             );
+            drop(bench);
+            std::fs::remove_dir_all(&data).expect("remove startup-only benchmark data");
+            assert!(
+                first_paint_ms <= startup_limit_ms,
+                "startup viewport={viewport} exceeded the {startup_limit_ms:.3} ms startup-to-first-paint budget: {first_paint_ms:.3} ms",
+            );
             return;
         }
+        assert!(
+            first_paint_ms <= startup_limit_ms,
+            "startup viewport={viewport} exceeded the {startup_limit_ms:.3} ms startup-to-first-paint budget: {first_paint_ms:.3} ms",
+        );
 
         let mut walking = Vec::new();
         let mut all_frames = Vec::with_capacity(journey.masks.len());
