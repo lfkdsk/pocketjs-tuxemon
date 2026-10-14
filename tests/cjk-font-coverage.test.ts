@@ -64,8 +64,8 @@ describe.skipIf(!existsSync(join(ROOT, "dist/zh-text.txt")))("CJK font subset", 
 
   // The {x:map_desc} resolver reads dist/map-descriptions.zh_CN.json and the
   // battle UI / {x:monster_0_name} token read data/battle-names.zh_CN.json;
-  // both are bundled into the JS via ui/zh-data.ts, so the baker's module
-  // scan never sees them. They must be in the charset explicitly.
+  // both are raw pak/data.fs startup entries loaded by ui/zh-data.ts, so the
+  // baker's module scan never sees them. They must be in the charset explicitly.
   test("every runtime-displayed Chinese table is inside the charset", () => {
     const charset = new Set([...readFileSync(join(ROOT, "fonts/cjk-charset.txt"), "utf8")]);
     const tables: [string, string][] = [

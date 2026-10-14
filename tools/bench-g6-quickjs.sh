@@ -37,9 +37,10 @@ for artifact in "$app_js" "$app_pak" "$project_shell"; do
   fi
 done
 
-# The desktop bundle and streamed map shards must come from the same import.
-# A stale bundle can otherwise boot against newer maps and fail deep inside
-# createSession with an apparently unrelated unregistered-extension error.
+# The finalized desktop bundle, startup pak and staged project shells must
+# come from the same desktop build. A stale package can otherwise boot against
+# newer map shards and fail deep inside createSession with an apparently
+# unrelated unregistered-extension error.
 map_manifest_hash=$(bun -e '
   const project = JSON.parse(await Bun.file(process.argv[1]).text());
   const value = project.mapManifestHash;
@@ -48,10 +49,8 @@ map_manifest_hash=$(bun -e '
   }
   console.log(value);
 ' "$project_shell")
-desktop_app_id=$(bun -e 'console.log((await Bun.file(process.argv[1]).json()).id)' "$root/pocket.json")
-staged_project="$root/dist/runtime-data/$desktop_app_id/data/l10n/en_US/project-shell.json"
-if [[ ! -f $staged_project ]] || ! cmp -s "$project_shell" "$staged_project"; then
-  echo "bench-g6-quickjs: dist/linux-app is stale relative to dist/project-shell.json" >&2
+if ! freshness_error=$(bun "$root/tools/desktop-build-receipt.ts" verify "$root" "$app_dist" 2>&1); then
+  echo "bench-g6-quickjs: $freshness_error" >&2
   echo "run 'bun tools/desktop.ts --build-only' before this benchmark" >&2
   exit 1
 fi

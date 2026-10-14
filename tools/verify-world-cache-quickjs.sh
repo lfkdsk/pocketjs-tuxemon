@@ -33,10 +33,17 @@ map_manifest_hash=$(bun -e '
   }
   console.log(value);
 ' "$project_shell")
-if ! grep -Fq "$map_manifest_hash" "$app_js"; then
-  echo "verify-world-cache: desktop bundle is stale relative to project-shell.json" >&2
+if ! freshness_error=$(bun "$root/tools/desktop-build-receipt.ts" verify "$input_root" "$app_dist" 2>&1); then
+  echo "verify-world-cache: $freshness_error" >&2
   echo "run 'bun tools/desktop.ts --build-only' first" >&2
   exit 1
+fi
+
+# The ordinary test suite exercises the real validator entry point through
+# this fast exit, without compiling the benchmark host or collecting timings.
+if [[ ${WORLD_CACHE_FRESHNESS_ONLY:-0} == 1 ]]; then
+  echo "verify-world-cache: desktop build is fresh"
+  exit 0
 fi
 
 app_js_sha256=$(sha256sum "$app_js" | cut -d' ' -f1)

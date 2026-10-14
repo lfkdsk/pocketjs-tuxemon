@@ -6,6 +6,7 @@ import { $ } from "bun";
 import { desktopHostFeatures } from "../vendor/pocket-rpgkit/tools/lib/desktop.ts";
 import { validateAndResolveBuildPlan } from "../vendor/pocket-rpgkit/vendor/pocketjs/framework/src/manifest/resolve.ts";
 import { externalizeDesktopPak } from "./desktop-audio.ts";
+import { writeDesktopBuildReceipt } from "./desktop-build-receipt.ts";
 import { minifyRuntimeBundle } from "./runtime-bundle.ts";
 
 const root = resolve(import.meta.dir, "..");
@@ -69,6 +70,14 @@ copyFileSync(
   join(root, "licenses", "AUDIO-ATTRIBUTIONS.md"),
   join(outdir, "AUDIO-ATTRIBUTIONS.md"),
 );
+const receipt = writeDesktopBuildReceipt({
+  inputRoot: root,
+  appDist: outdir,
+  target,
+  appId: plan.app.id,
+  output: plan.app.output,
+});
+console.log(`desktop: wrote ${receipt}`);
 await $`cargo build --release ${desktopHostFeatures()}`.cwd(join(pocketjs, "hosts", "desktop"));
 
 const bin = join(pocketjs, "hosts", "desktop", "target", "release", "pocket-desktop-host");
