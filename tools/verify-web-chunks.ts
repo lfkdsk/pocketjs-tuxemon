@@ -105,6 +105,7 @@ registerCleanup(() => server.stop(true));
 class BrowserSession {
   private ws: WebSocket;
   private nextId = 0;
+  private navigation = 0;
   private pending = new Map<number, (message: any) => void>();
   readonly errors: string[] = [];
 
@@ -171,13 +172,17 @@ window.requestAnimationFrame = () => 0; window.cancelAnimationFrame = () => {};`
   }
 
   async navigate(lang: "en" | "zh"): Promise<void> {
-    const query = lang === "zh" ? "?lang=zh" : "";
+    const nav = String(++this.navigation);
+    const query = new URLSearchParams({ verify_nav: nav });
+    if (lang === "zh") query.set("lang", "zh");
     await this.send("Page.navigate", {
-      url: `http://127.0.0.1:${server.port}/pocket-tuxemon/${query}`,
+      url: `http://127.0.0.1:${server.port}/pocket-tuxemon/?${query}`,
     });
     for (let attempt = 0; attempt < 6_000; attempt++) {
       const ready = await this.evaluate<boolean>(
-        `!!(globalThis.__pocketPlayer && globalThis.__pocketPlayer.state === "running" && globalThis.__rpgSessionState && globalThis.__pocketPak)`,
+        `new URLSearchParams(location.search).get("verify_nav") === ${JSON.stringify(nav)} &&
+          !!(globalThis.__pocketPlayer && globalThis.__pocketPlayer.state === "running" &&
+          globalThis.__rpgSessionState && globalThis.__pocketPak)`,
       ).catch(() => false);
       if (ready) return;
       await Bun.sleep(10);
@@ -303,7 +308,8 @@ async function waitForBackground(browser: BrowserSession, label: string): Promis
   const deadline = Date.now() + 90_000;
   while (Date.now() < deadline) {
     const stats = await browser.evaluate<RunResult["stats"]>("globalThis.__pocketPlayer.pakChunks.stats()");
-    if (stats.pending.length === 0 && stats.queued.length === 0) return stats;
+    if (stats.pending.length === 0 && stats.queued.length === 0 &&
+        stats.resident.length === EXPECTED_CHUNKS && Object.keys(stats.failures).length === 0) return stats;
     await Bun.sleep(50);
   }
   throw new Error(`verify-web-chunks: ${label} background queue did not finish`);
@@ -373,6 +379,10 @@ const assertions = {
     delayedEnBackground.resident.length === EXPECTED_CHUNKS,
   warmCacheNoChunkRequests: (chunkRequests.get("warm-en")?.length ?? 0) === 0 &&
     warmStats.pending.length === 0 && warmStats.queued.length === 0 && warmStats.resident.length === EXPECTED_CHUNKS,
+  noDuplicateChunkRequests: ["delayed-en", "warm-en"].every((label) => {
+    const requests = chunkRequests.get(label) ?? [];
+    return requests.length === new Set(requests).size;
+  }),
 };
 const ok = Object.values(assertions).every(Boolean);
 const report = {
