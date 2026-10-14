@@ -1,0 +1,72 @@
+import { expect, test } from "bun:test";
+import {
+  createGameMapEntrySource,
+  type GameEntryReaders,
+} from "../ui/entry-readers.ts";
+import { createWebAudioChunkReader } from "../ui/weather-effects.tsx";
+import type { BrowserPakChunks } from "../ui/web-pak.ts";
+
+function bridge(ready: Set<string>, prepare: (key: string) => Promise<void>): BrowserPakChunks {
+  return {
+    ready: (key) => ready.has(key),
+    prepare,
+    prefetch: async () => {},
+    stats: () => ({
+      startupBytes: 0,
+      resident: [],
+      pending: [],
+      queued: [],
+      blocking: [],
+      failures: {},
+      compressedBytes: 0,
+    }),
+  };
+}
+
+test("the browser map source reports not-ready without reading and prepares the exact entry", async () => {
+  const reads: string[] = [];
+  const prepares: string[] = [];
+  const ready = new Set<string>();
+  const readers: GameEntryReaders = {
+    read: (entry) => {
+      reads.push(entry);
+      return new Uint8Array([7]);
+    },
+  };
+  const source = createGameMapEntrySource(readers, bridge(ready, async (entry) => {
+    prepares.push(entry);
+    ready.add(entry);
+  }));
+  expect(source.read("maps/a.rkm")).toBeUndefined();
+  expect(reads).toEqual([]);
+  await source.prepare!("maps/a.rkm");
+  expect(prepares).toEqual(["maps/a.rkm"]);
+  expect([...source.read("maps/a.rkm")!]).toEqual([7]);
+  expect(reads).toEqual(["maps/a.rkm"]);
+});
+
+test("a deferred Web track is retried once after preparation, without changing its bytes", async () => {
+  const key = "audio:qoa.music/music_town.qoa";
+  const ready = new Set<string>();
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => { release = resolve; });
+  let prepareCalls = 0;
+  const staged = createWebAudioChunkReader(bridge(ready, async (entry) => {
+    prepareCalls++;
+    await gate;
+    ready.add(entry);
+  }), () => new Uint8Array([1, 2, 3]));
+  expect(() => staged.read(key)).toThrow(/not ready/);
+  expect(() => staged.read(key)).toThrow(/not ready/);
+  expect(prepareCalls).toBe(1);
+  release();
+  for (let turn = 0; turn < 4 && !ready.has(key); turn++) {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+  const retries: string[] = [];
+  staged.retryReady({ retryResource: (entry) => { retries.push(entry); } });
+  expect(retries).toEqual([key]);
+  staged.retryReady({ retryResource: (entry) => { retries.push(entry); } });
+  expect(retries).toEqual([key]);
+  expect([...staged.read(key)]).toEqual([1, 2, 3]);
+});

@@ -23,11 +23,51 @@ import {
   createAudioSettingsAdapter,
   type SettingsController,
 } from "./settings.ts";
+import { browserPakChunks, type BrowserPakChunks } from "./web-pak.ts";
 
 interface SyncingAudioDriver {
   sync(state: AudioDriverState, timelineState?: AudioDriverState): void;
   retryResource(pakKey: string): void;
   dispose(): void;
+}
+
+export interface WebAudioChunkReader {
+  read: AudioResourceReader;
+  /** Forget driver-cached misses whose chunk completed while the host veil
+   *  held simulation outside the frame loop. */
+  retryReady(driver: Pick<SyncingAudioDriver, "retryResource">): void;
+}
+
+export function createWebAudioChunkReader(
+  chunks: BrowserPakChunks,
+  readResource: AudioResourceReader,
+  reportError: (message: string) => void = (message) => console.error(message),
+): WebAudioChunkReader {
+  const pending = new Set<string>();
+  const ready = new Set<string>();
+  const failed = new Set<string>();
+  return {
+    read(pakKey) {
+      if (chunks.ready(pakKey)) return readResource(pakKey);
+      if (!pending.has(pakKey) && !failed.has(pakKey)) {
+        pending.add(pakKey);
+        void chunks.prepare(pakKey).then(
+          () => { ready.add(pakKey); },
+          (error) => {
+            failed.add(pakKey);
+            reportError(error instanceof Error ? error.message : String(error));
+          },
+        ).then(() => pending.delete(pakKey));
+      }
+      // AudioDriver deliberately treats unavailable audio as an optional
+      // cached miss. retryReady clears precisely this key after prepare.
+      throw new Error(`web audio chunk is not ready: ${pakKey}`);
+    },
+    retryReady(driver) {
+      for (const pakKey of ready) driver.retryResource(pakKey);
+      ready.clear();
+    },
+  };
 }
 
 export type StagedAudioFrameState = AudioDriverState & {
@@ -184,9 +224,20 @@ export function createGameEffects(
     const audioSettings = settings ? createAudioSettingsAdapter(settings) : null;
     const ticksPerFrame = 60 / simulationHz();
     if (!desktopFs) {
-      // Web and PSP keep all audio in the pak and retain the direct path.
-      const driver = createAudioDriver(host, audioResources, readAudio, ticksPerFrame);
+      // A chunked Web page prepares a missing track outside the guest clock,
+      // then clears AudioDriver's optional-resource miss on the first frame
+      // after the host veil. PSP and legacy single-pak pages retain the
+      // original direct reader with no extra per-frame path.
+      const webChunks = browserPakChunks();
+      const staged = webChunks ? createWebAudioChunkReader(webChunks, readAudio) : null;
+      const driver = createAudioDriver(
+        host,
+        audioResources,
+        staged?.read ?? readAudio,
+        ticksPerFrame,
+      );
       onFrame(() => {
+        staged?.retryReady(driver);
         const timelineState = props.state();
         driver.sync(audioSettings?.apply(timelineState) ?? timelineState, timelineState);
       });

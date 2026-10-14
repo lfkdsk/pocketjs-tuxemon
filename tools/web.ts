@@ -4,6 +4,10 @@
 import { copyFileSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { minifyRuntimeBundle } from "./runtime-bundle.ts";
+import {
+  buildWebPakChunks,
+  WEB_PAK_MANIFEST,
+} from "./web-chunks.ts";
 
 const root = resolve(import.meta.dir, "..");
 
@@ -130,12 +134,9 @@ const expeditionReplayHtml = playerHtml
   .replace('<section class="info">', `${expeditionReplayControls}\n<section class="info">`)
   .replace(configPattern, `$1${JSON.stringify(expeditionReplayConfig).replace(/</g, "\\u003c")}$3`);
 await Bun.write(join(gameDir, "expedition-replay.html"), expeditionReplayHtml);
-await Bun.write(
-  playerPath,
-  playerHtml.replace(
-    '<section class="info">',
-    '<p class="arena-replay-entry"><a href="replay.html">Battle replay / 对战回放</a> · <a href="expedition-replay.html">Expedition replay / 远征回放</a></p>\n<section class="info">',
-  ),
+let ordinaryPlayerHtml = playerHtml.replace(
+  '<section class="info">',
+  '<p class="arena-replay-entry"><a href="replay.html">Battle replay / 对战回放</a> · <a href="expedition-replay.html">Expedition replay / 远征回放</a></p>\n<section class="info">',
 );
 if (!ordinaryBundleBytes.equals(readFileSync(ordinaryBundlePath))) {
   throw new Error("web: replay entries changed the ordinary game JavaScript bundle");
@@ -146,6 +147,24 @@ if (!ordinaryPakBytes.equals(readFileSync(ordinaryPakPath))) {
 console.log(
   `ordinary replay isolation: ${ordinaryBundleBytes.byteLength} JS bytes and ` +
   `${ordinaryPakBytes.byteLength} pak bytes unchanged`,
+);
+const webPak = buildWebPakChunks({
+  pakPath: ordinaryPakPath,
+  projectShellPath: join(root, "dist", "project-shell.json"),
+  outDir: gameDir,
+  removeSource: true,
+});
+const ordinaryConfig = JSON.parse(configMatch[2]!) as Record<string, unknown>;
+ordinaryConfig.pak = null;
+ordinaryConfig.pakManifest = WEB_PAK_MANIFEST;
+ordinaryPlayerHtml = ordinaryPlayerHtml.replace(
+  configPattern,
+  `$1${JSON.stringify(ordinaryConfig).replace(/</g, "\\u003c")}$3`,
+);
+await Bun.write(playerPath, ordinaryPlayerHtml);
+console.log(
+  `web chunks: ${webPak.startupBytes} startup bytes, ${webPak.chunkBytes} deferred bytes ` +
+  `across ${webPak.manifest.chunks.length} chunks (${webPak.sourceBytes} source bytes)`,
 );
 copyFileSync(
   join(root, "licenses", "AUDIO-ATTRIBUTIONS.md"),

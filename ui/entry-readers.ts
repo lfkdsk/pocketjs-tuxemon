@@ -14,6 +14,7 @@ import { pakGet } from "@pocketjs/framework";
 import { fsHost, readFileSync } from "@pocketjs/framework/fs";
 import { createJsonMapRepository } from "../vendor/pocket-rpgkit/src/engine/map-repository.ts";
 import type { MapIndexEntry, MapRepository } from "../vendor/pocket-rpgkit/src/engine/types.ts";
+import { browserPakChunks, type BrowserPakChunks } from "./web-pak.ts";
 
 export interface GameEntryReaders {
   /** Byte reader for every entry-keyed shard (desktop data.fs, web/console pak). */
@@ -32,16 +33,29 @@ export interface GameMapRepository {
   readEntry: (entry: string) => Uint8Array;
 }
 
+export function createGameMapEntrySource(
+  readers: GameEntryReaders,
+  chunks: BrowserPakChunks | null,
+): {
+  read: (entry: string) => Uint8Array | undefined;
+  readText?: (entry: string) => string | undefined;
+  prepare?: (entry: string) => Promise<void>;
+} {
+  if (!chunks) return readers;
+  return {
+    read: (entry) => chunks.ready(entry) ? readers.read(entry) : undefined,
+    prepare: (entry) => chunks.prepare(entry),
+  };
+}
+
 export const createGameMapRepository = (
   entries: readonly MapIndexEntry[],
   host: ReturnType<typeof fsHost>,
 ): GameMapRepository => {
   const readers = createGameEntryReaders(host);
+  const source = createGameMapEntrySource(readers, host ? null : browserPakChunks());
   return {
-    repository: createJsonMapRepository(entries, {
-      read: readers.read,
-      readText: readers.readText,
-    }),
+    repository: createJsonMapRepository(entries, source),
     readEntry: readers.read,
   };
 };
