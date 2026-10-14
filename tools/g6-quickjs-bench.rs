@@ -267,10 +267,54 @@ mod g6_quickjs_bench {
     /// in one call (see `gp1_eval_staged`); `host_finish_ms` is the small
     /// tail after eval (frame-handler check, initial `svc_push`, wiring).
     struct StageTimes {
+        pak_read_ms: f64,
+        source_read_ms: f64,
+        surface_create_ms: f64,
+        pak_feed_ms: f64,
+        supervisor_ms: f64,
+        guest_ms: f64,
+        mounts_ms: f64,
+        prelude_ms: f64,
+        profile_overhead_ms: f64,
         host_init_ms: f64,
         compile_ms: f64,
         eval_ms: f64,
         host_finish_ms: f64,
+    }
+
+    #[derive(Deserialize)]
+    struct StartupProfileMark {
+        name: String,
+        at: f64,
+    }
+
+    /// Install the kit's optional startup marker on a native monotonic clock.
+    /// This is opt-in because the hook itself is benchmark instrumentation,
+    /// not product startup work. Normal budget runs leave it absent.
+    fn install_startup_profile(guest: &Guest, origin: Instant) -> Result<()> {
+        guest.mount("startupProfileClock", move |ctx, ns| {
+            ns.set(
+                "now",
+                Function::new(ctx.clone(), move || {
+                    origin.elapsed().as_secs_f64() * 1_000.0
+                })?,
+            )?;
+            Ok(())
+        })?;
+        guest.eval(
+            "startup-profile-hooks",
+            r#"
+            globalThis.__startupProfileMarks = [];
+            globalThis.__rpgkitStartupProfileMark = function(name) {
+              globalThis.__startupProfileMarks.push({name, at: globalThis.startupProfileClock.now()});
+            };
+            globalThis.__startupModuleEvalMarks = [];
+            globalThis.__startupModuleEvalMark = function(name) {
+              globalThis.__startupModuleEvalMarks.push({name, at: globalThis.startupProfileClock.now()});
+            };
+            "#,
+        )?;
+        Ok(())
     }
 
     /// GP1: `pocket_mod::Guest::eval` (vendor/) does one
@@ -383,8 +427,13 @@ mod g6_quickjs_bench {
             ));
         }
         let host_init_start = Instant::now();
+        let phase_start = Instant::now();
         let pak = std::fs::read(resolve_asset(args.pak.clone(), &args.app, "pak")?)?;
+        let pak_read_ms = phase_start.elapsed().as_secs_f64() * 1_000.0;
+        let phase_start = Instant::now();
         let source = std::fs::read_to_string(resolve_asset(args.js.clone(), &args.app, "js")?)?;
+        let source_read_ms = phase_start.elapsed().as_secs_f64() * 1_000.0;
+        let phase_start = Instant::now();
         let surface = UiSurface::new_with_density(
             (args.viewport.0 as f32, args.viewport.1 as f32),
             args.density,
@@ -392,7 +441,11 @@ mod g6_quickjs_bench {
         surface.set_identity(HOST_ID, HOST_ABI);
         surface.set_tick_rate(60);
         surface.set_svc_allowlist(args.companions.clone());
+        let surface_create_ms = phase_start.elapsed().as_secs_f64() * 1_000.0;
+        let phase_start = Instant::now();
         surface.feed_pak(&pak);
+        let pak_feed_ms = phase_start.elapsed().as_secs_f64() * 1_000.0;
+        let phase_start = Instant::now();
         let audio_host = audio::AudioHost::new(
             1 + args
                 .system
@@ -405,6 +458,7 @@ mod g6_quickjs_bench {
             args.data_root.clone(),
             &audio_host,
         )?;
+        let supervisor_ms = phase_start.elapsed().as_secs_f64() * 1_000.0;
         let count_allocs = std::env::var("G6_COUNT_ALLOCS").is_ok();
         // The diagnostic counting allocator predates the production idle-GC
         // allocator and cannot be composed with it. Allocation probes run in
@@ -414,11 +468,14 @@ mod g6_quickjs_bench {
         } else {
             GcMode::from_env()
         };
+        let phase_start = Instant::now();
         let guest = if count_allocs {
             Guest::new_with_alloc(CountingAllocator::new())?
         } else {
             gc_mode.guest()?
         };
+        let guest_ms = phase_start.elapsed().as_secs_f64() * 1_000.0;
+        let phase_start = Instant::now();
         surface.mount(&guest)?;
         let offload = text_worker(pak);
         offload.mount(&guest)?;
@@ -430,6 +487,15 @@ mod g6_quickjs_bench {
         // Same order as the host's Runtime::new: net.http and net.socket are
         // installed before the application bundle is evaluated.
         let network = network::Network::mount(&guest)?;
+        let mounts_ms = phase_start.elapsed().as_secs_f64() * 1_000.0;
+        let profile_overhead_ms = if std::env::var("G6_STARTUP_PROFILE").as_deref() == Ok("1") {
+            let started = Instant::now();
+            install_startup_profile(&guest, host_init_start)?;
+            started.elapsed().as_secs_f64() * 1_000.0
+        } else {
+            0.0
+        };
+        let phase_start = Instant::now();
         // Journey and performance fixtures must not inherit the machine wall
         // clock. Install the same fixed civil time used by the Bun and web
         // harnesses before the application bundle is evaluated.
@@ -484,8 +550,13 @@ mod g6_quickjs_bench {
                 "globalThis.__pocketTuxemonWeatherOverlayFrameControl={disabled:false};",
             )?;
         }
-        let audio = audio::AudioSurface::new(audio_host.client(0));
-        audio.mount(&guest)?;
+        if std::env::var("G6_SHOW_TITLE").as_deref() == Ok("1") {
+            guest.eval(
+                "g6-show-title",
+                "globalThis.__pocketTuxemonShowTitle=true;",
+            )?;
+        }
+        let prelude_ms = phase_start.elapsed().as_secs_f64() * 1_000.0;
         let host_init_ms = host_init_start.elapsed().as_secs_f64() * 1_000.0;
 
         let (compile_ms, eval_ms) = gp1_eval_staged(&guest, &args.app, &source)?;
@@ -547,6 +618,15 @@ mod g6_quickjs_bench {
         Ok((
             runtime,
             StageTimes {
+                pak_read_ms,
+                source_read_ms,
+                surface_create_ms,
+                pak_feed_ms,
+                supervisor_ms,
+                guest_ms,
+                mounts_ms,
+                prelude_ms,
+                profile_overhead_ms,
                 host_init_ms,
                 compile_ms,
                 eval_ms,
@@ -1351,6 +1431,29 @@ mod g6_quickjs_bench {
             serde_json::from_str(&bench.string("JSON.stringify(globalThis.__gp1Marks ?? [])"))
                 .expect("gp1 marks JSON");
         assert_gp1_marks(&marks);
+        let host_phases = [
+            ("pak-read", stages.pak_read_ms),
+            ("source-read", stages.source_read_ms),
+            ("surface-create", stages.surface_create_ms),
+            ("pak-feed", stages.pak_feed_ms),
+            ("supervisor", stages.supervisor_ms),
+            ("runtime-create", stages.guest_ms),
+            ("host-mounts", stages.mounts_ms),
+            ("profile-overhead", stages.profile_overhead_ms),
+            ("benchmark-prelude", stages.prelude_ms),
+        ];
+        let mut host_at = 0.0;
+        for (name, delta) in host_phases {
+            println!(
+                "HOST_STAGE viewport={viewport} name={name} at_ms={host_at:.3} delta_ms={delta:.3}",
+            );
+            host_at += delta;
+        }
+        println!(
+            "HOST_STAGE viewport={viewport} name=TOTAL detailed_ms={host_at:.3} host_init_ms={:.3} unaccounted_ms={:.3}",
+            stages.host_init_ms,
+            stages.host_init_ms - host_at,
+        );
         println!(
             "STAGE viewport={viewport} name=host-init at_ms=0.000 delta_ms={:.3}",
             stages.host_init_ms,
@@ -1389,6 +1492,64 @@ mod g6_quickjs_bench {
             boot_ms,
             boot_ms - accounted_ms,
         );
+        if bench.boolean("Array.isArray(globalThis.__startupProfileMarks)") {
+            let kit_marks: Vec<StartupProfileMark> = serde_json::from_str(
+                &bench.string("JSON.stringify(globalThis.__startupProfileMarks)"),
+            )
+            .expect("RPG Kit startup marks JSON");
+            let mut previous = eval_start_ms;
+            for mark in kit_marks {
+                println!(
+                    "RPGKIT_STAGE viewport={viewport} name={} at_ms={:.3} delta_ms={:.3}",
+                    mark.name,
+                    mark.at,
+                    mark.at - previous,
+                );
+                previous = mark.at;
+            }
+        }
+        if bench.boolean("Array.isArray(globalThis.__startupModuleEvalMarks)") {
+            let module_marks: Vec<StartupProfileMark> = serde_json::from_str(
+                &bench.string("JSON.stringify(globalThis.__startupModuleEvalMarks)"),
+            )
+            .expect("startup module eval marks JSON");
+            if !module_marks.is_empty() {
+                assert_eq!(
+                    module_marks.last().map(|mark| mark.name.as_str()),
+                    Some("__end__"),
+                    "instrumented startup bundle must finish with the end marker",
+                );
+                let mut modules: Vec<(&str, f64)> = module_marks
+                    .windows(2)
+                    .map(|pair| (pair[0].name.as_str(), pair[1].at - pair[0].at))
+                    .collect();
+                let total_ms: f64 = modules.iter().map(|(_, delta)| delta).sum();
+                modules.sort_by(|left, right| {
+                    right
+                        .1
+                        .partial_cmp(&left.1)
+                        .unwrap()
+                        .then_with(|| left.0.cmp(right.0))
+                });
+                println!(
+                    "MODULE_EVAL_TOTAL viewport={viewport} modules={} measured_ms={total_ms:.3} eval_ms={:.3}",
+                    modules.len(),
+                    stages.eval_ms,
+                );
+                for (index, (module, delta_ms)) in modules.iter().take(20).enumerate() {
+                    let percent = if total_ms > 0.0 {
+                        *delta_ms / total_ms * 100.0
+                    } else {
+                        0.0
+                    };
+                    println!(
+                        "MODULE_EVAL viewport={viewport} rank={} module={} delta_ms={delta_ms:.3} percent={percent:.2}",
+                        index + 1,
+                        module,
+                    );
+                }
+            }
+        }
     }
 
     fn assert_frame_budget(label: &str, samples: &[Sample], limit_ms: f64) {
@@ -1808,6 +1969,32 @@ mod g6_quickjs_bench {
         }
     }
 
+    /// Mirrors the two English startup shells externalized by tools/desktop.ts.
+    fn seed_en_startup(data_root: &Path) {
+        let dist = PathBuf::from(std::env::var("G6_MAPS").expect("G6_MAPS"))
+            .parent()
+            .expect("G6_MAPS must have a dist parent")
+            .to_path_buf();
+        let destination = data_root
+            .join(BENCH_APP_ID)
+            .join("data")
+            .join("l10n")
+            .join("en_US");
+        let _ = std::fs::remove_dir_all(&destination);
+        std::fs::create_dir_all(&destination).expect("create benchmark English startup directory");
+        for (env_name, file_name) in [
+            ("G6_EN_PROJECT", "project-shell.json"),
+            ("G6_EN_BATTLE_SHELL", "battle-runtime-shell.json"),
+        ] {
+            let source = std::env::var(env_name)
+                .map(PathBuf::from)
+                .unwrap_or_else(|_| dist.join(file_name));
+            std::fs::copy(&source, destination.join(file_name)).unwrap_or_else(|error| {
+                panic!("copy {} to English startup data: {error}", source.display())
+            });
+        }
+    }
+
     /// Stage every audio manifest entry under its exact resource key. The
     /// production desktop build removes these lazy payloads from the startup
     /// pak and resolves them through data.fs; benchmark boots mirror that
@@ -1959,6 +2146,7 @@ mod g6_quickjs_bench {
 
     fn seed_feature_data(data: &Path) {
         seed_maps(Path::new(&std::env::var("G6_MAPS").expect("G6_MAPS")), data);
+        seed_en_startup(data);
         seed_battle(Path::new(&std::env::var("G6_BATTLE").expect("G6_BATTLE")), data);
         seed_img_entries(
             Path::new(&std::env::var("G6_PORTRAITS").expect("G6_PORTRAITS")),
@@ -2192,6 +2380,7 @@ mod g6_quickjs_bench {
         let data = bench_root.join(format!("qjs-data-{}-{width}x{height}", std::process::id()));
         let maps = PathBuf::from(std::env::var("G6_MAPS").expect("G6_MAPS"));
         seed_maps(&maps, &data);
+        seed_en_startup(&data);
         if let Ok(maps_zh) = std::env::var("G6_MAPS_ZH") {
             seed_maps_zh(Path::new(&maps_zh), &data);
         }
@@ -2397,6 +2586,18 @@ mod g6_quickjs_bench {
             first_paint_ms <= startup_limit_ms,
             "startup viewport={viewport} exceeded the {startup_limit_ms:.3} ms startup-to-first-paint budget: {first_paint_ms:.3} ms",
         );
+        if std::env::var("G6_STARTUP_ONLY").as_deref() == Ok("1") {
+            if let Ok(path) = std::env::var("G6_STATE_OUT") {
+                let state_text = bench.string("JSON.stringify(globalThis.__rpgSessionState)");
+                std::fs::write(path, state_text).expect("write startup state");
+            }
+            println!(
+                "STARTUP_ONLY viewport={viewport} lang={} title={} frames=1",
+                std::env::var("G6_LANG").unwrap_or_else(|_| "en_US".into()),
+                std::env::var("G6_SHOW_TITLE").as_deref() == Ok("1"),
+            );
+            return;
+        }
 
         let mut walking = Vec::new();
         let mut all_frames = Vec::with_capacity(journey.masks.len());
@@ -2662,6 +2863,7 @@ mod g6_quickjs_bench {
         let data = bench_root.join(format!("qjs-mem-{}-{width}x{height}", std::process::id()));
         let maps = PathBuf::from(std::env::var("G6_MAPS").expect("G6_MAPS"));
         seed_maps(&maps, &data);
+        seed_en_startup(&data);
         let battle = PathBuf::from(std::env::var("G6_BATTLE").expect("G6_BATTLE"));
         seed_battle(&battle, &data);
         let portraits = PathBuf::from(std::env::var("G6_PORTRAITS").expect("G6_PORTRAITS"));
@@ -2872,6 +3074,7 @@ mod g6_quickjs_bench {
         ));
         let maps = PathBuf::from(std::env::var("G6_MAPS").expect("G6_MAPS"));
         seed_maps(&maps, &data);
+        seed_en_startup(&data);
         let battle = PathBuf::from(std::env::var("G6_BATTLE").expect("G6_BATTLE"));
         seed_battle(&battle, &data);
         let animated = PathBuf::from(std::env::var("G6_ANIMATED").expect("G6_ANIMATED"));
@@ -3531,6 +3734,7 @@ mod g6_quickjs_bench {
             &PathBuf::from(std::env::var("G6_MAPS").expect("G6_MAPS")),
             &data,
         );
+        seed_en_startup(&data);
         seed_battle(
             &PathBuf::from(std::env::var("G6_BATTLE").expect("G6_BATTLE")),
             &data,

@@ -48,7 +48,9 @@ map_manifest_hash=$(bun -e '
   }
   console.log(value);
 ' "$project_shell")
-if ! grep -Fq "$map_manifest_hash" "$app_js"; then
+desktop_app_id=$(bun -e 'console.log((await Bun.file(process.argv[1]).json()).id)' "$root/pocket.json")
+staged_project="$root/dist/runtime-data/$desktop_app_id/data/l10n/en_US/project-shell.json"
+if [[ ! -f $staged_project ]] || ! cmp -s "$project_shell" "$staged_project"; then
   echo "bench-g6-quickjs: dist/linux-app is stale relative to dist/project-shell.json" >&2
   echo "run 'bun tools/desktop.ts --build-only' before this benchmark" >&2
   exit 1
@@ -82,7 +84,7 @@ else
   sed -i '$a include!("g6-quickjs-bench.rs");' "$scratch/src/main.rs"
 fi
 
-if [[ ${G6_SKIP_MAP_BENCH:-0} != 1 && ${G6_FEATURE_MODES_ONLY:-0} != 1 ]]; then
+if [[ ${G6_SKIP_MAP_BENCH:-0} != 1 && ${G6_FEATURE_MODES_ONLY:-0} != 1 && ${G6_STARTUP_ONLY:-0} != 1 ]]; then
   rm -rf "$map_bundle"
   mkdir -p "$map_bundle"
   bun "$pocketjs/tools/build.ts" "$root/tools/map-benchmark-entry.tsx" \
@@ -146,6 +148,10 @@ for viewport in "${viewports[@]}"; do
       G6_STATE_OUT="$state" G6_EXPECTED_MAP="$expected_map" \
       G6_BENCH_W="$width" G6_BENCH_H="$height" \
       "$binary" g6_quickjs_bench::journey --ignored --exact --nocapture
+    if [[ ${G6_STARTUP_ONLY:-0} == 1 ]]; then
+      echo "STATE viewport=${width}x${height} run=$run startup-only=true"
+      continue
+    fi
     actual=$(sha256sum "$state" | cut -d' ' -f1)
     # Complete post-Billie state, including persistent party/history, the
     # independent battle/weather RNG cursors, saved clock/daylight state, and
@@ -158,7 +164,7 @@ for viewport in "${viewports[@]}"; do
   done
 done
 
-if [[ ${G6_SKIP_MAP_BENCH:-0} != 1 ]]; then
+if [[ ${G6_SKIP_MAP_BENCH:-0} != 1 && ${G6_STARTUP_ONLY:-0} != 1 ]]; then
   G6_MAP_BENCH_DIST="$map_bundle" G6_MAPS="$root/dist/maps" \
     G6_BENCH_ROOT="$bench_root" G6_MAP_REPORT="$map_report" \
     "$binary" g6_quickjs_bench::map_first_visits --ignored --exact --nocapture
