@@ -17,6 +17,7 @@ import type {
   GameViewSessionHost,
 } from "../vendor/pocket-rpgkit/src/ui/demo-contract.ts";
 import { loadSession } from "../vendor/pocket-rpgkit/src/engine/save-restore.ts";
+import { prepareSessionMap } from "../vendor/pocket-rpgkit/src/engine/session.ts";
 
 declare global {
   // eslint-disable-next-line no-var
@@ -27,27 +28,76 @@ declare global {
   var __pocketTuxemonBootReady: boolean | undefined;
 }
 
-export function createBootSnapshotOverlay(): GameViewOverlayConfig {
+export interface BootSnapshotOverlayOptions {
+  /** Keep a browser host/core frame uncommitted while a snapshot map chunk
+   * is fetched and compiled. Local/PSP repositories never call this hook. */
+  setFrameBlocked?: (blocked: boolean) => void;
+}
+
+export function createBootSnapshotOverlay(
+  options: BootSnapshotOverlayOptions = {},
+): GameViewOverlayConfig {
   return {
     create(host: GameViewSessionHost): GameViewDemoRuntime {
       let done = false;
+      let snapshot: Parameters<typeof loadSession>[1] | undefined;
+      let pending: { ready: boolean; error?: unknown } | null = null;
+
+      const fail = (message: string): never => {
+        done = true;
+        options.setFrameBlocked?.(false);
+        throw new Error(message);
+      };
+
       return {
         step(_buttons: number, _pressed: number): GameViewDemoStepResult {
           if (done) return { consumed: false };
-          done = true;
           const input = globalThis.__pocketTuxemonBootSnapshot;
           if (typeof input === "string" && input.length > 0) {
             // Chapter envelopes are baked as JSON text. Pass the inner
             // SaveSnapshot object (not the envelope string) so the load skips
             // the envelope content-identity check: chapter snapshots are
             // baked from the desktop project and carry no shard manifest.
-            const parsed = JSON.parse(input) as { state?: unknown } | undefined;
-            const snapshot = (parsed && typeof parsed === "object" && "state" in parsed
-              ? parsed.state
-              : parsed) as Parameters<typeof loadSession>[1];
+            if (snapshot === undefined) {
+              let parsed: { state?: unknown } | undefined;
+              try {
+                parsed = JSON.parse(input) as { state?: unknown } | undefined;
+              } catch (error) {
+                return fail(`boot snapshot restore failed: ${error instanceof Error ? error.message : String(error)}`);
+              }
+              snapshot = (parsed && typeof parsed === "object" && "state" in parsed
+                ? parsed.state
+                : parsed) as Parameters<typeof loadSession>[1];
+            }
+            if (pending) {
+              if (pending.error !== undefined) {
+                return fail(`boot snapshot map preparation failed: ${
+                  pending.error instanceof Error ? pending.error.message : String(pending.error)
+                }`);
+              }
+              if (!pending.ready) return { consumed: true };
+              pending = null;
+            }
             const result = loadSession(host.session, snapshot);
             if (!result.ok) {
-              throw new Error(
+              const mapId = result.error?.mapId;
+              if (result.error?.code === "map-not-ready" && mapId && host.session.repository?.prepare) {
+                const wait = { ready: false, error: undefined as unknown };
+                pending = wait;
+                options.setFrameBlocked?.(true);
+                void prepareSessionMap(host.session, mapId).then(
+                  () => {
+                    wait.ready = true;
+                    options.setFrameBlocked?.(false);
+                  },
+                  (error) => {
+                    wait.error = error ?? new Error(`map preparation failed: ${mapId}`);
+                    options.setFrameBlocked?.(false);
+                  },
+                );
+                return { consumed: true };
+              }
+              return fail(
                 `boot snapshot restore failed: ${result.error?.code ?? "unknown"}`,
               );
             }
@@ -59,9 +109,11 @@ export function createBootSnapshotOverlay(): GameViewOverlayConfig {
             const bootFrame = globalThis.__pocketTuxemonBootFrame;
             if (typeof bootFrame === "number") result.state.frame = bootFrame;
             host.replaceState(result.state, result.held);
+            done = true;
             globalThis.__pocketTuxemonBootReady = true;
             return { consumed: true, stateChanged: true };
           }
+          done = true;
           globalThis.__pocketTuxemonBootReady = true;
           return { consumed: false };
         },

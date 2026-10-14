@@ -403,4 +403,3 @@ for (const [name, passed] of Object.entries(assertions)) {
 console.log(`chunk requests: ${JSON.stringify(chunkRequestSummary)}`);
 console.log(ok ? "WEB CHUNKS PASS" : "WEB CHUNKS FAIL");
 process.exit(ok ? 0 : 1);
-

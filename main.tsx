@@ -544,7 +544,9 @@ const overlay = createCompositeOverlay(
 // The boot-snapshot overlay runs first so a PSP segment build can restore a
 // chapter save before the tape replay starts. Production builds leave its
 // global unset and it is inert after the first frame.
-const bootSnapshotOverlay = createBootSnapshotOverlay();
+const bootSnapshotOverlay = createBootSnapshotOverlay({
+  setFrameBlocked: (blocked) => browserPakChunks()?.setFrameBlocked?.(blocked),
+});
 const overlayWithBoot: GameViewOverlayConfig = {
   create(host) {
     const boot = bootSnapshotOverlay.create(host);

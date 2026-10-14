@@ -15,6 +15,10 @@ import { join, resolve } from "node:path";
 import { FIXED_INITIAL_CIVIL_TIME } from "../battle/time-weather.ts";
 import { doubleBattleBootSnapshot } from "./double-battle-visual-fixture.ts";
 import { registerCleanup, spawnHeadlessChrome } from "./headless-chrome.ts";
+import {
+  WEB_CHUNK_AWARE_STEP_EXPRESSION,
+  WEB_CHUNK_AWARE_STEP_SOURCE,
+} from "./web-chunk-step.ts";
 
 const ROOT = resolve(import.meta.dir, "..");
 const SITE = resolve(ROOT, "dist/web");
@@ -101,6 +105,7 @@ await send("Page.addScriptToEvaluateOnNewDocument", {
     globalThis.__pocketTuxemonBootSnapshot = fixtures[new URLSearchParams(location.search).get("doubleInput")];
     window.requestAnimationFrame = () => 0;
     window.cancelAnimationFrame = () => {};
+    ${WEB_CHUNK_AWARE_STEP_SOURCE}
   `,
 });
 
@@ -125,9 +130,17 @@ async function waitFor(label: string, expression: string, timeoutMs = 20_000): P
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     if (await evaluate<boolean>(expression).catch(() => false)) return;
+    await evaluate(WEB_CHUNK_AWARE_STEP_EXPRESSION).catch(() => false);
     await sleep(20);
   }
-  throw new Error(`verify-web-double-input: timed out waiting for ${label}`);
+  const detail = await evaluate(`({
+    player: globalThis.__pocketPlayer?.state,
+    bootReady: globalThis.__pocketTuxemonBootReady,
+    hasSession: !!globalThis.__rpgSessionState,
+    frameBlocked: globalThis.__pocketPlayer?.frameBlocked,
+    chunks: globalThis.__pocketPlayer?.pakChunks?.stats?.(),
+  })`).catch(() => null);
+  throw new Error(`verify-web-double-input: timed out waiting for ${label}: ${JSON.stringify(detail)}; ${browserErrors.join(" | ")}`);
 }
 
 async function boot(query: string): Promise<void> {
@@ -143,7 +156,9 @@ async function boot(query: string): Promise<void> {
 }
 
 async function step(count = 1): Promise<void> {
-  await evaluate(`(() => { const p = globalThis.__pocketPlayer; for (let i = 0; i < ${count}; i++) p.step(); })()`);
+  await evaluate(`(async () => {
+    for (let i = 0; i < ${count}; i++) await (${WEB_CHUNK_AWARE_STEP_EXPRESSION});
+  })()`);
 }
 
 interface InputPress {

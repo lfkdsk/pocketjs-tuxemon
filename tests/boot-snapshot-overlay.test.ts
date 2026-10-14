@@ -15,9 +15,11 @@ import {
   type Session,
   type SessionState,
 } from "../vendor/pocket-rpgkit/src/engine/session.ts";
+import { MapNotReadyError } from "../vendor/pocket-rpgkit/src/engine/map-repository.ts";
+import type { MapRepository, ProjectSource } from "../vendor/pocket-rpgkit/src/engine/types.ts";
 import type { GameViewSessionHost } from "../vendor/pocket-rpgkit/src/ui/demo-contract.ts";
 import { createBootSnapshotOverlay } from "../ui/boot-snapshot-overlay.tsx";
-import { readInlineProject } from "../tools/generated-project.ts";
+import { readInlineProject, readShardedProject } from "../tools/generated-project.ts";
 import { mainlineSessionOptions } from "../tools/mainline-session.ts";
 import {
   loadChapters,
@@ -30,13 +32,15 @@ import {
 
 const globals = globalThis as unknown as Record<string, unknown>;
 
-function makeHost(): { host: GameViewSessionHost; session: Session; getState: () => SessionState } {
-  const project = readInlineProject(ROOT);
+function makeProjectHost(
+  project: ProjectSource,
+  repository?: MapRepository,
+): { host: GameViewSessionHost; session: Session; getState: () => SessionState } {
   const { worldTraversal } = loadMainlineTape(ROOT);
   const session = createSession(
     project,
     60,
-    mainlineSessionOptions(project, worldTraversal),
+    mainlineSessionOptions(project, worldTraversal, repository ? { maps: repository } : {}),
   );
   let state = startSession(project, session);
   const host: GameViewSessionHost = {
@@ -49,6 +53,10 @@ function makeHost(): { host: GameViewSessionHost; session: Session; getState: ()
     },
   };
   return { host, session, getState: () => state };
+}
+
+function makeHost(): { host: GameViewSessionHost; session: Session; getState: () => SessionState } {
+  return makeProjectHost(readInlineProject(ROOT));
 }
 
 function chapter(id: string) {
@@ -97,6 +105,59 @@ describe("boot-snapshot overlay", () => {
     const again = runtime.step(0, 0);
     expect(again.consumed).toBe(false);
     expect(again.stateChanged).toBeUndefined();
+  });
+
+  test("a deferred snapshot map holds the host frame until preparation finishes", async () => {
+    const radio = chapter("radio-broadcast");
+    const sharded = readShardedProject(ROOT);
+    const base = sharded.repository;
+    const target = "spyder_radiotower";
+    let ready = false;
+    let prepareCalls = 0;
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => { release = resolve; });
+    const repository: MapRepository = {
+      meta: (id) => base.meta(id),
+      acquire(id) {
+        if (id === target && !ready) {
+          const meta = base.meta(id)!;
+          throw new MapNotReadyError(id, meta.entry);
+        }
+        return base.acquire(id);
+      },
+      releaseExcept: (ids) => base.releaseExcept(ids),
+      async prepare(id) {
+        if (id !== target) return;
+        prepareCalls++;
+        await gate;
+        ready = true;
+      },
+    };
+    const { host, getState } = makeProjectHost(sharded.project, repository);
+    const before = getState();
+    const frameBlocks: boolean[] = [];
+    globals.__pocketTuxemonBootSnapshot = radio.snapshot;
+    globals.__pocketTuxemonBootFrame = radio.timelineFrame;
+
+    const runtime = createBootSnapshotOverlay({
+      setFrameBlocked: (blocked) => frameBlocks.push(blocked),
+    }).create(host);
+    expect(runtime.step(0, 0)).toEqual({ consumed: true });
+    expect(runtime.step(0, 0)).toEqual({ consumed: true });
+    expect(getState()).toBe(before);
+    expect(globals.__pocketTuxemonBootReady).toBeUndefined();
+    expect(prepareCalls).toBe(1);
+    expect(frameBlocks).toEqual([true]);
+
+    release();
+    for (let attempt = 0; attempt < 20 && frameBlocks.at(-1) !== false; attempt++) {
+      await Bun.sleep(0);
+    }
+    expect(frameBlocks).toEqual([true, false]);
+    expect(runtime.step(0, 0)).toEqual({ consumed: true, stateChanged: true });
+    expect(getState().mapId).toBe(target);
+    expect(getState().frame).toBe(radio.timelineFrame);
+    expect(globals.__pocketTuxemonBootReady).toBe(true);
   });
 
   test("is inert when no snapshot global is set (production builds)", () => {

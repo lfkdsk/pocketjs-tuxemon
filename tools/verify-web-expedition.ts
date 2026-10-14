@@ -311,8 +311,9 @@ async function bootReplay(path: string, language = "en"): Promise<void> {
   await evaluate(`globalThis.__pocketExpeditionReplay.pause(); globalThis.__pocketPlayer.paint()`);
 }
 
-// Ordinary startup keeps its production bundle/pak and never asks for the
-// opt-in expedition replay assets.
+// Ordinary startup keeps its chunked production payload and never asks for
+// the opt-in expedition replay assets. The replay stays on its standalone
+// monolithic pak contract.
 const requestStart = requests.length;
 await send("Page.navigate", { url: base });
 await waitFor("ordinary player", `!!(globalThis.__pocketPlayer && globalThis.__pocketPlayer.state === "running")`);
@@ -326,9 +327,21 @@ check(
 const normalConfig = JSON.parse(readFileSync(join(SITE, GAME, "index.html"), "utf8")
   .match(/<script type="application\/json" id="pocket-game">(.*?)<\/script>/s)![1]!) as Record<string, unknown>;
 check(
-  "ordinary player keeps the production bundle and pak",
-  normalConfig.bundle === "pocket-tuxemon.js" && normalConfig.pak === "pocket-tuxemon.pak",
-  `${String(normalConfig.bundle)} / ${String(normalConfig.pak)}`,
+  "ordinary player keeps the chunked production bundle",
+  normalConfig.bundle === "pocket-tuxemon.js" && normalConfig.pak === null &&
+    normalConfig.pakManifest === "pocket-tuxemon.pak-manifest.json" &&
+    ordinaryRequests.some((url) => /pocket-tuxemon\.pak-manifest\.json(?:$|\?)/.test(url)) &&
+    ordinaryRequests.some((url) => /\/chunks\/startup-[a-f0-9]{64}\.pak\.gz(?:$|\?)/.test(url)) &&
+    !ordinaryRequests.some((url) => /\/pocket-tuxemon\.pak(?:$|\?)/.test(url)),
+  `${String(normalConfig.bundle)} / ${String(normalConfig.pak)} / ${String(normalConfig.pakManifest)}`,
+);
+const replayConfig = JSON.parse(readFileSync(join(SITE, GAME, "expedition-replay.html"), "utf8")
+  .match(/<script type="application\/json" id="pocket-game">(.*?)<\/script>/s)![1]!) as Record<string, unknown>;
+check(
+  "expedition replay keeps its standalone bundle and monolithic pak",
+  replayConfig.bundle === "expedition-replay.js" && replayConfig.pak === "expedition-replay.pak" &&
+    replayConfig.pakManifest === undefined,
+  `${String(replayConfig.bundle)} / ${String(replayConfig.pak)} / ${String(replayConfig.pakManifest)}`,
 );
 
 await bootReplay("expedition-journal.json");
