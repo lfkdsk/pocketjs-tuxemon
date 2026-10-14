@@ -1817,9 +1817,10 @@ function makeRules(db: TuxemonBattleDb): BattleCoreRules<BattleMonster, TuxemonB
       // Upstream evaluates the opponent before selecting a move. A later
       // random legal (move,target) choice normally overwrites that result;
       // only fallback selection retains it. The evaluator itself is active
-      // only for trainer doubles and resolves ties in stable field order.
+      // only for the AI side in trainer doubles and resolves ties in stable
+      // field order.
       let target = targets[0]!;
-      if (state.kind === "trainer" && state.fieldSize === 2) {
+      if (state.kind === "trainer" && state.fieldSize === 2 && getSide(state, uid) === 1) {
         const owner = getSide(state, uid) === 1 ? state.opponent : "default";
         const rule = db.opponent_targeting?.[owner] ?? db.opponent_targeting?.default;
         if (rule) {

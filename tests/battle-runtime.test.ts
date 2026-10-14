@@ -1017,6 +1017,80 @@ describe("Tuxemon BattleRules adapter", () => {
     expect(wildTargets).toEqual([wild.parties[0][0]!.uid, wild.parties[0][0]!.uid]);
   });
 
+  test("keeps player fallback targets unweighted while AI fallback uses imported weights", () => {
+    const weak = (slug: string, iid: string, seed: number) => crafted(slug, 5, iid, seed, {
+      base: { hp: 20, armour: 1, dodge: 1, melee: 1, ranged: 1, speed: 1 },
+      currentHp: 4,
+      moves: ["ram"],
+    });
+    const strong = (slug: string, iid: string, seed: number) => crafted(slug, 15, iid, seed, {
+      base: { hp: 100, armour: 20, dodge: 15, melee: 30, ranged: 25, speed: 10 },
+      currentHp: 90,
+      moves: ["ram"],
+    });
+    let battle = createBattle(RULE_DB, {
+      seed: 731,
+      kind: "trainer",
+      opponent: OPPONENT,
+      fieldSize: 2,
+      player: [weak("nut", "cooling-player-a", 75), strong("rockitten", "cooling-player-b", 76)],
+      enemy: [weak("memnomnom", "cooling-enemy-a", 77), strong("miaownolith", "cooling-enemy-b", 78)],
+      manualSides: [0, 1],
+    });
+    for (const monster of [...battle.parties[0], ...battle.parties[1]]) {
+      for (const move of monster.moves) move.cooldown = 2;
+    }
+
+    for (let decision = 0; decision < 4; decision++) {
+      battle = reduceBattle(RULE_DB, battle, { type: "technique", choice: 0 });
+    }
+    const fallbackTargets = (side: 0 | 1) => battle.events
+      .filter((event) => event.type === "decision" && event.turn === 1 && event.side === side)
+      .map((event) => event.target);
+
+    expect(fallbackTargets(1)).toEqual([
+      battle.parties[0][1]!.uid,
+      battle.parties[0][1]!.uid,
+    ]);
+    expect(fallbackTargets(0)).toEqual([
+      battle.parties[1][0]!.uid,
+      battle.parties[1][0]!.uid,
+    ]);
+  });
+
+  test("keeps the first active opponent when trainer-double fallback scores tie", () => {
+    const tiedTarget = (iid: string, seed: number) => crafted("nut", 10, iid, seed, {
+      base: { hp: 50, armour: 8, dodge: 7, melee: 9, ranged: 6, speed: 5 },
+      currentHp: 25,
+      moves: ["ram"],
+    });
+    const coolingEnemy = (iid: string, seed: number) => crafted("memnomnom", 10, iid, seed, {
+      moves: ["ram"],
+    });
+    let battle = createBattle(RULE_DB, {
+      seed: 732,
+      kind: "trainer",
+      opponent: OPPONENT,
+      fieldSize: 2,
+      player: [tiedTarget("tied-player-a", 79), tiedTarget("tied-player-b", 80)],
+      enemy: [coolingEnemy("tied-enemy-a", 81), coolingEnemy("tied-enemy-b", 82)],
+      manualSides: [0, 1],
+    });
+    for (const monster of battle.parties[1]) {
+      for (const move of monster.moves) move.cooldown = 2;
+    }
+
+    battle = reduceBattle(RULE_DB, battle, { type: "technique", choice: 0 });
+    battle = reduceBattle(RULE_DB, battle, { type: "technique", choice: 0 });
+    const targets = battle.events
+      .filter((event) => event.type === "decision" && event.turn === 1 && event.side === 1)
+      .map((event) => event.target);
+    expect(targets).toEqual([
+      battle.parties[0][0]!.uid,
+      battle.parties[0][0]!.uid,
+    ]);
+  });
+
   test("keeps uniform legal move-target selection after opponent scoring is overwritten", () => {
     const weak = crafted("nut", 5, "random-player-a", 81, {
       base: { hp: 20, armour: 1, dodge: 1, melee: 1, ranged: 1, speed: 1 },
