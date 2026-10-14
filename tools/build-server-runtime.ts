@@ -2,11 +2,14 @@ import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { extname, relative, resolve, sep } from "node:path";
 
+import { SERVER_RUNTIME_DECLARATION } from "./server-runtime-declaration.ts";
+
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const DEFAULT_ENTRY = resolve(ROOT, "battle/server-runtime.ts");
 const SHARED_NAMES = resolve(ROOT, "battle/battle-names.ts");
 const SERVER_NAMES = resolve(ROOT, "battle/server-battle-names.ts");
 const OUTPUT = resolve(ROOT, "server-runtime/index.mjs");
+const DECLARATION_OUTPUT = resolve(ROOT, "server-runtime/index.d.mts");
 
 const ASSET_EXTENSIONS = new Set([
   ".bin", ".bmp", ".gif", ".jpeg", ".jpg", ".mp3", ".ogg", ".pak", ".png",
@@ -21,12 +24,18 @@ export interface ServerRuntimeBoundaryViolation {
 
 export interface ServerRuntimeBuild {
   bytes: Uint8Array;
+  declarationBytes: Uint8Array;
   sha256: string;
   metafile: NonNullable<Awaited<ReturnType<typeof Bun.build>>["metafile"]>;
   inputs: string[];
   aliasCount: number;
   violations: ServerRuntimeBoundaryViolation[];
 }
+
+const DECLARATION_IMPORT = /\bimport\b/;
+const DECLARATION_EXPORT_FROM =
+  /\bexport\s+(?:type\s+)?(?:\*\s*(?:as\s+[A-Za-z_$][\w$]*\s*)?|\{[^}]*\})\s+from\s*["']/m;
+const DECLARATION_REFERENCE = /\/\/\/\s*<reference\b/i;
 
 function slash(path: string): string {
   return path.split(sep).join("/");
@@ -48,6 +57,16 @@ export function assertServerRuntimeBoundary(build: ServerRuntimeBuild): void {
   }
   if (build.violations.length > 0) {
     throw new Error(`server runtime boundary violation: ${JSON.stringify(build.violations)}`);
+  }
+  const declaration = new TextDecoder().decode(build.declarationBytes);
+  if (DECLARATION_IMPORT.test(declaration)) {
+    throw new Error("server runtime declaration contains an import");
+  }
+  if (DECLARATION_EXPORT_FROM.test(declaration)) {
+    throw new Error("server runtime declaration contains an export-from");
+  }
+  if (DECLARATION_REFERENCE.test(declaration)) {
+    throw new Error("server runtime declaration contains a triple-slash reference");
   }
 }
 
@@ -105,6 +124,7 @@ export async function bundleServerRuntime(entry = DEFAULT_ENTRY): Promise<Server
   }
   return {
     bytes,
+    declarationBytes: new TextEncoder().encode(SERVER_RUNTIME_DECLARATION),
     sha256: createHash("sha256").update(bytes).digest("hex"),
     metafile,
     inputs,
@@ -117,5 +137,6 @@ if (import.meta.main) {
   const built = await bundleServerRuntime();
   assertServerRuntimeBoundary(built);
   await Bun.write(OUTPUT, built.bytes);
+  await Bun.write(DECLARATION_OUTPUT, built.declarationBytes);
   console.log(`server runtime: ${built.bytes.byteLength} bytes sha256=${built.sha256}`);
 }

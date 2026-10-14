@@ -16,9 +16,11 @@ import {
   assertServerRuntimeBoundary,
   bundleServerRuntime,
 } from "../tools/build-server-runtime.ts";
+import { SERVER_RUNTIME_DECLARATION } from "../tools/server-runtime-declaration.ts";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const ARTIFACT = join(ROOT, "server-runtime/index.mjs");
+const DECLARATION = join(ROOT, "server-runtime/index.d.mts");
 const SERVER_ENTRY = join(ROOT, "battle/server-runtime.ts");
 const UI_MUTATION = join(ROOT, "ui/battle-scene-locale.ts");
 
@@ -50,6 +52,7 @@ const VALUE_EXPORTS = [
 ] as const;
 
 type Runtime = typeof shared;
+const artifactRuntime: Runtime = artifact;
 type FixtureCase = {
   name: string;
   config: shared.ArenaConfig;
@@ -88,7 +91,7 @@ function fixtureStateHash(battle: shared.ArenaBattle): string {
 describe("committed Arena server artifact", () => {
   test("has one explicit value surface and a content-bound data identity", () => {
     expect(Object.keys(shared).sort()).toEqual([...VALUE_EXPORTS].sort());
-    expect(Object.keys(artifact).sort()).toEqual([...VALUE_EXPORTS].sort());
+    expect(Object.keys(artifactRuntime).sort()).toEqual([...VALUE_EXPORTS].sort());
     expect(artifact.SERVER_RUNTIME_IDENTITY).toEqual(shared.SERVER_RUNTIME_IDENTITY);
     expect(battleDbJson.sourceRevision).toBe(shared.SERVER_DATA_REVISION);
     expect(battleDbZhJson.sourceRevision).toBe(battleDbJson.sourceRevision);
@@ -110,6 +113,27 @@ describe("committed Arena server artifact", () => {
     expect(built.inputs).not.toContain("battle/battle-names.ts");
     expect(built.violations).toEqual([]);
     expect(built.bytes).toEqual(new Uint8Array(readFileSync(ARTIFACT)));
+    expect(built.declarationBytes).toEqual(new Uint8Array(readFileSync(DECLARATION)));
+    expect(new TextDecoder().decode(built.declarationBytes)).toBe(SERVER_RUNTIME_DECLARATION);
+    for (const [source, error] of [
+      ['import type { ArenaBattle } from "../battle/arena.ts";\n', "contains an import"],
+      ['export * from "../battle/server-runtime.ts";\n', "contains an export-from"],
+      ['/// <reference path="../battle/arena.ts" />\n', "contains a triple-slash reference"],
+    ] as const) {
+      expect(() => assertServerRuntimeBoundary({
+        ...built,
+        declarationBytes: new TextEncoder().encode(source),
+      })).toThrow(error);
+    }
+  });
+
+  test("ships self-contained typings with no source-graph dependency syntax", () => {
+    const declaration = readFileSync(DECLARATION, "utf8");
+    expect(declaration).not.toMatch(/\bimport\b/);
+    expect(declaration).not.toMatch(
+      /\bexport\s+(?:type\s+)?(?:\*\s*(?:as\s+[A-Za-z_$][\w$]*\s*)?|\{[^}]*\})\s+from\s*["']/m,
+    );
+    expect(declaration).not.toMatch(/\/\/\/\s*<reference\b/i);
   });
 
   test("makes a deliberately introduced runtime UI edge visible and rejects it", async () => {
