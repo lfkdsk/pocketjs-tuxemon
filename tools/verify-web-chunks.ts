@@ -21,6 +21,11 @@ import { registerCleanup, spawnHeadlessChrome, type HeadlessChrome } from "./hea
 const ROOT = resolve(import.meta.dir, "..");
 const SITE = resolve(ROOT, "dist/web");
 const OUT = resolve(ROOT, "dist/web-chunks-verify");
+const MANIFEST = JSON.parse(readFileSync(
+  join(SITE, "pocket-tuxemon", "pocket-tuxemon.pak-manifest.json"),
+  "utf8",
+)) as { chunks: Array<{ id: string }> };
+const EXPECTED_CHUNKS = MANIFEST.chunks.length;
 const chromeFlag = process.argv.indexOf("--chrome");
 const CHROME = chromeFlag >= 0 ? process.argv[chromeFlag + 1]! :
   process.env.CHROME ?? Bun.which("google-chrome") ?? Bun.which("chromium") ?? "google-chrome";
@@ -357,14 +362,15 @@ const assertions = {
   noChunkFailures: [instantEn, instantZh, delayedEn, delayedZh]
     .every((run) => run.errors.length === 0 && Object.keys(run.stats.failures).length === 0),
   backgroundComplete: delayedEnBackground.pending.length === 0 && delayedEnBackground.queued.length === 0 &&
-    delayedEnBackground.resident.length === 282,
+    delayedEnBackground.resident.length === EXPECTED_CHUNKS,
   warmCacheNoChunkRequests: (chunkRequests.get("warm-en")?.length ?? 0) === 0 &&
-    warmStats.pending.length === 0 && warmStats.queued.length === 0 && warmStats.resident.length === 282,
+    warmStats.pending.length === 0 && warmStats.queued.length === 0 && warmStats.resident.length === EXPECTED_CHUNKS,
 };
 const ok = Object.values(assertions).every(Boolean);
 const report = {
   format: "pocket-tuxemon-web-chunk-verification/v1",
   delayMs: DELAY_MS,
+  expectedChunks: EXPECTED_CHUNKS,
   runs: { instantEn, delayedEn, instantZh, delayedZh },
   delayedEnBackground,
   warmStats,
