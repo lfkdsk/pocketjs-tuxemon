@@ -39,11 +39,13 @@ export function createGameMapEntrySource(
 ): {
   read: (entry: string) => Uint8Array | undefined;
   readText?: (entry: string) => string | undefined;
+    prefetch?: (entry: string) => Promise<void>;
   prepare?: (entry: string) => Promise<void>;
 } {
   if (!chunks) return readers;
   return {
     read: (entry) => chunks.ready(entry) ? readers.read(entry) : undefined,
+    prefetch: (entry) => chunks.prefetch(entry),
     prepare: (entry) => chunks.prepare(entry),
   };
 }

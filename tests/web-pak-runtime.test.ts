@@ -6,11 +6,15 @@ import {
 import { createWebAudioChunkReader } from "../ui/weather-effects.tsx";
 import type { BrowserPakChunks } from "../ui/web-pak.ts";
 
-function bridge(ready: Set<string>, prepare: (key: string) => Promise<void>): BrowserPakChunks {
+function bridge(
+  ready: Set<string>,
+  prepare: (key: string) => Promise<void>,
+  prefetch: (key: string) => Promise<void> = async () => {},
+): BrowserPakChunks {
   return {
     ready: (key) => ready.has(key),
     prepare,
-    prefetch: async () => {},
+    prefetch,
     stats: () => ({
       startupBytes: 0,
       resident: [],
@@ -43,6 +47,25 @@ test("the browser map source reports not-ready without reading and prepares the 
   expect(prepares).toEqual(["maps/a.rkm"]);
   expect([...source.read("maps/a.rkm")!]).toEqual([7]);
   expect(reads).toEqual(["maps/a.rkm"]);
+});
+
+test("the browser map source keeps working-set prefetch separate from blocking preparation", async () => {
+  const prefetched: string[] = [];
+  const prepared: string[] = [];
+  const source = createGameMapEntrySource(
+    { read: () => new Uint8Array([7]) },
+    bridge(
+      new Set(),
+      async (entry) => { prepared.push(entry); },
+      async (entry) => { prefetched.push(entry); },
+    ),
+  );
+
+  await source.prefetch!("maps/next.rkm");
+  expect(prefetched).toEqual(["maps/next.rkm"]);
+  expect(prepared).toEqual([]);
+  await source.prepare!("maps/next.rkm");
+  expect(prepared).toEqual(["maps/next.rkm"]);
 });
 
 test("a deferred Web track is retried once after preparation, without changing its bytes", async () => {
