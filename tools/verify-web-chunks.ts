@@ -76,9 +76,8 @@ const journeys: Record<"en" | "zh", Journey> = {
   zh: JSON.parse(readFileSync(join(ROOT, "data/zh-smoke-journey.json"), "utf8")),
 };
 
-let serverLabel = "idle";
-let serverDelayMs = 0;
 const chunkRequests = new Map<string, string[]>();
+const runDelays = new Map<string, number>();
 const server = Bun.serve({
   port: 0,
   hostname: "127.0.0.1",
@@ -90,10 +89,12 @@ const server = Bun.serve({
     if (!existsSync(path)) return new Response("not found", { status: 404 });
     const chunk = url.pathname.includes("/chunks/") && url.pathname.endsWith(".pak.gz");
     if (chunk) {
-      const requests = chunkRequests.get(serverLabel) ?? [];
+      const run = /(?:^|;\s*)pak-run=([^;]+)/.exec(request.headers.get("cookie") ?? "")?.[1] ?? "unlabelled";
+      const requests = chunkRequests.get(run) ?? [];
       requests.push(url.pathname);
-      chunkRequests.set(serverLabel, requests);
-      if (serverDelayMs > 0) await Bun.sleep(serverDelayMs);
+      chunkRequests.set(run, requests);
+      const delayMs = runDelays.get(run) ?? 0;
+      if (delayMs > 0) await Bun.sleep(delayMs);
     }
     // Cache Storage, not an HTTP freshness heuristic, owns the warm-run proof.
     return new Response(Bun.file(path), { headers: { "cache-control": "no-store" } });
@@ -133,6 +134,7 @@ class BrowserSession {
     const session = new BrowserSession(chrome, ws);
     await session.send("Runtime.enable");
     await session.send("Page.enable");
+    await session.send("Network.enable");
     await session.send("Page.addScriptToEvaluateOnNewDocument", {
       source: `globalThis.__pocketTuxemonInitialCivilTime = ${JSON.stringify(FIXED_INITIAL_CIVIL_TIME)};
 globalThis.__pocketTuxemonShowTitle = false;
@@ -182,6 +184,16 @@ window.requestAnimationFrame = () => 0; window.cancelAnimationFrame = () => {};`
     }
     throw new Error(`verify-web-chunks: ${lang} page did not boot`);
   }
+
+  async setRun(label: string, delayMs: number): Promise<void> {
+    runDelays.set(label, delayMs);
+    const result = await this.send("Network.setCookie", {
+      name: "pak-run",
+      value: label,
+      url: `http://127.0.0.1:${server.port}/`,
+    });
+    if (result.success !== true) throw new Error(`verify-web-chunks: could not label ${label} requests`);
+  }
 }
 
 async function drive(
@@ -190,6 +202,7 @@ async function drive(
   lang: "en" | "zh",
   delayMs: number,
 ): Promise<RunResult> {
+  await browser.setRun(label, delayMs);
   await browser.navigate(lang);
   const journey = journeys[lang];
   const errorStart = browser.errors.length;
@@ -297,8 +310,6 @@ async function waitForBackground(browser: BrowserSession, label: string): Promis
 }
 
 async function singleRun(label: string, lang: "en" | "zh", delayMs: number): Promise<RunResult> {
-  serverLabel = label;
-  serverDelayMs = delayMs;
   const browser = await BrowserSession.open(join(OUT, `${label}-profile`));
   try {
     return await drive(browser, label, lang, delayMs);
@@ -315,8 +326,6 @@ const instantZh = await singleRun("instant-zh", "zh", 0);
 console.log(`  ${instantZh.stateSha256} at ${instantZh.location.join(",")} (${instantZh.blocks} async waits)`);
 
 console.log(`verify-web-chunks: delayed English journey (${DELAY_MS} ms per chunk)...`);
-serverLabel = "delayed-en";
-serverDelayMs = DELAY_MS;
 const delayedEnBrowser = await BrowserSession.open(join(OUT, "delayed-en-profile"));
 let delayedEn: RunResult;
 let delayedEnBackground: RunResult["stats"];
@@ -326,8 +335,7 @@ try {
   delayedEnBackground = await waitForBackground(delayedEnBrowser, "delayed English");
   console.log(`  ${delayedEn.stateSha256} at ${delayedEn.location.join(",")} (${delayedEn.blocks} blocked tape frames)`);
   console.log("verify-web-chunks: warm reload from verified Cache Storage...");
-  serverLabel = "warm-en";
-  serverDelayMs = DELAY_MS;
+  await delayedEnBrowser.setRun("warm-en", DELAY_MS);
   await delayedEnBrowser.navigate("en");
   warmStats = await waitForBackground(delayedEnBrowser, "warm English");
 } finally {
