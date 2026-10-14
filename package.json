@@ -101,6 +101,7 @@
     "goldens:features": "bun tools/update-feature-modes-goldens.ts",
     "desktop": "bun tools/desktop.ts",
     "web": "bun tools/web.ts",
+    "bench:web:load": "bun tools/bench-web-load.ts",
     "arena:demo": "bun tools/arena-demo.ts",
     "expedition:demo": "bun tools/expedition-demo.ts",
     "verify:web:arena": "bun tools/verify-web-arena.ts",
