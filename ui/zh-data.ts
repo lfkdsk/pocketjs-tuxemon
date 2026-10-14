@@ -5,6 +5,7 @@
 // keys from its external pak.
 import type { ZhData } from "./zh-data-types.ts";
 import { decodeMapEntryBytes } from "../vendor/pocket-rpgkit/src/engine/map-repository.ts";
+import { startupProfileMark } from "../vendor/pocket-rpgkit/src/startup-profile.ts";
 
 export const ZH_DATA_ENTRIES = {
   project: "l10n/zh_CN/project-shell.json",
@@ -31,8 +32,14 @@ export function createZhDataStore(): ZhDataStore {
     load(read) {
       if (cached) return cached;
       const parse = <T>(entry: string): T => {
+        startupProfileMark(`startup-data:${entry}:read-start`);
         const input = read(entry);
-        return JSON.parse(typeof input === "string" ? input : decodeMapEntryBytes(input)) as T;
+        startupProfileMark(`startup-data:${entry}:read-end`);
+        const value = JSON.parse(
+          typeof input === "string" ? input : decodeMapEntryBytes(input),
+        ) as T;
+        startupProfileMark(`startup-data:${entry}:parse-end`);
+        return value;
       };
       cached = {
         project: parse<ZhData["project"]>(ZH_DATA_ENTRIES.project),

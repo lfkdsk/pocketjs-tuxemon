@@ -5,6 +5,7 @@
 import type { ProjectShell } from "../vendor/pocket-rpgkit/src/engine/types.ts";
 import type { BattleRuntimeShell } from "../importer/battle-schema.ts";
 import { decodeMapEntryBytes } from "../vendor/pocket-rpgkit/src/engine/map-repository.ts";
+import { startupProfileMark } from "../vendor/pocket-rpgkit/src/startup-profile.ts";
 
 export const EN_STARTUP_DATA_ENTRIES = {
   project: "l10n/en_US/project-shell.json",
@@ -29,8 +30,14 @@ export function createEnStartupDataStore(): EnStartupDataStore {
     load(read) {
       if (cached) return cached;
       const parse = <T>(entry: string): T => {
+        startupProfileMark(`startup-data:${entry}:read-start`);
         const input = read(entry);
-        return JSON.parse(typeof input === "string" ? input : decodeMapEntryBytes(input)) as T;
+        startupProfileMark(`startup-data:${entry}:read-end`);
+        const value = JSON.parse(
+          typeof input === "string" ? input : decodeMapEntryBytes(input),
+        ) as T;
+        startupProfileMark(`startup-data:${entry}:parse-end`);
+        return value;
       };
       cached = {
         project: parse<ProjectShell>(EN_STARTUP_DATA_ENTRIES.project),
