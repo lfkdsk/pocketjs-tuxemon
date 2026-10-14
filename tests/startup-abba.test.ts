@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import {
   bootstrapMedian95,
   parseStartupOutput,
+  selectStartupCells,
   summarizeStartupSamples,
   type StartupSample,
 } from "../tools/bench-startup-abba.ts";
@@ -75,5 +76,25 @@ BOOT viewport=480x272 gc_mode=idle startup_to_first=149.750ms objects=1
     expect(first).toEqual(second);
     expect(first.low).toBeLessThanOrEqual(3);
     expect(first.high).toBeGreaterThanOrEqual(3);
+  });
+
+  test("selects an explicit cell and rejects unknown cell names", () => {
+    expect(selectStartupCells("zh_CN-960x544")).toEqual([
+      { language: "zh_CN", viewport: "960 544" },
+    ]);
+    expect(() => selectStartupCells("en_US-123x456")).toThrow(
+      "unknown STARTUP_ABBA_CELLS",
+    );
+  });
+
+  test("rejects an interrupted window instead of reporting a biased delta", () => {
+    const interrupted = [
+      sample(1, 1, "baseline", 200),
+      sample(1, 2, "candidate", 140),
+      sample(1, 3, "candidate", 142),
+    ];
+    expect(() => summarizeStartupSamples(interrupted)).toThrow(
+      "startup summary requires a complete ABBA window",
+    );
   });
 });

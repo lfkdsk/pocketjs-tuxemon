@@ -48,6 +48,35 @@ export interface CellSummary {
   pairedDelta95: Interval;
 }
 
+export interface StartupCell {
+  language: "en_US" | "zh_CN";
+  viewport: "480 272" | "960 544";
+}
+
+export const STARTUP_CELLS: readonly StartupCell[] = [
+  { language: "en_US", viewport: "480 272" },
+  { language: "en_US", viewport: "960 544" },
+  { language: "zh_CN", viewport: "480 272" },
+  { language: "zh_CN", viewport: "960 544" },
+];
+
+function cellName(cell: StartupCell): string {
+  return `${cell.language}-${cell.viewport.replace(" ", "x")}`;
+}
+
+export function selectStartupCells(filter?: string): readonly StartupCell[] {
+  if (!filter) return STARTUP_CELLS;
+  const requested = new Set(filter.split(",").map((value) => value.trim()).filter(Boolean));
+  const known = new Set(STARTUP_CELLS.map(cellName));
+  const unknown = [...requested].filter((value) => !known.has(value));
+  if (unknown.length > 0) {
+    throw new Error(`unknown STARTUP_ABBA_CELLS: ${unknown.join(", ")}`);
+  }
+  const selected = STARTUP_CELLS.filter((cell) => requested.has(cellName(cell)));
+  if (selected.length === 0) throw new Error("STARTUP_ABBA_CELLS selected no cells");
+  return selected;
+}
+
 function median(values: readonly number[]): number {
   if (values.length === 0) throw new Error("median requires at least one value");
   const sorted = [...values].sort((a, b) => a - b);
@@ -110,6 +139,17 @@ export function summarizeStartupSamples(samples: readonly StartupSample[]): Cell
     const windows = [...new Set(rows.map((sample) => sample.window))].sort((a, b) => a - b);
     const windowDeltas = windows.map((window) => {
       const inWindow = rows.filter((sample) => sample.window === window);
+      const slots = [...inWindow].sort((a, b) => a.slot - b.slot);
+      const expectedOrder = window % 2 === 1 ? "ABBA" : "BAAB";
+      if (
+        slots.length !== 4
+        || slots.map((sample) => sample.slot).join(",") !== "1,2,3,4"
+        || slots.some((sample) => sample.order !== expectedOrder)
+        || slots.map((sample) => sample.variant === "baseline" ? "A" : "B").join("")
+          !== expectedOrder
+      ) {
+        throw new Error(`startup summary requires a complete ${expectedOrder} window: ${cell} window ${window}`);
+      }
       const baseline = median(
         inWindow.filter((sample) => sample.variant === "baseline").map((sample) => sample.startupMs),
       );
@@ -210,12 +250,7 @@ async function main(): Promise<void> {
   })}\n`);
   writeFileSync(log, "");
   const samples: StartupSample[] = [];
-  const cells = [
-    { language: "en_US" as const, viewport: "480 272" },
-    { language: "en_US" as const, viewport: "960 544" },
-    { language: "zh_CN" as const, viewport: "480 272" },
-    { language: "zh_CN" as const, viewport: "960 544" },
-  ];
+  const cells = selectStartupCells(process.env.STARTUP_ABBA_CELLS);
   for (const { language, viewport } of cells) {
     const cell = `${language}-${viewport.replace(" ", "x")}`;
     for (let window = 1; window <= windows; window++) {
