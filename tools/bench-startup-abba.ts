@@ -178,9 +178,17 @@ export function parseStartupOutput(output: string): {
   const collect = (prefix: string): Record<string, number> => {
     const result: Record<string, number> = {};
     for (const line of output.split(/\r?\n/)) {
-      if (!line.startsWith(prefix)) continue;
-      const name = line.match(/\bname=([^ ]+)/)?.[1];
-      const delta = line.match(/\bdelta_ms=(-?[0-9.]+)/)?.[1];
+      // Rust's libtest prints `test module::case ... ` before the first
+      // uncaptured line, so the initial pak-read mark is not necessarily at
+      // column zero. Later marks do start at column zero.
+      let start = line.indexOf(prefix);
+      while (start > 0 && !/\s/.test(line[start - 1]!)) {
+        start = line.indexOf(prefix, start + prefix.length);
+      }
+      if (start < 0) continue;
+      const stage = line.slice(start);
+      const name = stage.match(/\bname=([^ ]+)/)?.[1];
+      const delta = stage.match(/\bdelta_ms=(-?[0-9.]+)/)?.[1];
       if (name && delta !== undefined) result[name] = Number(delta);
     }
     return result;

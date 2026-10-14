@@ -39,7 +39,7 @@ function sample(
 describe("startup ABBA analysis", () => {
   test("parses the startup and detailed stage lines", () => {
     const parsed = parseStartupOutput(`
-HOST_STAGE viewport=480x272 name=pak-read at_ms=0.000 delta_ms=12.500
+test g6_quickjs_bench::journey ... HOST_STAGE viewport=480x272 name=pak-read at_ms=0.000 delta_ms=12.500
 STAGE viewport=480x272 name=compile at_ms=12.500 delta_ms=31.250
 BOOT viewport=480x272 gc_mode=idle startup_to_first=149.750ms objects=1
 `);
