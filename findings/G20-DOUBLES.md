@@ -141,10 +141,11 @@ hashes, `fieldSize=2`, complete party provenance, two active slots per side,
 localized HUD names/prompts/commands, visible HP fills, nontrivial palettes,
 and exact 2x composition at the larger viewport.
 
-All eight images were opened at 3x. Both monsters are visible on each side,
-the English and Chinese HUD strings are legible, no name, level, prompt or
-command is clipped, and the 960x544 captures are the intended nearest-neighbor
-2x presentation rather than a stale 480x272 frame.
+All eight images were opened at 3x. One monster sprite is visible on each side,
+while battle state and the party trays retain two active slots per side. The
+English and Chinese HUD strings are legible, no name, level, prompt or command
+is clipped, and the 960x544 captures are the intended nearest-neighbor 2x
+presentation rather than a stale 480x272 frame.
 
 The built Web game adds two independent input proofs:
 
