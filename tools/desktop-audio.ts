@@ -1,12 +1,12 @@
-// Desktop audio sidecar policy.
+// Desktop startup-pak sidecar policy.
 //
 // The native desktop host reads the complete application pak before it can
 // compile the JavaScript bundle. Audio is already lazy at the game layer, so
-// keeping large QOA payloads in that startup read only adds cold-I/O latency.
-// Desktop builds stage music under the app's data.fs root and repack the
-// startup pak without it. The small WAV effects stay packed so one-shot cues
-// do not wait for the incremental sidecar reader. Web and console builds do
-// not call this helper and continue to carry every audio entry in their pak.
+// keeping lazy QOA payloads or data.fs-backed JSON shards in that startup
+// read only adds cold-I/O and pak-copy latency. Desktop builds stage those
+// entries under the app's data.fs root and repack the startup pak without
+// duplicate data. UI textures, fonts and small WAV effects stay packed.
+// Web and console builds do not call this helper and keep the complete pak.
 
 import {
   mkdirSync,
@@ -24,12 +24,17 @@ import {
 
 export interface DesktopPakPartition {
   readonly startup: PakBlob[];
+  readonly sidecar: PakBlob[];
   readonly audio: PakBlob[];
+  readonly dataBytes: number;
   readonly audioBytes: number;
 }
 
-export interface DesktopAudioExternalization {
+export interface DesktopPakExternalization {
   readonly entries: number;
+  readonly dataEntries: number;
+  readonly audioEntries: number;
+  readonly dataBytes: number;
   readonly audioBytes: number;
   readonly fullPakBytes: number;
   readonly startupPakBytes: number;
@@ -39,52 +44,88 @@ export function isDesktopAudioEntry(key: string): boolean {
   return key.startsWith("audio:qoa.");
 }
 
+const DESKTOP_DATA_PREFIXES = [
+  "animated/",
+  "battle/",
+  "battle-zh/",
+  "choice-icons/",
+  "demo/",
+  "feature/",
+  "l10n/",
+  "maps/",
+  "maps-zh/",
+  "npc-src/",
+  "portraits/",
+  "terrain-stream/",
+] as const;
+
+const DESKTOP_DATA_FILES = new Set(["game:battle-db", "world-index.json"]);
+
+export function isDesktopDataEntry(key: string): boolean {
+  return DESKTOP_DATA_FILES.has(key)
+    || DESKTOP_DATA_PREFIXES.some((prefix) => key.startsWith(prefix));
+}
+
+export function isDesktopSidecarEntry(key: string): boolean {
+  return isDesktopAudioEntry(key) || isDesktopDataEntry(key);
+}
+
 export function partitionDesktopPakEntries(
   entries: readonly PakBlob[],
 ): DesktopPakPartition {
   const startup: PakBlob[] = [];
+  const sidecar: PakBlob[] = [];
   const audio: PakBlob[] = [];
+  let dataBytes = 0;
   let audioBytes = 0;
   for (const entry of entries) {
     if (isDesktopAudioEntry(entry.key)) {
       audio.push(entry);
       audioBytes += entry.data.length;
+      sidecar.push(entry);
+    } else if (isDesktopDataEntry(entry.key)) {
+      dataBytes += entry.data.length;
+      sidecar.push(entry);
     } else {
       startup.push(entry);
     }
   }
-  return { startup, audio, audioBytes };
+  return { startup, sidecar, audio, dataBytes, audioBytes };
 }
 
 function dataPath(root: string, key: string): string {
   const absoluteRoot = resolve(root);
   const target = resolve(absoluteRoot, key);
   if (!target.startsWith(absoluteRoot + sep)) {
-    throw new Error(`desktop: unsafe audio entry key '${key}'`);
+    throw new Error(`desktop: unsafe sidecar entry key '${key}'`);
   }
   return target;
 }
 
-/** Move QOA music payloads from a built desktop pak into its data.fs tree. */
-export function externalizeDesktopAudio(
+/** Move lazy payloads from a built desktop pak into its data.fs tree. */
+export function externalizeDesktopPak(
   pakPath: string,
   appDataRoot: string,
-): DesktopAudioExternalization {
+): DesktopPakExternalization {
   const fullPak = new Uint8Array(readFileSync(pakPath));
   const partition = partitionDesktopPakEntries(unpack(fullPak));
-  if (partition.audio.length === 0) {
-    throw new Error("desktop: built pak contains no audio entries to externalize");
+  if (partition.sidecar.length === 0 || partition.audio.length === 0) {
+    throw new Error("desktop: built pak contains no data/audio entries to externalize");
   }
 
   mkdirSync(appDataRoot, { recursive: true });
-  // Remove obsolete audio sidecar roots from an earlier build while leaving
-  // maps, saves, language choice and the other data.fs namespaces intact.
+  // Remove obsolete managed roots from an earlier build while preserving
+  // saves and the user-selected lang.json file.
   for (const entry of readdirSync(appDataRoot, { withFileTypes: true })) {
-    if (entry.name.startsWith("audio:")) {
+    if (
+      entry.name.startsWith("audio:qoa.")
+      || DESKTOP_DATA_FILES.has(entry.name)
+      || DESKTOP_DATA_PREFIXES.some((prefix) => entry.name === prefix.slice(0, -1))
+    ) {
       rmSync(resolve(appDataRoot, entry.name), { recursive: true, force: true });
     }
   }
-  for (const entry of partition.audio) {
+  for (const entry of partition.sidecar) {
     const target = dataPath(appDataRoot, entry.key);
     mkdirSync(dirname(target), { recursive: true });
     writeFileSync(target, entry.data);
@@ -93,7 +134,10 @@ export function externalizeDesktopAudio(
   const startupPak = pack(partition.startup);
   writeFileSync(pakPath, startupPak);
   return {
-    entries: partition.audio.length,
+    entries: partition.sidecar.length,
+    dataEntries: partition.sidecar.length - partition.audio.length,
+    audioEntries: partition.audio.length,
+    dataBytes: partition.dataBytes,
     audioBytes: partition.audioBytes,
     fullPakBytes: fullPak.length,
     startupPakBytes: startupPak.length,

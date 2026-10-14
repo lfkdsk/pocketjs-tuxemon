@@ -20,6 +20,8 @@
 import { readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { createProductionTuxemonBattle } from "../battle/production.ts";
+import battleRuntimeShell from "../dist/battle-runtime-shell.json";
+import type { BattleRuntimeShell } from "../importer/battle-schema.ts";
 import { createSession, startSession, stepSession, type SessionInput } from "../vendor/pocket-rpgkit/src/engine/session.ts";
 import { readShardedProject } from "./generated-project.ts";
 
@@ -41,7 +43,10 @@ function input(mask: number, previous: number): SessionInput {
 }
 
 const readEntry = (entry: string) => readFileSync(join(ROOT, "dist", entry));
-const { extensions, rules, scenes } = createProductionTuxemonBattle({ read: readEntry });
+const { extensions, rules, scenes } = createProductionTuxemonBattle(
+  { read: readEntry },
+  battleRuntimeShell as unknown as BattleRuntimeShell,
+);
 const session = createSession(project, 60, { maps, extensions, battle: rules, scenes });
 
 let state = startSession(project, session);

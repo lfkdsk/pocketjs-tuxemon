@@ -150,6 +150,7 @@ zhData.load((entry) => {
 });
 const { extensions, rules, scenes } = createProductionTuxemonBattle(
   { read: (entry) => new Uint8Array(readFileSync(join(root, "dist", entry))) },
+  zhData.current()!.battleShell,
   { initialTimeWeather: timeWeatherAt(FIXED_INITIAL_CIVIL_TIME) },
   "zh_CN",
 );

@@ -1,11 +1,11 @@
 // Build and launch Pocket Tuxemon in PocketJS's portable desktop host.
 
-import { copyFileSync, cpSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { $ } from "bun";
 import { desktopHostFeatures } from "../vendor/pocket-rpgkit/tools/lib/desktop.ts";
 import { validateAndResolveBuildPlan } from "../vendor/pocket-rpgkit/vendor/pocketjs/framework/src/manifest/resolve.ts";
-import { externalizeDesktopAudio } from "./desktop-audio.ts";
+import { externalizeDesktopPak } from "./desktop-audio.ts";
 import { minifyRuntimeBundle } from "./runtime-bundle.ts";
 
 const root = resolve(import.meta.dir, "..");
@@ -42,90 +42,28 @@ const plan = resolution.plan;
 const outdir = join(root, "dist", target);
 mkdirSync(outdir, { recursive: true });
 const dataRoot = join(root, "dist", "runtime-data");
-const mapData = join(dataRoot, plan.app.id, "data", "maps");
-rmSync(mapData, { recursive: true, force: true });
-mkdirSync(resolve(mapData, ".."), { recursive: true });
-cpSync(join(root, "dist", "maps"), mapData, { recursive: true });
-// GP1: the sharded battle-runtime tables (monsters/techniques/items/
-// statuses) are read the same way as maps — readFileSync from data.fs on
-// desktop, since fsHost() selects that path over the pak.
-const battleData = join(dataRoot, plan.app.id, "data", "battle");
-rmSync(battleData, { recursive: true, force: true });
-mkdirSync(resolve(battleData, ".."), { recursive: true });
-cpSync(join(root, "dist", "battle"), battleData, { recursive: true });
-// GP1 fix 1: the sharded animated-tile table (dist/animated/<mapId>.json)
-// and per-NPC sprite table (dist/npc-src/<npcId>.json) are read the same
-// way — readFileSync from data.fs on desktop.
-const animatedData = join(dataRoot, plan.app.id, "data", "animated");
-rmSync(animatedData, { recursive: true, force: true });
-mkdirSync(resolve(animatedData, ".."), { recursive: true });
-cpSync(join(root, "dist", "animated"), animatedData, { recursive: true });
-const npcSrcData = join(dataRoot, plan.app.id, "data", "npc-src");
-rmSync(npcSrcData, { recursive: true, force: true });
-mkdirSync(resolve(npcSrcData, ".."), { recursive: true });
-cpSync(join(root, "dist", "npc-src"), npcSrcData, { recursive: true });
-// Monster-intro portrait backdrops (on-demand IMG entries) are read the same
-// way — readFileSync from data.fs on desktop.
-const portraitData = join(dataRoot, plan.app.id, "data", "portraits");
-rmSync(portraitData, { recursive: true, force: true });
-mkdirSync(resolve(portraitData, ".."), { recursive: true });
-cpSync(join(root, "dist", "portraits"), portraitData, { recursive: true });
-// choice_monster menu icons (on-demand IMG entries) are read the same way —
-// readFileSync from data.fs on desktop.
-const choiceIconData = join(dataRoot, plan.app.id, "data", "choice-icons");
-rmSync(choiceIconData, { recursive: true, force: true });
-mkdirSync(resolve(choiceIconData, ".."), { recursive: true });
-cpSync(join(root, "dist", "choice-icons"), choiceIconData, { recursive: true });
-// GP1 fix 1: the sharded terrain-stream ground/upper chunk-ref tables
-// (dist/terrain-stream/{ground,upper}/<mapId>.json) are read the same way.
-const terrainStreamData = join(dataRoot, plan.app.id, "data", "terrain-stream");
-rmSync(terrainStreamData, { recursive: true, force: true });
-mkdirSync(resolve(terrainStreamData, ".."), { recursive: true });
-cpSync(join(root, "dist", "terrain-stream"), terrainStreamData, { recursive: true });
-// zh_CN content: the map and battle shards the Chinese build reads, staged
-// alongside the English ones so the in-game language switcher works.
-const mapsZhData = join(dataRoot, plan.app.id, "data", "maps-zh");
-rmSync(mapsZhData, { recursive: true, force: true });
-mkdirSync(resolve(mapsZhData, ".."), { recursive: true });
-cpSync(join(root, "dist", "maps-zh"), mapsZhData, { recursive: true });
-const battleZhData = join(dataRoot, plan.app.id, "data", "battle-zh");
-rmSync(battleZhData, { recursive: true, force: true });
-mkdirSync(resolve(battleZhData, ".."), { recursive: true });
-cpSync(join(root, "dist", "battle-zh"), battleZhData, { recursive: true });
-// The five Chinese startup documents are raw pak entries on web/consoles.
-// Stage their exact keys in data.fs so the desktop's synchronous reader sees
-// the same layout without putting their JSON text back in the JS bundle.
-const l10nZhData = join(dataRoot, plan.app.id, "data", "l10n", "zh_CN");
-rmSync(l10nZhData, { recursive: true, force: true });
-mkdirSync(l10nZhData, { recursive: true });
-for (const [name, source] of [
-  ["project-shell.json", join(root, "dist", "project-shell.zh_CN.json")],
-  ["battle-runtime-shell.json", join(root, "dist", "battle-runtime-shell.zh_CN.json")],
-  ["battle-names.json", join(root, "data", "battle-names.zh_CN.json")],
-  ["map-descriptions.json", join(root, "dist", "map-descriptions.zh_CN.json")],
-  ["month-names.json", join(root, "data", "month-names.zh_CN.json")],
-] as const) {
-  copyFileSync(source, join(l10nZhData, name));
-}
+const appDataRoot = join(dataRoot, plan.app.id, "data");
+mkdirSync(appDataRoot, { recursive: true });
 // --lang stages the boot language the bundle reads from data.fs.
 if (lang !== undefined) {
   const normalized = lang === "zh" ? "zh_CN" : lang === "en" ? "en_US" : lang;
-  writeFileSync(join(dataRoot, plan.app.id, "data", "lang.json"), JSON.stringify({ lang: normalized }) + "\n");
+  writeFileSync(join(appDataRoot, "lang.json"), JSON.stringify({ lang: normalized }) + "\n");
 }
 const planPath = join(root, ".pocket", target, `${plan.app.output}.plan.json`);
 mkdirSync(resolve(planPath, ".."), { recursive: true });
 await Bun.write(planPath, JSON.stringify(plan, null, 2) + "\n");
 await $`bun ${join(pocketjs, "tools", "build.ts")} --plan=${planPath} --project-root=${root} --outdir=${outdir}`.cwd(root);
-const bundle = minifyRuntimeBundle(join(outdir, `${plan.app.output}.js`));
+const bundle = await minifyRuntimeBundle(join(outdir, `${plan.app.output}.js`));
 console.log(`runtime bundle: ${bundle.before} -> ${bundle.after} bytes`);
 const desktopPak = join(outdir, `${plan.app.output}.pak`);
-const audioSidecar = externalizeDesktopAudio(
+const sidecar = externalizeDesktopPak(
   desktopPak,
-  join(dataRoot, plan.app.id, "data"),
+  appDataRoot,
 );
 console.log(
-  `desktop: staged ${audioSidecar.entries} audio entries (${audioSidecar.audioBytes} bytes) in data.fs; ` +
-    `startup pak ${audioSidecar.fullPakBytes} -> ${audioSidecar.startupPakBytes} bytes`,
+  `desktop: staged ${sidecar.dataEntries} data entries (${sidecar.dataBytes} bytes) and ` +
+    `${sidecar.audioEntries} audio entries (${sidecar.audioBytes} bytes) in data.fs; ` +
+    `startup pak ${sidecar.fullPakBytes} -> ${sidecar.startupPakBytes} bytes`,
 );
 copyFileSync(
   join(root, "licenses", "AUDIO-ATTRIBUTIONS.md"),

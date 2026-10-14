@@ -11,9 +11,9 @@ import {
 import { onMount } from "solid-js";
 import { getOps } from "@pocketjs/framework/host";
 import { createGameEntryReaders, createGameMapRepository } from "./ui/entry-readers.ts";
+import { enStartupData } from "./ui/en-startup-data.ts";
 import type { ProjectShell } from "./vendor/pocket-rpgkit/src/engine/types.ts";
 import {
-  rawProject,
   GAME_ASSETS,
   ANIMATED_INDEX,
   NPC_SRC_INDEX,
@@ -133,11 +133,12 @@ const host = fsHost();
 const settingsController = createSettingsController();
 const buttonRemapper = createButtonRemapper(settingsController);
 const requestedLang = zhData.available ? detectLang() : "en_US";
-const bootReaders = requestedLang === "zh_CN" ? createGameEntryReaders(host) : null;
-const localizedData = bootReaders
-  ? zhData.load((entry) => bootReaders.readText?.(entry) ?? bootReaders.read(entry))
-  : null;
+const bootReaders = createGameEntryReaders(host);
+const readStartupEntry = (entry: string): string | Uint8Array =>
+  bootReaders.readText?.(entry) ?? bootReaders.read(entry);
+const localizedData = requestedLang === "zh_CN" ? zhData.load(readStartupEntry) : null;
 const lang = localizedData ? requestedLang : "en_US";
+const startupData = localizedData ?? enStartupData.load(readStartupEntry);
 gp1Mark("language-data");
 setBattleSceneLang(lang);
 // PSP zh: stream CJK glyphs from the memory-stick archive (no-op elsewhere).
@@ -150,7 +151,7 @@ onMount(() => initZhFontStream(lang));
 // callback already sees it.
 const pspAutosave = pspAutosaveBridge();
 if (pspAutosave) globalThis.__rpgkitAutosave = pspAutosave;
-const project = (localizedData?.project ?? rawProject) as unknown as ProjectShell;
+const project = startupData.project as unknown as ProjectShell;
 // The {x:} text-token resolver for the boot language. GameView forwards it
 // to both the live session and the attract/demo controller, so a demo, a
 // rewind and a re-fold expand text identically. The zh_CN descriptions come
@@ -195,6 +196,7 @@ const {
   monsterTotal,
 } = createProductionTuxemonBattle(
   { read: readEntry },
+  startupData.battleShell,
   {
     initialTimeWeather,
     hemisphere: () => settingsController.get().hemisphere,

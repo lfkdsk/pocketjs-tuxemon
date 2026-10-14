@@ -12,6 +12,8 @@ import { createHash } from "node:crypto";
 import { readFileSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { createProductionTuxemonBattle } from "../battle/production.ts";
+import battleRuntimeShell from "../dist/battle-runtime-shell.json";
+import type { BattleRuntimeShell } from "../importer/battle-schema.ts";
 import { createTuxemonSessionOptions } from "../battle/game.ts";
 import { FIXED_INITIAL_CIVIL_TIME, timeWeatherAt } from "../battle/time-weather.ts";
 import { canonicalJson } from "../vendor/pocket-rpgkit/src/engine/save.ts";
@@ -105,6 +107,7 @@ if (terminal.frame !== tape.length) throw new Error("PSP journey length mismatch
 const { project, repository } = readShardedProject(root);
 const { extensions, rules, scenes } = createProductionTuxemonBattle(
   { read: (entry) => new Uint8Array(readFileSync(join(root, "dist", entry))) },
+  battleRuntimeShell as unknown as BattleRuntimeShell,
   { initialTimeWeather: timeWeatherAt(FIXED_INITIAL_CIVIL_TIME) },
 );
 const sessionRuntime = createSession(project, 60, createTuxemonSessionOptions(project, worldTraversal, {

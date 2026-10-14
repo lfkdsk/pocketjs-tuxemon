@@ -6888,6 +6888,14 @@
     "file": "data/battle-db.json"
   },
   {
+    "key": "l10n/en_US/battle-runtime-shell.json",
+    "file": "dist/battle-runtime-shell.json"
+  },
+  {
+    "key": "l10n/en_US/project-shell.json",
+    "file": "dist/project-shell.json"
+  },
+  {
     "key": "l10n/zh_CN/battle-names.json",
     "file": "data/battle-names.zh_CN.json"
   },

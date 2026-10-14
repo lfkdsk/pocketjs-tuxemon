@@ -683,11 +683,13 @@ const audioAttributionPakEntry: PakManifestEntry = {
   file: "licenses/AUDIO-ATTRIBUTIONS.md",
 };
 const audioBytes = Object.values(audioManifest.files).reduce((sum, f) => sum + f.bytes, 0);
-// Chinese startup documents stay out of the shared JS bundle. Web/console
-// read these raw entries from pak; tools/desktop.ts stages the same keys in
-// data.fs. Keeping zh_CN in every key also lets the English-only PSP filter
-// remove them with the rest of the Chinese content.
-const zhStartupPakEntries: PakManifestEntry[] = [
+// Generated startup documents stay out of the JS bundle. Web/consoles read
+// these raw entries from pak; the desktop partitioner stages the same keys
+// in data.fs. Keeping zh_CN in every localized key also lets the English-only
+// PSP filter remove that locale without touching the English shells.
+const startupPakEntries: PakManifestEntry[] = [
+  { key: "l10n/en_US/project-shell.json", file: "dist/project-shell.json" },
+  { key: "l10n/en_US/battle-runtime-shell.json", file: "dist/battle-runtime-shell.json" },
   { key: "l10n/zh_CN/project-shell.json", file: "dist/project-shell.zh_CN.json" },
   { key: "l10n/zh_CN/battle-runtime-shell.json", file: "dist/battle-runtime-shell.zh_CN.json" },
   { key: "l10n/zh_CN/battle-names.json", file: "data/battle-names.zh_CN.json" },
@@ -701,7 +703,7 @@ const pakEntries = [
   ...battle.rawPakEntries,
   ...battle.battleRepository.pakEntries,
   ...battleZh.battleRepository.pakEntries,
-  ...zhStartupPakEntries,
+  ...startupPakEntries,
   ...animatedPakEntries,
   ...npcSrcPakEntries,
   ...portraitPakEntries,

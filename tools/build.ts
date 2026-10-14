@@ -24,7 +24,7 @@ const exitCode = await build.exited;
 if (exitCode === 0) {
   // The entrypoint build derives its output name from main.tsx. Targeted
   // desktop/web/PSP builds use their manifest's pocket-tuxemon name instead.
-  const bundle = minifyRuntimeBundle(join(root, "dist", "main.js"));
+  const bundle = await minifyRuntimeBundle(join(root, "dist", "main.js"));
   console.log(`runtime bundle: ${bundle.before} -> ${bundle.after} bytes`);
   copyFileSync(
     join(root, "licenses", "AUDIO-ATTRIBUTIONS.md"),

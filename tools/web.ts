@@ -23,7 +23,7 @@ await run([
   "--project-root=.",
   "pocket-tuxemon",
 ]);
-const bundle = minifyRuntimeBundle(
+const bundle = await minifyRuntimeBundle(
   join(root, "dist", "web", "pocket-tuxemon", "pocket-tuxemon.js"),
 );
 console.log(`runtime bundle: ${bundle.before} -> ${bundle.after} bytes`);
@@ -43,7 +43,7 @@ await run([
   `--project-root=${root}`,
   `--outdir=${gameDir}`,
 ]);
-const replayBundle = minifyRuntimeBundle(join(gameDir, "battle-replay.js"));
+const replayBundle = await minifyRuntimeBundle(join(gameDir, "battle-replay.js"));
 console.log(`replay bundle: ${replayBundle.before} -> ${replayBundle.after} bytes`);
 await run([
   process.execPath,
@@ -54,7 +54,7 @@ await run([
   `--project-root=${root}`,
   `--outdir=${gameDir}`,
 ]);
-const expeditionReplayBundle = minifyRuntimeBundle(join(gameDir, "expedition-replay.js"));
+const expeditionReplayBundle = await minifyRuntimeBundle(join(gameDir, "expedition-replay.js"));
 console.log(`expedition replay bundle: ${expeditionReplayBundle.before} -> ${expeditionReplayBundle.after} bytes`);
 
 const replayControls = `

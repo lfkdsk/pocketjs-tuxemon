@@ -174,7 +174,7 @@ try {
     writeFileSync(zhDataPath, savedZhData);
   }
 }
-const runtimeBundle = minifyRuntimeBundle(join(out, "pocket-tuxemon.js"));
+const runtimeBundle = await minifyRuntimeBundle(join(out, "pocket-tuxemon.js"));
 console.log(`runtime bundle: ${runtimeBundle.before} -> ${runtimeBundle.after} bytes`);
 
 const pakPath = join(out, "pocket-tuxemon.pak");
