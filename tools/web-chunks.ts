@@ -24,9 +24,6 @@ export const WEB_PAK_REPORT = "pocket-tuxemon.pak-report.json";
 export const WEB_STARTUP_MAPS = new Set(["spyder_bedroom"]);
 export const WEB_STARTUP_QOA = new Set([
   "audio:qoa.music/music_home.qoa",
-  "audio:qoa.music/music_battle_loop.qoa",
-  "audio:qoa.music/music_win_battle_boss.qoa",
-  "audio:qoa.music/music_gameover.qoa",
 ]);
 
 const CONTENT_FORMAT = "pocket-pak-chunks/v1" as const;

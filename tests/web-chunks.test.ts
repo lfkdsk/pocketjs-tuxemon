@@ -41,12 +41,14 @@ describe("Web pak partition", () => {
         { key: "maps-zh/spyder_routec.rkm", dtype: 0, data: bytes('{"id":"spyder_routec"}') },
         { key: "ui:tile.tuxemon-spyder_routec-ground-0", dtype: 0, data: bytes("routec") },
         { key: "audio:qoa.music/music_home.qoa", dtype: 0, data: bytes("home") },
+        { key: "audio:qoa.music/music_battle_loop.qoa", dtype: 0, data: bytes("battle music") },
         { key: "audio:qoa.music/music_town.qoa", dtype: 0, data: bytes("town") },
       ]));
       writeFileSync(shellPath, JSON.stringify({
         tileSize: 16,
         audio: {
           music_home: "audio:qoa.music/music_home.qoa",
+          music_battle_loop: "audio:qoa.music/music_battle_loop.qoa",
           music_town: "audio:qoa.music/music_town.qoa",
         },
         worldLayout: {
@@ -68,14 +70,15 @@ describe("Web pak partition", () => {
 
       const manifest = JSON.parse(readFileSync(first.manifestPath, "utf8")) as WebPakManifest;
       expect(manifest.format).toBe("pocket-pak-chunks/v1");
-      expect(manifest.chunks).toHaveLength(5);
+      expect(manifest.chunks).toHaveLength(6);
       for (const asset of [manifest.startup, ...manifest.chunks]) {
         expect(asset.file).toContain(asset.sha256);
         expect(readFileSync(join(outA, asset.file)).byteLength).toBe(asset.bytes);
       }
       const map = manifest.chunks.find((chunk) => chunk.id === "map:spyder_downstairs")!;
       const visual = manifest.chunks.find((chunk) => chunk.id === "visual:spyder_downstairs")!;
-      const audio = manifest.chunks.find((chunk) => chunk.id.startsWith("audio:"))!;
+      const audio = manifest.chunks.find((chunk) => chunk.id === "audio:music/music_town.qoa")!;
+      const battleAudio = manifest.chunks.find((chunk) => chunk.id === "audio:music/music_battle_loop.qoa")!;
       expect(map.entries).toEqual([
         "maps-zh/spyder_downstairs.rkm",
         "maps/spyder_downstairs.rkm",
@@ -88,6 +91,7 @@ describe("Web pak partition", () => {
       expect(visual.entries).toEqual(["ui:tile.tuxemon-spyder_downstairs-ground-0"]);
       expect(visual.requires).toEqual([]);
       expect(audio.entries).toEqual(["audio:qoa.music/music_town.qoa"]);
+      expect(battleAudio.entries).toEqual(["audio:qoa.music/music_battle_loop.qoa"]);
 
       const startup = unpack(gunzipSync(readFileSync(join(outA, manifest.startup.file))));
       const startupKeys = startup.map((entry) => entry.key);
@@ -96,6 +100,7 @@ describe("Web pak partition", () => {
       expect(startupKeys).toContain("audio:qoa.music/music_home.qoa");
       expect(startupKeys).toContain("ui:tile.battle/animations/hit.page-0");
       expect(startupKeys).not.toContain("maps/spyder_downstairs.rkm");
+      expect(startupKeys).not.toContain("audio:qoa.music/music_battle_loop.qoa");
       expect(startupKeys).not.toContain("audio:qoa.music/music_town.qoa");
 
       const report = JSON.parse(readFileSync(first.reportPath, "utf8")) as {
