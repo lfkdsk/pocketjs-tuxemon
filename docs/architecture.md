@@ -147,13 +147,15 @@ build time, so the import is byte-stable across ffmpeg versions:
 3. `gen-assets.ts` reads the manifest and registers each blob as a raw pak
    entry (`audio:qoa.*` / `audio:wav.*`); the importer's `Project.audio` table
    maps sanitized slugs to those keys. Web and PSP keep the payloads in their
-   pak. The desktop launcher writes the 24 QOA keys under `data.fs` and repacks
-   its startup pak without them, so the native host does not synchronously read
-   22,481,712 B of music before compiling the bundle. Its staged reader copies
-   at most one 64 KiB `data.fs` page on a frame where a requested file is still
-   incomplete and neither map-entry settling nor world prefetch owns the
-   frame; two settled confirmation frames after prefetch also stay clear. It
-   owns at most one in-flight or
+   pak. The desktop launcher keeps render-critical textures, fonts and the
+   three small WAV effects in the startup pak, then writes 2,951 lazy data
+   entries (maps, battle data and art, demos, localization and related
+   documents) plus the 24 QOA entries under `data.fs` without changing their
+   keys. This keeps 43,643,354 B out of the synchronous startup-pak read. The
+   QOA staged reader copies at most one 64 KiB `data.fs` page on a frame where
+   a requested file is still incomplete and neither map-entry settling nor
+   world prefetch owns the frame; two settled confirmation frames after
+   prefetch also stay clear. It owns at most one in-flight or
    ready file, rejects declarations above 4 MiB (about twice the largest
    shipped QOA), hands the completed buffer to the decoder once, and releases
    its staging reference immediately. The audio driver is replaced once when

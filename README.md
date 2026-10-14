@@ -78,20 +78,34 @@ summary:
   maps cross a 128 KiB compact-decode cap, trading a small amount of storage
   for bounded first-visit latency on QuickJS. Indexed battle art plus its lazy
   database occupies 3,516,960 B in the pak. The current bilingual Web game pak
-  is 91,483,568 B, including English and Chinese content, CJK font atlases, all
+  is 97,049,200 B, including English and Chinese content, CJK font atlases, all
   content-resolvable audio, its attribution list and demo data. The desktop
-  launcher removes the 24 QOA music payloads (22,481,712 B) from that target's
-  startup read: its pak is 55,559,552 B and those files retain their exact
-  `audio:qoa.*` keys under the companion `dist/runtime-data` tree. The three
-  small WAV effects remain packed for immediate one-shot playback; QOA files
-  are copied from `data.fs` one 64 KiB page per frame before playback starts.
+  launcher keeps render-critical textures, fonts and the three small WAV
+  effects in its 37,855,968 B startup pak. It moves 2,951 lazy data entries
+  (21,161,642 B) and the 24 QOA music entries (22,481,712 B) to the companion
+  `dist/runtime-data` tree without changing their keys. QOA files are copied
+  from `data.fs` one 64 KiB page per frame before playback starts; maps,
+  battle data and the other lazy documents use their existing on-demand
+  readers. The fully minified desktop JavaScript is 1,388,507 B.
   Before compact
   maps and indexed battle art, an earlier English-only Web build was
   66,791,328 B. The all-image battle encoding is
   2,206,076 B on disk and 13,394,688 B if every PSM_T8 texture were decoded,
   but only the active battle working set is resident.
 
-  On the desktop QuickJS host, the current fixed-CPU matrix starts five fresh
+  A dedicated desktop QuickJS cold-start comparison uses ten alternating
+  ABBA/BAAB windows per language and viewport, with 20 fresh processes per
+  side. Full bundle minification, English startup-data entries and the smaller
+  pak improve the paired median by 8.96–12.72%. The four current medians are
+  224.654–229.591 ms. QuickJS compilation is still 136.037–139.418 ms
+  (60.27–61.81% of startup), so the 150 ms target is not yet met; a retained
+  scheduler-preempted sample reached 335.092 ms and also misses the 250 ms
+  worst-case target. Chrome with cache disabled and 4× CPU throttling improves
+  from a 1,440.250 ms median to 1,379.200 ms (-3.53%). Exact stage tables,
+  confidence intervals and the remaining PocketJS loader/bytecode-cache
+  blocker are in [the startup report](findings/G21-STARTUP.md).
+
+  On the desktop QuickJS host, the fixed-CPU journey matrix starts fresh
   processes per route and viewport. Under one-minute loads of 1.30–4.89, all
   completed GB6, hospital-to-radio J3 and two-pass outdoor-cache production
   frames stayed below the stricter 45 ms line; the worst QuickJS-plus-core CPU
@@ -255,11 +269,12 @@ covering exactly the characters the Chinese build uses — catalog text, the
 runtime resolver tables (map descriptions, battle names) and the game-drawn
 strings — is baked into the font atlases at build time.
 
-The Chinese project shell, battle shell, battle-name table, map descriptions
-and month names are raw pak entries rather than JavaScript literals. Web and
-console builds read them from the pak, while desktop stages the same keys in
-`data.fs`; they are decoded, parsed and cached only when a Chinese boot is
-selected. An English boot does not read or parse any of those five documents. Chinese map shards use the same
+The English and Chinese project and battle shells are raw pak entries rather
+than JavaScript literals. The Chinese battle-name table, map descriptions and
+month names use the same mechanism. Web and console builds read the selected
+entries from the pak, while desktop stages the same keys in `data.fs`; they are
+decoded, parsed and cached once for the selected language. An English boot
+does not read or parse any of the five Chinese-only documents. Chinese map shards use the same
 128 KiB compact-decode cap as English, so the three oversized event-heavy maps
 are stored as canonical JSON in both languages.
 

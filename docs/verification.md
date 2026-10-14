@@ -309,6 +309,73 @@ The tables above preserve the cold-start and Chinese-frame measurements. See
 the [Cotton Town performance report](../findings/GP-COTTON.md) for the newer
 outdoor-cache attribution, per-process measurements and compatibility gates.
 
+### Current startup ABBA and stage profiler
+
+The current startup driver compares two already-built desktop distributions
+in alternating ABBA/BAAB windows. It runs every slot as a fresh process and
+QuickJS realm, pins the child to one logical CPU, keeps failed 250 ms samples,
+refuses a slot when the one-minute load exceeds its configured ceiling, and
+requires every four-slot window to be complete before summarizing it.
+Confidence intervals use a deterministic 20,000-resample bootstrap:
+
+~~~sh
+STARTUP_BASELINE_DIST=<baseline-dist> \
+STARTUP_CANDIDATE_DIST=<candidate-dist> \
+STARTUP_ABBA_OUTPUT=<result.ndjson> \
+STARTUP_BENCH_CPU=<logical-cpu> \
+bun tools/bench-startup-abba.ts
+~~~
+
+The companion module profiler makes a readable diagnostic build, marks Bun's
+emitted module boundaries and leaves the shipped fully minified bundle
+untouched:
+
+~~~sh
+bun tools/profile-startup-modules.ts <profile-dist>
+G6_DIST=<profile-dist> G6_STARTUP_PROFILE=1 G6_STARTUP_ONLY=1 \
+G6_SHOW_TITLE=1 G6_SKIP_MAP_BENCH=1 \
+bash tools/bench-g6-quickjs.sh
+~~~
+
+`G6_STARTUP_PROFILE=1` adds native timing callbacks and is attribution-only;
+it must not supply an absolute startup pass. Ordinary acceptance samples leave
+it and both diagnostic budget overrides unset. The host reports source/pak
+read, pak feed, runtime creation, QuickJS compile/evaluate, each localized
+startup-data read/parse, first-map decode/validate/world/passage preparation,
+mount and the first painted frame.
+
+The accepted ten-window matrix has 20 baseline and 20 candidate processes in
+each cell:
+
+| Language | Viewport | Baseline median (95% CI) | Current median (95% CI) | Paired delta |
+| --- | --- | ---: | ---: | ---: |
+| en_US | 480×272 | 246.435 ms (244.735–248.608) | 224.654 ms (223.690–225.894) | -8.962% |
+| en_US | 960×544 | 249.644 ms (247.925–251.894) | 225.954 ms (224.562–227.242) | -9.483% |
+| zh_CN | 480×272 | 258.297 ms (256.009–260.045) | 225.719 ms (222.797–227.127) | -12.718% |
+| zh_CN | 960×544 | 259.645 ms (257.121–261.841) | 229.591 ms (228.310–232.303) | -11.527% |
+
+The optimized pak read/feed stage is 44.500–45.166 ms, while QuickJS compile
+is 136.037–139.418 ms and 60.27–61.81% of total startup. Thus all medians
+remain above the 150 ms target. The retained Chinese 960×544 worst is
+335.092 ms, above the 250 ms preemption target. Full stage tables, module Top
+20, first-use scene costs, raw artifact names and the PocketJS loader/cache
+blocker are in the [startup report](../findings/G21-STARTUP.md).
+
+The Web counterpart creates a new Chrome profile per slot, disables cache and
+uses DevTools CPU throttling:
+
+~~~sh
+WEB_STARTUP_BASELINE_SITE=<baseline-site> \
+WEB_STARTUP_CANDIDATE_SITE=<candidate-site> \
+WEB_STARTUP_OUTPUT=<result.ndjson> \
+WEB_STARTUP_CPU_THROTTLE=4 \
+bun tools/bench-web-startup.ts
+~~~
+
+At 4× throttle the accepted five-window run improved the title-painted median
+from 1,440.250 ms to 1,379.200 ms (-3.5268%, paired 95% interval -5.0216% to
+-3.2982%).
+
 ## The tapes
 
 A tape is a JSON document holding the input masks (one per 60 Hz frame), the
