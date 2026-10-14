@@ -110,6 +110,7 @@
     "verify:web:audio": "bun tools/verify-web-audio.ts",
     "verify:desktop:audio": "bun tools/verify-desktop-audio.ts",
     "verify:web:lang": "bun tools/verify-web-lang.ts",
+    "verify:web:chunks": "bun tools/verify-web-chunks.ts",
     "test": "bun test tests/",
     "tsc": "bunx tsc --noEmit",
     "build:psp": "bun tools/psp.ts",
