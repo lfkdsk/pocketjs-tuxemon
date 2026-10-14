@@ -4,12 +4,15 @@
 // DevTools binding at the exact painted frame where they become interactive.
 
 import {
+  createReadStream,
   existsSync,
   mkdirSync,
   rmSync,
   statSync,
   writeFileSync,
 } from "node:fs";
+import { createServer } from "node:http";
+import type { AddressInfo } from "node:net";
 import { dirname, join, resolve, sep } from "node:path";
 import { registerCleanup, spawnHeadlessChrome } from "./headless-chrome.ts";
 
@@ -27,7 +30,9 @@ interface RequestSnapshot {
   finished: boolean;
   status: number | null;
   fromDiskCache: boolean;
+  fromPrefetchCache: boolean;
   fromServiceWorker: boolean;
+  failedReason: string | null;
 }
 
 interface Milestone {
@@ -117,6 +122,8 @@ function pageProbe(token: string): string {
       title: 0,
       firstMap: 0,
       titleFrames: -1,
+      titleCandidateFrame: -1,
+      mapCandidateFrame: -1,
     };
     (() => {
       const probe = globalThis.__webLoadProbe;
@@ -128,15 +135,17 @@ function pageProbe(token: string): string {
         mapId: globalThis.__rpgSessionState?.mapId ?? null,
         titleScreen: globalThis.__pocketTitleBattle?.state().screen ?? null,
       }));
-      const afterTwoPaints = (fn) => requestAnimationFrame(() => requestAnimationFrame(fn));
       const titleReady = () => {
         const player = globalThis.__pocketPlayer;
         const title = globalThis.__pocketTitleBattle;
         const rows = title?.titleRows?.() ?? [];
         return player?.state === "running"
+          && player.running === true
           && title?.state().screen === "title"
           && rows.includes("newGame")
-          && !!globalThis.__rpgSessionState;
+          && !!globalThis.__rpgSessionState
+          && player.frameBlocked !== true
+          && player.chunkVeil !== true;
       };
       const mapReady = () => {
         const player = globalThis.__pocketPlayer;
@@ -149,30 +158,48 @@ function pageProbe(token: string): string {
       };
       const waitForMap = () => {
         if (!mapReady()) {
+          probe.mapCandidateFrame = -1;
           requestAnimationFrame(waitForMap);
           return;
         }
-        afterTwoPaints(() => {
-          if (!mapReady() || probe.firstMap) return requestAnimationFrame(waitForMap);
-          probe.firstMap = performance.now();
-          emit("first-map-interactive");
-        });
+        const frame = globalThis.__pocketPlayer.frames;
+        if (probe.mapCandidateFrame < 0) {
+          probe.mapCandidateFrame = frame;
+          requestAnimationFrame(waitForMap);
+          return;
+        }
+        if (frame <= probe.mapCandidateFrame || probe.firstMap) {
+          requestAnimationFrame(waitForMap);
+          return;
+        }
+        probe.firstMap = performance.now();
+        emit("first-map-interactive");
       };
       const waitForTitle = () => {
         if (!titleReady()) {
+          probe.titleCandidateFrame = -1;
           requestAnimationFrame(waitForTitle);
           return;
         }
-        afterTwoPaints(() => {
-          if (!titleReady() || probe.title) return requestAnimationFrame(waitForTitle);
-          probe.title = performance.now();
-          probe.titleFrames = globalThis.__pocketPlayer.frames;
-          emit("title-interactive");
-          const title = globalThis.__pocketTitleBattle;
-          title.selectTitle(title.titleRows().indexOf("newGame"));
-          title.act("confirm");
-          requestAnimationFrame(waitForMap);
-        });
+        const frame = globalThis.__pocketPlayer.frames;
+        if (probe.titleCandidateFrame < 0) {
+          probe.titleCandidateFrame = frame;
+          requestAnimationFrame(waitForTitle);
+          return;
+        }
+        if (frame <= probe.titleCandidateFrame || probe.title) {
+          requestAnimationFrame(waitForTitle);
+          return;
+        }
+        probe.title = performance.now();
+        probe.titleFrames = frame;
+        emit("title-interactive");
+        const title = globalThis.__pocketTitleBattle;
+        const newGame = title.titleRows().indexOf("newGame");
+        if (newGame < 0) throw new Error("web load benchmark: New Game row disappeared");
+        // selectTitle is the semantic click: it selects and confirms once.
+        title.selectTitle(newGame);
+        requestAnimationFrame(waitForMap);
       };
       requestAnimationFrame(waitForTitle);
     })();
@@ -212,7 +239,7 @@ async function measure(
     const mapReached = new Promise<void>((resolveReached) => { resolveMap = resolveReached; });
 
     const requestSnapshot = (): RequestSnapshot[] => [...requests.values()]
-      .filter((request) => request.encodedBytes > 0)
+      .filter((request) => request.encodedBytes > 0 || request.failedReason !== null)
       .map((request) => ({ ...request }))
       .sort((a, b) => a.url.localeCompare(b.url));
     const transferredBytes = (): number => [...requests.values()]
@@ -235,7 +262,9 @@ async function measure(
           finished: false,
           status: null,
           fromDiskCache: false,
+          fromPrefetchCache: false,
           fromServiceWorker: false,
+          failedReason: null,
         });
       } else if (message.method === "Network.dataReceived") {
         const request = requests.get(message.params.requestId);
@@ -245,8 +274,12 @@ async function measure(
         if (request) {
           request.status = Number(message.params.response.status);
           request.fromDiskCache = message.params.response.fromDiskCache === true;
+          request.fromPrefetchCache = message.params.response.fromPrefetchCache === true;
           request.fromServiceWorker = message.params.response.fromServiceWorker === true;
         }
+      } else if (message.method === "Network.requestServedFromCache") {
+        const request = requests.get(message.params.requestId);
+        if (request) request.fromDiskCache = true;
       } else if (message.method === "Network.loadingFinished") {
         const request = requests.get(message.params.requestId);
         if (request) {
@@ -256,6 +289,9 @@ async function measure(
             Number(message.params.encodedDataLength ?? 0),
           );
         }
+      } else if (message.method === "Network.loadingFailed") {
+        const request = requests.get(message.params.requestId);
+        if (request) request.failedReason = String(message.params.errorText ?? "loading failed");
       } else if (message.method === "Runtime.bindingCalled" && message.params.name === "__webLoadMark") {
         const payload = JSON.parse(message.params.payload);
         if (payload.token !== token || milestones.has(payload.name)) return;
@@ -304,7 +340,9 @@ async function measure(
     await send("Page.enable");
     await send("Network.enable");
     await send("Runtime.addBinding", { name: "__webLoadMark" });
+    await send("Network.clearBrowserCache");
     await send("Network.setCacheDisabled", { cacheDisabled: true });
+    await send("Network.setBypassServiceWorker", { bypass: true });
     await send("Network.emulateNetworkConditions", {
       offline: false,
       latency: profile.latencyMs,
@@ -314,7 +352,9 @@ async function measure(
     });
     await send("Emulation.setCPUThrottlingRate", { rate: cpuThrottle });
     await send("Page.addScriptToEvaluateOnNewDocument", { source: pageProbe(token) });
-    await send("Page.navigate", { url });
+    const navigationUrl = new URL(url);
+    navigationUrl.searchParams.set("web_load_generation", token);
+    await send("Page.navigate", { url: navigationUrl.href });
 
     let timer: ReturnType<typeof setTimeout> | undefined;
     await Promise.race([
@@ -331,6 +371,11 @@ async function measure(
     const title = milestones.get("title-interactive");
     const firstMap = milestones.get("first-map-interactive");
     if (!title || !firstMap) throw new Error(`${variant} ${profile.id}: missing milestone`);
+    const failed = firstMap.requests.filter((request) => request.failedReason !== null);
+    if (failed.length > 0) {
+      throw new Error(`${variant} ${profile.id}: ${failed.length} request(s) failed: ` +
+        failed.map((request) => `${request.url}: ${request.failedReason}`).join(", "));
+    }
     const page = await evaluate(`(() => {
       const navigation = performance.getEntriesByType("navigation")[0];
       return {
@@ -421,37 +466,66 @@ async function main(): Promise<void> {
   rmSync(profilesDir, { recursive: true, force: true });
   mkdirSync(profilesDir, { recursive: true });
 
-  const server = Bun.serve({
-    hostname: "127.0.0.1",
-    port: 0,
-    fetch(request) {
-      const url = new URL(request.url);
+  // Node's streaming server has no response idle deadline. That matters for
+  // the 96.6 MB baseline under the 1.6 Mbps DevTools profile: Bun.serve's
+  // default ten-second request timeout aborts a deliberately slow transfer.
+  const server = createServer((request, response) => {
+    try {
+      const url = new URL(request.url ?? "/", "http://127.0.0.1");
       const [, rawVariant, ...parts] = decodeURIComponent(url.pathname).split("/");
       if (rawVariant !== "baseline" && rawVariant !== "candidate") {
-        return new Response("not found", { status: 404 });
+        response.writeHead(404).end("not found");
+        return;
       }
       const root = sites[rawVariant];
       let path = resolve(root, `.${sep}${parts.join(sep)}`);
-      if (!path.startsWith(root + sep)) return new Response("forbidden", { status: 403 });
+      if (!path.startsWith(root + sep)) {
+        response.writeHead(403).end("forbidden");
+        return;
+      }
       if (existsSync(path) && statSync(path).isDirectory()) path = join(path, "index.html");
-      if (!existsSync(path)) return new Response("not found", { status: 404 });
+      if (!existsSync(path)) {
+        response.writeHead(404).end("not found");
+        return;
+      }
       const file = Bun.file(path);
-      return new Response(file, {
-        headers: {
-          "cache-control": "no-store",
-          "content-type": file.type || "application/octet-stream",
-        },
+      const size = statSync(path).size;
+      response.writeHead(200, {
+        "cache-control": "no-store",
+        "content-length": size,
+        "content-type": file.type || "application/octet-stream",
       });
-    },
+      if (request.method === "HEAD") response.end();
+      else createReadStream(path).pipe(response);
+    } catch (error) {
+      response.writeHead(500).end(error instanceof Error ? error.message : String(error));
+    }
   });
-  registerCleanup(() => server.stop(true));
+  server.requestTimeout = 0;
+  server.headersTimeout = 0;
+  await new Promise<void>((resolveListening, rejectListening) => {
+    server.once("error", rejectListening);
+    server.listen(0, "127.0.0.1", () => {
+      server.off("error", rejectListening);
+      resolveListening();
+    });
+  });
+  const serverAddress = server.address() as AddressInfo;
+  let serverStopped = false;
+  const stopServer = () => {
+    if (serverStopped) return;
+    serverStopped = true;
+    server.closeAllConnections();
+    server.close();
+  };
+  registerCleanup(stopServer);
 
   const results: Measurement[] = [];
   try {
     for (const profile of selectedProfiles()) {
       for (const variant of selectedVariants()) {
         const profileDir = join(profilesDir, `${profile.id}-${variant}`);
-        const url = `http://127.0.0.1:${server.port}/${variant}/pocket-tuxemon/?lang=en_US&web_load=${Date.now()}`;
+        const url = `http://127.0.0.1:${serverAddress.port}/${variant}/pocket-tuxemon/?lang=en_US&web_load=${Date.now()}`;
         console.log(
           `WEB_LOAD begin variant=${variant} profile=${profile.id} cpu=${cpuThrottle}x `
           + `down=${profile.downBytesPerSecond}Bps latency=${profile.latencyMs}ms`,
@@ -477,7 +551,7 @@ async function main(): Promise<void> {
       }
     }
   } finally {
-    server.stop(true);
+    stopServer();
     rmSync(profilesDir, { recursive: true, force: true });
   }
 
