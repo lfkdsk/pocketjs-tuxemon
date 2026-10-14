@@ -326,3 +326,151 @@ and first-use frame guards. This work intentionally does not modify PocketJS.
 subagent 使用：3 个 / bundle_graph 调查静态 bundle 与 minify，gates_web 盘点 CI、Web、PSP 门禁，startup_chain 梳理启动链和打点位置 / 并行调查节省了前期归因时间；主代理复核并执行了所有性能测量与重门禁
 
 BLOCKED
+
+## Fix 1: sidecar-aware desktop freshness
+
+### Failure and package invariant
+
+The world-cache validator used to read `mapManifestHash` from the generated
+English project shell and search for that value in the desktop JavaScript.
+That stopped being a valid freshness test when localized startup documents
+moved out of the bundle and into the desktop `data.fs` staging tree. A newly
+built package was therefore rejected even though the runtime-visible shell was
+current.
+
+The desktop build now writes a versioned receipt after bundle minification and
+pak externalization. Before writing it, the builder requires the staged
+English and Chinese project shells to be byte-identical to their generated
+sources. The receipt then records byte counts and SHA-256 values for the final
+JavaScript, startup pak, staged English shell and staged Chinese shell. The
+world-cache and Cotton validators recompute that complete receipt before any
+host compilation or timing. This binds all four runtime inputs to the same
+desktop build and catches both reimport-without-rebuild and an independently
+replaced bundle or pak.
+
+The accepted production receipt was:
+
+| Artifact | Bytes | SHA-256 |
+| --- | ---: | --- |
+| JavaScript | 1,388,507 | `1299ed091c6c7c8c8478cb014d02f7d18690c6f7ad13a6e901b79a15b16dc95b` |
+| Startup pak | 37,855,968 | `852f5446799d18db066fd0832d1f82454475ccbcae722f6da1e7ae5709c74c88` |
+| English project shell | 202,861 | `506cb28b64d348194aa959f2d0caf63aab506e5b3dd3976a13ffdf2e3e2556a7` |
+| Chinese project shell | 207,670 | `468d0dd28ed805b3399d8b01cf516a7b251155c3162c2f2d9f9382c426d9371f` |
+
+`WORLD_CACHE_FRESHNESS_ONLY=1` exercises the real public validator entry
+points but exits before compiling the Rust host. This keeps the package-layout
+contract in the ordinary test suite without putting performance timing in CI.
+
+### Audit and mutation strength
+
+A full search of `tools/` and `tests/` found no other executable assumption
+that a project-shell hash lives in JavaScript. The journey bench still reads
+the generated shell to obtain its manifest identity, which is valid, and the
+remaining test references inspect source documents deliberately. Two comments
+that still described Chinese startup tables as bundled JavaScript were
+corrected.
+
+The focused suite has three cases and drives both `verify:world-cache` and
+`bench:cotton:quickjs` through disposable new-layout packages:
+
+- a valid sidecar package passes even though its manifest hash is absent from
+  JavaScript;
+- changing the generated English shell after receipt creation fails both
+  validators as stale;
+- replacing either the final JavaScript or startup pak fails receipt
+  validation.
+
+Two isolated mutations established that the assertions are discriminating.
+Restoring the old bundle grep made the suite fail twice, including the fresh
+fixture with `desktop bundle is stale relative to project-shell.json`.
+Removing the generated-shell versus staged-sidecar equality check let the
+genuinely stale fixture exit 0 and made the suite fail once. The unmodified
+focused suite passed 3/3, and the related startup suites passed 14/14.
+
+### World-cache and Cotton measurements
+
+The accepted world-cache runs used the production desktop bundle and the same
+50 ms thread-CPU limit as the historical record. The maxima below use sampled
+total CPU, matching the figures previously quoted in the status document:
+
+| Viewport | Cross-map max | Render max | Native revisit growth | Heap revisit growth | Historical cross / render / heap |
+| --- | ---: | ---: | --- | ---: | --- |
+| 480×272 | 12.300 ms | 42.733 ms | 0 nodes / 0 textures | +19,774 B | 12.438 / 42.956 ms / +2,331 B |
+| 960×544 | 19.355 ms | 44.817 ms | 0 nodes / 0 textures | -615 B | 9.874 / 36.636 ms / +3,779 B |
+
+Both viewports stayed below 50 ms, native resources remained flat and heap
+growth stayed inside the 128 KiB allowance. The 480×272 frame maxima improved
+slightly. The accepted 960×544 run was slower than the historical record, so
+it is reported as such rather than labelled an improvement.
+
+Four earlier world-cache attempts under heavy shared-machine load genuinely
+failed at 65.221, 51.758, 58.145 and 52.259 ms. Their worst frame moved among
+Candy Town, Route 1 and Route C rather than remaining on one deterministic
+path. After one-minute load fell from 26.94 to 9.54 and the selected CPU pair
+was about 89% idle, the final 960×544 run passed with the 44.817 ms render
+maximum above. These retained failures make the measurement's host-load
+sensitivity explicit; they are not discarded from the raw log.
+
+The six fresh-process Cotton samples all passed their 45 ms limit:
+
+| Viewport | Current maxima | Current worst | Historical worst |
+| --- | --- | ---: | ---: |
+| 480×272 | 16.344 / 17.451 / 28.937 ms | 28.937 ms | 15.046 ms |
+| 960×544 | 28.694 / 26.359 / 29.170 ms | 29.170 ms | 16.045 ms |
+
+The current samples are slower than the historical record but retain
+15.830 ms or more of budget. The freshness change itself runs before timing;
+it does not add work to measured application frames.
+
+The archived cold-journey state pin used by an older verification note is no
+longer present and is documented elsewhere as stale for the current mainline.
+The supported startup-only path was therefore run against the real production
+bundle with its unchanged 250 ms limit:
+
+| Viewport | Fresh-process samples | Median | Worst |
+| --- | --- | ---: | ---: |
+| 480×272 | 236.334 / 233.326 / 229.897 ms | 233.326 ms | 236.334 ms |
+| 960×544 | 238.939 / 235.048 / 237.683 ms | 237.683 ms | 238.939 ms |
+
+All six processes passed. These medians are slower than the earlier optimized
+224.654–229.591 ms ABBA medians but stay within the production gate. QuickJS
+used heap was 9.42 MiB, malloc was 11.74 MiB and 27,727 objects were live.
+The original report's 150 ms desired startup target remains a separate
+`Partial` limitation; this narrow validator repair does not claim to solve it.
+
+### Regression and release gates
+
+Two complete imports were byte-identical and left no tracked difference. The
+determinism check covered 5,077 files / 68,960,530 B with aggregate SHA-256
+`3c5a935486adb7a545c3bb2e8a0ef99cdaa15bd6d395f5bbe4b2cbdf1cd051ff`.
+Type checking, the standard build, WebAssembly build and PSP snapshot
+generation all passed.
+
+Every command represented by the CI workflow was run locally. The ordinary
+test partitions passed 55 importer, 12 replay, 361 lock/battle/terrain, 746
+rest-a–l and 685 rest-m–z tests. The six browser-conditioned cases from those
+partitions were rerun under the browser condition; the complete conditioned
+suite then finished with 1,865 pass, 0 fail and 0 skip. All 16 journey-matrix
+commands passed. Full GB6 and J1–J4 replay, save/load, rewind and 20/30/60 Hz
+checks retained their terminal hashes:
+
+| Journey | Terminal SHA-256 |
+| --- | --- |
+| GB6 | `748f84174b32011c4419588650a41d6c57c31c79d3f9e772fcc72b25c3bf9b80` |
+| J1 | `c0b36ae2112df49774377c30e728d03a929fba771746bf54cb14e684742a8a87` |
+| J2 | `b40b13672d7fd34db52e7607ebcf600f5740fe54c2b0915c7ff60bdb392b763d` |
+| J3 | `49307027321e7f51ab1a8c81e48ca615cd70d636c289f4170e63fc408b1774bf` |
+| J4 | `1977c1b0f3bd1bba2c4e5ad82332599c4fc72f0acd84d9437868976fbfb5c736` |
+
+The Web build and all seven Chrome gates passed with zero console errors. PSP
+bootstrap, the exact CI `build:psp --skip-assets` command and a full PSP build
+passed. Localization remained complete: all 11 localization checks passed and
+the CJK checker covered all 2,644 fallback characters.
+
+The new-layout receipt restores both public validators, rejects real stale or
+mixed packages, is guarded by mutation-sensitive regular tests, and leaves the
+mainline terminal state unchanged. This fix is accepted.
+
+subagent 使用：3 个 / assumption_scan 核对过期判据和隐含假设，layout_audit 审计桌面数据布局与旧布局引用，test_design 审查测试辨识力与变异方案 / 三项只读审查并行完成并节省前期核对时间；主代理复核结论并串行执行全部变异、性能与重门禁
+
+PASS
