@@ -288,3 +288,81 @@ actions remain unchanged.
 subagent 使用：4 / 上游 AI 语义、8 场事件清单、组件差异、G6 慢测与拆分审查 / 是；四条只读调查并行完成，主代理复核结论并串行跑完全部门禁。
 
 PASS
+
+## Fix1: keep player fallback targets unweighted
+
+The battle adapter uses the same action selector for both sides. Opponent
+profile weighting is now entered only for side 1 in a trainer double. When a
+player monster has no usable move, its fallback therefore targets the first
+active opponent exactly as the pre-G20 implementation did; an AI monster in
+the same state still uses the imported weights.
+
+This side boundary matches upstream ownership. `tuxemon/ai/ai.py:199-223`
+constructs `OpponentEvaluator` as part of an `AI`, and
+`tuxemon/ai/decision_strategy.py:188-193` asks that AI for the target before
+choosing its fallback. There is no corresponding player evaluator. Upstream
+`tuxemon/ai/opponent_evaluator.py:63-66` uses Python `max(..., key=...)` over
+field order, so equal scores keep the first opponent. The port consequently
+retains a strict `score > bestScore` comparison.
+
+Two structural runtime tests pin these boundaries:
+
+- with every move cooling in a trainer double, both AI decisions select the
+  weighted second player monster while both player decisions select the first
+  AI monster;
+- with two equally scored player monsters, both AI fallback decisions select
+  the first active player monster.
+
+Both requested mutations were run in isolated worktrees and failed only the
+new discriminating assertion:
+
+| Mutation | Red result |
+| --- | --- |
+| Remove the side-1 guard | player fallback expected `[3,3]`, received `[4,4]` |
+| Change strict `>` to `>=` | tied fallback expected `[1,1]`, received `[2,2]` |
+
+The focused runtime file passed 29/29 tests after restoring each mutant.
+Double-battle import, runtime, real-map and visual coverage passed 44/44;
+battle determinism/oracles passed 7/7; the ten Arena and Expedition suites
+passed 78/78.
+
+### Fix1 regression gates
+
+- Two full imports were byte-stable: 5,077 generated files, 68,960,334 bytes,
+  SHA-256
+  `b1d96ae1e0f435c57792edb426dd6a8778e613eee44135c79b13f999f90b0394`.
+- TypeScript, production build, rebuilt WASM, localization (11/11), and CJK
+  coverage (2,644 required characters) passed.
+- The exact CI test groups passed 55 + 12 + 361 + 742 + 673 tests with zero
+  failures. The default Node conditions intentionally skipped six
+  browser-only bodies; rerunning the two affected files with browser
+  conditions passed 9/9, leaving zero unexecuted tests. The aggregate default
+  suite was 1,843 pass, six intentional skips, zero fail.
+- All 16 journey commands passed, including GB6 failure paths, lock and frozen
+  scans, chapters, save resumes, preview coverage, and built-bundle replay.
+  GB6 and J1-J4 retained the five terminal hashes recorded above.
+- The production Web build and all seven browser verifiers passed. Route 5
+  keyboard input and Dragon's Cave Chinese touch input each opened the
+  authored double battle.
+- PSP bootstrap, the CI `build:psp --skip-assets` command, and the complete
+  `build:psp` command all passed. The complete build regenerated the
+  76,231,312-byte pak and release EBOOT; only the two existing host warnings
+  were emitted.
+- The parent section's QuickJS ABBA table remains the latest measured
+  performance evidence. This fix adds one constant-time side check only in
+  the no-candidate fallback branch and changes no render, build, or per-frame
+  path; no new performance number is asserted.
+
+The corrected visual statement now records the renderer's existing behavior:
+one monster sprite is visible per side, while battle state and both party
+trays retain two active slots per side. `docs/status.md` did not repeat the
+incorrect sprite claim and already describes AI-only opponent evaluation, so
+it required no edit.
+
+The worktree and both nested submodules are clean after the complete PSP
+build. `bun.lock` remains byte-identical at
+`8ccfa9937302846daca5f829c3ef706f1cfa7d3e521c2fad9076842f6ab306e2`.
+
+subagent 使用：3 / 上游平局与调用链核对、端口测试设计和守卫变异、CI 与文档门禁清点 / 是；并行调查与隔离变异缩短了核对时间，主代理复核并串行执行全部门禁。
+
+PASS
