@@ -21,8 +21,13 @@ import { join } from "node:path";
 import type { SessionState } from "../vendor/pocket-rpgkit/src/engine/session.ts";
 import {
   decodePspSaveRecord,
+  loadTape,
+  OPENING_PREFIX,
   PHASES,
+  pspPhysicalSavePath,
   runPhase,
+  saveTape,
+  autosaveContinueTape,
   type LogEntry,
   type MenuStateShape,
   type PspSaveVerifyDeps,
@@ -134,6 +139,43 @@ describe("PSP physical save records", () => {
   });
 });
 
+describe("PSP memstick path projection", () => {
+  test("appends the logical save path exactly once below the PocketJS app root", () => {
+    expect(pspPhysicalSavePath("/memstick", "save/slot-1.json"))
+      .toBe("/memstick/PSP/COMMON/pocketjs/save/slot-1.json");
+    expect(pspPhysicalSavePath("/memstick", "save/autosave.json"))
+      .toBe("/memstick/PSP/COMMON/pocketjs/save/autosave.json");
+  });
+
+  test("rejects paths outside the PSP save namespace", () => {
+    expect(() => pspPhysicalSavePath("/memstick", "slot-1.json")).toThrow(/invalid PSP save path/);
+    expect(() => pspPhysicalSavePath("/memstick", "save/nested/slot-1.json")).toThrow(/invalid PSP save path/);
+    expect(() => pspPhysicalSavePath("/memstick", "save/../slot-1.json")).toThrow(/invalid PSP save path/);
+  });
+});
+
+describe("START menu tape navigation", () => {
+  const pressedEdges = (tape: Tape): number[] => tape.masks
+    .slice(OPENING_PREFIX + 30)
+    .filter((mask) => mask !== 0);
+
+  test("manual save traverses START Save, save root and slot 1", () => {
+    const tape = saveTape();
+    expect(pressedEdges(tape)).toEqual([0x0008, 0x0040, 0x2000, 0x2000, 0x2000]);
+    expect(tape.logAt).toBe(tape.masks.length);
+  });
+
+  test("manual and automatic load traverse START Load", () => {
+    const expected = [0x0008, 0x0040, 0x0040, 0x2000, 0x2000];
+    const manual = loadTape();
+    const automatic = autosaveContinueTape();
+    expect(pressedEdges(manual)).toEqual(expected);
+    expect(pressedEdges(automatic)).toEqual(expected);
+    expect(manual.logAt).toBe(manual.masks.length);
+    expect(automatic.logAt).toBe(automatic.masks.length);
+  });
+});
+
 describe("every phase passes through the dispatcher with a valid log", () => {
   // The positive path is the mutation killer: deleting a dispatch branch
   // makes runPhase throw "unknown phase", turning these red.
@@ -191,6 +233,23 @@ describe("an empty emulator log fails every phase through the dispatcher", () =>
     test(`${phase} throws its own missing-log error, not "unknown phase"`, () => {
       const { deps } = makeFakeDeps({});
       expect(() => runPhase(phase, deps)).toThrow(/no (marked|terminal) log entry with a state/);
+    });
+  }
+});
+
+describe("a partial emulator log fails every successful phase", () => {
+  for (const phase of ["save", "load", "autosave"] as const) {
+    test(`${phase} rejects marked without terminal`, () => {
+      const state = fakeState();
+      const markedOnly = [{ kind: "marked", frame: 1, state }];
+      const fake = makeFakeDeps({
+        save: markedOnly,
+        load: markedOnly,
+        "autosave-trigger": markedOnly,
+        "autosave-continue": markedOnly,
+      });
+      fake.files.set("save/autosave.json", JSON.stringify({ frame: 2544 }));
+      expect(() => runPhase(phase, fake.deps)).toThrow(/no terminal log entry with a state/);
     });
   }
 });

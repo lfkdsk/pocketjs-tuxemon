@@ -29,6 +29,17 @@ import type { SessionState } from "../../vendor/pocket-rpgkit/src/engine/session
 const PSP_SAVE_MAGIC = new TextEncoder().encode("PJSAVE1\n");
 const PSP_SAVE_HEADER_BYTES = 16;
 const PSP_SAVE_MAX_PAYLOAD = 1 << 20;
+const PSP_APP_ROOT_REL = "PSP/COMMON/pocketjs";
+
+/** Project the guest's logical PSP save name onto a PPSSPP memstick root.
+ * Keep the physical root at the PocketJS app directory and append the guest
+ * path unchanged: `save/` belongs to the guest contract exactly once. */
+export function pspPhysicalSavePath(memstick: string, rel: string): string {
+  if (!/^save\/[^/.][^/]*$/.test(rel)) {
+    throw new Error(`invalid PSP save path ${JSON.stringify(rel)}`);
+  }
+  return join(memstick, PSP_APP_ROOT_REL, rel);
+}
 
 function fnv1aBytes(bytes: Uint8Array): number {
   let hash = 0x811c9dc5;
@@ -161,7 +172,9 @@ function bootAndOpenMenu(): number[] {
 
 export function saveTape(): Tape {
   const masks = bootAndOpenMenu();
-  press(masks, CIRCLE, 8); // root row 0: Save to slot
+  press(masks, DOWN, 8); // START row 1: Save
+  press(masks, CIRCLE, 8); // open the save child on its root page
+  press(masks, CIRCLE, 8); // save root row 0: Save to slot
   // The save executes on this CIRCLE; logAt is the next frame so the logged
   // state is the snapshot (the world stays paused while the menu is open).
   masks.push(CIRCLE);
@@ -170,7 +183,8 @@ export function saveTape(): Tape {
 
 export function loadTape(): Tape {
   const masks = bootAndOpenMenu();
-  press(masks, DOWN, 8); // root row 1: Load from slot
+  press(masks, DOWN, 8);
+  press(masks, DOWN, 8); // START row 2: Load
   press(masks, CIRCLE, 8); // slots-load page (row 0 = slot 1, no autosave yet)
   // The load executes on this CIRCLE and closes the menu; logAt is the next
   // frame, before the world advances, so the logged state is the restored
@@ -187,7 +201,8 @@ export function autosaveTriggerTape(autosaveFrame: number): Tape {
 
 export function autosaveContinueTape(): Tape {
   const masks = bootAndOpenMenu();
-  press(masks, DOWN, 8); // root row 1: Load from slot
+  press(masks, DOWN, 8);
+  press(masks, DOWN, 8); // START row 2: Load
   press(masks, CIRCLE, 8); // slots-load page (row 0 = Automatic Save)
   // The autosave load executes on this CIRCLE and closes the menu; logAt is
   // the next frame, before the world advances.
@@ -236,6 +251,18 @@ export function stateFromLog(entries: LogEntry[], kind: "marked" | "terminal"): 
   return entry.state;
 }
 
+/** A successful emulator leg must reach both its assertion point and the end
+ * of its bounded tape. This rejects partial PPSSPP runs that happened to log
+ * `marked` before hanging or timing out. */
+function completedMarkedState(entries: LogEntry[]): SessionState {
+  const marked = stateFromLog(entries, "marked");
+  const terminal = stateFromLog(entries, "terminal");
+  if ((terminal.interp as { error?: unknown })?.error !== undefined) {
+    throw new Error("the PSP run reached terminal with interp.error set");
+  }
+  return marked;
+}
+
 export function menuFromMarked(entries: LogEntry[]): MenuStateShape | null {
   const entry = entries.find((e) => e.kind === "marked");
   if (!entry) throw new Error("no marked log entry");
@@ -254,7 +281,7 @@ function runSaveHalf(deps: PspSaveVerifyDeps): SessionState {
   deps.cleanMemstick();
   deps.build(saveTape());
   const log = deps.run("save", deps.memstick);
-  const saved = stateFromLog(log, "marked");
+  const saved = completedMarkedState(log);
   if (!deps.saveFileExists("save/slot-1.json")) {
     throw new Error("save/slot-1.json was not written to the memstick");
   }
@@ -268,7 +295,7 @@ function runLoadHalf(deps: PspSaveVerifyDeps, saved: SessionState): void {
   console.log("\n--- load: boot -> load slot 1 -> compare ---");
   deps.build(loadTape());
   const log = deps.run("load", deps.memstick);
-  const loaded = stateFromLog(log, "marked");
+  const loaded = completedMarkedState(log);
   console.log(`# loaded: ${summarize(loaded)}`);
   if (!digestsEqual(saved, loaded)) {
     throw new Error("save/load state mismatch: the loaded state differs from the saved state");
@@ -301,7 +328,7 @@ export function phaseAutosave(deps: PspSaveVerifyDeps): void {
   deps.cleanMemstick();
   deps.build(autosaveTriggerTape(deps.autosaveFrame));
   const triggerLog = deps.run("autosave-trigger", deps.memstick);
-  const atAutosave = stateFromLog(triggerLog, "marked");
+  const atAutosave = completedMarkedState(triggerLog);
   const envelopeText = deps.readSaveFile("save/autosave.json");
   if (envelopeText === null) {
     throw new Error("save/autosave.json was not written (the opening crossed no autosave point?)");
@@ -319,7 +346,7 @@ export function phaseAutosave(deps: PspSaveVerifyDeps): void {
 
   deps.build(autosaveContinueTape());
   const continueLog = deps.run("autosave-continue", deps.memstick);
-  const continued = stateFromLog(continueLog, "marked");
+  const continued = completedMarkedState(continueLog);
   console.log(`# continued from autosave: ${summarize(continued)}`);
   // Same caliber as the manual phase: the state at the autosave point and the
   // restored state must be field-by-field identical (minus the host frame and

@@ -18,6 +18,7 @@ import { FIXED_INITIAL_CIVIL_TIME } from "../battle/time-weather.ts";
 import {
   decodePspSaveRecord,
   PHASES,
+  pspPhysicalSavePath,
   runPhase,
   type LogEntry,
   type PspSaveVerifyDeps,
@@ -118,10 +119,6 @@ function findAutosaveLogAt(): number {
   throw new Error("the opening tape crossed no autosave point");
 }
 
-function savePath(rel: string): string {
-  return join(MEMSTICK, SAVE_DIR_REL, rel.replace(/^save\//, ""));
-}
-
 const deps: PspSaveVerifyDeps = {
   build: buildJourney,
   run: runPsp,
@@ -138,7 +135,7 @@ const deps: PspSaveVerifyDeps = {
     try { fn(); } finally { chmodSync(dir, 0o755); }
   },
   readSaveFile(rel: string) {
-    const live = savePath(rel);
+    const live = pspPhysicalSavePath(MEMSTICK, rel);
     const backup = `${live}.bak`;
     let liveError: unknown;
     if (existsSync(live)) {
@@ -153,7 +150,7 @@ const deps: PspSaveVerifyDeps = {
     return null;
   },
   saveFileExists(rel: string) {
-    const live = savePath(rel);
+    const live = pspPhysicalSavePath(MEMSTICK, rel);
     return existsSync(live) || existsSync(`${live}.bak`);
   },
 };
