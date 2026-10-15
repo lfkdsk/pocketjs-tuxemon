@@ -102,6 +102,7 @@ const replayArtifactDir = join(gameDir, "replays", currentReplayRelease.artifact
 mkdirSync(replayArtifactDir, { recursive: true });
 copyFileSync(replayBundlePath, join(replayArtifactDir, "battle-replay.js"));
 copyFileSync(replayPakPath, join(replayArtifactDir, "battle-replay.pak"));
+copyFileSync(join(gameDir, "audio-worklet.js"), join(replayArtifactDir, "audio-worklet.js"));
 rmSync(replayBundlePath);
 rmSync(replayPakPath);
 await run([
@@ -177,7 +178,12 @@ replayConfig.wasm = "../../../pocketjs.wasm";
 replayConfig.autosaveStorageKey = "pocket-rpgkit:battle-replay:unused:v1";
 replayConfig.replayRelease = currentReplayRelease;
 replayConfig.trustedReplayBase = tuxLinkConfig?.trustedReplayBase ?? null;
+const demoControlsPattern = /<section class="demo-controls"[\s\S]*?<\/section>\s*/;
+if (!demoControlsPattern.test(playerHtml)) {
+  throw new Error("web: generated player page has no demo controls to remove from battle replay");
+}
 const replayHtml = playerHtml
+  .replace(demoControlsPattern, "")
   .replaceAll('href="../', 'href="../../../')
   .replaceAll('src="../', 'src="../../../')
   .replace("</head>", `${replayStyles}\n</head>`)

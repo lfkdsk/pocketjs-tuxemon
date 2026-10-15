@@ -221,6 +221,8 @@ export interface PocketTuxLinkHook {
     deadlineAtMs: number | null;
     actionIndex: number;
     selfSubmitted: boolean;
+    legalActions: ArenaAction[];
+    actingMoves: Array<{ slot: number; slug: string }>;
     opponentRefs: string[];
     replayAvailable: boolean;
     opponentSpecies: string[];
@@ -385,21 +387,28 @@ export function createTitleBattleOverlay(options: TitleBattleOptions): SessionOw
         back,
       };
       const linkHook: PocketTuxLinkHook = {
-        state: () => ({
-          lang: options.lang,
-          layer: layer(),
-          available: available(),
-          auth: authState(),
-          phase: client.state().phase,
-          connectionEpoch: client.state().connectionEpoch,
-          turnRevision: client.state().turnRevision,
-          deadlineAtMs: client.state().deadlineAtMs,
-          actionIndex: client.state().actionIndex,
-          selfSubmitted: client.state().selfSubmitted,
-          opponentRefs: client.state().observation?.opponent.active.map((monster) => monster.publicId) ?? [],
-          replayAvailable: client.state().replayUrl !== null,
-          opponentSpecies: client.state().observation?.opponent.active.map((monster) => monster.species.slug) ?? [],
-        }),
+        state: () => {
+          const state = client.state();
+          const observation = state.observation;
+          const acting = observation?.own.party.find((monster) => monster.party === observation.actingParty);
+          return {
+            lang: options.lang,
+            layer: layer(),
+            available: available(),
+            auth: authState(),
+            phase: state.phase,
+            connectionEpoch: state.connectionEpoch,
+            turnRevision: state.turnRevision,
+            deadlineAtMs: state.deadlineAtMs,
+            actionIndex: state.actionIndex,
+            selfSubmitted: state.selfSubmitted,
+            legalActions: observation?.legalActions.map((action) => ({ ...action })) ?? [],
+            actingMoves: acting?.moves.map((move) => ({ slot: move.slot, slug: move.slug })) ?? [],
+            opponentRefs: observation?.opponent.active.map((monster) => monster.publicId) ?? [],
+            replayAvailable: state.replayUrl !== null,
+            opponentSpecies: observation?.opponent.active.map((monster) => monster.species.slug) ?? [],
+          };
+        },
       };
       globalThis.__pocketTuxLink = linkHook;
 

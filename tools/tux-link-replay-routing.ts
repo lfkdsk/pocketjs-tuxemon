@@ -113,6 +113,7 @@ export function tuxLinkReplayDispatcherHtml(
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Crect width='8' height='8' rx='1' fill='%23071923'/%3E%3Cpath d='M1 4h6M4 1v6' stroke='%2373e5ef'/%3E%3C/svg%3E">
   <title>Battle replay · Pocket Tuxemon</title>
   <style>body{margin:0;background:#071923;color:#e7f7fa;font:16px system-ui,sans-serif}main{max-width:44rem;margin:12vh auto;padding:2rem;border:1px solid #547583;border-radius:.75rem;background:#102b37}h1{color:#73e5ef}p{line-height:1.6}</style>
 </head>
