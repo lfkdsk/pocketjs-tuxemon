@@ -121,9 +121,10 @@ image has clang but not `llvm-ar`, `llvm-ranlib` or `llvm-objcopy`) and point
 content-addressed PSP toolchain cache, and run the pinned bootstrap. The bootstrap installs and
 verifies the PSP SDK checksum, Rust nightly and `cargo-psp` revision declared
 by PocketJS. `bun run build:psp --skip-assets` then consumes the import already
-produced by prepare and builds the release EBOOT with its seekable external
-asset archive. CI retains `EBOOT.PBP`, `assets.pak`, the PSPLINK PRX and the
-build receipt as the `psp-release` artifact for 14 days. This job does not
+produced by prepare and builds the generic runtime EBOOT with its bytecode-bearing
+`app.pocket` and seekable external asset archive. CI retains `EBOOT.PBP`,
+`app.pocket`, `assets.pak`, the PSPLINK PRX and the build receipt as the
+`psp-release` artifact for 14 days. This job does not
 gate the Pages deploy.
 
 ### deploy — GitHub Pages

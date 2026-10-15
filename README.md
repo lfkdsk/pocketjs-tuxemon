@@ -702,7 +702,7 @@ bun run bench:indoor-fast-path  # production-entry indoor single-map probe
 bun run bench:cotton:quickjs    # three fresh Cotton Town windows per viewport
 bun run verify:world-cache      # visit all 67 outdoor maps twice at both viewports
 bun run verify:world-cache:cold # five fresh cache walks at each viewport
-bun run build:psp               # release EBOOT plus external asset pak
+bun run build:psp               # release EBOOT plus app.pocket and external asset pak
 ```
 
 The importer reads the Tuxemon source from the repo-local `.tuxemon-src`
@@ -712,11 +712,11 @@ checkout instead, set `TUXEMON_SRC` to its path (e.g.
 
 ## PSP
 
-The PSP build keeps the complete resource archive beside the executable so
-textures and map shards can be read by index instead of occupying the EBOOT.
-The current build keeps all 263 maps, audio and battle art in a seekable
-`assets.pak`; its small embedded boot pak holds only fonts, sprite atlases,
-styles and the external archive index.
+The PSP build keeps the application and complete resource archive beside the
+generic runtime so textures and map shards can be read by index instead of
+occupying the EBOOT. `app.pocket` contains target-specific QuickJS bytecode,
+its source fallback and the small boot pak; the seekable `assets.pak` keeps all
+263 maps, audio and battle art.
 
 Install PocketJS's pinned, checksum-verified PSP SDK, Rust nightly and
 `cargo-psp` once, then build the game:
@@ -726,8 +726,8 @@ Install PocketJS's pinned, checksum-verified PSP SDK, Rust nightly and
 bun run build:psp
 ```
 
-Copy `dist/psp/EBOOT.PBP`, `dist/psp/assets.pak` and the readable
-`dist/psp/AUDIO-ATTRIBUTIONS.md` into the same directory on the memory stick.
+Copy `dist/psp/EBOOT.PBP`, `dist/psp/app.pocket`, `dist/psp/assets.pak` and the
+readable `dist/psp/AUDIO-ATTRIBUTIONS.md` into the same directory on the memory stick.
 `dist/psp/pocket-tuxemon.prx` is also emitted for PSPLINK
 development. Linux builds use Clang against the pinned PSP sysroot; macOS uses
 the pinned PSP GCC wrapper by default. Set `POCKETJS_PSP_C_COMPILER` to

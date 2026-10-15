@@ -487,7 +487,8 @@ state against the desktop replay. Build the package first with
 `bun run build:psp --journey`. The gate needs a local PPSSPPHeadless build
 (`HEADLESS_CROSS=1`; override the path with `PPSSPP_HEADLESS`).
 
-The gate runs the bare `dist/psp/pocket-tuxemon.prx` (ELF), not
+The gate runs the bare `dist/psp/pocket-tuxemon.prx` (ELF), with the required
+bytecode-bearing `dist/psp/app.pocket` beside it, not
 `EBOOT.PBP`: the journey `EBOOT.PBP` does not complete under PPSSPP
 (cause not diagnosed — the SFO lacks `MEMSIZE`, yet PPSSPP grants ~46 MiB
 arena in at least one PBP build, so the earlier 24 MiB / ~15 MiB OOM root
@@ -523,7 +524,7 @@ generates the intermediate envelopes, `build` builds and stashes all
 segments, `run --jobs=4` runs up to 4 PPSSPPHeadless instances in parallel
 (taskset affinity, isolated memsticks), verifies each terminal and collects
 per-segment profile/bench/metrics into `reports/psp-mainline/`, and `report`
-aggregates the high-waters. The runner is strict: a missing bench, an
+aggregates the high-waters. The runner is strict: a missing app package or bench, an
 incomplete bench window, a non-zero emulator exit, a verifier FAIL or a
 PRX/receipt hash mismatch fails the segment, and any failed segment fails
 the whole run. Each segment build bakes a single bench window covering the
@@ -540,8 +541,8 @@ PocketJS GC fix ("keep collecting once the arena's bump tail is spent")
 resolved it, and the segment now reaches its desktop terminal. The
 retained assets are content-addressed (a sha256-named store copy plus a
 hardlink per segment), so the evidence tree is portable. `bun
-tools/psp-mainline.ts verify` (no flags) is the four-way consistency gate:
-retained PRX and assets.pak hash to their receipts, each receipt is bound
+tools/psp-mainline.ts verify` (no flags) is the consistency gate: retained PRX,
+`app.pocket` and `assets.pak` hash to their receipts, each receipt is bound
 to its plan entry (segment id, chapter, start frame, window length and the
 end boundary: `endFrame` equals the plan entry's end, `terminalFrame`
 equals `endFrame`), the profile's newest session and its terminal match the
