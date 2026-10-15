@@ -201,7 +201,7 @@ properties from the decoded pixels as well as pinning the PNG bytes.
 - **Locally:** `bun run web`, then serve `dist/web` the same way; or
   `bun run desktop` for the desktop host.
 - **Browser keys:** arrows walk, `A`/`Z`/`Enter` talks and confirms, `B`/`Esc`
-  goes back, `Space` (START) opens the save menu, and `L`/`Q` rewinds three
+  goes back, `Space` (START) opens the world menu, and `L`/`Q` rewinds three
   seconds.
 - **Desktop-host keys:** arrows walk, `X`/`Backspace` talks and confirms,
   `Z`/`Enter` goes back, `A` is SQUARE, `S` is TRIANGLE, `Space` is START,
@@ -209,8 +209,8 @@ properties from the decoded pixels as well as pinning the PNG bytes.
 
 ### Saving and loading
 
-Press START (`Space` in the browser and on desktop) to open the save menu. The
-world is paused while the menu is open.
+Press START (`Space` in the browser and on desktop) to open the world menu,
+then choose **Save** or **Load**. The world is paused while the menu is open.
 
 - **Save to slot / Load from slot:** three slots. The desktop build writes
   `save/slot-1.json` … `save/slot-3.json` in the app's data folder. The browser
@@ -792,8 +792,9 @@ build does not need the archive.
 
 ### Saving on PSP
 
-START opens the save menu on PSP, with three manual slots and the read-only
-Automatic Save row, just like desktop and web. Saves land on the memory stick
+START opens the world menu on PSP; choose **Save** or **Load** for the three
+manual slots and the read-only Automatic Save row, just like desktop and web.
+Saves land on the memory stick
 at `PSP/COMMON/pocketjs/save/` (`ms0:/PSP/COMMON/pocketjs/save/`):
 `slot-1.json` … `slot-3.json` and `autosave.json`. Each new write is wrapped
 in a length-and-checksum record, written to `.tmp`, closed, synced and read
@@ -803,11 +804,16 @@ live. Reads validate live and fall back to a valid backup, so failure or power
 loss at any write step leaves the old or new complete save readable. Deleting
 a slot checks removal of both live and backup copies. A failed operation
 (memory stick full or read-only) is reported in the menu instead of being
-swallowed. A save is bounded to 1 MiB. The same files work in PPSSPP:
+swallowed. Complete raw-JSON saves written before the `PJSAVE1` envelope remain
+readable at the same path. A save is bounded to 1 MiB. The same files work in PPSSPP:
 `--memstick=<dir>` maps `ms0:` to `<dir>`, so saves persist across emulator
 restarts. `bun run verify:psp:save` drives the menu through a save, a
 restart and a load under PPSSPPHeadless and checks the states match
-field-by-field, plus the autosave point and the read-only failure path.
+field-by-field, continues the restored world, reads the legacy raw format,
+and covers the autosave point and read-only failure path. CI runs the canonical
+English bytecode package against a pinned PPSSPP revision. Local release checks
+also run `--lang=en|zh --execution=bytecode|source`; the source mode removes only
+the PSP QJBC section and requires the host's traced source-fallback path.
 
 For a deterministic device or emulator check, build with
 `bun run build:psp --journey` and run the bare `dist/psp/pocket-tuxemon.prx`

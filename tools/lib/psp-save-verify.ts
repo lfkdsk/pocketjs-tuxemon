@@ -123,6 +123,19 @@ export interface Tape {
   masks: number[];
   logAt: number;
   label: string;
+  /** Optional verifier-only checkpoint restored before mask 0. This keeps a
+   * long authored path honest without replaying asset-heavy prefix frames on
+   * every PSP run. The suffix still crosses the real event under PPSSPP. */
+  boot?: AutosaveSeed;
+}
+
+export interface AutosaveSeed {
+  /** Opening-tape frame immediately after the checkpoint state. */
+  frame: number;
+  /** Reducer timeline frame restored by the boot-snapshot overlay. */
+  timelineFrame: number;
+  /** Complete rpgkit-save/v1 envelope text. */
+  snapshot: string;
 }
 
 /** A parsed profile.jsonl entry. The marked/terminal kinds carry the live
@@ -155,6 +168,8 @@ export interface PspSaveVerifyDeps {
   work: string;
   /** Host frame of the opening's autosave point. */
   autosaveFrame: number;
+  /** Last save-safe opening state before the authored autosave. */
+  autosaveSeed?: AutosaveSeed;
   /** Build language whose maintained opening tape drives the menus. */
   language: PspSaveLanguage;
   /** Remove the memstick's PSP tree so a phase starts from a clean stick. */
@@ -254,8 +269,20 @@ export function loadTape(language: PspSaveLanguage = "en"): Tape {
 export function autosaveTriggerTape(
   autosaveFrame: number,
   language: PspSaveLanguage = "en",
+  seed?: AutosaveSeed,
 ): Tape {
-  return { masks: fullOpeningMasks(language), logAt: autosaveFrame, label: "autosave-trigger" };
+  if (!seed) {
+    return { masks: fullOpeningMasks(language), logAt: autosaveFrame, label: "autosave-trigger" };
+  }
+  if (seed.frame < 0 || seed.frame >= autosaveFrame) {
+    throw new Error(`invalid autosave seed frame ${seed.frame} for autosave frame ${autosaveFrame}`);
+  }
+  return {
+    masks: fullOpeningMasks(language).slice(seed.frame),
+    logAt: autosaveFrame - seed.frame,
+    label: "autosave-trigger",
+    boot: seed,
+  };
 }
 
 export function autosaveContinueTape(language: PspSaveLanguage = "en"): Tape {
@@ -407,7 +434,7 @@ export function phaseLegacy(deps: PspSaveVerifyDeps): void {
 export function phaseAutosave(deps: PspSaveVerifyDeps): void {
   console.log("\n=== autosave point -> restart -> continue ===");
   deps.cleanMemstick();
-  deps.build(autosaveTriggerTape(deps.autosaveFrame, deps.language));
+  deps.build(autosaveTriggerTape(deps.autosaveFrame, deps.language, deps.autosaveSeed));
   const triggerLog = deps.run("autosave-trigger", deps.memstick);
   const atAutosave = completedMarkedState(triggerLog).marked;
   const envelopeText = deps.readSaveFile("save/autosave.json");

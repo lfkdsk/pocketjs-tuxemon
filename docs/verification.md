@@ -33,6 +33,7 @@ where noted. Set `TUXEMON_SRC` first (or keep a repo-local `.tuxemon-src`).
 | `verify:zh:tape` | Re-transcribes the English mainline for the Chinese build and requires `data/zh-mainline-journey.json` and `data/chapters.zh_CN.json` byte for byte: an English and a Chinese session fold in lockstep, only confirm presses inside dialog boxes may change, and the language-neutral states (everything but compiled event text, the open box and a scene title) must agree after every box, at every chapter and at the end. Fails before folding when a journey's masks, `data/chapters.json` or the dialog font no longer match the hashes the Chinese files record. | the five maintained tapes, `data/chapters.json`, generated en/zh projects | ~35 s |
 | `verify:zh:demo` | Boots the built game in Chinese: every chapter jump restores exactly the reducer's Chinese chapter state, Autoplay from three chapters folds 600 frames to the Chinese reducer state (the English state apart from words), and the Chinese chapter thumbnails re-render to the committed ones. `--autoplay=all` covers every chapter, `--full` the whole tape from the bedroom (~1 min). | Chinese tape and chapters, built bundle | ~5 s |
 | `verify:save` | Five saves through the game's own save path (save-point check, slot store or save code, content identity, decode, restore): after a battle, after a map change and after a late battle in the 09:00 GB6 replay, and one minute before noon plus mid-tint-tween right after the daylight stage turns in an 11:52 replay. Each restored state equals the live state at its save frame (one frame later for the rebuilt NPC table), and each resumed replay ends at the uninterrupted terminal state hash. Only the host frame counter `SessionState.frame`, which the reducer never reads, is set back for hashing. Report in `reports/save-resume.json`. | GB6 tape, generated shards | ~4 min |
+| `verify:psp:save` | Builds bounded PSP menu tapes and runs them under PPSSPPHeadless with an isolated memory stick. The canonical CI run proves manual save → restart → exact-state load → continued play, a pre-envelope raw JSON load, autosave restart, and a visible read-only failure. Local `--lang=en\|zh --execution=bytecode\|source` runs cover both languages and require the native host trace to confirm QJBC or source fallback. | PSP SDK, pinned PPSSPPHeadless, generated project | ~35 min in CI |
 | `verify:preview:coverage` | The neighbour NPC preview by sandboxed map entry, for every map at the new-game state and at all 20 chapter snapshots: no mainline (`spyder_*`) event is rejected, the sandbox never changes the live state, and the new-game result equals the import report. Writes `reports/preview-coverage.md` (and `.zh_CN.md`). | `dist/project.json`, `data/chapters.json`, `dist/import-report.json` | ~15 s |
 
 Durations are wall-clock measured on a current developer machine; the CI
@@ -488,6 +489,37 @@ terminal state. The warp spawns are covered by `tests/warp-spawns.test.ts`
 area; the eighteen `blocked` maps have no standable event-free cell) and by
 the import job's cleanliness check. Open the rebaked thumbnails and look at
 them before committing, the same as goldens.
+
+## PSP save verification (CI)
+
+The `psp` CI job builds and caches PPSSPPHeadless at the revision pinned in
+`.github/workflows/ci.yml`, then runs the default English/QJBC
+`bun run verify:psp:save`. Every emulator leg must reach both its marked state
+and the bounded tape's terminal record and exit with status zero; timeouts,
+malformed profile output and silent source fallback fail the gate. After the
+E2E, CI rebuilds the normal PSP release because the verifier's final artifact
+is deliberately instrumented.
+
+The autosave trigger derives the last save-safe checkpoint before the first
+authored autosave from the same maintained opening tape, restores that complete
+snapshot through the PSP boot overlay, and replays the remaining suffix under
+PPSSPP. The memory stick starts clean: only the real `autosave` command may
+create `autosave.json`, and the following emulator restart must load it and
+continue.
+
+For the local release matrix, run all four manual round-trips (a standalone
+`load` phase creates its own slot when needed):
+
+```sh
+bun run verify:psp:save --phase=load --lang=en --execution=bytecode
+bun run verify:psp:save --phase=load --lang=en --execution=source
+bun run verify:psp:save --phase=load --lang=zh --execution=bytecode
+bun run verify:psp:save --phase=load --lang=zh --execution=source
+```
+
+The source variant removes only the PSP QJBC section from `app.pocket`; the
+NUL-terminated production source remains unchanged. Chinese runs stage
+`font-archive.bin` under the same PPSSPP memory-stick app root used on device.
 
 ## PSP emulator verification (manual, not CI)
 

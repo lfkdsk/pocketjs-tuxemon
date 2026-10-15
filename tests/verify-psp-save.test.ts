@@ -14,7 +14,7 @@
 // false green), and the dispatcher rejects unknown phases outright.
 
 import { afterEach, describe, expect, test } from "bun:test";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -37,6 +37,7 @@ import {
   runPhase,
   saveTape,
   autosaveContinueTape,
+  autosaveTriggerTape,
   type LogEntry,
   type MenuStateShape,
   type PspSaveVerifyDeps,
@@ -231,6 +232,20 @@ describe("START menu tape navigation", () => {
     expect(pressedEdges(automatic)).toEqual(expected);
     expect(manual.logAt).toBe(manual.masks.length - POST_LOAD_CONTINUE_FRAMES);
     expect(automatic.logAt).toBe(automatic.masks.length - POST_LOAD_CONTINUE_FRAMES);
+  });
+
+  test("autosave trigger restores the last safe checkpoint and replays only its authored suffix", () => {
+    const opening = (JSON.parse(readFileSync(
+      join(import.meta.dir, "../data/g6-journey.json"),
+      "utf8",
+    )) as { masks: number[] }).masks;
+    const seed = { frame: 3582, timelineFrame: 3582, snapshot: "seed-envelope" };
+    const tape = autosaveTriggerTape(3590, "en", seed);
+    expect(tape.boot).toEqual(seed);
+    expect(tape.logAt).toBe(8);
+    expect(tape.masks).toEqual(opening.slice(seed.frame));
+    expect(() => autosaveTriggerTape(3590, "en", { ...seed, frame: 3590 }))
+      .toThrow(/invalid autosave seed/);
   });
 });
 

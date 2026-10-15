@@ -120,9 +120,15 @@ image has clang but not `llvm-ar`, `llvm-ranlib` or `llvm-objcopy`) and point
 `POCKETJS_LLVM_BIN` at `/usr/lib/llvm-18/bin`, restore PocketJS's
 content-addressed PSP toolchain cache, and run the pinned bootstrap. The bootstrap installs and
 verifies the PSP SDK checksum, Rust nightly and `cargo-psp` revision declared
-by PocketJS. `bun run build:psp --skip-assets` then consumes the import already
-produced by prepare and builds the generic runtime EBOOT with its bytecode-bearing
-`app.pocket` and seekable external asset archive. CI retains `EBOOT.PBP`,
+by PocketJS. A second cache holds PPSSPPHeadless plus its assets at the exact
+revision named in the workflow; a cache miss builds that revision from source
+with the headless-only CMake configuration. `bun run verify:psp:save` then
+drives the production START/Save/Load menus against an isolated memory stick,
+checking a manual restart round-trip, continued play, the pre-envelope raw JSON
+format, autosave restart and a visible read-only failure. The verifier creates
+instrumented packages, so `bun run build:psp --skip-assets` runs afterwards to
+restore the normal traceless release with bytecode-bearing `app.pocket` and its
+seekable external asset archive. CI retains `EBOOT.PBP`,
 `app.pocket`, `assets.pak`, the PSPLINK PRX and the build receipt as the
 `psp-release` artifact for 14 days. This job does not
 gate the Pages deploy.
@@ -205,8 +211,10 @@ bun tools/verify-web-demo.ts
 bun run verify:web:arena
 bun run verify:web:audio
 
-# psp job (downloads the pinned toolchain on first use)
+# psp job (downloads the pinned toolchain and builds pinned PPSSPP on first use)
 (cd vendor/pocket-rpgkit/vendor/pocketjs && bun run bootstrap)
+PPSSPP_HEADLESS=/path/to/pinned/PPSSPPHeadless bun run verify:psp:save
+# The E2E leaves an instrumented package behind; rebuild the release last.
 bun run build:psp --skip-assets
 ```
 

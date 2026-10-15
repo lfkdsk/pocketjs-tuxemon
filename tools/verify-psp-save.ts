@@ -13,6 +13,11 @@ import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 
 import {
+  canSave,
+  createSessionSnapshot,
+  encodeEnvelope,
+} from "../vendor/pocket-rpgkit/src/engine/save.ts";
+import {
   createSession,
   startSession,
   stepSession,
@@ -32,6 +37,7 @@ import {
   pspPhysicalAppRoot,
   pspPhysicalSavePath,
   runPhase,
+  type AutosaveSeed,
   type LogEntry,
   type PspSaveExecution,
   type PspSaveLanguage,
@@ -70,7 +76,12 @@ const WORK = join(ROOT, ".psp-save-e2e", `${language}-${execution}`);
 
 function buildJourney(tape: Tape): void {
   const tapeFile = join(WORK, `${tape.label}.tape.json`);
-  writeFileSync(tapeFile, JSON.stringify({ masks: tape.masks, logAt: tape.logAt, label: tape.label }));
+  writeFileSync(tapeFile, JSON.stringify({
+    masks: tape.masks,
+    logAt: tape.logAt,
+    label: tape.label,
+    ...(tape.boot ? { boot: tape.boot } : {}),
+  }));
   console.log(`# build ${tape.label} (${tape.masks.length} frames, logAt=${tape.logAt})`);
   const buildArgs = [
     "run",
@@ -132,10 +143,13 @@ function runPsp(phase: string, memstick: string): LogEntry[] {
   });
   const stdout = r.stdout?.toString() ?? "";
   const stderr = r.stderr?.toString() ?? "";
-  if (r.status !== 0) {
+  const timedOut = stdout.includes("TIMEOUT") || stderr.includes("TIMEOUT");
+  if (r.status !== 0 || timedOut) {
     console.error(stdout);
     console.error(stderr);
-    throw new Error(`PPSSPP exited with status ${r.status} for ${phase}`);
+    throw new Error(timedOut
+      ? `PPSSPP timed out for ${phase}`
+      : `PPSSPP exited with status ${r.status} for ${phase}`);
   }
   const tracePath = join(dir, "PocketJS-trace.txt");
   if (!existsSync(tracePath)) throw new Error(`no PocketJS-trace.txt for ${phase}`);
@@ -164,13 +178,16 @@ function runPsp(phase: string, memstick: string): LogEntry[] {
  *  state after the frame that publishes the autosave is logAt = frame + 1.
  *  Replayed in bun (the reducer is pure, so the frame matches the PPSSPP run
  *  frame-for-frame) so the trigger tape logs the state at the autosave point. */
-function findAutosaveLogAt(lang: PspSaveLanguage): number {
+function findAutosaveCheckpoint(lang: PspSaveLanguage): {
+  autosaveFrame: number;
+  seed: AutosaveSeed;
+} {
   const journey = JSON.parse(readFileSync(join(
     ROOT,
     lang === "zh" ? "data/zh-smoke-journey.json" : "data/g6-journey.json",
   ), "utf8")) as { masks: number[] };
   const localized = lang === "zh" ? readShardedProject(ROOT, "zh_CN") : null;
-  const game = localized
+  const createGame = () => localized
     ? {
         project: localized.project,
         session: createSession(localized.project, 60, createTuxemonSessionOptions(
@@ -180,9 +197,11 @@ function findAutosaveLogAt(lang: PspSaveLanguage): number {
         )),
       }
     : createGameSession(FIXED_INITIAL_CIVIL_TIME, "seamless-v1");
-  const { project, session } = game;
+  let { project, session } = createGame();
   let state = startSession(project, session);
   let published = false;
+  let lastSafeFrame = -1;
+  let autosaveFrame = -1;
   const sink = {
     publish(e: SessionHostEffect) {
       if (e.action === "autosave") published = true;
@@ -192,10 +211,35 @@ function findAutosaveLogAt(lang: PspSaveLanguage): number {
   for (let f = 0; f < journey.masks.length; f++) {
     const mask = journey.masks[f]!;
     state = stepSession(session, state, input(mask, previous), sink);
-    if (published) return f + 1;
+    if (published) {
+      autosaveFrame = f + 1;
+      break;
+    }
+    if (canSave(state.move, state.interp, state.scene)
+        && !state.interp.inputLocked && !state.fade) {
+      lastSafeFrame = f + 1;
+    }
     previous = mask;
   }
-  throw new Error("the opening tape crossed no autosave point");
+  if (autosaveFrame < 0) throw new Error("the opening tape crossed no autosave point");
+  if (lastSafeFrame < 0) throw new Error("the opening tape had no save-safe state before its autosave point");
+
+  // Replay exactly to the selected state before snapshotting it. This avoids
+  // retaining an earlier SessionState across later reducer steps and makes
+  // the verifier checkpoint byte-deterministic.
+  ({ project, session } = createGame());
+  state = startSession(project, session);
+  previous = 0;
+  for (let f = 0; f < lastSafeFrame; f++) {
+    const mask = journey.masks[f]!;
+    state = stepSession(session, state, input(mask, previous));
+    previous = mask;
+  }
+  const snapshot = encodeEnvelope(createSessionSnapshot(session, state, previous));
+  return {
+    autosaveFrame,
+    seed: { frame: lastSafeFrame, timelineFrame: state.frame, snapshot },
+  };
 }
 
 const deps: PspSaveVerifyDeps = {
@@ -204,6 +248,7 @@ const deps: PspSaveVerifyDeps = {
   memstick: MEMSTICK,
   work: WORK,
   autosaveFrame: -1, // resolved in main after the preflight
+  autosaveSeed: undefined,
   language,
   cleanMemstick() {
     rmSync(join(MEMSTICK, "PSP"), { recursive: true, force: true });
@@ -249,9 +294,16 @@ if (!existsSync(HEADLESS)) throw new Error(`PPSSPPHeadless not found at ${HEADLE
 if (!PHASES.includes(phase as (typeof PHASES)[number]) && phase !== "all") {
   throw new Error(`unknown phase ${JSON.stringify(phase)} (expected one of: ${PHASES.join(", ")}, all)`);
 }
-deps.autosaveFrame = findAutosaveLogAt(language);
 console.log(`# PSP save matrix lang=${language} execution=${execution}`);
-console.log(`# opening autosave point logged at logAt ${deps.autosaveFrame}`);
+if (phase === "autosave" || phase === "all") {
+  const checkpoint = findAutosaveCheckpoint(language);
+  deps.autosaveFrame = checkpoint.autosaveFrame;
+  deps.autosaveSeed = checkpoint.seed;
+  console.log(
+    `# opening autosave point ${checkpoint.autosaveFrame}; ` +
+    `boot checkpoint ${checkpoint.seed.frame} (${checkpoint.autosaveFrame - checkpoint.seed.frame} replay frames)`,
+  );
+}
 
 runPhase(phase, deps);
 

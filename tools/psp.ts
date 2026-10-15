@@ -326,26 +326,44 @@ if (journeyTapeArg !== undefined) {
     masks: number[];
     logAt?: number;
     label?: string;
+    boot?: { frame: number; timelineFrame: number; snapshot: string };
   };
   if (!Array.isArray(tapeSpec.masks) || tapeSpec.masks.length === 0) {
     throw new Error(`--journey-tape: ${tapeFile} has no masks`);
   }
-  journeyTapeLength = tapeSpec.masks.length;
+  const boot = tapeSpec.boot;
+  if (boot !== undefined && (!Number.isSafeInteger(boot.frame)
+      || !Number.isSafeInteger(boot.timelineFrame)
+      || typeof boot.snapshot !== "string" || boot.snapshot.length === 0)) {
+    throw new Error(`--journey-tape: ${tapeFile} has an invalid boot checkpoint`);
+  }
+  // A boot checkpoint consumes one neutral host frame before mask 0. Include
+  // it in the bounded bench window so the terminal record flushes before the
+  // native host exits.
+  journeyTapeLength = tapeSpec.masks.length + (boot ? 1 : 0);
   const bundlePath = join(out, "pocket-tuxemon.js");
   const original = readFileSync(bundlePath, "utf8");
   journeyBuildId = createHash("sha256")
     .update(original)
     .update(JSON.stringify(tapeSpec.masks))
+    .update(JSON.stringify(boot ?? null))
     .update(JSON.stringify(FIXED_INITIAL_CIVIL_TIME))
     .digest("hex");
   const prefix =
-    `${langPrefix}globalThis.__pocketTuxemonInitialCivilTime=${JSON.stringify(FIXED_INITIAL_CIVIL_TIME)};\n`;
+    `${langPrefix}globalThis.__pocketTuxemonInitialCivilTime=${JSON.stringify(FIXED_INITIAL_CIVIL_TIME)};\n` +
+    (boot
+      ? `globalThis.__pocketTuxemonBootSnapshot=${JSON.stringify(boot.snapshot)};\n` +
+        `globalThis.__pocketTuxemonBootFrame=${boot.timelineFrame};\n`
+      : "");
   const logAt = tapeSpec.logAt ?? -1;
   const suffix =
     `\n;(function(){var id=${JSON.stringify(journeyBuildId)};` +
     `__pspLog(JSON.stringify({kind:"session",buildId:id}));` +
-    `var f=globalThis.frame,n=0,tape=${JSON.stringify(tapeSpec.masks)},logAt=${logAt};` +
-    `globalThis.frame=function(buttons,analog){f(n<tape.length?tape[n]:buttons,analog);n++;` +
+    `var f=globalThis.frame,sf=${boot ? "f.__pocketSemanticFrame||f" : "f"},n=0,` +
+    `tape=${JSON.stringify(tapeSpec.masks)},logAt=${logAt},started=${boot ? "false" : "true"};` +
+    `globalThis.frame=function(buttons,analog){` +
+    `if(!started){sf(0,analog);if(globalThis.__pocketTuxemonBootReady)started=true;return;}` +
+    `sf(n<tape.length?tape[n]:buttons,analog);n++;` +
     `var s=globalThis.__rpgSessionState;` +
     `if(n===logAt){var m=null;try{var h=globalThis.__pocketTuxemonSave;m=h?h.menu():null;}catch(e){}` +
     `__pspLog(JSON.stringify({kind:"marked",frame:n,state:s,menu:m,buildId:id}));}` +

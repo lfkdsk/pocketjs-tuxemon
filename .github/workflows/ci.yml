@@ -225,12 +225,13 @@ jobs:
   psp:
     name: PSP release package
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 75
     env:
       # The runner image ships clang-18 but not the LLVM binutils the PSP
       # toolchain also needs (llvm-ar, llvm-ranlib, llvm-objcopy); the llvm-18
       # package installs them next to clang under /usr/lib/llvm-18/bin.
       POCKETJS_LLVM_BIN: /usr/lib/llvm-18/bin
+      PPSSPP_REV: a2f4ce214f224c6c26b3319409ec50205ff8253d
     steps:
       - uses: actions/checkout@v7
         with:
@@ -243,12 +244,50 @@ jobs:
         with:
           path: ~/.cache/pocket-nexus
           key: ${{ runner.os }}-pocketjs-psp-${{ hashFiles('vendor/pocket-rpgkit/vendor/pocketjs/tools/cli/psp-toolchain.json') }}
-      - name: Install the LLVM binutils
-        run: sudo apt-get update && sudo apt-get install -y llvm-18
+      - name: Cache the pinned PPSSPP headless host
+        id: cache-ppsspp
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/pocket-tuxemon/ppsspp-${{ env.PPSSPP_REV }}
+          key: ${{ runner.os }}-ppsspp-headless-${{ env.PPSSPP_REV }}
+      - name: Install the PSP and PPSSPP build dependencies
+        run: sudo apt-get update && sudo apt-get install -y llvm-18 ninja-build libpng-dev libgl1-mesa-dev
+      - name: Build the pinned PPSSPP headless host
+        if: steps.cache-ppsspp.outputs.cache-hit != 'true'
+        run: |
+          src="$RUNNER_TEMP/ppsspp-src"
+          install="$HOME/.cache/pocket-tuxemon/ppsspp-$PPSSPP_REV"
+          git init "$src"
+          git -C "$src" remote add origin https://github.com/hrydgard/ppsspp.git
+          git -C "$src" fetch --depth=1 origin "$PPSSPP_REV"
+          git -C "$src" checkout --detach FETCH_HEAD
+          git -C "$src" submodule update --init --recursive --depth=1
+          cmake -S "$src" -B "$src/build" -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DHEADLESS=ON \
+            -DHEADLESS_CROSS=ON \
+            -DUSE_SYSTEM_LIBPNG=ON
+          cmake --build "$src/build" --target PPSSPPHeadless --parallel 2
+          mkdir -p "$install"
+          cp "$src/build/PPSSPPHeadless" "$install/PPSSPPHeadless"
+          cp -R "$src/assets" "$install/assets"
+      - name: Select the pinned PPSSPP headless host
+        run: |
+          headless="$HOME/.cache/pocket-tuxemon/ppsspp-$PPSSPP_REV/PPSSPPHeadless"
+          test -x "$headless"
+          "$headless" --version 2>&1 | grep -F "${PPSSPP_REV:0:7}"
+          echo "PPSSPP_HEADLESS=$headless" >> "$GITHUB_ENV"
       - name: Install and verify the pinned PSP toolchain
         working-directory: vendor/pocket-rpgkit/vendor/pocketjs
         run: bun run bootstrap
+      - name: Verify PSP memory-stick saves
+        env:
+          PSP_SAVE_MEMSTICK: ${{ runner.temp }}/psp-save-memstick
+          PSP_EMU_TIMEOUT: "420"
+        run: bun run verify:psp:save
       - name: Build the PSP release package
+        # The save verifier builds instrumented journey packages per phase;
+        # rebuild the normal, traceless release before retaining artifacts.
         run: bun run build:psp --skip-assets
       - name: Keep the PSP release package
         uses: actions/upload-artifact@v7
