@@ -2,18 +2,20 @@
 // tools/verify-psp-save.ts CLI so the phases can be unit-tested with fake
 // build/run deps (the real thing needs PPSSPPHeadless and the PSP SDK).
 //
-// Four phases, each a separate --journey-tape build + emulator run:
+// Five phases, each using a separate --journey-tape build + emulator run:
 //
 //   1. save      boot, open the START menu, save to slot 1, log the state.
 //   2. load      boot with the same memstick, load slot 1, log the state.
 //                The two logged states must be field-by-field identical.
-//   3. autosave  replay the opening (crosses the Paper Town autosave point),
+//   3. legacy    replace the framed slot with the prior raw-JSON format,
+//                then load it and prove the world loop continues.
+//   4. autosave  replay the opening (crosses the Paper Town autosave point),
 //                then a second run loads the Automatic Save row and continues.
 //                Same caliber as the manual phase: the state logged at the
 //                autosave point and the state restored after restart must be
 //                field-by-field identical (minus the host frame counter and
 //                the one-frame hostActions queue).
-//   4. failure   a read-only memstick makes the save fail visibly: the menu
+//   5. failure   a read-only memstick makes the save fail visibly: the menu
 //                shows a SAVE FAILED message, the run completes (no crash)
 //                and no slot file is written.
 //
@@ -25,11 +27,27 @@ import { join } from "node:path";
 
 import { canonicalJson } from "../../vendor/pocket-rpgkit/src/engine/save.ts";
 import type { SessionState } from "../../vendor/pocket-rpgkit/src/engine/session.ts";
+import {
+  decodePocketPackage,
+  encodePocketPackage,
+  findSection,
+  findVariant,
+  POCKET_SECTION,
+} from "../../vendor/pocket-rpgkit/vendor/pocketjs/contracts/spec/pocket-package.ts";
 
 const PSP_SAVE_MAGIC = new TextEncoder().encode("PJSAVE1\n");
 const PSP_SAVE_HEADER_BYTES = 16;
 const PSP_SAVE_MAX_PAYLOAD = 1 << 20;
 const PSP_APP_ROOT_REL = "PSP/COMMON/pocketjs";
+
+export const PSP_SAVE_LANGUAGES = ["en", "zh"] as const;
+export type PspSaveLanguage = (typeof PSP_SAVE_LANGUAGES)[number];
+export const PSP_SAVE_EXECUTIONS = ["bytecode", "source"] as const;
+export type PspSaveExecution = (typeof PSP_SAVE_EXECUTIONS)[number];
+
+export function pspPhysicalAppRoot(memstick: string): string {
+  return join(memstick, PSP_APP_ROOT_REL);
+}
 
 /** Project the guest's logical PSP save name onto a PPSSPP memstick root.
  * Keep the physical root at the PocketJS app directory and append the guest
@@ -38,7 +56,29 @@ export function pspPhysicalSavePath(memstick: string, rel: string): string {
   if (!/^save\/[^/.][^/]*$/.test(rel)) {
     throw new Error(`invalid PSP save path ${JSON.stringify(rel)}`);
   }
-  return join(memstick, PSP_APP_ROOT_REL, rel);
+  return join(pspPhysicalAppRoot(memstick), rel);
+}
+
+/** Remove only the PSP variant's QJBC section from a valid native package.
+ * The NUL-terminated source section remains untouched, forcing the real PSP
+ * host down its production source-fallback path. */
+export function makeSourceOnlyPspPackage(bytes: Uint8Array): Uint8Array {
+  const pkg = decodePocketPackage(bytes);
+  const psp = findVariant(pkg, "psp");
+  if (!psp) throw new Error("PSP save verifier: app.pocket has no PSP variant");
+  if (!findSection(psp, POCKET_SECTION.js)) {
+    throw new Error("PSP save verifier: app.pocket has no source fallback");
+  }
+  const bytecodeSections = psp.sections.filter((section) => section.kind === POCKET_SECTION.bytecode);
+  if (bytecodeSections.length !== 1) {
+    throw new Error(`PSP save verifier: expected one QJBC section, found ${bytecodeSections.length}`);
+  }
+  return encodePocketPackage({
+    manifest: pkg.manifest,
+    variants: pkg.variants.map((variant) => variant.target === "psp"
+      ? { ...variant, sections: variant.sections.filter((section) => section.kind !== POCKET_SECTION.bytecode) }
+      : variant),
+  });
 }
 
 function fnv1aBytes(bytes: Uint8Array): number {
@@ -115,6 +155,8 @@ export interface PspSaveVerifyDeps {
   work: string;
   /** Host frame of the opening's autosave point. */
   autosaveFrame: number;
+  /** Build language whose maintained opening tape drives the menus. */
+  language: PspSaveLanguage;
   /** Remove the memstick's PSP tree so a phase starts from a clean stick. */
   cleanMemstick(): void;
   /** Run fn with the save dir read-only, then restore it. */
@@ -124,10 +166,13 @@ export interface PspSaveVerifyDeps {
   readSaveFile(rel: string): string | null;
   /** Whether a save file relative to the save dir exists. */
   saveFileExists(rel: string): boolean;
+  /** Replace a framed save with complete raw JSON from the pre-record host
+   * format, at the same physical path. */
+  writeLegacySaveFile(rel: string, json: string): void;
 }
 
 /** The documented phases. `all` runs every one of them. */
-export const PHASES = ["save", "load", "autosave", "failure"] as const;
+export const PHASES = ["save", "load", "legacy", "autosave", "failure"] as const;
 export type Phase = (typeof PHASES)[number] | "all";
 
 /** The opening tape plays through the bedroom intro question and the Paper
@@ -135,6 +180,8 @@ export type Phase = (typeof PHASES)[number] | "all";
  *  Town at a safe save point. Both the save and load tapes start from this
  *  prefix so they reach the same pre-menu state. */
 export const OPENING_PREFIX = 1406;
+export const ZH_OPENING_PREFIX = 1441;
+export const POST_LOAD_CONTINUE_FRAMES = 30;
 
 // Button masks (framework input bits).
 const START = 0x0008;
@@ -147,22 +194,28 @@ function press(masks: number[], button: number, gap = 8): void {
   for (let i = 0; i < gap; i++) masks.push(0);
 }
 
-export function openingMasks(): number[] {
+function openingDocument(language: PspSaveLanguage): { masks: number[] } {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const journey = JSON.parse(readFileSync(join(import.meta.dir, "../../data/g6-journey.json"), "utf8")) as { masks: number[] };
-  return journey.masks.slice(0, OPENING_PREFIX);
+  return JSON.parse(readFileSync(join(
+    import.meta.dir,
+    language === "zh" ? "../../data/zh-smoke-journey.json" : "../../data/g6-journey.json",
+  ), "utf8")) as { masks: number[] };
 }
 
-function fullOpeningMasks(): number[] {
-  const journey = JSON.parse(readFileSync(join(import.meta.dir, "../../data/g6-journey.json"), "utf8")) as { masks: number[] };
-  return journey.masks;
+export function openingMasks(language: PspSaveLanguage = "en"): number[] {
+  const prefix = language === "zh" ? ZH_OPENING_PREFIX : OPENING_PREFIX;
+  return openingDocument(language).masks.slice(0, prefix);
+}
+
+function fullOpeningMasks(language: PspSaveLanguage): number[] {
+  return openingDocument(language).masks;
 }
 
 /** Boot settle, dismiss the bedroom intro question (answer "yes" to skip the
  *  intro, which teleports to Paper Scoop), then open the START menu. Returns
  *  the masks so far. */
-function bootAndOpenMenu(): number[] {
-  const masks = openingMasks();
+function bootAndOpenMenu(language: PspSaveLanguage): number[] {
+  const masks = openingMasks(language);
   // The opening prefix ends mid-Paper-Town; a few zero frames let any last
   // dialog settle before the menu opens.
   for (let i = 0; i < 30; i++) masks.push(0);
@@ -170,8 +223,8 @@ function bootAndOpenMenu(): number[] {
   return masks;
 }
 
-export function saveTape(): Tape {
-  const masks = bootAndOpenMenu();
+export function saveTape(language: PspSaveLanguage = "en"): Tape {
+  const masks = bootAndOpenMenu(language);
   press(masks, DOWN, 8); // START row 1: Save
   press(masks, CIRCLE, 8); // open the save child on its root page
   press(masks, CIRCLE, 8); // save root row 0: Save to slot
@@ -181,8 +234,8 @@ export function saveTape(): Tape {
   return { masks, logAt: masks.length, label: "save" };
 }
 
-export function loadTape(): Tape {
-  const masks = bootAndOpenMenu();
+export function loadTape(language: PspSaveLanguage = "en"): Tape {
+  const masks = bootAndOpenMenu(language);
   press(masks, DOWN, 8);
   press(masks, DOWN, 8); // START row 2: Load
   press(masks, CIRCLE, 8); // slots-load page (row 0 = slot 1, no autosave yet)
@@ -190,29 +243,37 @@ export function loadTape(): Tape {
   // frame, before the world advances, so the logged state is the restored
   // snapshot.
   masks.push(CIRCLE);
-  return { masks, logAt: masks.length, label: "load" };
+  const logAt = masks.length;
+  // Prove the restored session can resume the world loop, not only decode.
+  for (let i = 0; i < POST_LOAD_CONTINUE_FRAMES; i++) masks.push(0);
+  return { masks, logAt, label: "load" };
 }
 
 /** The opening tape crosses the Paper Town autosave point; log the state at
  *  that frame so it can be compared with the restored state after restart. */
-export function autosaveTriggerTape(autosaveFrame: number): Tape {
-  return { masks: fullOpeningMasks(), logAt: autosaveFrame, label: "autosave-trigger" };
+export function autosaveTriggerTape(
+  autosaveFrame: number,
+  language: PspSaveLanguage = "en",
+): Tape {
+  return { masks: fullOpeningMasks(language), logAt: autosaveFrame, label: "autosave-trigger" };
 }
 
-export function autosaveContinueTape(): Tape {
-  const masks = bootAndOpenMenu();
+export function autosaveContinueTape(language: PspSaveLanguage = "en"): Tape {
+  const masks = bootAndOpenMenu(language);
   press(masks, DOWN, 8);
   press(masks, DOWN, 8); // START row 2: Load
   press(masks, CIRCLE, 8); // slots-load page (row 0 = Automatic Save)
   // The autosave load executes on this CIRCLE and closes the menu; logAt is
   // the next frame, before the world advances.
   masks.push(CIRCLE);
-  return { masks, logAt: masks.length, label: "autosave-continue" };
+  const logAt = masks.length;
+  for (let i = 0; i < POST_LOAD_CONTINUE_FRAMES; i++) masks.push(0);
+  return { masks, logAt, label: "autosave-continue" };
 }
 
 /** Same as the save tape; the failure is injected by a read-only memstick. */
-export function failureTape(): Tape {
-  return saveTape();
+export function failureTape(language: PspSaveLanguage = "en"): Tape {
+  return saveTape(language);
 }
 
 // --- state comparison --------------------------------------------------------
@@ -254,13 +315,13 @@ export function stateFromLog(entries: LogEntry[], kind: "marked" | "terminal"): 
 /** A successful emulator leg must reach both its assertion point and the end
  * of its bounded tape. This rejects partial PPSSPP runs that happened to log
  * `marked` before hanging or timing out. */
-function completedMarkedState(entries: LogEntry[]): SessionState {
+function completedMarkedState(entries: LogEntry[]): { marked: SessionState; terminal: SessionState } {
   const marked = stateFromLog(entries, "marked");
   const terminal = stateFromLog(entries, "terminal");
   if ((terminal.interp as { error?: unknown })?.error !== undefined) {
     throw new Error("the PSP run reached terminal with interp.error set");
   }
-  return marked;
+  return { marked, terminal };
 }
 
 export function menuFromMarked(entries: LogEntry[]): MenuStateShape | null {
@@ -279,9 +340,9 @@ const SAVED_ARTIFACT = "saved-state.json";
 function runSaveHalf(deps: PspSaveVerifyDeps): SessionState {
   console.log("\n--- save: boot -> save to slot 1 ---");
   deps.cleanMemstick();
-  deps.build(saveTape());
+  deps.build(saveTape(deps.language));
   const log = deps.run("save", deps.memstick);
-  const saved = completedMarkedState(log);
+  const saved = completedMarkedState(log).marked;
   if (!deps.saveFileExists("save/slot-1.json")) {
     throw new Error("save/slot-1.json was not written to the memstick");
   }
@@ -293,14 +354,19 @@ function runSaveHalf(deps: PspSaveVerifyDeps): SessionState {
 /** The load half: boot with the same memstick, load slot 1, compare. */
 function runLoadHalf(deps: PspSaveVerifyDeps, saved: SessionState): void {
   console.log("\n--- load: boot -> load slot 1 -> compare ---");
-  deps.build(loadTape());
+  deps.build(loadTape(deps.language));
   const log = deps.run("load", deps.memstick);
-  const loaded = completedMarkedState(log);
+  const completed = completedMarkedState(log);
+  const loaded = completed.marked;
   console.log(`# loaded: ${summarize(loaded)}`);
   if (!digestsEqual(saved, loaded)) {
     throw new Error("save/load state mismatch: the loaded state differs from the saved state");
   }
+  if (completed.terminal.frame <= loaded.frame) {
+    throw new Error("save/load restored the state but did not continue the game loop");
+  }
   console.log("# PASS: loaded state is field-by-field identical to the saved state");
+  console.log(`# PASS: continued ${completed.terminal.frame - loaded.frame} session frames after load`);
 }
 
 export function phaseSave(deps: PspSaveVerifyDeps): void {
@@ -315,7 +381,7 @@ export function phaseLoad(deps: PspSaveVerifyDeps): void {
   // self-contained, unless a previous save phase left its artifact.
   const artifact = join(deps.work, SAVED_ARTIFACT);
   let saved: SessionState;
-  if (existsSync(artifact)) {
+  if (existsSync(artifact) && deps.saveFileExists("save/slot-1.json")) {
     saved = JSON.parse(readFileSync(artifact, "utf8")) as SessionState;
   } else {
     saved = runSaveHalf(deps);
@@ -323,12 +389,27 @@ export function phaseLoad(deps: PspSaveVerifyDeps): void {
   runLoadHalf(deps, saved);
 }
 
+/** Prove the native host still reads the complete raw-JSON record used before
+ * the crash-safe PJSAVE1 envelope, at the unchanged memory-stick path. */
+export function phaseLegacy(deps: PspSaveVerifyDeps): void {
+  console.log("\n=== legacy raw JSON -> load -> continue ===");
+  const artifact = join(deps.work, SAVED_ARTIFACT);
+  const saved = existsSync(artifact) && deps.saveFileExists("save/slot-1.json")
+    ? JSON.parse(readFileSync(artifact, "utf8")) as SessionState
+    : runSaveHalf(deps);
+  const json = deps.readSaveFile("save/slot-1.json");
+  if (json === null) throw new Error("legacy compatibility setup has no slot-1.json");
+  deps.writeLegacySaveFile("save/slot-1.json", json);
+  runLoadHalf(deps, saved);
+  console.log("# PASS: the PSP host loaded and continued a pre-PJSAVE1 raw JSON record");
+}
+
 export function phaseAutosave(deps: PspSaveVerifyDeps): void {
   console.log("\n=== autosave point -> restart -> continue ===");
   deps.cleanMemstick();
-  deps.build(autosaveTriggerTape(deps.autosaveFrame));
+  deps.build(autosaveTriggerTape(deps.autosaveFrame, deps.language));
   const triggerLog = deps.run("autosave-trigger", deps.memstick);
-  const atAutosave = completedMarkedState(triggerLog);
+  const atAutosave = completedMarkedState(triggerLog).marked;
   const envelopeText = deps.readSaveFile("save/autosave.json");
   if (envelopeText === null) {
     throw new Error("save/autosave.json was not written (the opening crossed no autosave point?)");
@@ -344,9 +425,10 @@ export function phaseAutosave(deps: PspSaveVerifyDeps): void {
     );
   }
 
-  deps.build(autosaveContinueTape());
+  deps.build(autosaveContinueTape(deps.language));
   const continueLog = deps.run("autosave-continue", deps.memstick);
-  const continued = completedMarkedState(continueLog);
+  const completed = completedMarkedState(continueLog);
+  const continued = completed.marked;
   console.log(`# continued from autosave: ${summarize(continued)}`);
   // Same caliber as the manual phase: the state at the autosave point and the
   // restored state must be field-by-field identical (minus the host frame and
@@ -357,7 +439,11 @@ export function phaseAutosave(deps: PspSaveVerifyDeps): void {
   if (continued.mapId === "spyder_bedroom") {
     throw new Error("autosave continue restored the boot bedroom, not the autosave point");
   }
+  if (completed.terminal.frame <= continued.frame) {
+    throw new Error("autosave restored the state but did not continue the game loop");
+  }
   console.log("# PASS: the Automatic Save row restores the autosave point, field-by-field");
+  console.log(`# PASS: continued ${completed.terminal.frame - continued.frame} session frames after autosave`);
 }
 
 export function phaseFailure(deps: PspSaveVerifyDeps): void {
@@ -365,7 +451,7 @@ export function phaseFailure(deps: PspSaveVerifyDeps): void {
   deps.cleanMemstick();
   let log: LogEntry[] = [];
   deps.withReadOnlySaveDir(() => {
-    deps.build(failureTape());
+    deps.build(failureTape(deps.language));
     log = deps.run("failure", deps.memstick);
   });
   // The run must complete (the failed save is handled, not a crash) and no
@@ -379,10 +465,11 @@ export function phaseFailure(deps: PspSaveVerifyDeps): void {
   }
   // The save menu must show the failure, not a silent success.
   const menu = menuFromMarked(log);
-  if (!menu || menu.kind !== "message" || menu.title !== "SAVE FAILED") {
+  const expectedTitle = deps.language === "zh" ? "保存失败" : "SAVE FAILED";
+  if (!menu || menu.kind !== "message" || menu.title !== expectedTitle) {
     throw new Error(`the save did not fail visibly (menu=${JSON.stringify(menu)})`);
   }
-  console.log("# PASS: the save failed visibly (SAVE FAILED menu, no file, no crash)");
+  console.log(`# PASS: the save failed visibly (${expectedTitle} menu, no file, no crash)`);
 }
 
 /** Dispatch a phase by name. Unknown phases throw instead of silently
@@ -396,6 +483,9 @@ export function runPhase(phase: string, deps: PspSaveVerifyDeps): void {
     case "load":
       phaseLoad(deps);
       return;
+    case "legacy":
+      phaseLegacy(deps);
+      return;
     case "autosave":
       phaseAutosave(deps);
       return;
@@ -405,6 +495,7 @@ export function runPhase(phase: string, deps: PspSaveVerifyDeps): void {
     case "all":
       phaseSave(deps);
       phaseLoad(deps);
+      phaseLegacy(deps);
       phaseAutosave(deps);
       phaseFailure(deps);
       return;

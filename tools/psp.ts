@@ -280,6 +280,7 @@ if (zh && !args.has("--journey") && segmentChapter === undefined) {
 }
 
 let journeyBuildId: string | undefined;
+let journeyTapeLength: number | undefined;
 if (args.has("--journey")) {
   const bundlePath = join(out, "pocket-tuxemon.js");
   const original = readFileSync(bundlePath, "utf8");
@@ -316,8 +317,9 @@ if (args.has("--journey")) {
 // come from a JSON file ({masks:number[], logAt?:number}). The save/load
 // e2e (tools/verify-psp-save.ts) uses it to drive the START menu under
 // PPSSPP and log the live state right after a save or a load, so the two
-// runs can be compared field-by-field. Implies --bench (the wrapper calls
-// __pspLog/__pspExit, which the bench feature registers).
+// runs can be compared field-by-field. The custom tape gets a bounded host
+// capture+bench window below: bench exposes __pspLog and capture exits after
+// the terminal frame.
 if (journeyTapeArg !== undefined) {
   const tapeFile = journeyTapeArg.slice("--journey-tape=".length);
   const tapeSpec = JSON.parse(readFileSync(tapeFile, "utf8")) as {
@@ -328,6 +330,7 @@ if (journeyTapeArg !== undefined) {
   if (!Array.isArray(tapeSpec.masks) || tapeSpec.masks.length === 0) {
     throw new Error(`--journey-tape: ${tapeFile} has no masks`);
   }
+  journeyTapeLength = tapeSpec.masks.length;
   const bundlePath = join(out, "pocket-tuxemon.js");
   const original = readFileSync(bundlePath, "utf8");
   journeyBuildId = createHash("sha256")
@@ -346,8 +349,7 @@ if (journeyTapeArg !== undefined) {
     `var s=globalThis.__rpgSessionState;` +
     `if(n===logAt){var m=null;try{var h=globalThis.__pocketTuxemonSave;m=h?h.menu():null;}catch(e){}` +
     `__pspLog(JSON.stringify({kind:"marked",frame:n,state:s,menu:m,buildId:id}));}` +
-    `if(n===tape.length)__pspLog(JSON.stringify({kind:"terminal",frame:n,state:s,buildId:id}));` +
-    `if(n===tape.length&&typeof __pspExit==="function")__pspExit();};})();\n`;
+    `if(n===tape.length)__pspLog(JSON.stringify({kind:"terminal",frame:n,state:s,buildId:id}));};})();\n`;
   writeFileSync(bundlePath, prefix + original + suffix);
 }
 
@@ -402,8 +404,8 @@ if (segmentChapter !== undefined) {
 // the host's capture window is offset by one there.
 //
 // A capture that replays a journey needs BOTH host features: capture (the
-// framebuffer dump) and bench (which registers __pspLog/__pspRoundTrip/
-// __pspExit the journey wrapper calls). The vendor's --bench flag enables
+// framebuffer dump) and bench (which registers the journey wrapper's
+// __pspLog/__pspRoundTrip calls). The vendor's --bench flag enables
 // both; POCKETJS_BENCH_DUMP_FRAMES=1 makes the dump path write frames
 // instead of exiting silently after the window. A plain capture (no tape)
 // keeps --capture alone.
@@ -424,20 +426,27 @@ if (args.has("--capture")) {
 // instead of losing the <300-frame tail the rotating 300-frame windows left
 // unlogged. The vendor --bench flag enables capture+bench; with
 // BENCH_DUMP_FRAMES unset the host dumps no framebuffers and exits cleanly at
-// the window end (the journey wrapper delays __pspExit by one frame so the
-// terminal frame's window flushes first).
+// the window end after the terminal frame has flushed.
 const segmentPerf = segmentChapter !== undefined && !args.has("--capture");
+// A custom verifier tape also needs a bounded capture+bench window. The
+// capture feature exits the PSP process at the end of the tape after the JS
+// wrapper has emitted its terminal record; unlike the nonexistent
+// __pspExit hook, this is the production host's deterministic exit path.
+const journeyTapePerf = journeyTapeLength !== undefined && !args.has("--capture");
 const perfEnv: Record<string, string> = {};
 if (segmentPerf) {
   perfEnv.POCKETJS_CAP_START = "0";
   perfEnv.POCKETJS_CAP_N = String(segmentSuffix!.length + 1);
+} else if (journeyTapePerf) {
+  perfEnv.POCKETJS_CAP_START = "0";
+  perfEnv.POCKETJS_CAP_N = String(journeyTapeLength);
 }
 
 // Hardware timing needs the bench functions, but not the capture feature:
 // capture intentionally exits after its bounded framebuffer window.
 const hostFeatures = args.has("--capture")
   ? (captureWithJourney ? ["--bench"] : ["--capture"])
-  : segmentPerf
+  : segmentPerf || journeyTapePerf
     ? ["--bench"]
     : benchmark
       ? ["--features=bench"]
@@ -519,8 +528,11 @@ writeFileSync(join(out, "build-receipt.json"), JSON.stringify({
   zh,
   ...(segmentReceipt === undefined ? {} : { journeySegment: segmentReceipt }),
   ...(journeyBuildId === undefined ? {} : { journeyBuildId }),
-  ...(!segmentPerf ? {} : {
-    benchWindow: { start: 0, n: segmentSuffix!.length + 1 },
+  ...(!segmentPerf && !journeyTapePerf ? {} : {
+    benchWindow: {
+      start: 0,
+      n: segmentPerf ? segmentSuffix!.length + 1 : journeyTapeLength!,
+    },
   }),
   ...(!args.has("--capture") ? {} : {
     captureWindow: {

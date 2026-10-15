@@ -20,10 +20,19 @@ import { join } from "node:path";
 
 import type { SessionState } from "../vendor/pocket-rpgkit/src/engine/session.ts";
 import {
+  decodePocketPackage,
+  encodePocketPackage,
+  findSection,
+  findVariant,
+  POCKET_SECTION,
+} from "../vendor/pocket-rpgkit/vendor/pocketjs/contracts/spec/pocket-package.ts";
+import {
   decodePspSaveRecord,
   loadTape,
+  makeSourceOnlyPspPackage,
   OPENING_PREFIX,
   PHASES,
+  POST_LOAD_CONTINUE_FRAMES,
   pspPhysicalSavePath,
   runPhase,
   saveTape,
@@ -67,14 +76,19 @@ interface FakeDeps {
   /** Logs returned per phase label. */
   logs: Record<string, LogEntry[]>;
   files: Map<string, string>;
+  legacyWrites: string[];
 }
 
-function makeFakeDeps(logs: Record<string, LogEntry[]>, opts: { writes?: boolean } = {}): FakeDeps {
+function makeFakeDeps(
+  logs: Record<string, LogEntry[]>,
+  opts: { writes?: boolean; language?: "en" | "zh" } = {},
+): FakeDeps {
   const work = mkdtempSync(join(tmpdir(), "psp-save-verify-"));
   dirs.push(work);
   const files = new Map<string, string>();
   const builds: Tape[] = [];
   const runs: string[] = [];
+  const legacyWrites: string[] = [];
   const writes = opts.writes ?? true;
   const deps: PspSaveVerifyDeps = {
     build(tape) { builds.push(tape); },
@@ -88,12 +102,17 @@ function makeFakeDeps(logs: Record<string, LogEntry[]>, opts: { writes?: boolean
     memstick: join(work, "memstick"),
     work,
     autosaveFrame: 3942,
+    language: opts.language ?? "en",
     cleanMemstick() { files.clear(); },
     withReadOnlySaveDir(fn) { fn(); },
     readSaveFile(rel) { return files.get(rel) ?? null; },
     saveFileExists(rel) { return files.has(rel); },
+    writeLegacySaveFile(rel, json) {
+      legacyWrites.push(rel);
+      files.set(rel, json);
+    },
   };
-  return { deps, builds, runs, logs, files };
+  return { deps, builds, runs, logs, files, legacyWrites };
 }
 
 const dirs: string[] = [];
@@ -103,15 +122,16 @@ afterEach(() => {
 
 /** A marked+terminal log pair for one state. */
 function logFor(state: SessionState, menu?: MenuStateShape | null): LogEntry[] {
+  const terminal = { ...state, frame: state.frame + POST_LOAD_CONTINUE_FRAMES } as SessionState;
   return [
     { kind: "marked", frame: 1, state, menu: menu ?? null },
-    { kind: "terminal", frame: 2, state },
+    { kind: "terminal", frame: 2, state: terminal },
   ];
 }
 
 describe("phase dispatch", () => {
-  test("the documented phases are exactly save/load/autosave/failure", () => {
-    expect([...PHASES]).toEqual(["save", "load", "autosave", "failure"]);
+  test("the documented phases include legacy compatibility", () => {
+    expect([...PHASES]).toEqual(["save", "load", "legacy", "autosave", "failure"]);
   });
 
   test("an unknown phase throws instead of passing", () => {
@@ -136,6 +156,44 @@ describe("PSP physical save records", () => {
     const damaged = valid.slice();
     damaged[damaged.length - 1] ^= 1;
     expect(() => decodePspSaveRecord(damaged)).toThrow(/checksum/);
+  });
+});
+
+describe("source-fallback PSP package", () => {
+  test("removes only PSP bytecode while preserving source and other variants", () => {
+    const source = new TextEncoder().encode("globalThis.frame=()=>0;\0");
+    const pspBytecode = new Uint8Array([1, 2, 3]);
+    const desktopBytecode = new Uint8Array([4, 5, 6]);
+    const pkg = encodePocketPackage({
+      manifest: new TextEncoder().encode("{}"),
+      variants: [
+        { target: "psp", hostAbi: 1, sections: [
+          { kind: POCKET_SECTION.js, bytes: source },
+          { kind: POCKET_SECTION.bytecode, bytes: pspBytecode },
+        ] },
+        { target: "linux-app", hostAbi: 1, sections: [
+          { kind: POCKET_SECTION.js, bytes: source },
+          { kind: POCKET_SECTION.bytecode, bytes: desktopBytecode },
+        ] },
+      ],
+    });
+
+    const transformed = decodePocketPackage(makeSourceOnlyPspPackage(pkg));
+    const psp = findVariant(transformed, "psp")!;
+    const desktop = findVariant(transformed, "linux-app")!;
+    expect(findSection(psp, POCKET_SECTION.js)).toEqual(source);
+    expect(findSection(psp, POCKET_SECTION.bytecode)).toBeNull();
+    expect(findSection(desktop, POCKET_SECTION.bytecode)).toEqual(desktopBytecode);
+  });
+
+  test("rejects packages without one PSP source and bytecode pair", () => {
+    const sourceOnly = encodePocketPackage({
+      manifest: new TextEncoder().encode("{}"),
+      variants: [{ target: "psp", hostAbi: 1, sections: [
+        { kind: POCKET_SECTION.js, bytes: new TextEncoder().encode("source\0") },
+      ] }],
+    });
+    expect(() => makeSourceOnlyPspPackage(sourceOnly)).toThrow(/expected one QJBC section/);
   });
 });
 
@@ -171,8 +229,8 @@ describe("START menu tape navigation", () => {
     const automatic = autosaveContinueTape();
     expect(pressedEdges(manual)).toEqual(expected);
     expect(pressedEdges(automatic)).toEqual(expected);
-    expect(manual.logAt).toBe(manual.masks.length);
-    expect(automatic.logAt).toBe(automatic.masks.length);
+    expect(manual.logAt).toBe(manual.masks.length - POST_LOAD_CONTINUE_FRAMES);
+    expect(automatic.logAt).toBe(automatic.masks.length - POST_LOAD_CONTINUE_FRAMES);
   });
 });
 
@@ -200,6 +258,17 @@ describe("every phase passes through the dispatcher with a valid log", () => {
     expect(fake.runs).toEqual(["save", "load"]);
   });
 
+  test("legacy passes after replacing the framed slot with raw JSON", () => {
+    const state = fakeState();
+    const fake = makeFakeDeps({
+      save: logFor(state),
+      load: logFor(state),
+    });
+    expect(() => runPhase("legacy", fake.deps)).not.toThrow();
+    expect(fake.runs).toEqual(["save", "load"]);
+    expect(fake.legacyWrites).toEqual(["save/slot-1.json"]);
+  });
+
   test("autosave passes with a matching continue state", () => {
     // The live state at the autosave point carries the one-frame hostActions
     // queue; the restored state does not. The comparison strips it.
@@ -222,6 +291,14 @@ describe("every phase passes through the dispatcher with a valid log", () => {
     expect(() => runPhase("failure", fake.deps)).not.toThrow();
     expect(fake.runs).toEqual(["failure"]);
   });
+
+  test("failure recognises the localized Chinese failure title", () => {
+    const state = fakeState();
+    const fake = makeFakeDeps({
+      failure: logFor(state, { kind: "message", title: "保存失败", body: "只读" }),
+    }, { language: "zh" });
+    expect(() => runPhase("failure", fake.deps)).not.toThrow();
+  });
 });
 
 describe("an empty emulator log fails every phase through the dispatcher", () => {
@@ -238,7 +315,7 @@ describe("an empty emulator log fails every phase through the dispatcher", () =>
 });
 
 describe("a partial emulator log fails every successful phase", () => {
-  for (const phase of ["save", "load", "autosave"] as const) {
+  for (const phase of ["save", "load", "legacy", "autosave"] as const) {
     test(`${phase} rejects marked without terminal`, () => {
       const state = fakeState();
       const markedOnly = [{ kind: "marked", frame: 1, state }];
@@ -272,6 +349,16 @@ describe("injected inconsistencies fail the phase that owns them", () => {
       load: logFor(loaded),
     });
     expect(() => runPhase("load", fake.deps)).toThrow(/mismatch/);
+  });
+
+  test("load throws when it restores but does not continue the game loop", () => {
+    const state = fakeState();
+    const stalled = [
+      { kind: "marked", frame: 1, state },
+      { kind: "terminal", frame: 2, state },
+    ];
+    const fake = makeFakeDeps({ save: logFor(state), load: stalled });
+    expect(() => runPhase("load", fake.deps)).toThrow(/did not continue/);
   });
 
   test("autosave throws when the autosave file is missing", () => {
@@ -334,8 +421,16 @@ describe("runPhase all", () => {
       failure: logFor(state, { kind: "message", title: "SAVE FAILED", body: "" }),
     });
     expect(() => runPhase("all", fake.deps)).not.toThrow();
-    // save runs once (phaseSave), then load reuses the artifact (no second
-    // save run), then autosave (trigger+continue), then failure.
-    expect(fake.runs).toEqual(["save", "load", "autosave-trigger", "autosave-continue", "failure"]);
+    // save runs once (phaseSave), load and legacy reuse its artifact, then
+    // autosave (trigger+continue), then failure.
+    expect(fake.runs).toEqual([
+      "save",
+      "load",
+      "load",
+      "autosave-trigger",
+      "autosave-continue",
+      "failure",
+    ]);
+    expect(fake.legacyWrites).toEqual(["save/slot-1.json"]);
   });
 });
