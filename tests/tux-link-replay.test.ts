@@ -258,6 +258,10 @@ describe("Tux Link replay source authority", () => {
     for (const finalUrl of [
       "https://evil.example/gateway/tux/v1/replays/match-1",
       "https://battle.example/gateway/tux/v1/replays-evil/match-1",
+      "https://battle.example/gateway/tux/v1/replays/%2foutside",
+      "https://battle.example/gateway/tux/v1/replays/%2Foutside",
+      "https://battle.example/gateway/tux/v1/replays/%5coutside",
+      "https://battle.example/gateway/tux/v1/replays/%5Coutside",
     ]) {
       await expect(loadArenaReplayDocument(
         externalQuery(),
@@ -275,6 +279,17 @@ describe("Tux Link replay source authority", () => {
       }),
       OPTIONS,
     )).rejects.toThrow("external source redirected away from HTTPS");
+  });
+
+  test("fails closed when fetch does not expose an absolute final response URL", async () => {
+    for (const finalUrl of ["", "/gateway/tux/v1/replays/match-1"]) {
+      await expect(loadArenaReplayDocument(
+        externalQuery(),
+        PLAYER,
+        async () => response(JSON.stringify(authoritative()), { url: finalUrl }),
+        OPTIONS,
+      )).rejects.toThrow(/final URL/);
+    }
   });
 
   test("requires JSON MIME and enforces the shared 4 MiB stream bound", async () => {
@@ -322,6 +337,8 @@ describe("Tux Link replay source authority", () => {
 
     for (const unsafe of [
       localUrl.replace("/tux/v1/replays/", "/tux/v1/replays-evil/"),
+      localUrl.replace("/tux/v1/replays/", "/tux/v1/replays/%2foutside/"),
+      localUrl.replace("/tux/v1/replays/", "/tux/v1/replays/%5Coutside/"),
       localUrl.replace("127.0.0.1:8787", "127.0.0.1:8788"),
       localUrl.replace("127.0.0.1", "public.example"),
     ]) {

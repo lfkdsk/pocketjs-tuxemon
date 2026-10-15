@@ -32,9 +32,9 @@ export type ReplayJsonFetch = (
 ) => Promise<ReplayJsonResponse>;
 
 /** Bounded JSON text plus the transport facts needed by format-specific trust
- * policies. `finalUrl` is the normalized final response URL for fetched input
- * (falling back to the requested URL when a host omits Response.url), and null
- * for inline data URLs. */
+ * policies. `finalUrl` is the normalized final response URL for fetched input,
+ * and null for inline data URLs. Fetched input fails closed when the host does
+ * not expose an absolute final response URL. */
 export interface LoadedReplayJsonText {
   text: string;
   source: ReplayJsonSource;
@@ -193,9 +193,12 @@ export async function loadReplayJsonTextWithMetadata(
     credentials: source.external ? "omit" : "same-origin",
   });
   if (!response.ok) sourceError(policy, `source request failed with HTTP ${response.status}`);
+  if (typeof response.url !== "string" || response.url.length === 0) {
+    sourceError(policy, "source response did not expose its final URL");
+  }
   let finalUrl: URL;
   try {
-    finalUrl = new URL(response.url || source.url);
+    finalUrl = new URL(response.url);
   } catch {
     sourceError(policy, "source returned an invalid final URL");
   }
@@ -253,9 +256,14 @@ function trustedLoopbackExternal(url: URL, trustedExternalBase?: string): boolea
   if (trusted.protocol !== "http:" || !loopbackHost(trusted.hostname) ||
     trusted.username || trusted.password || trusted.search || trusted.hash) return false;
   const prefix = trusted.pathname.endsWith("/") ? trusted.pathname : `${trusted.pathname}/`;
+  if (encodedPathSeparator(trusted.pathname) || encodedPathSeparator(url.pathname)) return false;
   return url.protocol === "http:" && loopbackHost(url.hostname) &&
     url.username === "" && url.password === "" && url.hash === "" &&
     url.origin === trusted.origin && url.pathname.startsWith(prefix);
+}
+
+function encodedPathSeparator(pathname: string): boolean {
+  return /%(?:2f|5c)/i.test(pathname);
 }
 
 function loopbackHost(hostname: string): boolean {

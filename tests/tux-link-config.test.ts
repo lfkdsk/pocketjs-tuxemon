@@ -67,6 +67,8 @@ describe("Tux Link build URL", () => {
       "https://battle.example?redirect=https://evil.example",
       "https://battle.example/#https://evil.example",
       "https://battle.example\\@evil.example",
+      "https://battle.example/gateway/%2foutside",
+      "https://battle.example/gateway/%5Coutside",
       " https://battle.example",
       "https://battle.example\n",
       "https://battle.example:",

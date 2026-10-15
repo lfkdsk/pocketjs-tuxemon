@@ -142,6 +142,7 @@ export function tuxLinkReplayDispatcherHtml(
       try { base = new URL(cfg.trustedReplayBase); } catch { return false; }
       return base.protocol === "http:" && url.origin === base.origin &&
         base.pathname.endsWith("/") && url.pathname.startsWith(base.pathname) &&
+        !/%(?:2f|5c)/i.test(base.pathname) && !/%(?:2f|5c)/i.test(url.pathname) &&
         !url.username && !url.password && !url.hash;
     };
     const dataText = (value) => {
@@ -202,7 +203,8 @@ export function tuxLinkReplayDispatcherHtml(
           (requested.protocol !== "https:" && !trustedLocal(requested)))) throw new Error("source");
       const response = await fetch(requested.href, { credentials: external ? "omit" : "same-origin" });
       if (!response.ok) throw new Error("source");
-      const finalUrl = new URL(response.url || requested.href);
+      if (!response.url) throw new Error("source");
+      const finalUrl = new URL(response.url);
       if ((!external && finalUrl.origin !== location.origin) ||
           (external && finalUrl.protocol !== "https:" && !trustedLocal(finalUrl))) throw new Error("source");
       const mime = (response.headers.get("content-type") || "").split(";", 1)[0].trim();
@@ -245,5 +247,6 @@ function validTrustedReplayBase(value: string): boolean {
     url.hostname === "localhost" || url.hostname === "[::1]" || /^127(?:\.\d{1,3}){3}$/.test(url.hostname)
   );
   return (url.protocol === "https:" || local) && url.username === "" && url.password === "" &&
-    url.search === "" && url.hash === "" && url.pathname.endsWith("/") && url.href === value;
+    url.search === "" && url.hash === "" && !/%(?:2f|5c)/i.test(url.pathname) &&
+    url.pathname.endsWith("/") && url.href === value;
 }

@@ -134,7 +134,12 @@ export function isTrustedTuxReplayUrl(value: string, trustedReplayBase: string):
   return (secure || local) && url.origin === base.origin &&
     url.username === "" && url.password === "" && url.hash === "" &&
     base.username === "" && base.password === "" && base.search === "" && base.hash === "" &&
+    !encodedPathSeparator(url.pathname) && !encodedPathSeparator(base.pathname) &&
     base.pathname.endsWith("/") && url.pathname.startsWith(base.pathname);
+}
+
+function encodedPathSeparator(pathname: string): boolean {
+  return /%(?:2f|5c)/i.test(pathname);
 }
 
 function loopbackHost(hostname: string): boolean {

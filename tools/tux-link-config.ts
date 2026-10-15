@@ -78,6 +78,7 @@ export function parseTuxBattleBaseUrl(value: string): TuxLinkConfig {
     fail("expected an absolute HTTP(S) URL");
   }
   if (parsed.username !== "" || parsed.password !== "") fail("userinfo is not allowed");
+  if (/%(?:2f|5c)/i.test(parsed.pathname)) fail("encoded path separators are not allowed");
 
   const port = explicitPort(authority);
   if (port === "NaN" || Number(port) > 65535) fail("invalid port");

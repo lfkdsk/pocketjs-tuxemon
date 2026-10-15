@@ -107,6 +107,8 @@ describe("immutable Tux Link replay routing", () => {
     expect(html).toContain(current.artifactId);
     expect(html).toContain("credentials: external ? \"omit\" : \"same-origin\"");
     expect(html).toContain("length > cfg.maxBytes");
+    expect(html).toContain("if (!response.url)");
+    expect(html).toContain("/%(?:2f|5c)/i.test(url.pathname)");
     expect(html).toContain('new URL("replays/" + release.artifactId');
     expect(html).toContain('"trustedReplayBase":"http://127.0.0.1:8787/tux/v1/replays/"');
     expect(html).not.toContain("value.engineRevision + \"/replay.html\"");
@@ -118,6 +120,12 @@ describe("immutable Tux Link replay routing", () => {
       current,
       4 * 1024 * 1024,
       "http://public.example/tux/v1/replays/",
+    )).toThrow("trusted replay base is invalid");
+    expect(() => tuxLinkReplayDispatcherHtml(
+      releases,
+      current,
+      4 * 1024 * 1024,
+      "https://battle.example/proxy/%2foutside/tux/v1/replays/",
     )).toThrow("trusted replay base is invalid");
   });
 });

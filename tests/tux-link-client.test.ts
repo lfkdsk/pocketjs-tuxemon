@@ -377,6 +377,10 @@ describe("Tux Link client", () => {
       "https://battle.example/prefix/tux/v1/replays-evil/match-1",
       "https://evil.example/prefix/tux/v1/replays/match-1",
       "https://user@battle.example/prefix/tux/v1/replays/match-1",
+      "https://battle.example/prefix/tux/v1/replays/%2foutside",
+      "https://battle.example/prefix/tux/v1/replays/%2Foutside",
+      "https://battle.example/prefix/tux/v1/replays/%5coutside",
+      "https://battle.example/prefix/tux/v1/replays/%5Coutside",
       `${replayUrl}#fragment`,
       ` ${replayUrl}`,
     ]) {

@@ -135,9 +135,14 @@ export function isTrustedLinkReplayResponse(
     loopbackHost(final.hostname) && loopbackHost(trusted.hostname);
   if ((!secure && !local) ||
     final.username || final.password || trusted.username || trusted.password ||
-    trusted.search || trusted.hash) return false;
+    trusted.search || trusted.hash || encodedPathSeparator(final.pathname) ||
+    encodedPathSeparator(trusted.pathname)) return false;
   const prefix = trusted.pathname.endsWith("/") ? trusted.pathname : `${trusted.pathname}/`;
   return final.origin === trusted.origin && final.pathname.startsWith(prefix);
+}
+
+function encodedPathSeparator(pathname: string): boolean {
+  return /%(?:2f|5c)/i.test(pathname);
 }
 
 /** Strictly validate a parsed envelope and its transport provenance. */
