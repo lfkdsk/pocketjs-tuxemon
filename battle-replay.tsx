@@ -14,7 +14,7 @@ import {
   prepareArenaReplay,
   type PreparedArenaReplay,
 } from "./battle/arena-replay.ts";
-import type { ArenaBattle } from "./battle/arena.ts";
+import { stateHash, type ArenaBattle } from "./battle/arena.ts";
 import type { RuntimeBattleState } from "./battle/runtime.ts";
 import {
   SERVER_DATA_DIGEST,
@@ -81,6 +81,10 @@ export interface ArenaReplayPageState {
   total: number;
   playing: boolean;
   speed: 1 | 2 | 4;
+  /** Hash of the battle actually advanced by this page, available only once
+   * playback reaches the tape boundary. `terminalHash` remains the separately
+   * precomputed expected hash used to validate the tape before playback. */
+  settledHash: string | null;
   terminalHash: string | null;
   authoritativeResult: string | null;
   error: string | null;
@@ -191,16 +195,22 @@ function ReplayApp() {
   let frameTicks = 0;
   let failure: string | null = null;
 
-  const state = (): ArenaReplayPageState => ({
-    status: failure !== null ? "error" : prepared === null ? "loading" : "ready",
-    turn,
-    total: prepared?.tape.actions.length ?? 0,
-    playing,
-    speed,
-    terminalHash: prepared?.terminalHash ?? null,
-    authoritativeResult: authoritativeResult(),
-    error: failure,
-  });
+  const state = (): ArenaReplayPageState => {
+    const settledHash = prepared !== null && battle !== null && turn >= prepared.tape.actions.length
+      ? stateHash(battle)
+      : null;
+    return {
+      status: failure !== null ? "error" : prepared === null ? "loading" : "ready",
+      turn,
+      total: prepared?.tape.actions.length ?? 0,
+      playing,
+      speed,
+      settledHash,
+      terminalHash: prepared?.terminalHash ?? null,
+      authoritativeResult: authoritativeResult(),
+      error: failure,
+    };
+  };
 
   const syncControls = (): void => {
     const play = button("arena-replay-play");
