@@ -29,6 +29,7 @@ import { checkBuildArtifact, type ProfileEntry } from "./psp-segment.ts";
 const root = resolve(import.meta.dir, "..");
 const pspOut = join(root, "dist/psp");
 const prxPath = join(pspOut, "pocket-tuxemon.prx");
+const packagePath = join(pspOut, "app.pocket");
 const receiptPath = join(pspOut, "build-receipt.json");
 const profilePath = join(pspOut, "profile.jsonl");
 const benchPath = join(pspOut, "PocketJS-bench.jsonl");
@@ -55,6 +56,8 @@ if (receipt.zh !== true || receipt.journey !== true || typeof receipt.journeyBui
 }
 checkBuildArtifact(receipt.artifacts, "pocket-tuxemon.prx",
   createHash("sha256").update(readFileSync(prxPath)).digest("hex"));
+checkBuildArtifact(receipt.artifacts, "app.pocket",
+  createHash("sha256").update(readFileSync(packagePath)).digest("hex"));
 
 const timeout = Number(process.env.PSP_EMU_TIMEOUT ?? "240");
 const memstick = process.env.PSP_EMU_MEMSTICK || join(root, ".psp-emu-memstick-zh");

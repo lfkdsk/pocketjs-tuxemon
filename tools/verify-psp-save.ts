@@ -53,6 +53,9 @@ function runPsp(phase: string, memstick: string): LogEntry[] {
   mkdirSync(dir, { recursive: true });
   const prx = join(dir, "pocket-tuxemon.prx");
   writeFileSync(prx, readFileSync(join(PSP_OUT, "pocket-tuxemon.prx")));
+  // The generic PSP runtime resolves its native package from host0:, beside
+  // the PRX. Keep the bytecode and source-fallback package with every run.
+  writeFileSync(join(dir, "app.pocket"), readFileSync(join(PSP_OUT, "app.pocket")));
   // The external assets.pak must sit beside the PRX: pak_external.rs reads it
   // from the PRX's directory, and without it the game halts during boot.
   writeFileSync(join(dir, "assets.pak"), readFileSync(join(PSP_OUT, "assets.pak")));

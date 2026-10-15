@@ -74,6 +74,7 @@ function makeSegmentDir(
 }
 
 const PRX_BYTES = new TextEncoder().encode("FAKE-PRX-FOR-TESTS");
+const APP_PACKAGE_BYTES = new TextEncoder().encode("FAKE-APP-POCKET-FOR-TESTS");
 const PROFILE = [
   JSON.stringify({ kind: "session", buildId: "b", segment: "radio-broadcast" }),
   JSON.stringify({ kind: "abi", passed: true, buildId: "b" }),
@@ -110,6 +111,7 @@ function receipt(frames = 23): string {
     },
     artifacts: {
       "pocket-tuxemon.prx": { bytes: PRX_BYTES.length, sha256: sha256(PRX_BYTES) },
+      "app.pocket": { bytes: APP_PACKAGE_BYTES.length, sha256: sha256(APP_PACKAGE_BYTES) },
     },
   });
 }
@@ -127,6 +129,7 @@ function completeSegment(extra: Record<string, string | Uint8Array> = {}): strin
   return makeSegmentDir({
     "build-receipt.json": receipt(),
     "pocket-tuxemon.prx": PRX_BYTES,
+    "app.pocket": APP_PACKAGE_BYTES,
     "profile.jsonl": PROFILE,
     "bench.jsonl": bench(),
     ...extra,
@@ -252,6 +255,14 @@ describe("PSP mainline segment evaluation", () => {
     expect(v.detail).toMatch(/prx|artifact/i);
   });
 
+  test("a missing app package fails", () => {
+    const dir = completeSegment();
+    rmSync(join(dir, "app.pocket"));
+    const v = evaluateSegmentRun({ dir, exitCode: 0, verifyStatus: 0, verifyOutput: PASS_DETAIL });
+    expect(v.status).toBe("FAIL");
+    expect(v.detail).toMatch(/app\.pocket/);
+  });
+
   test("a missing receipt fails", () => {
     const dir = completeSegment();
     rmSync(join(dir, "build-receipt.json"));
@@ -357,6 +368,7 @@ describe("PSP mainline retained-evidence verification", () => {
     writeFileSync(assets, ASSETS);
     writeFileSync(join(dir, "build-receipt.json"), retainedReceipt());
     writeFileSync(join(dir, "pocket-tuxemon.prx"), PRX_BYTES);
+    writeFileSync(join(dir, "app.pocket"), APP_PACKAGE_BYTES);
     writeFileSync(join(dir, "profile.jsonl"), PROFILE);
     writeFileSync(join(dir, "bench.jsonl"), bench());
     for (const [name, content] of Object.entries(extra)) {
@@ -385,6 +397,13 @@ describe("PSP mainline retained-evidence verification", () => {
     const check = verifyRetainedSegment({ dir, assetsPakPath: assets });
     expect(check.ok).toBe(false);
     expect(check.issues.join(" ")).toMatch(/PRX/);
+  });
+
+  test("an app package that does not match the receipt fails", () => {
+    const { dir, assets } = retainedSegment({ "app.pocket": new TextEncoder().encode("TAMPERED") });
+    const check = verifyRetainedSegment({ dir, assetsPakPath: assets });
+    expect(check.ok).toBe(false);
+    expect(check.issues.join(" ")).toMatch(/app\.pocket/);
   });
 
   test("an assets.pak that does not match the receipt fails", () => {
@@ -588,6 +607,7 @@ describe("PSP mainline metrics drift", () => {
     mkdirSync(seg);
     writeFileSync(join(seg, "build-receipt.json"), receipt());
     writeFileSync(join(seg, "pocket-tuxemon.prx"), PRX_BYTES);
+    writeFileSync(join(seg, "app.pocket"), APP_PACKAGE_BYTES);
     writeFileSync(join(seg, "profile.jsonl"), PROFILE);
     writeFileSync(join(seg, "bench.jsonl"), bench());
     return out;
@@ -727,6 +747,7 @@ describe("PSP mainline verify --known-incomplete (integration)", () => {
     const plan = buildPlan();
     const PRX = new TextEncoder().encode("FAKE-PRX");
     const ASSETS = new TextEncoder().encode("FAKE-ASSETS-PAK");
+    const APP_PACKAGE = new TextEncoder().encode("FAKE-APP-POCKET");
     for (const e of plan) {
       const frames = e.end - segmentStart(e.chapter);
       const dir = join(root, e.id);
@@ -745,10 +766,12 @@ describe("PSP mainline verify --known-incomplete (integration)", () => {
         },
         artifacts: {
           "pocket-tuxemon.prx": { sha256: sha256(PRX) },
+          "app.pocket": { sha256: sha256(APP_PACKAGE) },
           "assets.pak": { sha256: sha256(ASSETS) },
         },
       }));
       writeFileSync(join(dir, "pocket-tuxemon.prx"), PRX);
+      writeFileSync(join(dir, "app.pocket"), APP_PACKAGE);
       writeFileSync(join(dir, "assets.pak"), ASSETS);
       const incomplete = e.id === "06-cotton-town-a";
       writeFileSync(join(dir, "profile.jsonl"), [

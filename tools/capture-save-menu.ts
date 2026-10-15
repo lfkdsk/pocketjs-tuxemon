@@ -40,6 +40,7 @@ rmSync(join(capMemstick, "dc_cap"), { recursive: true, force: true });
 mkdirSync(capMemstick, { recursive: true });
 const prx = join(OUT, "pocket-tuxemon.prx");
 copyFileSync(join(PSP_OUT, "pocket-tuxemon.prx"), prx);
+copyFileSync(join(PSP_OUT, "app.pocket"), join(OUT, "app.pocket"));
 copyFileSync(join(PSP_OUT, "assets.pak"), join(OUT, "assets.pak"));
 console.log("# run PPSSPP capture");
 const run = spawnSync(HEADLESS, ["--graphics=software", "--timeout=120", `--memstick=${capMemstick}`, prx], {

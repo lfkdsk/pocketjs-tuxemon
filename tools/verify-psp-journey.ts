@@ -10,7 +10,7 @@
 
 import { createHash } from "node:crypto";
 import { readFileSync, statSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { createProductionTuxemonBattle } from "../battle/production.ts";
 import battleRuntimeShell from "../dist/battle-runtime-shell.json";
 import type { BattleRuntimeShell } from "../importer/battle-schema.ts";
@@ -52,8 +52,11 @@ if (receipt.target !== "psp" || receipt.journey !== true ||
 // tied to the verified build.
 checkBuildArtifact(receipt.artifacts, "pocket-tuxemon.prx",
   createHash("sha256").update(readFileSync(prxPath)).digest("hex"));
-if (statSync(profilePath).mtimeMs < statSync(prxPath).mtimeMs) {
-  throw new Error("PSP profile predates the journey PRX; run the current build first");
+const packagePath = join(dirname(prxPath), "app.pocket");
+checkBuildArtifact(receipt.artifacts, "app.pocket",
+  createHash("sha256").update(readFileSync(packagePath)).digest("hex"));
+if (statSync(profilePath).mtimeMs < Math.max(statSync(prxPath).mtimeMs, statSync(packagePath).mtimeMs)) {
+  throw new Error("PSP profile predates the journey runtime/package; run the current build first");
 }
 
 const entries = readFileSync(profilePath, "utf8").trim().split("\n").map((line, index) => {

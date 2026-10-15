@@ -3,15 +3,15 @@
 // framebuffer window under PPSSPPHeadless; the desktop side renders the same
 // global frame from the same chapter save and the same mainline tape through
 // the sim host. The two sides are therefore the same reducer state at the
-// same global frame, and the retained PRX + build receipt close the
-// capture-to-build chain (PRX sha256 == receipt artifact hash).
+// same global frame, and the retained PRX + app package + build receipt close
+// the capture-to-build chain (artifact sha256 values match the receipt).
 //
 // Not in CI — needs a local PPSSPPHeadless and the PSP SDK.
 //
 // Usage:
 //   bun tools/psp-capture.ts desktop [--shot=<id>]   # render desktop controls
 //   bun tools/psp-capture.ts psp [--shot=<id>]       # build + run + convert PSP
-//   bun tools/psp-capture.ts verify                  # PRX/receipt hash + source cleanliness
+//   bun tools/psp-capture.ts verify                  # runtime/package hashes + source cleanliness
 //
 // Env: PSP_CAPTURE_DIR (default dist/captures, gitignored),
 //      PPSSPP_HEADLESS, PSP_EMU_TIMEOUT.
@@ -170,8 +170,10 @@ function buildPsp(shot: Shot): void {
     },
   });
   if (r.status !== 0) throw new Error(`capture build failed for ${shot.id}`);
-  // Retain the PRX + receipt so the capture-to-build chain is verifiable.
+  // Retain the generic runtime, its app package and receipt so the
+  // capture-to-build chain is verifiable.
   writeFileSync(join(dir, `${shot.id}.prx`), readFileSync(join(ROOT, "dist/psp/pocket-tuxemon.prx")));
+  writeFileSync(join(dir, "app.pocket"), readFileSync(join(ROOT, "dist/psp/app.pocket")));
   writeFileSync(join(dir, `${shot.id}-receipt.json`), readFileSync(join(ROOT, "dist/psp/build-receipt.json")));
 }
 
@@ -273,7 +275,8 @@ function verifyChain(): void {
     const dir = shotDir(shot);
     const prxPath = join(dir, `${shot.id}.prx`);
     const receiptPath = join(dir, `${shot.id}-receipt.json`);
-    if (!existsSync(prxPath) || !existsSync(receiptPath)) {
+    const packagePath = join(dir, "app.pocket");
+    if (!existsSync(prxPath) || !existsSync(packagePath) || !existsSync(receiptPath)) {
       console.log(`MISSING ${shot.id}`);
       bad++;
       continue;
@@ -287,6 +290,11 @@ function verifyChain(): void {
     const expected = receipt.artifacts?.["pocket-tuxemon.prx"]?.sha256;
     if (actual !== expected) {
       issues.push(`prx ${actual.slice(0, 12)} != receipt ${String(expected).slice(0, 12)}`);
+    }
+    const actualPackage = sha256(readFileSync(packagePath));
+    const expectedPackage = receipt.artifacts?.["app.pocket"]?.sha256;
+    if (actualPackage !== expectedPackage) {
+      issues.push(`app.pocket ${actualPackage.slice(0, 12)} != receipt ${String(expectedPackage).slice(0, 12)}`);
     }
     // Source provenance: the capture must come from a clean worktree at HEAD
     // or a docs-only ancestor, not a dirty tree or an artifact-affecting

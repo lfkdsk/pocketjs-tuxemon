@@ -256,6 +256,7 @@ jobs:
           name: psp-release
           path: |
             dist/psp/EBOOT.PBP
+            dist/psp/app.pocket
             dist/psp/assets.pak
             dist/psp/pocket-tuxemon.prx
             dist/psp/AUDIO-ATTRIBUTIONS.md

@@ -269,7 +269,7 @@ export function expectedBenchWindow(frames: number): { start: number; n: number 
 }
 
 /** Evaluate one segment run from its artifact directory. Every failure mode
- *  is a FAIL: missing receipt/PRX/profile/bench, PRX/receipt hash mismatch,
+ *  is a FAIL: missing receipt/PRX/package/profile/bench, artifact hash mismatch,
  *  non-zero emulator exit, verifier failure, or incomplete bench coverage. */
 export function evaluateSegmentRun(opts: {
   dir: string;
@@ -296,6 +296,12 @@ export function evaluateSegmentRun(opts: {
   const expectedPrx = receipt.artifacts?.["pocket-tuxemon.prx"]?.sha256;
   if (typeof expectedPrx !== "string" || sha256(readFileSync(prxPath)) !== expectedPrx) {
     return fail("PRX sha256 does not match the receipt artifact hash");
+  }
+  const packagePath = join(opts.dir, "app.pocket");
+  if (!existsSync(packagePath)) return fail("missing app.pocket");
+  const expectedPackage = receipt.artifacts?.["app.pocket"]?.sha256;
+  if (typeof expectedPackage !== "string" || sha256(readFileSync(packagePath)) !== expectedPackage) {
+    return fail("app.pocket sha256 does not match the receipt artifact hash");
   }
   if (opts.exitCode !== 0) {
     return fail(`emulator exited ${opts.exitCode ?? "unknown"}`);
@@ -458,8 +464,8 @@ export interface RetainedCheck {
   issues: string[];
 }
 
-/** Check one retained segment directory against its receipt: the PRX hashes
- *  to the receipt's PRX artifact hash, the retained assets.pak hashes to the
+/** Check one retained segment directory against its receipt: the PRX and
+ *  app.pocket hash to their receipt artifact hashes, the retained assets.pak hashes to the
  *  receipt's assets.pak artifact hash, the receipt is bound to the plan
  *  entry being verified (segment id, chapter, start frame, window length AND
  *  the end boundary: endFrame, terminalFrame), the profile's newest session
@@ -548,6 +554,15 @@ export function verifyRetainedSegment(opts: {
     const expected = receipt.artifacts?.["pocket-tuxemon.prx"]?.sha256;
     if (typeof expected !== "string" || sha256(readFileSync(prxPath)) !== expected) {
       issues.push("PRX sha256 does not match the receipt");
+    }
+  }
+  const packagePath = join(opts.dir, "app.pocket");
+  if (!existsSync(packagePath)) {
+    issues.push("missing app.pocket");
+  } else {
+    const expected = receipt.artifacts?.["app.pocket"]?.sha256;
+    if (typeof expected !== "string" || sha256(readFileSync(packagePath)) !== expected) {
+      issues.push("app.pocket sha256 does not match the receipt");
     }
   }
   if (!existsSync(opts.assetsPakPath)) {
@@ -716,7 +731,7 @@ if (import.meta.main) {
         `--journey-segment=${e.chapter}`, `--journey-segment-end=${e.end}`],
         { POCKETJS_LLVM_BIN: llvm });
       if (status !== 0) throw new Error(`build failed for ${e.id}`);
-      // Stash the PRX + receipt per segment so the run command can run them in
+      // Stash the runtime PRX, app package and receipt per segment so the run command can run them in
       // parallel; assets.pak is retained content-addressed (a hardlink to the
       // sha256-named store entry, never an absolute symlink into dist/), so the
       // retained evidence is portable and does not follow later rebuilds.
@@ -724,6 +739,7 @@ if (import.meta.main) {
       mkdirSync(dir, { recursive: true });
       writeFileSync(join(dir, "build-receipt.json"), readFileSync(join(PSP_OUT, "build-receipt.json")));
       writeFileSync(join(dir, "pocket-tuxemon.prx"), readFileSync(join(PSP_OUT, "pocket-tuxemon.prx")));
+      writeFileSync(join(dir, "app.pocket"), readFileSync(join(PSP_OUT, "app.pocket")));
       retainArtifact(join(PSP_OUT, "assets.pak"), join(dir, "assets.pak"), join(OUT, "assets"), ".pak");
     }
     console.log(`\nBUILD ALL DONE`);
@@ -768,6 +784,13 @@ if (import.meta.main) {
         };
         if (sha256(readFileSync(prx)) !== receipt.artifacts?.["pocket-tuxemon.prx"]?.sha256) {
           throw new Error(`PRX/receipt hash mismatch for ${e.id}; rebuild this segment`);
+        }
+        const packagePath = join(dir, "app.pocket");
+        if (!existsSync(packagePath)) {
+          throw new Error(`missing app.pocket for ${e.id}; rebuild this segment`);
+        }
+        if (sha256(readFileSync(packagePath)) !== receipt.artifacts?.["app.pocket"]?.sha256) {
+          throw new Error(`app.pocket/receipt hash mismatch for ${e.id}; rebuild this segment`);
         }
         // host0: maps to the PRX's directory, so profile/bench land in dir/.
         // Remove every artifact a previous run may have left — including the
@@ -855,9 +878,9 @@ if (import.meta.main) {
     }
     writeFileSync(join(OUT, "metrics.json"), JSON.stringify(metrics, null, 2) + "\n");
   } else if (command === "verify") {
-    // Four-way consistency gate: retained artifacts (PRX + assets.pak) match
-    // their receipts, the profile belongs to the receipt's build/segment and
-    // reached its frame count, the bench window covers [0, frames+1), and
+    // Consistency gate: retained artifacts (PRX + app.pocket + assets.pak)
+    // match their receipts, the profile belongs to the receipt's build/segment
+    // and reached its frame count, the bench window covers [0, frames+1), and
     // metrics.json recomputes from the benches. Run after `run` + `report`.
     //
     // --known-incomplete=<id> or --known-incomplete <id> (repeatable)
