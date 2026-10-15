@@ -113,7 +113,7 @@
     "verify:desktop:audio": "bun tools/verify-desktop-audio.ts",
     "verify:web:lang": "bun tools/verify-web-lang.ts",
     "verify:web:chunks": "bun tools/verify-web-chunks.ts",
-    "test": "bun test tests/",
+    "test": "bun test $(ls tests/*.test.ts | grep -v -E '(bag-menu-visual|start-menu-visual)\\.test\\.ts$') && bun test --conditions=browser tests/bag-menu-visual.test.ts tests/start-menu-visual.test.ts",
     "tsc": "bunx tsc --noEmit",
     "build:psp": "bun tools/psp.ts",
     "build:psp:zh": "bun tools/psp.ts --zh",

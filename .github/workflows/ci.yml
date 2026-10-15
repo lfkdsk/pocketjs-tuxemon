@@ -66,6 +66,12 @@ jobs:
             files: tests/g7-repository.test.ts tests/g6-golden.test.ts
           - name: locks, battle data and terrain
             files: tests/g6-locks.test.ts tests/battle-db-adapter.test.ts tests/battle-golden.test.ts tests/terrain.test.ts
+          # Solid's semantic DOM and raster paths require the browser export;
+          # running these files under the default server export only skips the
+          # assertions and would leave a misleading green job.
+          - name: browser UI visuals
+            files: tests/bag-menu-visual.test.ts tests/start-menu-visual.test.ts
+            options: --conditions=browser
           - name: rest (a-l)
             files: rest-a-l
           - name: rest (m-z)
@@ -80,7 +86,7 @@ jobs:
           files="${{ matrix.files }}"
           case "$files" in
             rest-a-l|rest-m-z)
-              rest=$(ls tests/*.test.ts | grep -v -E '(importer|g7-repository|g6-golden|g6-locks|battle-db-adapter|battle-golden|terrain)\.test\.ts$')
+              rest=$(ls tests/*.test.ts | grep -v -E '(importer|g7-repository|g6-golden|g6-locks|battle-db-adapter|battle-golden|terrain|bag-menu-visual|start-menu-visual)\.test\.ts$')
               if [ "$files" = rest-a-l ]; then
                 files=$(printf '%s\n' $rest | grep -E '^tests/[a-l]')
               else
@@ -88,7 +94,7 @@ jobs:
               fi
               ;;
           esac
-          bun test $files
+          bun test ${{ matrix.options }} $files
 
   journey:
     name: ${{ matrix.name }}

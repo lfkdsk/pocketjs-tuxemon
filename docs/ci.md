@@ -181,7 +181,8 @@ bun run check:cjk
 bun test tests/importer.test.ts
 bun test tests/g7-repository.test.ts tests/g6-golden.test.ts
 bun test tests/g6-locks.test.ts tests/battle-db-adapter.test.ts tests/battle-golden.test.ts tests/terrain.test.ts
-rest=$(ls tests/*.test.ts | grep -v -E '(importer|g7-repository|g6-golden|g6-locks|battle-db-adapter|battle-golden|terrain)\.test\.ts$')
+bun test --conditions=browser tests/bag-menu-visual.test.ts tests/start-menu-visual.test.ts
+rest=$(ls tests/*.test.ts | grep -v -E '(importer|g7-repository|g6-golden|g6-locks|battle-db-adapter|battle-golden|terrain|bag-menu-visual|start-menu-visual)\.test\.ts$')
 bun test $(printf '%s\n' $rest | grep -E '^tests/[a-l]')
 bun test $(printf '%s\n' $rest | grep -v -E '^tests/[a-l]')
 
@@ -209,6 +210,8 @@ bun tools/verify-web-journey.ts
 bun tools/verify-web-zh.ts
 bun tools/verify-web-demo.ts
 bun run verify:web:arena
+bun run verify:web:expedition
+bun run verify:web:doubles
 bun run verify:web:audio
 
 # psp job (downloads the pinned toolchain and builds pinned PPSSPP on first use)
