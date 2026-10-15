@@ -7,6 +7,7 @@ import { desktopHostFeatures } from "../vendor/pocket-rpgkit/tools/lib/desktop.t
 import { validateAndResolveBuildPlan } from "../vendor/pocket-rpgkit/vendor/pocketjs/framework/src/manifest/resolve.ts";
 import { externalizeDesktopPak } from "./desktop-audio.ts";
 import { writeDesktopBuildReceipt } from "./desktop-build-receipt.ts";
+import { writeNativeReleasePackage } from "./native-release-package.ts";
 import { minifyRuntimeBundle } from "./runtime-bundle.ts";
 
 const root = resolve(import.meta.dir, "..");
@@ -66,6 +67,18 @@ console.log(
     `${sidecar.audioEntries} audio entries (${sidecar.audioBytes} bytes) in data.fs; ` +
     `startup pak ${sidecar.fullPakBytes} -> ${sidecar.startupPakBytes} bytes`,
 );
+const packagePath = join(outdir, `${plan.app.output}.pocket`);
+const releasePackage = await writeNativeReleasePackage({
+  projectRoot: root,
+  outdir,
+  packagePath,
+  target,
+  plan,
+});
+console.log(
+  `desktop: native package keeps ${releasePackage.sourceBytes} source bytes and ` +
+    `${releasePackage.bytecodeBytes} bytecode bytes`,
+);
 copyFileSync(
   join(root, "licenses", "AUDIO-ATTRIBUTIONS.md"),
   join(outdir, "AUDIO-ATTRIBUTIONS.md"),
@@ -87,15 +100,7 @@ if (buildOnly) {
 }
 
 const flags = [
-  "--app", plan.app.output,
-  "--app-id", plan.app.id,
-  "--title", plan.app.title,
-  "--viewport", `${plan.viewport.logical[0]}x${plan.viewport.logical[1]}`,
-  "--density", String(plan.viewport.rasterDensity),
-  ...(plan.viewport.policy === "fixed" ? ["--fixed"] : []),
-  ...(plan.companions.length > 0 ? ["--companions", plan.companions.join(",")] : []),
-  "--js", join(outdir, `${plan.app.output}.js`),
-  "--pak", join(outdir, `${plan.app.output}.pak`),
+  "--pocket", packagePath,
   "--data-root", dataRoot,
 ];
 await $`${bin} ${flags} ${passthrough}`.env({ ...process.env, RUST_LOG: process.env.RUST_LOG ?? "info" });

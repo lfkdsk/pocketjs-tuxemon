@@ -25,6 +25,7 @@ interface Fixture {
   readonly appDist: string;
   readonly bundle: string;
   readonly startupPak: string;
+  readonly nativePackage: string;
   readonly projectShell: string;
 }
 
@@ -45,6 +46,7 @@ function fixture(): Fixture {
   const data = join(root, "dist", "runtime-data", APP_ID, "data", "l10n");
   const bundle = join(appDist, `${OUTPUT}.js`);
   const startupPak = join(appDist, `${OUTPUT}.pak`);
+  const nativePackage = join(appDist, `${OUTPUT}.pocket`);
   const projectShell = join(root, "dist", "project-shell.json");
   const chineseProjectShell = join(root, "dist", "project-shell.zh_CN.json");
   mkdirSync(appDist, { recursive: true });
@@ -58,6 +60,7 @@ function fixture(): Fixture {
   // bundle must make the fresh-fixture test fail.
   writeFileSync(bundle, "globalThis.frame = () => 0;\n");
   writeFileSync(startupPak, new Uint8Array([80, 65, 75, 0]));
+  writeFileSync(nativePackage, new Uint8Array([80, 67, 75, 84]));
   writeFileSync(projectShell, shell(HASH_A));
   writeFileSync(chineseProjectShell, shell("c".repeat(64)));
   writeFileSync(join(data, "en_US", "project-shell.json"), readFileSync(projectShell));
@@ -72,7 +75,7 @@ function fixture(): Fixture {
     appId: APP_ID,
     output: OUTPUT,
   });
-  return { root, appDist, bundle, startupPak, projectShell };
+  return { root, appDist, bundle, startupPak, nativePackage, projectShell };
 }
 
 function run(script: typeof SCRIPTS[number], value: Fixture) {
@@ -117,16 +120,16 @@ describe("world-cache desktop build freshness", () => {
     }
   });
 
-  test("the receipt rejects independently replaced JavaScript and startup pak files", () => {
+  test("the receipt rejects independently replaced JavaScript, pak and native package files", () => {
     const value = fixture();
-    for (const path of [value.bundle, value.startupPak]) {
+    for (const path of [value.bundle, value.startupPak, value.nativePackage]) {
       const original = readFileSync(path);
       writeFileSync(path, Buffer.concat([original, Buffer.from([1])]));
       for (const script of SCRIPTS) {
         const result = run(script, value);
         expect(result.exitCode, `${script}: ${path}`).toBe(1);
         expect(result.stderr, `${script}: ${path}`).toContain(
-          "receipt does not match the current bundle, pak and project shells",
+          "receipt does not match the current bundle, pak, native package and project shells",
         );
       }
       writeFileSync(path, original);

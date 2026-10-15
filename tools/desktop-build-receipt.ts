@@ -1,12 +1,13 @@
-// Bind the finalized desktop JavaScript, startup pak and data.fs project
-// shells to one launcher invocation. The runtime reads the shells from the
-// sidecar, so their bytes can no longer be correlated by searching the bundle.
+// Bind the finalized desktop JavaScript, startup pak, native package and
+// data.fs project shells to one launcher invocation. The runtime reads the
+// shells from the sidecar, so their bytes cannot be correlated by searching
+// the bundle.
 
 import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
 
-const FORMAT = "pocket-tuxemon/desktop-build-receipt/v1";
+const FORMAT = "pocket-tuxemon/desktop-build-receipt/v2";
 const SHA256 = /^[0-9a-f]{64}$/;
 
 export interface DesktopBuildIdentity {
@@ -31,6 +32,7 @@ export interface DesktopBuildReceipt {
   readonly artifacts: {
     readonly bundle: ArtifactReceipt;
     readonly startupPak: ArtifactReceipt;
+    readonly nativePackage: ArtifactReceipt;
     readonly englishProjectShell: ArtifactReceipt;
     readonly chineseProjectShell: ArtifactReceipt;
   };
@@ -40,6 +42,7 @@ interface DesktopBuildPaths {
   readonly receipt: string;
   readonly bundle: string;
   readonly startupPak: string;
+  readonly nativePackage: string;
   readonly englishProjectShell: string;
   readonly stagedEnglishProjectShell: string;
   readonly chineseProjectShell: string;
@@ -52,6 +55,7 @@ function pathsFor(identity: DesktopBuildIdentity): DesktopBuildPaths {
     receipt: join(identity.appDist, `${identity.output}.build-receipt.json`),
     bundle: join(identity.appDist, `${identity.output}.js`),
     startupPak: join(identity.appDist, `${identity.output}.pak`),
+    nativePackage: join(identity.appDist, `${identity.output}.pocket`),
     englishProjectShell: join(identity.inputRoot, "dist", "project-shell.json"),
     stagedEnglishProjectShell: join(data, "l10n", "en_US", "project-shell.json"),
     chineseProjectShell: join(identity.inputRoot, "dist", "project-shell.zh_CN.json"),
@@ -103,6 +107,7 @@ function expectedReceipt(identity: DesktopBuildIdentity): DesktopBuildReceipt {
     artifacts: {
       bundle: artifact(paths.bundle, `${identity.output}.js`),
       startupPak: artifact(paths.startupPak, `${identity.output}.pak`),
+      nativePackage: artifact(paths.nativePackage, `${identity.output}.pocket`),
       englishProjectShell: artifact(
         paths.stagedEnglishProjectShell,
         "data/l10n/en_US/project-shell.json",
@@ -151,6 +156,7 @@ function readReceipt(path: string): DesktopBuildReceipt {
     || artifacts === undefined
     || !isArtifactReceipt(artifacts.bundle)
     || !isArtifactReceipt(artifacts.startupPak)
+    || !isArtifactReceipt(artifacts.nativePackage)
     || !isArtifactReceipt(artifacts.englishProjectShell)
     || !isArtifactReceipt(artifacts.chineseProjectShell)
   ) {
@@ -164,7 +170,7 @@ export function assertDesktopBuildFresh(identity: DesktopBuildIdentity): Desktop
   const actual = readReceipt(path);
   const expected = expectedReceipt(identity);
   if (JSON.stringify(actual) !== JSON.stringify(expected)) {
-    throw new Error("desktop build receipt does not match the current bundle, pak and project shells");
+    throw new Error("desktop build receipt does not match the current bundle, pak, native package and project shells");
   }
   return actual;
 }

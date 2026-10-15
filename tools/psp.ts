@@ -29,6 +29,7 @@ import {
   VICTORY_TRACK,
 } from "./host-audio-probe.ts";
 import { bakeSegmentBundle, resolveSegment, replaySuffixTerminal } from "./psp-segment.ts";
+import { writeNativeReleasePackage } from "./native-release-package.ts";
 import { minifyRuntimeBundle } from "./runtime-bundle.ts";
 
 const sha256 = (bytes: Uint8Array | string): string =>
@@ -441,10 +442,24 @@ const hostFeatures = args.has("--capture")
     : benchmark
       ? ["--features=bench"]
       : [];
+const planPath = join(root, ".pocket/psp/plan.json");
+const plan = JSON.parse(readFileSync(planPath, "utf8"));
+const releasePackage = await writeNativeReleasePackage({
+  projectRoot: root,
+  outdir: out,
+  packagePath: join(out, "app.pocket"),
+  target: "psp",
+  plan,
+});
+console.log(
+  `PSP: app.pocket keeps ${releasePackage.sourceBytes} source bytes and ` +
+    `${releasePackage.bytecodeBytes} bytecode bytes`,
+);
 await run(
   [
     join(framework, "tools/psp.ts"),
-    `--plan=${join(root, ".pocket/psp/plan.json")}`,
+    "--runtime",
+    `--plan=${planPath}`,
     `--project-root=${root}`,
     `--outdir=${out}`,
     "--skip-build",
@@ -524,6 +539,7 @@ writeFileSync(join(out, "build-receipt.json"), JSON.stringify({
     "assets.pak",
     "pocket-tuxemon.js",
     "pocket-tuxemon.pak",
+    "app.pocket",
     "AUDIO-ATTRIBUTIONS.md",
     // The CJK glyph archive ships only in the Chinese package; bind it to the
     // build the same way as the PRX and pak so the verifier can audit it.
