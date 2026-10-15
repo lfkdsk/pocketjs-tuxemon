@@ -321,10 +321,20 @@ Confidence intervals use a deterministic 20,000-resample bootstrap:
 ~~~sh
 STARTUP_BASELINE_DIST=<baseline-dist> \
 STARTUP_CANDIDATE_DIST=<candidate-dist> \
+STARTUP_CANDIDATE_BYTECODE=<candidate.qjbc> \
 STARTUP_ABBA_OUTPUT=<result.ndjson> \
 STARTUP_BENCH_CPU=<logical-cpu> \
 bun tools/bench-startup-abba.ts
 ~~~
+
+`STARTUP_CANDIDATE_BYTECODE` is optional. When present, the candidate feeds
+that raw, ABI-matched bytecode to the same host and keeps the candidate's
+source file available as fallback; the baseline still compiles source. The
+accepted native-bytecode run used CPU 7 and ten windows at each English
+viewport. Source-only/bytecode medians were 224.483/108.916 ms at 480×272 and
+227.493/109.118 ms at 960×544, with bytecode worst cases of 110.894 and
+112.971 ms. The complete protocol, confidence intervals, package sizes and
+PPSSPP comparison are in [the bytecode report](../findings/G23-BYTECODE.md).
 
 The companion module profiler makes a readable diagnostic build, marks Bun's
 emitted module boundaries and leaves the shipped fully minified bundle

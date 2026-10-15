@@ -93,17 +93,18 @@ summary:
   2,206,076 B on disk and 13,394,688 B if every PSM_T8 texture were decoded,
   but only the active battle working set is resident.
 
-  A dedicated desktop QuickJS cold-start comparison uses ten alternating
-  ABBA/BAAB windows per language and viewport, with 20 fresh processes per
-  side. Full bundle minification, English startup-data entries and the smaller
-  pak improve the paired median by 8.96–12.72%. The four current medians are
-  224.654–229.591 ms. QuickJS compilation is still 136.037–139.418 ms
-  (60.27–61.81% of startup), so the 150 ms target is not yet met; a retained
-  scheduler-preempted sample reached 335.092 ms and also misses the 250 ms
-  worst-case target. Chrome with cache disabled and 4× CPU throttling improves
-  from a 1,440.250 ms median to 1,379.200 ms (-3.53%). Exact stage tables,
-  confidence intervals and the remaining PocketJS loader/bytecode-cache
-  blocker are in [the startup report](findings/G21-STARTUP.md).
+  Native desktop releases now keep the final source bundle as a fallback and
+  add target-matched QuickJS bytecode. A fixed-CPU comparison used ten
+  alternating ABBA/BAAB windows per viewport, with 20 fresh processes per side.
+  At 480×272, source-only and bytecode medians were 224.483 and 108.916 ms;
+  at 960×544 they were 227.493 and 109.118 ms. The paired improvements were
+  51.62% and 51.81%, and the bytecode worst cases were 110.894 and 112.971 ms,
+  meeting both the 150 ms median target and 250 ms hard limit. The 45,564,952 B
+  package is 6,316,560 B larger than its source-only form because it retains
+  the 1,390,793 B source section beside a 6,316,531 B bytecode envelope. Web
+  remains source-only. See [the bytecode report](findings/G23-BYTECODE.md) for
+  native measurements and [the earlier startup report](findings/G21-STARTUP.md)
+  for the source-minification and browser-loading history.
 
   On the desktop QuickJS host, the fixed-CPU journey matrix starts fresh
   processes per route and viewport. Under one-minute loads of 1.30–4.89, all
