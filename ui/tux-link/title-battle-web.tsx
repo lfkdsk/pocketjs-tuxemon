@@ -43,6 +43,7 @@ import {
 } from "./auth-store.ts";
 import {
   TuxLinkClient,
+  tuxLinkReplayPageUrl,
   type TuxLinkClientState,
   type TuxLinkRuntimeConfig,
 } from "./client.ts";
@@ -90,6 +91,8 @@ const STRINGS = {
     victory: "Victory!",
     defeat: "Defeat",
     draw: "Draw",
+    watchReplay: "Watch replay",
+    replayReady: "Trusted server replay link available.",
     replayUnavailable: "No trusted replay link was provided.",
     resultHelp: "Return to Battle modes",
     move: "Move",
@@ -123,6 +126,8 @@ const STRINGS = {
     victory: "胜利！",
     defeat: "战败",
     draw: "平局",
+    watchReplay: "观看回放",
+    replayReady: "可信服务器回放链接已就绪。",
     replayUnavailable: "服务器未提供可信回放链接。",
     resultHelp: "返回对战模式",
     move: "招式",
@@ -217,6 +222,7 @@ export interface PocketTuxLinkHook {
     actionIndex: number;
     selfSubmitted: boolean;
     opponentRefs: string[];
+    replayAvailable: boolean;
     opponentSpecies: string[];
   };
 }
@@ -336,7 +342,10 @@ export function createTitleBattleOverlay(options: TitleBattleOptions): SessionOw
         if (authState() !== "ready") return;
         if (state.phase === "idle") void client.createMatch();
         else if (state.phase === "decision") client.submitSelected();
-        else if (state.phase === "ended" || state.phase === "error") leaveLink();
+        else if (state.phase === "ended" && state.replayUrl) {
+          const location = (globalThis as unknown as { location?: Location }).location;
+          if (location) location.assign(tuxLinkReplayPageUrl(state.replayUrl, location.href));
+        } else if (state.phase === "ended" || state.phase === "error") leaveLink();
       };
 
       const selectMode = (index: number): void => {
@@ -388,6 +397,7 @@ export function createTitleBattleOverlay(options: TitleBattleOptions): SessionOw
           actionIndex: client.state().actionIndex,
           selfSubmitted: client.state().selfSubmitted,
           opponentRefs: client.state().observation?.opponent.active.map((monster) => monster.publicId) ?? [],
+          replayAvailable: client.state().replayUrl !== null,
           opponentSpecies: client.state().observation?.opponent.active.map((monster) => monster.species.slug) ?? [],
         }),
       };
@@ -575,9 +585,9 @@ const TuxLinkTitleView: Component<{ controller: TuxLinkTitleController }> = (pro
                 </>
               }>
                 <Text class="text-lg" style={{ posType: 1, insetL: 22, insetT: 22, width: 272, height: 31, lineHeight: 25, textAlign: 1, textColor: TUXEMON_UI_THEME.accent }} debugName="tux-link-result">{resultText()}</Text>
-                <Text class="text-xs" style={{ posType: 1, insetL: 22, insetT: 63, width: 272, height: 31, lineHeight: 15, textAlign: 1, textColor: TUXEMON_UI_THEME.dim }} debugName="tux-link-replay-unavailable">{t().replayUnavailable}</Text>
+                <Text class="text-xs" style={{ posType: 1, insetL: 22, insetT: 63, width: 272, height: 31, lineHeight: 15, textAlign: 1, textColor: TUXEMON_UI_THEME.dim }} debugName={state().replayUrl ? "tux-link-replay-ready" : "tux-link-replay-unavailable"}>{state().replayUrl ? t().replayReady : t().replayUnavailable}</Text>
                 <View class="absolute flex-row justify-center items-center" style={{ posType: 1, insetL: PRIMARY_RECT.x - 82, insetT: PRIMARY_RECT.y - 62, width: PRIMARY_RECT.w, height: PRIMARY_RECT.h, borderWidth: 2, borderColor: TUXEMON_UI_THEME.accent, bgColor: "#145064" }}>
-                  <Text class="text-sm" style={{ width: 180, height: 20, lineHeight: 18, textAlign: 1, textColor: "#ffffff" }}>{t().resultHelp}</Text>
+                  <Text class="text-sm" style={{ width: 180, height: 20, lineHeight: 18, textAlign: 1, textColor: "#ffffff" }}>{state().replayUrl ? t().watchReplay : t().resultHelp}</Text>
                 </View>
               </Show>
             </View>

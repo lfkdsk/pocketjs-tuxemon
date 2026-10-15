@@ -10,6 +10,8 @@ import type {
 import type { TuxPublicObservation } from "../battle/tux-link-wire.ts";
 import {
   TuxLinkClient,
+  isTrustedTuxReplayUrl,
+  tuxLinkReplayPageUrl,
   type TuxLinkFetch,
   type TuxLinkHttpResponse,
 } from "../ui/tux-link/client.ts";
@@ -180,12 +182,12 @@ function fixture(capabilities: unknown = {
   };
 }
 
-function welcome(selfSubmitted = false, connectionEpoch = 1) {
+function welcome(selfSubmitted = false, connectionEpoch = 1, caps = 1) {
   return {
     type: "welcome",
     v: 1,
     arenaV: 1,
-    caps: 1,
+    caps,
     side: 0,
     connectionEpoch,
     turnRevision: 7,
@@ -232,7 +234,7 @@ describe("Tux Link client", () => {
     expect(JSON.parse(f.sockets[0]!.sent[0]!)).toEqual({
       type: "hello",
       v: 1,
-      caps: 1,
+      caps: 3,
       ticket: "opaque-ticket",
       requestId: "hello_request_00001",
     });
@@ -349,7 +351,105 @@ describe("Tux Link client", () => {
     expect(f.client.state()).toMatchObject({
       phase: "ended",
       result: { winner: "self", reason: "knockout" },
+      replayUrl: null,
     });
-    expect(JSON.stringify(f.client.state())).not.toContain("replay");
+  });
+
+  test("accepts replay links only with the negotiated bit and exact trusted HTTPS prefix", async () => {
+    const replayUrl = `${CONFIG.trustedReplayBase}match-1?expires=1&signature=opaque`;
+    expect(isTrustedTuxReplayUrl(replayUrl, CONFIG.trustedReplayBase)).toBe(true);
+    const pageUrl = tuxLinkReplayPageUrl(replayUrl, "https://game.example/pocket-tuxemon/index.html?old=1");
+    const target = new URL(pageUrl);
+    expect(target.pathname).toBe("/pocket-tuxemon/replay.html");
+    expect(target.searchParams.get("battleReplay")).toBe(replayUrl);
+    expect(target.searchParams.get("battleReplayExternal")).toBe("1");
+    expect(target.searchParams.has("old")).toBe(false);
+    for (const unsafe of [
+      "http://battle.example/prefix/tux/v1/replays/match-1",
+      "https://battle.example/prefix/tux/v1/replays-evil/match-1",
+      "https://evil.example/prefix/tux/v1/replays/match-1",
+      "https://user@battle.example/prefix/tux/v1/replays/match-1",
+      `${replayUrl}#fragment`,
+      ` ${replayUrl}`,
+    ]) {
+      expect(isTrustedTuxReplayUrl(unsafe, CONFIG.trustedReplayBase)).toBe(false);
+    }
+
+    const capabilities = {
+      service: "tux-battle",
+      enabled: true,
+      wireV: 1,
+      arenaV: 1,
+      caps: 3,
+      requiredCaps: 1,
+    };
+    const accepted = fixture(capabilities);
+    await accepted.client.probe();
+    accepted.client.enter("opaque-ticket", INVITE);
+    const acceptedSocket = accepted.sockets[0]!;
+    acceptedSocket.open();
+    expect(JSON.parse(acceptedSocket.sent[0]!).caps).toBe(3);
+    acceptedSocket.message(welcome(false, 1, 3));
+    acceptedSocket.message({
+      type: "ended",
+      v: 1,
+      turnRevision: 8,
+      result: { winner: "self", reason: "knockout" },
+      observation: observation(8, { winner: 0, turns: 8, reason: "knockout" }),
+      replayUrl,
+    });
+    expect(accepted.client.state()).toMatchObject({ phase: "ended", replayUrl });
+
+    const missingBit = fixture();
+    await missingBit.client.probe();
+    missingBit.client.enter("opaque-ticket", INVITE);
+    const missingBitSocket = missingBit.sockets[0]!;
+    missingBitSocket.open();
+    missingBitSocket.message(welcome());
+    missingBitSocket.message({
+      type: "ended",
+      v: 1,
+      turnRevision: 8,
+      result: { winner: "self", reason: "knockout" },
+      observation: observation(8, { winner: 0, turns: 8, reason: "knockout" }),
+      replayUrl,
+    });
+    expect(missingBit.client.state()).toMatchObject({
+      phase: "error",
+      replayUrl: null,
+      error: "replay-capability-not-negotiated",
+    });
+
+    const overNegotiated = fixture();
+    await overNegotiated.client.probe();
+    overNegotiated.client.enter("opaque-ticket", INVITE);
+    const overNegotiatedSocket = overNegotiated.sockets[0]!;
+    overNegotiatedSocket.open();
+    overNegotiatedSocket.message(welcome(false, 1, 3));
+    expect(overNegotiated.client.state()).toMatchObject({
+      phase: "error",
+      replayUrl: null,
+      error: "invalid-capability-negotiation",
+    });
+
+    const wrongPath = fixture(capabilities);
+    await wrongPath.client.probe();
+    wrongPath.client.enter("opaque-ticket", INVITE);
+    const wrongPathSocket = wrongPath.sockets[0]!;
+    wrongPathSocket.open();
+    wrongPathSocket.message(welcome(false, 1, 3));
+    wrongPathSocket.message({
+      type: "ended",
+      v: 1,
+      turnRevision: 8,
+      result: { winner: "self", reason: "knockout" },
+      observation: observation(8, { winner: 0, turns: 8, reason: "knockout" }),
+      replayUrl: "https://battle.example/prefix/tux/v1/replays-evil/match-1",
+    });
+    expect(wrongPath.client.state()).toMatchObject({
+      phase: "error",
+      replayUrl: null,
+      error: "untrusted-replay-url",
+    });
   });
 });

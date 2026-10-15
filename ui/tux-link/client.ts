@@ -7,6 +7,7 @@ import {
 } from "@pocketjs/framework/socket";
 
 import {
+  TUX_CAP_REPLAY_URL_V1,
   TUX_REQUIRED_CAPS,
   TUX_SUPPORTED_CAPS,
   TUX_WIRE_VERSION,
@@ -61,6 +62,7 @@ export interface TuxLinkClientState {
   readonly presentationTicks: number;
   readonly actionIndex: number;
   readonly result: { winner: "self" | "opponent" | null; reason: string } | null;
+  readonly replayUrl: string | null;
   readonly error: string | null;
 }
 
@@ -113,6 +115,34 @@ function joinBase(base: string, path: string): string {
   return `${base}${path}`;
 }
 
+/** Preliminary check for a result-page link. The replay loader repeats this
+ * check against fetch's final Response.url before accepting authority. */
+export function isTrustedTuxReplayUrl(value: string, trustedReplayBase: string): boolean {
+  if (value !== value.trim() || trustedReplayBase !== trustedReplayBase.trim() ||
+    /[\u0000-\u0020\u007f\\]/.test(value) || /[\u0000-\u0020\u007f\\]/.test(trustedReplayBase)) return false;
+  let url: URL;
+  let base: URL;
+  try {
+    url = new URL(value);
+    base = new URL(trustedReplayBase);
+  } catch {
+    return false;
+  }
+  return url.protocol === "https:" && base.protocol === "https:" && url.origin === base.origin &&
+    url.username === "" && url.password === "" && url.hash === "" &&
+    base.username === "" && base.password === "" && base.search === "" && base.hash === "" &&
+    base.pathname.endsWith("/") && url.pathname.startsWith(base.pathname);
+}
+
+/** Navigate only to the flat dispatcher. It chooses immutable artifact paths
+ * from its embedded allowlist after reading the replay identity. */
+export function tuxLinkReplayPageUrl(replayUrl: string, pageUrl: string): string {
+  const target = new URL("replay.html", pageUrl);
+  target.searchParams.set("battleReplay", replayUrl);
+  target.searchParams.set("battleReplayExternal", "1");
+  return target.href;
+}
+
 function message(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
@@ -135,6 +165,7 @@ function initialState(config: TuxLinkRuntimeConfig | null): TuxLinkClientState {
     presentationTicks: 0,
     actionIndex: 0,
     result: null,
+    replayUrl: null,
     error: null,
   };
 }
@@ -160,6 +191,7 @@ export class TuxLinkClient {
   private inviteSecret: string | null = null;
   private helloRequestId: string | null = null;
   private submitRequestId: string | null = null;
+  private negotiatedCaps = 0;
 
   constructor(options: TuxLinkClientOptions) {
     this.config = options.config;
@@ -229,6 +261,7 @@ export class TuxLinkClient {
       phase: "idle",
       error: null,
       result: null,
+      replayUrl: null,
       presentation: [],
       presentationTicks: 0,
     });
@@ -342,10 +375,20 @@ export class TuxLinkClient {
 
   private applyFrame(frame: TuxServerFrame): void {
     if (frame.type === "welcome") {
+      const advertisedCaps = this.current.capability.kind === "ready"
+        ? this.current.capability.response.caps
+        : 0;
+      if (((frame.caps & ~TUX_SUPPORTED_CAPS) >>> 0) !== 0 ||
+        ((frame.caps & ~advertisedCaps) >>> 0) !== 0) {
+        this.socket?.close(1008, "protocol");
+        this.publish({ phase: "error", replayUrl: null, error: "invalid-capability-negotiation" });
+        return;
+      }
       const consumedInvite = this.inviteSecret !== null;
       this.inviteSecret = null;
       this.helloRequestId = null;
       this.submitRequestId = null;
+      this.negotiatedCaps = frame.caps;
       this.reconnectAtMs = 0;
       this.publish({
         phase: frame.selfSubmitted ? "submitted" : "decision",
@@ -401,11 +444,24 @@ export class TuxLinkClient {
       return;
     }
     this.submitRequestId = null;
+    const replayUrl = frame.replayUrl;
+    if (replayUrl !== undefined && (this.negotiatedCaps & TUX_CAP_REPLAY_URL_V1) === 0) {
+      this.socket?.close(1008, "protocol");
+      this.publish({ phase: "error", replayUrl: null, error: "replay-capability-not-negotiated" });
+      return;
+    }
+    if (replayUrl !== undefined &&
+      (!this.config || !isTrustedTuxReplayUrl(replayUrl, this.config.trustedReplayBase))) {
+      this.socket?.close(1008, "protocol");
+      this.publish({ phase: "error", replayUrl: null, error: "untrusted-replay-url" });
+      return;
+    }
     this.publish({
       phase: "ended",
       turnRevision: frame.turnRevision,
       observation: frame.observation,
       result: frame.result,
+      replayUrl: replayUrl ?? null,
       selfSubmitted: false,
       submitPending: false,
       presentation: [],
@@ -520,6 +576,7 @@ export class TuxLinkClient {
     this.inviteSecret = null;
     this.helloRequestId = null;
     this.submitRequestId = null;
+    this.negotiatedCaps = 0;
     const capability = this.current.capability;
     this.current = { ...initialState(this.config), capability };
     this.onChange?.(this.current);

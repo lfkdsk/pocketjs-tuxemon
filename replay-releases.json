@@ -1,0 +1,10 @@
+{
+  "v": 1,
+  "releases": [
+    {
+      "engineRevision": "pocket-tuxemon/arena-engine/v1",
+      "dataDigest": "49cc9fc9b11899d511689ea9a59169bcaa41c86262f3e46f3b0a25a475e002a3",
+      "artifactId": "arena-engine-v1-49cc9fc9b11899d511689ea9a59169bcaa41c86262f3e46f3b0a25a475e002a3"
+    }
+  ]
+}

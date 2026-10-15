@@ -10,12 +10,17 @@ import { onFrame } from "@pocketjs/framework/lifecycle";
 import {
   advanceArenaReplay,
   arenaReplayRuntimeState,
-  loadArenaReplayTape,
+  loadArenaReplayDocument,
   prepareArenaReplay,
   type PreparedArenaReplay,
 } from "./battle/arena-replay.ts";
 import type { ArenaBattle } from "./battle/arena.ts";
 import type { RuntimeBattleState } from "./battle/runtime.ts";
+import {
+  SERVER_DATA_DIGEST,
+  SERVER_ENGINE_REVISION,
+} from "./battle/server-runtime.ts";
+import type { LinkTerminalOverride } from "./battle/tux-link-replay.ts";
 import type { JsonValue } from "./vendor/pocket-rpgkit/src/engine/types.ts";
 import { TuxemonBattleScene } from "./ui/battle-scene.tsx";
 import { setBattleSceneLang } from "./ui/battle-scene-locale.ts";
@@ -41,9 +46,14 @@ const COPY = lang === "zh_CN" ? {
   turn: "回合",
   ready: "录带已验证",
   complete: "回放结束",
+  authoritativeAbandoned: "权威赛果：对局已中止。",
+  authoritativeForfeit: (side: number) => `权威赛果：第 ${side} 方因对手弃权获胜。`,
   controls: "对战回放控制",
   error: "无法加载录带",
-  help: "只读取版本化 JSON 录带；支持 data:、同源路径和显式 HTTPS 外部地址。",
+  browserUnavailable: "浏览器回放接口不可用。",
+  incompatible: "回放无效、来源不可信，或与此固定版本播放器不兼容。",
+  playerMismatch: "播放器页面与其固定引擎身份不匹配。",
+  help: "只读取版本化 JSON 录带或 Link 回放；外部权威赛果必须来自可信 HTTPS 地址。",
   title: "对战回放",
 } : {
   loading: "Loading battle tape…",
@@ -54,9 +64,14 @@ const COPY = lang === "zh_CN" ? {
   turn: "Turn",
   ready: "Tape verified",
   complete: "Replay complete",
+  authoritativeAbandoned: "Authoritative result: match abandoned.",
+  authoritativeForfeit: (side: number) => `Authoritative result: Side ${side} wins by forfeit.`,
   controls: "Battle replay controls",
   error: "Could not load tape",
-  help: "Reads versioned JSON tapes only: data:, same-origin paths, or explicitly enabled external HTTPS.",
+  browserUnavailable: "Browser replay APIs are unavailable.",
+  incompatible: "The replay is invalid, untrusted, or incompatible with this immutable player.",
+  playerMismatch: "The player page does not match its immutable engine identity.",
+  help: "Reads versioned JSON tapes or Link replays; authoritative external results require trusted HTTPS.",
   title: "Battle replay",
 };
 
@@ -67,6 +82,7 @@ export interface ArenaReplayPageState {
   playing: boolean;
   speed: 1 | 2 | 4;
   terminalHash: string | null;
+  authoritativeResult: string | null;
   error: string | null;
 }
 
@@ -91,6 +107,42 @@ const browser = globalThis as unknown as {
 };
 const document = browser.document;
 const location = browser.location;
+
+interface EmbeddedReplayBuildConfig {
+  trustedReplayBase: string | null;
+}
+
+function embeddedReplayBuildConfig(): EmbeddedReplayBuildConfig {
+  const text = document?.getElementById("pocket-game")?.textContent;
+  if (!text) throw new Error("missing player config");
+  const value = JSON.parse(text) as Record<string, unknown>;
+  const release = value.replayRelease;
+  if (typeof release !== "object" || release === null || Array.isArray(release)) {
+    throw new Error("missing replay release identity");
+  }
+  const identity = release as Record<string, unknown>;
+  if (identity.engineRevision !== SERVER_ENGINE_REVISION || identity.dataDigest !== SERVER_DATA_DIGEST) {
+    throw new Error("replay release identity mismatch");
+  }
+  const trustedReplayBase = value.trustedReplayBase;
+  if (trustedReplayBase === null) return { trustedReplayBase: null };
+  if (typeof trustedReplayBase !== "string" || trustedReplayBase !== trustedReplayBase.trim() ||
+    /[\u0000-\u0020\u007f\\]/.test(trustedReplayBase)) {
+    throw new Error("invalid trusted replay base");
+  }
+  const base = new URL(trustedReplayBase);
+  if (base.protocol !== "https:" || base.username || base.password || base.search || base.hash ||
+    !base.pathname.endsWith("/")) {
+    throw new Error("invalid trusted replay base");
+  }
+  return { trustedReplayBase: base.href };
+}
+
+function terminalOverrideText(override: LinkTerminalOverride): string {
+  return override.reason === "abandoned"
+    ? COPY.authoritativeAbandoned
+    : COPY.authoritativeForfeit(override.winner + 1);
+}
 
 function element(id: string): HTMLElement | null {
   return document?.getElementById(id) ?? null;
@@ -119,8 +171,10 @@ if (document) {
 function ReplayApp() {
   const [runtime, setRuntime] = createSignal<RuntimeBattleState | null>(null);
   const [canvasMessage, setCanvasMessage] = createSignal(COPY.loading);
+  const [authoritativeResult, setAuthoritativeResult] = createSignal<string | null>(null);
   let prepared: PreparedArenaReplay | null = null;
   let battle: ArenaBattle | null = null;
+  let terminalOverride: LinkTerminalOverride | null = null;
   let turn = 0;
   let playing = false;
   let speed: 1 | 2 | 4 = 1;
@@ -134,6 +188,7 @@ function ReplayApp() {
     playing,
     speed,
     terminalHash: prepared?.terminalHash ?? null,
+    authoritativeResult: authoritativeResult(),
     error: failure,
   });
 
@@ -153,7 +208,7 @@ function ReplayApp() {
     if (status) {
       status.textContent = failure !== null
         ? `${COPY.error}: ${failure}`
-        : prepared === null ? COPY.loading : complete ? COPY.complete : COPY.ready;
+        : prepared === null ? COPY.loading : complete ? authoritativeResult() ?? COPY.complete : COPY.ready;
     }
     for (const speedButton of Array.from(
       document?.querySelectorAll<HTMLButtonElement>("[data-arena-replay-speed]") ?? [],
@@ -165,6 +220,8 @@ function ReplayApp() {
 
   const publish = (): void => {
     if (!battle) return;
+    const complete = prepared !== null && turn >= prepared.tape.actions.length;
+    setAuthoritativeResult(complete && terminalOverride ? terminalOverrideText(terminalOverride) : null);
     setRuntime(arenaReplayRuntimeState(battle));
     setCanvasMessage("");
     syncControls();
@@ -234,23 +291,45 @@ function ReplayApp() {
     }
     syncControls();
     if (!location || !browser.fetch) {
-      failure = "browser replay APIs are unavailable";
+      failure = COPY.browserUnavailable;
       setCanvasMessage(`${COPY.error}: ${failure}`);
       syncControls();
       return;
     }
-    void loadArenaReplayTape(
+    let buildConfig: EmbeddedReplayBuildConfig;
+    try {
+      buildConfig = embeddedReplayBuildConfig();
+    } catch (error) {
+      console.error("battle replay build identity rejected", error);
+      failure = COPY.playerMismatch;
+      setCanvasMessage(`${COPY.error}: ${failure}`);
+      syncControls();
+      return;
+    }
+    void loadArenaReplayDocument(
       location.search,
       location.href,
       (url, init) => browser.fetch!(url, init),
-    ).then((recording) => {
-      prepared = prepareArenaReplay(recording);
+      {
+        expectedIdentity: {
+          engineRevision: SERVER_ENGINE_REVISION,
+          dataDigest: SERVER_DATA_DIGEST,
+        },
+        trustedReplayBase: buildConfig.trustedReplayBase ?? "https://invalid.invalid/replays/",
+      },
+    ).then((loaded) => {
+      if (loaded.kind !== "raw" && buildConfig.trustedReplayBase === null) {
+        throw new Error("Link replay player has no trusted replay base");
+      }
+      terminalOverride = loaded.kind === "raw" ? null : loaded.terminalOverride;
+      prepared = prepareArenaReplay(loaded.tape);
       battle = prepared.initial;
       turn = battle.turn;
       publish();
       play();
     }).catch((error: unknown) => {
-      failure = error instanceof Error ? error.message : String(error);
+      console.error("battle replay document rejected", error);
+      failure = COPY.incompatible;
       setCanvasMessage(`${COPY.error}: ${failure}`);
       syncControls();
     });
@@ -273,12 +352,28 @@ function ReplayApp() {
           </Text>
         </View>}
     >
-      {(value) => <TuxemonBattleScene
-        state={value() as unknown as JsonValue}
-        width={480}
-        height={272}
-        active
-      />}
+      {(value) => <>
+        <TuxemonBattleScene
+          state={value() as unknown as JsonValue}
+          width={480}
+          height={272}
+          active
+        />
+        <Show when={authoritativeResult()}>
+          {(message) => <View
+            class="absolute flex items-center justify-center"
+            style={{ posType: 1, insetL: 34, insetT: 92, width: 412, height: 88, borderWidth: 2, borderColor: "#73e5ef", bgColor: "#071923ee" }}
+            debugName="arena-replay-authoritative-result"
+          >
+            <Text
+              class="text-sm text-white text-center"
+              style={{ width: 370, height: 52, lineHeight: 20 }}
+            >
+              {message()}
+            </Text>
+          </View>}
+        </Show>
+      </>}
     </Show>
   );
 }

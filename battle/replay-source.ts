@@ -31,6 +31,16 @@ export type ReplayJsonFetch = (
   init: { credentials: "same-origin" | "omit" },
 ) => Promise<ReplayJsonResponse>;
 
+/** Bounded JSON text plus the transport facts needed by format-specific trust
+ * policies. `finalUrl` is the normalized final response URL for fetched input
+ * (falling back to the requested URL when a host omits Response.url), and null
+ * for inline data URLs. */
+export interface LoadedReplayJsonText {
+  text: string;
+  source: ReplayJsonSource;
+  finalUrl: string | null;
+}
+
 export class ReplaySourceError extends Error {
   constructor(message: string) {
     super(message);
@@ -163,16 +173,20 @@ export function resolveReplayJsonSource(
   return { kind: "url", url: url.href, external };
 }
 
-/** Load one bounded JSON document. Redirects preserve the source trust class. */
-export async function loadReplayJsonText(
+/** Load one bounded JSON document while retaining its source and final URL.
+ * Redirects preserve the source trust class. Format-specific code may impose a
+ * narrower final-origin/path policy after this transport-only validation. */
+export async function loadReplayJsonTextWithMetadata(
   search: string,
   baseUrl: string,
   fetcher: ReplayJsonFetch,
   policy: ReplayJsonSourcePolicy,
   noun: string,
-): Promise<string> {
+): Promise<LoadedReplayJsonText> {
   const source = resolveReplayJsonSource(search, baseUrl, policy, noun);
-  if (source.kind === "inline") return source.json;
+  if (source.kind === "inline") {
+    return { text: source.json, source, finalUrl: null };
+  }
   const response = await fetcher(source.url, {
     credentials: source.external ? "omit" : "same-origin",
   });
@@ -196,5 +210,26 @@ export async function loadReplayJsonText(
   if (Number.isFinite(declared) && declared > policy.maxBytes) {
     sourceError(policy, `${noun} exceeds ${policy.maxBytes} decoded bytes`);
   }
-  return readResponseJson(response.body, policy, noun);
+  return {
+    text: await readResponseJson(response.body, policy, noun),
+    source,
+    finalUrl: finalUrl.href,
+  };
+}
+
+/** Backward-compatible text-only facade used by existing replay formats. */
+export async function loadReplayJsonText(
+  search: string,
+  baseUrl: string,
+  fetcher: ReplayJsonFetch,
+  policy: ReplayJsonSourcePolicy,
+  noun: string,
+): Promise<string> {
+  return (await loadReplayJsonTextWithMetadata(
+    search,
+    baseUrl,
+    fetcher,
+    policy,
+    noun,
+  )).text;
 }

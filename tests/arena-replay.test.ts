@@ -13,6 +13,7 @@ import {
   advanceArenaReplay,
   ARENA_REPLAY_MAX_BYTES,
   arenaReplayRuntimeState,
+  loadArenaReplayDocument,
   loadArenaReplayTape,
   parseArenaReplayTape,
   prepareArenaReplay,
@@ -23,6 +24,13 @@ import { tuxemonRuntimeBattleState } from "../battle/runtime.ts";
 
 const SEED = "0123456789abcdef".repeat(4);
 const BASE = "https://game.example/pocket-tuxemon/replay.html";
+const DOCUMENT_OPTIONS = {
+  expectedIdentity: {
+    engineRevision: "pocket-tuxemon/arena-engine/v1",
+    dataDigest: "4".repeat(64),
+  },
+  trustedReplayBase: "https://battle.example/tux/v1/replays/",
+};
 
 function oneTurnTape(): BattleTape {
   const battle = createArenaBattle({
@@ -108,6 +116,25 @@ describe("Arena web replay input", () => {
     await expect(loadArenaReplayTape("?battleReplay=tape.json", BASE, async () => response(json, {
       headers: { get: () => "text/html" },
     }))).rejects.toThrow("must be JSON");
+  });
+
+  test("the document loader preserves URL source and final response metadata for raw tapes", async () => {
+    const json = JSON.stringify(oneTurnTape());
+    const sourceUrl = "https://other.example/tape.json";
+    const finalUrl = "https://cdn.example/replays/tape.json?signature=opaque";
+    const loaded = await loadArenaReplayDocument(
+      `?battleReplay=${encodeURIComponent(sourceUrl)}&battleReplayExternal=1`,
+      BASE,
+      async (_url, init) => {
+        expect(init.credentials).toBe("omit");
+        return response(json, { url: finalUrl });
+      },
+      DOCUMENT_OPTIONS,
+    );
+    expect(loaded.kind).toBe("raw");
+    expect(loaded.source).toEqual({ kind: "url", url: sourceUrl, external: true });
+    expect(loaded.finalUrl).toBe(finalUrl);
+    expect(loaded.tape).toEqual(oneTurnTape());
   });
 
   test("bounds a chunked response before allocating or parsing the complete body", async () => {

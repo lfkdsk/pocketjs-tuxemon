@@ -54,4 +54,24 @@ describe("Tux Link build isolation", () => {
     expect(generated).toContain("globalThis.__pocketTuxLinkBuildConfig = null;");
     expect(generated).not.toMatch(/https?:\/\//);
   });
+
+  test("replay artifacts are built only after ordinary bundle bytes are frozen and checked", () => {
+    const source = readFileSync(resolve(ROOT, "tools/web.ts"), "utf8");
+    const snapshot = source.indexOf("const ordinaryBundleBytes");
+    const replayBuild = source.indexOf('join(root, "battle-replay.tsx")');
+    const unchangedCheck = source.indexOf("ordinaryBundleBytes.equals");
+    expect(snapshot).toBeGreaterThan(-1);
+    expect(replayBuild).toBeGreaterThan(snapshot);
+    expect(unchangedCheck).toBeGreaterThan(replayBuild);
+    expect(source).toContain('join(gameDir, "replays", currentReplayRelease.artifactId)');
+    expect(source).toContain("tuxLinkReplayDispatcherHtml");
+    expect(source).toContain('replayConfig.wasm = "../../../pocketjs.wasm"');
+    expect(source).toContain(".replaceAll('src=\"../', 'src=\"../../../')");
+
+    const replayEntry = readFileSync(resolve(ROOT, "battle-replay.tsx"), "utf8");
+    expect(replayEntry).toContain("loadArenaReplayDocument");
+    expect(replayEntry).toContain("SERVER_ENGINE_REVISION");
+    expect(replayEntry).toContain("SERVER_DATA_DIGEST");
+    expect(replayEntry).toContain("arena-replay-authoritative-result");
+  });
 });

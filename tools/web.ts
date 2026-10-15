@@ -1,14 +1,24 @@
 // Build Pocket Tuxemon's static web site and keep the audio credits readable
 // beside the downloadable game. The same file also travels inside the pak.
 
-import { copyFileSync, readFileSync, rmSync } from "node:fs";
+import { copyFileSync, mkdirSync, readFileSync, rmSync } from "node:fs";
 import { join, resolve } from "node:path";
+import {
+  SERVER_DATA_DIGEST,
+  SERVER_ENGINE_REVISION,
+} from "../battle/server-runtime.ts";
+import { ARENA_REPLAY_MAX_BYTES } from "../battle/tux-link-replay.ts";
 import { minifyRuntimeBundle } from "./runtime-bundle.ts";
 import {
   resolveTuxLinkConfig,
   resolveTuxLinkWebAuthConfig,
 } from "./tux-link-config.ts";
 import { tuxLinkWebEntrySource } from "./tux-link-web-entry.ts";
+import {
+  parseReplayReleaseManifest,
+  requireReplayRelease,
+  tuxLinkReplayDispatcherHtml,
+} from "./tux-link-replay-routing.ts";
 import {
   buildWebPakChunks,
   WEB_PAK_MANIFEST,
@@ -17,6 +27,13 @@ import {
 const root = resolve(import.meta.dir, "..");
 const tuxLinkConfig = resolveTuxLinkConfig(process.argv.slice(2), process.env);
 const tuxLinkWebAuth = resolveTuxLinkWebAuthConfig(process.argv.slice(2), process.env);
+const replayReleases = parseReplayReleaseManifest(JSON.parse(
+  readFileSync(join(root, "replay-releases.json"), "utf8"),
+));
+const currentReplayRelease = requireReplayRelease(replayReleases, {
+  engineRevision: SERVER_ENGINE_REVISION,
+  dataDigest: SERVER_DATA_DIGEST,
+});
 
 async function run(command: string[]): Promise<void> {
   const child = Bun.spawn(command, {
@@ -77,8 +94,16 @@ await run([
   `--project-root=${root}`,
   `--outdir=${gameDir}`,
 ]);
-const replayBundle = await minifyRuntimeBundle(join(gameDir, "battle-replay.js"));
+const replayBundlePath = join(gameDir, "battle-replay.js");
+const replayPakPath = join(gameDir, "battle-replay.pak");
+const replayBundle = await minifyRuntimeBundle(replayBundlePath);
 console.log(`replay bundle: ${replayBundle.before} -> ${replayBundle.after} bytes`);
+const replayArtifactDir = join(gameDir, "replays", currentReplayRelease.artifactId);
+mkdirSync(replayArtifactDir, { recursive: true });
+copyFileSync(replayBundlePath, join(replayArtifactDir, "battle-replay.js"));
+copyFileSync(replayPakPath, join(replayArtifactDir, "battle-replay.pak"));
+rmSync(replayBundlePath);
+rmSync(replayPakPath);
 await run([
   process.execPath,
   join(root, "vendor", "pocket-rpgkit", "vendor", "pocketjs", "tools", "build.ts"),
@@ -148,13 +173,24 @@ const replayConfig = JSON.parse(configMatch[2]!) as Record<string, unknown>;
 replayConfig.app = "battle-replay";
 replayConfig.bundle = "battle-replay.js";
 replayConfig.pak = "battle-replay.pak";
+replayConfig.wasm = "../../../pocketjs.wasm";
 replayConfig.autosaveStorageKey = "pocket-rpgkit:battle-replay:unused:v1";
+replayConfig.replayRelease = currentReplayRelease;
+replayConfig.trustedReplayBase = tuxLinkConfig?.trustedReplayBase.startsWith("https:")
+  ? tuxLinkConfig.trustedReplayBase
+  : null;
 const replayHtml = playerHtml
+  .replaceAll('href="../', 'href="../../../')
+  .replaceAll('src="../', 'src="../../../')
   .replace("</head>", `${replayStyles}\n</head>`)
   .replace('<section class="info">', `${replayControls}\n<section class="info">`)
   .replace(configPattern, `$1${JSON.stringify(replayConfig).replace(/</g, "\\u003c")}$3`);
-await Bun.write(join(gameDir, "replay.html"), replayHtml);
-const expeditionReplayConfig = { ...replayConfig };
+await Bun.write(join(replayArtifactDir, "replay.html"), replayHtml);
+await Bun.write(
+  join(gameDir, "replay.html"),
+  tuxLinkReplayDispatcherHtml(replayReleases, currentReplayRelease, ARENA_REPLAY_MAX_BYTES),
+);
+const expeditionReplayConfig = JSON.parse(configMatch[2]!) as Record<string, unknown>;
 expeditionReplayConfig.app = "expedition-replay";
 expeditionReplayConfig.bundle = "expedition-replay.js";
 expeditionReplayConfig.pak = "expedition-replay.pak";

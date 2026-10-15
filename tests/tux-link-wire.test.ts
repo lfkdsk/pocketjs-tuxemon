@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
   TUX_CAP_PUBLIC_PRESENTATION_V1,
+  TUX_CAP_REPLAY_URL_V1,
   decodeTuxAction,
   decodeTuxCapabilities,
   decodeTuxCreateMatchResponse,
@@ -87,6 +88,19 @@ describe("Tux Link wire v1 capabilities and invite", () => {
     });
     expect(current).not.toBeNull();
     expect(supportsTuxLinkV1(current!)).toBe(true);
+
+    const replayRequired = decodeTuxCapabilities({
+      ...current,
+      caps: TUX_CAP_PUBLIC_PRESENTATION_V1 | TUX_CAP_REPLAY_URL_V1,
+      requiredCaps: TUX_CAP_REPLAY_URL_V1,
+    });
+    expect(replayRequired && supportsTuxLinkV1(replayRequired)).toBe(true);
+    const impossibleRequired = decodeTuxCapabilities({
+      ...current,
+      caps: TUX_CAP_PUBLIC_PRESENTATION_V1,
+      requiredCaps: TUX_CAP_REPLAY_URL_V1,
+    });
+    expect(impossibleRequired && supportsTuxLinkV1(impossibleRequired)).toBe(false);
 
     const oldWire = decodeTuxCapabilities({ ...current, wireV: 0 });
     const wrongArena = decodeTuxCapabilities({ ...current, arenaV: 2 });
@@ -204,6 +218,25 @@ describe("Tux Link wire v1 battle documents", () => {
       type: "ended", v: 1, turnRevision: 8,
       result: { winner: "self", reason: "battle-complete" }, observation: terminal,
     })?.type).toBe("ended");
+    const replayUrl = "https://battle.example/tux/v1/replays/match?expires=1&signature=opaque";
+    expect(decodeTuxServerFrame({
+      type: "ended", v: 1, turnRevision: 8,
+      result: { winner: "self", reason: "battle-complete" }, observation: terminal,
+      replayUrl,
+    })).toMatchObject({ type: "ended", replayUrl });
+    for (const unsafe of [
+      "http://battle.example/tux/v1/replays/match",
+      "https://user@battle.example/tux/v1/replays/match",
+      "https://battle.example/tux/v1/replays/match#fragment",
+      " https://battle.example/tux/v1/replays/match",
+      "https://battle.example\\evil.example/replay",
+    ]) {
+      expect(decodeTuxServerFrame({
+        type: "ended", v: 1, turnRevision: 8,
+        result: { winner: "self", reason: "battle-complete" }, observation: terminal,
+        replayUrl: unsafe,
+      })).toBeNull();
+    }
     expect(decodeTuxServerFrame({
       type: "ended", v: 1, turnRevision: 8,
       result: { winner: "self", reason: "battle-complete", replayUrl: "https://private.example" },

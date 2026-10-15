@@ -14,7 +14,7 @@ export const TUX_CAP_PUBLIC_PRESENTATION_V1 = 1 << 0;
 export const TUX_CAP_REPLAY_URL_V1 = 1 << 1;
 export const TUX_KNOWN_CAPS =
   TUX_CAP_PUBLIC_PRESENTATION_V1 | TUX_CAP_REPLAY_URL_V1;
-export const TUX_SUPPORTED_CAPS = TUX_CAP_PUBLIC_PRESENTATION_V1;
+export const TUX_SUPPORTED_CAPS = TUX_KNOWN_CAPS;
 export const TUX_REQUIRED_CAPS = TUX_CAP_PUBLIC_PRESENTATION_V1;
 export const TUX_MAX_CLIENT_FRAME_BYTES = 1_024;
 
@@ -215,6 +215,7 @@ export interface TuxEndedFrame {
   turnRevision: number;
   result: { winner: "self" | "opponent" | null; reason: string };
   observation: TuxPublicObservation;
+  replayUrl?: string;
 }
 
 export type TuxServerFrame =
@@ -242,8 +243,9 @@ export function decodeTuxCapabilities(value: unknown): TuxCapabilitiesResponse |
 export function supportsTuxLinkV1(value: TuxCapabilitiesResponse): boolean {
   return value.enabled && value.wireV === TUX_WIRE_VERSION && value.arenaV === TUX_ARENA_VERSION &&
     (value.caps & TUX_REQUIRED_CAPS) === TUX_REQUIRED_CAPS &&
+    (value.caps & value.requiredCaps) === value.requiredCaps &&
     (value.requiredCaps & ~TUX_KNOWN_CAPS) === 0 &&
-    (value.requiredCaps & TUX_REQUIRED_CAPS) === value.requiredCaps;
+    (value.requiredCaps & TUX_SUPPORTED_CAPS) === value.requiredCaps;
 }
 
 export function decodeTuxCreateMatchResponse(value: unknown): TuxCreateMatchResponse | null {
@@ -379,14 +381,28 @@ export function decodeTuxServerFrame(value: unknown): TuxServerFrame | null {
       : null;
   }
   if (raw.type === "ended") {
-    if (!exactKeys(raw, ["type", "v", "turnRevision", "result", "observation"]) ||
+    if (!exactKeys(raw, ["type", "v", "turnRevision", "result", "observation"], ["replayUrl"]) ||
       nonNegativeSafeInteger(raw.turnRevision) === null || !endedResult(raw.result)) return null;
+    if (raw.replayUrl !== undefined && !replayUrl(raw.replayUrl)) return null;
     const observation = decodeTuxPublicObservation(raw.observation);
     return observation && observation.turn === raw.turnRevision && observation.result !== null
       ? raw as unknown as TuxEndedFrame
       : null;
   }
   return null;
+}
+
+function replayUrl(value: unknown): value is string {
+  if (typeof value !== "string" || value.length < 1 || value.length > 2_048 ||
+    value !== value.trim() || /[\u0000-\u0020\u007f\\]/.test(value)) return false;
+  let parsed: URL;
+  try {
+    parsed = new URL(value);
+  } catch {
+    return false;
+  }
+  return parsed.protocol === "https:" && parsed.username === "" &&
+    parsed.password === "" && parsed.hash === "";
 }
 
 /** Validate and serialize one client frame within the server's 1,024-byte cap. */

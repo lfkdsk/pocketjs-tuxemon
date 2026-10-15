@@ -28,14 +28,24 @@ import {
   ReplaySourceError,
   assertReplayJsonSize,
   loadReplayJsonText,
+  loadReplayJsonTextWithMetadata,
   resolveReplayJsonSource,
+  type LoadedReplayJsonText,
   type ReplayJsonFetch,
   type ReplayJsonResponse,
   type ReplayJsonSource,
-  type ReplayJsonSourcePolicy,
 } from "./replay-source.ts";
+import {
+  ARENA_REPLAY_MAX_BYTES,
+  ARENA_REPLAY_SOURCE_POLICY,
+  LINK_REPLAY_KIND,
+  validateLinkReplayEnvelope,
+  type LinkReplayEnvelope,
+  type LinkReplayValidationOptions,
+  type LinkTerminalOverride,
+} from "./tux-link-replay.ts";
 
-export const ARENA_REPLAY_MAX_BYTES = 4 * 1024 * 1024;
+export { ARENA_REPLAY_MAX_BYTES } from "./tux-link-replay.ts";
 
 export type ArenaReplaySource = ReplayJsonSource;
 export type ArenaReplayResponse = ReplayJsonResponse;
@@ -47,13 +57,24 @@ export interface PreparedArenaReplay {
   terminalHash: string;
 }
 
+export type LoadedArenaReplayDocument =
+  | {
+      kind: "raw";
+      tape: BattleTape;
+      source: ReplayJsonSource;
+      finalUrl: string | null;
+    }
+  | {
+      kind: typeof LINK_REPLAY_KIND;
+      tape: BattleTape;
+      envelope: LinkReplayEnvelope;
+      source: ReplayJsonSource;
+      finalUrl: string | null;
+      terminalHash: string;
+      terminalOverride: LinkTerminalOverride | null;
+    };
+
 const SOURCE_DB = validateBattleDb(battleDbJson);
-const ARENA_SOURCE_POLICY: ReplayJsonSourcePolicy = {
-  sourceParam: "battleReplay",
-  externalParam: "battleReplayExternal",
-  maxBytes: ARENA_REPLAY_MAX_BYTES,
-  errorPrefix: "battle replay",
-};
 
 function replayError(message: string): never {
   throw new ArenaTapeError(`battle replay: ${message}`);
@@ -64,29 +85,35 @@ function replayError(message: string): never {
  * without credentials and still parsed only as JSON. */
 export function resolveArenaReplaySource(search: string, baseUrl: string): ArenaReplaySource {
   try {
-    return resolveReplayJsonSource(search, baseUrl, ARENA_SOURCE_POLICY, "tape");
+    return resolveReplayJsonSource(search, baseUrl, ARENA_REPLAY_SOURCE_POLICY, "tape");
   } catch (error) {
     if (error instanceof ReplaySourceError) throw new ArenaTapeError(error.message);
     throw error;
   }
 }
 
+function validatedArenaReplayTape(value: unknown): BattleTape {
+  const checked: ArenaTapeValidation = validateBattleTape(value);
+  if (!checked.ok) replayError(checked.error);
+  return checked.tape;
+}
+
+function parseReplayJson(text: string): unknown {
+  try {
+    return JSON.parse(text);
+  } catch {
+    replayError("source is not valid JSON");
+  }
+}
+
 export function parseArenaReplayTape(text: string): BattleTape {
   try {
-    assertReplayJsonSize(text, ARENA_SOURCE_POLICY, "tape");
+    assertReplayJsonSize(text, ARENA_REPLAY_SOURCE_POLICY, "tape");
   } catch (error) {
     if (error instanceof ReplaySourceError) throw new ArenaTapeError(error.message);
     throw error;
   }
-  let value: unknown;
-  try {
-    value = JSON.parse(text);
-  } catch {
-    replayError("source is not valid JSON");
-  }
-  const checked: ArenaTapeValidation = validateBattleTape(value);
-  if (!checked.ok) replayError(checked.error);
-  return checked.tape;
+  return validatedArenaReplayTape(parseReplayJson(text));
 }
 
 /** Load one bounded JSON tape. Redirects must preserve the source's trust
@@ -101,13 +128,65 @@ export async function loadArenaReplayTape(
       search,
       baseUrl,
       fetcher,
-      ARENA_SOURCE_POLICY,
+      ARENA_REPLAY_SOURCE_POLICY,
       "tape",
     ));
   } catch (error) {
     if (error instanceof ReplaySourceError) throw new ArenaTapeError(error.message);
     throw error;
   }
+}
+
+function hasOwnKind(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value) &&
+    Object.prototype.hasOwnProperty.call(value, "kind");
+}
+
+/** Load either a legacy raw BattleTape or an exact Tuxemon Link envelope.
+ * Dispatch is intentionally based only on an own `kind` field: a missing kind
+ * stays backward-compatible with raw tapes, while unknown kinds never fall
+ * through to another validator. */
+export async function loadArenaReplayDocument(
+  search: string,
+  baseUrl: string,
+  fetcher: ArenaReplayFetch,
+  options: LinkReplayValidationOptions,
+): Promise<LoadedArenaReplayDocument> {
+  let loaded: LoadedReplayJsonText;
+  try {
+    loaded = await loadReplayJsonTextWithMetadata(
+      search,
+      baseUrl,
+      fetcher,
+      ARENA_REPLAY_SOURCE_POLICY,
+      "document",
+    );
+  } catch (error) {
+    if (error instanceof ReplaySourceError) throw new ArenaTapeError(error.message);
+    throw error;
+  }
+  const value = parseReplayJson(loaded.text);
+  if (!hasOwnKind(value)) {
+    return {
+      kind: "raw",
+      tape: validatedArenaReplayTape(value),
+      source: loaded.source,
+      finalUrl: loaded.finalUrl,
+    };
+  }
+  if (value.kind !== LINK_REPLAY_KIND) {
+    replayError("unsupported replay document kind");
+  }
+  const linked = validateLinkReplayEnvelope(value, loaded, options);
+  return {
+    kind: LINK_REPLAY_KIND,
+    tape: linked.envelope.tape,
+    envelope: linked.envelope,
+    source: linked.source,
+    finalUrl: linked.finalUrl,
+    terminalHash: linked.terminalHash,
+    terminalOverride: linked.terminalOverride,
+  };
 }
 
 /** Validate the complete semantic replay before the first frame is shown.
