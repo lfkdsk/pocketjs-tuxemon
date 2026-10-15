@@ -233,6 +233,12 @@ async function main(): Promise<void> {
   const root = resolve(import.meta.dir, "..");
   const baseline = requiredDirectory("STARTUP_BASELINE_DIST");
   const candidate = requiredDirectory("STARTUP_CANDIDATE_DIST");
+  const candidateBytecode = process.env.STARTUP_CANDIDATE_BYTECODE
+    ? resolve(process.env.STARTUP_CANDIDATE_BYTECODE)
+    : undefined;
+  if (candidateBytecode && !existsSync(candidateBytecode)) {
+    throw new Error(`STARTUP_CANDIDATE_BYTECODE is missing: ${candidateBytecode}`);
+  }
   const output = resolve(
     process.env.STARTUP_ABBA_OUTPUT
       ?? join(process.env.TMPDIR ?? "/var/tmp", "pocket-tuxemon-startup-abba.ndjson"),
@@ -250,6 +256,7 @@ async function main(): Promise<void> {
     type: "header",
     baseline,
     candidate,
+    candidateBytecode,
     cpu,
     windows,
     maxLoad,
@@ -289,6 +296,8 @@ async function main(): Promise<void> {
         delete env.G6_STARTUP_MS;
         delete env.G6_BUDGET_MS;
         delete env.G6_STARTUP_PROFILE;
+        if (variant === "candidate" && candidateBytecode) env.G6_BYTECODE = candidateBytecode;
+        else delete env.G6_BYTECODE;
         if (language === "zh_CN") env.G6_LANG = language;
         else delete env.G6_LANG;
         const cpuBefore = cpuStat(cpu);

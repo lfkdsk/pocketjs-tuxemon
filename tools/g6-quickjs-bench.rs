@@ -269,6 +269,7 @@ mod g6_quickjs_bench {
     struct StageTimes {
         pak_read_ms: f64,
         source_read_ms: f64,
+        bytecode_read_ms: f64,
         surface_create_ms: f64,
         pak_feed_ms: f64,
         supervisor_ms: f64,
@@ -433,6 +434,14 @@ mod g6_quickjs_bench {
         let phase_start = Instant::now();
         let source = std::fs::read_to_string(resolve_asset(args.js.clone(), &args.app, "js")?)?;
         let source_read_ms = phase_start.elapsed().as_secs_f64() * 1_000.0;
+        let (bytecode, bytecode_read_ms) = if let Some(path) = std::env::var_os("G6_BYTECODE") {
+            let phase_start = Instant::now();
+            let bytes = std::fs::read(&path)
+                .map_err(|error| anyhow!("read trusted benchmark bytecode {:?}: {error}", path))?;
+            (Some(bytes), phase_start.elapsed().as_secs_f64() * 1_000.0)
+        } else {
+            (None, 0.0)
+        };
         let phase_start = Instant::now();
         let surface = UiSurface::new_with_density(
             (args.viewport.0 as f32, args.viewport.1 as f32),
@@ -559,7 +568,15 @@ mod g6_quickjs_bench {
         let prelude_ms = phase_start.elapsed().as_secs_f64() * 1_000.0;
         let host_init_ms = host_init_start.elapsed().as_secs_f64() * 1_000.0;
 
-        let (compile_ms, eval_ms) = gp1_eval_staged(&guest, &args.app, &source)?;
+        let (compile_ms, eval_ms) = if let Some(bytecode) = bytecode.as_deref() {
+            let eval_start = Instant::now();
+            // G6_BYTECODE is benchmark-only and must be extracted from a
+            // package that already passed the target ABI/integrity gate.
+            unsafe { guest.eval_trusted_bytecode(&args.app, bytecode) }?;
+            (0.0, eval_start.elapsed().as_secs_f64() * 1_000.0)
+        } else {
+            gp1_eval_staged(&guest, &args.app, &source)?
+        };
         // Native-audio verification wraps the mounted audio namespace after
         // the production bundle has installed its frame handler. Ordinary
         // performance runs do not set this variable and pay no extra eval or
@@ -620,6 +637,7 @@ mod g6_quickjs_bench {
             StageTimes {
                 pak_read_ms,
                 source_read_ms,
+                bytecode_read_ms,
                 surface_create_ms,
                 pak_feed_ms,
                 supervisor_ms,
@@ -1434,6 +1452,7 @@ mod g6_quickjs_bench {
         let host_phases = [
             ("pak-read", stages.pak_read_ms),
             ("source-read", stages.source_read_ms),
+            ("bytecode-read", stages.bytecode_read_ms),
             ("surface-create", stages.surface_create_ms),
             ("pak-feed", stages.pak_feed_ms),
             ("supervisor", stages.supervisor_ms),
@@ -1813,6 +1832,7 @@ mod g6_quickjs_bench {
     fn args(dist: &PathBuf, app: &str, data: PathBuf, width: u32, height: u32) -> Args {
         Args {
             app: app.into(),
+            pocket: None,
             js: Some(dist.join(format!("{app}.js"))),
             pak: Some(dist.join(format!("{app}.pak"))),
             file: None,
@@ -3161,8 +3181,9 @@ mod g6_quickjs_bench {
         let report = PathBuf::from(std::env::var("G6_MAP_REPORT").expect("G6_MAP_REPORT"));
         let data = bench_root.join(format!("qjs-map-data-{}", std::process::id()));
         seed_maps(&maps, &data);
-        let runtime =
-            Runtime::boot(args(&dist, "map-benchmark-entry", data.clone(), 480, 272)).unwrap();
+        let mut runtime_args = args(&dist, "map-benchmark-entry", data.clone(), 480, 272);
+        let assets = GuestAssets::load(&mut runtime_args).unwrap();
+        let runtime = Runtime::boot(runtime_args, assets).unwrap();
         let (profile_frames, profile_marks, profile_capture) = frame_profile_config();
         let bench = Bench {
             rt: runtime,
