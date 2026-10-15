@@ -679,6 +679,35 @@ base. A missing historical artifact, mismatched player identity, unknown
 revision/digest, invalid pre-terminal hash, or natural-terminal override fails
 closed with a bilingual error.
 
+Historical players stay available without committing their large generated
+files to Git. `replay-releases.json` is an append-only allowlist. Its current
+entry is rebuilt locally and may omit `artifacts`; before advancing to a new
+engine or data identity, publish the exact current player's four files under
+immutable HTTPS URLs:
+
+```text
+replay.html
+battle-replay.js
+battle-replay.pak
+audio-worklet.js
+```
+
+Then generate their byte-count and SHA-256 locks and copy the printed
+`artifacts` object into that entry:
+
+```sh
+bun tools/lock-tux-link-replay.ts \
+  --artifact-dir dist/web/pocket-tuxemon/replays/<artifact-id> \
+  --asset-base https://downloads.example/releases/<release>/
+```
+
+Do not replace an existing URL, object or lock. Once another entry becomes
+current, every Web build restores all historical players from those locks.
+Downloads omit credentials and accept only final HTTPS URLs whose complete
+stream matches the checked-in byte count and digest; missing locks, changed
+local bytes, incomplete downloads and changed remote bytes fail the build
+closed. Partial files are removed rather than published.
+
 Forfeit and abandonment are authoritative only when the loaded response's
 final URL remains within the exact configured replay origin and pathname
 prefix. Production trust is HTTPS-only. An explicitly configured Web build may

@@ -2,7 +2,24 @@ export interface ReplayRelease {
   engineRevision: string;
   dataDigest: string;
   artifactId: string;
+  /** Once this entry is no longer current, these content-addressed release
+   * assets restore its immutable player into each fresh Pages build. */
+  artifacts?: ReplayReleaseArtifacts;
 }
+
+export type ReplayReleaseArtifactName =
+  | "replay.html"
+  | "battle-replay.js"
+  | "battle-replay.pak"
+  | "audio-worklet.js";
+
+export interface ReplayReleaseArtifact {
+  url: string;
+  bytes: number;
+  sha256: string;
+}
+
+export type ReplayReleaseArtifacts = Record<ReplayReleaseArtifactName, ReplayReleaseArtifact>;
 
 export type ReplayRouteSelection =
   | { ok: true; release: ReplayRelease; raw: boolean }
@@ -11,6 +28,15 @@ export type ReplayRouteSelection =
 const REVISION = /^[A-Za-z0-9][A-Za-z0-9._/-]{0,127}$/;
 const SHA256 = /^[0-9a-f]{64}$/;
 const ARTIFACT_ID = /^[a-z0-9][a-z0-9._-]{0,126}$/;
+const ARTIFACT_NAMES: readonly ReplayReleaseArtifactName[] = [
+  "replay.html", "battle-replay.js", "battle-replay.pak", "audio-worklet.js",
+];
+const ARTIFACT_MAX_BYTES: Readonly<Record<ReplayReleaseArtifactName, number>> = {
+  "replay.html": 1 * 1024 * 1024,
+  "battle-replay.js": 16 * 1024 * 1024,
+  "battle-replay.pak": 256 * 1024 * 1024,
+  "audio-worklet.js": 1 * 1024 * 1024,
+};
 
 function record(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -21,11 +47,37 @@ function exactKeys(value: Record<string, unknown>, keys: readonly string[]): boo
     keys.every((key) => Object.prototype.hasOwnProperty.call(value, key));
 }
 
+function validArtifactUrl(value: unknown): value is string {
+  if (typeof value !== "string" || value !== value.trim() || /[\u0000-\u0020\u007f\\]/.test(value)) return false;
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    return false;
+  }
+  return url.protocol === "https:" && !url.username && !url.password && !url.search && !url.hash &&
+    !/%(?:2f|5c)/i.test(url.pathname) && url.href === value;
+}
+
+function validArtifacts(value: unknown): value is ReplayReleaseArtifacts {
+  if (!record(value) || !exactKeys(value, ARTIFACT_NAMES)) return false;
+  return ARTIFACT_NAMES.every((name) => {
+    const artifact = value[name];
+    return record(artifact) && exactKeys(artifact, ["url", "bytes", "sha256"]) &&
+      validArtifactUrl(artifact.url) && Number.isSafeInteger(artifact.bytes) &&
+      (artifact.bytes as number) > 0 && (artifact.bytes as number) <= ARTIFACT_MAX_BYTES[name] &&
+      typeof artifact.sha256 === "string" && SHA256.test(artifact.sha256);
+  });
+}
+
 function validRelease(value: unknown): value is ReplayRelease {
-  return record(value) && exactKeys(value, ["engineRevision", "dataDigest", "artifactId"]) &&
+  return record(value) &&
+    (exactKeys(value, ["engineRevision", "dataDigest", "artifactId"]) ||
+      exactKeys(value, ["engineRevision", "dataDigest", "artifactId", "artifacts"])) &&
     typeof value.engineRevision === "string" && REVISION.test(value.engineRevision) &&
     typeof value.dataDigest === "string" && SHA256.test(value.dataDigest) &&
-    typeof value.artifactId === "string" && ARTIFACT_ID.test(value.artifactId);
+    typeof value.artifactId === "string" && ARTIFACT_ID.test(value.artifactId) &&
+    (value.artifacts === undefined || validArtifacts(value.artifacts));
 }
 
 /** Parse the checked-in immutable-player allowlist. Artifact paths come only
@@ -36,7 +88,17 @@ export function parseReplayReleaseManifest(value: unknown): ReplayRelease[] {
     !value.releases.every(validRelease)) {
     throw new Error("replay release manifest is invalid");
   }
-  const releases = value.releases.map((release) => ({ ...release })) as ReplayRelease[];
+  const releases = value.releases.map((release) => {
+    const valid = release as ReplayRelease;
+    return {
+      engineRevision: valid.engineRevision,
+      dataDigest: valid.dataDigest,
+      artifactId: valid.artifactId,
+      ...(valid.artifacts
+        ? { artifacts: Object.fromEntries(ARTIFACT_NAMES.map((name) => [name, { ...valid.artifacts![name] }])) as ReplayReleaseArtifacts }
+        : {}),
+    };
+  });
   const identities = releases.map((release) => `${release.engineRevision}\n${release.dataDigest}`);
   const artifactIds = releases.map((release) => release.artifactId);
   if (new Set(identities).size !== identities.length || new Set(artifactIds).size !== artifactIds.length) {
@@ -107,7 +169,16 @@ export function tuxLinkReplayDispatcherHtml(
   if (trustedReplayBase !== null && !validTrustedReplayBase(trustedReplayBase)) {
     throw new Error("trusted replay base is invalid");
   }
-  const config = scriptJson({ v: 1, releases, current, maxBytes, trustedReplayBase });
+  const route = ({ engineRevision, dataDigest, artifactId }: ReplayRelease): ReplayRelease => ({
+    engineRevision, dataDigest, artifactId,
+  });
+  const config = scriptJson({
+    v: 1,
+    releases: releases.map(route),
+    current: route(current),
+    maxBytes,
+    trustedReplayBase,
+  });
   return `<!doctype html>
 <html lang="en">
 <head>

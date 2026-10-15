@@ -19,6 +19,7 @@ import {
   requireReplayRelease,
   tuxLinkReplayDispatcherHtml,
 } from "./tux-link-replay-routing.ts";
+import { materializeHistoricalReplayReleases } from "./tux-link-replay-artifacts.ts";
 import {
   buildWebPakChunks,
   WEB_PAK_MANIFEST,
@@ -81,6 +82,11 @@ console.log(`runtime bundle: ${bundle.before} -> ${bundle.after} bytes`);
 const gameDir = join(root, "dist", "web", "pocket-tuxemon");
 const ordinaryBundlePath = join(gameDir, "pocket-tuxemon.js");
 const ordinaryPakPath = join(gameDir, "pocket-tuxemon.pak");
+await materializeHistoricalReplayReleases({
+  releases: replayReleases,
+  current: currentReplayRelease,
+  outDir: join(gameDir, "replays"),
+});
 // This is the completed ordinary build before either optional replay entry is
 // compiled. Keep its bytes so the same Web job proves entry-graph isolation.
 const ordinaryBundleBytes = readFileSync(ordinaryBundlePath);
