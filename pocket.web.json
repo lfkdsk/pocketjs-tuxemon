@@ -1,0 +1,36 @@
+{
+  "$schema": "https://pocketjs.dev/schema/pocket-2.json",
+  "pocket": 2,
+  "id": "dev.lfkdsk.pocket-tuxemon",
+  "name": "pocket-tuxemon",
+  "title": "Pocket Tuxemon",
+  "version": "0.1.0",
+  "engine": {
+    "capabilities": {
+      "requires": [
+        "text.glyphs.baked",
+        "input.buttons",
+        "net.http",
+        "net.socket"
+      ],
+      "enhances": [
+        "data.fs",
+        "audio.pcm"
+      ]
+    }
+  },
+  "app": {
+    "entry": "web-main.generated.tsx",
+    "output": "pocket-tuxemon",
+    "framework": "solid",
+    "viewport": {
+      "fixed": {
+        "logical": [
+          480,
+          272
+        ],
+        "presentation": "integer-fit"
+      }
+    }
+  }
+}

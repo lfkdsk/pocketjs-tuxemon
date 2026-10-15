@@ -4,11 +4,22 @@ export interface TuxLinkConfig {
   trustedReplayBase: string;
 }
 
+export interface TuxLinkWebAuthConfig {
+  github: {
+    clientId: string;
+    worker: string;
+  };
+}
+
 export type TuxLinkEnvironment = Readonly<Record<string, string | undefined>>;
 
 const FLAG = "--tux-battle-url";
 const ENV_KEY = "TUX_BATTLE_BASE_URL";
 const REPLAY_PREFIX = "tux/v1/replays/";
+const AUTH_CLIENT_FLAG = "--tux-github-client-id";
+const AUTH_WORKER_FLAG = "--tux-github-auth-worker";
+const AUTH_CLIENT_ENV = "TUX_GITHUB_CLIENT_ID";
+const AUTH_WORKER_ENV = "TUX_GITHUB_AUTH_WORKER";
 
 function fail(reason: string): never {
   throw new Error(`invalid Tux Battle base URL: ${reason}`);
@@ -119,4 +130,54 @@ export function resolveTuxLinkConfig(
   if (selected === undefined) return null;
   if (selected.length === 0) throw new Error(`${ENV_KEY} must not be empty`);
   return parseTuxBattleBaseUrl(selected);
+}
+
+function flagValue(args: readonly string[], flag: string): string | undefined {
+  let selected: string | undefined;
+  for (let index = 0; index < args.length; index++) {
+    const arg = args[index]!;
+    let value: string | undefined;
+    if (arg === flag) {
+      value = args[++index];
+      if (value === undefined || value.startsWith("--")) throw new Error(`${flag} requires a value`);
+    } else if (arg.startsWith(`${flag}=`)) {
+      value = arg.slice(flag.length + 1);
+    } else {
+      continue;
+    }
+    if (selected !== undefined) throw new Error(`${flag} may be specified only once`);
+    if (value.length === 0) throw new Error(`${flag} requires a value`);
+    selected = value;
+  }
+  return selected;
+}
+
+/** Optional page-chrome OAuth metadata. It is a build input rather than a
+ * repository default so public source never pins a deployment address. */
+export function resolveTuxLinkWebAuthConfig(
+  args: readonly string[],
+  env: TuxLinkEnvironment,
+): TuxLinkWebAuthConfig | null {
+  const clientId = flagValue(args, AUTH_CLIENT_FLAG) ?? env[AUTH_CLIENT_ENV];
+  const workerValue = flagValue(args, AUTH_WORKER_FLAG) ?? env[AUTH_WORKER_ENV];
+  if (clientId === undefined && workerValue === undefined) return null;
+  if (clientId === undefined || workerValue === undefined) {
+    throw new Error(`${AUTH_CLIENT_ENV} and ${AUTH_WORKER_ENV} must be configured together`);
+  }
+  if (!/^[A-Za-z0-9_]+$/.test(clientId)) throw new Error(`${AUTH_CLIENT_ENV} is not a valid OAuth client id`);
+  if (workerValue !== workerValue.trim() || /[\u0000-\u0020\u007f\\]/.test(workerValue) ||
+    workerValue.includes("?") || workerValue.includes("#")) {
+    throw new Error(`${AUTH_WORKER_ENV} must be an absolute HTTPS URL without query or fragment`);
+  }
+  let worker: URL;
+  try {
+    worker = new URL(workerValue);
+  } catch {
+    throw new Error(`${AUTH_WORKER_ENV} must be an absolute HTTPS URL`);
+  }
+  if (worker.protocol !== "https:" || worker.username || worker.password) {
+    throw new Error(`${AUTH_WORKER_ENV} must be an absolute HTTPS URL without userinfo`);
+  }
+  worker.pathname = worker.pathname.replace(/\/+$/, "");
+  return { github: { clientId, worker: worker.toString().replace(/\/$/, "") } };
 }

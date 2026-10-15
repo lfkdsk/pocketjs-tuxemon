@@ -4,6 +4,7 @@
   "games": {
     "pocket-tuxemon": {
       "title": "Pocket Tuxemon",
+      "manifest": "pocket.web.json",
       "description": "Play the complete Spyder campaign from the new-game bedroom through the Omnichannel Radio Tower broadcast and the Kernel showdown — 263 imported maps with NPCs, dialogue, shops and real battles. Use the chapter buttons to jump into any story beat, or warp to any map.",
       "controls": [
         {

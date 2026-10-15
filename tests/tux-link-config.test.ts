@@ -3,6 +3,7 @@ import { describe, expect, test } from "bun:test";
 import {
   parseTuxBattleBaseUrl,
   resolveTuxLinkConfig,
+  resolveTuxLinkWebAuthConfig,
 } from "../tools/tux-link-config.ts";
 
 describe("Tux Link build URL", () => {
@@ -103,5 +104,44 @@ describe("Tux Link build URL", () => {
     expect(() => resolveTuxLinkConfig([], { TUX_BATTLE_BASE_URL: "" })).toThrow(/must not be empty/);
     expect(() => resolveTuxLinkConfig([], { TUX_BATTLE_BASE_URL: "http://production.example" }))
       .toThrow(/HTTP is allowed only/);
+  });
+});
+
+describe("Tux Link Web auth build metadata", () => {
+  test("is absent by default and accepts paired CLI or environment values", () => {
+    expect(resolveTuxLinkWebAuthConfig([], {})).toBeNull();
+    expect(resolveTuxLinkWebAuthConfig([], {
+      TUX_GITHUB_CLIENT_ID: "public_client_123",
+      TUX_GITHUB_AUTH_WORKER: "https://auth.example/tux/",
+    })).toEqual({ github: { clientId: "public_client_123", worker: "https://auth.example/tux" } });
+    expect(resolveTuxLinkWebAuthConfig([
+      "--tux-github-client-id=cli_client",
+      "--tux-github-auth-worker", "https://login.example/callback-base",
+    ], {
+      TUX_GITHUB_CLIENT_ID: "env_client",
+      TUX_GITHUB_AUTH_WORKER: "https://env.example",
+    })).toEqual({ github: { clientId: "cli_client", worker: "https://login.example/callback-base" } });
+  });
+
+  test("requires a complete safe pair without a baked deployment fallback", () => {
+    expect(() => resolveTuxLinkWebAuthConfig([], { TUX_GITHUB_CLIENT_ID: "only_client" }))
+      .toThrow(/configured together/);
+    expect(() => resolveTuxLinkWebAuthConfig([], { TUX_GITHUB_AUTH_WORKER: "https:\/\/auth.example" }))
+      .toThrow(/configured together/);
+    for (const worker of [
+      "http://auth.example",
+      "https://user@auth.example",
+      "https://auth.example?next=evil",
+      " https://auth.example",
+    ]) {
+      expect(() => resolveTuxLinkWebAuthConfig([], {
+        TUX_GITHUB_CLIENT_ID: "client",
+        TUX_GITHUB_AUTH_WORKER: worker,
+      }), worker).toThrow();
+    }
+    expect(() => resolveTuxLinkWebAuthConfig([], {
+      TUX_GITHUB_CLIENT_ID: "bad-client",
+      TUX_GITHUB_AUTH_WORKER: "https://auth.example",
+    })).toThrow(/client id/);
   });
 });

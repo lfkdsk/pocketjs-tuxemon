@@ -1,15 +1,22 @@
 // Build Pocket Tuxemon's static web site and keep the audio credits readable
 // beside the downloadable game. The same file also travels inside the pak.
 
-import { copyFileSync, readFileSync } from "node:fs";
+import { copyFileSync, readFileSync, rmSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { minifyRuntimeBundle } from "./runtime-bundle.ts";
+import {
+  resolveTuxLinkConfig,
+  resolveTuxLinkWebAuthConfig,
+} from "./tux-link-config.ts";
+import { tuxLinkWebEntrySource } from "./tux-link-web-entry.ts";
 import {
   buildWebPakChunks,
   WEB_PAK_MANIFEST,
 } from "./web-chunks.ts";
 
 const root = resolve(import.meta.dir, "..");
+const tuxLinkConfig = resolveTuxLinkConfig(process.argv.slice(2), process.env);
+const tuxLinkWebAuth = resolveTuxLinkWebAuthConfig(process.argv.slice(2), process.env);
 
 async function run(command: string[]): Promise<void> {
   const child = Bun.spawn(command, {
@@ -21,12 +28,35 @@ async function run(command: string[]): Promise<void> {
 }
 
 await run([process.execPath, join(root, "gen-assets.ts")]);
-await run([
-  process.execPath,
-  join(root, "vendor", "pocket-rpgkit", "tools", "web.ts"),
-  "--project-root=.",
-  "pocket-tuxemon",
-]);
+const webEntryPath = join(root, "web-main.generated.tsx");
+const webSiteConfigPath = join(root, "web.link.generated.json");
+await Bun.write(
+  webEntryPath,
+  tuxLinkWebEntrySource(readFileSync(join(root, "main.tsx"), "utf8"), tuxLinkConfig),
+);
+if (tuxLinkWebAuth) {
+  const site = JSON.parse(readFileSync(join(root, "web.json"), "utf8")) as {
+    games?: Record<string, Record<string, unknown>>;
+  };
+  const game = site.games?.["pocket-tuxemon"];
+  if (!game) throw new Error("Tux Link: web.json has no pocket-tuxemon game entry");
+  game.auth = tuxLinkWebAuth;
+  await Bun.write(webSiteConfigPath, `${JSON.stringify(site, null, 2)}\n`);
+}
+try {
+  await run([
+    process.execPath,
+    join(root, "vendor", "pocket-rpgkit", "tools", "web.ts"),
+    "--project-root=.",
+    ...(tuxLinkWebAuth ? [`--config=${webSiteConfigPath}`] : []),
+    "pocket-tuxemon",
+  ]);
+} finally {
+  rmSync(webEntryPath, { force: true });
+  rmSync(webSiteConfigPath, { force: true });
+}
+console.log(`Tux Link: ${tuxLinkConfig ? `configured for ${tuxLinkConfig.httpBase}` : "disabled (no service URL)"}`);
+console.log(`Tux Link page auth: ${tuxLinkWebAuth ? "configured" : "disabled (no OAuth metadata)"}`);
 const bundle = await minifyRuntimeBundle(
   join(root, "dist", "web", "pocket-tuxemon", "pocket-tuxemon.js"),
 );
