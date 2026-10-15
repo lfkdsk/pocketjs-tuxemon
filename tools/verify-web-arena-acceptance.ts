@@ -302,10 +302,14 @@ function replayQuery(path: string): string {
   return `lang=en&battleReplay=${encodeURIComponent(path)}`;
 }
 
+function routedReplaySource(path: string): string {
+  return path.slice(0, 5).toLowerCase() === "data:" ? path : new URL(path, base).href;
+}
+
 async function boot(path: string, timeoutMs = 30_000): Promise<ReplayState> {
   await send("Page.navigate", { url: `${base}replay.html?${replayQuery(path)}` });
   await waitFor("validated replay", `location.pathname.includes("/replays/") &&
-    new URLSearchParams(location.search).get("battleReplay") === ${JSON.stringify(path)} &&
+    new URLSearchParams(location.search).get("battleReplay") === ${JSON.stringify(routedReplaySource(path))} &&
     globalThis.__pocketPlayer?.state === "running" &&
     globalThis.__pocketArenaReplay?.state().status === "ready"`, timeoutMs);
   await evaluate(`globalThis.__pocketArenaReplay.pause(); globalThis.__pocketArenaReplay.restart()`);
@@ -355,7 +359,7 @@ async function expectUntrustedOverride(label: string, path: string): Promise<voi
   const errorStart = browserErrors.length;
   await send("Page.navigate", { url: `${base}replay.html?${replayQuery(path)}` });
   await waitFor("untrusted replay rejection", `location.pathname.includes("/replays/") &&
-    new URLSearchParams(location.search).get("battleReplay") === ${JSON.stringify(path)} &&
+    new URLSearchParams(location.search).get("battleReplay") === ${JSON.stringify(routedReplaySource(path))} &&
     globalThis.__pocketArenaReplay?.state().status === "error"`);
   const rejected = await snapshot();
   assert(rejected.turn === 0 && rejected.settledHash === null && rejected.terminalHash === null,

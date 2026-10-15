@@ -148,6 +148,12 @@ export function replayArtifactPageUrl(
   if (!ARTIFACT_ID.test(release.artifactId)) throw new Error("unsafe replay artifact id");
   const target = new URL(`replays/${release.artifactId}/replay.html`, pageUrl);
   target.search = search;
+  const source = target.searchParams.get("battleReplay");
+  if (source && source.slice(0, 5).toLowerCase() !== "data:") {
+    // A relative source was resolved against the dispatcher before routing.
+    // Preserve that meaning after moving into the nested immutable player.
+    target.searchParams.set("battleReplay", new URL(source, pageUrl).href);
+  }
   return target.href;
 }
 
@@ -298,6 +304,10 @@ export function tuxLinkReplayDispatcherHtml(
       const release = select(value);
       const target = new URL("replays/" + release.artifactId + "/replay.html", location.href);
       target.search = location.search;
+      const source = target.searchParams.get("battleReplay");
+      if (source && source.slice(0, 5).toLowerCase() !== "data:") {
+        target.searchParams.set("battleReplay", new URL(source, location.href).href);
+      }
       location.replace(target.href);
     }).catch((error) => fail(error instanceof Error && error.message === "unavailable" ? "unavailable" : error instanceof Error && error.message === "document" ? "document" : "source"));
   })();

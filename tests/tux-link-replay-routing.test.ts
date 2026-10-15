@@ -92,6 +92,15 @@ describe("immutable Tux Link replay routing", () => {
     expect(routed.pathname).toBe(`/pocket-tuxemon/replays/${current.artifactId}/replay.html`);
     expect(routed.searchParams.get("battleReplay")).toBe("https://battle.example/replay");
     expect(routed.pathname).not.toContain("attacker");
+
+    const relative = new URL(replayArtifactPageUrl(
+      "https://game.example/pocket-tuxemon/replay.html",
+      "?battleReplay=arena-tape.json",
+      current,
+    ));
+    expect(relative.searchParams.get("battleReplay")).toBe(
+      "https://game.example/pocket-tuxemon/arena-tape.json",
+    );
   });
 
   test("emits a bounded bilingual flat dispatcher with only manifest artifacts", () => {
@@ -110,6 +119,7 @@ describe("immutable Tux Link replay routing", () => {
     expect(html).toContain("if (!response.url)");
     expect(html).toContain("/%(?:2f|5c)/i.test(url.pathname)");
     expect(html).toContain('new URL("replays/" + release.artifactId');
+    expect(html).toContain('target.searchParams.set("battleReplay", new URL(source, location.href).href)');
     expect(html).toContain('"trustedReplayBase":"http://127.0.0.1:8787/tux/v1/replays/"');
     expect(html).not.toContain("value.engineRevision + \"/replay.html\"");
     const runtime = html.match(/<script>\n([\s\S]*?)\n  <\/script>/)?.[1];

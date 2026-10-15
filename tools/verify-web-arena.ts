@@ -39,6 +39,32 @@ if (!existsSync(join(SITE, GAME, "replay.html"))) {
   console.error("verify-web-arena: no replay page in dist/web; run `bun run web` first");
   process.exit(2);
 }
+
+function embeddedJson(path: string, id: string): Record<string, unknown> {
+  const match = readFileSync(path, "utf8").match(new RegExp(
+    `<script type="application/json" id="${id}">(.*?)<\\/script>`,
+    "s",
+  ));
+  if (!match?.[1]) throw new Error(`verify-web-arena: ${path} has no ${id} configuration`);
+  return JSON.parse(match[1]) as Record<string, unknown>;
+}
+
+const replayDispatcherPath = join(SITE, GAME, "replay.html");
+const replayRouting = embeddedJson(replayDispatcherPath, "replay-routing");
+const currentReplay = replayRouting.current as Record<string, unknown> | undefined;
+if (!currentReplay || typeof currentReplay.artifactId !== "string") {
+  throw new Error("verify-web-arena: replay dispatcher has no current immutable player");
+}
+const replayPlayerPath = join(
+  SITE,
+  GAME,
+  "replays",
+  currentReplay.artifactId,
+  "replay.html",
+);
+if (!existsSync(replayPlayerPath)) {
+  throw new Error(`verify-web-arena: immutable replay player ${currentReplay.artifactId} is missing`);
+}
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
 mkdirSync(GOLDENS, { recursive: true });
@@ -189,8 +215,7 @@ check(
   !ordinaryRequests.some((url) => /battle-replay\.(?:js|pak)(?:$|\?)/.test(url)),
   ordinaryRequests.filter((url) => url.includes("battle-replay")).join(", ") || "no replay requests",
 );
-const normalConfig = JSON.parse(readFileSync(join(SITE, GAME, "index.html"), "utf8")
-  .match(/<script type="application\/json" id="pocket-game">(.*?)<\/script>/s)![1]!) as Record<string, unknown>;
+const normalConfig = embeddedJson(join(SITE, GAME, "index.html"), "pocket-game");
 check(
   "ordinary player keeps the chunked production bundle",
   normalConfig.bundle === "pocket-tuxemon.js" && normalConfig.pak === null &&
@@ -200,8 +225,7 @@ check(
     !ordinaryRequests.some((url) => /\/pocket-tuxemon\.pak(?:$|\?)/.test(url)),
   `${String(normalConfig.bundle)} / ${String(normalConfig.pak)} / ${String(normalConfig.pakManifest)}`,
 );
-const replayConfig = JSON.parse(readFileSync(join(SITE, GAME, "replay.html"), "utf8")
-  .match(/<script type="application\/json" id="pocket-game">(.*?)<\/script>/s)![1]!) as Record<string, unknown>;
+const replayConfig = embeddedJson(replayPlayerPath, "pocket-game");
 check(
   "battle replay keeps its standalone bundle and monolithic pak",
   replayConfig.bundle === "battle-replay.js" && replayConfig.pak === "battle-replay.pak" &&
@@ -288,6 +312,7 @@ check(
 );
 
 // Script-looking fields are schema errors and are never evaluated.
+const maliciousErrorStart = errors.length;
 await send("Page.navigate", {
   url: `${base}replay.html?lang=en&battleReplay=${inlineSource(MALICIOUS_JSON)}`,
 });
@@ -305,6 +330,11 @@ check(
   malicious.executed === false && malicious.status === "error" && malicious.message.startsWith("Could not load tape"),
   JSON.stringify(malicious),
 );
+await Bun.sleep(50);
+const maliciousDiagnostics = errors.splice(maliciousErrorStart);
+errors.push(...maliciousDiagnostics.filter((message) =>
+  !message.includes("battle replay document rejected")
+));
 
 // Capture a reviewed battle boundary at both supported raster sizes.
 await bootReplay(`lang=en&battleReplay=${encodeURIComponent("arena-tape.json")}`);
