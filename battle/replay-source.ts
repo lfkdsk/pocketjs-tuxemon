@@ -145,6 +145,7 @@ export function resolveReplayJsonSource(
   baseUrl: string,
   policy: ReplayJsonSourcePolicy,
   noun: string,
+  trustedExternalBase?: string,
 ): ReplayJsonSource {
   const params = new URLSearchParams(search);
   const value = params.get(policy.sourceParam);
@@ -167,7 +168,7 @@ export function resolveReplayJsonSource(
   if (external && params.get(policy.externalParam) !== "1") {
     sourceError(policy, `cross-origin source requires ${policy.externalParam}=1`);
   }
-  if (external && url.protocol !== "https:") {
+  if (external && url.protocol !== "https:" && !trustedLoopbackExternal(url, trustedExternalBase)) {
     sourceError(policy, "cross-origin source must use HTTPS");
   }
   return { kind: "url", url: url.href, external };
@@ -182,8 +183,9 @@ export async function loadReplayJsonTextWithMetadata(
   fetcher: ReplayJsonFetch,
   policy: ReplayJsonSourcePolicy,
   noun: string,
+  trustedExternalBase?: string,
 ): Promise<LoadedReplayJsonText> {
-  const source = resolveReplayJsonSource(search, baseUrl, policy, noun);
+  const source = resolveReplayJsonSource(search, baseUrl, policy, noun, trustedExternalBase);
   if (source.kind === "inline") {
     return { text: source.json, source, finalUrl: null };
   }
@@ -201,7 +203,8 @@ export async function loadReplayJsonTextWithMetadata(
   if (!source.external && finalUrl.origin !== base.origin) {
     sourceError(policy, "same-origin source redirected across origins");
   }
-  if (source.external && finalUrl.protocol !== "https:") {
+  if (source.external && finalUrl.protocol !== "https:" &&
+    !trustedLoopbackExternal(finalUrl, trustedExternalBase)) {
     sourceError(policy, "external source redirected away from HTTPS");
   }
   const mime = (response.headers.get("content-type") ?? "").split(";", 1)[0]!.trim();
@@ -224,6 +227,7 @@ export async function loadReplayJsonText(
   fetcher: ReplayJsonFetch,
   policy: ReplayJsonSourcePolicy,
   noun: string,
+  trustedExternalBase?: string,
 ): Promise<string> {
   return (await loadReplayJsonTextWithMetadata(
     search,
@@ -231,5 +235,33 @@ export async function loadReplayJsonText(
     fetcher,
     policy,
     noun,
+    trustedExternalBase,
   )).text;
+}
+
+/** The only HTTP exception is an exact configured loopback origin and path
+ * prefix. Production callers omit this parameter and retain HTTPS-only cross
+ * origin behavior. */
+function trustedLoopbackExternal(url: URL, trustedExternalBase?: string): boolean {
+  if (!trustedExternalBase) return false;
+  let trusted: URL;
+  try {
+    trusted = new URL(trustedExternalBase);
+  } catch {
+    return false;
+  }
+  if (trusted.protocol !== "http:" || !loopbackHost(trusted.hostname) ||
+    trusted.username || trusted.password || trusted.search || trusted.hash) return false;
+  const prefix = trusted.pathname.endsWith("/") ? trusted.pathname : `${trusted.pathname}/`;
+  return url.protocol === "http:" && loopbackHost(url.hostname) &&
+    url.username === "" && url.password === "" && url.hash === "" &&
+    url.origin === trusted.origin && url.pathname.startsWith(prefix);
+}
+
+function loopbackHost(hostname: string): boolean {
+  if (hostname === "localhost" || hostname === "[::1]") return true;
+  const octets = hostname.split(".");
+  return octets.length === 4 && octets[0] === "127" && octets.every((octet) =>
+    /^(0|[1-9][0-9]{0,2})$/.test(octet) && Number(octet) <= 255
+  );
 }

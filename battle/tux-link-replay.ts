@@ -3,7 +3,8 @@
  * This module is used only by the dedicated replay entry. It deliberately
  * keeps transport trust separate from the Arena tape: an otherwise valid
  * terminal override is authoritative only when the fetched response itself
- * ends inside the configured HTTPS replay origin and path prefix.
+ * ends inside the configured replay origin and path prefix. Production is
+ * HTTPS-only; an exact loopback HTTP base is accepted for local development.
  */
 
 import {
@@ -129,7 +130,10 @@ export function isTrustedLinkReplayResponse(
   } catch {
     return false;
   }
-  if (final.protocol !== "https:" || trusted.protocol !== "https:" ||
+  const secure = final.protocol === "https:" && trusted.protocol === "https:";
+  const local = final.protocol === "http:" && trusted.protocol === "http:" &&
+    loopbackHost(final.hostname) && loopbackHost(trusted.hostname);
+  if ((!secure && !local) ||
     final.username || final.password || trusted.username || trusted.password ||
     trusted.search || trusted.hash) return false;
   const prefix = trusted.pathname.endsWith("/") ? trusted.pathname : `${trusted.pathname}/`;
@@ -189,7 +193,7 @@ export function validateLinkReplayEnvelope(
     }
     if (loaded.source.kind !== "url" ||
       !isTrustedLinkReplayResponse(loaded.finalUrl, options.trustedReplayBase)) {
-      linkError("terminalOverride requires a trusted HTTPS replay response");
+      linkError("terminalOverride requires a trusted replay response");
     }
   } else if (finalBattle.terminal === null) {
     linkError("a non-terminal tape requires terminalOverride");
@@ -229,10 +233,19 @@ export async function loadLinkReplayEnvelope(
       fetcher,
       ARENA_REPLAY_SOURCE_POLICY,
       "document",
+      options.trustedReplayBase,
     );
     return validateLinkReplayEnvelope(parseJson(loaded.text), loaded, options);
   } catch (error) {
     if (error instanceof ReplaySourceError) throw new LinkReplayError(error.message);
     throw error;
   }
+}
+
+function loopbackHost(hostname: string): boolean {
+  if (hostname === "localhost" || hostname === "[::1]") return true;
+  const octets = hostname.split(".");
+  return octets.length === 4 && octets[0] === "127" && octets.every((octet) =>
+    /^(0|[1-9][0-9]{0,2})$/.test(octet) && Number(octet) <= 255
+  );
 }

@@ -128,10 +128,21 @@ export function isTrustedTuxReplayUrl(value: string, trustedReplayBase: string):
   } catch {
     return false;
   }
-  return url.protocol === "https:" && base.protocol === "https:" && url.origin === base.origin &&
+  const secure = url.protocol === "https:" && base.protocol === "https:";
+  const local = url.protocol === "http:" && base.protocol === "http:" &&
+    loopbackHost(url.hostname) && loopbackHost(base.hostname);
+  return (secure || local) && url.origin === base.origin &&
     url.username === "" && url.password === "" && url.hash === "" &&
     base.username === "" && base.password === "" && base.search === "" && base.hash === "" &&
     base.pathname.endsWith("/") && url.pathname.startsWith(base.pathname);
+}
+
+function loopbackHost(hostname: string): boolean {
+  if (hostname === "localhost" || hostname === "[::1]") return true;
+  const octets = hostname.split(".");
+  return octets.length === 4 && octets[0] === "127" && octets.every((octet) =>
+    /^(0|[1-9][0-9]{0,2})$/.test(octet) && Number(octet) <= 255
+  );
 }
 
 /** Navigate only to the flat dispatcher. It chooses immutable artifact paths

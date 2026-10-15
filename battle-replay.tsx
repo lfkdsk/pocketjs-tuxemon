@@ -53,7 +53,7 @@ const COPY = lang === "zh_CN" ? {
   browserUnavailable: "浏览器回放接口不可用。",
   incompatible: "回放无效、来源不可信，或与此固定版本播放器不兼容。",
   playerMismatch: "播放器页面与其固定引擎身份不匹配。",
-  help: "只读取版本化 JSON 录带或 Link 回放；外部权威赛果必须来自可信 HTTPS 地址。",
+  help: "只读取版本化 JSON 录带或 Link 回放；外部权威赛果必须来自可信地址（本地开发可用回环 HTTP）。",
   title: "对战回放",
 } : {
   loading: "Loading battle tape…",
@@ -71,7 +71,7 @@ const COPY = lang === "zh_CN" ? {
   browserUnavailable: "Browser replay APIs are unavailable.",
   incompatible: "The replay is invalid, untrusted, or incompatible with this immutable player.",
   playerMismatch: "The player page does not match its immutable engine identity.",
-  help: "Reads versioned JSON tapes or Link replays; authoritative external results require trusted HTTPS.",
+  help: "Reads versioned JSON tapes or Link replays; authoritative results require a trusted source (loopback HTTP is local-only).",
   title: "Battle replay",
 };
 
@@ -131,11 +131,21 @@ function embeddedReplayBuildConfig(): EmbeddedReplayBuildConfig {
     throw new Error("invalid trusted replay base");
   }
   const base = new URL(trustedReplayBase);
-  if (base.protocol !== "https:" || base.username || base.password || base.search || base.hash ||
+  const transport = base.protocol === "https:" ||
+    (base.protocol === "http:" && loopbackHost(base.hostname));
+  if (!transport || base.username || base.password || base.search || base.hash ||
     !base.pathname.endsWith("/")) {
     throw new Error("invalid trusted replay base");
   }
   return { trustedReplayBase: base.href };
+}
+
+function loopbackHost(hostname: string): boolean {
+  if (hostname === "localhost" || hostname === "[::1]") return true;
+  const octets = hostname.split(".");
+  return octets.length === 4 && octets[0] === "127" && octets.every((octet) =>
+    /^(0|[1-9][0-9]{0,2})$/.test(octet) && Number(octet) <= 255
+  );
 }
 
 function terminalOverrideText(override: LinkTerminalOverride): string {

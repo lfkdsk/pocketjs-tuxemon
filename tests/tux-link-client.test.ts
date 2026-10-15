@@ -358,6 +358,14 @@ describe("Tux Link client", () => {
   test("accepts replay links only with the negotiated bit and exact trusted HTTPS prefix", async () => {
     const replayUrl = `${CONFIG.trustedReplayBase}match-1?expires=1&signature=opaque`;
     expect(isTrustedTuxReplayUrl(replayUrl, CONFIG.trustedReplayBase)).toBe(true);
+    expect(isTrustedTuxReplayUrl(
+      "http://127.0.0.1:8787/tux/v1/replays/match-1?exp=1&sig=opaque",
+      "http://127.0.0.1:8787/tux/v1/replays/",
+    )).toBe(true);
+    expect(isTrustedTuxReplayUrl(
+      "http://127.0.0.1:8788/tux/v1/replays/match-1?exp=1&sig=opaque",
+      "http://127.0.0.1:8787/tux/v1/replays/",
+    )).toBe(false);
     const pageUrl = tuxLinkReplayPageUrl(replayUrl, "https://game.example/pocket-tuxemon/index.html?old=1");
     const target = new URL(pageUrl);
     expect(target.pathname).toBe("/pocket-tuxemon/replay.html");

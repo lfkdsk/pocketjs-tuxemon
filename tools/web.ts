@@ -176,9 +176,7 @@ replayConfig.pak = "battle-replay.pak";
 replayConfig.wasm = "../../../pocketjs.wasm";
 replayConfig.autosaveStorageKey = "pocket-rpgkit:battle-replay:unused:v1";
 replayConfig.replayRelease = currentReplayRelease;
-replayConfig.trustedReplayBase = tuxLinkConfig?.trustedReplayBase.startsWith("https:")
-  ? tuxLinkConfig.trustedReplayBase
-  : null;
+replayConfig.trustedReplayBase = tuxLinkConfig?.trustedReplayBase ?? null;
 const replayHtml = playerHtml
   .replaceAll('href="../', 'href="../../../')
   .replaceAll('src="../', 'src="../../../')
@@ -188,7 +186,12 @@ const replayHtml = playerHtml
 await Bun.write(join(replayArtifactDir, "replay.html"), replayHtml);
 await Bun.write(
   join(gameDir, "replay.html"),
-  tuxLinkReplayDispatcherHtml(replayReleases, currentReplayRelease, ARENA_REPLAY_MAX_BYTES),
+  tuxLinkReplayDispatcherHtml(
+    replayReleases,
+    currentReplayRelease,
+    ARENA_REPLAY_MAX_BYTES,
+    tuxLinkConfig?.trustedReplayBase ?? null,
+  ),
 );
 const expeditionReplayConfig = JSON.parse(configMatch[2]!) as Record<string, unknown>;
 expeditionReplayConfig.app = "expedition-replay";

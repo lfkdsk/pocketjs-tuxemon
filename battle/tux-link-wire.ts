@@ -401,8 +401,18 @@ function replayUrl(value: unknown): value is string {
   } catch {
     return false;
   }
-  return parsed.protocol === "https:" && parsed.username === "" &&
+  const transport = parsed.protocol === "https:" ||
+    (parsed.protocol === "http:" && loopbackHost(parsed.hostname));
+  return transport && parsed.username === "" &&
     parsed.password === "" && parsed.hash === "";
+}
+
+function loopbackHost(hostname: string): boolean {
+  if (hostname === "localhost" || hostname === "[::1]") return true;
+  const octets = hostname.split(".");
+  return octets.length === 4 && octets[0] === "127" && octets.every((octet) =>
+    /^(0|[1-9][0-9]{0,2})$/.test(octet) && Number(octet) <= 255
+  );
 }
 
 /** Validate and serialize one client frame within the server's 1,024-byte cap. */

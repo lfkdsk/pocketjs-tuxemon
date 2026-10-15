@@ -224,8 +224,15 @@ describe("Tux Link wire v1 battle documents", () => {
       result: { winner: "self", reason: "battle-complete" }, observation: terminal,
       replayUrl,
     })).toMatchObject({ type: "ended", replayUrl });
+    const localReplayUrl = "http://127.0.0.1:8787/tux/v1/replays/match?exp=1&sig=opaque";
+    expect(decodeTuxServerFrame({
+      type: "ended", v: 1, turnRevision: 8,
+      result: { winner: "self", reason: "battle-complete" }, observation: terminal,
+      replayUrl: localReplayUrl,
+    })).toMatchObject({ type: "ended", replayUrl: localReplayUrl });
     for (const unsafe of [
       "http://battle.example/tux/v1/replays/match",
+      "http://127.0.0.2.example/tux/v1/replays/match",
       "https://user@battle.example/tux/v1/replays/match",
       "https://battle.example/tux/v1/replays/match#fragment",
       " https://battle.example/tux/v1/replays/match",

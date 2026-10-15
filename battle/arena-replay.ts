@@ -160,6 +160,7 @@ export async function loadArenaReplayDocument(
       fetcher,
       ARENA_REPLAY_SOURCE_POLICY,
       "document",
+      options.trustedReplayBase,
     );
   } catch (error) {
     if (error instanceof ReplaySourceError) throw new ArenaTapeError(error.message);

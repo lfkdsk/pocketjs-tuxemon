@@ -661,12 +661,32 @@ replay.html?lang=zh&battleReplay=matches/example.json
 replay.html?battleReplay=https%3A%2F%2Fexample.org%2Fmatch.json&battleReplayExternal=1
 ```
 
-The page accepts a bounded `data:application/json` value, a same-origin
-relative HTTP(S) path, or an explicitly enabled cross-origin HTTPS URL.
-External requests omit credentials; redirects, MIME type, UTF-8, the 4 MiB
-limit, and the tape schema are checked before playback. Tape fields are data,
-never HTML or script. The English/Chinese page uses the production battle
-scene and provides pause, one-pair step, and 1×/2×/4× playback controls.
+The page accepts either the existing raw `BattleTape` or a strict
+`tux-link-replay` envelope. Sources may be bounded `data:application/json`, a
+same-origin relative HTTP(S) path, or an explicitly enabled cross-origin HTTPS
+URL. External requests omit credentials; redirects, final response URL, MIME
+type, UTF-8, the 4 MiB limit, identity-bearing fields and the complete schema
+are checked before playback. Tape fields are data, never HTML or script. The
+English/Chinese page uses the production battle scene and provides pause,
+one-pair step, and 1×/2×/4× playback controls.
+
+A Link envelope pins both `engineRevision` and `dataDigest`. The flat
+`replay.html` dispatcher reads only enough bounded JSON to select an entry from
+the generated `replay-releases.json` allowlist; it never turns either untrusted
+identity into a pathname. Each `replays/<artifact>/replay.html` is an immutable
+historical player with its own embedded revision, digest and trusted replay
+base. A missing historical artifact, mismatched player identity, unknown
+revision/digest, invalid pre-terminal hash, or natural-terminal override fails
+closed with a bilingual error.
+
+Forfeit and abandonment are authoritative only when the loaded response's
+final URL remains within the exact configured replay origin and pathname
+prefix. Production trust is HTTPS-only. An explicitly configured Web build may
+use plain HTTP solely for a literal loopback replay origin during local
+development; public HTTP, private-LAN hosts, a different loopback origin, and
+same-origin paths outside the trusted prefix remain rejected. The Link result
+page applies the same rule before showing its bilingual **Watch Replay / 查看回放**
+link.
 
 ## Running
 

@@ -95,7 +95,12 @@ describe("immutable Tux Link replay routing", () => {
   });
 
   test("emits a bounded bilingual flat dispatcher with only manifest artifacts", () => {
-    const html = tuxLinkReplayDispatcherHtml(releases, current, 4 * 1024 * 1024);
+    const html = tuxLinkReplayDispatcherHtml(
+      releases,
+      current,
+      4 * 1024 * 1024,
+      "http://127.0.0.1:8787/tux/v1/replays/",
+    );
     expect(html).toContain("Battle replay / 对战回放");
     expect(html).toContain("No immutable player is available");
     expect(html).toContain("此回放版本没有可用的固定播放器");
@@ -103,9 +108,16 @@ describe("immutable Tux Link replay routing", () => {
     expect(html).toContain("credentials: external ? \"omit\" : \"same-origin\"");
     expect(html).toContain("length > cfg.maxBytes");
     expect(html).toContain('new URL("replays/" + release.artifactId');
+    expect(html).toContain('"trustedReplayBase":"http://127.0.0.1:8787/tux/v1/replays/"');
     expect(html).not.toContain("value.engineRevision + \"/replay.html\"");
     const runtime = html.match(/<script>\n([\s\S]*?)\n  <\/script>/)?.[1];
     expect(runtime).toBeDefined();
     expect(() => new Function(runtime!)).not.toThrow();
+    expect(() => tuxLinkReplayDispatcherHtml(
+      releases,
+      current,
+      4 * 1024 * 1024,
+      "http://public.example/tux/v1/replays/",
+    )).toThrow("trusted replay base is invalid");
   });
 });

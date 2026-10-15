@@ -251,7 +251,7 @@ describe("Tux Link replay source authority", () => {
       PLAYER,
       async () => { throw new Error("inline input must not fetch"); },
       OPTIONS,
-    )).rejects.toThrow("trusted HTTPS replay response");
+    )).rejects.toThrow("trusted replay response");
   });
 
   test("fails closed when a redirect leaves the trusted origin or path prefix", async () => {
@@ -264,7 +264,7 @@ describe("Tux Link replay source authority", () => {
         PLAYER,
         async () => response(JSON.stringify(authoritative()), { url: finalUrl }),
         OPTIONS,
-      )).rejects.toThrow("trusted HTTPS replay response");
+      )).rejects.toThrow("trusted replay response");
     }
 
     await expect(loadArenaReplayDocument(
@@ -300,5 +300,37 @@ describe("Tux Link replay source authority", () => {
       async () => response("", { body }),
       OPTIONS,
     )).rejects.toThrow(`exceeds ${ARENA_REPLAY_MAX_BYTES}`);
+  });
+
+  test("permits only the configured loopback HTTP origin and path in local development", async () => {
+    const localBase = "http://127.0.0.1:8787/tux/v1/replays/";
+    const localUrl = `${localBase}r_local/${"a".repeat(64)}.json?exp=1&sig=opaque`;
+    const localOptions: LinkReplayValidationOptions = {
+      expectedIdentity: EXPECTED,
+      trustedReplayBase: localBase,
+    };
+    const loaded = await loadArenaReplayDocument(
+      externalQuery(localUrl),
+      "http://127.0.0.1:4173/replay.html",
+      async (_url, init) => {
+        expect(init.credentials).toBe("omit");
+        return response(JSON.stringify(authoritative()), { url: localUrl });
+      },
+      localOptions,
+    );
+    expect(loaded.kind).toBe(LINK_REPLAY_KIND);
+
+    for (const unsafe of [
+      localUrl.replace("/tux/v1/replays/", "/tux/v1/replays-evil/"),
+      localUrl.replace("127.0.0.1:8787", "127.0.0.1:8788"),
+      localUrl.replace("127.0.0.1", "public.example"),
+    ]) {
+      await expect(loadArenaReplayDocument(
+        externalQuery(unsafe),
+        "http://127.0.0.1:4173/replay.html",
+        async () => { throw new Error("unsafe local URL must not fetch"); },
+        localOptions,
+      )).rejects.toThrow();
+    }
   });
 });
