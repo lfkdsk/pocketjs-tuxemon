@@ -192,14 +192,18 @@ bun run verify:g6:determinism
 bun run check:l10n
 bun run check:cjk
 
-# test job (one group per line, or run the whole suite with `bun run test`)
+# test job (one group per line). Do not run the whole suite with
+# `bun run test` in one process: a single Bun realm grows past the 14 GiB
+# runner budget.
 bun test tests/importer.test.ts
 bun test tests/g7-repository.test.ts tests/g6-golden.test.ts
 bun test tests/g6-locks.test.ts tests/battle-db-adapter.test.ts tests/battle-golden.test.ts tests/terrain.test.ts
 bun test --conditions=browser tests/bag-menu-visual.test.ts tests/start-menu-visual.test.ts
-rest=$(ls tests/*.test.ts | grep -v -E '(importer|g7-repository|g6-golden|g6-locks|battle-db-adapter|battle-golden|terrain|bag-menu-visual|start-menu-visual)\.test\.ts$')
-bun test $(printf '%s\n' $rest | grep -E '^tests/[a-l]')
-bun test $(printf '%s\n' $rest | grep -v -E '^tests/[a-l]')
+bun test tests/locale-visual.test.ts
+rest=$(ls tests/*.test.ts | grep -v -E '(importer|g7-repository|g6-golden|g6-locks|battle-db-adapter|battle-golden|terrain|bag-menu-visual|start-menu-visual|locale-visual)\.test\.ts$')
+for range in a-d e-l m-r s-t u-z; do
+  bun test $(printf '%s\n' $rest | grep -E "^tests/[$range]")
+done
 
 # journey job (one leg per line)
 bun run verify:gb6:mainline
@@ -251,8 +255,9 @@ The deploy job is a single GitHub Actions call and has no local equivalent.
 
   The script must exist in `package.json` and be self-contained. Nothing else
   in the workflow needs to change.
-- **A new slow test file:** new files are picked up by one of the two `rest`
-  halves automatically. If a file is too slow for its half (the groups are meant to
-  stay around a minute each), move it to an explicit group's `files:` list
-  and add its basename to the `rest` group's exclusion grep in the same
-  commit.
+- **A new slow test file:** new files are picked up by one of the five `rest`
+  ranges (`a-d`, `e-l`, `m-r`, `s-t`, `u-z`) automatically. If a file is too
+  slow or too memory-hungry for its range (the groups are meant to stay around
+  a minute each and well under the 14 GiB runner budget), move it to an
+  explicit group's `files:` list and add its basename to the `rest` exclusion
+  grep in the same commit.
