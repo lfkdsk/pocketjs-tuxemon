@@ -134,37 +134,23 @@ function replaceExactly(html: string, pattern: RegExp, replacement: string, labe
   return html.replace(pattern, replacement);
 }
 
-function pwaMarkup(version: string, packages: Record<string, OfflinePackageSummary>, clientName: string): string {
-  const options = PWA_LANGUAGES.map((language) => {
-    const pack = packages[language.code]!;
-    const mib = (pack.bytes / (1024 * 1024)).toFixed(pack.bytes < 10 * 1024 * 1024 ? 1 : 0);
-    return `<option value="${language.code}">${language.label} / ${language.labelZh} — ${mib} MiB</option>`;
-  }).join("");
-  const config = JSON.stringify({
-    build: version,
-    packages,
-  }).replace(/</g, "\\u003c");
+function pwaMarkup(version: string, clientName: string): string {
+  const config = JSON.stringify({ build: version }).replace(/</g, "\\u003c");
   return `${PWA_MARKER_START}
-<style>
-.offline-controls{max-width:60rem;margin:1rem auto;padding:1rem;border:1px solid var(--line,#5f7180);border-radius:.75rem;background:var(--panel,#17232d)}
-.offline-controls h2{margin-top:0}.offline-controls-row{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap}.offline-controls select,.offline-controls button{min-height:2.5rem}.offline-controls output{display:block;margin-top:.65rem}.offline-missing{position:fixed;z-index:20;inset:0;display:grid;place-items:center;padding:1rem;background:#000b}.offline-missing[hidden]{display:none}.offline-missing-card{max-width:32rem;padding:1rem;border:2px solid #f4c35a;border-radius:.75rem;background:#17232d;color:#fff}.offline-missing-actions{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem}
-</style>
-<section class="offline-controls" aria-labelledby="offline-heading">
-  <h2 id="offline-heading">Offline play / 离线游玩</h2>
-  <div class="offline-controls-row">
-    <label for="offline-language">Content language / 内容语言</label>
-    <select id="offline-language">${options}</select>
-    <button type="button" id="offline-download" aria-pressed="false">Download or resume / 下载或继续</button>
-    <button type="button" id="pwa-install" hidden>Install / 安装</button>
-    <button type="button" id="pwa-update" hidden>Reload update / 重载更新</button>
-  </div>
-  <output id="offline-status" role="status" aria-live="polite"></output>
-</section>
-<div class="offline-missing" id="offline-missing" role="alertdialog" aria-modal="true" aria-labelledby="offline-missing-title" hidden>
-  <div class="offline-missing-card"><h2 id="offline-missing-title">Offline content unavailable / 离线内容尚未下载</h2><p id="offline-missing-text"></p><div class="offline-missing-actions"><button type="button" id="offline-missing-retry">Retry / 重试</button><button type="button" id="offline-missing-return">Return to cached game / 返回已缓存游戏</button></div></div>
-</div>
 <script type="application/json" id="pocket-pwa">${config}</script>
-<script type="module" src="${clientName}"></script>
+<script id="pocket-pwa-loader">(function(){
+  var loaded=false;
+  function load(){if(loaded)return;loaded=true;import("./${clientName}");}
+  function waitForFirstMap(){
+    var player=globalThis.__pocketPlayer;
+    var title=globalThis.__pocketTitleBattle;
+    if(player&&player.state==="running"&&globalThis.__rpgSessionState&&(!title||title.state().screen==="closed")){
+      setTimeout(load,1500);
+    }else setTimeout(waitForFirstMap,50);
+  }
+  if("serviceWorker" in navigator&&navigator.serviceWorker.controller)load();
+  else addEventListener("load",waitForFirstMap,{once:true});
+})();</script>
 ${PWA_MARKER_END}`;
 }
 
@@ -240,7 +226,7 @@ export function finalizeWebPwa(options: FinalizeWebPwaOptions): WebPwaBuildResul
   html = replaceExactly(
     html,
     /<section class="info">/,
-    `${pwaMarkup(VERSION_PLACEHOLDER, packages, client.name)}\n<section class="info">`,
+    `${pwaMarkup(VERSION_PLACEHOLDER, client.name)}\n<section class="info">`,
     "player info section",
   );
   const versionSeed = {

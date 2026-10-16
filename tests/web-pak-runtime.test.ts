@@ -103,10 +103,12 @@ test("map load recovery is opt-in and forwards the exact controls to the PWA pag
   const previous = globals.__pocketPwa;
   try {
     delete globals.__pocketPwa;
-    expect(browserPwaMapLoadErrorHandler()).toBeUndefined();
+    const handler = browserPwaMapLoadErrorHandler();
+    const unavailable = new Error("legacy fatal");
+    expect(() => handler({ mapId: "route6", error: unavailable, retry() {}, cancel() {} }))
+      .toThrow(unavailable);
     const received: GameViewMapLoadFailure[] = [];
     globals.__pocketPwa = { showMapLoadFailure: (failure) => { received.push(failure); } };
-    const handler = browserPwaMapLoadErrorHandler();
     let retries = 0;
     let cancels = 0;
     const failure: GameViewMapLoadFailure = {

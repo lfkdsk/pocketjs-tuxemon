@@ -37,15 +37,16 @@ export function browserPakChunks(): BrowserPakChunks | null {
     : null;
 }
 
-/** Resolve the optional page-level recovery UI once during browser mount.
- * Leaving this undefined preserves GameView's fatal behavior on native hosts
- * and on legacy pages that do not install the PWA controller. */
-export function browserPwaMapLoadErrorHandler():
-  ((failure: GameViewMapLoadFailure) => void) | undefined {
-  const value = (globalThis as typeof globalThis & {
-    __pocketPwa?: Partial<BrowserPwaControls>;
-  }).__pocketPwa;
-  return value && typeof value.showMapLoadFailure === "function"
-    ? (failure) => value.showMapLoadFailure!(failure)
-    : undefined;
+/** Resolve the page-level recovery UI when a failure occurs. The PWA client
+ * is deliberately loaded after the first interactive map, so looking it up
+ * here (rather than at mount) keeps cold-start bytes off the critical path.
+ * Native and legacy hosts preserve the original fatal error. */
+export function browserPwaMapLoadErrorHandler(): (failure: GameViewMapLoadFailure) => void {
+  return (failure) => {
+    const value = (globalThis as typeof globalThis & {
+      __pocketPwa?: Partial<BrowserPwaControls>;
+    }).__pocketPwa;
+    if (!value || typeof value.showMapLoadFailure !== "function") throw failure.error;
+    value.showMapLoadFailure(failure);
+  };
 }

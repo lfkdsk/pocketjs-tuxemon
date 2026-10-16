@@ -115,7 +115,8 @@ describe("Web PWA finalizer", () => {
       expect(firstHtml).toContain(`data-pwa-build="${first.version}"`);
       expect(firstHtml).toContain(`"pwaBuild":"${first.version}"`);
       expect(firstHtml).toContain('href="manifest.webmanifest"');
-      expect(firstHtml).toContain('src="pwa-client.');
+      expect(firstHtml).toContain('import("./pwa-client.');
+      expect(firstHtml).not.toContain('class="offline-controls"');
       expect(firstHtml).not.toContain('src="../player.js"');
       expect(readFileSync(join(fixture.gameDir, "replay.html"), "utf8")).toBe("replay stays byte-identical");
 

@@ -11,6 +11,7 @@ const shellByUrl = new Map(BUILD.shell.map((asset) => [new URL(asset.url, scopeU
 const indexUrl = new URL("index.html", scopeUrl).href;
 const manifestUrl = new URL(BUILD.contentManifest, scopeUrl).href;
 const webManifestUrl = new URL("manifest.webmanifest", scopeUrl).href;
+const DOWNLOAD_CONCURRENCY = 4;
 let activeDownload = null;
 
 const hex = (bytes) => Array.from(new Uint8Array(bytes), (byte) =>
@@ -189,7 +190,7 @@ async function manifestFromShell() {
 }
 
 async function notify(source, message) {
-  if (source && "postMessage" in source) source.postMessage(message);
+  if (source && "postMessage" in source) source.postMessage({ ...message, build: BUILD.version });
 }
 
 async function cachedContentProgress(language) {
@@ -218,30 +219,49 @@ async function downloadLanguage(language, source) {
   const token = { controller, language };
   activeDownload?.controller.abort();
   activeDownload = token;
-  const progress = await cachedContentProgress(language);
-  const cache = await caches.open(CONTENT_CACHE);
-  await notify(source, { type: "OFFLINE_PROGRESS", language, ...progress, chunks: undefined });
+  let progress = null;
   try {
-    for (const chunk of progress.chunks) {
-      if (activeDownload !== token) throw new DOMException("download paused", "AbortError");
-      const url = new URL(chunk.file, manifestUrl).href;
-      const cached = await cache.match(url);
-      if (cached) continue;
-      const response = await fetchVerified({ ...chunk, url }, controller.signal);
-      await cache.put(url, response);
-      const stored = await cache.match(url);
-      if (!stored) throw new Error(`browser did not retain ${chunk.file}`);
-      progress.completed++;
-      progress.bytes += chunk.bytes;
-      await notify(source, { type: "OFFLINE_PROGRESS", language, ...progress, chunks: undefined });
-    }
+    progress = await cachedContentProgress(language);
+    const cache = await caches.open(CONTENT_CACHE);
+    await notify(source, { type: "OFFLINE_PROGRESS", language, ...progress, chunks: undefined });
+    let cursor = 0;
+    const downloadNext = async () => {
+      while (cursor < progress.chunks.length) {
+        if (activeDownload !== token) throw new DOMException("download paused", "AbortError");
+        const chunk = progress.chunks[cursor++];
+        const url = new URL(chunk.file, manifestUrl).href;
+        const cached = await cache.match(url);
+        if (cached) {
+          try {
+            await verifiedResponse(chunk, cached);
+            continue;
+          } catch {
+            await cache.delete(url);
+            progress.completed--;
+            progress.bytes -= chunk.bytes;
+          }
+        }
+        const response = await fetchVerified({ ...chunk, url }, controller.signal);
+        await cache.put(url, response);
+        const stored = await cache.match(url);
+        if (!stored) throw new Error(`browser did not retain ${chunk.file}`);
+        progress.completed++;
+        progress.bytes += chunk.bytes;
+        await notify(source, { type: "OFFLINE_PROGRESS", language, ...progress, chunks: undefined });
+      }
+    };
+    await Promise.all(Array.from(
+      { length: Math.min(DOWNLOAD_CONCURRENCY, progress.chunks.length) },
+      () => downloadNext(),
+    ));
     await notify(source, { type: "OFFLINE_COMPLETE", language, ...progress, chunks: undefined });
   } catch (error) {
+    controller.abort();
     const paused = error?.name === "AbortError" || activeDownload !== token;
     await notify(source, {
       type: paused ? "OFFLINE_PAUSED" : "OFFLINE_ERROR",
       language,
-      ...progress,
+      ...(progress ?? {}),
       chunks: undefined,
       error: paused ? undefined : String(error?.message || error),
     });

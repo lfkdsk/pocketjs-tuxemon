@@ -5,6 +5,46 @@ const configNode = document.getElementById("pocket-pwa");
 const config = configNode ? JSON.parse(configNode.textContent || "null") : null;
 
 if (config && "serviceWorker" in navigator) {
+  const languages = [
+    ["en", "English", "英语"],
+    ["zh", "Chinese", "中文"],
+    ["de", "German", "德语"],
+    ["fr", "French", "法语"],
+    ["es", "Spanish", "西班牙语"],
+    ["it", "Italian", "意大利语"],
+    ["pt-br", "Portuguese (Brazil)", "巴西葡萄牙语"],
+  ];
+  const style = document.createElement("style");
+  style.textContent = ".offline-controls{max-width:60rem;margin:1rem auto;padding:1rem;border:1px solid var(--line,#5f7180);border-radius:.75rem;background:var(--panel,#17232d)}" +
+    ".offline-controls h2{margin-top:0}.offline-controls-row{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap}.offline-controls select,.offline-controls button{min-height:2.5rem}.offline-controls output{display:block;margin-top:.65rem}" +
+    ".offline-missing{position:fixed;z-index:20;inset:0;display:grid;place-items:center;padding:1rem;background:#000b}.offline-missing[hidden]{display:none}.offline-missing-card{max-width:32rem;padding:1rem;border:2px solid #f4c35a;border-radius:.75rem;background:#17232d;color:#fff}.offline-missing-actions{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem}";
+  document.head.append(style);
+  const controls = document.createElement("section");
+  controls.className = "offline-controls";
+  controls.setAttribute("aria-labelledby", "offline-heading");
+  controls.innerHTML = `<h2 id="offline-heading">Offline play / 离线游玩</h2>
+    <div class="offline-controls-row">
+      <label for="offline-language">Content language / 内容语言</label>
+      <select id="offline-language">${languages.map(([code, label, labelZh]) =>
+        `<option value="${code}">${label} / ${labelZh}</option>`).join("")}</select>
+      <button type="button" id="offline-download" aria-pressed="false">Download or resume / 下载或继续</button>
+      <button type="button" id="pwa-install" hidden>Install / 安装</button>
+      <button type="button" id="pwa-update" hidden>Reload update / 重载更新</button>
+    </div>
+    <output id="offline-status" role="status" aria-live="polite"></output>`;
+  const info = document.querySelector("section.info");
+  if (info) info.before(controls);
+  else (document.querySelector("main") || document.body).append(controls);
+  const missingPanel = document.createElement("div");
+  missingPanel.className = "offline-missing";
+  missingPanel.id = "offline-missing";
+  missingPanel.setAttribute("role", "alertdialog");
+  missingPanel.setAttribute("aria-modal", "true");
+  missingPanel.setAttribute("aria-labelledby", "offline-missing-title");
+  missingPanel.hidden = true;
+  missingPanel.innerHTML = `<div class="offline-missing-card"><h2 id="offline-missing-title">Offline content unavailable / 离线内容尚未下载</h2><p id="offline-missing-text"></p><div class="offline-missing-actions"><button type="button" id="offline-missing-retry">Retry / 重试</button><button type="button" id="offline-missing-return">Return to cached game / 返回已缓存游戏</button></div></div>`;
+  document.body.append(missingPanel);
+
   const select = document.getElementById("offline-language");
   const button = document.getElementById("offline-download");
   const status = document.getElementById("offline-status");
@@ -18,18 +58,13 @@ if (config && "serviceWorker" in navigator) {
   let resumeLanguage = null;
   let installPrompt = null;
   let mapLoadFailure = null;
+  let workerBuild = null;
 
   const humanBytes = (bytes) => {
     const mib = bytes / (1024 * 1024);
     return `${mib.toFixed(mib < 10 ? 1 : 0)} MiB`;
   };
-  const selectedPackage = () => config.packages[select.value];
-  const idleLabel = () => {
-    const pack = selectedPackage();
-    return pack
-      ? `${pack.label}: ${humanBytes(pack.bytes)} / ${pack.labelZh}：${humanBytes(pack.bytes)}`
-      : "Offline package unavailable / 离线包不可用";
-  };
+  const idleLabel = () => "Checking offline content… / 正在检查离线内容…";
   const setStatus = (text) => {
     status.textContent = text;
   };
@@ -55,7 +90,7 @@ if (config && "serviceWorker" in navigator) {
 
   const pageLanguage = document.documentElement.getAttribute("data-page-lang") ||
     document.documentElement.lang || "en";
-  const preferred = pageLanguage in config.packages ? pageLanguage : "en";
+  const preferred = languages.some(([code]) => code === pageLanguage) ? pageLanguage : "en";
   select.value = preferred;
   setStatus(idleLabel());
   select.addEventListener("change", () => {
@@ -79,6 +114,7 @@ if (config && "serviceWorker" in navigator) {
   navigator.serviceWorker.addEventListener("message", (event) => {
     const message = event.data;
     if (!message || typeof message !== "object") return;
+    if (typeof message.build === "string") workerBuild = message.build;
     if (message.type === "OFFLINE_PROGRESS" && message.language === select.value) {
       setDownloading(true);
       setStatus(
@@ -211,6 +247,7 @@ if (config && "serviceWorker" in navigator) {
     view() {
       return {
         build: config.build,
+        workerBuild,
         language: select.value,
         downloading,
         status: status.textContent,
