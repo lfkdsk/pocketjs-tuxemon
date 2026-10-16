@@ -62,6 +62,16 @@ export interface FinalizeWebPwaOptions {
 const sha256 = (bytes: Uint8Array | string): string =>
   createHash("sha256").update(bytes).digest("hex");
 
+export function pwaReleaseVersion(seed: {
+  page: string;
+  worker: string;
+  assets: readonly PwaShellAsset[];
+  installAssets: readonly PwaShellAsset[];
+  languages: Readonly<Record<string, string>>;
+}): string {
+  return sha256(JSON.stringify({ format: PWA_FORMAT, ...seed }));
+}
+
 function assertAsset(asset: { file: string; bytes: number; sha256: string }): void {
   if (!SHA256.test(asset.sha256) || !asset.file.includes(asset.sha256) || asset.bytes < 1) {
     throw new Error(`web PWA: invalid content-addressed asset ${asset.file}`);
@@ -234,13 +244,13 @@ export function finalizeWebPwa(options: FinalizeWebPwaOptions): WebPwaBuildResul
     "player info section",
   );
   const versionSeed = {
-    format: PWA_FORMAT,
     page: sha256(html),
     worker: sha256(workerTemplate),
     assets: [player.asset, game.asset, wasm.asset, css.asset, audio.asset, contentManifest.asset, client.asset],
     installAssets,
+    languages: Object.fromEntries(PWA_LANGUAGES.map(({ code, tag }) => [code, tag])),
   };
-  const version = sha256(JSON.stringify(versionSeed));
+  const version = pwaReleaseVersion(versionSeed);
   const placeholders = html.split(VERSION_PLACEHOLDER).length - 1;
   if (placeholders !== 3) {
     throw new Error(`web PWA: expected three page version placeholders, found ${placeholders}`);
@@ -267,7 +277,7 @@ export function finalizeWebPwa(options: FinalizeWebPwaOptions): WebPwaBuildResul
     version,
     shell,
     contentManifest: contentManifest.name,
-    languages: Object.fromEntries(PWA_LANGUAGES.map(({ code, tag }) => [code, tag])),
+    languages: versionSeed.languages,
   };
   const serviceWorkerPath = join(gameDir, "service-worker.js");
   writeFileSync(serviceWorkerPath, workerTemplate.replace(SERVICE_WORKER_TOKEN, JSON.stringify(workerConfig)));

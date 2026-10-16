@@ -22,6 +22,8 @@ import {
   writeFileSync,
 } from "node:fs";
 import { join, resolve, sep } from "node:path";
+import { gzipSync, gunzipSync } from "node:zlib";
+import { createHash } from "node:crypto";
 import { FIXED_INITIAL_CIVIL_TIME } from "../battle/time-weather.ts";
 import { decodePng } from "../vendor/pocket-rpgkit/vendor/pocketjs/framework/compiler/pak.ts";
 import type { WebPakManifest } from "./web-chunks.ts";
@@ -48,13 +50,6 @@ const journey = JSON.parse(readFileSync(join(ROOT, "data", "g6-journey.json"), "
 const bedroom = journey.checkpoints.find((checkpoint) => checkpoint.name === "bedroom") ?? (() => {
   throw new Error("verify-web-pwa: maintained journey has no bedroom checkpoint");
 })();
-const routeOne = journey.checkpoints.find((checkpoint) => checkpoint.name === "route-1") ?? (() => {
-  throw new Error("verify-web-pwa: maintained journey has no Route 1 checkpoint");
-})();
-const mainline = JSON.parse(readFileSync(join(ROOT, "data", "gb6-mainline-journey.json"), "utf8")) as {
-  masks: number[];
-  maps: Array<{ name: string; frame: number; map: string; position: [number, number] }>;
-};
 
 type ReleaseMode = "A" | "mixed" | "B";
 type JsonObject = Record<string, unknown>;
@@ -66,6 +61,8 @@ interface PwaView {
   downloading: boolean;
   status: string;
   missing: boolean;
+  missingMap: string | null;
+  missingEntry: string | null;
 }
 
 interface WorkerMessage extends JsonObject {
@@ -85,6 +82,7 @@ interface ServerCounts {
   chunks: number;
   replay: number;
   network: number;
+  chunkFiles: Record<string, number>;
 }
 
 interface CheckRecord {
@@ -151,7 +149,42 @@ function check(label: string, condition: unknown, detail?: unknown): asserts con
 }
 
 function emptyCounts(): ServerCounts {
-  return { total: 0, index: 0, worker: 0, chunks: 0, replay: 0, network: 0 };
+  return { total: 0, index: 0, worker: 0, chunks: 0, replay: 0, network: 0, chunkFiles: {} };
+}
+
+const sha256 = (bytes: Uint8Array): string => createHash("sha256").update(bytes).digest("hex");
+
+function rotateContentChunk(site: string, manifest: WebPakManifest): {
+  id: string;
+  A: { file: string; bytes: number; sha256: string };
+  B: { file: string; bytes: number; sha256: string };
+} {
+  const index = manifest.chunks.findIndex((chunk) => chunk.id.startsWith("map:en_US:"));
+  if (index < 0) throw new Error("verify-web-pwa: release fixture has no English map chunk");
+  const original = manifest.chunks[index]!;
+  const originalBytes = new Uint8Array(readFileSync(join(site, GAME, original.file)));
+  const unpacked = gunzipSync(originalBytes);
+  const repacked = gzipSync(unpacked, { level: 1 });
+  if (sha256(repacked) === original.sha256) {
+    // The OS byte is outside the compressed stream and payload CRC. zlib emits
+    // no gzip header CRC, so changing it preserves the exact unpacked pak.
+    if ((repacked[3]! & 0x02) !== 0) throw new Error("verify-web-pwa: unexpected gzip header CRC");
+    repacked[9] = repacked[9]! ^ 1;
+  }
+  const digest = sha256(repacked);
+  const file = original.file.replace(/-[0-9a-f]{64}\.pak\.gz$/, `-${digest}.pak.gz`);
+  if (file === original.file) throw new Error(`verify-web-pwa: chunk is not content addressed: ${original.file}`);
+  if (!Buffer.from(gunzipSync(repacked)).equals(Buffer.from(unpacked))) {
+    throw new Error("verify-web-pwa: release B chunk changed unpacked content");
+  }
+  writeFileSync(join(site, GAME, file), repacked);
+  manifest.chunks[index] = { ...original, file, bytes: repacked.byteLength, sha256: digest };
+  writeFileSync(join(site, GAME, `${GAME}.pak-manifest.json`), `${JSON.stringify(manifest)}\n`);
+  return {
+    id: original.id,
+    A: { file: original.file, bytes: original.bytes, sha256: original.sha256 },
+    B: { file, bytes: repacked.byteLength, sha256: digest },
+  };
 }
 
 function copyRelease(source: string, destination: string): void {
@@ -369,25 +402,32 @@ async function main(): Promise<void> {
     `globalThis.__pocketPwaVerifierRelease = "B";\n`;
   writeFileSync(join(rootB, "web", "pwa-client.js"), clientB);
   cpSync(join(ROOT, "web", "service-worker.js"), join(rootB, "web", "service-worker.js"));
-  const pakManifest = JSON.parse(readFileSync(
+  const pakManifestA = JSON.parse(readFileSync(
+    join(releaseA, GAME, `${GAME}.pak-manifest.json`),
+    "utf8",
+  )) as WebPakManifest;
+  const pakManifestB = JSON.parse(readFileSync(
     join(releaseB, GAME, `${GAME}.pak-manifest.json`),
     "utf8",
   )) as WebPakManifest;
+  const rotatedChunk = rotateContentChunk(releaseB, pakManifestB);
   const receiptA = JSON.parse(readFileSync(join(releaseA, GAME, "pwa-build.json"), "utf8")) as {
     version: string;
     packages: Record<string, { chunks: number; bytes: number }>;
   };
-  const builtB = finalizeWebPwa({ root: rootB, siteDir: releaseB, gameId: GAME, manifest: pakManifest });
+  const builtB = finalizeWebPwa({ root: rootB, siteDir: releaseB, gameId: GAME, manifest: pakManifestB });
   const receiptB = JSON.parse(readFileSync(join(releaseB, GAME, "pwa-build.json"), "utf8")) as {
     version: string;
   };
-  check("release B changes when only the PWA client changes", builtB.version !== receiptA.version && receiptB.version === builtB.version, {
+  check("release B changes its PWA client and one content-addressed map chunk",
+    builtB.version !== receiptA.version && receiptB.version === builtB.version, {
     A: receiptA.version,
     B: builtB.version,
   });
   report.releases = {
     A: receiptA.version,
     B: builtB.version,
+    rotatedChunk,
     englishPackage: receiptA.packages.en,
   };
 
@@ -425,6 +465,7 @@ async function main(): Promise<void> {
       const chunk = url.pathname.startsWith(`${GAME_PATH}chunks/`) && url.pathname.endsWith(".pak.gz");
       if (chunk) {
         count.chunks++;
+        count.chunkFiles[url.pathname] = (count.chunkFiles[url.pathname] ?? 0) + 1;
         if (chunkDelayMs > 0) await Bun.sleep(chunkDelayMs);
       }
       const selected = mode === "A" || (mode === "mixed" && url.pathname === `${GAME_PATH}service-worker.js`)
@@ -493,11 +534,13 @@ async function main(): Promise<void> {
   check("cold online boot reaches the first bedroom map", coldMap.map === "spyder_bedroom", coldMap);
   const coldPwa = await waitPwa("cold PWA worker installation", receiptA.version, false);
   await browser.screenshot("cold-online.png");
-  check("cold page installs A without being controlled prematurely", coldPwa.controller === false, coldPwa);
+  check("cold page installs A and wraps map prepares without premature control",
+    coldPwa.controller === false && coldPwa.mapPrepareWrapped === true, coldPwa);
 
   await browser.reload("controlled A reload");
   const controlledA = await waitPwa("A service-worker control", receiptA.version, true);
-  check("controlled A page and worker builds match", controlledA.build === controlledA.workerBuild, controlledA);
+  check("controlled A page, worker and map recovery are ready",
+    controlledA.build === controlledA.workerBuild && controlledA.mapPrepareWrapped === true, controlledA);
   report.coldOnline = { firstMap: coldMap, firstPwa: coldPwa, controlled: controlledA };
 
   // Ask Chrome itself, rather than only parsing files, whether the manifest
@@ -679,26 +722,24 @@ async function main(): Promise<void> {
   const residentBeforeMissing = await browser.evaluate<string[]>(
     `globalThis.__pocketPlayer.pakChunks.stats().resident.slice()`,
   );
-  const missingTarget = mainline.maps.find((checkpoint) => checkpoint.frame > routeOne.frame &&
+  const missingTarget = journey.checkpoints.find((checkpoint) => checkpoint.frame > bedroom.frame &&
     !residentBeforeMissing.includes(`map:en_US:${checkpoint.map}`) &&
-    pakManifest.chunks.some((chunk) => chunk.id === `map:en_US:${checkpoint.map}`));
-  check("mainline has a future map outside the resident working set", missingTarget !== undefined, {
+    pakManifestA.chunks.some((chunk) => chunk.id === `map:en_US:${checkpoint.map}`));
+  check("maintained opening has a future map outside the resident working set", missingTarget !== undefined, {
     residentMaps: residentBeforeMissing.filter((id) => id.startsWith("map:en_US:")),
   });
-  const missingChunk = pakManifest.chunks.find((chunk) => chunk.id === `map:en_US:${missingTarget.map}`)!;
+  const missingChunk = pakManifestA.chunks.find((chunk) => chunk.id === `map:en_US:${missingTarget.map}`)!;
   const cacheRemoval = await browser.evaluate<JsonObject>(`(async () => {
     const cache = await caches.open("pocket-rpgkit:pak-chunks:v1");
     const url = new URL(${JSON.stringify(missingChunk.file)}, location.href).href;
     const removed = await cache.delete(url);
     return { url, removed, remains: !!(await cache.match(url)) };
   })()`);
-  check("selected future map is absent from the persistent content cache", cacheRemoval.remains === false,
+  check("selected future map is absent from the persistent content cache",
+    cacheRemoval.remains === false,
     { target: missingTarget, chunk: missingChunk.file, cacheRemoval });
   const missingAttempt = await browser.evaluate<JsonObject>(`(async () => {
-    const masks = ${JSON.stringify([
-      ...journey.masks.slice(bedroom.frame + 1, routeOne.frame + 1),
-      ...mainline.masks.slice(routeOne.frame + 1, missingTarget.frame + 1),
-    ])};
+    const masks = ${JSON.stringify(journey.masks.slice(bedroom.frame + 1, missingTarget.frame + 1))};
     const p = globalThis.__pocketPlayer;
     const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
     const at = () => [__rpgSessionState.mapId, __rpgSessionState.move.tx, __rpgSessionState.move.ty].join(",");
@@ -749,11 +790,15 @@ async function main(): Promise<void> {
   check("uncached map shows explicit bilingual #offline-missing recovery UI",
     missingView.missing === true && missingEvidence.role === "alertdialog" &&
     typeof missingEvidence.title === "string" && missingEvidence.title.includes("Offline content unavailable") && missingEvidence.title.includes("离线内容尚未下载") &&
-    missingEvidence.retryDisabled === true && missingEvidence.location === beforeMissing,
+    typeof missingEvidence.text === "string" && missingEvidence.text.includes(missingTarget.map) &&
+    missingView.missingMap === missingTarget.map && missingView.missingEntry === `maps/${missingTarget.map}.rkm` &&
+    missingEvidence.retryDisabled === true && missingEvidence.location === beforeMissing &&
+    String((missingAttempt.pak as { failures?: Record<string, string> })?.failures?.[`map:en_US:${missingTarget.map}`] ?? "")
+      .includes(missingChunk.file),
     missingEvidence);
   const missingMessages = missingEvidence.messages as WorkerMessage[];
-  check("missing-content worker message carries release A", missingMessages.length > 0 && missingMessages.every((message) => message.build === receiptA.version),
-    missingMessages);
+  check("background chunk failures do not masquerade as a map transition",
+    missingMessages.length === 0, missingMessages);
   const missingPng = await browser.screenshot("offline-missing.png");
   const border = goldBorderPixels(missingPng, missingEvidence.rect as Parameters<typeof goldBorderPixels>[1]);
   check("missing-dialog screenshot contains the semantic gold card border",
@@ -763,7 +808,7 @@ async function main(): Promise<void> {
   await browser.evaluate(`document.getElementById("offline-missing-return").click()`);
   const recovered = await browser.waitFor<JsonObject>("Return to cached game recovery", `(() => {
     const view = globalThis.__pocketPwa?.view?.();
-    if (performance.timeOrigin === ${returnTimeOrigin} || !view || view.missing ||
+    if (performance.timeOrigin === ${returnTimeOrigin} || !view || view.missing || !view.mapPrepareWrapped ||
         globalThis.__pocketPlayer.frameBlocked || globalThis.__pocketPlayer.state !== "running") return false;
     return { view, location: [__rpgSessionState.mapId, __rpgSessionState.move.tx, __rpgSessionState.move.ty].join(","),
       frame: __rpgSessionState.frame,
@@ -802,6 +847,13 @@ async function main(): Promise<void> {
   check("disconnect leaves an explicitly resumable partial package",
     interrupted.build === receiptA.version && Number(interrupted.completed) >= Number(partial.completed) && Number(interrupted.completed) < Number(interrupted.total),
     interrupted);
+  const cachedBeforeResume = await browser.evaluate<string[]>(`(async () => {
+    const cache = await caches.open("pocket-rpgkit:pak-chunks:v1");
+    return (await cache.keys()).map((request) => new URL(request.url).pathname)
+      .filter((path) => path.startsWith(${JSON.stringify(`${GAME_PATH}chunks/`)})).sort();
+  })()`);
+  const requestsBeforeResume = Object.fromEntries(cachedBeforeResume.map((path) =>
+    [path, counts.A.chunkFiles[path] ?? 0]));
   await setConnectivity(false);
   const complete = await browser.waitFor<WorkerMessage>("automatic English download resume", `(() => {
     const rows = globalThis.__pocketPwaVerifierMessages.filter((message) =>
@@ -815,8 +867,20 @@ async function main(): Promise<void> {
     complete.total === receiptA.packages.en.chunks && complete.totalBytes === receiptA.packages.en.bytes &&
     counts.A.chunks > chunkRequestsBefore,
     { complete, chunkRequests: counts.A.chunks - chunkRequestsBefore });
+  const redownloaded = cachedBeforeResume.filter((path) =>
+    (counts.A.chunkFiles[path] ?? 0) !== requestsBeforeResume[path]);
+  check("resume reuses every chunk already durable at interruption",
+    cachedBeforeResume.length >= Number(interrupted.completed) - 1 && redownloaded.length === 0,
+    { cachedBeforeResume: cachedBeforeResume.length, redownloaded });
   await browser.screenshot("offline-package-ready.png");
-  report.download = { partial, interrupted, complete, chunkRequests: counts.A.chunks - chunkRequestsBefore };
+  report.download = {
+    partial,
+    interrupted,
+    complete,
+    cachedBeforeResume: cachedBeforeResume.length,
+    redownloaded,
+    chunkRequests: counts.A.chunks - chunkRequestsBefore,
+  };
 
   // Mixed mode exposes B's page/assets while retaining A at the stable worker
   // URL. A's navigation policy must reject the B page and keep running its
@@ -825,9 +889,15 @@ async function main(): Promise<void> {
   mode = "mixed";
   await browser.navigate(`${base}?pwa_probe=mixed`, "mixed-release navigation");
   const mixed = await waitPwa("atomic mixed-release fallback", receiptA.version, true);
+  const mixedChunk = await browser.evaluate<JsonObject>(`(() => {
+    const asset = globalThis.__pocketPlayer.pakChunks.manifest.chunks.find((chunk) =>
+      chunk.id === ${JSON.stringify(rotatedChunk.id)});
+    return asset ? { file: asset.file, bytes: asset.bytes, sha256: asset.sha256 } : {};
+  })()`);
   check("mixed B page plus A worker executes only the matched A release",
-    mixed.build === receiptA.version && mixed.workerBuild === receiptA.version && counts.mixed.index > 0,
-    { mixed, requests: counts.mixed });
+    mixed.build === receiptA.version && mixed.workerBuild === receiptA.version && counts.mixed.index > 0 &&
+    mixedChunk.file === rotatedChunk.A.file && mixedChunk.sha256 === rotatedChunk.A.sha256,
+    { mixed, mixedChunk, requests: counts.mixed });
   await browser.screenshot("update-mixed-stays-a.png");
 
   mode = "B";
@@ -847,18 +917,41 @@ async function main(): Promise<void> {
     const view = ${pwaState};
     return view && view.build === ${JSON.stringify(builtB.version)} &&
       view.workerBuild === ${JSON.stringify(builtB.version)} &&
+      view.mapPrepareWrapped === true &&
       globalThis.__pocketPwaVerifierRelease === "B" &&
       globalThis.__pocketPlayer?.state === "running" && globalThis.__rpgSessionState ? view : false;
   })()`, 90_000);
   const cacheKeys = await browser.evaluate<string[]>(`caches.keys()`);
+  const shellCacheFor = (version: string): string | undefined => cacheKeys.find((name) =>
+    name.startsWith("pocket-tuxemon:shell:v1:") && name.endsWith(`:${version}`));
+  const updatedChunk = await browser.evaluate<JsonObject>(`(async () => {
+    const asset = globalThis.__pocketPlayer.pakChunks.manifest.chunks.find((chunk) =>
+      chunk.id === ${JSON.stringify(rotatedChunk.id)});
+    if (!asset) return {};
+    const url = new URL(asset.file, location.href);
+    const response = await fetch(url);
+    const bytes = await response.arrayBuffer();
+    const digest = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", bytes)), (byte) =>
+      byte.toString(16).padStart(2, "0")).join("");
+    const cache = await caches.open("pocket-rpgkit:pak-chunks:v1");
+    return { file: asset.file, expectedBytes: asset.bytes, bytes: bytes.byteLength,
+      expectedSha256: asset.sha256, sha256: digest, cached: !!(await cache.match(url.href)),
+      stored: (localStorage.getItem("pocket-tuxemon/save/slot-1") || "").length };
+  })()`);
   check("activation converges atomically on matched B page and worker",
     updated.build === builtB.version && updated.workerBuild === builtB.version &&
     updated.map === "spyder_bedroom" &&
-    cacheKeys.includes(`pocket-tuxemon:shell:v1:${builtB.version}`) &&
-    !cacheKeys.includes(`pocket-tuxemon:shell:v1:${receiptA.version}`),
+    shellCacheFor(builtB.version) !== undefined && shellCacheFor(receiptA.version) === undefined,
     { updated, cacheKeys });
+  check("release B uses and verifies its rotated content chunk, never A's filename",
+    updatedChunk.file === rotatedChunk.B.file && updatedChunk.file !== rotatedChunk.A.file &&
+    updatedChunk.bytes === rotatedChunk.B.bytes && updatedChunk.expectedBytes === rotatedChunk.B.bytes &&
+    updatedChunk.sha256 === rotatedChunk.B.sha256 && updatedChunk.expectedSha256 === rotatedChunk.B.sha256 &&
+    updatedChunk.cached === true && Number(updatedChunk.stored) === Number(saveLoad.stored) &&
+    counts.B.chunkFiles[`${GAME_PATH}${rotatedChunk.B.file}`] > 0,
+    { updatedChunk, requests: counts.B.chunkFiles });
   await browser.screenshot("update-complete-b.png");
-  report.update = { mixed, waiting, updated, cacheKeys };
+  report.update = { mixed, mixedChunk, waiting, updated, updatedChunk, cacheKeys };
 
   check("acceptance run has no uncaught page exception or console error", browser.errors.length === 0, browser.errors);
   report.browserErrors = browser.errors;

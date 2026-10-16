@@ -58,6 +58,8 @@ if (config && "serviceWorker" in navigator) {
   let resumeLanguage = null;
   let installPrompt = null;
   let mapLoadFailure = null;
+  let mapPrepareAttempts = 0;
+  let lastMapPrepareEntry = null;
   let workerBuild = null;
 
   const mapIdForEntry = (entry) => {
@@ -67,8 +69,8 @@ if (config && "serviceWorker" in navigator) {
   const showMapLoadFailure = (failure) => {
     mapLoadFailure = failure;
     missingText.textContent = navigator.onLine
-      ? `Could not load ${failure.mapId}. Retry now, or stay on this map. / 无法加载 ${failure.mapId}，可重试或留在当前地图。`
-      : `The content for ${failure.mapId} is not cached. Reconnect to retry, or stay on this map. / ${failure.mapId} 尚未缓存，联网后可重试，或留在当前地图。`;
+      ? `Could not load ${failure.mapId}. Retry now, or reload cached gameplay. / 无法加载 ${failure.mapId}，可重试或重新载入已缓存游戏。`
+      : `The content for ${failure.mapId} is not cached. Reconnect to retry, or reload cached gameplay. / ${failure.mapId} 尚未缓存，联网后可重试，或重新载入已缓存游戏。`;
     missing.hidden = false;
     missingRetry.disabled = !navigator.onLine;
   };
@@ -77,36 +79,48 @@ if (config && "serviceWorker" in navigator) {
   // prepares after the first playable map: native builds retain their exact
   // bundle, while a failed Web fetch parks the same reducer frame until Retry
   // succeeds or Return reloads the already cached game page.
-  const chunks = globalThis.__pocketPak;
-  if (chunks && typeof chunks.prepare === "function" && !chunks.__pocketPwaMapPrepare) {
+  let chunks = null;
+  const installMapPrepareRecovery = () => {
+    const next = globalThis.__pocketPak;
+    if (!next || typeof next.prepare !== "function") {
+      setTimeout(installMapPrepareRecovery, 25);
+      return;
+    }
+    chunks = next;
+    if (chunks.__pocketPwaMapPrepare) return;
     const prepare = chunks.prepare.bind(chunks);
     Object.defineProperty(chunks, "__pocketPwaMapPrepare", { value: prepare });
-    chunks.prepare = (entry) => prepare(entry).catch((error) => {
-      const mapId = typeof entry === "string" ? mapIdForEntry(entry) : null;
-      if (!mapId) throw error;
-      return new Promise((resolve) => {
-        const failure = {
-          mapId,
-          entry,
-          error,
-          async retry() {
-            try {
-              await prepare(entry);
-              if (mapLoadFailure === failure) {
-                mapLoadFailure = null;
-                missing.hidden = true;
+    chunks.prepare = (entry) => {
+      mapPrepareAttempts++;
+      lastMapPrepareEntry = entry;
+      return prepare(entry).catch((error) => {
+        const mapId = typeof entry === "string" ? mapIdForEntry(entry) : null;
+        if (!mapId) throw error;
+        return new Promise((resolve) => {
+          const failure = {
+            mapId,
+            entry,
+            error,
+            async retry() {
+              try {
+                await prepare(entry);
+                if (mapLoadFailure === failure) {
+                  mapLoadFailure = null;
+                  missing.hidden = true;
+                }
+                resolve();
+              } catch (nextError) {
+                failure.error = nextError;
+                showMapLoadFailure(failure);
               }
-              resolve();
-            } catch (nextError) {
-              failure.error = nextError;
-              showMapLoadFailure(failure);
-            }
-          },
-        };
-        showMapLoadFailure(failure);
+            },
+          };
+          showMapLoadFailure(failure);
+        });
       });
-    });
-  }
+    };
+  };
+  installMapPrepareRecovery();
 
   const humanBytes = (bytes) => {
     const mib = bytes / (1024 * 1024);
@@ -298,6 +312,9 @@ if (config && "serviceWorker" in navigator) {
         missing: !missing.hidden,
         missingMap: mapLoadFailure?.mapId ?? null,
         missingEntry: mapLoadFailure?.entry ?? null,
+        mapPrepareWrapped: !!chunks?.__pocketPwaMapPrepare,
+        mapPrepareAttempts,
+        lastMapPrepareEntry,
       };
     },
   };

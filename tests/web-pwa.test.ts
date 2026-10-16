@@ -12,6 +12,7 @@ import { join } from "node:path";
 import {
   finalizeWebPwa,
   offlinePackages,
+  pwaReleaseVersion,
   renderGameManifest,
 } from "../tools/web-pwa.ts";
 import type { WebPakManifest } from "../tools/web-chunks.ts";
@@ -83,6 +84,20 @@ function makeFixture(clientSuffix = ""): {
 }
 
 describe("Web PWA finalizer", () => {
+  test("language routing participates in the release identity", () => {
+    const seed = {
+      page: "page",
+      worker: "worker",
+      assets: [],
+      installAssets: [],
+      languages: { en: "en_US" },
+    };
+    expect(pwaReleaseVersion(seed)).not.toBe(pwaReleaseVersion({
+      ...seed,
+      languages: { en: "en_GB" },
+    }));
+  });
+
   test("selects one locale and its maps while sharing all language-neutral chunks", () => {
     const manifest = fixtureManifest();
     const packages = offlinePackages(manifest);
@@ -138,7 +153,14 @@ describe("Web PWA finalizer", () => {
       expect(firstWorker).toContain(`"version":"${first.version}"`);
       expect(firstWorker).toContain('message.type === "ACTIVATE_UPDATE"');
       expect(firstWorker).toContain("url.origin !== scopeUrl.origin || isReplayRequest(url)");
+      expect(firstWorker).toContain("encodeURIComponent(scopePath)");
+      expect(firstWorker).toContain("await verifiedResponse(asset, response)");
+      expect(firstWorker).not.toContain("OFFLINE_CHUNK_MISSING");
       expect(() => new Function(firstWorker)).not.toThrow();
+
+      const clientSource = readFileSync(join(fixture.gameDir, client.url), "utf8");
+      expect(clientSource).toContain("__pocketPwaMapPrepare");
+      expect(clientSource).toContain("installMapPrepareRecovery");
 
       const manifest = JSON.parse(renderGameManifest()) as Record<string, unknown>;
       expect(manifest).toMatchObject({ id: "./", start_url: "./", scope: "./", display: "standalone" });
