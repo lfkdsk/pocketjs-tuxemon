@@ -57,7 +57,7 @@ jobs:
         # Explicit groups of roughly a minute each: bun's --shard cuts the
         # sorted file list into contiguous runs, which bunches the slow
         # battle and replay suites together. New test files land in one of
-        # the two "rest" halves by name. One process for all of them peaked
+        # the five "rest" ranges by name. One process for all of them peaked
         # at 11.5 GB resident and was killed on the 16 GB runner.
         include:
           - name: importer
@@ -72,10 +72,21 @@ jobs:
           - name: browser UI visuals
             files: tests/bag-menu-visual.test.ts tests/start-menu-visual.test.ts
             options: --conditions=browser
-          - name: rest (a-l)
-            files: rest-a-l
-          - name: rest (m-z)
-            files: rest-m-z
+          # This suite performs 50 production bundle/Wasm boots and peaks at
+          # 8.4 GiB by itself. Sharing rest (a-l)'s Bun realm exceeded the
+          # 14 GiB CI budget even though the exact golden coverage is valid.
+          - name: locale production visuals
+            files: tests/locale-visual.test.ts
+          - name: rest (a-d)
+            files: rest-a-d
+          - name: rest (e-l)
+            files: rest-e-l
+          - name: rest (m-r)
+            files: rest-m-r
+          - name: rest (s-t)
+            files: rest-s-t
+          - name: rest (u-z)
+            files: rest-u-z
     steps:
       - uses: actions/checkout@v7
         with:
@@ -85,12 +96,18 @@ jobs:
         run: |
           files="${{ matrix.files }}"
           case "$files" in
-            rest-a-l|rest-m-z)
-              rest=$(ls tests/*.test.ts | grep -v -E '(importer|g7-repository|g6-golden|g6-locks|battle-db-adapter|battle-golden|terrain|bag-menu-visual|start-menu-visual)\.test\.ts$')
-              if [ "$files" = rest-a-l ]; then
-                files=$(printf '%s\n' $rest | grep -E '^tests/[a-l]')
+            rest-a-d|rest-e-l|rest-m-r|rest-s-t|rest-u-z)
+              rest=$(ls tests/*.test.ts | grep -v -E '(importer|g7-repository|g6-golden|g6-locks|battle-db-adapter|battle-golden|terrain|bag-menu-visual|start-menu-visual|locale-visual)\.test\.ts$')
+              if [ "$files" = rest-a-d ]; then
+                files=$(printf '%s\n' $rest | grep -E '^tests/[a-d]')
+              elif [ "$files" = rest-e-l ]; then
+                files=$(printf '%s\n' $rest | grep -E '^tests/[e-l]')
+              elif [ "$files" = rest-m-r ]; then
+                files=$(printf '%s\n' $rest | grep -E '^tests/[m-r]')
+              elif [ "$files" = rest-s-t ]; then
+                files=$(printf '%s\n' $rest | grep -E '^tests/[s-t]')
               else
-                files=$(printf '%s\n' $rest | grep -v -E '^tests/[a-l]')
+                files=$(printf '%s\n' $rest | grep -E '^tests/[u-z]')
               fi
               ;;
           esac

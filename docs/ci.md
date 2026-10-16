@@ -1,8 +1,8 @@
 # CI
 
 CI is a single workflow, `.github/workflows/ci.yml`. Five jobs run in
-parallel from the shared prepare action — `import`, `test` (six matrix
-legs), `journey` (sixteen matrix legs), `web` and `psp`, twenty-five runners in all —
+parallel from the shared prepare action — `import`, `test` (ten matrix
+legs), `journey` (seventeen matrix legs), `web` and `psp`, thirty runners in all —
 and `deploy` publishes Pages once all but `psp` pass. The slowest journey leg
 (`verify:chapters`, which re-bakes and suffix-replays every chapter) sets
 the wall-clock. It runs on pushes to `main`, on pull requests, and on
@@ -39,7 +39,7 @@ Prepare with `build: "false"`, then:
 - `bun run check:l10n` and `bun run check:cjk` — the Chinese supplement is
   well formed and the baked subset covers every imported character.
 
-### test — the suite in six parallel groups
+### test — the suite in ten parallel groups
 
 The suite is split into explicit groups of roughly a minute each, because
 bun's own sharding cuts the sorted file list into contiguous runs and would
@@ -51,12 +51,20 @@ bunch the slow battle and replay suites together:
 | `replays` | `tests/g7-repository.test.ts`, `tests/g6-golden.test.ts` |
 | `locks, battle data and terrain` | `tests/g6-locks.test.ts`, `tests/battle-db-adapter.test.ts`, `tests/battle-golden.test.ts`, `tests/terrain.test.ts` |
 | `browser UI visuals` | `tests/bag-menu-visual.test.ts`, `tests/start-menu-visual.test.ts` under the browser export condition |
-| `rest (a-l)` | every other test whose basename starts with `a` through `l` (100 files) |
-| `rest (m-z)` | the other half of the remainder (88 files) |
+| `locale production visuals` | `tests/locale-visual.test.ts` (50 exact production-render goldens in a bounded process) |
+| `rest (a-d)` | every other test whose basename starts with `a` through `d` (52 files) |
+| `rest (e-l)` | every other test whose basename starts with `e` through `l` (50 files) |
+| `rest (m-r)` | every other test whose basename starts with `m` through `r` (30 files) |
+| `rest (s-t)` | every other test whose basename starts with `s` through `t` (39 files) |
+| `rest (u-z)` | every other test whose basename starts with `u` through `z` (20 files) |
 
 The former single `rest` process reached 11.5 GiB resident memory on
-a 16 GiB runner. The two halves run in separate processes and keep that peak
-bounded. New test files land in one half automatically — no workflow edit is needed.
+a 16 GiB runner. Continued production-render growth later pushed both old
+alphabetic halves beyond a 14 GiB test budget, so they now use five bounded
+ranges. The locale visual suite itself performs 50 production bundle/Wasm
+boots and peaks at 8.4 GiB, so it has a dedicated process instead of sharing
+one of those ranges. New test files land in one range
+automatically — no workflow edit is needed.
 If a new file is slow enough to deserve an explicit group, add it to that
 group's `files:` list **and** to the exclusion grep in the same change, or
 it runs twice.
