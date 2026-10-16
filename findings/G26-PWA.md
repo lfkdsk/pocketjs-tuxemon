@@ -231,4 +231,152 @@ the shipped behavior and its current limitations.
 
 subagent 使用：3 个 / 分别静态审计 CI 与文档、实现边界、Chrome 验证器与变异辨识力；并行找出了 native 隔离、真实 A/B 分块、续传和双分辨率证据缺口，均由主代理复核和修复，节省了串行审计时间。
 
+## Fix 1: changing language during an offline download
+
+### Resolution and policy
+
+The client now records the language of the active offline-package operation
+separately from the language selector. Changing the selector does not discard
+the active operation's progress, completion, or failure messages. The verified
+package already in flight continues to a terminal state; the new selector value
+becomes the language for the next explicit download. This avoids throwing away
+durable chunks and avoids a service-worker protocol change solely for
+cancellation. While the two languages differ, the bilingual status explicitly
+names both the active package and the next selection. Completion and failure
+always clear the busy state and restore an actionable button.
+
+The same narrow fix also closes the review follow-ups:
+
+- map-prepare recovery now makes at most 64 attempts with exponential delays of
+  25, 50, 100, 200, 400, 800, then at most 1,000 ms; `pagehide` cancels the
+  timer;
+- the unreachable `OFFLINE_CHUNK_MISSING` client branch was removed;
+- service-worker tests execute the emitted worker against in-memory Cache
+  Storage and network implementations instead of treating source substrings as
+  proof of behavior;
+- the unrelated CI-guide edit remains absent. README and the feature-status
+  table describe only the shipped language-switch policy.
+
+### Unit and service-worker behavior
+
+`tests/web-pwa.test.ts` now has eight tests. The two executable worker tests
+cover shell/manifest/content cache routing, online network isolation, offline
+fallbacks, atomic release activation, same-scope stale-shell cleanup, preservation
+of shared content caches, and `skipWaiting`. The client harness executes the
+real `web/pwa-client.js` and verifies that:
+
+1. a German operation remains authoritative after the selector changes to
+   Chinese;
+2. German progress and completion update the UI and unlock the control;
+3. the next click starts Chinese, and an error returns it to the resumable
+   state; and
+4. recovery polling is bounded, backs off, and is cancelled on `pagehide`.
+
+The fresh CI shard run added four tests relative to the original delivery:
+
+| CI shard | Tests | Fail | Skip |
+| --- | ---: | ---: | ---: |
+| importer | 55 | 0 | 0 |
+| replays | 12 | 0 | 0 |
+| locks, battle data and terrain | 361 | 0 | 0 |
+| browser UI visuals | 9 | 0 | 0 |
+| locale production visuals | 5 | 0 | 0 |
+| rest a-d | 395 | 0 | 0 |
+| rest e-l | 361 | 0 | 0 |
+| rest m-r | 250 | 0 | 0 |
+| rest s-t | 365 | 0 | 0 |
+| rest u-z | 201 | 0 | 0 |
+| **Total** | **2,014** | **0** | **0** |
+
+### Real Chrome C12 and mutation
+
+The real-Chrome verifier now includes the reported race in its normal release
+A run. German began through the visible controls, the selector changed to
+Chinese while German was active, and German still completed all 548 files and
+29,197,908 bytes. Its terminal message unlocked the button without a reload.
+The next click then started Chinese, which was paused at 289/548 files. Together
+with the existing installability, offline journey, save/load, missing-chunk,
+resume, release B, and update tests, the verifier passed **41 checks**, zero
+failed and zero skipped.
+
+The final 1200×761 screenshot was opened and inspected rather than accepted by
+hash alone. It shows Chinese selected, an enabled **Download or resume / 下载或继续**
+button, and **German is ready offline; Chinese is selected / 德语已可离线游玩；当前选择中文**.
+
+Mutation was isolated in a detached worktree. The complete client fix commit
+was reverse-applied while the new verifier remained present, then the Web build
+and Chrome verifier were rerun. `bun run verify:web:pwa` exited 1 after 7.43 s:
+
+```text
+FAIL German package starts through the visible offline controls:
+  status="Checking offline content… / 正在检查离线内容…"
+Error: verify-web-pwa: German package starts through the visible offline controls
+error: script "verify:web:pwa" exited with code 1
+```
+
+The isolated worktree was removed after the expected failure.
+
+### Full regression gates
+
+The deterministic import still produced 5,077 files and 69,577,033 bytes with
+SHA-256
+`bb6a32fdd5c16cdbe860fdeca0012539f0746935688fa74f240742bb43e218c3`.
+TypeScript, the production build, Wasm build, all 11 locale catalogs, CJK
+checks, and both importer runs passed. The second import had no diff.
+
+All 17 journey-matrix commands passed. The maintained terminal hashes stayed:
+
+- GB6: `748f84174b32011c4419588650a41d6c57c31c79d3f9e772fcc72b25c3bf9b80`
+- J1: `c0b36ae2112df49774377c30e728d03a929fba771746bf54cb14e684742a8a87`
+- J2: `b40b13672d7fd34db52e7607ebcf600f5740fe54c2b0915c7ff60bdb392b763d`
+- J3: `49307027321e7f51ab1a8c81e48ca615cd70d636c289f4170e63fc408b1774bf`
+- J4: `1977c1b0f3bd1bba2c4e5ad82332599c4fc72f0acd84d9437868976fbfb5c736`
+
+Both failure tapes, 20 chapter suffixes, five save/resume points, 21 preview
+states, the frozen-lock scan, and all 242 boot-world checkpoints passed. The
+German mainline completed 230,322 frames at the same language-neutral endpoint.
+
+Every Web command from the workflow was reproduced locally and passed:
+`verify:web:link`, the production Web build, `verify:web:pwa`, Web journey,
+Chinese production, Web demo, arena, expedition, doubles, audio,
+`verify:web:chunks` with all 11 assertions, and `verify:web:lang`. Release A
+finished at
+`086ddc58d3a4387d747eee7024d87b6e1b3abb9d65c3bf7fdffd7268fd1ae7d1`;
+the one-chunk release B finished at
+`83a162cd04e9d7fdb3b7cef7e9677b7e25c9bcee5febeb57600f0279cb32484a`.
+All fresh gates had zero failures and zero skips.
+
+### Native invariance and PSP save E2E
+
+The Web-only client and verifier changes do not enter desktop or PSP inputs.
+The rebuilt desktop release had 8,412 files and 167,197,979 bytes, with an empty
+recursive diff against the original delivery's runtime data. Its JavaScript,
+pak, `.pocket`, and build-receipt hashes were byte-identical. Because every
+QuickJS input is identical, the prior timing result remains applicable without
+introducing a noisy remeasurement.
+
+The rebuilt PSP release retained byte-identical game content:
+
+- `app.pocket`: `c07f72a034c416e94bbc0a2c726bfa8f883631e35329fc340724fdeb114097d1`
+- `assets.pak`: `bc546df22cef9ae546ec523c18b6b8cffd88de299044d4a8879165812e81260a`
+- game JavaScript: `bb68431cd21524dbb8029767eb287269f798418c09e664db4223af26f6d7cac0`
+- game pak: `9f2bd7d59bf6b4364a3c652d0d013fc2686593a19f6e6fca84636d8f5ec50d78`
+
+Host binary hashes remain build-path dependent, as documented in the original
+review; native sources did not change. A final traceless PSP release was rebuilt
+after verification and contains no save-verifier markers.
+
+The exact CI PSP save command was rerun with PPSSPP revision
+`a2f4ce214f224c6c26b3319409ec50205ff8253d`. It saved
+`spyder_downstairs@[6,6]` at frame 115 (3,935 bytes), loaded a field-identical
+state and advanced 30 frames, accepted legacy raw JSON, restored autosave and
+advanced another 30 frames, then showed **SAVE FAILED** on a read-only memory
+stick without writing a slot or crashing. The receipt ends `ALL PHASES PASS`.
+
+A final pre-delivery fetch showed no commits behind `origin/main`, so no rebase
+or merge commit was needed. `bun.lock` is unchanged, and no background verifier,
+browser, server, or emulator process remains.
+
+subagent 使用：3 个 / 分别审计客户端竞态、service worker 行为测试、验收与文档覆盖；主代理逐项复核并执行全部门禁，三个只读审计并行完成，节省了串行复审时间。
+
 PASS
