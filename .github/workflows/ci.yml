@@ -286,6 +286,11 @@ jobs:
       - name: Install and verify the pinned PSP toolchain
         working-directory: vendor/pocket-rpgkit/vendor/pocketjs
         run: bun run bootstrap
+      - name: Warm the PSP build
+        # The first PSP build fetches the Rust standard-library sources for
+        # build-std; doing it here keeps the save verifier's per-phase journey
+        # builds incremental and inside its build timeout.
+        run: bun run build:psp --skip-assets
       - name: Verify PSP memory-stick saves
         env:
           PSP_SAVE_MEMSTICK: ${{ runner.temp }}/psp-save-memstick
