@@ -41,6 +41,12 @@ import {
   battleViewportLayout,
   partyBallRect,
 } from "./battle-layout.ts";
+import { BATTLE_MONSTER_BOUNDS } from "./battle-assets.ts";
+import {
+  battleAnimationTightClip,
+  battleMonsterTightClip,
+  type BattleSpriteBounds,
+} from "./battle-tight-clip.ts";
 
 type Runtime = ReturnType<typeof tuxemonRuntimeBattleState>;
 type MonsterArt = Runtime["visuals"]["monsters"][string];
@@ -435,16 +441,21 @@ export const TuxemonBattleScene: Component<BattleSceneViewProps> = (props) => {
     const source = createMemo(() => art()[side]);
     const pose = () => side === "back" ? paint.playerPose : paint.enemyPose;
     const sprite = () => side === "back" ? paint.playerSprite : paint.enemySprite;
+    const bounds = createMemo<BattleSpriteBounds>(() =>
+      BATTLE_MONSTER_BOUNDS[monster().slug]?.[side] ?? [0, 0, 64, 64]);
+    const clip = createMemo(() => battleMonsterTightClip(
+      bounds(), source()[0], source()[1], sprite().dx, sprite().sinkY,
+    ));
     return (
       <View
         class="absolute overflow-hidden"
         style={{
           posType: 1,
-          insetL: rect.x,
+          insetL: rect.x + clip().x,
           translateX: pose().offsetX,
-          insetT: rect.y,
-          width: rect.width,
-          height: rect.height,
+          insetT: rect.y + clip().y,
+          width: clip().width,
+          height: clip().height,
           opacity: pose().opacity,
         }}
         debugName={`${debugName}-clip`}
@@ -454,9 +465,9 @@ export const TuxemonBattleScene: Component<BattleSceneViewProps> = (props) => {
           cache={imageCache}
           active={props.active}
           class="absolute"
-          style={{ posType: 1, insetL: -source()[0] * 2, insetT: -source()[1] * 2,
+          style={{ posType: 1, insetL: clip().imageX, insetT: clip().imageY,
             width: art().sheet.width * 2, height: art().sheet.height * 2,
-            translateX: sprite().dx, translateY: sprite().sinkY, opacity: sprite().opacity }}
+            opacity: sprite().opacity }}
           debugName={debugName}
         />
       </View>
@@ -514,6 +525,9 @@ export const TuxemonBattleScene: Component<BattleSceneViewProps> = (props) => {
   const animationPage = createMemo(() => animation().page ?? environment().partyIcons.icon_empty!);
   const animationRect = createMemo(() => runtime().battle.parties[0].some((monster) => monster.uid === animation().target)
     ? R.playerMonster : R.enemyMonster);
+  const animationClip = createMemo(() => battleAnimationTightClip(
+    animation().page, animation().sourceX, animation().sourceY,
+  ));
 
   // Presentation visibility changes every few reference ticks. Keep these
   // nodes mounted and switch only their opacity/image so steady battle frames
@@ -685,10 +699,10 @@ export const TuxemonBattleScene: Component<BattleSceneViewProps> = (props) => {
           class="absolute overflow-hidden"
           style={{
             posType: 1,
-            insetL: animationRect().x,
-            insetT: animationRect().y,
-            width: animationRect().width,
-            height: animationRect().height,
+            insetL: animationRect().x + animationClip().x,
+            insetT: animationRect().y + animationClip().y,
+            width: animationClip().width,
+            height: animationClip().height,
             opacity: animation().opacity,
           }}
           debugName="battle-animation-clip"
@@ -698,9 +712,7 @@ export const TuxemonBattleScene: Component<BattleSceneViewProps> = (props) => {
             cache={imageCache}
             active={props.active}
             class="absolute"
-            style={{ posType: 1, insetL: 0, insetT: 0,
-              translateX: (128 - (animation().page?.contentWidth ?? 8) * 2) / 2 - animation().sourceX * 2,
-              translateY: (128 - (animation().page?.contentHeight ?? 8) * 2) / 2 - animation().sourceY * 2,
+            style={{ posType: 1, insetL: animationClip().imageX, insetT: animationClip().imageY,
               width: animationPage().width * 2, height: animationPage().height * 2 }}
             debugName="battle-animation"
           />
