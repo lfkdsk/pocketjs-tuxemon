@@ -918,6 +918,9 @@ const noReplayService = {
 // support negotiated at both the capability probe and welcome frame. The
 // first match above remains the bit-0-only compatibility path.
 await Promise.all([creator.navigate("about:blank"), joiner.navigate("about:blank")]);
+// The first match is over. Headless Chrome on CI runners can keep a navigated-
+// away page's socket open past the wait below, so the service ends it too.
+for (const socket of service.sockets) socket?.close(1001, "match over");
 await waitForService("first match sockets to close", () => service.sockets.every((socket) => socket === null), []);
 service = new MockWireService(true);
 
