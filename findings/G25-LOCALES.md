@@ -186,15 +186,16 @@ inventory, story state and campaign endpoint as English.
 The final source pak is 136,356,304 bytes. The ordinary page publishes a
 6,586,991-byte gzip English startup pack and 2,124 deferred chunks totaling
 29,315,968 compressed bytes. Only 284 shared chunks are marked for bounded
-background fetching; locale map banks remain demand-loaded. The game runtime
-JavaScript is 1,444,268 bytes and the shared player is 85,182 bytes.
+background fetching; locale map banks remain demand-loaded. The ordinary
+game runtime JavaScript is 1,444,290 bytes and the shared player is 85,182
+bytes.
 
 | Essential startup component | Baseline | Seven-locale build | Delta |
 | --- | ---: | ---: | ---: |
 | Startup pak | 6,648,028 | 6,586,991 | -61,037 (-0.918%) |
-| Game runtime JavaScript | 1,441,960 | 1,444,268 | +2,308 (+0.160%) |
+| Game runtime JavaScript | 1,441,960 | 1,444,290 | +2,330 (+0.162%) |
 | Shared player JavaScript | 84,991 | 85,182 | +191 (+0.225%) |
-| **Combined** | **8,174,979** | **8,116,441** | **-58,538 (-0.716%)** |
+| **Combined** | **8,174,979** | **8,116,463** | **-58,516 (-0.716%)** |
 
 An English boot has no locale bootstrap. A localized boot fetches only the
 chosen bootstrap before demand-loading that locale's maps:
