@@ -151,7 +151,10 @@ export function checkExternalPak(
     if (!key) throw new Error(`embedded index has no ${label} entry`);
     return key;
   };
-  const mapKey = pick((k) => k.startsWith("maps/") && k.endsWith(".rkm"), "real map (maps/*.rkm)");
+  const mapKey = pick(
+    (k) => /^maps(?:-[^/]+)?\/.+\.rkm$/.test(k),
+    "real map (maps[-locale]/*.rkm)",
+  );
   const audioKey = pick((k) => k.startsWith("audio:qoa."), "real audio (audio:qoa.*)");
   const battleKey = pick((k) => k.startsWith("ui:tile.battle/"), "real battle tile (ui:tile.battle/*)");
   const samples = [mapKey, audioKey, battleKey].map((key) => {

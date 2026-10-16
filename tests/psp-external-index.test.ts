@@ -125,9 +125,9 @@ describe("PSP build self-check (checkExternalPak)", () => {
 
   /** A synthetic PSP output dir: sidecar + boot pak whose embedded index is
    *  the sidecar's header+directory prefix. */
-  function buildOutDir(index?: Uint8Array): string {
+  function buildOutDir(index?: Uint8Array, entries = sidecarEntries): string {
     const dir = mkdtempSync(join(tmpdir(), "psp-external-check-"));
-    const sidecar = pack(sidecarEntries);
+    const sidecar = pack(entries);
     const embedded = index ?? sidecar.subarray(0, u32(sidecar, 20));
     const boot = pack([
       { key: "ui:styles", dtype: 0, data: new Uint8Array([7]) },
@@ -151,6 +151,22 @@ describe("PSP build self-check (checkExternalPak)", () => {
       // the map sample (the old loose predicate picked battle/items/app_map.json).
       expect(keys).not.toContain("battle/items/app_map.json");
       expect(summary.samples.every((s) => s.bytes > 0)).toBe(true);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("accepts a locale-owned RKM map when the English map bank is filtered", () => {
+    const localizedEntries = sidecarEntries.map((entry) =>
+      entry.key === "maps/spyder_bedroom.rkm"
+        ? { ...entry, key: "maps-de_DE/spyder_bedroom.rkm" }
+        : entry
+    );
+    const dir = buildOutDir(undefined, localizedEntries);
+    try {
+      const summary = checkExternalPak(dir);
+      expect(summary.samples.map((sample) => sample.key))
+        .toContain("maps-de_DE/spyder_bedroom.rkm");
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
