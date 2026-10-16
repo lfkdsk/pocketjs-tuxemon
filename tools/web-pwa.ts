@@ -172,10 +172,14 @@ export function finalizeWebPwa(options: FinalizeWebPwaOptions): WebPwaBuildResul
   const playerBytes = new TextEncoder().encode(
     playerOriginal.replace(/audio-worklet(?:\.[0-9a-f]{64})?\.js/g, audio.name),
   );
-  const player = writeContentCopy(playerPath, options.siteDir, playerBytes);
+  // Keep every ordinary-game shell response beneath the game scope. A
+  // path-scoped worker cannot intercept the shared site-root player, Wasm or
+  // stylesheet on an offline reload; replay pages continue using those
+  // original root files and remain outside this PWA.
+  const player = writeContentCopy(playerPath, gameDir, playerBytes);
   const game = writeContentCopy(gameBundlePath, gameDir);
-  const wasm = writeContentCopy(wasmPath, options.siteDir);
-  const css = writeContentCopy(cssPath, options.siteDir);
+  const wasm = writeContentCopy(wasmPath, gameDir);
+  const css = writeContentCopy(cssPath, gameDir);
   const contentManifest = writeContentCopy(contentManifestPath, gameDir);
   const client = writeContentCopy(clientPath, gameDir);
 
@@ -215,12 +219,12 @@ export function finalizeWebPwa(options: FinalizeWebPwaOptions): WebPwaBuildResul
   if (!configMatch) throw new Error("web PWA: player page has no pocket-game config");
   const playerConfig = JSON.parse(configMatch[2]!) as Record<string, unknown>;
   playerConfig.bundle = game.name;
-  playerConfig.wasm = `../${wasm.name}`;
+  playerConfig.wasm = wasm.name;
   playerConfig.pakManifest = contentManifest.name;
   playerConfig.pwaBuild = VERSION_PLACEHOLDER;
   html = html.replace(configPattern, `$1${JSON.stringify(playerConfig).replace(/</g, "\\u003c")}$3`);
-  html = replaceExactly(html, /href="\.\.\/site(?:\.[0-9a-f]{64})?\.css"/, `href="../${css.name}"`, "site stylesheet");
-  html = replaceExactly(html, /src="\.\.\/player(?:\.[0-9a-f]{64})?\.js"/, `src="../${player.name}"`, "player script");
+  html = replaceExactly(html, /href="(?:\.\.\/)?site(?:\.[0-9a-f]{64})?\.css"/, `href="${css.name}"`, "site stylesheet");
+  html = replaceExactly(html, /src="(?:\.\.\/)?player(?:\.[0-9a-f]{64})?\.js"/, `src="${player.name}"`, "player script");
   html = replaceExactly(html, /href="(?:\.\.\/)?manifest\.webmanifest"/, 'href="manifest.webmanifest"', "manifest link");
   html = replaceExactly(html, /href="(?:\.\.\/)?apple-touch-icon\.png"/, 'href="apple-touch-icon.png"', "Apple icon link");
   html = replaceExactly(
@@ -249,9 +253,9 @@ export function finalizeWebPwa(options: FinalizeWebPwaOptions): WebPwaBuildResul
     { ...audio.asset, url: audio.name },
     { ...contentManifest.asset, url: contentManifest.name },
     { ...client.asset, url: client.name },
-    { ...player.asset, url: `../${player.name}` },
-    { ...wasm.asset, url: `../${wasm.name}` },
-    { ...css.asset, url: `../${css.name}` },
+    { ...player.asset, url: player.name },
+    { ...wasm.asset, url: wasm.name },
+    { ...css.asset, url: css.name },
   ];
   shell.push(...installAssets);
   const htmlBytes = new Uint8Array(readFileSync(join(gameDir, "index.html")));

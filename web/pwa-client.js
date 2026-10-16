@@ -157,19 +157,23 @@ if (config && "serviceWorker" in navigator) {
     }
     location.reload();
   });
+  const returnToCachedGame = () => {
+    const url = new URL(location.href);
+    for (const key of ["chapter", "map", "x", "y", "autoplay", "speed"]) url.searchParams.delete(key);
+    url.searchParams.set("lang", select.value);
+    try { localStorage.setItem("pocket-tuxemon/lang", select.value); } catch {}
+    location.replace(url.pathname + (url.searchParams.size ? `?${url.searchParams}` : ""));
+  };
   missingReturn.addEventListener("click", () => {
     if (mapLoadFailure) {
       const failure = mapLoadFailure;
       mapLoadFailure = null;
       missing.hidden = true;
       failure.cancel();
+      returnToCachedGame();
       return;
     }
-    const url = new URL(location.href);
-    for (const key of ["chapter", "map", "x", "y", "autoplay", "speed"]) url.searchParams.delete(key);
-    url.searchParams.set("lang", "en");
-    try { localStorage.setItem("pocket-tuxemon/lang", "en"); } catch {}
-    location.replace(url.pathname + (url.searchParams.size ? `?${url.searchParams}` : ""));
+    returnToCachedGame();
   });
   window.addEventListener("online", () => {
     missingRetry.disabled = false;

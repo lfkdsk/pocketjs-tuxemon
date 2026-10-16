@@ -215,6 +215,8 @@ jobs:
         run: bun run verify:web:link
       - name: Build the deployable web site
         run: bun run web
+      - name: Verify installable offline PWA behavior in headless Chrome
+        run: bun run verify:web:pwa
       - name: Play the journey in headless Chrome
         run: bun tools/verify-web-journey.ts
       - name: Play the zh_CN opening in headless Chrome
@@ -253,6 +255,14 @@ jobs:
         with:
           name: web-demo
           path: dist/web-demo/*.png
+          retention-days: 14
+          if-no-files-found: ignore
+      - name: Keep the PWA acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: web-pwa
+          path: dist/web-pwa-verify
           retention-days: 14
           if-no-files-found: ignore
 

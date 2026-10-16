@@ -111,9 +111,18 @@ async function contentAsset(request, clientId) {
   const cache = await caches.open(CONTENT_CACHE);
   const cached = await cache.match(request.url);
   if (cached) return cached;
+  const notifyMissing = async () => {
+    if (!clientId) return;
+    const client = await self.clients.get(clientId);
+    client?.postMessage({ type: "OFFLINE_CHUNK_MISSING", file: new URL(request.url).pathname,
+      build: BUILD.version });
+  };
   try {
     const response = await fetch(request);
-    if (!response.ok) return response;
+    if (!response.ok) {
+      await notifyMissing();
+      return response;
+    }
     const match = /-([0-9a-f]{64})\.pak\.gz$/.exec(new URL(request.url).pathname);
     if (!match) return response;
     const bytes = await response.clone().arrayBuffer();
@@ -122,10 +131,7 @@ async function contentAsset(request, clientId) {
     await cache.put(request.url, response.clone());
     return response;
   } catch {
-    if (clientId) {
-      const client = await self.clients.get(clientId);
-      client?.postMessage({ type: "OFFLINE_CHUNK_MISSING", file: new URL(request.url).pathname });
-    }
+    await notifyMissing();
     return new Response("offline content not downloaded", {
       status: 503,
       headers: { "content-type": "text/plain; charset=utf-8", "x-pocket-offline": "missing" },

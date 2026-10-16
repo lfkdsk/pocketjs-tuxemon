@@ -118,15 +118,17 @@ describe("Web PWA finalizer", () => {
       expect(firstHtml).toContain('import("./pwa-client.');
       expect(firstHtml).not.toContain('class="offline-controls"');
       expect(firstHtml).not.toContain('src="../player.js"');
+      expect(firstHtml).toMatch(/src="player\.[0-9a-f]{64}\.js"/);
+      expect(firstHtml).toMatch(/"wasm":"pocketjs\.[0-9a-f]{64}\.wasm"/);
+      expect(firstHtml).toMatch(/href="site\.[0-9a-f]{64}\.css"/);
       expect(readFileSync(join(fixture.gameDir, "replay.html"), "utf8")).toBe("replay stays byte-identical");
 
       const client = first.shell.find((entry) => entry.url.startsWith("pwa-client."))!;
       expect(existsSync(join(fixture.gameDir, client.url))).toBeTrue();
       expect(existsSync(join(fixture.root, "web", client.url))).toBeFalse();
       for (const shell of first.shell) {
-        const path = shell.url.startsWith("../")
-          ? join(fixture.siteDir, shell.url.slice(3))
-          : join(fixture.gameDir, shell.url);
+        expect(shell.url.startsWith("../")).toBeFalse();
+        const path = join(fixture.gameDir, shell.url);
         if (shell.url === fixture.manifest.startup.file) continue;
         expect(existsSync(path)).toBeTrue();
         expect(readFileSync(path).byteLength).toBe(shell.bytes);
