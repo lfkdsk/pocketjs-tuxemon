@@ -107,7 +107,7 @@
     "verify:web:arena": "bun tools/verify-web-arena.ts",
     "verify:web:expedition": "bun tools/verify-web-expedition.ts",
     "verify:web:doubles": "bun tools/verify-web-double-input.ts",
-    "verify:web:link": "bun tools/verify-tux-link-web.ts",
+    "verify:web:link": "bun tools/verify-tux-link-web.ts --build",
     "web:verify": "bun vendor/pocket-rpgkit/tools/web-verify.ts --site dist/web --out dist/web-verify",
     "verify:web:audio": "bun tools/verify-web-audio.ts",
     "verify:desktop:audio": "bun tools/verify-desktop-audio.ts",

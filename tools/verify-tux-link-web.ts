@@ -15,7 +15,9 @@ import {
 import { join, resolve } from "node:path";
 
 import {
-  TUX_CAP_PUBLIC_PRESENTATION_V1,
+  TUX_ARENA_VERSION,
+  TUX_REQUIRED_CAPS,
+  TUX_SUPPORTED_CAPS,
   TUX_WIRE_VERSION,
   decodeTuxClientFrame,
   type TuxClientFrame,
@@ -36,7 +38,9 @@ const OUT = join(ROOT, "dist", "tux-link-web");
 const GOLDENS = join(ROOT, "tests", "goldens", "tux-link");
 const PORT = 49_190;
 const BASE = `http://127.0.0.1:${PORT}`;
+const TRUSTED_REPLAY_BASE = `${BASE}/tux/v1/replays/`;
 const UPDATE = process.argv.includes("--update");
+const BUILD = process.argv.includes("--build");
 const chromeFlag = process.argv.indexOf("--chrome");
 const CHROME = chromeFlag >= 0 ? process.argv[chromeFlag + 1]!
   : process.env.CHROME ?? Bun.which("google-chrome") ?? Bun.which("chromium") ?? "google-chrome";
@@ -47,6 +51,22 @@ const INVITE = `${MATCH}.${SECRET}`;
 const TICKETS = ["browser-ticket-creator", "browser-ticket-joiner"] as const;
 const DEADLINES = [4_102_444_830_000, 4_102_444_860_000] as const;
 const EXPIRES_AT_MS = 4_102_444_800_000;
+const REPLAY_URL = `${TRUSTED_REPLAY_BASE}${MATCH}?expires=4102444800&signature=opaque`;
+
+if (BUILD) {
+  const build = Bun.spawn([process.execPath, join(ROOT, "tools", "web.ts")], {
+    cwd: ROOT,
+    env: {
+      ...process.env,
+      TUX_BATTLE_BASE_URL: BASE,
+      TUX_GITHUB_CLIENT_ID: "pocket_tuxemon_link_verifier",
+      TUX_GITHUB_AUTH_WORKER: "https://auth.example.invalid/tux",
+    },
+    stdio: ["inherit", "inherit", "inherit"],
+  });
+  const exitCode = await build.exited;
+  if (exitCode !== 0) process.exit(exitCode);
+}
 
 if (!existsSync(join(SITE, GAME, "index.html"))) {
   console.error("verify-tux-link-web: no Web site at dist/web; build it with the loopback Link URL first");
@@ -156,6 +176,16 @@ class MockWireService {
   nextSocketId = 1;
   turn = 0;
 
+  constructor(readonly replayCapability: boolean) {
+    const advertised = this.advertisedCaps();
+    assert((advertised & TUX_REQUIRED_CAPS) === TUX_REQUIRED_CAPS,
+      `mock capability bits ${advertised} omit required client bits ${TUX_REQUIRED_CAPS}`);
+  }
+
+  private advertisedCaps(): number {
+    return this.replayCapability ? TUX_SUPPORTED_CAPS : TUX_REQUIRED_CAPS;
+  }
+
   async response(request: Request, server: UpgradeServer): Promise<Response | undefined> {
     const url = new URL(request.url);
     if (url.pathname === "/tux/v1/capabilities") {
@@ -163,10 +193,10 @@ class MockWireService {
       return Response.json({
         service: "tux-battle",
         enabled: true,
-        wireV: 1,
-        arenaV: 1,
-        caps: TUX_CAP_PUBLIC_PRESENTATION_V1,
-        requiredCaps: TUX_CAP_PUBLIC_PRESENTATION_V1,
+        wireV: TUX_WIRE_VERSION,
+        arenaV: TUX_ARENA_VERSION,
+        caps: this.advertisedCaps(),
+        requiredCaps: TUX_REQUIRED_CAPS,
       });
     }
     if (url.pathname === "/tux/v1/matches") {
@@ -253,9 +283,9 @@ class MockWireService {
     this.welcomed[side] = true;
     this.send(side, {
       type: "welcome",
-      v: 1,
-      arenaV: 1,
-      caps: TUX_CAP_PUBLIC_PRESENTATION_V1,
+      v: TUX_WIRE_VERSION,
+      arenaV: TUX_ARENA_VERSION,
+      caps: this.advertisedCaps(),
       side,
       connectionEpoch: this.epochs[side],
       turnRevision: this.turn,
@@ -300,10 +330,11 @@ class MockWireService {
       for (const side of [0, 1] as const) {
         this.send(side, {
           type: "ended",
-          v: 1,
+          v: TUX_WIRE_VERSION,
           turnRevision: 2,
           result: { winner: side === 0 ? "self" : "opponent", reason: "knockout" },
           observation: observationFor(side, 2, true),
+          ...(this.replayCapability ? { replayUrl: REPLAY_URL } : {}),
         });
       }
     }
@@ -333,7 +364,7 @@ class MockWireService {
   }
 }
 
-const service = new MockWireService();
+let service = new MockWireService(false);
 const server = Bun.serve<SocketData>({
   hostname: "127.0.0.1",
   port: PORT,
@@ -356,7 +387,11 @@ interface HookState {
   deadlineAtMs: number | null;
   actionIndex: number;
   selfSubmitted: boolean;
+  legalActions: TuxPublicObservation["legalActions"];
+  actingMoves: Array<{ slot: number; slug: string }>;
   opponentRefs: string[];
+  replayUrl: string | null;
+  replayAvailable: boolean;
   opponentSpecies: string[];
 }
 
@@ -618,6 +653,47 @@ class BrowserDriver {
       };
     })()`);
   }
+
+  async resultSemanticPixels(): Promise<{
+    width: number;
+    height: number;
+    unique: number;
+    button: number[];
+    border: number[];
+    panel: number[];
+    backdrop: number[];
+  }> {
+    return this.evaluate(`(() => {
+      globalThis.__pocketPlayer.paint();
+      const canvas = document.getElementById("screen");
+      const context = canvas.getContext("2d");
+      const density = canvas.width / 480;
+      const mean = (x, y, w, h) => {
+        const data = context.getImageData(x * density, y * density, w * density, h * density).data;
+        const sum = [0, 0, 0, 0];
+        for (let i = 0; i < data.length; i += 4) {
+          sum[0] += data[i]; sum[1] += data[i + 1]; sum[2] += data[i + 2]; sum[3] += data[i + 3];
+        }
+        const count = data.length / 4;
+        return sum.map((value) => Math.round(value / count));
+      };
+      const all = context.getImageData(0, 0, canvas.width, canvas.height).data;
+      const colors = new Set();
+      for (let y = 0; y < canvas.height; y += 16) for (let x = 0; x < canvas.width; x += 16) {
+        const offset = (y * canvas.width + x) * 4;
+        colors.add([all[offset], all[offset + 1], all[offset + 2], all[offset + 3]].join(","));
+      }
+      return {
+        width: canvas.width,
+        height: canvas.height,
+        unique: colors.size,
+        button: mean(145, 171, 8, 20),
+        border: mean(136, 164, 2, 36),
+        panel: mean(86, 67, 8, 20),
+        backdrop: mean(2, 52, 12, 20),
+      };
+    })()`);
+  }
 }
 
 function colorDistance(left: number[], right: number[]): number {
@@ -810,24 +886,105 @@ const terminalCreator = await creator.hook();
 const terminalJoiner = await joiner.hook();
 assert(terminalCreator.turnRevision === 2 && terminalJoiner.turnRevision === 2,
   `terminal revisions differ: ${JSON.stringify({ terminalCreator, terminalJoiner })}`);
-assert(!JSON.stringify(terminalCreator).toLowerCase().includes("replay") &&
-  !JSON.stringify(terminalJoiner).toLowerCase().includes("replay"), "client invented a replay field");
+assert(terminalCreator.replayUrl === null && terminalJoiner.replayUrl === null &&
+  !terminalCreator.replayAvailable && !terminalJoiner.replayAvailable,
+  `unnegotiated replay became available: ${JSON.stringify({ terminalCreator, terminalJoiner })}`);
 
 const resultGoldens = [
   await recordGolden("desktop-en-result-960x544.png", await creator.canvasPng(960, 544)),
   await recordGolden("phone-zh-result-480x272.png", await joiner.canvasPng(480, 272)),
 ];
+const noReplayService = {
+  capabilities: service.requests.filter((request) => request === "GET /tux/v1/capabilities").length,
+  creates: service.requests.filter((request) => request === "POST /tux/v1/matches").length,
+  sockets: service.requests.filter((request) => request.startsWith("WS ")).length,
+  connectionEpochs: [...service.epochs],
+  submits: [service.submitCount(0, 0), service.submitCount(1, 0), service.submitCount(0, 1), service.submitCount(1, 1)],
+};
+
+// Run a second match in the same two browser profiles with optional replay
+// support negotiated at both the capability probe and welcome frame. The
+// first match above remains the bit-0-only compatibility path.
+await Promise.all([creator.navigate("about:blank"), joiner.navigate("about:blank")]);
+await waitForService("first match sockets to close", () => service.sockets.every((socket) => socket === null), []);
+service = new MockWireService(true);
+
+await creator.navigate(`${gameUrl}?lang=en`);
+await creator.waitFor("replay-capable English Web Link", `globalThis.__pocketPlayer?.state === "running" &&
+  globalThis.__pocketTuxLink?.state().available === true`);
+await creator.evaluate(`globalThis.__pocketPlayer.focus()`);
+await creator.step(5);
+await openBattleByKeyboard(creator);
+await creator.pressKey("Enter", "Enter", 13);
+await creator.waitFor("replay-capable creator invitation", `globalThis.__pocketTuxLink.state().phase === "waiting" &&
+  document.getElementById("auth-invite")?.value.includes("#invite=")`);
+
+await joiner.navigate(`${gameUrl}?lang=zh#invite=${encodeURIComponent(INVITE)}`);
+await joiner.waitFor("replay-capable Chinese Web Link", `globalThis.__pocketPlayer?.state === "running" &&
+  globalThis.__pocketTuxLink?.state().available === true`);
+await joiner.evaluate(`globalThis.__pocketPlayer.focus()`);
+await joiner.step(5);
+await openBattleByTouch(joiner);
+await Promise.all([
+  creator.waitFor("replay match first creator decision", `globalThis.__pocketTuxLink.state().phase === "decision"`),
+  joiner.waitFor("replay match first joiner decision", `globalThis.__pocketTuxLink.state().phase === "decision"`),
+]);
+
+await creator.pressKey("Enter", "Enter", 13);
+await joiner.pressTouch("CIRCLE");
+await waitForService("replay match first submissions", () => service.pending.size === 2, [creator, joiner]);
+service.resolve();
+await Promise.all([
+  creator.waitFor("replay match second creator decision", `globalThis.__pocketTuxLink.state().turnRevision === 1 &&
+    globalThis.__pocketTuxLink.state().phase === "decision"`),
+  joiner.waitFor("replay match second joiner decision", `globalThis.__pocketTuxLink.state().turnRevision === 1 &&
+    globalThis.__pocketTuxLink.state().phase === "decision"`),
+]);
+
+await creator.pressKey("Enter", "Enter", 13);
+await joiner.pressTouch("CIRCLE");
+await waitForService("replay match terminal submissions", () => service.pending.size === 2, [creator, joiner]);
+service.resolve();
+await Promise.all([
+  creator.waitFor("trusted creator replay result", `globalThis.__pocketTuxLink.state().phase === "ended" &&
+    globalThis.__pocketTuxLink.state().replayAvailable === true`),
+  joiner.waitFor("trusted joiner replay result", `globalThis.__pocketTuxLink.state().phase === "ended" &&
+    globalThis.__pocketTuxLink.state().replayAvailable === true`),
+]);
+
+const replayCreator = await creator.hook();
+const replayJoiner = await joiner.hook();
+assert(replayCreator.replayUrl === REPLAY_URL && replayJoiner.replayUrl === REPLAY_URL,
+  `negotiated replay URL differs: ${JSON.stringify({ replayCreator, replayJoiner })}`);
+assert([replayCreator.replayUrl, replayJoiner.replayUrl].every((url) =>
+  url !== null && url.startsWith(TRUSTED_REPLAY_BASE)),
+  `negotiated replay left trusted prefix ${TRUSTED_REPLAY_BASE}`);
+
+const replayPixels = await creator.resultSemanticPixels();
+assert(replayPixels.width === 960 && replayPixels.height === 544 && replayPixels.unique >= 12,
+  `trusted replay result is missing visual detail: ${JSON.stringify(replayPixels)}`);
+assert(colorDistance(replayPixels.button, replayPixels.border) >= 20 &&
+  colorDistance(replayPixels.panel, replayPixels.backdrop) >= 15,
+  `trusted replay result semantic regions are not distinct: ${JSON.stringify(replayPixels)}`);
+
+const replayGoldens = [
+  await recordGolden("desktop-en-result-replay-960x544.png", await creator.canvasPng(960, 544)),
+  await recordGolden("phone-zh-result-replay-480x272.png", await joiner.canvasPng(480, 272)),
+];
 assert(creator.errors.length === 0 && joiner.errors.length === 0,
   `browser errors: ${[...creator.errors, ...joiner.errors].join(" | ")}`);
 
+const replayService = {
+  capabilities: service.requests.filter((request) => request === "GET /tux/v1/capabilities").length,
+  creates: service.requests.filter((request) => request === "POST /tux/v1/matches").length,
+  sockets: service.requests.filter((request) => request.startsWith("WS ")).length,
+  connectionEpochs: [...service.epochs],
+  submits: [service.submitCount(0, 0), service.submitCount(1, 0), service.submitCount(0, 1), service.submitCount(1, 1)],
+};
+
 const receipt = {
-  service: {
-    capabilities: service.requests.filter((request) => request === "GET /tux/v1/capabilities").length,
-    creates: service.requests.filter((request) => request === "POST /tux/v1/matches").length,
-    sockets: service.requests.filter((request) => request.startsWith("WS ")).length,
-    connectionEpochs: service.epochs,
-    submits: [service.submitCount(0, 0), service.submitCount(1, 0), service.submitCount(0, 1), service.submitCount(1, 1)],
-  },
+  service: noReplayService,
+  replayService,
   inputs: {
     keyboard: keyboardFirst,
     touch: { down: touchDown, confirm: touchConfirm },
@@ -842,8 +999,14 @@ const receipt = {
     opponentServerFrames: `${joinerFramesBeforePending}->${joinerFramesAfterPending}`,
     unchangedBeforeResolution: true,
   },
+  replay: {
+    unnegotiated: [terminalCreator.replayUrl, terminalJoiner.replayUrl],
+    negotiated: [replayCreator.replayUrl, replayJoiner.replayUrl],
+    trustedPrefix: TRUSTED_REPLAY_BASE,
+    pixels: replayPixels,
+  },
   pixels,
-  screenshots: [...decisionGoldens, ...resultGoldens],
+  screenshots: [...decisionGoldens, ...resultGoldens, ...replayGoldens],
 };
 await Bun.write(join(OUT, "receipt.json"), `${JSON.stringify(receipt, null, 2)}\n`);
 

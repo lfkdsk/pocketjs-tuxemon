@@ -224,6 +224,7 @@ export interface PocketTuxLinkHook {
     legalActions: ArenaAction[];
     actingMoves: Array<{ slot: number; slug: string }>;
     opponentRefs: string[];
+    replayUrl: string | null;
     replayAvailable: boolean;
     opponentSpecies: string[];
   };
@@ -405,6 +406,7 @@ export function createTitleBattleOverlay(options: TitleBattleOptions): SessionOw
             legalActions: observation?.legalActions.map((action) => ({ ...action })) ?? [],
             actingMoves: acting?.moves.map((move) => ({ slot: move.slot, slug: move.slug })) ?? [],
             opponentRefs: observation?.opponent.active.map((monster) => monster.publicId) ?? [],
+            replayUrl: state.replayUrl,
             replayAvailable: state.replayUrl !== null,
             opponentSpecies: observation?.opponent.active.map((monster) => monster.species.slug) ?? [],
           };
