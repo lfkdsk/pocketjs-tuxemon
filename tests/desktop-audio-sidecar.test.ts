@@ -24,6 +24,8 @@ test("desktop pak partition keeps render assets and extracts lazy data and audio
     { key: "ui:styles", dtype: 0, data: new Uint8Array([1]) },
     { key: "ui:tile.route-ground", dtype: 0, data: new Uint8Array([8, 9]) },
     { key: "maps/route.json", dtype: 0, data: new Uint8Array([10, 11, 12]) },
+    { key: "maps-de_DE/route.json", dtype: 0, data: new Uint8Array([14, 15]) },
+    { key: "battle-fr_FR/monster.json", dtype: 0, data: new Uint8Array([16]) },
     { key: "l10n/zh_CN/project-shell.json", dtype: 0, data: new Uint8Array([13]) },
     { key: "audio:qoa.music/town.qoa", dtype: 0, data: new Uint8Array([2, 3]) },
     { key: "audio:wav.sounds/confirm.wav", dtype: 0, data: new Uint8Array([4, 5, 6]) },
@@ -40,9 +42,11 @@ test("desktop pak partition keeps render assets and extracts lazy data and audio
     "audio:qoa.music/town.qoa",
   ]);
   expect(partition.audioBytes).toBe(2);
-  expect(partition.dataBytes).toBe(4);
+  expect(partition.dataBytes).toBe(7);
   expect(partition.sidecar.map((entry) => entry.key)).toEqual([
     "maps/route.json",
+    "maps-de_DE/route.json",
+    "battle-fr_FR/monster.json",
     "l10n/zh_CN/project-shell.json",
     "audio:qoa.music/town.qoa",
   ]);

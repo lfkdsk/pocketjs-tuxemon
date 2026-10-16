@@ -24,6 +24,11 @@ import {
   buildWebPakChunks,
   WEB_PAK_MANIFEST,
 } from "./web-chunks.ts";
+import {
+  injectBrowserLanguageDetection,
+  injectLocaleBootstrapBarrier,
+  WEB_LOCALE_BOOTSTRAP,
+} from "./web-locale.ts";
 
 const root = resolve(import.meta.dir, "..");
 const tuxLinkConfig = resolveTuxLinkConfig(process.argv.slice(2), process.env);
@@ -172,7 +177,12 @@ const expeditionReplayStyles = `<style>
 </style>`;
 
 const playerPath = join(gameDir, "index.html");
-const playerHtml = await Bun.file(playerPath).text();
+const playerScriptPath = join(gameDir, "player.js");
+await Bun.write(
+  playerScriptPath,
+  injectLocaleBootstrapBarrier(await Bun.file(playerScriptPath).text()),
+);
+const playerHtml = injectBrowserLanguageDetection(await Bun.file(playerPath).text());
 const configPattern = /(<script type="application\/json" id="pocket-game">)(.*?)(<\/script>)/s;
 const configMatch = playerHtml.match(configPattern);
 if (!configMatch) throw new Error("web: generated player page has no pocket-game config");
@@ -238,6 +248,7 @@ const webPak = buildWebPakChunks({
 const ordinaryConfig = JSON.parse(configMatch[2]!) as Record<string, unknown>;
 ordinaryConfig.pak = null;
 ordinaryConfig.pakManifest = WEB_PAK_MANIFEST;
+ordinaryConfig.localeBootstrap = WEB_LOCALE_BOOTSTRAP;
 ordinaryPlayerHtml = ordinaryPlayerHtml.replace(
   configPattern,
   `$1${JSON.stringify(ordinaryConfig).replace(/</g, "\\u003c")}$3`,

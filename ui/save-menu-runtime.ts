@@ -152,6 +152,8 @@ function saveMenuText(overrides?: UiTextOverrides) {
  *  Says which language the save is in and how to switch to it. */
 function languageMismatchMessage(saveLang: Lang, back: MenuState): MenuState {
   const otherLabel = languageLabel(saveLang);
+  const otherEn = saveLang === "zh_CN" ? "Chinese (中文)" : otherLabel;
+  const otherZh = saveLang === "en_US" ? "英文" : otherLabel;
   const howEn = langSwitchMechanism() === "reload"
     ? `Press R, pick ${otherLabel}, then load it again.`
     : `Switch the language to ${otherLabel} and restart the game, then load it again.`;
@@ -160,7 +162,7 @@ function languageMismatchMessage(saveLang: Lang, back: MenuState): MenuState {
     : `切换到${otherLabel}并重启游戏后重新读取。`;
   return message(
     "LANGUAGE MISMATCH / 语言不匹配",
-    `That save is from the ${otherLabel} build. ${howEn} / 该存档来自${otherLabel}版，${howZh}`,
+    `That save is from the ${otherEn} build. ${howEn} / 该存档来自${otherZh}版，${howZh}`,
     back,
   );
 }

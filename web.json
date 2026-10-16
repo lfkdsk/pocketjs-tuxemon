@@ -186,6 +186,26 @@
         {
           "code": "zh",
           "label": "中文"
+        },
+        {
+          "code": "de",
+          "label": "Deutsch"
+        },
+        {
+          "code": "fr",
+          "label": "Français"
+        },
+        {
+          "code": "es",
+          "label": "Español"
+        },
+        {
+          "code": "it",
+          "label": "Italiano"
+        },
+        {
+          "code": "pt-BR",
+          "label": "Português (Brasil)"
         }
       ],
       "languageSwitch": {

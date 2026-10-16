@@ -156,7 +156,7 @@ export function createTitleBattleOverlay(options: TitleBattleOptions): SessionOw
 
 const TitleBattleView: Component<{ runtime: TitleBattleRuntime }> = (props) => {
   const runtime = props.runtime;
-  const t = () => STRINGS[runtime.lang] ?? STRINGS.en_US;
+  const t = () => runtime.lang === "zh_CN" ? STRINGS.zh_CN : STRINGS.en_US;
   const state = () => runtime.state();
   const titleRows = () => runtime.titleRows();
   const titleRects = createMemo(() => titleMenuRowRects(titleRows().length));

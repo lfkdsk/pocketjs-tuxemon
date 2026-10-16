@@ -21,7 +21,33 @@ interface UnavailableZhData {
   };
   mapDescriptions: Record<string, string>;
   monthNames: string[];
+  featureModes: never;
 }
+
+type LocalizedLang = "zh_CN" | "de_DE" | "fr_FR" | "es_ES" | "it_IT" | "pt_BR";
+
+export function localeDataEntries(lang: LocalizedLang) {
+  const root = `l10n/${lang}`;
+  return {
+    project: `${root}/project-shell.json`,
+    battleShell: `${root}/battle-runtime-shell.json`,
+    names: `${root}/battle-names.json`,
+    mapDescriptions: `${root}/map-descriptions.json`,
+    monthNames: `${root}/month-names.json`,
+    featureModes: `${root}/feature-modes-shell.json`,
+    worldItems: `${root}/feature-world-items.json`,
+  } as const;
+}
+
+export const localeData: {
+  readonly available: boolean;
+  load(lang: LocalizedLang, read: (entry: string) => string | Uint8Array): UnavailableZhData | null;
+  current(lang?: LocalizedLang): UnavailableZhData | null;
+} = {
+  available: false,
+  load: (_lang, _read) => null,
+  current: (_lang) => null,
+};
 
 export const zhData: {
   readonly available: boolean;

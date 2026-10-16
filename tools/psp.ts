@@ -31,13 +31,28 @@ import {
 import { bakeSegmentBundle, resolveSegment, replaySuffixTerminal } from "./psp-segment.ts";
 import { writeNativeReleasePackage } from "./native-release-package.ts";
 import { minifyRuntimeBundle } from "./runtime-bundle.ts";
+import { normalizeLang, type Lang } from "../ui/language.ts";
 
 const sha256 = (bytes: Uint8Array | string): string =>
   createHash("sha256").update(bytes).digest("hex");
 
-const args = new Set(process.argv.slice(2));
+const rawArgs = process.argv.slice(2);
+let requestedLang: string | undefined;
+const filteredArgs: string[] = [];
+for (let i = 0; i < rawArgs.length; i++) {
+  const arg = rawArgs[i]!;
+  if (arg === "--lang") {
+    requestedLang = rawArgs[++i];
+    if (requestedLang === undefined) throw new Error("--lang requires a locale");
+  } else if (arg.startsWith("--lang=")) {
+    requestedLang = arg.slice("--lang=".length);
+  } else {
+    filteredArgs.push(arg);
+  }
+}
+const args = new Set(filteredArgs);
 const allowed = new Set(["--skip-assets", "--bench", "--journey", "--capture", "--help", "--zh"]);
-for (const arg of args) {
+for (const arg of filteredArgs) {
   if (!allowed.has(arg) && !arg.startsWith("--journey-segment=")
       && !arg.startsWith("--journey-segment-end=")
       && !arg.startsWith("--journey-tape=")) {
@@ -49,10 +64,20 @@ for (const arg of args) {
 // (the PSP host has no localStorage and mounts no fs module, so the language
 // is a build-time choice injected here rather than a runtime switch). The
 // English package (the default) is unchanged.
-const zh = args.has("--zh");
+if (args.has("--zh")) {
+  if (requestedLang !== undefined && normalizeLang(requestedLang) !== "zh_CN") {
+    throw new Error("--zh cannot be combined with another --lang");
+  }
+  requestedLang = "zh_CN";
+}
+const lang: Lang = requestedLang === undefined ? "en_US" : normalizeLang(requestedLang) ?? (() => {
+  throw new Error(`PSP: unsupported --lang '${requestedLang}' (use en, zh, de, fr, es, it, or pt-BR)`);
+})();
+const zh = lang === "zh_CN";
+const localized = lang !== "en_US";
 if (args.has("--help")) {
   console.log(
-    "bun run build:psp [--skip-assets] [--bench] [--journey] [--journey-segment=<chapter>] [--journey-segment-end=<frame>] [--capture]\n" +
+    "bun run build:psp [--lang=<en|zh|de|fr|es|it|pt-BR>] [--skip-assets] [--bench] [--journey] [--journey-segment=<chapter>] [--journey-segment-end=<frame>] [--capture]\n" +
       "Normal builds accept live controls. --bench enables timing logs. " +
       "--journey replays the maintained opening and implies --bench. " +
       "--journey-segment replays a mainline chapter suffix from a chapter save and implies --bench. " +
@@ -151,9 +176,12 @@ const fontsJsonPath = join(root, "fonts.json");
 const savedFontsJson = readFileSync(fontsJsonPath, "utf8");
 const zhDataPath = join(root, "ui", "zh-data.ts");
 const savedZhData = readFileSync(zhDataPath, "utf8");
-const englishOnlyFonts = JSON.stringify({ fallback: [], characterFiles: [] }, null, 2) + "\n";
-writeFileSync(fontsJsonPath, englishOnlyFonts);
-if (!zh) {
+const pspFonts = JSON.stringify({
+  fallback: [],
+  characterFiles: lang === "en_US" || lang === "zh_CN" ? [] : ["fonts/latin-charset.txt"],
+}, null, 2) + "\n";
+writeFileSync(fontsJsonPath, pspFonts);
+if (!localized) {
   // Normal web/desktop builds read the five zh_CN startup documents through
   // ui/zh-data.ts. Swapping in the English-only stub makes Chinese unavailable
   // during PSP compilation; the matching pak entries are filtered below.
@@ -171,7 +199,7 @@ try {
   ]);
 } finally {
   writeFileSync(fontsJsonPath, savedFontsJson);
-  if (!zh) {
+  if (!localized) {
     writeFileSync(zhDataPath, savedZhData);
   }
 }
@@ -184,11 +212,21 @@ const fullPak = readFileSync(pakPath);
 // the English build strips the zh_CN shards so its download stays
 // English-only. The --zh build keeps them (they cost download bytes, not
 // PSP RAM — the external pak is read on demand from the memory stick).
-const externalEntries = unpack(fullPak).filter((entry) =>
-  zh || (!entry.key.includes("zh_CN") && !entry.key.startsWith("battle-zh/")
-    && !entry.key.startsWith("maps-zh/")
-    && !entry.key.startsWith("license:NotoSansCJK"))
-);
+function entryLang(key: string): Lang | undefined {
+  const l10n = /^l10n\/([^/]+)\//.exec(key)?.[1];
+  if (l10n) return normalizeLang(l10n);
+  const map = /^maps(?:-([^/]+))?\//.exec(key);
+  if (map) return map[1] === undefined ? "en_US" : normalizeLang(map[1] === "zh" ? "zh_CN" : map[1]);
+  const battle = /^battle(?:-([^/]+))?\//.exec(key);
+  if (battle) return battle[1] === undefined ? "en_US" : normalizeLang(battle[1] === "zh" ? "zh_CN" : battle[1]);
+  return undefined;
+}
+const externalEntries = unpack(fullPak).filter((entry) => {
+  const owned = entryLang(entry.key);
+  if (owned !== undefined && owned !== lang) return false;
+  if (entry.key.startsWith("license:NotoSansCJK") && !zh) return false;
+  return true;
+});
 // The sidecar and its embedded index MUST be built from the SAME filtered
 // entry list: the PSP host (pak_external.rs) rejects a sidecar whose length
 // or byte-for-byte index prefix does not match the embedded directory.
@@ -271,10 +309,10 @@ if (zh) {
 // The PSP host has no localStorage and mounts no fs module, so the language
 // is a build-time choice: --zh injects the boot-language override the kit
 // reads before any URL/storage/fs lookup (ui/language.ts detectLang).
-const langPrefix = zh
-  ? `globalThis.__pocketTuxemonLang="zh_CN";\n`
+const langPrefix = localized
+  ? `globalThis.__pocketTuxemonLang=${JSON.stringify(lang)};\n`
   : "";
-if (zh && !args.has("--journey") && segmentChapter === undefined) {
+if (localized && !args.has("--journey") && segmentChapter === undefined) {
   const bundlePath = join(out, "pocket-tuxemon.js");
   writeFileSync(bundlePath, langPrefix + readFileSync(bundlePath, "utf8"));
 }
@@ -544,6 +582,7 @@ writeFileSync(join(out, "build-receipt.json"), JSON.stringify({
   capture: args.has("--capture"),
   journey: args.has("--journey") || segmentChapter !== undefined || journeyTapeArg !== undefined,
   zh,
+  lang,
   ...(segmentReceipt === undefined ? {} : { journeySegment: segmentReceipt }),
   ...(journeyBuildId === undefined ? {} : { journeyBuildId }),
   ...(!segmentPerf && !journeyTapePerf ? {} : {

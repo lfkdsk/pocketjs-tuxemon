@@ -114,7 +114,7 @@ export function createNuPhoneOverlay(options: NuPhoneOptions): GameViewOverlayCo
 const NuPhoneView: Component<{ runtime: NuPhoneRuntime }> = (props) => {
   const runtime = props.runtime;
   const data = runtime.data;
-  const t = () => STRINGS[runtime.lang] ?? STRINGS.en_US;
+  const t = () => runtime.lang === "zh_CN" ? STRINGS.zh_CN : STRINGS.en_US;
   const open = () => runtime.openSignal();
   const state = () => runtime.state();
   const [viewport, setViewport] = createSignal({ w: NUPHONE_BASE_W, h: NUPHONE_BASE_H });

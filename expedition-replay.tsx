@@ -252,11 +252,12 @@ if (document) {
 }
 
 function localName(value: ExpeditionPublicName | { en_US: string; zh_CN: string }): string {
-  return value[lang];
+  return lang === "zh_CN" ? value.zh_CN : value.en_US;
 }
 
 function areaName(id: string, fallback: string): string {
-  return AREA_NAMES[id]?.[lang] ?? fallback;
+  const value = AREA_NAMES[id];
+  return value ? (lang === "zh_CN" ? value.zh_CN : value.en_US) : fallback;
 }
 
 function itemName(slug: string): string {
@@ -499,11 +500,11 @@ function arenaActionLabel(action: ArenaAction, observation: ArenaObservation, ow
     if (own) {
       const party = observation.own.party[observation.own.active[0] ?? 0];
       const move = party?.moves[action.slot];
-      if (move) return move.displayName[lang];
+      if (move) return lang === "zh_CN" ? move.displayName.zh_CN : move.displayName.en_US;
     } else {
       const moves = observation.opponent.active[0]?.revealedMoves ?? [];
       const revealed = moves.at(-1);
-      if (revealed) return revealed.displayName[lang];
+      if (revealed) return lang === "zh_CN" ? revealed.displayName.zh_CN : revealed.displayName.en_US;
     }
     return `${COPY.move} ${action.slot + 1}`;
   }
@@ -670,7 +671,9 @@ function endingText(observation: ExpeditionObservation): string {
 }
 
 function InventoryPanel(props: { observation: ExpeditionObservation; tick: number }) {
-  const rows = () => props.observation.backpack.map((item) => `${item[lang]} ×${item.quantity}`);
+  const rows = () => props.observation.backpack.map((item) =>
+    `${lang === "zh_CN" ? item.zh_CN : item.en_US} ×${item.quantity}`
+  );
   return (
     <View class="absolute" style={{ posType: 1, insetL: 8, insetT: 162, width: 316, height: 76, bgColor: THEME.panel }}
       debugName="expedition-inventory-panel">

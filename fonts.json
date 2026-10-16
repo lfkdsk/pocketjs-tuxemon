@@ -3,6 +3,7 @@
     "fonts/NotoSansCJKsc-subset.otf"
   ],
   "characterFiles": [
-    "fonts/cjk-charset.txt"
+    "fonts/cjk-charset.txt",
+    "fonts/latin-charset.txt"
   ]
 }

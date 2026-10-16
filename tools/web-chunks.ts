@@ -43,7 +43,7 @@ interface ChunkAsset {
 export interface WebPakChunk extends ChunkAsset {
   id: string;
   entries: string[];
-  background: true;
+  background: boolean;
   requires: string[];
 }
 
@@ -62,6 +62,7 @@ export interface WebPakBuildResult {
   startupBytes: number;
   chunkBytes: number;
   entries: number;
+  localeBytes: Record<string, number>;
 }
 
 export interface WebPakBuildOptions {
@@ -95,9 +96,31 @@ const sha256 = (bytes: Uint8Array): string =>
 const align = (value: number): number => (value + PAK_ALIGN - 1) & ~(PAK_ALIGN - 1);
 const textBytes = (value: string): number => Buffer.byteLength(value, "utf8");
 
+const WEB_LANGS = ["en_US", "zh_CN", "de_DE", "fr_FR", "es_ES", "it_IT", "pt_BR"] as const;
+type WebLang = (typeof WEB_LANGS)[number];
+
+function mapEntryInfo(key: string): { lang: WebLang; id: string } | undefined {
+  const match = /^maps(?:-([^/]+))?\/([^/]+)\.(?:json|rkm)$/.exec(key);
+  if (!match) return undefined;
+  const tag = match[1];
+  const lang = tag === undefined ? "en_US" : tag === "zh" ? "zh_CN" : tag;
+  if (!(WEB_LANGS as readonly string[]).includes(lang)) return undefined;
+  return { lang: lang as WebLang, id: match[2]! };
+}
+
 function mapEntryId(key: string): string | undefined {
-  const match = /^(?:maps|maps-zh)\/([^/]+)\.(?:json|rkm)$/.exec(key);
-  return match?.[1];
+  return mapEntryInfo(key)?.id;
+}
+
+/** Entries that must be resident before evaluating one non-English boot. */
+function bootstrapLang(key: string): Exclude<WebLang, "en_US"> | undefined {
+  const l10n = /^l10n\/([^/]+)\//.exec(key)?.[1];
+  const battle = /^battle-([^/]+)\//.exec(key)?.[1];
+  const tag = l10n ?? battle;
+  const lang = tag === "zh" ? "zh_CN" : tag;
+  return lang && lang !== "en_US" && (WEB_LANGS as readonly string[]).includes(lang)
+    ? lang as Exclude<WebLang, "en_US">
+    : undefined;
 }
 
 function mapTileId(key: string, idsByLength: readonly string[]): string | undefined {
@@ -128,8 +151,9 @@ function mapAudioDependencies(
 ): Map<string, string[]> {
   const dependencies = new Map<string, string[]>();
   for (const entry of entries) {
-    if (!entry.key.startsWith("maps/")) continue;
-    const mapId = mapEntryId(entry.key)!;
+    const info = mapEntryInfo(entry.key);
+    if (!info || info.lang !== "en_US") continue;
+    const mapId = info.id;
     let parsed: unknown;
     try {
       parsed = JSON.parse(new TextDecoder().decode(entry.data));
@@ -191,7 +215,7 @@ function mapVisualDependencies(
 }
 
 function categoryOf(key: string, mapTile: boolean): string {
-  if (key.startsWith("maps/") || key.startsWith("maps-zh/") ||
+  if (/^maps(?:-[^/]+)?\//.test(key) ||
       key.startsWith("terrain-stream/") || key.startsWith("animated/") || mapTile) {
     return "maps-and-tiles";
   }
@@ -199,7 +223,7 @@ function categoryOf(key: string, mapTile: boolean): string {
   if (key.startsWith("audio:wav.")) return "sound-effects";
   if (key.startsWith("ui:font.") || key.startsWith("license:NotoSansCJK")) return "fonts";
   if (key.startsWith("demo/")) return "demo-tapes";
-  if (key.startsWith("l10n/") || key.startsWith("battle-zh/")) return "localization";
+  if (key.startsWith("l10n/") || /^battle-[^/]+\//.test(key)) return "localization";
   if (key.startsWith("battle/") || key === "game:battle-db" ||
       key.startsWith("portraits/") || key.startsWith("choice-icons/") ||
       key.startsWith("ui:tile.battle/")) return "battle-art-and-data";
@@ -268,9 +292,10 @@ function mapOrder(a: string, b: string): number {
 export function buildWebPakChunks(options: WebPakBuildOptions): WebPakBuildResult {
   const source = readFileSync(options.pakPath);
   const entries = unpack(source);
-  const mapIds = entries.flatMap((entry) => entry.key.startsWith("maps/")
-    ? [mapEntryId(entry.key)!]
-    : []);
+  const mapIds = entries.flatMap((entry) => {
+    const info = mapEntryInfo(entry.key);
+    return info?.lang === "en_US" ? [info.id] : [];
+  });
   const mapIdSet = new Set(mapIds);
   if (mapIdSet.size !== mapIds.length || mapIds.length === 0) {
     throw new Error("web chunks: the ordinary pak has missing or duplicate map entries");
@@ -281,12 +306,8 @@ export function buildWebPakChunks(options: WebPakBuildOptions): WebPakBuildResul
   const idsByLength = [...mapIds].sort((a, b) => b.length - a.length || a.localeCompare(b));
   const project = JSON.parse(readFileSync(options.projectShellPath, "utf8")) as ProjectShellAudio;
   const audio = project.audio ?? {};
-  const placedMaps = new Set(
-    project.worldLayout?.components.flatMap((component) =>
-      component.placements.map((placement) => placement.mapId)) ?? [],
-  );
-
-  const mapGroups = new Map<string, PakBlob[]>();
+  const mapGroups = new Map<string, { lang: WebLang; mapId: string; entries: PakBlob[] }>();
+  const localeGroups = new Map<Exclude<WebLang, "en_US">, PakBlob[]>();
   const visualGroups = new Map<string, PakBlob[]>();
   const audioGroups = new Map<string, PakBlob[]>();
   const startupEntries: PakBlob[] = [];
@@ -300,14 +321,29 @@ export function buildWebPakChunks(options: WebPakBuildOptions): WebPakBuildResul
     }
   }
   for (const entry of entries) {
-    const entryMap = mapEntryId(entry.key);
+    const entryMap = mapEntryInfo(entry.key);
     const tileMap = mapTileId(entry.key, idsByLength);
-    const mapId = entryMap ?? tileMap;
-    if (mapId && !WEB_STARTUP_MAPS.has(mapId)) {
-      const groups = tileMap && placedMaps.has(mapId) ? visualGroups : mapGroups;
-      const group = groups.get(mapId) ?? [];
+    const ownedLang = bootstrapLang(entry.key);
+    if (entryMap && WEB_STARTUP_MAPS.has(entryMap.id) && entryMap.lang !== "en_US") {
+      const group = localeGroups.get(entryMap.lang) ?? [];
       group.push(entry);
-      groups.set(mapId, group);
+      localeGroups.set(entryMap.lang, group);
+      deferredEntries.push(entry);
+    } else if (entryMap && !WEB_STARTUP_MAPS.has(entryMap.id)) {
+      const key = `${entryMap.lang}\0${entryMap.id}`;
+      const group = mapGroups.get(key) ?? { lang: entryMap.lang, mapId: entryMap.id, entries: [] };
+      group.entries.push(entry);
+      mapGroups.set(key, group);
+      deferredEntries.push(entry);
+    } else if (tileMap && !WEB_STARTUP_MAPS.has(tileMap)) {
+      const group = visualGroups.get(tileMap) ?? [];
+      group.push(entry);
+      visualGroups.set(tileMap, group);
+      deferredEntries.push(entry);
+    } else if (ownedLang) {
+      const group = localeGroups.get(ownedLang) ?? [];
+      group.push(entry);
+      localeGroups.set(ownedLang, group);
       deferredEntries.push(entry);
     } else if (audioChunkByKey.has(entry.key)) {
       deferredEntries.push(entry);
@@ -316,12 +352,24 @@ export function buildWebPakChunks(options: WebPakBuildOptions): WebPakBuildResul
     }
   }
 
-  for (const mapId of mapIds) {
-    if (WEB_STARTUP_MAPS.has(mapId)) continue;
-    const group = mapGroups.get(mapId);
-    if (!group || !group.some((entry) => entry.key.startsWith("maps/")) ||
-        !group.some((entry) => entry.key.startsWith("maps-zh/"))) {
-      throw new Error(`web chunks: map chunk ${mapId} does not contain both language shards`);
+  for (const lang of WEB_LANGS) {
+    if (lang !== "en_US") {
+      const locale = localeGroups.get(lang);
+      if (!locale?.some((entry) => entry.key === `l10n/${lang}/project-shell.json`)) {
+        throw new Error(`web chunks: locale bootstrap ${lang} has no project shell`);
+      }
+      for (const startupMap of WEB_STARTUP_MAPS) {
+        if (!locale.some((entry) => mapEntryInfo(entry.key)?.id === startupMap)) {
+          throw new Error(`web chunks: locale bootstrap ${lang} has no ${startupMap} map`);
+        }
+      }
+    }
+    for (const mapId of mapIds) {
+      if (WEB_STARTUP_MAPS.has(mapId)) continue;
+      const group = mapGroups.get(`${lang}\0${mapId}`);
+      if (!group || group.entries.length !== 1 || mapEntryInfo(group.entries[0]!.key)?.lang !== lang) {
+        throw new Error(`web chunks: map chunk ${lang}/${mapId} does not contain exactly its locale shard`);
+      }
     }
   }
   if (startupEntries.length + deferredEntries.length !== entries.length) {
@@ -350,31 +398,48 @@ export function buildWebPakChunks(options: WebPakBuildOptions): WebPakBuildResul
   const dependencies = mapAudioDependencies(entries, audio, audioChunkByKey);
   const visualDependencies = mapVisualDependencies(project, mapIdSet);
   const chunks: WebPakChunk[] = [];
-  for (const mapId of [...mapGroups.keys()].sort(mapOrder)) {
-    const written = writeCompressedPak(chunksDir, `map-${mapId}`, mapGroups.get(mapId)!);
+  for (const lang of WEB_LANGS) {
+    if (lang === "en_US") continue;
+    const written = writeCompressedPak(chunksDir, `locale-${lang}`, localeGroups.get(lang)!);
     chunks.push({
-      id: `map:${mapId}`,
+      id: `locale:${lang}`,
       ...written.asset,
       entries: written.entries,
-      background: true,
+      background: false,
+      requires: [],
+    });
+  }
+  const orderedMapGroups = [...mapGroups.values()].sort((a, b) =>
+    mapOrder(a.mapId, b.mapId) || WEB_LANGS.indexOf(a.lang) - WEB_LANGS.indexOf(b.lang)
+  );
+  for (const group of orderedMapGroups) {
+    const written = writeCompressedPak(
+      chunksDir,
+      `map-${group.lang}-${group.mapId}`,
+      group.entries,
+    );
+    chunks.push({
+      id: `map:${group.lang}:${group.mapId}`,
+      ...written.asset,
+      entries: written.entries,
+      background: false,
       requires: [
-        ...(visualDependencies.get(mapId) ?? [])
+        ...(visualDependencies.get(group.mapId) ?? [group.mapId])
           .filter((candidate) => visualGroups.has(candidate))
           .map((candidate) => `visual:${candidate}`),
-        ...(dependencies.get(mapId) ?? []),
+        ...(dependencies.get(group.mapId) ?? []),
       ].sort(),
     });
-    const visuals = visualGroups.get(mapId);
-    if (visuals) {
-      const visual = writeCompressedPak(chunksDir, `visual-${mapId}`, visuals);
-      chunks.push({
-        id: `visual:${mapId}`,
-        ...visual.asset,
-        entries: visual.entries,
-        background: true,
-        requires: [],
-      });
-    }
+  }
+  for (const mapId of [...visualGroups.keys()].sort(mapOrder)) {
+    const visual = writeCompressedPak(chunksDir, `visual-${mapId}`, visualGroups.get(mapId)!);
+    chunks.push({
+      id: `visual:${mapId}`,
+      ...visual.asset,
+      entries: visual.entries,
+      background: true,
+      requires: [],
+    });
   }
   for (const [id, group] of [...audioGroups].sort(([a], [b]) => a.localeCompare(b))) {
     const safeId = id.slice("audio:".length).replace(/[^a-zA-Z0-9._-]+/g, "-");
@@ -397,6 +462,10 @@ export function buildWebPakChunks(options: WebPakBuildOptions): WebPakBuildResul
   writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 
   const chunkBytes = chunks.reduce((sum, chunk) => sum + chunk.bytes, 0);
+  const localeBytes = Object.fromEntries(WEB_LANGS.map((lang) => [
+    lang,
+    lang === "en_US" ? 0 : chunks.find((chunk) => chunk.id === `locale:${lang}`)!.bytes,
+  ]));
   const report = {
     format: "pocket-tuxemon-web-pak-report/v1",
     source: {
@@ -413,11 +482,16 @@ export function buildWebPakChunks(options: WebPakBuildOptions): WebPakBuildResul
       bytes: startup.bytes,
       unpackedBytes: startup.unpackedBytes,
       file: startup.file,
+      localeBootstraps: Object.fromEntries(WEB_LANGS.map((lang) => [lang, {
+        bytes: localeBytes[lang],
+        effectiveBootBytes: startup.bytes + localeBytes[lang]!,
+      }])),
     },
     deferred: {
       entries: deferredEntries.length,
       chunks: chunks.length,
       mapChunks: mapGroups.size,
+      localeChunks: localeGroups.size,
       visualChunks: visualGroups.size,
       audioChunks: audioGroups.size,
       bytes: chunkBytes,
@@ -438,5 +512,6 @@ export function buildWebPakChunks(options: WebPakBuildOptions): WebPakBuildResul
     startupBytes: startup.bytes,
     chunkBytes,
     entries: entries.length,
+    localeBytes,
   };
 }

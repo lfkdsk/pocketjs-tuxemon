@@ -39,7 +39,7 @@ export function createLangMenu(active: Lang): GameViewOverlayConfig & {
               >
                 <Panel
                   theme={theme}
-                  style={{ posType: 1, width: 360, height: 150 }}
+                  style={{ posType: 1, width: 360, height: 230 }}
                   paperClass="flex-col grow p-[8]"
                   debugName="tux-lang-panel"
                 >

@@ -11,7 +11,9 @@ import { createLangMenuRuntime, LANG_MENU_BUTTON } from "../ui/lang-menu-runtime
 import {
   cleanedLangSwitchUrl,
   detectLang,
+  LANGUAGES,
   LANG_STORAGE_KEY,
+  normalizeLang,
 } from "../ui/language.ts";
 
 // Bun tests have no location/localStorage/history globals; each case
@@ -56,7 +58,7 @@ function mockWeb(href: string, stored: string | null): MockWeb {
 }
 
 afterEach(() => {
-  for (const key of ["location", "history", "localStorage"] as const) {
+  for (const key of ["location", "history", "localStorage", "navigator"] as const) {
     delete (globalThis as Record<string, unknown>)[key];
   }
 });
@@ -76,6 +78,15 @@ describe("cleanedLangSwitchUrl", () => {
 });
 
 describe("detectLang boot priority", () => {
+  test("normalizes canonical ids, URL aliases, and regional browser tags", () => {
+    expect(["de_DE", "fr_FR", "es_ES", "it_IT", "pt_BR"].map(normalizeLang)).toEqual([
+      "de_DE", "fr_FR", "es_ES", "it_IT", "pt_BR",
+    ]);
+    expect(["de-AT", "fr-CA", "es-MX", "it-CH", "pt-PT"].map(normalizeLang)).toEqual([
+      "de_DE", "fr_FR", "es_ES", "it_IT", "pt_BR",
+    ]);
+  });
+
   test("URL parameter wins over storage", () => {
     mockWeb("https://example.com/?lang=zh", "en");
     expect(detectLang()).toBe("zh_CN");
@@ -87,6 +98,15 @@ describe("detectLang boot priority", () => {
   test("defaults to en_US with neither URL nor storage", () => {
     mockWeb("https://example.com/", null);
     expect(detectLang()).toBe("en_US");
+  });
+
+  test("uses the first supported browser language after URL and storage", () => {
+    mockWeb("https://example.com/", null);
+    Object.defineProperty(globalThis, "navigator", {
+      configurable: true,
+      value: { languages: ["nl-NL", "fr-CA", "de-DE"], language: "nl-NL" },
+    });
+    expect(detectLang()).toBe("fr_FR");
   });
 });
 
@@ -142,5 +162,19 @@ describe("in-page language switch through the menu runtime", () => {
 
     web.setAddress("https://example.com/");
     expect(detectLang()).toBe("zh_CN");
+  });
+
+  test("all seven native language rows are selectable and persist stable codes", () => {
+    expect(LANGUAGES.map(({ lang }) => lang)).toEqual([
+      "en_US", "zh_CN", "de_DE", "fr_FR", "es_ES", "it_IT", "pt_BR",
+    ]);
+    const web = mockWeb("https://example.com/", null);
+    const menu = createLangMenuRuntime("en_US");
+    menu.step(0, LANG_MENU_BUTTON);
+    menu.step(0, BTN.DOWN);
+    menu.step(0, BTN.DOWN);
+    menu.step(0, BTN.CIRCLE);
+    expect(web.store.get(LANG_STORAGE_KEY)).toBe("de");
+    expect(web.reloads).toBe(1);
   });
 });

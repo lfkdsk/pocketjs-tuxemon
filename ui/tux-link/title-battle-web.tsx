@@ -469,7 +469,7 @@ export function createTitleBattleOverlay(options: TitleBattleOptions): SessionOw
 
 const TuxLinkTitleView: Component<{ controller: TuxLinkTitleController }> = (props) => {
   const controller = props.controller;
-  const t = () => STRINGS[controller.lang];
+  const t = () => controller.lang === "zh_CN" ? STRINGS.zh_CN : STRINGS.en_US;
   const state = controller.clientState;
   const [viewport, setViewport] = createSignal({ w: TITLE_BATTLE_BASE_W, h: TITLE_BATTLE_BASE_H });
   onFrame(() => {

@@ -19,6 +19,14 @@ import {
 } from "../tools/web-chunks.ts";
 
 const bytes = (text: string): Uint8Array => new TextEncoder().encode(text);
+const LOCALES = [
+  ["zh_CN", "maps-zh"],
+  ["de_DE", "maps-de_DE"],
+  ["fr_FR", "maps-fr_FR"],
+  ["es_ES", "maps-es_ES"],
+  ["it_IT", "maps-it_IT"],
+  ["pt_BR", "maps-pt_BR"],
+] as const;
 
 describe("Web pak partition", () => {
   test("is deterministic, complete, content-addressed and wires map music dependencies", () => {
@@ -32,13 +40,20 @@ describe("Web pak partition", () => {
         { key: "ui:styles", dtype: 0, data: bytes("styles") },
         { key: "ui:tile.battle/animations/hit.page-0", dtype: 0, data: bytes("battle") },
         { key: "maps/spyder_bedroom.rkm", dtype: 0, data: bytes('{"id":"spyder_bedroom","music":"music_home"}') },
-        { key: "maps-zh/spyder_bedroom.rkm", dtype: 0, data: bytes('{"id":"spyder_bedroom"}') },
+        ...LOCALES.flatMap(([lang, dir]) => [
+          { key: `l10n/${lang}/project-shell.json`, dtype: 0, data: bytes(`{"lang":"${lang}"}`) },
+          { key: `${dir}/spyder_bedroom.rkm`, dtype: 0, data: bytes('{"id":"spyder_bedroom"}') },
+        ]),
         { key: "ui:tile.tuxemon-spyder_bedroom-ground-0", dtype: 0, data: bytes("bedroom") },
         { key: "maps/spyder_downstairs.rkm", dtype: 0, data: bytes('{"id":"spyder_downstairs","music":"music_town"}') },
-        { key: "maps-zh/spyder_downstairs.rkm", dtype: 0, data: bytes('{"id":"spyder_downstairs"}') },
+        ...LOCALES.map(([, dir]) => (
+          { key: `${dir}/spyder_downstairs.rkm`, dtype: 0, data: bytes('{"id":"spyder_downstairs"}') }
+        )),
         { key: "ui:tile.tuxemon-spyder_downstairs-ground-0", dtype: 0, data: bytes("downstairs") },
         { key: "maps/spyder_routec.rkm", dtype: 0, data: bytes('{"id":"spyder_routec"}') },
-        { key: "maps-zh/spyder_routec.rkm", dtype: 0, data: bytes('{"id":"spyder_routec"}') },
+        ...LOCALES.map(([, dir]) => (
+          { key: `${dir}/spyder_routec.rkm`, dtype: 0, data: bytes('{"id":"spyder_routec"}') }
+        )),
         { key: "ui:tile.tuxemon-spyder_routec-ground-0", dtype: 0, data: bytes("routec") },
         { key: "audio:qoa.music/music_home.qoa", dtype: 0, data: bytes("home") },
         { key: "audio:qoa.music/music_battle_loop.qoa", dtype: 0, data: bytes("battle music") },
@@ -70,19 +85,23 @@ describe("Web pak partition", () => {
 
       const manifest = JSON.parse(readFileSync(first.manifestPath, "utf8")) as WebPakManifest;
       expect(manifest.format).toBe("pocket-pak-chunks/v1");
-      expect(manifest.chunks).toHaveLength(6);
+      expect(manifest.chunks).toHaveLength(24);
       for (const asset of [manifest.startup, ...manifest.chunks]) {
         expect(asset.file).toContain(asset.sha256);
         expect(readFileSync(join(outA, asset.file)).byteLength).toBe(asset.bytes);
       }
-      const map = manifest.chunks.find((chunk) => chunk.id === "map:spyder_downstairs")!;
+      const map = manifest.chunks.find((chunk) => chunk.id === "map:de_DE:spyder_downstairs")!;
+      const locale = manifest.chunks.find((chunk) => chunk.id === "locale:de_DE")!;
       const visual = manifest.chunks.find((chunk) => chunk.id === "visual:spyder_downstairs")!;
       const audio = manifest.chunks.find((chunk) => chunk.id === "audio:music/music_town.qoa")!;
       const battleAudio = manifest.chunks.find((chunk) => chunk.id === "audio:music/music_battle_loop.qoa")!;
-      expect(map.entries).toEqual([
-        "maps-zh/spyder_downstairs.rkm",
-        "maps/spyder_downstairs.rkm",
+      expect(map.entries).toEqual(["maps-de_DE/spyder_downstairs.rkm"]);
+      expect(map.background).toBeFalse();
+      expect(locale.entries).toEqual([
+        "l10n/de_DE/project-shell.json",
+        "maps-de_DE/spyder_bedroom.rkm",
       ]);
+      expect(locale.background).toBeFalse();
       expect(map.requires).toEqual([
         audio.id,
         "visual:spyder_downstairs",
@@ -100,6 +119,8 @@ describe("Web pak partition", () => {
       expect(startupKeys).toContain("audio:qoa.music/music_home.qoa");
       expect(startupKeys).toContain("ui:tile.battle/animations/hit.page-0");
       expect(startupKeys).not.toContain("maps/spyder_downstairs.rkm");
+      expect(startupKeys).not.toContain("maps-de_DE/spyder_bedroom.rkm");
+      expect(startupKeys).not.toContain("l10n/de_DE/project-shell.json");
       expect(startupKeys).not.toContain("audio:qoa.music/music_battle_loop.qoa");
       expect(startupKeys).not.toContain("audio:qoa.music/music_town.qoa");
 

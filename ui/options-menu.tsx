@@ -274,7 +274,7 @@ const OptionsView: Component<{ runtime: OptionsRuntime; data: OptionsData; lang:
               debugName="options-legend"
             >
               {props.runtime.persistFailed()
-                ? (SAVE_FAILED[props.lang] ?? SAVE_FAILED.en_US)
+                ? (props.lang === "zh_CN" ? SAVE_FAILED.zh_CN : SAVE_FAILED.en_US)
                 : `↑↓  ←→   ${props.runtime.controlGlyph("primary")} ${t(props.data.controls.primary)}`}
             </Text>
             <View

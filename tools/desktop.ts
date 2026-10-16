@@ -9,6 +9,7 @@ import { externalizeDesktopPak } from "./desktop-audio.ts";
 import { writeDesktopBuildReceipt } from "./desktop-build-receipt.ts";
 import { writeNativeReleasePackage } from "./native-release-package.ts";
 import { minifyRuntimeBundle } from "./runtime-bundle.ts";
+import { normalizeLang } from "../ui/language.ts";
 
 const root = resolve(import.meta.dir, "..");
 const pocketjs = join(root, "vendor", "pocket-rpgkit", "vendor", "pocketjs");
@@ -27,8 +28,9 @@ for (let i = 0; i < argv.length; i++) {
   if (arg.startsWith("--lang=")) { lang = arg.slice("--lang=".length); continue; }
   passthrough.push(arg);
 }
-if (lang !== undefined && lang !== "zh" && lang !== "zh_CN" && lang !== "en" && lang !== "en_US") {
-  throw new Error(`desktop: unsupported --lang '${lang}' (use zh or en)`);
+const normalizedLang = lang === undefined ? undefined : normalizeLang(lang);
+if (lang !== undefined && normalizedLang === undefined) {
+  throw new Error(`desktop: unsupported --lang '${lang}' (use en, zh, de, fr, es, it, or pt-BR)`);
 }
 
 await $`bun ${join(root, "gen-assets.ts")}`.cwd(root);
@@ -48,8 +50,7 @@ const appDataRoot = join(dataRoot, plan.app.id, "data");
 mkdirSync(appDataRoot, { recursive: true });
 // --lang stages the boot language the bundle reads from data.fs.
 if (lang !== undefined) {
-  const normalized = lang === "zh" ? "zh_CN" : lang === "en" ? "en_US" : lang;
-  writeFileSync(join(appDataRoot, "lang.json"), JSON.stringify({ lang: normalized }) + "\n");
+  writeFileSync(join(appDataRoot, "lang.json"), JSON.stringify({ lang: normalizedLang }) + "\n");
 }
 const planPath = join(root, ".pocket", target, `${plan.app.output}.plan.json`);
 mkdirSync(resolve(planPath, ".."), { recursive: true });

@@ -96,7 +96,8 @@ export function decodeDemoTape(bytes: Uint8Array): DecodedDemoTape {
 
 /** True when the build has demo chapters for this language. */
 export function hasDemoChapters(lang: Lang): boolean {
-  return (lang === "zh_CN" ? DEMO_CHAPTER_INDEX_ZH : DEMO_CHAPTER_INDEX).length > 0;
+  if (lang === "zh_CN") return DEMO_CHAPTER_INDEX_ZH.length > 0;
+  return lang === "en_US" && DEMO_CHAPTER_INDEX.length > 0;
 }
 
 /** Which pak entries a language's demo chapters read their tape and saves
@@ -108,6 +109,9 @@ export interface DemoResources {
 }
 
 export function demoResourcesForLang(lang: Lang): DemoResources {
+  if (lang !== "en_US" && lang !== "zh_CN") {
+    throw new Error(`demo chapters are unavailable for ${lang}`);
+  }
   const zh = lang === "zh_CN";
   return {
     tapeEntry: zh ? DEMO_TAPE_ENTRY_ZH : DEMO_TAPE_ENTRY,
@@ -127,6 +131,9 @@ export function createDemoOptions(
   lang: Lang = "en_US",
 ): DemoOptions & { demoResources: DemoResources } {
   const expected = worldTraversal(expectedWorldTraversal, "demo index");
+  if (lang !== "en_US" && lang !== "zh_CN") {
+    throw new Error(`demo chapters are unavailable for ${lang}`);
+  }
   const zh = lang === "zh_CN";
   const index = zh ? DEMO_CHAPTER_INDEX_ZH : DEMO_CHAPTER_INDEX;
   const { tapeEntry, snapshotsEntry } = demoResourcesForLang(lang);

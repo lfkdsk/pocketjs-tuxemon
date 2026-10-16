@@ -27,7 +27,19 @@ import { buildWarpIndex } from "./importer/warp.ts";
 import { buildDemoData, buildEnDemoData, buildZhDemoData, demoIndexSource } from "./importer/demo-data.ts";
 import { splitGameProjectMaps } from "./importer/map-shards.ts";
 import { buildPreviewCoverage, tuxemonPreviewSessionOptions } from "./importer/preview-coverage.ts";
-import { featureModesRuntimeData, loadFeatureModes } from "./importer/feature-modes.ts";
+import {
+  createFeatureCatalogs,
+  featureModesRuntimeData,
+  loadFeatureModes,
+} from "./importer/feature-modes.ts";
+import {
+  localizedShardDir,
+  localizedSuffix,
+  enCatalog,
+  UPSTREAM_LATIN_LANGS,
+  type ImportLang,
+  type TextCatalog,
+} from "./importer/l10n.ts";
 import { importExpeditionShops } from "./importer/expedition-shops.ts";
 import monthNames from "./data/month-names.json";
 
@@ -37,6 +49,7 @@ import monthNames from "./data/month-names.json";
 const ROOT = resolve(process.env.G6_OUTPUT_ROOT ?? import.meta.dir);
 const DIST = join(ROOT, "dist");
 const sourceRoot = process.env.TUXEMON_SRC ?? DEFAULT_TUXEMON_SRC;
+const LOCALIZED_LANGS = ["zh_CN", ...UPSTREAM_LATIN_LANGS] as const;
 mkdirSync(DIST, { recursive: true });
 mkdirSync(join(ROOT, "data"), { recursive: true });
 mkdirSync(join(ROOT, "reports"), { recursive: true });
@@ -351,14 +364,17 @@ const battle = writeBattleArtifacts({
   scope: battleScope,
   extraSelection: titleBattleSelection,
 });
-// zh_CN battle data: names and descriptions from the merged Chinese catalog.
+// Localized battle data: names/descriptions and text-bearing runtime shards.
 // Art cooking is language-neutral and shared (rewritten byte-identically).
-const battleZh = writeBattleArtifacts({
-  outputRoot: ROOT,
-  scope: battleScope,
-  lang: "zh_CN",
-  extraSelection: titleBattleSelection,
-});
+const localizedBattles = new Map<ImportLang, ReturnType<typeof writeBattleArtifacts>>();
+for (const lang of LOCALIZED_LANGS) {
+  localizedBattles.set(lang, writeBattleArtifacts({
+    outputRoot: ROOT,
+    scope: battleScope,
+    lang,
+    extraSelection: titleBattleSelection,
+  }));
+}
 
 // WX1: procedural weather particle textures. Deterministic by construction;
 // committed under assets/weather/ like the other baked art. The path literals
@@ -547,86 +563,261 @@ const mapPakEntries: PakManifestEntry[] = split.entries.map((entry) => ({
 }));
 
 // ---------------------------------------------------------------------------
-// zh_CN variant: the same world with the merged Chinese catalog (upstream
-// zh_CN + the project supplement + en_US fallback). Only text-bearing
-// artifacts differ — project shell, map shards, battle shell and battle
-// shards. Terrain, sprites, audio and animations are the en build's.
-setImportLang("zh_CN");
-const zhImported = buildProject(
-  availableMapIds(),
-  G6_IMPORT_OPTIONS,
-  Object.fromEntries(terrain.fragment.maps.map((map) => [map.id, map.surfaceLabels])),
-);
-let zhProject = applyTerrain(zhImported.project, terrain.fragment);
-zhProject = {
-  ...zhProject,
-  sheets: zhProject.sheets.filter((sheet) => sheet.id !== "tux"),
-  maps: zhProject.maps.map((map) => ({ ...map, sheets: map.sheets?.filter((sheet) => sheet !== "tux") })),
-};
-const zhCharacters = await cookCharacters(zhProject, {
-  outputRoot: ROOT,
-  monsterMenuIcons: zhImported.presentation.monsterMenuIcons,
-});
-zhProject = zhCharacters.project;
-const zhSplit = splitGameProjectMaps(zhProject, undefined, {
-  shellEntry: "project-shell.zh_CN.json",
-  mapEntry: (id, extension) => `maps-zh/${id}.${extension}`,
-});
-const mapsZhDir = join(DIST, "maps-zh");
-rmSync(mapsZhDir, { recursive: true, force: true });
-mkdirSync(mapsZhDir, { recursive: true });
-for (const entry of zhSplit.entries) {
-  const path = join(DIST, entry.path);
-  mkdirSync(dirname(path), { recursive: true });
-  writeFileSync(path, entry.bytes);
+// Localized variants share all art/terrain/audio and regenerate only the
+// text-bearing project, map, battle and menu documents. Each locale receives
+// its own pak keys so web/desktop/PSP packagers can retain exactly one.
+interface GapRow {
+  fallbackKeys: readonly string[];
+  invalidKeys: readonly string[];
+  fuzzyKeys: readonly string[];
+  missingKeys: readonly string[];
+  usedKeys: readonly string[];
 }
-const mapZhPakEntries: PakManifestEntry[] = zhSplit.entries.map((entry) => ({
-  key: entry.meta.entry,
-  file: `dist/${entry.path}`,
-}));
-writeFileSync(join(DIST, "project-shell.zh_CN.json"), zhSplit.shellText);
-assertShellManifestFresh(JSON.parse(readFileSync(join(DIST, "project-shell.zh_CN.json"), "utf8")));
-writeFileSync(join(DIST, "project.zh_CN.json"), jsonBytes(zhProject));
-// import-report.zh_CN.json is written with the en one, once the preview
-// coverage exists (below).
-// zh_CN slug -> description table for the {x:map_desc} resolver.
-writeFileSync(join(DIST, "map-descriptions.zh_CN.json"), jsonBytes(zhImported.mapDescriptions));
-// The CJK subset baker scans this file for every character the zh build
-// displays (map and battle shards are not imported by the bundle, so the
-// baker's module scan does not see them). The {x:map_desc} resolver reads
-// dist/map-descriptions.zh_CN.json and the battle UI / {x:monster_0_name}
-// token read data/battle-names.zh_CN.json. These tables are loaded on demand
-// through ui/zh-data.ts, so they are added here explicitly or their glyphs
-// (e.g. 尺, 粮) are missing from the baked font.
+
+function catalogGapRow(catalog: TextCatalog): GapRow {
+  return {
+    fallbackKeys: [...catalog.fallbackKeys].sort(),
+    invalidKeys: [...catalog.invalidKeys].filter((key) => catalog.usedKeys.has(key)).sort(),
+    fuzzyKeys: [...catalog.fuzzyKeys].filter((key) => catalog.usedKeys.has(key)).sort(),
+    missingKeys: [...catalog.missingKeys].sort(),
+    usedKeys: [...catalog.usedKeys].sort(),
+  };
+}
+
+function localeGapReport(lang: ImportLang, rows: readonly GapRow[]) {
+  const union = (field: keyof GapRow): string[] =>
+    [...new Set(rows.flatMap((row) => [...row[field]]))].sort();
+  const usedKeys = union("usedKeys");
+  const fallbackKeys = union("fallbackKeys");
+  const invalidKeys = union("invalidKeys");
+  const fuzzyKeys = union("fuzzyKeys");
+  const recordedMissingKeys = union("missingKeys");
+  const fallbackSet = new Set(fallbackKeys);
+  // Keys absent from en_US are content gaps, not translation opportunities;
+  // report them separately and use only valid English targets as denominator.
+  const english = enCatalog();
+  const targetKeys = usedKeys.filter((key) => english.has(key));
+  const missingKeys = usedKeys.filter((key) => !english.has(key));
+  if (recordedMissingKeys.some((key) => english.has(key))) {
+    throw new Error(`${lang}: a recorded missing localization key unexpectedly exists in en_US`);
+  }
+  const translatedKeys = targetKeys.filter((key) => !fallbackSet.has(key));
+  return {
+    format: "pocket-tuxemon/locale-report/v1" as const,
+    lang,
+    counts: {
+      used: usedKeys.length,
+      targets: targetKeys.length,
+      translated: translatedKeys.length,
+      fallback: fallbackKeys.length,
+      invalid: invalidKeys.length,
+      fuzzy: fuzzyKeys.length,
+      missingEnglish: missingKeys.length,
+    },
+    coveragePercent: targetKeys.length === 0
+      ? 100
+      : Math.round(translatedKeys.length * 10000 / targetKeys.length) / 100,
+    usedKeys,
+    targetKeys,
+    translatedKeys,
+    fallbackKeys,
+    invalidKeys,
+    fuzzyKeys,
+    missingKeys,
+    missingKeyCategories: categorizeMissingKeys(missingKeys),
+  };
+}
+
+type LocalizedBuild = {
+  lang: (typeof LOCALIZED_LANGS)[number];
+  imported: ReturnType<typeof buildProject>;
+  project: Project;
+  split: ReturnType<typeof splitGameProjectMaps>;
+  mapPakEntries: PakManifestEntry[];
+  battle: ReturnType<typeof writeBattleArtifacts>;
+  localeReport: ReturnType<typeof localeGapReport>;
+};
+const localizedBuilds: LocalizedBuild[] = [];
+const surfaceLabels = Object.fromEntries(
+  terrain.fragment.maps.map((map) => [map.id, map.surfaceLabels]),
+);
+
+for (const lang of LOCALIZED_LANGS) {
+  setImportLang(lang);
+  const localizedImported = buildProject(availableMapIds(), G6_IMPORT_OPTIONS, surfaceLabels);
+  const projectGaps = importL10nGaps();
+  let localizedProject = applyTerrain(localizedImported.project, terrain.fragment);
+  localizedProject = {
+    ...localizedProject,
+    sheets: localizedProject.sheets.filter((sheet) => sheet.id !== "tux"),
+    maps: localizedProject.maps.map((map) => ({
+      ...map,
+      sheets: map.sheets?.filter((sheet) => sheet !== "tux"),
+    })),
+  };
+  const localizedCharacters = await cookCharacters(localizedProject, {
+    outputRoot: ROOT,
+    monsterMenuIcons: localizedImported.presentation.monsterMenuIcons,
+  });
+  localizedProject = localizedCharacters.project;
+
+  const suffix = localizedSuffix(lang);
+  const mapDir = localizedShardDir("maps", lang);
+  const localizedSplit = splitGameProjectMaps(localizedProject, undefined, {
+    shellEntry: `project-shell${suffix}.json`,
+    mapEntry: (id, extension) => `${mapDir}/${id}.${extension}`,
+  });
+  rmSync(join(DIST, mapDir), { recursive: true, force: true });
+  mkdirSync(join(DIST, mapDir), { recursive: true });
+  for (const entry of localizedSplit.entries) {
+    const path = join(DIST, entry.path);
+    mkdirSync(dirname(path), { recursive: true });
+    writeFileSync(path, entry.bytes);
+  }
+  const shellFile = join(DIST, `project-shell${suffix}.json`);
+  writeFileSync(shellFile, localizedSplit.shellText);
+  assertShellManifestFresh(JSON.parse(readFileSync(shellFile, "utf8")));
+  writeFileSync(join(DIST, `project${suffix}.json`), jsonBytes(localizedProject));
+  writeFileSync(
+    join(DIST, `map-descriptions${suffix}.json`),
+    jsonBytes(localizedImported.mapDescriptions),
+  );
+
+  const featureCatalogs = createFeatureCatalogs(lang);
+  const localizedFeatureModes = featureModesRuntimeData(loadFeatureModes(
+    sourceRoot,
+    surfaceLabels,
+    lang,
+    featureCatalogs,
+  ));
+  const { worldItems: localizedWorldItems, ...localizedFeatureShell } = localizedFeatureModes;
+  writeFileSync(
+    join(ROOT, `data/feature-modes-shell${suffix}.json`),
+    jsonBytes(localizedFeatureShell),
+  );
+  writeFileSync(
+    join(DIST, `feature-world-items${suffix}.json`),
+    jsonBytes(localizedWorldItems),
+  );
+
+  const localizedBattle = localizedBattles.get(lang)!;
+  const featureCatalog = featureCatalogs[lang];
+  if (!featureCatalog) throw new Error(`gen-assets: missing feature catalog for ${lang}`);
+  const localeReport = localeGapReport(lang, [
+    projectGaps,
+    localizedBattle.l10nGaps!,
+    catalogGapRow(featureCatalog),
+  ]);
+  writeFileSync(join(DIST, `l10n-report${suffix}.json`), jsonBytes(localeReport));
+  if (lang === "zh_CN") {
+    writeFileSync(join(DIST, "zh-fallbacks.json"), jsonBytes({
+      fallbackKeys: localeReport.fallbackKeys,
+      missingKeys: localeReport.missingKeys,
+      missingKeyCategories: localeReport.missingKeyCategories,
+    }));
+  }
+
+  localizedBuilds.push({
+    lang,
+    imported: localizedImported,
+    project: localizedProject,
+    split: localizedSplit,
+    mapPakEntries: localizedSplit.entries.map((entry) => ({
+      key: entry.meta.entry,
+      file: `dist/${entry.path}`,
+    })),
+    battle: localizedBattle,
+    localeReport,
+  });
+}
+setImportLang("en_US");
+
+const zhBuild = localizedBuilds.find((entry) => entry.lang === "zh_CN")!;
+const zhImported = zhBuild.imported;
+const battleZh = zhBuild.battle;
+// The CJK subset baker scans this aggregate because localized shards are raw
+// pak entries and therefore invisible to PocketJS's static source scanner.
 const zhTextParts: string[] = [
-  zhSplit.shellText,
-  ...zhSplit.entries.map((entry) => new TextDecoder().decode(entry.bytes)),
+  zhBuild.split.shellText,
+  ...zhBuild.split.entries.map((entry) => new TextDecoder().decode(entry.bytes)),
   readFileSync(join(DIST, "battle-runtime-shell.zh_CN.json"), "utf8"),
   readFileSync(join(DIST, "map-descriptions.zh_CN.json"), "utf8"),
   readFileSync(join(ROOT, "data/battle-names.zh_CN.json"), "utf8"),
+  readFileSync(join(ROOT, "data/feature-modes-shell.zh_CN.json"), "utf8"),
+  readFileSync(join(DIST, "feature-world-items.zh_CN.json"), "utf8"),
   readFileSync(join(import.meta.dir, "l10n/zh_CN/chapter-titles.json"), "utf8"),
 ];
 for (const entry of battleZh.battleRepository.pakEntries) {
   zhTextParts.push(readFileSync(join(ROOT, entry.file), "utf8"));
 }
 writeFileSync(join(DIST, "zh-text.txt"), zhTextParts.join("\n"));
-// Merged fallback accounting: project lookups plus battle name/description
-// lookups that fell back to en_US or missed every catalog. Missing keys are
-// categorized by where they were looked up (real dialog / choice value /
-// name lookup); none of them exist in en_US either, so the English build
-// shows the raw key for the same lines.
-const zhGaps = (() => {
-  const project = importL10nGaps();
-  const battle = battleZh.l10nGaps ?? { fallbackKeys: [], missingKeys: [] };
-  const missingKeys = [...new Set([...project.missingKeys, ...battle.missingKeys])].sort();
-  return {
-    fallbackKeys: [...new Set([...project.fallbackKeys, ...battle.fallbackKeys])].sort(),
-    missingKeys,
-    missingKeyCategories: categorizeMissingKeys(missingKeys),
-  };
-})();
-writeFileSync(join(DIST, "zh-fallbacks.json"), jsonBytes(zhGaps));
-setImportLang("en_US");
+
+// Raw pak JSON is invisible to PocketJS's source scanner. Feed every scalar
+// used by the five Latin locale payloads to the primary Inter atlas through
+// fonts.json, and retain a per-locale inventory for coverage tests/reports.
+const localeCharacters: Record<string, string> = {};
+const latinCharacters = new Set<number>();
+// Explicit product contract: keep the complete Western-European accent set
+// even if a future translation revision temporarily stops using one scalar.
+const REQUIRED_LATIN_CHARACTERS = "éèêëàâäçñüößãõíóúìòÉÈÊËÀÂÄÇÑÜÖẞÃÕÍÓÚÌÒ";
+for (const scalar of REQUIRED_LATIN_CHARACTERS) latinCharacters.add(scalar.codePointAt(0)!);
+
+function collectLocaleScalars(value: unknown, lang: ImportLang, points: Set<number>): void {
+  if (typeof value === "string") {
+    for (const scalar of value) {
+      const point = scalar.codePointAt(0)!;
+      if (point >= 32 && point !== 127) points.add(point);
+    }
+    return;
+  }
+  if (Array.isArray(value)) {
+    for (const entry of value) collectLocaleScalars(entry, lang, points);
+    return;
+  }
+  if (value === null || typeof value !== "object") return;
+
+  const record = value as Record<string, unknown>;
+  // Feature-mode documents deliberately carry en_US, zh_CN and the selected
+  // extra locale in each LocalizedFeatureText record. Only English fallback
+  // and the package's selected locale are reachable by that player; scanning
+  // every field would incorrectly feed the Chinese copy into the Latin atlas.
+  if (typeof record.en_US === "string" && typeof record.zh_CN === "string") {
+    collectLocaleScalars(record.en_US, lang, points);
+    collectLocaleScalars(record[lang] ?? record.en_US, lang, points);
+    return;
+  }
+  for (const entry of Object.values(record)) collectLocaleScalars(entry, lang, points);
+}
+
+for (const localized of localizedBuilds) {
+  if (localized.lang === "zh_CN") continue;
+  const suffix = localizedSuffix(localized.lang);
+  const sources = [
+    join(DIST, `project${suffix}.json`),
+    join(ROOT, `data/battle-runtime-db${suffix}.json`),
+    join(ROOT, `data/battle-names${suffix}.json`),
+    join(ROOT, `data/month-names${suffix}.json`),
+    join(ROOT, `data/feature-modes-shell${suffix}.json`),
+    join(DIST, `map-descriptions${suffix}.json`),
+    join(DIST, `feature-world-items${suffix}.json`),
+  ];
+  const points = new Set<number>();
+  for (const file of sources) {
+    collectLocaleScalars(JSON.parse(readFileSync(file, "utf8")), localized.lang, points);
+  }
+  const sorted = [...points].sort((a, b) => a - b);
+  localeCharacters[localized.lang] = sorted.map((point) => String.fromCodePoint(point)).join("");
+  for (const point of sorted) latinCharacters.add(point);
+}
+const latinCharset = [...latinCharacters].sort((a, b) => a - b)
+  .map((point) => String.fromCodePoint(point)).join("");
+mkdirSync(join(ROOT, "fonts"), { recursive: true });
+writeFileSync(join(ROOT, "fonts/latin-charset.txt"), latinCharset);
+writeFileSync(join(ROOT, "data/locale-characters.json"), jsonBytes({
+  format: "pocket-tuxemon/locale-characters/v1",
+  locales: localeCharacters,
+  union: latinCharset,
+}));
 // Demo menu data: the 206,818-frame mainline tape (nibble-packed) and the 20
 // chapter snapshots become pak entries read on demand; only the tiny chapter
 // index is inline in the bundle (ui/demo-index.ts). The baked chapter data
@@ -690,19 +881,27 @@ const audioBytes = Object.values(audioManifest.files).reduce((sum, f) => sum + f
 const startupPakEntries: PakManifestEntry[] = [
   { key: "l10n/en_US/project-shell.json", file: "dist/project-shell.json" },
   { key: "l10n/en_US/battle-runtime-shell.json", file: "dist/battle-runtime-shell.json" },
-  { key: "l10n/zh_CN/project-shell.json", file: "dist/project-shell.zh_CN.json" },
-  { key: "l10n/zh_CN/battle-runtime-shell.json", file: "dist/battle-runtime-shell.zh_CN.json" },
-  { key: "l10n/zh_CN/battle-names.json", file: "data/battle-names.zh_CN.json" },
-  { key: "l10n/zh_CN/map-descriptions.json", file: "dist/map-descriptions.zh_CN.json" },
-  { key: "l10n/zh_CN/month-names.json", file: "data/month-names.zh_CN.json" },
+  ...localizedBuilds.flatMap(({ lang }) => {
+    const suffix = localizedSuffix(lang);
+    const root = `l10n/${lang}`;
+    return [
+      { key: `${root}/project-shell.json`, file: `dist/project-shell${suffix}.json` },
+      { key: `${root}/battle-runtime-shell.json`, file: `dist/battle-runtime-shell${suffix}.json` },
+      { key: `${root}/battle-names.json`, file: `data/battle-names${suffix}.json` },
+      { key: `${root}/map-descriptions.json`, file: `dist/map-descriptions${suffix}.json` },
+      { key: `${root}/month-names.json`, file: `data/month-names${suffix}.json` },
+      { key: `${root}/feature-modes-shell.json`, file: `data/feature-modes-shell${suffix}.json` },
+      { key: `${root}/feature-world-items.json`, file: `dist/feature-world-items${suffix}.json` },
+    ];
+  }),
 ];
 const pakEntries = [
   ...pakManifest(terrain.entries),
   ...mapPakEntries,
-  ...mapZhPakEntries,
+  ...localizedBuilds.flatMap((entry) => entry.mapPakEntries),
   ...battle.rawPakEntries,
   ...battle.battleRepository.pakEntries,
-  ...battleZh.battleRepository.pakEntries,
+  ...localizedBuilds.flatMap((entry) => entry.battle.battleRepository.pakEntries),
   ...startupPakEntries,
   ...animatedPakEntries,
   ...npcSrcPakEntries,
@@ -756,9 +955,12 @@ const previewCoverage = buildPreviewCoverage(project, tuxemonPreviewSessionOptio
   monthNames as string[],
 ));
 imported.report.preview = previewCoverage;
-zhImported.report.preview = previewCoverage;
+for (const localized of localizedBuilds) localized.imported.report.preview = previewCoverage;
 writeFileSync(join(DIST, "import-report.json"), jsonBytes(imported.report));
-writeFileSync(join(DIST, "import-report.zh_CN.json"), jsonBytes(zhImported.report));
+for (const localized of localizedBuilds) {
+  const suffix = localizedSuffix(localized.lang);
+  writeFileSync(join(DIST, `import-report${suffix}.json`), jsonBytes(localized.imported.report));
+}
 // Slug -> localized map description for the {x:map_desc} text-token resolver.
 writeFileSync(join(DIST, "map-descriptions.json"), jsonBytes(imported.mapDescriptions));
 writeFileSync(join(DIST, "weather.json"), jsonBytes({
@@ -777,6 +979,13 @@ writeFileSync(
   join(ROOT, "reports/G1-coverage.zh_CN.md"),
   coverageMarkdown(zhImported.report, battleZh.report.battleMusic),
 );
+for (const localized of localizedBuilds) {
+  if (localized.lang === "zh_CN") continue;
+  writeFileSync(
+    join(ROOT, `reports/G1-coverage.${localized.lang}.md`),
+    coverageMarkdown(localized.imported.report, localized.battle.report.battleMusic),
+  );
+}
 
 function gameAssetsSource(
   player: PlayerFrames,

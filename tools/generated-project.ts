@@ -13,6 +13,7 @@ import type {
   Project,
   ProjectShell,
 } from "../vendor/pocket-rpgkit/src/engine/types.ts";
+import type { GameLang } from "../battle/extension.ts";
 
 export interface GeneratedShardedProject {
   project: ProjectShell;
@@ -23,9 +24,9 @@ export function readInlineProject(root: string): Project {
   return JSON.parse(readFileSync(join(resolve(root), "dist/project.json"), "utf8")) as Project;
 }
 
-export function readShardedProject(root: string, lang: "en_US" | "zh_CN" = "en_US"): GeneratedShardedProject {
+export function readShardedProject(root: string, lang: GameLang = "en_US"): GeneratedShardedProject {
   const absolute = resolve(root);
-  const suffix = lang === "zh_CN" ? ".zh_CN" : "";
+  const suffix = lang === "en_US" ? "" : `.${lang}`;
   const project = JSON.parse(
     readFileSync(join(absolute, `dist/project-shell${suffix}.json`), "utf8"),
   ) as ProjectShell;

@@ -47,13 +47,11 @@ export function isDesktopAudioEntry(key: string): boolean {
 const DESKTOP_DATA_PREFIXES = [
   "animated/",
   "battle/",
-  "battle-zh/",
   "choice-icons/",
   "demo/",
   "feature/",
   "l10n/",
   "maps/",
-  "maps-zh/",
   "npc-src/",
   "portraits/",
   "terrain-stream/",
@@ -63,6 +61,7 @@ const DESKTOP_DATA_FILES = new Set(["game:battle-db", "world-index.json"]);
 
 export function isDesktopDataEntry(key: string): boolean {
   return DESKTOP_DATA_FILES.has(key)
+    || /^(?:battle|maps)-[^/]+\//.test(key)
     || DESKTOP_DATA_PREFIXES.some((prefix) => key.startsWith(prefix));
 }
 
@@ -120,6 +119,7 @@ export function externalizeDesktopPak(
     if (
       entry.name.startsWith("audio:qoa.")
       || DESKTOP_DATA_FILES.has(entry.name)
+      || /^(?:battle|maps)-[^/]+$/.test(entry.name)
       || DESKTOP_DATA_PREFIXES.some((prefix) => entry.name === prefix.slice(0, -1))
     ) {
       rmSync(resolve(appDataRoot, entry.name), { recursive: true, force: true });

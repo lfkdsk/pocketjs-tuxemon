@@ -10,6 +10,7 @@ const FILES: Record<string, string> = {
   [ZH_DATA_ENTRIES.names]: "data/battle-names.zh_CN.json",
   [ZH_DATA_ENTRIES.mapDescriptions]: "dist/map-descriptions.zh_CN.json",
   [ZH_DATA_ENTRIES.monthNames]: "data/month-names.zh_CN.json",
+  [ZH_DATA_ENTRIES.featureModes]: "data/feature-modes-shell.zh_CN.json",
 };
 
 describe("on-demand zh_CN startup data", () => {
@@ -28,13 +29,14 @@ describe("on-demand zh_CN startup data", () => {
     expect(Object.keys(first?.names.monsters ?? {}).length).toBeGreaterThan(100);
     expect(Object.keys(first?.mapDescriptions ?? {}).length).toBeGreaterThan(40);
     expect(first?.monthNames).toHaveLength(12);
+    expect(first?.featureModes.format).toBe("pocket-tuxemon/feature-modes/v1");
 
     const second = store.load(() => { throw new Error("cached load must not read"); });
     expect(second).toBe(first);
     expect(store.current()).toBe(first);
   });
 
-  test("pak.json exposes the same five raw entry keys", () => {
+  test("pak.json exposes the same six startup entry keys", () => {
     const manifest = JSON.parse(readFileSync(resolve(ROOT, "pak.json"), "utf8")) as
       Array<{ key: string; file: string }>;
     for (const key of Object.values(ZH_DATA_ENTRIES)) {

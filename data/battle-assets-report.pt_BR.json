@@ -1,0 +1,150 @@
+{
+ "format": "pocket-tuxemon/battle-import-report/v1",
+ "sourceRevision": "9e6258ff726b786040a267e8bdbbf037b560285e",
+ "scope": "spyder",
+ "counts": {
+  "monsters": 407,
+  "techniques": 260,
+  "items": 114,
+  "elements": 13,
+  "tastes": 12,
+  "statuses": 35,
+  "plagues": 1,
+  "encounters": 22,
+  "npcs": 206,
+  "environments": 10,
+  "trainerParties": 213,
+  "trainerMonsterSlots": 611,
+  "battleSlots": 283,
+  "randomEncounterUses": 286,
+  "wildEncounterUses": 17
+ },
+ "art": {
+  "sourceFiles": 739,
+  "files": 739,
+  "sourceBytes": 2397304,
+  "pngBytes": 1486344,
+  "textureBytes": 30922008,
+  "encodedBytes": 2780624,
+  "residentBytes": 16214784,
+  "pakBytes": 4493616,
+  "maxWidth": 512,
+  "maxHeight": 512,
+  "quantization": {
+   "sourceColours": 13351,
+   "paletteColours": 13351,
+   "quantizedFiles": 0,
+   "quantizedColours": 0,
+   "remappedPixels": 0,
+   "totalSquaredError": 0,
+   "maxSquaredError": 0,
+   "meanSquaredError": 0
+  },
+  "categories": {
+   "backgrounds": {
+    "sourceFiles": 10,
+    "files": 10,
+    "sourceBytes": 166376,
+    "pngBytes": 176789,
+    "textureBytes": 655440
+   },
+   "capture-devices": {
+    "sourceFiles": 28,
+    "files": 28,
+    "sourceBytes": 157559,
+    "pngBytes": 8343,
+    "textureBytes": 57568
+   },
+   "element-icons": {
+    "sourceFiles": 26,
+    "files": 26,
+    "sourceBytes": 68674,
+    "pngBytes": 6203,
+    "textureBytes": 33488
+   },
+   "hud": {
+    "sourceFiles": 12,
+    "files": 12,
+    "sourceBytes": 20900,
+    "pngBytes": 2569,
+    "textureBytes": 70240
+   },
+   "islands": {
+    "sourceFiles": 6,
+    "files": 6,
+    "sourceBytes": 7920,
+    "pngBytes": 6195,
+    "textureBytes": 196656
+   },
+   "item-status-animations": {
+    "sourceFiles": 3,
+    "files": 3,
+    "sourceBytes": 3270,
+    "pngBytes": 2785,
+    "textureBytes": 196632
+   },
+   "monster-sheets": {
+    "sourceFiles": 407,
+    "files": 407,
+    "sourceBytes": 1222541,
+    "pngBytes": 740630,
+    "textureBytes": 13339832
+   },
+   "range-speed-icons": {
+    "sourceFiles": 13,
+    "files": 13,
+    "sourceBytes": 40070,
+    "pngBytes": 2318,
+    "textureBytes": 15976
+   },
+   "status-icons": {
+    "sourceFiles": 34,
+    "files": 34,
+    "sourceBytes": 6733,
+    "pngBytes": 4669,
+    "textureBytes": 17680
+   },
+   "technique-animations": {
+    "sourceFiles": 136,
+    "files": 136,
+    "sourceBytes": 564794,
+    "pngBytes": 461122,
+    "textureBytes": 15287360
+   },
+   "trainer-sheets": {
+    "sourceFiles": 61,
+    "files": 61,
+    "sourceBytes": 130999,
+    "pngBytes": 74702,
+    "textureBytes": 1098216
+   },
+   "ui": {
+    "sourceFiles": 4,
+    "files": 4,
+    "sourceBytes": 8452,
+    "pngBytes": 780,
+    "textureBytes": 18464
+   }
+  }
+ },
+ "battleDbBytes": 1653933,
+ "runtimeDbBytes": 1515402,
+ "pakKey": "game:battle-db",
+ "battleMusic": {
+  "environmentSets": 40,
+  "npcOverrideSets": 0,
+  "resolvedCues": 120,
+  "silentCues": 0,
+  "uniqueTracks": [
+   "music_battle_loop",
+   "music_gameover",
+   "music_win_battle_boss"
+  ],
+  "invalidReferencePolicy": "reject-like-upstream-music-properties"
+ },
+ "battleRepository": {
+  "shellBytes": 244517,
+  "entries": 816,
+  "entryBytes": 1192014
+ }
+}

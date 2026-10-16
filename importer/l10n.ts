@@ -165,10 +165,9 @@ export const ZH_BUILTIN_STRINGS: Readonly<Record<string, string>> = {
 export interface TextCatalog {
   readonly lang: ImportLang;
   get(key: string): string | undefined;
-  /** Look up a key WITHOUT recording it in the fallback/missing gap sets.
-   *  For metadata lookups (e.g. map descriptions) that are not dialog text
-   *  and must not pollute the l10n gap report. Returns the en_US fallback
-   *  for a zh build, like get() does. */
+  /** Look up metadata such as map descriptions. English fallback remains
+   * observable for exact coverage accounting; source-less metadata is not
+   * added to missingKeys because it is not a player-visible dialog error. */
   peek(key: string): string | undefined;
   /** Non-empty keys looked up in a zh build that fell back to en_US. */
   readonly fallbackKeys: Set<string>;
@@ -221,7 +220,11 @@ class Catalog implements TextCatalog {
     this.usedKeys.add(key);
     const hit = this.resolved.get(key);
     if (hit !== undefined) return hit;
-    if (this.en) return this.en.get(key);
+    if (this.en) {
+      const en = this.en.get(key);
+      if (en !== undefined) this.fallbackKeys.add(key);
+      return en;
+    }
     return undefined;
   }
 }
@@ -270,12 +273,36 @@ function tokenCounts(text: string): Map<string, number> {
   return result;
 }
 
-function placeholdersMatch(english: string, translated: string): boolean {
+export function placeholdersMatch(english: string, translated: string): boolean {
   const left = tokenCounts(english);
   const right = tokenCounts(translated);
   if (left.size !== right.size) return false;
   for (const [token, count] of left) if (right.get(token) !== count) return false;
   return english.split("\\n").length === translated.split("\\n").length;
+}
+
+/** Extract fuzzy msgids, including gettext's multiline msgid form. */
+export function fuzzyMsgids(text: string): Set<string> {
+  const result = new Set<string>();
+  for (const block of text.split(/\r?\n\s*\r?\n/)) {
+    if (!/^#,.*\bfuzzy\b/m.test(block)) continue;
+    const lines = block.split(/\r?\n/);
+    const first = lines.findIndex((line) => line.startsWith("msgid "));
+    if (first < 0) continue;
+    const fragments: string[] = [];
+    const initial = lines[first]!.slice("msgid ".length).trim();
+    if (!initial.startsWith('"')) continue;
+    fragments.push(initial);
+    for (let i = first + 1; i < lines.length && lines[i]!.trimStart().startsWith('"'); i++) {
+      fragments.push(lines[i]!.trim());
+    }
+    try {
+      result.add(fragments.map((fragment) => JSON.parse(fragment) as string).join(""));
+    } catch {
+      throw new Error(`could not decode fuzzy msgid block: ${block.slice(0, 160)}`);
+    }
+  }
+  return result;
 }
 
 /** Load one upstream locale and reject translations that would corrupt a
@@ -292,19 +319,7 @@ export function buildUpstreamCatalog(lang: Exclude<ImportLang, "en_US" | "zh_CN"
   const resolved = new Map<string, string>();
   const invalidKeys = new Set<string>();
   const fuzzyKeys = new Set<string>();
-  // parsePo intentionally accepts the upstream file's one malformed quoted
-  // line, but does not retain gettext flags. Recover the simple msgid keys
-  // attached to fuzzy blocks so standard gettext's "do not compile" rule is
-  // preserved by the game import.
-  for (const match of readFileSync(path, "utf8").matchAll(
-    /^#,.*\bfuzzy\b[^\n]*\n(?:^#.*\n)*^msgid "((?:[^"\\]|\\.)*)"/gm,
-  )) {
-    try {
-      fuzzyKeys.add(JSON.parse(`"${match[1]}"`) as string);
-    } catch {
-      throw new Error(`${path}: could not decode fuzzy msgid ${match[1]}`);
-    }
-  }
+  for (const key of fuzzyMsgids(readFileSync(path, "utf8"))) fuzzyKeys.add(key);
   for (const [key, translated] of upstream) {
     const source = english.get(key);
     if (fuzzyKeys.has(key)) continue;

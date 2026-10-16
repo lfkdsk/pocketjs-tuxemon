@@ -6,7 +6,7 @@
 // ui/zh-data.ts for an English-only stub, so it carries no zh_CN battle
 // names; the Chinese PSP package (build:psp:zh) keeps the real module.
 
-import { zhData } from "../ui/zh-data.ts";
+import { localeData } from "../ui/zh-data.ts";
 import enNamesJson from "../data/battle-names.json";
 import { battleSceneLang } from "../ui/battle-scene-locale.ts";
 import type { GameLang } from "./extension.ts";
@@ -46,7 +46,7 @@ function tableFor(
   kind: BattleNameKind,
   localized?: BattleNames,
 ): Readonly<Record<string, string>> | undefined {
-  const names = lang === "zh_CN" ? (localized ?? zhData.current()?.names) : enNames;
+  const names = lang === "en_US" ? enNames : (localized ?? localeData.current(lang)?.names);
   return names?.[TABLE_KEY[kind]];
 }
 

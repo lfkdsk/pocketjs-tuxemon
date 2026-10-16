@@ -1,6 +1,6 @@
 // @title Pocket Tuxemon — the imported Tuxemon world on Pocket RPG Kit
 import { gp1Mark } from "./ui/gp1-marks.ts";
-import { zhData } from "./ui/zh-data.ts";
+import { localeData, localeDataEntries } from "./ui/zh-data.ts";
 import {
   mount,
   fsHost,
@@ -133,11 +133,13 @@ import {
 const host = fsHost();
 const settingsController = createSettingsController();
 const buttonRemapper = createButtonRemapper(settingsController);
-const requestedLang = zhData.available ? detectLang() : "en_US";
+const requestedLang = localeData.available ? detectLang() : "en_US";
 const bootReaders = createGameEntryReaders(host);
 const readStartupEntry = (entry: string): string | Uint8Array =>
   bootReaders.readText?.(entry) ?? bootReaders.read(entry);
-const localizedData = requestedLang === "zh_CN" ? zhData.load(readStartupEntry) : null;
+const localizedData = requestedLang === "en_US"
+  ? null
+  : localeData.load(requestedLang, readStartupEntry);
 const lang = localizedData ? requestedLang : "en_US";
 const startupData = localizedData ?? enStartupData.load(readStartupEntry);
 gp1Mark("language-data");
@@ -158,10 +160,8 @@ const project = startupData.project as unknown as ProjectShell;
 // rewind and a re-fold expand text identically. The zh_CN descriptions come
 // from the on-demand zh data (absent in the English-only PSP build).
 const textTokens = createTuxemonTextTokens(lang, {
-  mapDescriptions: (lang === "zh_CN"
-    ? localizedData!.mapDescriptions
-    : enMapDescriptions) as Record<string, string>,
-  monthNames: (lang === "zh_CN" ? localizedData!.monthNames : enMonthNames) as string[],
+  mapDescriptions: (localizedData?.mapDescriptions ?? enMapDescriptions) as Record<string, string>,
+  monthNames: (localizedData?.monthNames ?? enMonthNames) as string[],
   battleNames: localizedData?.names,
 });
 // splitProjectMaps/splitBattleRuntimeDb/splitAnimatedTiles/splitNpcSrc/
@@ -322,12 +322,15 @@ const demo: GameViewDemoConfig | undefined = hasDemoChapters(lang) ? (() => {
 // switcher is hidden on targets that cannot persist a choice (PSP: language
 // is a build-time choice there).
 const langSwitchable = canSwitchLang();
-const featureModes = featureModesJson as unknown as FeatureModesShellData;
+const featureModes = localizedData?.featureModes
+  ?? featureModesJson as unknown as FeatureModesShellData;
 let featureWorldItems: WorldItemMapData | null = null;
 const worldItemData = (): WorldItemMapData => {
   if (featureWorldItems === null) {
     featureWorldItems = JSON.parse(
-      decodeMapEntryBytes(readEntry("feature/world-items.json")),
+      decodeMapEntryBytes(readEntry(lang === "en_US"
+        ? "feature/world-items.json"
+        : localeDataEntries(lang).worldItems)),
     ) as WorldItemMapData;
   }
   return featureWorldItems;

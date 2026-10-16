@@ -1,36 +1,46 @@
-// The five zh_CN startup documents are raw pak/data.fs entries rather than
-// imports. This keeps their JSON text out of the shared JS bundle and lets an
-// English boot avoid decoding or parsing any Chinese content. The PSP build
-// swaps this module for tools/psp-stubs/zh-data.ts and filters the same entry
-// keys from its external pak.
-import type { ZhData } from "./zh-data-types.ts";
+// Non-English startup documents are raw pak/data.fs entries rather than
+// imports. This keeps every translation out of the shared JS bundle and lets
+// a boot decode only its selected locale. The PSP build swaps this module for
+// tools/psp-stubs/zh-data.ts in its English-only package.
+import type { GameLang } from "../battle/extension.ts";
+import type { LocaleData, ZhData } from "./zh-data-types.ts";
 import { decodeMapEntryBytes } from "../vendor/pocket-rpgkit/src/engine/map-repository.ts";
 import { startupProfileMark } from "../vendor/pocket-rpgkit/src/startup-profile.ts";
 
-export const ZH_DATA_ENTRIES = {
-  project: "l10n/zh_CN/project-shell.json",
-  battleShell: "l10n/zh_CN/battle-runtime-shell.json",
-  names: "l10n/zh_CN/battle-names.json",
-  mapDescriptions: "l10n/zh_CN/map-descriptions.json",
-  monthNames: "l10n/zh_CN/month-names.json",
-} as const;
+export type LocalizedLang = Exclude<GameLang, "en_US">;
+
+export function localeDataEntries(lang: LocalizedLang) {
+  const root = `l10n/${lang}`;
+  return {
+    project: `${root}/project-shell.json`,
+    battleShell: `${root}/battle-runtime-shell.json`,
+    names: `${root}/battle-names.json`,
+    mapDescriptions: `${root}/map-descriptions.json`,
+    monthNames: `${root}/month-names.json`,
+    featureModes: `${root}/feature-modes-shell.json`,
+    worldItems: `${root}/feature-world-items.json`,
+  } as const;
+}
+
+const { worldItems: _zhWorldItems, ...zhStartupEntries } = localeDataEntries("zh_CN");
+export const ZH_DATA_ENTRIES = zhStartupEntries;
 
 export type ZhDataReader = (entry: string) => string | Uint8Array;
 
-export interface ZhDataStore {
+export interface LocaleDataStore {
   readonly available: boolean;
-  /** Decode all five documents on the first Chinese boot; later calls reuse them. */
-  load(read: ZhDataReader): ZhData | null;
-  /** The already-loaded Chinese data, or null before a Chinese boot. */
-  current(): ZhData | null;
+  load(lang: LocalizedLang, read: ZhDataReader): LocaleData | null;
+  current(lang?: LocalizedLang): LocaleData | null;
 }
 
-export function createZhDataStore(): ZhDataStore {
-  let cached: ZhData | null = null;
+export function createLocaleDataStore(): LocaleDataStore {
+  const cached = new Map<LocalizedLang, LocaleData>();
   return {
     available: true,
-    load(read) {
-      if (cached) return cached;
+    load(lang, read) {
+      const existing = cached.get(lang);
+      if (existing) return existing;
+      const entries = localeDataEntries(lang);
       const parse = <T>(entry: string): T => {
         startupProfileMark(`startup-data:${entry}:read-start`);
         const input = read(entry);
@@ -41,16 +51,39 @@ export function createZhDataStore(): ZhDataStore {
         startupProfileMark(`startup-data:${entry}:parse-end`);
         return value;
       };
-      cached = {
-        project: parse<ZhData["project"]>(ZH_DATA_ENTRIES.project),
-        battleShell: parse<ZhData["battleShell"]>(ZH_DATA_ENTRIES.battleShell),
-        names: parse<ZhData["names"]>(ZH_DATA_ENTRIES.names),
-        mapDescriptions: parse<ZhData["mapDescriptions"]>(ZH_DATA_ENTRIES.mapDescriptions),
-        monthNames: parse<ZhData["monthNames"]>(ZH_DATA_ENTRIES.monthNames),
+      const data: LocaleData = {
+        project: parse<LocaleData["project"]>(entries.project),
+        battleShell: parse<LocaleData["battleShell"]>(entries.battleShell),
+        names: parse<LocaleData["names"]>(entries.names),
+        mapDescriptions: parse<LocaleData["mapDescriptions"]>(entries.mapDescriptions),
+        monthNames: parse<LocaleData["monthNames"]>(entries.monthNames),
+        featureModes: parse<LocaleData["featureModes"]>(entries.featureModes),
       };
-      return cached;
+      cached.set(lang, data);
+      return data;
     },
-    current: () => cached,
+    current: (lang) => lang === undefined
+      ? cached.values().next().value ?? null
+      : cached.get(lang) ?? null,
+  };
+}
+
+export const localeData = createLocaleDataStore();
+
+export interface ZhDataStore {
+  readonly available: boolean;
+  /** Decode all five documents on the first Chinese boot; later calls reuse them. */
+  load(read: ZhDataReader): ZhData | null;
+  /** The already-loaded Chinese data, or null before a Chinese boot. */
+  current(): ZhData | null;
+}
+
+export function createZhDataStore(): ZhDataStore {
+  const store = createLocaleDataStore();
+  return {
+    available: true,
+    load: (read) => store.load("zh_CN", read),
+    current: () => store.current("zh_CN"),
   };
 }
 

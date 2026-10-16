@@ -1,0 +1,11 @@
+{
+ "format": "pocket-tuxemon/locale-characters/v1",
+ "locales": {
+  "de_DE": " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_abcdefghijklmnopqrstuvwxyz{}°ÄÖÜßäéöü—…™↑↓♪",
+  "fr_FR": " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_abcdefghijklmnopqrstuvwxyz{} §°ÀÇÈÉÊÎÔàâçèéêîïôùûŒœ–—… €™♪",
+  "es_ES": " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_abcdefghijklmnopqrstuvwxyz{}¡°¿ÁÉÍÓÚáéíñóúü—…™↑↓♀♂♪",
+  "it_IT": " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_abcdefghijklmnopqrstuvwxyz{}«°»ÀÈÉÌàèéìòù—…™↑↓♪",
+  "pt_BR": " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_abcdefghijklmnopqrstuvwxyz{}°ºÁÃÇÉÊÓàáâãçéêíóôõú—…™↑↓♪"
+ },
+ "union": " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_abcdefghijklmnopqrstuvwxyz{} ¡§«°º»¿ÀÁÂÃÄÇÈÉÊËÌÍÎÑÒÓÔÕÖÚÜßàáâãäçèéêëìíîïñòóôõöùúûüŒœẞ–—… €™↑↓♀♂♪"
+}

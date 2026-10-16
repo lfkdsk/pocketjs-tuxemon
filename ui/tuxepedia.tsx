@@ -158,7 +158,7 @@ function typeName(slug: string, lang: Lang): string {
 }
 
 function strings(lang: Lang) {
-  return STRINGS[lang] ?? STRINGS.en_US;
+  return lang === "zh_CN" ? STRINGS.zh_CN : STRINGS.en_US;
 }
 
 function statusMarker(caught: boolean, seen: boolean, preview: boolean): string {
