@@ -12,7 +12,7 @@ import type {
   WorldItemDirective,
   WorldItemFishingConfig,
 } from "../battle/world-items.ts";
-import type { WorldItemMapData } from "./feature-modes-data.ts";
+import { featureText, type WorldItemMapData } from "./feature-modes-data.ts";
 import type { Lang } from "./language.ts";
 
 const DX = [0, -1, 0, 1] as const;
@@ -61,7 +61,7 @@ function fishingRules(
 ): Record<string, WorldItemFishingConfig> {
   return Object.fromEntries(Object.entries(data.fishing).map(([slug, config]) => [slug, {
     ...config,
-    failure: config.failure[lang],
+    failure: featureText(config.failure, lang),
   }]));
 }
 

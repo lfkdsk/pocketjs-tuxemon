@@ -17,9 +17,43 @@ import { join } from "node:path";
 import { parsePo, TUXEMON_SRC } from "./source.ts";
 import type { UiTextTable } from "../vendor/pocket-rpgkit/src/engine/ui-text.ts";
 
-export type ImportLang = "en_US" | "zh_CN";
+export const IMPORT_LANGS = [
+  "en_US",
+  "zh_CN",
+  "de_DE",
+  "fr_FR",
+  "es_ES",
+  "it_IT",
+  "pt_BR",
+] as const;
+export type ImportLang = (typeof IMPORT_LANGS)[number];
 
-export const IMPORT_LANGS: readonly ImportLang[] = ["en_US", "zh_CN"];
+/** Locales added from the pinned upstream catalogs. Chinese keeps its
+ * reviewed project supplement; these five intentionally use upstream PO
+ * text with a validated English fallback. */
+export const UPSTREAM_LATIN_LANGS = [
+  "de_DE",
+  "fr_FR",
+  "es_ES",
+  "it_IT",
+  "pt_BR",
+] as const satisfies readonly ImportLang[];
+
+export function isImportLang(value: string): value is ImportLang {
+  return (IMPORT_LANGS as readonly string[]).includes(value);
+}
+
+/** Stable artifact path component. Preserve the established short Chinese
+ * directories while giving every new locale an unambiguous BCP47-like id. */
+export function localizedShardDir(base: "maps" | "battle", lang: ImportLang): string {
+  if (lang === "en_US") return base;
+  if (lang === "zh_CN") return `${base}-zh`;
+  return `${base}-${lang}`;
+}
+
+export function localizedSuffix(lang: ImportLang): string {
+  return lang === "en_US" ? "" : `.${lang}`;
+}
 
 const EN_PO = join(TUXEMON_SRC, "mods/tuxemon/l18n/en_US/LC_MESSAGES/base.po");
 const ZH_UPSTREAM_PO = join(TUXEMON_SRC, "mods/tuxemon/l18n/zh_CN/LC_MESSAGES/base.po");
@@ -138,20 +172,38 @@ export interface TextCatalog {
   peek(key: string): string | undefined;
   /** Non-empty keys looked up in a zh build that fell back to en_US. */
   readonly fallbackKeys: Set<string>;
+  /** Keys whose non-empty translation was rejected because its runtime
+   * placeholders or authored newlines differ from en_US. They are also in
+   * fallbackKeys because the resolved value is English. */
+  readonly invalidKeys: Set<string>;
+  /** Translator-marked fuzzy rows omitted with standard gettext semantics. */
+  readonly fuzzyKeys: Set<string>;
   /** Non-empty keys looked up but absent from every catalog. */
   readonly missingKeys: Set<string>;
+  /** Exact source keys consumed by this importer layer, including metadata
+   * lookups through peek(). */
+  readonly usedKeys: Set<string>;
 }
 
 class Catalog implements TextCatalog {
   readonly fallbackKeys = new Set<string>();
+  readonly invalidKeys = new Set<string>();
+  readonly fuzzyKeys = new Set<string>();
   readonly missingKeys = new Set<string>();
+  readonly usedKeys = new Set<string>();
   constructor(
     readonly lang: ImportLang,
     private readonly resolved: ReadonlyMap<string, string>,
     private readonly en: ReadonlyMap<string, string> | undefined,
-  ) {}
+    invalidKeys: ReadonlySet<string> = new Set(),
+    fuzzyKeys: ReadonlySet<string> = new Set(),
+  ) {
+    for (const key of invalidKeys) this.invalidKeys.add(key);
+    for (const key of fuzzyKeys) this.fuzzyKeys.add(key);
+  }
   get(key: string): string | undefined {
     if (key === "") return undefined;
+    this.usedKeys.add(key);
     const hit = this.resolved.get(key);
     if (hit !== undefined) return hit;
     if (this.en) {
@@ -166,6 +218,7 @@ class Catalog implements TextCatalog {
   }
   peek(key: string): string | undefined {
     if (key === "") return undefined;
+    this.usedKeys.add(key);
     const hit = this.resolved.get(key);
     if (hit !== undefined) return hit;
     if (this.en) return this.en.get(key);
@@ -207,9 +260,72 @@ export function buildZhCatalog(): Map<string, string> {
   return merged;
 }
 
+const PLACEHOLDER_RE = /\$\{\{[^{}]*\}\}|\$\{[^{}]*\}|\{[^{}]*\}/g;
+
+function tokenCounts(text: string): Map<string, number> {
+  const result = new Map<string, number>();
+  for (const token of text.match(PLACEHOLDER_RE) ?? []) {
+    result.set(token, (result.get(token) ?? 0) + 1);
+  }
+  return result;
+}
+
+function placeholdersMatch(english: string, translated: string): boolean {
+  const left = tokenCounts(english);
+  const right = tokenCounts(translated);
+  if (left.size !== right.size) return false;
+  for (const [token, count] of left) if (right.get(token) !== count) return false;
+  return english.split("\\n").length === translated.split("\\n").length;
+}
+
+/** Load one upstream locale and reject translations that would corrupt a
+ * runtime substitution. Rejected entries are not silently repaired: the
+ * catalog falls back to English and exposes the exact key in invalidKeys. */
+export function buildUpstreamCatalog(lang: Exclude<ImportLang, "en_US" | "zh_CN">): {
+  resolved: Map<string, string>;
+  invalidKeys: Set<string>;
+  fuzzyKeys: Set<string>;
+} {
+  const path = join(TUXEMON_SRC, `mods/tuxemon/l18n/${lang}/LC_MESSAGES/base.po`);
+  const upstream = parsePo(path);
+  const english = enCatalog();
+  const resolved = new Map<string, string>();
+  const invalidKeys = new Set<string>();
+  const fuzzyKeys = new Set<string>();
+  // parsePo intentionally accepts the upstream file's one malformed quoted
+  // line, but does not retain gettext flags. Recover the simple msgid keys
+  // attached to fuzzy blocks so standard gettext's "do not compile" rule is
+  // preserved by the game import.
+  for (const match of readFileSync(path, "utf8").matchAll(
+    /^#,.*\bfuzzy\b[^\n]*\n(?:^#.*\n)*^msgid "((?:[^"\\]|\\.)*)"/gm,
+  )) {
+    try {
+      fuzzyKeys.add(JSON.parse(`"${match[1]}"`) as string);
+    } catch {
+      throw new Error(`${path}: could not decode fuzzy msgid ${match[1]}`);
+    }
+  }
+  for (const [key, translated] of upstream) {
+    const source = english.get(key);
+    if (fuzzyKeys.has(key)) continue;
+    // gettext uses an empty msgstr for untranslated rows. Preserve genuinely
+    // empty/whitespace English UI sentinels (for example combat_none), but do
+    // not mistake an empty translation for coverage.
+    if (translated.length === 0 && source !== undefined && source.length > 0) continue;
+    if (source !== undefined && !placeholdersMatch(source, translated)) {
+      invalidKeys.add(key);
+      continue;
+    }
+    resolved.set(key, translated);
+  }
+  return { resolved, invalidKeys, fuzzyKeys };
+}
+
 export function createTextCatalog(lang: ImportLang): TextCatalog {
   if (lang === "en_US") return new Catalog(lang, enCatalog(), undefined);
-  return new Catalog(lang, buildZhCatalog(), enCatalog());
+  if (lang === "zh_CN") return new Catalog(lang, buildZhCatalog(), enCatalog());
+  const upstream = buildUpstreamCatalog(lang);
+  return new Catalog(lang, upstream.resolved, enCatalog(), upstream.invalidKeys, upstream.fuzzyKeys);
 }
 
 let zhUiTextCache: Readonly<UiTextTable> | undefined;
@@ -279,7 +395,7 @@ export interface ImportUiStrings {
   dojoLearnPrompt: string;
 }
 
-export const IMPORT_UI: Record<ImportLang, ImportUiStrings> = {
+const BASE_IMPORT_UI: Record<"en_US" | "zh_CN", ImportUiStrings> = {
   en_US: {
     nextPage: "Next >",
     paren: (text) => `(${text})`,
@@ -342,4 +458,16 @@ export const IMPORT_UI: Record<ImportLang, ImportUiStrings> = {
     dojoForgetPrompt: "要遗忘哪个招式？",
     dojoLearnPrompt: "要学会哪个招式？",
   },
+};
+
+/** Importer-authored diagnostic copy has no upstream msgid. New upstream
+ * locales therefore use its documented English fallback. Player-facing PO
+ * copy (dialog, names, menus and battle data) still comes from TextCatalog. */
+export const IMPORT_UI: Record<ImportLang, ImportUiStrings> = {
+  ...BASE_IMPORT_UI,
+  de_DE: BASE_IMPORT_UI.en_US,
+  fr_FR: BASE_IMPORT_UI.en_US,
+  es_ES: BASE_IMPORT_UI.en_US,
+  it_IT: BASE_IMPORT_UI.en_US,
+  pt_BR: BASE_IMPORT_UI.en_US,
 };

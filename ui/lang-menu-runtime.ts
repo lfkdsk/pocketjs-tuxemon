@@ -5,14 +5,12 @@
 import { createSignal, type Accessor } from "solid-js";
 import { BTN } from "@pocketjs/framework/input";
 import type { GameViewDemoRuntime } from "../vendor/pocket-rpgkit/src/ui/demo-contract.ts";
-import { langSwitchMechanism, persistLang, switchLangAndReload, type Lang } from "./language.ts";
+import { LANGUAGES, langSwitchMechanism, persistLang, switchLangAndReload, type Lang } from "./language.ts";
 
 export const LANG_MENU_BUTTON = BTN.RTRIGGER;
 
-export const LANG_ROWS: { lang: Lang; label: string; sub: string }[] = [
-  { lang: "en_US", label: "English", sub: "English text" },
-  { lang: "zh_CN", label: "中文", sub: "简体中文" },
-];
+export const LANG_ROWS: { lang: Lang; label: string; sub: string }[] =
+  LANGUAGES.map(({ lang, label, sub }) => ({ lang, label, sub }));
 
 /** Everything the presentation reads, plus the GameView step contract. */
 export interface LangMenuRuntime {
@@ -27,7 +25,7 @@ export interface LangMenuRuntime {
 
 export function createLangMenuRuntime(active: Lang): LangMenuRuntime {
   const [openSignal, setOpen] = createSignal(false);
-  const [cursor, setCursor] = createSignal(active === "zh_CN" ? 1 : 0);
+  const [cursor, setCursor] = createSignal(Math.max(0, LANG_ROWS.findIndex((row) => row.lang === active)));
   const [notice, setNotice] = createSignal<string | null>(null);
   let waitRelease = false;
 
@@ -74,11 +72,9 @@ export function createLangMenuRuntime(active: Lang): LangMenuRuntime {
       } else {
         persistLang(choice.lang);
       }
-      setNotice(
-        choice.lang === "zh_CN"
-          ? "已切换为中文。重启游戏后生效。"
-          : "Switched to English. Restart the game to apply.",
-      );
+      setNotice(choice.lang === "zh_CN"
+        ? "已切换语言。重启游戏后生效。"
+        : `Switched to ${choice.label}. Restart the game to apply.`);
       return { consumed: true };
     }
     return { consumed: true };

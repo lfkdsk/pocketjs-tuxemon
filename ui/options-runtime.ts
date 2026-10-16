@@ -5,8 +5,9 @@
 import { createSignal, onCleanup, type Accessor } from "solid-js";
 import { BTN } from "@pocketjs/framework/input";
 import type { GameViewDemoRuntime } from "../vendor/pocket-rpgkit/src/ui/demo-contract.ts";
-import type { OptionsData } from "./feature-modes-data.ts";
+import { featureText, type LocalizedFeatureText, type OptionsData } from "./feature-modes-data.ts";
 import type { Lang } from "./language.ts";
+import { languageLabel } from "./language.ts";
 import {
   CONTROL_ACTIONS,
   bindControl,
@@ -97,8 +98,8 @@ const rowControl = (id: OptionsRowId): ControlAction | null =>
   id.startsWith("control:") ? id.slice("control:".length) as ControlAction : null;
 
 const pick = (data: OptionsData, lang: Lang) => ({
-  text: (value: { en_US: string; zh_CN: string }): string => value[lang],
-  control: (action: ControlAction): string => data.controls[action][lang],
+  text: (value: LocalizedFeatureText): string => featureText(value, lang),
+  control: (action: ControlAction): string => featureText(data.controls[action], lang),
 });
 
 function clampPercent(value: number): number {
@@ -157,9 +158,11 @@ export function createOptionsRuntime(options: OptionsRuntimeOptions): OptionsRun
         id: "language",
         section: "general",
         label: labels.text(options.data.language),
-        value: labels.text(options.lang === "zh_CN"
-          ? options.data.languageChinese
-          : options.data.languageEnglish),
+        value: options.lang === "en_US"
+          ? labels.text(options.data.languageEnglish)
+          : options.lang === "zh_CN"
+            ? labels.text(options.data.languageChinese)
+            : languageLabel(options.lang),
         enabled: true,
       });
     }

@@ -61,6 +61,7 @@ import {
   type AutosaveSlotStatus,
 } from "../vendor/pocket-rpgkit/src/host/autosave.ts";
 import { pspSaveHost, pspSaveStore } from "./save-psp.ts";
+import { isLang, type Lang } from "./language.ts";
 
 export const SAVE_SLOTS = 3;
 export const BROWSER_SAVE_KEY_PREFIX = "pocket-tuxemon/save/slot-";
@@ -294,7 +295,7 @@ export function peekSaveCode(code: string): SaveSnapshot {
 export function listSlots(
   slots: SlotStore | null,
   content: MapContentIdentity | null,
-  lang: "en_US" | "zh_CN" = "en_US",
+  lang: Lang = "en_US",
 ): SlotListing {
   const out: SlotListing = [];
   for (let slot = 1; slot <= SAVE_SLOTS; slot++) {
@@ -336,10 +337,12 @@ export function listSlots(
 /** The language a save was written with, read from its encoded extension
  *  envelope. Saves written before the language was recorded default to
  *  en_US (the game was English-only then). */
-export function snapshotLang(snapshot: SaveSnapshot): "en_US" | "zh_CN" {
+export function snapshotLang(snapshot: SaveSnapshot): Lang {
   const ext = snapshot.ext as { format?: unknown; lang?: unknown } | null;
   const lang = ext && typeof ext === "object" ? ext.lang : undefined;
-  return lang === "zh_CN" ? "zh_CN" : "en_US";
+  if (lang === undefined) return "en_US";
+  if (isLang(lang)) return lang;
+  throw new SaveError("shape", "save content language is unsupported");
 }
 
 /** One-line, player-facing explanation of a failed load. */

@@ -32,7 +32,7 @@ import type {
   GameViewDemoStepResult,
   GameViewSessionHost,
 } from "../vendor/pocket-rpgkit/src/ui/demo-contract.ts";
-import { langSwitchMechanism, type Lang } from "./language.ts";
+import { languageLabel, langSwitchMechanism, type Lang } from "./language.ts";
 import {
   describeLoadError,
   detectSlotStore,
@@ -151,9 +151,7 @@ function saveMenuText(overrides?: UiTextOverrides) {
 /** The prompt shown when a save was written in the other language build.
  *  Says which language the save is in and how to switch to it. */
 function languageMismatchMessage(saveLang: Lang, back: MenuState): MenuState {
-  const otherEn = saveLang === "zh_CN" ? "Chinese (中文)" : "English";
-  const otherZh = saveLang === "zh_CN" ? "中文" : "英文";
-  const otherLabel = saveLang === "zh_CN" ? "中文" : "English";
+  const otherLabel = languageLabel(saveLang);
   const howEn = langSwitchMechanism() === "reload"
     ? `Press R, pick ${otherLabel}, then load it again.`
     : `Switch the language to ${otherLabel} and restart the game, then load it again.`;
@@ -162,7 +160,7 @@ function languageMismatchMessage(saveLang: Lang, back: MenuState): MenuState {
     : `切换到${otherLabel}并重启游戏后重新读取。`;
   return message(
     "LANGUAGE MISMATCH / 语言不匹配",
-    `That save is from the ${otherEn} build. ${howEn} / 该存档来自${otherZh}版，${howZh}`,
+    `That save is from the ${otherLabel} build. ${howEn} / 该存档来自${otherLabel}版，${howZh}`,
     back,
   );
 }

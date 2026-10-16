@@ -172,7 +172,7 @@ function viewRect(
 }
 
 function localized(value: { en_US: string; zh_CN: string }, lang: Lang): string {
-  return value[lang];
+  return value[lang as "en_US" | "zh_CN"] ?? value.en_US;
 }
 
 export function tuxLinkActionLabel(
@@ -180,7 +180,7 @@ export function tuxLinkActionLabel(
   action: ArenaAction,
   lang: Lang,
 ): string {
-  const t = STRINGS[lang];
+  const t = STRINGS[lang as "en_US" | "zh_CN"] ?? STRINGS.en_US;
   if (action.type === "move") {
     const actor = observation.own.party.find((monster) => monster.party === observation.actingParty)
       ?? observation.own.party.find((monster) => monster.active);

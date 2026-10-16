@@ -10,7 +10,7 @@ import { modality, surfaceHasTouch } from "@pocketjs/framework/modality";
 import { platform } from "@pocketjs/framework/platform";
 import type { GameViewDemoRuntime, GameViewOverlayConfig } from "../vendor/pocket-rpgkit/src/ui/demo-contract.ts";
 import { Panel } from "../vendor/pocket-rpgkit/src/ui/Panel.tsx";
-import type { OptionsData } from "./feature-modes-data.ts";
+import { featureText, type LocalizedFeatureText, type OptionsData } from "./feature-modes-data.ts";
 import type { Lang } from "./language.ts";
 import {
   createOptionsRuntime,
@@ -156,7 +156,7 @@ const OptionsView: Component<{ runtime: OptionsRuntime; data: OptionsData; lang:
   const layout = createMemo(() => optionsRowLayout(rows()));
   const open = () => props.runtime.openSignal();
   const disabled: OptionsRect = { x: -1, y: -1, w: 0, h: 0 };
-  const t = (text: { en_US: string; zh_CN: string }): string => text[props.lang];
+  const t = (text: LocalizedFeatureText): string => featureText(text, props.lang);
 
   onFrame(() => {
     if (!open()) return;
@@ -274,7 +274,7 @@ const OptionsView: Component<{ runtime: OptionsRuntime; data: OptionsData; lang:
               debugName="options-legend"
             >
               {props.runtime.persistFailed()
-                ? SAVE_FAILED[props.lang]
+                ? (SAVE_FAILED[props.lang] ?? SAVE_FAILED.en_US)
                 : `↑↓  ←→   ${props.runtime.controlGlyph("primary")} ${t(props.data.controls.primary)}`}
             </Text>
             <View

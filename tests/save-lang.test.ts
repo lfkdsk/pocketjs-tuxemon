@@ -12,8 +12,9 @@ function snapshotWithExt(ext: unknown): SaveSnapshot {
 
 describe("snapshotLang", () => {
   test("reads the language from the encoded extension envelope", () => {
-    expect(snapshotLang(snapshotWithExt({ format: TUXEMON_EXT_SAVE_FORMAT, state: {}, lang: "zh_CN" }))).toBe("zh_CN");
-    expect(snapshotLang(snapshotWithExt({ format: TUXEMON_EXT_SAVE_FORMAT, state: {}, lang: "en_US" }))).toBe("en_US");
+    for (const lang of ["en_US", "zh_CN", "de_DE", "fr_FR", "es_ES", "it_IT", "pt_BR"] as const) {
+      expect(snapshotLang(snapshotWithExt({ format: TUXEMON_EXT_SAVE_FORMAT, state: {}, lang }))).toBe(lang);
+    }
   });
 
   test("defaults to en_US for saves written before the language was recorded", () => {
@@ -23,5 +24,13 @@ describe("snapshotLang", () => {
 
   test("legacy wrapped saves default to en_US", () => {
     expect(snapshotLang(snapshotWithExt({ format: "pocket-tuxemon/save-ext/v1", ext: {}, chars: {} }))).toBe("en_US");
+  });
+
+  test("rejects an explicit unsupported language instead of treating it as English", () => {
+    expect(() => snapshotLang(snapshotWithExt({
+      format: TUXEMON_EXT_SAVE_FORMAT,
+      state: {},
+      lang: "xx_XX",
+    }))).toThrow("save content language is unsupported");
   });
 });

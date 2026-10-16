@@ -264,7 +264,14 @@ export interface TuxemonExtensionRuntimeOptions {
 
 /** The game's content languages. Kept in the battle layer so the save codec
  *  and the runtime share one type without a UI dependency. */
-export type GameLang = "en_US" | "zh_CN";
+export type GameLang =
+  | "en_US"
+  | "zh_CN"
+  | "de_DE"
+  | "fr_FR"
+  | "es_ES"
+  | "it_IT"
+  | "pt_BR";
 
 export interface BattleDbProvider {
   load(): BattleDb;

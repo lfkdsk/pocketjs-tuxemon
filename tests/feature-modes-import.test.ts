@@ -9,13 +9,13 @@ import {
   loadTitleMinigame,
   parseNuPhoneMap,
   parseTitleBattle,
-  type FeatureLocale,
+  type FeatureCatalogs,
 } from "../importer/feature-modes.ts";
 import { createTextCatalog, type TextCatalog } from "../importer/l10n.ts";
 import { buildProject, G6_IMPORT_OPTIONS } from "../importer/project.ts";
 import { readYamlEvents, TUXEMON_SRC } from "../importer/source.ts";
 
-function catalogs(): Record<FeatureLocale, TextCatalog> {
+function catalogs(): FeatureCatalogs {
   return {
     en_US: createTextCatalog("en_US"),
     zh_CN: createTextCatalog("zh_CN"),

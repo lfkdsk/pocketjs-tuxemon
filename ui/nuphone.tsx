@@ -7,7 +7,7 @@ import { Image, Text, View } from "@pocketjs/framework/components";
 import { createGesture } from "@pocketjs/framework/gesture";
 import { getOps, hostViewport } from "@pocketjs/framework/host";
 import { onFrame } from "@pocketjs/framework/lifecycle";
-import type { NuPhoneMapPoint } from "./feature-modes-data.ts";
+import { featureText, type NuPhoneMapPoint } from "./feature-modes-data.ts";
 import type { GameViewOverlayConfig } from "../vendor/pocket-rpgkit/src/ui/demo-contract.ts";
 import { TUXEMON_UI_THEME } from "./tuxemon-theme.ts";
 import {
@@ -114,7 +114,7 @@ export function createNuPhoneOverlay(options: NuPhoneOptions): GameViewOverlayCo
 const NuPhoneView: Component<{ runtime: NuPhoneRuntime }> = (props) => {
   const runtime = props.runtime;
   const data = runtime.data;
-  const t = () => STRINGS[runtime.lang];
+  const t = () => STRINGS[runtime.lang] ?? STRINGS.en_US;
   const open = () => runtime.openSignal();
   const state = () => runtime.state();
   const [viewport, setViewport] = createSignal({ w: NUPHONE_BASE_W, h: NUPHONE_BASE_H });
@@ -127,7 +127,7 @@ const NuPhoneView: Component<{ runtime: NuPhoneRuntime }> = (props) => {
   const disabledRect = { x: -1, y: -1, w: 0, h: 0 } as const;
   const selected = createMemo(() => data.points.find((point) => point.key === state().cursor) ?? data.points[0]!);
   const selectedKnown = () => state().known.includes(selected().key);
-  const selectedLabel = () => selectedKnown() ? selected().label[runtime.lang] : "???";
+  const selectedLabel = () => selectedKnown() ? featureText(selected().label, runtime.lang) : "???";
   const currentPoint = createMemo(() => data.points.find((point) => point.key === state().currentLocation));
   const knownCount = () => state().known.length;
 
@@ -207,7 +207,7 @@ const NuPhoneView: Component<{ runtime: NuPhoneRuntime }> = (props) => {
             />
             <View class="absolute" style={{ posType: 1, insetL: 20, insetT: 18, width: 4, height: 28, bgColor: THEME.accent }} />
             <Text class="text-lg" style={{ posType: 1, insetL: 32, insetT: 16, width: 230, height: 26, lineHeight: 22, textColor: THEME.ink }} debugName="tux-nuphone-title">
-              {data.entry.phoneLabel[runtime.lang]}
+              {featureText(data.entry.phoneLabel, runtime.lang)}
             </Text>
             <Text class="text-xs" style={{ posType: 1, insetL: 30, insetT: 178, width: 200, height: 18, lineHeight: 14, textColor: THEME.dim }}>
               {t().installed}
@@ -227,7 +227,7 @@ const NuPhoneView: Component<{ runtime: NuPhoneRuntime }> = (props) => {
               >
                 <Image src={data.art.appIcon.texture} style={{ width: 56, height: 56, marginT: 10 }} />
                 <Text class="text-sm" style={{ width: 108, height: 22, lineHeight: 18, textColor: THEME.ink, textAlign: 1 }}>
-                  {data.entry.appLabel[runtime.lang]}
+                  {featureText(data.entry.appLabel, runtime.lang)}
                 </Text>
               </View>
               <Text class="text-xs" style={{ posType: 1, insetL: 164, insetT: 62, width: 270, height: 48, lineHeight: 16, textColor: THEME.dim }} debugName="tux-nuphone-app-help">
@@ -300,7 +300,7 @@ const NuPhoneView: Component<{ runtime: NuPhoneRuntime }> = (props) => {
               debugName="tux-nuphone-cursor"
             />
             <Text class="text-lg" style={{ posType: 1, insetL: 18, insetT: 10, width: 170, height: 24, lineHeight: 21, textColor: THEME.accent }} debugName="tux-nuphone-map-title">
-              {data.entry.appLabel[runtime.lang]}
+              {featureText(data.entry.appLabel, runtime.lang)}
             </Text>
             <View class="absolute" style={{ posType: 1, insetL: 340, insetT: 190, width: 122, height: 48, borderWidth: 1, borderColor: THEME.border, bgColor: "#071923" }} />
             <Text class="text-xs" style={{ posType: 1, insetL: 348, insetT: 196, width: 106, height: 16, lineHeight: 14, textColor: THEME.dim }}>
@@ -322,7 +322,7 @@ const NuPhoneView: Component<{ runtime: NuPhoneRuntime }> = (props) => {
           <Show when={state().screen === "message"}>
             <View class="absolute" style={{ posType: 1, insetL: 70, insetT: 70, width: 340, height: 132, borderWidth: 2, borderColor: THEME.rim, bgColor: THEME.paper }} debugName="tux-nuphone-message">
               <Text class="text-sm" style={{ posType: 1, insetL: 22, insetT: 30, width: 296, height: 42, lineHeight: 18, textColor: THEME.ink, textAlign: 1 }} debugName="tux-nuphone-message-text">
-                {data.entry.noTrackers[runtime.lang]}
+                {featureText(data.entry.noTrackers, runtime.lang)}
               </Text>
               <View class="absolute flex-row justify-center items-center" style={{ posType: 1, insetL: 120, insetT: 90, width: 100, height: 28, borderWidth: 1, borderColor: THEME.accent }}>
                 <Text class="text-sm" style={{ height: 18, lineHeight: 17, textColor: THEME.accent }}>{t().ok}</Text>

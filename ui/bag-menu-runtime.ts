@@ -24,7 +24,7 @@ import type {
   GameViewDemoRuntime,
   GameViewSessionHost,
 } from "../vendor/pocket-rpgkit/src/ui/demo-contract.ts";
-import type { StartMenuData } from "./feature-modes-data.ts";
+import { featureText, type LocalizedFeatureText, type StartMenuData } from "./feature-modes-data.ts";
 import type { Lang } from "./language.ts";
 
 export type BagMenuScreen = "items" | "confirm" | "party" | "moves" | "message";
@@ -145,8 +145,8 @@ declare global {
   var __pocketBagMenu: PocketBagMenuHook | undefined;
 }
 
-function localized(value: { en_US: string; zh_CN: string }, lang: Lang): string {
-  return value[lang];
+function localized(value: LocalizedFeatureText, lang: Lang): string {
+  return featureText(value, lang);
 }
 
 export function bagMenuLabels(data: StartMenuData, lang: Lang): BagMenuLabels {

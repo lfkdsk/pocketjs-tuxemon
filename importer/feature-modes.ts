@@ -5,7 +5,7 @@
 
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { createTextCatalog, type TextCatalog } from "./l10n.ts";
+import { createTextCatalog, type ImportLang, type TextCatalog } from "./l10n.ts";
 import { decodePng } from "./png.ts";
 import { readYamlEvents, type Cond, type Rule, type TuxEvent } from "./source.ts";
 import { randomMonsterCandidatePools } from "./random-monster.ts";
@@ -64,11 +64,23 @@ const MINIGAME_DIFFICULTIES = [
   { id: "hard", choices: 5, points: 3, clue: "description" },
 ] as const satisfies readonly Omit<TitleMinigameDifficulty, "label">[];
 
-function featureCatalogs(): Record<FeatureLocale, TextCatalog> {
-  return {
+export type FeatureCatalogs = Readonly<Partial<Record<FeatureLocale, TextCatalog>> & {
+  en_US: TextCatalog;
+  zh_CN: TextCatalog;
+}>;
+
+export function createFeatureCatalogs(extraLang?: ImportLang): FeatureCatalogs {
+  const catalogs: Partial<Record<FeatureLocale, TextCatalog>> & {
+    en_US: TextCatalog;
+    zh_CN: TextCatalog;
+  } = {
     en_US: createTextCatalog("en_US"),
     zh_CN: createTextCatalog("zh_CN"),
   };
+  if (extraLang && extraLang !== "en_US" && extraLang !== "zh_CN") {
+    catalogs[extraLang] = createTextCatalog(extraLang);
+  }
+  return catalogs;
 }
 
 function record(value: unknown, at: string): Record<string, unknown> {
@@ -122,17 +134,22 @@ function sameMembers(actual: readonly string[], expected: readonly string[], at:
   }
 }
 
-function translate(catalogs: Readonly<Record<FeatureLocale, TextCatalog>>, key: string): LocalizedFeatureText {
+function translate(catalogs: FeatureCatalogs, key: string): LocalizedFeatureText {
   const en_US = catalogs.en_US.get(key);
   const zh_CN = catalogs.zh_CN.get(key);
   if (!en_US || !zh_CN) throw new Error(`feature modes: missing bilingual text '${key}'`);
-  return { en_US, zh_CN };
+  const translated: LocalizedFeatureText = { en_US, zh_CN };
+  for (const [lang, catalog] of Object.entries(catalogs) as Array<[FeatureLocale, TextCatalog]>) {
+    if (lang === "en_US" || lang === "zh_CN") continue;
+    translated[lang] = catalog.get(key) ?? en_US;
+  }
+  return translated;
 }
 
 /** Import all copy used by the game-owned START and expanded title menus
  * from Tuxemon's catalogs. The UI owns layout and state, never translations. */
 export function loadStartMenu(
-  catalogs: Readonly<Record<FeatureLocale, TextCatalog>> = featureCatalogs(),
+  catalogs: FeatureCatalogs = createFeatureCatalogs(),
 ): StartMenuData {
   const t = (key: string) => translate(catalogs, key);
   return {
@@ -212,7 +229,7 @@ export function loadStartMenu(
 /** Import every authored ControlState label used by the game-owned Options
  * overlay. Missing translations fail the import instead of leaking msgids. */
 export function loadOptions(
-  catalogs: Readonly<Record<FeatureLocale, TextCatalog>> = featureCatalogs(),
+  catalogs: FeatureCatalogs = createFeatureCatalogs(),
 ): OptionsData {
   const t = (key: string) => translate(catalogs, key);
   return {
@@ -267,7 +284,7 @@ function fnv1a32(parts: readonly string[]): number {
  * discovery status and form level do not participate. */
 export function loadTitleMinigame(
   sourceRoot: string,
-  catalogs: Readonly<Record<FeatureLocale, TextCatalog>> = featureCatalogs(),
+  catalogs: FeatureCatalogs = createFeatureCatalogs(),
 ): TitleMinigameData {
   const monsterRoot = join(sourceRoot, "mods/tuxemon/db/monster");
   const monsters = readdirSync(monsterRoot)
@@ -350,7 +367,7 @@ function itemMenu(value: unknown, slug: string, expected: {
  * document in memory and prove that malformed authored data fails closed. */
 export function parseNuPhoneMap(
   value: unknown,
-  catalogs: Readonly<Record<FeatureLocale, TextCatalog>>,
+  catalogs: FeatureCatalogs,
 ): Omit<NuPhoneMapImport, "entry" | "art"> {
   const doc = record(value, "nu_phone_map.yaml");
   nonEmptyString(doc.map_path, "nu_phone_map.yaml.map_path");
@@ -468,7 +485,7 @@ function usage(events: readonly TuxEvent[]): AuthoredScriptUsage {
  * recipes from its random_monster commands. */
 export function parseTitleBattle(
   events: readonly TuxEvent[],
-  catalogs: Readonly<Record<FeatureLocale, TextCatalog>>,
+  catalogs: FeatureCatalogs,
   sourceRoot: string,
 ): TitleBattleImport {
   if (events.some((event) => event.source !== "battle_menu.yaml" || event.kind !== "event")) {
@@ -571,7 +588,7 @@ export function parseTitleBattle(
  * materialization. */
 export function loadTitleBattle(
   sourceRoot: string,
-  catalogs: Readonly<Record<FeatureLocale, TextCatalog>> = featureCatalogs(),
+  catalogs: FeatureCatalogs = createFeatureCatalogs(),
 ): TitleBattleImport {
   const battlePath = join(sourceRoot, "mods/tuxemon/maps/battle_menu.yaml");
   return parseTitleBattle(readYamlEvents(battlePath, "loaded"), catalogs, sourceRoot);
@@ -581,8 +598,10 @@ export function loadTitleBattle(
 export function loadFeatureModes(
   sourceRoot: string,
   surfaceLabels: Readonly<Record<string, Readonly<Record<string, readonly number[]>>>> = {},
+  extraLang?: ImportLang,
+  providedCatalogs?: FeatureCatalogs,
 ): FeatureModesImport {
-  const catalogs = featureCatalogs();
+  const catalogs = providedCatalogs ?? createFeatureCatalogs(extraLang);
   const mapPath = join(sourceRoot, "mods/nu_phone_map.yaml");
   const rawMap = Bun.YAML.parse(readFileSync(mapPath, "utf8")) as unknown;
   const rawMapRecord = record(rawMap, "nu_phone_map.yaml");

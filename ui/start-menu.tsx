@@ -18,7 +18,7 @@ import {
   LazyImage,
   type TileImageSource,
 } from "../vendor/pocket-rpgkit/src/ui/battle/index.ts";
-import type { LocalizedFeatureText, StartMenuData } from "./feature-modes-data.ts";
+import { featureText, type LocalizedFeatureText, type StartMenuData } from "./feature-modes-data.ts";
 import { imageSource, title } from "./journal-scene.tsx";
 import type { Lang } from "./language.ts";
 import {
@@ -101,7 +101,7 @@ const RELEASE_RECT: StartMenuRect = { x: 70, y: 78, w: 340, h: 120 };
 const BACK_RECT: StartMenuRect = { x: 394, y: 5, w: 76, h: 20 };
 const SWIPE_PX = 28;
 
-const pick = (text: LocalizedFeatureText, lang: Lang): string => text[lang];
+const pick = (text: LocalizedFeatureText, lang: Lang): string => featureText(text, lang);
 
 export function startMenuLabels(
   data: Readonly<StartMenuData>,
@@ -415,7 +415,7 @@ function PartyList(props: {
   const selectedMonster = () => state().party[menu().cursor];
   const actionLabel = (action: PartyActionId) => props.runtime.labels.partyActions[action];
   const sortLabel = (sort: PartySortId) => props.runtime.labels.partySorts[sort];
-  const t = () => EXTRA[props.lang];
+  const t = () => EXTRA[props.lang] ?? EXTRA.en_US;
   return (
     <>
       <Text class="text-lg" style={{ posType: 1, insetL: 10, insetT: 4, width: 280, height: 23, lineHeight: 21, textColor: THEME.accent }} debugName="start-menu-party-title">
@@ -542,7 +542,7 @@ function DetailPage(props: {
   const monster = () => state().party[menu().cursor];
   const view = () => props.runtime.selectedMonster();
   const db = () => monster() ? props.catalog.monster(monster()!.slug) : undefined;
-  const t = () => EXTRA[props.lang];
+  const t = () => EXTRA[props.lang] ?? EXTRA.en_US;
   const label = (value: LocalizedFeatureText) => pick(value, props.lang);
   const types = () => (monster()?.types ?? db()?.types ?? []).map(title).join(" / ");
   const experience = () => monster()
@@ -584,7 +584,7 @@ function MovesPage(props: {
   const state = () => props.runtime.state();
   const menu = () => state().partyMenu;
   const monster = () => state().party[menu().cursor];
-  const t = () => EXTRA[props.lang];
+  const t = () => EXTRA[props.lang] ?? EXTRA.en_US;
   const label = (value: LocalizedFeatureText) => pick(value, props.lang);
   return (
     <Panel theme={THEME} style={{ posType: 1, insetL: DETAIL_RECT.x, insetT: DETAIL_RECT.y, width: DETAIL_RECT.w, height: DETAIL_RECT.h }} debugName="start-menu-moves-panel">
@@ -793,7 +793,7 @@ export const StartMenuView: Component<{
           debugName="start-menu-canvas"
         >
           <Show when={state().screen === "root"}>
-            <RootPage runtime={props.runtime} heading={EXTRA[props.lang].menu} />
+            <RootPage runtime={props.runtime} heading={(EXTRA[props.lang] ?? EXTRA.en_US).menu} />
           </Show>
           <Show when={state().screen === "party" && !detailPhase() && !movesPhase()}>
             <PartyList runtime={props.runtime} catalog={props.catalog} cache={imageCache} active={open()} data={props.data} lang={props.lang} />
@@ -815,7 +815,7 @@ export const StartMenuView: Component<{
             </View>
           </Show>
           <Show when={detailPhase() || movesPhase()}>
-            <Text class="text-xs" style={{ posType: 1, insetL: 12, insetT: 251, width: 456, height: 16, lineHeight: 14, textColor: THEME.dim }} debugName="start-menu-detail-controls">{EXTRA[props.lang].controls}</Text>
+            <Text class="text-xs" style={{ posType: 1, insetL: 12, insetT: 251, width: 456, height: 16, lineHeight: 14, textColor: THEME.dim }} debugName="start-menu-detail-controls">{(EXTRA[props.lang] ?? EXTRA.en_US).controls}</Text>
           </Show>
           <Show when={state().screen === "party" && state().partyMenu.phase === "releaseConfirm"}>
             <ReleaseDialog runtime={props.runtime} data={props.data} lang={props.lang} />

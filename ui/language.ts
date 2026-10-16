@@ -20,13 +20,49 @@ export type Lang = GameLang;
 export const LANG_STORAGE_KEY = "pocket-tuxemon/lang";
 export const LANG_FS_ENTRY = "lang.json";
 
-export function langCode(lang: Lang): "en" | "zh" {
-  return lang === "zh_CN" ? "zh" : "en";
+export interface LanguageInfo {
+  readonly lang: Lang;
+  /** Stable URL/storage code written by this build. */
+  readonly code: string;
+  readonly label: string;
+  readonly sub: string;
 }
 
-function normalizeLang(value: string | null | undefined): Lang | undefined {
-  if (value === "zh" || value === "zh_CN") return "zh_CN";
-  if (value === "en" || value === "en_US") return "en_US";
+export const LANGUAGES: readonly LanguageInfo[] = [
+  { lang: "en_US", code: "en", label: "English", sub: "English" },
+  { lang: "zh_CN", code: "zh", label: "中文", sub: "简体中文" },
+  { lang: "de_DE", code: "de", label: "Deutsch", sub: "Deutsch" },
+  { lang: "fr_FR", code: "fr", label: "Français", sub: "Français" },
+  { lang: "es_ES", code: "es", label: "Español", sub: "Español" },
+  { lang: "it_IT", code: "it", label: "Italiano", sub: "Italiano" },
+  { lang: "pt_BR", code: "pt-BR", label: "Português", sub: "Português (Brasil)" },
+] as const;
+
+const LANGUAGE_BY_LANG = new Map(LANGUAGES.map((entry) => [entry.lang, entry]));
+
+/** True only for the stable locale ids stored in saves and generated data. */
+export function isLang(value: unknown): value is Lang {
+  return typeof value === "string" && LANGUAGE_BY_LANG.has(value as Lang);
+}
+
+export function langCode(lang: Lang): string {
+  return LANGUAGE_BY_LANG.get(lang)!.code;
+}
+
+export function languageLabel(lang: Lang): string {
+  return LANGUAGE_BY_LANG.get(lang)!.label;
+}
+
+export function normalizeLang(value: string | null | undefined): Lang | undefined {
+  const normalized = value?.trim().replaceAll("_", "-").toLowerCase();
+  if (!normalized) return undefined;
+  if (normalized === "zh" || normalized === "zh-cn" || normalized === "zh-hans") return "zh_CN";
+  if (normalized === "en" || normalized.startsWith("en-")) return "en_US";
+  if (normalized === "de" || normalized.startsWith("de-")) return "de_DE";
+  if (normalized === "fr" || normalized.startsWith("fr-")) return "fr_FR";
+  if (normalized === "es" || normalized.startsWith("es-")) return "es_ES";
+  if (normalized === "it" || normalized.startsWith("it-")) return "it_IT";
+  if (normalized === "pt" || normalized.startsWith("pt-")) return "pt_BR";
   return undefined;
 }
 
@@ -47,6 +83,24 @@ function storedLang(): Lang | undefined {
   } catch {
     return undefined;
   }
+}
+
+function browserLang(): Lang | undefined {
+  try {
+    const navigator = (globalThis as {
+      navigator?: { languages?: readonly string[]; language?: string };
+    }).navigator;
+    const candidates = navigator?.languages?.length
+      ? navigator.languages
+      : navigator?.language ? [navigator.language] : [];
+    for (const candidate of candidates) {
+      const lang = normalizeLang(candidate);
+      if (lang) return lang;
+    }
+  } catch {
+    // Sandboxed and non-browser hosts may expose a throwing navigator proxy.
+  }
+  return undefined;
 }
 
 /** Desktop and other fs-mounted targets: lang.json in data.fs. */
@@ -74,7 +128,7 @@ export function detectLang(): Lang {
     (globalThis as { __pocketTuxemonLang?: string }).__pocketTuxemonLang,
   );
   if (forced) return forced;
-  return urlLang() ?? storedLang() ?? fsLang() ?? "en_US";
+  return urlLang() ?? storedLang() ?? fsLang() ?? browserLang() ?? "en_US";
 }
 
 function reachableStorage(): { setItem(k: string, v: string): void } | null {

@@ -3,11 +3,32 @@
 // type imports, and build-only upstream image paths must never be considered
 // application texture literals.
 
-export type FeatureLocale = "en_US" | "zh_CN";
+export type FeatureLocale =
+  | "en_US"
+  | "zh_CN"
+  | "de_DE"
+  | "fr_FR"
+  | "es_ES"
+  | "it_IT"
+  | "pt_BR";
 
 export interface LocalizedFeatureText {
   en_US: string;
   zh_CN: string;
+  de_DE?: string;
+  fr_FR?: string;
+  es_ES?: string;
+  it_IT?: string;
+  pt_BR?: string;
+}
+
+/** Feature documents always carry English, while a locale-specific startup
+ * document additionally carries its selected translation. */
+export function featureText(
+  value: Readonly<LocalizedFeatureText>,
+  lang: FeatureLocale,
+): string {
+  return value[lang] ?? value.en_US;
 }
 
 export interface FeatureImage {

@@ -7,6 +7,7 @@ import { createGesture } from "@pocketjs/framework/gesture";
 import { getOps, hostViewport } from "@pocketjs/framework/host";
 import { onFrame } from "@pocketjs/framework/lifecycle";
 import type { BattleImageRef } from "../importer/battle-schema.ts";
+import { featureText } from "./feature-modes-data.ts";
 import {
   createBattleImageCache,
   LazyImage,
@@ -155,11 +156,11 @@ export function createTitleBattleOverlay(options: TitleBattleOptions): SessionOw
 
 const TitleBattleView: Component<{ runtime: TitleBattleRuntime }> = (props) => {
   const runtime = props.runtime;
-  const t = () => STRINGS[runtime.lang];
+  const t = () => STRINGS[runtime.lang] ?? STRINGS.en_US;
   const state = () => runtime.state();
   const titleRows = () => runtime.titleRows();
   const titleRects = createMemo(() => titleMenuRowRects(titleRows().length));
-  const titleRowLabel = (id: TitleMenuRowId): string => runtime.menuText[id][runtime.lang];
+  const titleRowLabel = (id: TitleMenuRowId): string => featureText(runtime.menuText[id], runtime.lang);
   const minigame = () => state().minigame;
   const minigameDifficulty = () => {
     const current = minigame();
@@ -331,7 +332,7 @@ const TitleBattleView: Component<{ runtime: TitleBattleRuntime }> = (props) => {
           <Show when={state().screen === "quit"}>
             <View class="absolute" style={{ posType: 1, insetL: 87, insetT: 73, width: 306, height: 126, borderWidth: 2, borderColor: TUXEMON_UI_THEME.rim, bgColor: "#071923ed" }} />
             <Text class="text-lg" style={{ posType: 1, insetL: 105, insetT: 95, width: 270, height: 31, lineHeight: 25, textAlign: 1, textColor: TUXEMON_UI_THEME.accent }} debugName="tux-title-quit-heading">
-              {runtime.menuText.exit[runtime.lang]}
+              {featureText(runtime.menuText.exit, runtime.lang)}
             </Text>
             <Text class="text-sm" style={{ posType: 1, insetL: 105, insetT: 143, width: 270, height: 25, lineHeight: 18, textAlign: 1, textColor: TUXEMON_UI_THEME.ink }} debugName="tux-title-quit-message">
               {t().quitMessage}
@@ -341,7 +342,7 @@ const TitleBattleView: Component<{ runtime: TitleBattleRuntime }> = (props) => {
           <Show when={state().screen === "difficulty"}>
             <View class="absolute" style={{ posType: 1, insetL: 111, insetT: 31, width: 258, height: 222, borderWidth: 2, borderColor: TUXEMON_UI_THEME.rim, bgColor: "#071923" }} />
             <Text class="text-sm" style={{ posType: 1, insetL: 125, insetT: 48, width: 230, height: 24, lineHeight: 19, textAlign: 1, textColor: TUXEMON_UI_THEME.accent }} debugName="tux-title-difficulty-prompt">
-              {runtime.data.difficultyPrompt[runtime.lang]}
+              {featureText(runtime.data.difficultyPrompt, runtime.lang)}
             </Text>
             <For each={runtime.data.difficulties}>{(difficulty, index) => {
               const rect = DIFFICULTY_ROWS[index()]!;
@@ -362,7 +363,7 @@ const TitleBattleView: Component<{ runtime: TitleBattleRuntime }> = (props) => {
                   debugName={`tux-title-difficulty-${difficulty.id}`}
                 >
                   <Text class="text-sm" style={{ marginL: 12, width: 124, height: 19, lineHeight: 17, textColor: TUXEMON_UI_THEME.ink }}>
-                    {difficulty.label[runtime.lang]}
+                    {featureText(difficulty.label, runtime.lang)}
                   </Text>
                   <Text class="text-xs" style={{ width: 72, height: 17, lineHeight: 14, textAlign: 2, textColor: TUXEMON_UI_THEME.dim }}>
                     {`${difficulty.partySize}v${difficulty.partySize}  Lv.${difficulty.level}`}
@@ -378,7 +379,7 @@ const TitleBattleView: Component<{ runtime: TitleBattleRuntime }> = (props) => {
           <Show when={state().screen === "minigameDifficulty"}>
             <View class="absolute" style={{ posType: 1, insetL: 111, insetT: 46, width: 258, height: 194, borderWidth: 2, borderColor: TUXEMON_UI_THEME.rim, bgColor: "#071923" }} />
             <Text class="text-sm" style={{ posType: 1, insetL: 125, insetT: 62, width: 230, height: 24, lineHeight: 19, textAlign: 1, textColor: TUXEMON_UI_THEME.accent }} debugName="tux-minigame-difficulty-prompt">
-              {runtime.minigameData.difficultyPrompt[runtime.lang]}
+              {featureText(runtime.minigameData.difficultyPrompt, runtime.lang)}
             </Text>
             <For each={runtime.minigameData.difficulties}>{(difficulty, index) => {
               const rect = MINIGAME_DIFFICULTY_ROWS[index()]!;
@@ -399,7 +400,7 @@ const TitleBattleView: Component<{ runtime: TitleBattleRuntime }> = (props) => {
                   debugName={`tux-minigame-difficulty-${difficulty.id}`}
                 >
                   <Text class="text-sm" style={{ marginL: 12, width: 125, height: 19, lineHeight: 17, textColor: TUXEMON_UI_THEME.ink }}>
-                    {difficulty.label[runtime.lang]}
+                    {featureText(difficulty.label, runtime.lang)}
                   </Text>
                   <Text class="text-xs" style={{ width: 66, height: 17, lineHeight: 14, textAlign: 2, textColor: TUXEMON_UI_THEME.dim }}>
                     {`+${difficulty.points}`}
@@ -414,7 +415,7 @@ const TitleBattleView: Component<{ runtime: TitleBattleRuntime }> = (props) => {
 
           <Show when={isMinigameQuestion(state().screen) && minigame() !== null}>
             <Text class="text-lg" style={{ posType: 1, insetL: 20, insetT: 8, width: 440, height: 25, lineHeight: 22, textAlign: 1, textColor: TUXEMON_UI_THEME.accent }} debugName="tux-minigame-question">
-              {runtime.minigameData.question[runtime.lang]}
+              {featureText(runtime.minigameData.question, runtime.lang)}
             </Text>
             <Show
               when={minigameDifficulty()?.clue === "image" ? currentMonster() : undefined}
@@ -485,24 +486,24 @@ const TitleBattleView: Component<{ runtime: TitleBattleRuntime }> = (props) => {
             }}</For>
 
             <Text class="text-sm" style={{ posType: 1, insetL: 20, insetT: 217, width: 145, height: 20, lineHeight: 17, textColor: TUXEMON_UI_THEME.ink }} debugName="tux-minigame-score">
-              {`${runtime.minigameData.scoreLabel[runtime.lang]}: ${minigame()!.score}`}
+              {`${featureText(runtime.minigameData.scoreLabel, runtime.lang)}: ${minigame()!.score}`}
             </Text>
             <Text class="text-sm" style={{ posType: 1, insetL: 171, insetT: 217, width: 145, height: 20, lineHeight: 17, textColor: TUXEMON_UI_THEME.ink }} debugName="tux-minigame-streak">
-              {`${runtime.minigameData.streakLabel[runtime.lang]}: ${minigame()!.streak}`}
+              {`${featureText(runtime.minigameData.streakLabel, runtime.lang)}: ${minigame()!.streak}`}
             </Text>
             <Show when={minigame()!.streak >= 10}>
               <Text class="text-xs" style={{ posType: 1, insetL: 20, insetT: 242, width: 340, height: 17, lineHeight: 14, textColor: "#ffd75a" }} debugName="tux-minigame-streak-bonus">
-                {runtime.minigameData.streakBonus[runtime.lang]}
+                {featureText(runtime.minigameData.streakBonus, runtime.lang)}
               </Text>
             </Show>
             <View class="absolute flex-row justify-center items-center" style={{ posType: 1, insetL: MINIGAME_EXIT_RECT.x, insetT: MINIGAME_EXIT_RECT.y, width: MINIGAME_EXIT_RECT.w, height: MINIGAME_EXIT_RECT.h, borderWidth: 1, borderColor: TUXEMON_UI_THEME.border, bgColor: "#0a2633" }} debugName="tux-minigame-exit">
-              <Text class="text-xs" style={{ width: 74, height: 16, lineHeight: 14, textAlign: 1, textColor: TUXEMON_UI_THEME.dim }}>{`× ${runtime.minigameData.exit[runtime.lang]}`}</Text>
+              <Text class="text-xs" style={{ width: 74, height: 16, lineHeight: 14, textAlign: 1, textColor: TUXEMON_UI_THEME.dim }}>{`× ${featureText(runtime.minigameData.exit, runtime.lang)}`}</Text>
             </View>
 
             <Show when={state().screen === "minigameWrong"}>
               <View class="absolute" style={{ posType: 1, insetL: 117, insetT: 83, width: 246, height: 119, borderWidth: 2, borderColor: TUXEMON_UI_THEME.rim, bgColor: "#071923f7" }} debugName="tux-minigame-wrong-panel">
                 <Text class="text-lg" style={{ posType: 1, insetL: 18, insetT: 20, width: 210, height: 30, lineHeight: 24, textAlign: 1, textColor: "#ffb17a" }} debugName="tux-minigame-wrong">
-                  {runtime.minigameData.wrong[runtime.lang]}
+                  {featureText(runtime.minigameData.wrong, runtime.lang)}
                 </Text>
                 <View class="absolute flex-row justify-center items-center" style={{ posType: 1, insetL: 28, insetT: 81, width: 190, height: 28, borderWidth: 1, borderColor: TUXEMON_UI_THEME.accent, bgColor: "#145064" }}>
                   <Text class="text-xs" style={{ width: 170, height: 16, lineHeight: 14, textAlign: 1, textColor: "#ffffff" }}>○</Text>

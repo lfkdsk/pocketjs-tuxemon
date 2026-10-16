@@ -64,7 +64,7 @@ export function tuxLinkBattleViewModel(
   return {
     own: observation.own.party.filter((monster) => monster.active).map((monster) => ({
       key: `self:${monster.party}`,
-      name: monster.species.displayName[lang],
+      name: monster.species.displayName[lang as "en_US" | "zh_CN"] ?? monster.species.displayName.en_US,
       level: monster.level,
       hpPercent: monster.hp.percent,
       status: monster.status,
@@ -72,7 +72,7 @@ export function tuxLinkBattleViewModel(
     opponent: observation.opponent.active.map((monster) => ({
       // Never use the species slug: two active monsters may be the same species.
       key: `opponent:${monster.publicId}`,
-      name: monster.species.displayName[lang],
+      name: monster.species.displayName[lang as "en_US" | "zh_CN"] ?? monster.species.displayName.en_US,
       level: monster.level,
       hpPercent: monster.hpPercent,
       status: monster.status,

@@ -280,10 +280,19 @@ export function importLang(): ImportLang {
 
 /** zh_CN builds only: keys that fell back to en_US, and keys absent from
  *  every catalog (sorted). */
-export function importL10nGaps(): { fallbackKeys: string[]; missingKeys: string[] } {
+export function importL10nGaps(): {
+  fallbackKeys: string[];
+  invalidKeys: string[];
+  fuzzyKeys: string[];
+  missingKeys: string[];
+  usedKeys: string[];
+} {
   return {
     fallbackKeys: [...po.fallbackKeys].sort(),
+    invalidKeys: [...po.invalidKeys].filter((key) => po.usedKeys.has(key)).sort(),
+    fuzzyKeys: [...po.fuzzyKeys].filter((key) => po.usedKeys.has(key)).sort(),
     missingKeys: [...po.missingKeys].sort(),
+    usedKeys: [...po.usedKeys].sort(),
   };
 }
 
@@ -5719,11 +5728,14 @@ export interface ImportReport {
     maps: "mods/tuxemon/maps";
     locale: ImportLang;
   };
-  /** zh_CN builds only: catalog keys that fell back to en_US, and keys
-   *  absent from every catalog. */
+  /** Non-English builds: exact consumed keys, English fallbacks, invalid
+   *  placeholder translations and keys absent from every catalog. */
   l10n?: {
     fallbackKeys: string[];
+    invalidKeys: string[];
+    fuzzyKeys: string[];
     missingKeys: string[];
+    usedKeys: string[];
     missingKeyCategories: { key: string; category: MissingKeyCategory }[];
   };
   options?: ImportOptions;
@@ -6593,7 +6605,7 @@ export function buildProject(
     report: {
       format: "pocket-tuxemon/import-report/v1",
       source: { maps: "mods/tuxemon/maps", locale: activeLang },
-      ...(activeLang === "zh_CN" ? { l10n: l10nReportSection() } : {}),
+      ...(activeLang !== "en_US" ? { l10n: l10nReportSection() } : {}),
       ...(Object.values(options).some(Boolean) ? { options } : {}),
       maps: [...want],
       schemaErrors,
