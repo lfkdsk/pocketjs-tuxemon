@@ -216,7 +216,9 @@ After the browser reaches the first map, the **Offline play / 离线游玩** pan
 appears below the player. Choose one content language and press **Download or
 resume / 下载或继续**. The panel reports the complete package size and progress;
 you can pause it, and an interrupted download resumes from the chunks already
-verified in browser storage when the connection returns.
+verified in browser storage when the connection returns. If you change the
+language selector while a package is downloading, that verified download
+finishes first; the new selection becomes the language for the next download.
 
 Chrome shows **Install / 安装** when its install prompt is available. You can
 also install Pocket Tuxemon from the browser's app menu. Installation and the
