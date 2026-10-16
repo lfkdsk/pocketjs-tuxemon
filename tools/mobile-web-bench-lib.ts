@@ -1,5 +1,13 @@
 export type BenchVariant = "baseline" | "candidate";
 
+/** Collision-free Cotton Town corridor used by the sustained walking cell.
+ * Keep the destination paired with its actual PSP direction bit: RIGHT moves
+ * toward x=15 and LEFT returns toward x=10. */
+export const MOBILE_WEB_CITY_WALK_ENDPOINTS = [
+  { x: 15, y: 30, mask: 0x0020 },
+  { x: 10, y: 30, mask: 0x0080 },
+] as const;
+
 export interface Distribution {
   count: number;
   p50: number;

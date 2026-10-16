@@ -5,11 +5,19 @@ import {
   distribution,
   evaluateFrameGate,
   medianDistribution,
+  MOBILE_WEB_CITY_WALK_ENDPOINTS,
   quantile,
   splitProfileHotspots,
 } from "../tools/mobile-web-bench-lib.ts";
 
 describe("mobile Web frame benchmark statistics", () => {
+  test("walks right to x=15 and left to x=10 in the Cotton Town corridor", () => {
+    expect(MOBILE_WEB_CITY_WALK_ENDPOINTS).toEqual([
+      { x: 15, y: 30, mask: 0x0020 },
+      { x: 10, y: 30, mask: 0x0080 },
+    ]);
+  });
+
   test("uses interpolated percentiles and strict long-frame thresholds", () => {
     expect(quantile([40, 10, 30, 20], 0.5)).toBe(25);
     expect(distribution([16.7, 16.71, 33, 33.01])).toEqual({

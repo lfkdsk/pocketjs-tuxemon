@@ -39,6 +39,7 @@ import {
   evaluateFrameGate,
   median,
   medianDistribution,
+  MOBILE_WEB_CITY_WALK_ENDPOINTS,
   splitProfileHotspots,
   summarizeFrames,
   type BenchVariant,
@@ -176,10 +177,7 @@ const SCENARIOS: readonly Scenario[] = [
     async prepare(driver) {
       await driver.evaluate(`(() => {
         const p = globalThis.__pocketPlayer;
-        const endpoints = [
-          { x: 15, y: 30, mask: 0x0080 },
-          { x: 10, y: 30, mask: 0x0020 },
-        ];
+        const endpoints = ${JSON.stringify(MOBILE_WEB_CITY_WALK_ENDPOINTS)};
         let target = 0;
         p.keys.set("__mobile_web_walk", endpoints[target].mask);
         globalThis.__mobileWebScenarioTimer = setInterval(() => {
