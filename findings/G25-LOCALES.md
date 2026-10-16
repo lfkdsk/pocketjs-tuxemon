@@ -276,10 +276,11 @@ Every journey matrix command passed: GB6, J1 through J4, the complete German
 campaign, golden synchronization, defeat/recovery, lock and frozen-map
 checks, chapters, Chinese and English tape/demo checks, save/resume, neighbour
 preview coverage and built-bundle replay. All Web CI journeys passed with
-zero console or audio errors. `verify:web:chunks`, `verify:web:lang` and
-`verify:psp:save` passed; the save verifier covered slot round-trip, legacy
-raw JSON, autosave restart and visible read-only failure. The final default
-PSP release package also built successfully from the pinned upstream source.
+zero console or audio errors. `verify:web:chunks`, `verify:web:lang`, the
+rebased `verify:web:link` gate and `verify:psp:save` passed; the save verifier
+covered slot round-trip, legacy raw JSON, autosave restart and visible
+read-only failure. The final default PSP release package also built
+successfully from the pinned upstream source.
 
 ## Limits
 
