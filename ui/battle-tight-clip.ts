@@ -1,11 +1,4 @@
-import type { BattleAnimationPage } from "../importer/battle-schema.ts";
-
-export type BattleSpriteBounds = readonly [
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-];
+import type { BattleAnimationPage, BattleSpriteBounds } from "../importer/battle-schema.ts";
 
 export interface BattleTightClip {
   /** Tight clip position inside the original 128x128 battle slot. */
@@ -74,16 +67,20 @@ export function battleMonsterTightClip(
  */
 export function battleAnimationTightClip(
   page: Pick<BattleAnimationPage, "contentWidth" | "contentHeight" | "frameWidth" | "frameHeight"> | null | undefined,
+  bounds: BattleSpriteBounds | null | undefined,
   sourceX: number,
   sourceY: number,
   slotSize = 128,
 ): BattleTightClip {
   const contentWidth = (page?.contentWidth ?? 8) * 2;
   const contentHeight = (page?.contentHeight ?? 8) * 2;
-  const left = (slotSize - contentWidth) / 2;
-  const top = (slotSize - contentHeight) / 2;
-  const right = left + contentWidth;
-  const bottom = top + contentHeight;
+  const contentLeft = (slotSize - contentWidth) / 2;
+  const contentTop = (slotSize - contentHeight) / 2;
+  const visible = bounds ?? [0, 0, contentWidth / 2, contentHeight / 2];
+  const left = contentLeft + visible[0] * 2;
+  const top = contentTop + visible[1] * 2;
+  const right = left + visible[2] * 2;
+  const bottom = top + visible[3] * 2;
   // A few legacy atlases pack cells smaller than the presentation slot. The
   // old full clip consequently exposes neighbouring frames; retaining the
   // full axis preserves that shipped composition instead of silently fixing
@@ -99,7 +96,7 @@ export function battleAnimationTightClip(
     y,
     width: Math.max(0, clippedRight - x),
     height: Math.max(0, clippedBottom - y),
-    imageX: left - sourceX * 2 - x,
-    imageY: top - sourceY * 2 - y,
+    imageX: contentLeft - sourceX * 2 - x,
+    imageY: contentTop - sourceY * 2 - y,
   };
 }

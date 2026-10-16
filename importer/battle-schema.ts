@@ -43,6 +43,13 @@ export interface BattleImageRef {
   rect: [number, number, number, number];
 }
 
+export type BattleSpriteBounds = readonly [
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+];
+
 /** Mirrors upstream `StatModel` (`tuxemon/db.py`), defaults included. */
 export interface BattleStatModifier {
   value: number;

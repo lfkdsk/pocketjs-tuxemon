@@ -15,7 +15,7 @@ import { battleSceneLabels } from "./battle-scene-locale.ts";
 import { battleDisplayName } from "../battle/battle-names.ts";
 import { tuxemonRuntimeBattleState } from "../battle/runtime.ts";
 import type { BattleEvent, BattleMonster } from "../battle/types.ts";
-import type { BattleImageRef } from "../importer/battle-schema.ts";
+import type { BattleImageRef, BattleSpriteBounds } from "../importer/battle-schema.ts";
 import type { BattleSceneViewProps } from "../vendor/pocket-rpgkit/src/ui/GameView.tsx";
 import { formatUiText } from "../vendor/pocket-rpgkit/src/engine/ui-text.ts";
 import { slotMeasure } from "../vendor/pocket-rpgkit/src/ui/text-measure.ts";
@@ -41,11 +41,10 @@ import {
   battleViewportLayout,
   partyBallRect,
 } from "./battle-layout.ts";
-import { BATTLE_MONSTER_BOUNDS } from "./battle-assets.ts";
+import { BATTLE_ANIMATION_BOUNDS, BATTLE_MONSTER_BOUNDS } from "./battle-assets.ts";
 import {
   battleAnimationTightClip,
   battleMonsterTightClip,
-  type BattleSpriteBounds,
 } from "./battle-tight-clip.ts";
 
 type Runtime = ReturnType<typeof tuxemonRuntimeBattleState>;
@@ -525,8 +524,15 @@ export const TuxemonBattleScene: Component<BattleSceneViewProps> = (props) => {
   const animationPage = createMemo(() => animation().page ?? environment().partyIcons.icon_empty!);
   const animationRect = createMemo(() => runtime().battle.parties[0].some((monster) => monster.uid === animation().target)
     ? R.playerMonster : R.enemyMonster);
+  const animationBounds = createMemo(() => {
+    const page = animation().page;
+    if (!page) return undefined;
+    const local = Math.floor(animation().sourceY / page.frameHeight) * page.columns +
+      Math.floor(animation().sourceX / page.frameWidth);
+    return BATTLE_ANIMATION_BOUNDS[page.key]?.[local];
+  });
   const animationClip = createMemo(() => battleAnimationTightClip(
-    animation().page, animation().sourceX, animation().sourceY,
+    animation().page, animationBounds(), animation().sourceX, animation().sourceY,
   ));
 
   // Presentation visibility changes every few reference ticks. Keep these

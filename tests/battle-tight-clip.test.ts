@@ -2,14 +2,13 @@ import { readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { describe, expect, test } from "bun:test";
 
-import type { BattleDb, BattleImageRef } from "../importer/battle-schema.ts";
+import type { BattleDb, BattleImageRef, BattleSpriteBounds } from "../importer/battle-schema.ts";
 import { decodePng } from "../importer/png.ts";
 import { battlePreviewSourcePath } from "../tools/render-battle-preview.ts";
-import { BATTLE_MONSTER_BOUNDS } from "../ui/battle-assets.ts";
+import { BATTLE_ANIMATION_BOUNDS, BATTLE_MONSTER_BOUNDS } from "../ui/battle-assets.ts";
 import {
   battleAnimationTightClip,
   battleMonsterTightClip,
-  type BattleSpriteBounds,
   type BattleTightClip,
 } from "../ui/battle-tight-clip.ts";
 
@@ -125,29 +124,54 @@ describe("battle transparent-padding clips", () => {
     }
   });
 
-  test("real technique atlases crop safe padding while preserving legacy neighbour-frame exposure", () => {
-    const check = (slug: "entomb" | "sunburst", expectedArea: number) => {
-      const animation = DB.techniques[slug]!.animation!;
+  test("real technique atlases crop per-frame alpha while preserving legacy neighbour-frame exposure", () => {
+    const checkedPages = new Set<string>();
+    for (const technique of Object.values(DB.techniques)) {
+      const animation = technique.animation;
+      if (!animation) continue;
       expect(animation.pages.length).toBeGreaterThan(0);
       for (const page of animation.pages) {
+        if (checkedPages.has(page.key)) continue;
+        checkedPages.add(page.key);
         const atlas = image(page);
+        const bounds = BATTLE_ANIMATION_BOUNDS[page.key];
+        expect(bounds, page.key).toHaveLength(page.frames);
         for (let local = 0; local < page.frames; local++) {
           const sourceX = (local % page.columns) * page.frameWidth;
           const sourceY = Math.floor(local / page.columns) * page.frameHeight;
-          const clip = battleAnimationTightClip(page, sourceX, sourceY);
+          expect(bounds![local], `${page.key} frame ${local}`).toEqual(visibleBounds(
+            atlas.rgba, atlas.width, [sourceX, sourceY, page.frameWidth, page.frameHeight],
+          ));
+          const clip = battleAnimationTightClip(page, bounds![local], sourceX, sourceY);
           const left = (SLOT - page.contentWidth * 2) / 2;
           const top = (SLOT - page.contentHeight * 2) / 2;
           const oldFrame = renderScaledImage(atlas, left - sourceX * 2, top - sourceY * 2);
           const newFrame = renderScaledImage(atlas, clip.x + clip.imageX, clip.y + clip.imageY, clip);
-          expect(newFrame, `${slug} frame ${page.firstFrame + local}`).toEqual(oldFrame);
-          expect(clip.width * clip.height).toBe(expectedArea);
+          expect(newFrame, `${animation.slug} frame ${page.firstFrame + local}`).toEqual(oldFrame);
         }
       }
+    }
+    expect(checkedPages.size).toBeGreaterThan(100);
+
+    const areaRatio = (techniqueSlug: "bullet" | "sunburst"): number => {
+      const animation = DB.techniques[techniqueSlug]!.animation!;
+      let area = 0;
+      let oldArea = 0;
+      for (const page of animation.pages) for (let local = 0; local < page.frames; local++) {
+        const sourceX = (local % page.columns) * page.frameWidth;
+        const sourceY = Math.floor(local / page.columns) * page.frameHeight;
+        const clip = battleAnimationTightClip(
+          page, BATTLE_ANIMATION_BOUNDS[page.key]![local], sourceX, sourceY,
+        );
+        area += clip.width * clip.height;
+        oldArea += SLOT * SLOT;
+      }
+      return area / oldArea;
     };
-    // 54px of visible content in a 64px cell: horizontal padding is safe.
-    check("entomb", 108 * SLOT);
+    // Bullet's rolling-ball frames occupy only a small part of their cells.
+    expect(areaRatio("bullet")).toBeLessThanOrEqual(0.11);
     // 32px cells are smaller than the old slot on both axes, which exposes
     // neighbours. A performance-only change must keep that full composition.
-    check("sunburst", SLOT * SLOT);
+    expect(areaRatio("sunburst")).toBe(1);
   });
 });
