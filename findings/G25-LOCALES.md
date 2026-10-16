@@ -295,4 +295,91 @@ and runtime integration; they shortened independent review, while the main
 agent performed integration, isolated mutations, visual inspection, package
 measurements and every acceptance gate.
 
+## Fix 1: bounded CI memory and importer timing
+
+### Locale visual memory
+
+The locale visual suite does not launch Chrome. It memoizes ten captures
+(five locales at two viewports), and each capture boots five independent
+production worlds for title, dialogue, battle, Bag and Options. Those 50
+boots each read and evaluate the 120,652,736-byte production pak and the
+runtime bundle in a fresh Wasm world. The 50 retained RGBA frames themselves
+total only 65,280,000 bytes (62.3 MiB); repeated pak, bundle and world
+allocation is the dominant churn. The `no DevTools endpoint` and `Chrome
+exited (code 3)` lines in the combined log came from deliberate fake-launcher
+cases in `headless-chrome-cleanup.test.ts`, not leaked locale Chrome children.
+
+All measurements below ran the real CI file selection in a user systemd
+cgroup with `MemoryMax=14G`. Peak RSS includes descendants and was sampled
+from `MemoryCurrent`, then checked against the completed unit's peak. Before
+the final split, locale visuals passed alone, but both old rest ranges reached
+the cap and were killed with exit 137 even after locale visuals were removed
+from `rest (a-l)`:
+
+| Before split | Result | Peak bytes | Peak GiB |
+| --- | --- | ---: | ---: |
+| Locale production visuals alone | 5 pass | 9,058,820,096 | 8.437 |
+| Old rest (a-l), locale excluded | OOM, exit 137 | 15,032,291,328 | 14.000 |
+| Old rest (m-z) | OOM, exit 137 | 15,032,385,536 | 14.000 |
+
+CI now gives the 50-production-boot suite its own process and routes every
+remaining test into five bounded alphabetical ranges. No visual code or
+oracle changed: all 50 exact PNG/RGBA goldens and their semantic assertions
+remain, and the locale leg completed 1,860 assertions. The final peaks were:
+
+| Final CI partition | Test result | Peak bytes | Peak GiB |
+| --- | --- | ---: | ---: |
+| importer | 55 pass | 2,910,552,064 | 2.711 |
+| replays | 12 pass | 1,575,534,592 | 1.467 |
+| locks, battle data and terrain | 361 pass | 1,266,778,112 | 1.180 |
+| browser UI visuals | 9 pass | 281,366,528 | 0.262 |
+| locale production visuals | 5 pass | 9,026,781,184 | 8.407 |
+| rest (a-d) | 395 pass | 9,105,199,104 | 8.480 |
+| rest (e-l) | 361 pass | 11,471,609,856 | 10.684 |
+| rest (m-r) | 250 pass | 3,166,556,160 | 2.949 |
+| rest (s-t) | 365 pass | 8,586,899,456 | 7.997 |
+| rest (u-z) | 193 pass | 6,806,446,080 | 6.339 |
+
+The highest final partition is 10.684 GiB, leaving 3.316 GiB below the
+enforced cap. A routing audit found 201 test files selected exactly once:
+201 unique, zero duplicates, zero missing and zero extra. The workflow and CI
+documentation both describe the ten legs and the rest-range exclusions.
+
+### Eclipse Park import timing
+
+The timeout was not caused by the new locale imports: the English
+`buildProject` call does not build the five Latin locale banks. The failing
+test instead performed a second 263-map import solely to repeat the
+`park_experience` coverage assertion. The preceding four-Park-map test already
+receives corpus-seeded coverage; an unselected or newly authored action is
+reported as dropped, so its `total: 8, native: 8, degraded: 0, placeholder: 0,
+dropped: 0` assertion is corpus-wide.
+
+The redundant test took 1,936.60 ms locally and made one assertion; GitHub's
+observed run took 5,599 ms and exceeded Bun's default 5-second timeout. The
+coverage assertion now lives with the real four-map lowering checks, whose
+complete body took 184.39 ms and made three assertions. No timeout was raised
+and no assertion was relaxed.
+
+### Fix verification
+
+Two imports were byte-stable and left the repository clean. Wasm and game
+builds, TypeScript, localization checks and CJK coverage passed. The ten
+14 GiB test partitions completed 2,006 tests with zero failures and zero
+skips. GB6, J1 through J4 and the German complete journey reached their pinned
+terminal states; defeat/recovery, 20 chapter suffixes, five save/resume points
+and the built game's 242 checkpoints also passed.
+
+The deployable Web build passed Link/replay, immediate and delayed chunk
+delivery, warm-cache, language switching and all 13 Chinese rendering checks.
+The default PSP release built, and the real PPSSPP save matrix passed slot
+round-trip, legacy raw JSON, autosave restart/continue and visible read-only
+failure. No Chrome or PPSSPP process remained after the run. This CI-only fix
+does not change a player feature, so the feature status table needs no update.
+
+Subagent use: 2 read-only agents traced locale allocation and Chrome-log
+provenance, and audited Eclipse import coverage semantics; parallel analysis
+shortened diagnosis, while the main agent reproduced both failures, applied
+the fixes and ran every acceptance gate.
+
 PASS
