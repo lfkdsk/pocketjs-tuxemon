@@ -29,6 +29,7 @@ import {
   injectLocaleBootstrapBarrier,
   WEB_LOCALE_BOOTSTRAP,
 } from "./web-locale.ts";
+import { finalizeWebPwa } from "./web-pwa.ts";
 
 const root = resolve(import.meta.dir, "..");
 const tuxLinkConfig = resolveTuxLinkConfig(process.argv.slice(2), process.env);
@@ -263,4 +264,14 @@ console.log(
 copyFileSync(
   join(root, "licenses", "AUDIO-ATTRIBUTIONS.md"),
   join(gameDir, "AUDIO-ATTRIBUTIONS.md"),
+);
+const pwa = finalizeWebPwa({
+  root,
+  siteDir: join(root, "dist", "web"),
+  gameId: "pocket-tuxemon",
+  manifest: webPak.manifest,
+});
+console.log(
+  `web PWA: ${pwa.version} (${pwa.shell.length} shell files; ` +
+  `${Object.values(pwa.packages).map((entry) => `${entry.code}=${entry.bytes}`).join(", ")})`,
 );
