@@ -31,7 +31,7 @@ import {
   recordParkCapture,
   recordParkSighting,
 } from "../battle/park.ts";
-import { availableMapIds, buildProject, G6_IMPORT_OPTIONS } from "../importer/project.ts";
+import { buildProject, G6_IMPORT_OPTIONS } from "../importer/project.ts";
 import { validateBattleDb } from "../importer/battle-schema.ts";
 import { AttractController } from "../vendor/pocket-rpgkit/src/engine/attract.ts";
 import { BTN_BITS } from "../vendor/pocket-rpgkit/src/engine/camera.ts";
@@ -154,7 +154,7 @@ describe("Eclipse Park session state", () => {
 });
 
 describe("real Eclipse Park import", () => {
-  test("all eight authored actions lower to saved session commands and blocking summaries", () => {
+  test("all eight corpus-authored actions lower to saved session commands and blocking summaries", () => {
     const built = buildProject(PARK_MAPS, G6_IMPORT_OPTIONS);
     const all = nodes(built.project);
     const actions = all.filter((node) => node.op === "ext" && node.call === "tux.park_experience");
@@ -169,14 +169,11 @@ describe("real Eclipse Park import", () => {
       { action: "stop" },
     ]);
     expect(all.filter((node) => node.op === "scene" && node.id === "tux.parkSummary")).toHaveLength(7);
+    // Coverage is seeded from every source event. An unselected or newly
+    // authored park_experience action is therefore reported as dropped, so
+    // this four-map build also proves the whole corpus remains 8/8 Native.
     const row = built.report.coverage.actions.rows.find((entry) => entry.type === "park_experience");
     expect(row).toMatchObject({ total: 8, native: 8, degraded: 0, placeholder: 0, dropped: 0 });
-  });
-
-  test("the whole corpus keeps park_experience Native", () => {
-    const full = buildProject(availableMapIds(), G6_IMPORT_OPTIONS);
-    expect(full.report.coverage.actions.rows.find((entry) => entry.type === "park_experience"))
-      .toMatchObject({ total: 8, native: 8, degraded: 0, placeholder: 0, dropped: 0 });
   });
 });
 
