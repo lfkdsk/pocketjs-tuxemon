@@ -74,6 +74,7 @@ interface Scenario {
   query: string;
   ready: string;
   prepare?: (driver: ChromeDriver) => Promise<void>;
+  validate?: (measurement: PageMeasurement) => string[];
 }
 
 interface BenchConfig {
@@ -170,19 +171,40 @@ const SCENARIOS: readonly Scenario[] = [
   {
     id: "city-walk",
     site: "game",
-    query: "?lang=en&map=spyder_cotton_town&x=16&y=17",
+    query: "?lang=en&map=spyder_cotton_town&x=10&y=30",
     ready: `${genericReady} && globalThis.__rpgSessionState.mapId === "spyder_cotton_town"`,
     async prepare(driver) {
       await driver.evaluate(`(() => {
         const p = globalThis.__pocketPlayer;
-        const masks = [0x0010, 0x0020, 0x0040, 0x0080];
-        let index = 0;
-        p.keys.set("__mobile_web_walk", masks[index]);
+        const endpoints = [
+          { x: 15, y: 30, mask: 0x0080 },
+          { x: 10, y: 30, mask: 0x0020 },
+        ];
+        let target = 0;
+        p.keys.set("__mobile_web_walk", endpoints[target].mask);
         globalThis.__mobileWebScenarioTimer = setInterval(() => {
-          index = (index + 1) % masks.length;
-          p.keys.set("__mobile_web_walk", masks[index]);
-        }, 900);
+          const state = globalThis.__rpgSessionState;
+          const endpoint = endpoints[target];
+          if (!state?.move?.moving && state?.move?.tx === endpoint.x && state?.move?.ty === endpoint.y) {
+            target = (target + 1) % endpoints.length;
+          }
+          p.keys.set("__mobile_web_walk", endpoints[target].mask);
+        }, 16);
       })()`);
+    },
+    validate(measurement) {
+      const failures: string[] = [];
+      if (measurement.semantic.maps.length !== 1 || measurement.semantic.maps[0] !== "spyder_cotton_town") {
+        failures.push(`left Cotton Town (${measurement.semantic.maps.join(", ") || "no map samples"})`);
+      }
+      if (measurement.semantic.movedFrames === 0) failures.push("recorded no player movement");
+      if (measurement.semantic.textFrames !== 0) failures.push(`${measurement.semantic.textFrames} text frames`);
+      if (measurement.semantic.battleFrames !== 0) failures.push(`${measurement.semantic.battleFrames} battle frames`);
+      if (measurement.semantic.overlayFrames !== 0) failures.push(`${measurement.semantic.overlayFrames} overlay frames`);
+      if (measurement.endState.map !== "spyder_cotton_town") {
+        failures.push(`ended on ${measurement.endState.map ?? "no map"}`);
+      }
+      return failures;
     },
   },
   {
@@ -663,6 +685,10 @@ async function runSample(
     const measurement = await driver.evaluate<PageMeasurement>(`globalThis.__mobileWebFrameBench.stopMeasurement()`);
     const consoleErrors = [...driver.errors];
     if (consoleErrors.length > 0) throw new Error(`${slug}: browser errors: ${consoleErrors.join(" | ")}`);
+    const semanticFailures = scenario.validate?.(measurement) ?? [];
+    if (semanticFailures.length > 0) {
+      throw new Error(`${slug}: scenario semantics failed: ${semanticFailures.join("; ")}`);
+    }
     if (measurement.work.length < 30) {
       throw new Error(`${slug}: only ${measurement.work.length} presented frames in ${config.durationMs} ms`);
     }
