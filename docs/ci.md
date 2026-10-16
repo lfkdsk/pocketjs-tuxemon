@@ -114,7 +114,12 @@ optional-replay capability modes. It pins both viewports, both languages,
 keyboard, touch, gamepad, reconnect, pending secrecy and the exact trusted
 replay prefix. `bun run web` then replaces that development build with the
 deployable, unconfigured static site in `dist/web`; this ordering prevents the
-loopback service URL from reaching either uploaded artifact. Next,
+loopback service URL from reaching either uploaded artifact. Next, `bun run
+verify:web:pwa` drives real Chrome through cold installation, a controlled
+offline reload, save/load, a missing-map recovery dialog, interrupted and
+resumed language-pack download, and an atomic two-release update. It also
+checks the manifest's installability data, release/cache identity, semantic
+dialog pixels and browser errors. Then,
 `bun tools/verify-web-journey.ts` plays the opening journey (bedroom through
 the first battle to Route 1) in headless Chrome against the built site,
 comparing checkpoint states and framebuffer hashes against the committed
@@ -126,8 +131,9 @@ checks both supported raster sizes and proves the normal page never requests
 the lazy replay assets, and `bun run verify:web:audio` plays three imported
 tracks. Any console error fails the run. The site is uploaded as the
 `web-site` artifact (14-day retention), and the journey screenshots as
-`web-journey`. On pushes to `main` the site is also staged as the Pages
-artifact.
+`web-journey`. The PWA verifier's JSON receipt and six screenshots are retained
+as `web-pwa` even when a later Web step fails. On pushes to `main` the site is
+also staged as the Pages artifact.
 
 ### psp — the release package
 
@@ -228,6 +234,7 @@ bun run verify:bootworld:replay
 # web job (needs Chrome or Chromium)
 bun run verify:web:link # builds and verifies a loopback-only Link site
 bun run web
+bun run verify:web:pwa
 bun tools/verify-web-journey.ts
 bun tools/verify-web-zh.ts
 bun tools/verify-web-demo.ts

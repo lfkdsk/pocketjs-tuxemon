@@ -210,6 +210,23 @@ properties from the decoded pixels as well as pinning the PNG bytes.
   `Z`/`Enter` goes back, `A` is SQUARE, `S` is TRIANGLE, `Space` is START,
   and `L`/`Q` rewinds. A host regression test pins this legacy desktop map.
 
+### Install and play offline
+
+After the browser reaches the first map, the **Offline play / 离线游玩** panel
+appears below the player. Choose one content language and press **Download or
+resume / 下载或继续**. The panel reports the complete package size and progress;
+you can pause it, and an interrupted download resumes from the chunks already
+verified in browser storage when the connection returns.
+
+Chrome shows **Install / 安装** when its install prompt is available. You can
+also install Pocket Tuxemon from the browser's app menu. Installation and the
+service worker require HTTPS, except that browsers also allow `localhost` for
+local development. Once cached, the game page, saves and downloaded areas work
+after an offline reload. Entering an area that was not downloaded keeps the
+current transition parked and opens a bilingual dialog: reconnect and retry,
+or return to the cached game. Battle and expedition replay pages and Link
+Battle deliberately remain outside the offline cache.
+
 ### Saving and loading
 
 Press START (`Space` in the browser and on desktop) to open the world menu,
@@ -762,6 +779,7 @@ bun run expedition:demo # acquire/train a team, validate it, then enter Arena
 bun run verify:web:arena # replay a tape and check controls, privacy and pixels in Chrome
 bun run verify:web:expedition # replay a journal and check controls, terminal state and pixels
 bun run verify:web:link  # build and play both strict mock Link capability modes in Chrome
+bun run verify:web:pwa   # verify install, offline play/download/resume and atomic updates in Chrome
 bun run verify:web:audio # stream three imported tracks in headless Chrome
 bunx tsc --noEmit       # typecheck
 bun run test            # the test suite (build first for the pixel replays)
