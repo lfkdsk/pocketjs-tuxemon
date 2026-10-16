@@ -78,7 +78,7 @@ to every simulated boot. This keeps their goldens independent of file order;
 
 ### journey — the maintained tapes
 
-Sixteen parallel legs, one `bun run verify:*` script each (the table lists
+Seventeen parallel legs, one `bun run verify:*` script each (the table lists
 the tape legs):
 
 | Leg | Script | What it proves |
@@ -88,6 +88,7 @@ the tape legs):
 | Hospital-cure journey from frame zero at 60 Hz | `verify:j2:mainline` | the J2 continuation, concatenated with GB6 and J1 and replayed from frame zero (193,755 frames), ends with the hospital cure. |
 | Radio-broadcast journey from frame zero at 60 Hz | `verify:j3:mainline` | the J3 continuation, concatenated with GB6, J1 and J2 and replayed from frame zero (211,745 frames), ends after 13 trainer wins, two wild wins and the Omnichannel Radio Tower broadcast. |
 | Kernel-quest journey from J3 save and frame zero | `verify:j4:mainline` | the J4 continuation replays twice from its J3 production-save boundary, then all five segments replay from frame zero (230,322 frames) through 17 new wins, the seven correct terminal answers, Kernel and Billie's epilogue. |
+| German complete journey matches English state | `verify:de:mainline` | the German dialog edges are transcribed in memory, then the complete 230,322-frame journey must match the English language-neutral reducer state at every campaign boundary and the endpoint. |
 | Golden screenshot checkpoints match their tapes | `verify:goldens:sync` | every maintained screenshot checkpoint still names the exact reducer map, tile and frame from its authoritative tape. |
 | Battle defeat and recovery journeys | `verify:gb6:failures` | both committed defeat tapes replay with their visible recovery order. |
 | Every imported input lock is executed to its unlock | `verify:g6:locks` | every `lockInput` page releases its lock. |
@@ -211,6 +212,7 @@ bun run verify:j1:mainline
 bun run verify:j2:mainline
 bun run verify:j3:mainline
 bun run verify:j4:mainline
+bun run verify:de:mainline
 bun run verify:goldens:sync
 bun run verify:gb6:failures
 bun run verify:g6:locks
