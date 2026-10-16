@@ -113,6 +113,8 @@ interface PageMeasurement {
     scene: string | null;
     link: string | null;
     playerFrames: number | null;
+    position: { x: number | null; y: number | null; moving: boolean | null };
+    keys: number[];
   };
 }
 
@@ -181,13 +183,12 @@ const SCENARIOS: readonly Scenario[] = [
         let target = 0;
         p.keys.set("__mobile_web_walk", endpoints[target].mask);
         globalThis.__mobileWebScenarioTimer = setInterval(() => {
-          const state = globalThis.__rpgSessionState;
-          const endpoint = endpoints[target];
-          if (!state?.move?.moving && state?.move?.tx === endpoint.x && state?.move?.ty === endpoint.y) {
-            target = (target + 1) % endpoints.length;
-          }
+          // Change direction on wall-clock time instead of waiting for an
+          // exact tile. A routed NPC may temporarily block an endpoint; the
+          // benchmark must resume rather than hold into that body forever.
+          target = (target + 1) % endpoints.length;
           p.keys.set("__mobile_web_walk", endpoints[target].mask);
-        }, 16);
+        }, 2_000);
       })()`);
     },
     validate(measurement) {
@@ -195,7 +196,9 @@ const SCENARIOS: readonly Scenario[] = [
       if (measurement.semantic.maps.length !== 1 || measurement.semantic.maps[0] !== "spyder_cotton_town") {
         failures.push(`left Cotton Town (${measurement.semantic.maps.join(", ") || "no map samples"})`);
       }
-      if (measurement.semantic.movedFrames === 0) failures.push("recorded no player movement");
+      if (measurement.semantic.movedFrames === 0) {
+        failures.push(`recorded no player movement (${JSON.stringify(measurement.endState)})`);
+      }
       if (measurement.semantic.textFrames !== 0) failures.push(`${measurement.semantic.textFrames} text frames`);
       if (measurement.semantic.battleFrames !== 0) failures.push(`${measurement.semantic.battleFrames} battle frames`);
       if (measurement.semantic.overlayFrames !== 0) failures.push(`${measurement.semantic.overlayFrames} overlay frames`);
@@ -582,6 +585,12 @@ function instrumentationSource(syntheticWorkMs: number): string {
           scene: state?.scene?.kind ?? null,
           link: globalThis.__pocketTuxLink?.state?.().phase ?? null,
           playerFrames: p.frames ?? null,
+          position: {
+            x: state?.move?.tx ?? null,
+            y: state?.move?.ty ?? null,
+            moving: state?.move?.moving ?? null,
+          },
+          keys: [...p.keys.values()],
         },
       };
     };
