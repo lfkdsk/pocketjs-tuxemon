@@ -25,6 +25,7 @@ import {
   type TuxPublicPresentation,
 } from "../battle/tux-link-wire.ts";
 import { TUX_LINK_TICKET_KEY } from "../ui/tux-link/auth-store.ts";
+import { decodePng } from "../vendor/pocket-rpgkit/vendor/pocketjs/framework/compiler/pak.ts";
 import { registerCleanup, spawnHeadlessChrome } from "./headless-chrome.ts";
 import {
   WEB_CHUNK_AWARE_STEP_EXPRESSION,
@@ -744,9 +745,20 @@ async function recordGolden(name: string, bytes: Uint8Array): Promise<{ path: st
   await Bun.write(actual, bytes);
   if (UPDATE) await Bun.write(golden, bytes);
   assert(existsSync(golden), `missing ${golden}; rerun with --update after visual review`);
-  const expected = readFileSync(golden);
-  assert(Buffer.from(bytes).equals(expected), `${name} differs from its reviewed golden`);
-  return { path: golden, sha256: sha256(bytes) };
+  // Compare decoded pixels, not PNG bytes: the browser's PNG encoder is not
+  // part of the contract and differs between Chrome builds.
+  const got = decodePng(bytes);
+  const want = decodePng(new Uint8Array(readFileSync(golden)));
+  assert(got.width === want.width && got.height === want.height,
+    `${name} is ${got.width}x${got.height}, golden is ${want.width}x${want.height}`);
+  let differing = 0;
+  for (let i = 0; i < got.rgba.length; i += 4) {
+    if (got.rgba[i] !== want.rgba[i] || got.rgba[i + 1] !== want.rgba[i + 1] ||
+      got.rgba[i + 2] !== want.rgba[i + 2] || got.rgba[i + 3] !== want.rgba[i + 3]) differing += 1;
+  }
+  assert(differing === 0,
+    `${name} differs from its reviewed golden in ${differing} of ${got.width * got.height} pixels (actual saved at ${actual})`);
+  return { path: golden, sha256: sha256(got.rgba) };
 }
 
 rmSync(OUT, { recursive: true, force: true });
