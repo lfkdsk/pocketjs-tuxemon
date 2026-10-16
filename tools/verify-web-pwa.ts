@@ -59,10 +59,13 @@ interface PwaView {
   workerBuild: string | null;
   language: string;
   downloading: boolean;
+  activeLanguage: string | null;
+  resumeLanguage: string | null;
   status: string;
   missing: boolean;
   missingMap: string | null;
   missingEntry: string | null;
+  mapPrepareWrapped: boolean;
 }
 
 interface WorkerMessage extends JsonObject {
@@ -105,6 +108,7 @@ const report: {
   saveLoad?: JsonObject;
   missing?: JsonObject;
   download?: JsonObject;
+  languageSwitch?: JsonObject;
   update?: JsonObject;
   browserErrors?: string[];
   server?: JsonObject;
@@ -526,7 +530,7 @@ async function main(): Promise<void> {
         const value = await browser.evaluate<PwaView & JsonObject | null>(pwaState);
         last = value;
         if (value && value.build === build && value.pageBuild === build &&
-            value.workerBuild === build && value.controller === controlled) return value;
+            value.workerBuild === build && value.controller === controlled && value.mapPrepareWrapped) return value;
       } catch (error) {
         last = errorText(error);
       }
@@ -917,6 +921,117 @@ async function main(): Promise<void> {
     cachedBeforeResume: cachedBeforeResume.length,
     redownloaded,
     chunkRequests: counts.A.chunks - chunkRequestsBefore,
+  };
+
+  // Keep the in-flight German operation authoritative when the selector moves
+  // to Chinese. The worker continues verified work; its German terminal event
+  // must still unlock the real button, leaving Chinese as the next explicit
+  // choice. Starting and pausing Chinese then proves the UI is actionable
+  // without a reload.
+  chunkDelayMs = 20;
+  const languageSwitchMessageStart = await browser.evaluate<number>(
+    `globalThis.__pocketPwaVerifierMessages.length`,
+  );
+  const languageSwitchStart = await browser.evaluate<JsonObject>(`(() => {
+    const select = document.getElementById("offline-language");
+    const button = document.getElementById("offline-download");
+    select.value = "de";
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+    button.click();
+    return { view: globalThis.__pocketPwa.view(), button: button.textContent,
+      pressed: button.getAttribute("aria-pressed") };
+  })()`);
+  check("German package starts through the visible offline controls",
+    (languageSwitchStart.view as PwaView).language === "de" &&
+    (languageSwitchStart.view as PwaView).activeLanguage === "de" &&
+    (languageSwitchStart.view as PwaView).downloading === true &&
+    languageSwitchStart.button === "Pause / 暂停" && languageSwitchStart.pressed === "true",
+    languageSwitchStart);
+  const germanPartial = await browser.waitFor<WorkerMessage>("partial German offline download", `(() => {
+    const rows = globalThis.__pocketPwaVerifierMessages.slice(${languageSwitchMessageStart}).filter((message) =>
+      message?.type === "OFFLINE_PROGRESS" && message.language === "de" &&
+      message.completed < message.total);
+    return rows.at(-1) || false;
+  })()`, 60_000);
+  check("German package reports partial progress before the selector changes",
+    germanPartial.build === receiptA.version && Number(germanPartial.completed) < Number(germanPartial.total),
+    germanPartial);
+
+  const switchedLanguage = await browser.evaluate<JsonObject>(`(() => {
+    const select = document.getElementById("offline-language");
+    const button = document.getElementById("offline-download");
+    select.value = "zh";
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+    return { view: globalThis.__pocketPwa.view(), button: button.textContent,
+      pressed: button.getAttribute("aria-pressed") };
+  })()`);
+  const switchedView = switchedLanguage.view as PwaView;
+  check("changing to Chinese keeps the German operation explicit and active",
+    switchedView.language === "zh" && switchedView.activeLanguage === "de" && switchedView.downloading === true &&
+    switchedLanguage.button === "Pause / 暂停" && switchedLanguage.pressed === "true" &&
+    switchedView.status.includes("German") && switchedView.status.includes("Chinese") &&
+    switchedView.status.includes("德语") && switchedView.status.includes("中文"),
+    switchedLanguage);
+
+  const germanComplete = await browser.waitFor<JsonObject>("German completion after selecting Chinese", `(() => {
+    const rows = globalThis.__pocketPwaVerifierMessages.slice(${languageSwitchMessageStart}).filter((message) =>
+      message?.type === "OFFLINE_COMPLETE" && message.language === "de");
+    const view = globalThis.__pocketPwa?.view?.();
+    if (!rows.length || !view || view.downloading || view.activeLanguage !== null) return false;
+    const button = document.getElementById("offline-download");
+    return { message: rows.at(-1), view, button: button.textContent,
+      pressed: button.getAttribute("aria-pressed"),
+      chineseProgress: globalThis.__pocketPwaVerifierMessages.slice(${languageSwitchMessageStart}).filter((message) =>
+        message?.type === "OFFLINE_PROGRESS" && message.language === "zh").length };
+  })()`, 180_000);
+  const germanCompleteMessage = germanComplete.message as WorkerMessage;
+  const germanCompleteView = germanComplete.view as PwaView;
+  check("German terminal state unlocks the UI while Chinese stays selected",
+    germanCompleteMessage.build === receiptA.version &&
+    germanCompleteMessage.completed === receiptA.packages.de.chunks &&
+    germanCompleteMessage.total === receiptA.packages.de.chunks &&
+    germanCompleteMessage.totalBytes === receiptA.packages.de.bytes &&
+    germanCompleteView.language === "zh" && germanCompleteView.activeLanguage === null &&
+    germanCompleteView.resumeLanguage === null && germanCompleteView.downloading === false &&
+    germanComplete.button === "Download or resume / 下载或继续" && germanComplete.pressed === "false" &&
+    germanCompleteView.status.includes("German is ready offline") &&
+    germanCompleteView.status.includes("德语已可离线游玩") && germanComplete.chineseProgress === 0,
+    germanComplete);
+  await browser.evaluate(`document.getElementById("offline-heading").scrollIntoView({ block: "center" })`);
+  await browser.screenshot("offline-language-switch-ready.png");
+
+  const chineseMessageStart = await browser.evaluate<number>(`globalThis.__pocketPwaVerifierMessages.length`);
+  await browser.evaluate(`document.getElementById("offline-download").click()`);
+  const chinesePartial = await browser.waitFor<WorkerMessage>("Chinese download from the recovered controls", `(() => {
+    const rows = globalThis.__pocketPwaVerifierMessages.slice(${chineseMessageStart}).filter((message) =>
+      message?.type === "OFFLINE_PROGRESS" && message.language === "zh" && message.completed < message.total);
+    const view = globalThis.__pocketPwa?.view?.();
+    return rows.length && view?.activeLanguage === "zh" && view.downloading ? rows.at(-1) : false;
+  })()`, 60_000);
+  await browser.evaluate(`document.getElementById("offline-download").click()`);
+  const chinesePaused = await browser.waitFor<JsonObject>("Chinese pause after language-switch recovery", `(() => {
+    const rows = globalThis.__pocketPwaVerifierMessages.slice(${chineseMessageStart}).filter((message) =>
+      message?.type === "OFFLINE_PAUSED" && message.language === "zh");
+    const view = globalThis.__pocketPwa?.view?.();
+    if (!rows.length || !view || view.downloading || view.activeLanguage !== null) return false;
+    const button = document.getElementById("offline-download");
+    return { message: rows.at(-1), view, button: button.textContent,
+      pressed: button.getAttribute("aria-pressed") };
+  })()`, 30_000);
+  chunkDelayMs = 0;
+  check("the recovered controls can start and pause the selected Chinese package",
+    chinesePartial.build === receiptA.version &&
+    (chinesePaused.view as PwaView).language === "zh" &&
+    (chinesePaused.view as PwaView).downloading === false &&
+    chinesePaused.button === "Download or resume / 下载或继续" && chinesePaused.pressed === "false",
+    { chinesePartial, chinesePaused });
+  report.languageSwitch = {
+    start: languageSwitchStart,
+    partial: germanPartial,
+    switched: switchedLanguage,
+    complete: germanComplete,
+    nextDownload: chinesePartial,
+    paused: chinesePaused,
   };
 
   // Mixed mode exposes B's page/assets while retaining A at the stable worker
