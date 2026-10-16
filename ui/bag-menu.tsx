@@ -8,8 +8,10 @@ import { getOps, hostViewport } from "@pocketjs/framework/host";
 import { onFrame } from "@pocketjs/framework/lifecycle";
 import type { GameViewOverlayConfig } from "../vendor/pocket-rpgkit/src/ui/demo-contract.ts";
 import { Panel } from "../vendor/pocket-rpgkit/src/ui/Panel.tsx";
+import { slotMeasure } from "../vendor/pocket-rpgkit/src/ui/text-measure.ts";
 import { resolveUiTheme, type UiTheme } from "../vendor/pocket-rpgkit/src/ui/theme.ts";
 import { TUXEMON_UI_THEME } from "./tuxemon-theme.ts";
+import { BAG_DETAIL_TEXT_WIDTH, bagDetailLines } from "./bag-menu-text.ts";
 import {
   createBagMenuRuntime,
   type BagMenuOptions,
@@ -264,8 +266,10 @@ const BagMenuView: Component<{ runtime: BagMenuRuntime; theme?: Partial<UiTheme>
                     <Text class="text-xs" style={{ posType: 1, insetL: 8, insetT: 48, width: 154, height: 16, lineHeight: 14, textColor: theme().dim }} debugName="tux-bag-item-category">
                       {item.category}
                     </Text>
-                    <Text class="text-xs" style={{ posType: 1, insetL: 8, insetT: 70, width: 154, height: 104, lineHeight: 14, textColor: theme().ink }} debugName="tux-bag-item-description">
-                      {item.description}
+                    <Text class="text-xs" style={{ posType: 1, insetL: 8, insetT: 70, width: BAG_DETAIL_TEXT_WIDTH, height: 104, lineHeight: 14, textColor: theme().ink }} debugName="tux-bag-item-description">
+                      {runtime.lang === "en_US" || runtime.lang === "zh_CN"
+                        ? item.description
+                        : bagDetailLines(item.description, slotMeasure()).join("\n")}
                     </Text>
                   </>
                 )}

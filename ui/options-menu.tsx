@@ -229,6 +229,15 @@ const OptionsView: Component<{ runtime: OptionsRuntime; data: OptionsData; lang:
             </Text>
             <For each={layout()}>{({ row, index, rect }) => {
               const selected = () => props.runtime.cursor() === index;
+              // Remapping rows show both the action and its assigned key.
+              // Latin translations can be substantially longer than English,
+              // so give the two values equal cells and use the existing 10px
+              // font instead of allowing one label to paint over the other.
+              const latinLocale = props.lang !== "en_US" && props.lang !== "zh_CN";
+              const compactControl = latinLocale && row.section === "controls";
+              const compact = compactControl || row.id === "screen";
+              const labelWidth = compactControl ? 99 : rect.w - (row.id === "screen" ? 55 : 82);
+              const valueWidth = compactControl ? 99 : row.id === "screen" ? 43 : 70;
               return (
                 <View
                   class="absolute flex-row items-center"
@@ -246,10 +255,10 @@ const OptionsView: Component<{ runtime: OptionsRuntime; data: OptionsData; lang:
                   debugName={`options-row-${row.id}`}
                 >
                   <Text
-                    class={row.id === "screen" ? "text-2xs" : "text-xs"}
+                    class={compact ? "text-2xs" : "text-xs"}
                     style={{
                       marginL: 6,
-                      width: rect.w - (row.id === "screen" ? 55 : 82),
+                      width: labelWidth,
                       height: 16,
                       lineHeight: 14,
                       textColor: selected() ? "#ffffff" : TUXEMON_UI_THEME.ink,
@@ -259,8 +268,8 @@ const OptionsView: Component<{ runtime: OptionsRuntime; data: OptionsData; lang:
                     {row.label}
                   </Text>
                   <Text
-                    class={row.id === "screen" ? "text-2xs" : "text-xs"}
-                    style={{ width: row.id === "screen" ? 43 : 70, height: 16, lineHeight: 14, textAlign: 2, textColor: selected() ? "#ffffff" : TUXEMON_UI_THEME.accent }}
+                    class={compact ? "text-2xs" : "text-xs"}
+                    style={{ width: valueWidth, height: 16, lineHeight: 14, textAlign: 2, textColor: selected() ? "#ffffff" : TUXEMON_UI_THEME.accent }}
                     debugName={`options-value-${row.id}`}
                   >
                     {row.value}

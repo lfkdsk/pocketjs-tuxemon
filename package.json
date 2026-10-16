@@ -99,6 +99,7 @@
     "build:wasm": "bun vendor/pocket-rpgkit/vendor/pocketjs/tools/wasm.ts",
     "build": "bun tools/build.ts",
     "goldens:features": "bun tools/update-feature-modes-goldens.ts",
+    "goldens:locales": "bun tools/update-locale-goldens.ts",
     "desktop": "bun tools/desktop.ts",
     "web": "bun tools/web.ts",
     "bench:web:load": "bun tools/bench-web-load.ts",

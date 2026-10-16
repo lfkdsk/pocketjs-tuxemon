@@ -12,11 +12,13 @@ import {
   packTuxemonExtensionState,
   tuxemonExtensionState,
 } from "../battle/extension.ts";
+import { tuxemonRuntimeBattleState } from "../battle/runtime.ts";
 import { battleDbToTuxemonBattleDb } from "../battle/from-battle-db.ts";
 import { TUXEMON_BATTLE_DB } from "../battle/game.ts";
 import { spawnMonster } from "../battle/spawn.ts";
 import type { PocketBagMenuHook } from "../ui/bag-menu-runtime.ts";
 import type { FeatureModesRuntimeData } from "../ui/feature-modes-data.ts";
+import type { Lang } from "../ui/language.ts";
 import type { PocketNuPhoneHook } from "../ui/nuphone-runtime.ts";
 import type { PocketOptionsHook } from "../ui/options-runtime.ts";
 import {
@@ -66,6 +68,15 @@ export const FEATURE_MODES_CASES = [
 export type FeatureModesCase = typeof FEATURE_MODES_CASES[number];
 export type FeatureModesMinigameCase = Extract<FeatureModesCase, `minigame-${string}`>;
 
+export const LOCALE_ACCEPTANCE_CASES = [
+  "title",
+  "dialog",
+  "battle",
+  "bag",
+  "options",
+] as const;
+export type LocaleAcceptanceCase = typeof LOCALE_ACCEPTANCE_CASES[number];
+
 interface CanvasPoint {
   x: number;
   y: number;
@@ -108,7 +119,7 @@ export interface FeatureModesMinigameProbe {
 export interface FeatureModesCapture {
   width: number;
   height: number;
-  lang: "en_US" | "zh_CN";
+  lang: Lang;
   cases: Record<FeatureModesCase, FeatureModesFrame>;
   touch: FeatureModesTouchProbe;
   minigame: Record<FeatureModesMinigameCase, FeatureModesMinigameProbe>;
@@ -120,11 +131,28 @@ export interface FeatureModesCapture {
   };
 }
 
+export interface LocaleAcceptanceCapture {
+  width: number;
+  height: number;
+  lang: Lang;
+  cases: Record<LocaleAcceptanceCase, FeatureModesFrame>;
+  dialogLines: string[];
+  battleMenu: Array<{ kind: string; slug: string }>;
+}
+
 function pump(world: SimWorld, frames: number): void {
   for (let frame = 0; frame < frames; frame++) {
     world.frame(0, 0x8080);
     world.tick();
   }
+}
+
+function waitFor(world: SimWorld, label: string, done: () => boolean, limit = 6_000): void {
+  for (let frame = 0; frame < limit; frame++) {
+    if (done()) return;
+    pump(world, 1);
+  }
+  throw new Error(`feature modes fixture: timed out waiting for ${label}`);
 }
 
 function capture(world: SimWorld): FeatureModesFrame {
@@ -221,7 +249,7 @@ function live(): SessionState {
 
 async function titleCases(
   viewport: { width: number; height: number },
-  lang: "en_US" | "zh_CN",
+  lang: Lang,
 ): Promise<{
   frames: Pick<Record<FeatureModesCase, FeatureModesFrame>, "title" | "difficulty" | "battle">;
   titleBattle: boolean;
@@ -269,7 +297,7 @@ async function titleCases(
 
 async function phoneCases(
   viewport: { width: number; height: number },
-  lang: "en_US" | "zh_CN",
+  lang: Lang,
 ): Promise<{
   frames: Pick<Record<FeatureModesCase, FeatureModesFrame>, "phone" | "map">;
   phoneMap: boolean;
@@ -313,7 +341,7 @@ async function phoneCases(
 
 async function startCases(
   viewport: { width: number; height: number },
-  lang: "en_US" | "zh_CN",
+  lang: Lang,
 ): Promise<{
   frames: Pick<Record<FeatureModesCase, FeatureModesFrame>,
     "start" | "party" | "release-confirm" | "release-result" | "player" | "bag">;
@@ -419,7 +447,7 @@ async function startCases(
 
 async function optionsCases(
   viewport: { width: number; height: number },
-  lang: "en_US" | "zh_CN",
+  lang: Lang,
 ): Promise<{
   frames: Pick<Record<FeatureModesCase, FeatureModesFrame>, "options-title" | "options-start">;
   titleOptions: boolean;
@@ -488,7 +516,7 @@ const MINIGAME_OPTION_POINTS = [
 
 async function minigameCases(
   viewport: { width: number; height: number },
-  lang: "en_US" | "zh_CN",
+  lang: Lang,
 ): Promise<{
   frames: Pick<Record<FeatureModesCase, FeatureModesFrame>, FeatureModesMinigameCase>;
   probes: Record<FeatureModesMinigameCase, FeatureModesMinigameProbe>;
@@ -572,9 +600,112 @@ async function minigameCases(
   };
 }
 
+async function localeTitleBattleCases(
+  viewport: { width: number; height: number },
+  lang: Lang,
+): Promise<{
+  title: FeatureModesFrame;
+  battle: FeatureModesFrame;
+  battleMenu: Array<{ kind: string; slug: string }>;
+}> {
+  const world = await bootWorld(BUNDLE, 60, {
+    ...FIXED_TIME_HOST_GLOBALS,
+    __pocketTuxemonLang: lang,
+    __pocketTuxemonShowTitle: true,
+  }, undefined, viewport);
+  pump(world, 12);
+  const title = capture(world);
+  tap(world, viewport, titleRowPoint("battle"));
+  tap(world, viewport, { x: 240, y: 101.5 });
+
+  waitFor(world, `${lang} battle root menu`, () => {
+    const scene = live().scene;
+    if (scene?.kind !== "battle") return false;
+    const state = tuxemonRuntimeBattleState(scene.state);
+    return state.menuMode === "root" && state.battle.awaiting !== null &&
+      state.eventCursor >= state.battle.events.length;
+  }, 2_000);
+  const scene = live().scene;
+  if (scene?.kind !== "battle") throw new Error("feature modes fixture: battle disappeared before capture");
+  const state = tuxemonRuntimeBattleState(scene.state);
+  return {
+    title,
+    battle: capture(world),
+    battleMenu: state.menu.map((entry) => ({ kind: entry.kind, slug: entry.slug })),
+  };
+}
+
+async function localeFirstDialogCase(
+  viewport: { width: number; height: number },
+  lang: Lang,
+): Promise<{ frame: FeatureModesFrame; lines: string[] }> {
+  const world = await bootWorld(BUNDLE, 60, {
+    ...FIXED_TIME_HOST_GLOBALS,
+    __pocketTuxemonLang: lang,
+    __pocketTuxemonShowTitle: false,
+    __pocketTuxemonSkipTitle: true,
+  }, undefined, viewport);
+  waitFor(world, `${lang} bedroom`, () => live().mapId === "spyder_bedroom");
+  // A fresh game first asks whether to play the imported introduction. Pick
+  // its default affirmative choice through the real input path, then capture
+  // the first text modal that the production event opens.
+  for (let guard = 0; guard < 6_000 && live().interp.modal?.kind !== "text"; guard++) {
+    const modal = live().interp.modal;
+    if (modal?.kind === "choices") press(world, BTN.CIRCLE);
+    else pump(world, 1);
+  }
+  if (live().interp.modal?.kind !== "text") {
+    throw new Error(`feature modes fixture: timed out waiting for ${lang} first imported dialog`);
+  }
+  waitFor(world, `${lang} completed first imported dialog`, () => {
+    const modal = live().interp.modal;
+    return modal?.kind === "text" && modal.complete === true;
+  });
+  const modal = live().interp.modal;
+  if (modal?.kind !== "text") throw new Error("feature modes fixture: first dialog disappeared");
+  return { frame: capture(world), lines: [...modal.lines] };
+}
+
+/** Five player-visible surfaces used by the locale acceptance suite. Every
+ * frame comes from the built production bundle, its imported locale shards,
+ * and the real software renderer at the requested viewport. */
+export async function captureLocaleAcceptance(
+  viewport: { width: number; height: number },
+  lang: Lang,
+): Promise<LocaleAcceptanceCapture> {
+  if (!existsSync(BUNDLE + ".js") || !existsSync(BUNDLE + ".pak")) {
+    throw new Error("feature modes fixture: run `bun run build` first");
+  }
+  const globals = globalThis as Record<string, unknown>;
+  const previousLang = globals.__pocketTuxemonLang;
+  try {
+    const titleBattle = await localeTitleBattleCases(viewport, lang);
+    const dialog = await localeFirstDialogCase(viewport, lang);
+    const start = await startCases(viewport, lang);
+    const options = await optionsCases(viewport, lang);
+    return {
+      width: viewport.width,
+      height: viewport.height,
+      lang,
+      cases: {
+        title: titleBattle.title,
+        dialog: dialog.frame,
+        battle: titleBattle.battle,
+        bag: start.frames.bag,
+        options: options.frames["options-start"],
+      },
+      dialogLines: dialog.lines,
+      battleMenu: titleBattle.battleMenu,
+    };
+  } finally {
+    if (previousLang === undefined) delete globals.__pocketTuxemonLang;
+    else globals.__pocketTuxemonLang = previousLang;
+  }
+}
+
 export async function captureFeatureModes(
   viewport: { width: number; height: number },
-  lang: "en_US" | "zh_CN",
+  lang: Lang,
 ): Promise<FeatureModesCapture> {
   if (!existsSync(BUNDLE + ".js") || !existsSync(BUNDLE + ".pak")) {
     throw new Error("feature modes fixture: run `bun run build` first");

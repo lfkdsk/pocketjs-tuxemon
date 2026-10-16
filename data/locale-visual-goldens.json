@@ -1,0 +1,724 @@
+{
+  "format": "pocket-tuxemon/locale-visual-goldens/v1",
+  "caseOrder": [
+    "title",
+    "dialog",
+    "battle",
+    "bag",
+    "options"
+  ],
+  "captures": [
+    {
+      "lang": "de_DE",
+      "width": 480,
+      "height": 272,
+      "dialogLines": [
+        "Do you want to skip the intro?"
+      ],
+      "battleMenu": [
+        {
+          "kind": "fight",
+          "slug": "fight"
+        },
+        {
+          "kind": "replacement",
+          "slug": "swap"
+        },
+        {
+          "kind": "item",
+          "slug": "item"
+        },
+        {
+          "kind": "forfeit",
+          "slug": "forfeit"
+        }
+      ]
+    },
+    {
+      "lang": "de_DE",
+      "width": 960,
+      "height": 544,
+      "dialogLines": [
+        "Do you want to skip the intro?"
+      ],
+      "battleMenu": [
+        {
+          "kind": "fight",
+          "slug": "fight"
+        },
+        {
+          "kind": "replacement",
+          "slug": "swap"
+        },
+        {
+          "kind": "item",
+          "slug": "item"
+        },
+        {
+          "kind": "forfeit",
+          "slug": "forfeit"
+        }
+      ]
+    },
+    {
+      "lang": "fr_FR",
+      "width": 480,
+      "height": 272,
+      "dialogLines": [
+        "Do you want to skip the intro?"
+      ],
+      "battleMenu": [
+        {
+          "kind": "fight",
+          "slug": "fight"
+        },
+        {
+          "kind": "replacement",
+          "slug": "swap"
+        },
+        {
+          "kind": "item",
+          "slug": "item"
+        },
+        {
+          "kind": "forfeit",
+          "slug": "forfeit"
+        }
+      ]
+    },
+    {
+      "lang": "fr_FR",
+      "width": 960,
+      "height": 544,
+      "dialogLines": [
+        "Do you want to skip the intro?"
+      ],
+      "battleMenu": [
+        {
+          "kind": "fight",
+          "slug": "fight"
+        },
+        {
+          "kind": "replacement",
+          "slug": "swap"
+        },
+        {
+          "kind": "item",
+          "slug": "item"
+        },
+        {
+          "kind": "forfeit",
+          "slug": "forfeit"
+        }
+      ]
+    },
+    {
+      "lang": "es_ES",
+      "width": 480,
+      "height": 272,
+      "dialogLines": [
+        "Do you want to skip the intro?"
+      ],
+      "battleMenu": [
+        {
+          "kind": "fight",
+          "slug": "fight"
+        },
+        {
+          "kind": "replacement",
+          "slug": "swap"
+        },
+        {
+          "kind": "item",
+          "slug": "item"
+        },
+        {
+          "kind": "forfeit",
+          "slug": "forfeit"
+        }
+      ]
+    },
+    {
+      "lang": "es_ES",
+      "width": 960,
+      "height": 544,
+      "dialogLines": [
+        "Do you want to skip the intro?"
+      ],
+      "battleMenu": [
+        {
+          "kind": "fight",
+          "slug": "fight"
+        },
+        {
+          "kind": "replacement",
+          "slug": "swap"
+        },
+        {
+          "kind": "item",
+          "slug": "item"
+        },
+        {
+          "kind": "forfeit",
+          "slug": "forfeit"
+        }
+      ]
+    },
+    {
+      "lang": "it_IT",
+      "width": 480,
+      "height": 272,
+      "dialogLines": [
+        "Do you want to skip the intro?"
+      ],
+      "battleMenu": [
+        {
+          "kind": "fight",
+          "slug": "fight"
+        },
+        {
+          "kind": "replacement",
+          "slug": "swap"
+        },
+        {
+          "kind": "item",
+          "slug": "item"
+        },
+        {
+          "kind": "forfeit",
+          "slug": "forfeit"
+        }
+      ]
+    },
+    {
+      "lang": "it_IT",
+      "width": 960,
+      "height": 544,
+      "dialogLines": [
+        "Do you want to skip the intro?"
+      ],
+      "battleMenu": [
+        {
+          "kind": "fight",
+          "slug": "fight"
+        },
+        {
+          "kind": "replacement",
+          "slug": "swap"
+        },
+        {
+          "kind": "item",
+          "slug": "item"
+        },
+        {
+          "kind": "forfeit",
+          "slug": "forfeit"
+        }
+      ]
+    },
+    {
+      "lang": "pt_BR",
+      "width": 480,
+      "height": 272,
+      "dialogLines": [
+        "Do you want to skip the intro?"
+      ],
+      "battleMenu": [
+        {
+          "kind": "fight",
+          "slug": "fight"
+        },
+        {
+          "kind": "replacement",
+          "slug": "swap"
+        },
+        {
+          "kind": "item",
+          "slug": "item"
+        },
+        {
+          "kind": "forfeit",
+          "slug": "forfeit"
+        }
+      ]
+    },
+    {
+      "lang": "pt_BR",
+      "width": 960,
+      "height": 544,
+      "dialogLines": [
+        "Do you want to skip the intro?"
+      ],
+      "battleMenu": [
+        {
+          "kind": "fight",
+          "slug": "fight"
+        },
+        {
+          "kind": "replacement",
+          "slug": "swap"
+        },
+        {
+          "kind": "item",
+          "slug": "item"
+        },
+        {
+          "kind": "forfeit",
+          "slug": "forfeit"
+        }
+      ]
+    }
+  ],
+  "frames": [
+    {
+      "case": "title",
+      "lang": "de_DE",
+      "width": 480,
+      "height": 272,
+      "file": "locale-title-de_DE-480x272.png",
+      "rgbaFnv1a": "f116551e",
+      "pngSha256": "b7c63a0da734f927258952a6953d22b1106c5cc59c60c14572840368de2d9c99"
+    },
+    {
+      "case": "dialog",
+      "lang": "de_DE",
+      "width": 480,
+      "height": 272,
+      "file": "locale-dialog-de_DE-480x272.png",
+      "rgbaFnv1a": "2775332a",
+      "pngSha256": "5594f7613b066f473b43264c186aac147974aa8590b78baf300c303269920f9c"
+    },
+    {
+      "case": "battle",
+      "lang": "de_DE",
+      "width": 480,
+      "height": 272,
+      "file": "locale-battle-de_DE-480x272.png",
+      "rgbaFnv1a": "cb5ddd58",
+      "pngSha256": "7073561b3102d162e2b03a6bd6fccd773010cbc728bd997a75652f4dad0819ff"
+    },
+    {
+      "case": "bag",
+      "lang": "de_DE",
+      "width": 480,
+      "height": 272,
+      "file": "locale-bag-de_DE-480x272.png",
+      "rgbaFnv1a": "12a3367f",
+      "pngSha256": "fb089bf5f5dcb1602451218336d148791dfbbed148b05eccef4cfdd85229f98b"
+    },
+    {
+      "case": "options",
+      "lang": "de_DE",
+      "width": 480,
+      "height": 272,
+      "file": "locale-options-de_DE-480x272.png",
+      "rgbaFnv1a": "804cb290",
+      "pngSha256": "09d41433f3a3e822be9ae77aca7d15566078b833c5091f35c94e9569ad8e9ae4"
+    },
+    {
+      "case": "title",
+      "lang": "de_DE",
+      "width": 960,
+      "height": 544,
+      "file": "locale-title-de_DE-960x544.png",
+      "rgbaFnv1a": "d0915c50",
+      "pngSha256": "0e506a535011b13a29af2c4606e32d10b87ec6e29166ab127cbf27e25762c7d5"
+    },
+    {
+      "case": "dialog",
+      "lang": "de_DE",
+      "width": 960,
+      "height": 544,
+      "file": "locale-dialog-de_DE-960x544.png",
+      "rgbaFnv1a": "b0f44551",
+      "pngSha256": "7ad96c5292498aa9e98edaaac928b7f4f8f570c0c5b9afd53cffd33e5c3123e3"
+    },
+    {
+      "case": "battle",
+      "lang": "de_DE",
+      "width": 960,
+      "height": 544,
+      "file": "locale-battle-de_DE-960x544.png",
+      "rgbaFnv1a": "6e17a3c3",
+      "pngSha256": "a59b05725d7b802bde775f6910f5baf9e5f2095ee65e10ee5c091d8798d6b0eb"
+    },
+    {
+      "case": "bag",
+      "lang": "de_DE",
+      "width": 960,
+      "height": 544,
+      "file": "locale-bag-de_DE-960x544.png",
+      "rgbaFnv1a": "cc207b6b",
+      "pngSha256": "ce5313fa9a863528364caf9f99f8be72d210cf6447686ff9349c5383c6ac3f3d"
+    },
+    {
+      "case": "options",
+      "lang": "de_DE",
+      "width": 960,
+      "height": 544,
+      "file": "locale-options-de_DE-960x544.png",
+      "rgbaFnv1a": "e9c6ea10",
+      "pngSha256": "abcb18650f811cd3772282a86ed1913ef62383a72954cb5402e4564a790c369d"
+    },
+    {
+      "case": "title",
+      "lang": "fr_FR",
+      "width": 480,
+      "height": 272,
+      "file": "locale-title-fr_FR-480x272.png",
+      "rgbaFnv1a": "5ac367d0",
+      "pngSha256": "dfb075641782dad6949d0216ee1870d84ff7904031cd79ab9d06cf207638ebc5"
+    },
+    {
+      "case": "dialog",
+      "lang": "fr_FR",
+      "width": 480,
+      "height": 272,
+      "file": "locale-dialog-fr_FR-480x272.png",
+      "rgbaFnv1a": "2775332a",
+      "pngSha256": "5594f7613b066f473b43264c186aac147974aa8590b78baf300c303269920f9c"
+    },
+    {
+      "case": "battle",
+      "lang": "fr_FR",
+      "width": 480,
+      "height": 272,
+      "file": "locale-battle-fr_FR-480x272.png",
+      "rgbaFnv1a": "cb5ddd58",
+      "pngSha256": "7073561b3102d162e2b03a6bd6fccd773010cbc728bd997a75652f4dad0819ff"
+    },
+    {
+      "case": "bag",
+      "lang": "fr_FR",
+      "width": 480,
+      "height": 272,
+      "file": "locale-bag-fr_FR-480x272.png",
+      "rgbaFnv1a": "647e8ce5",
+      "pngSha256": "d4cf854ed9466389b480bbbb3c0ff4d5cffbe465b437bc06d8be8be1c658f4d5"
+    },
+    {
+      "case": "options",
+      "lang": "fr_FR",
+      "width": 480,
+      "height": 272,
+      "file": "locale-options-fr_FR-480x272.png",
+      "rgbaFnv1a": "16d84d77",
+      "pngSha256": "1411e1d6b99211ed73c2f51eb5ede3a7f5e955f0cbbbd7e8d0930a0b028c766b"
+    },
+    {
+      "case": "title",
+      "lang": "fr_FR",
+      "width": 960,
+      "height": 544,
+      "file": "locale-title-fr_FR-960x544.png",
+      "rgbaFnv1a": "e5ef4478",
+      "pngSha256": "99cca6b5b8c98edc0f53dfb006f887880a248f58481c21eb5f1aeea1a4a25b00"
+    },
+    {
+      "case": "dialog",
+      "lang": "fr_FR",
+      "width": 960,
+      "height": 544,
+      "file": "locale-dialog-fr_FR-960x544.png",
+      "rgbaFnv1a": "b0f44551",
+      "pngSha256": "7ad96c5292498aa9e98edaaac928b7f4f8f570c0c5b9afd53cffd33e5c3123e3"
+    },
+    {
+      "case": "battle",
+      "lang": "fr_FR",
+      "width": 960,
+      "height": 544,
+      "file": "locale-battle-fr_FR-960x544.png",
+      "rgbaFnv1a": "6e17a3c3",
+      "pngSha256": "a59b05725d7b802bde775f6910f5baf9e5f2095ee65e10ee5c091d8798d6b0eb"
+    },
+    {
+      "case": "bag",
+      "lang": "fr_FR",
+      "width": 960,
+      "height": 544,
+      "file": "locale-bag-fr_FR-960x544.png",
+      "rgbaFnv1a": "051ec133",
+      "pngSha256": "8af6a223942b2becc769cda6a10b2d8712ebf1cd854d96afe58ecc0141b7b2be"
+    },
+    {
+      "case": "options",
+      "lang": "fr_FR",
+      "width": 960,
+      "height": 544,
+      "file": "locale-options-fr_FR-960x544.png",
+      "rgbaFnv1a": "34ea5827",
+      "pngSha256": "92e08a3874cab06877876c1ee844a03210e7f6b3497cd2c33c4a80d0cfdb5995"
+    },
+    {
+      "case": "title",
+      "lang": "es_ES",
+      "width": 480,
+      "height": 272,
+      "file": "locale-title-es_ES-480x272.png",
+      "rgbaFnv1a": "716ce0bb",
+      "pngSha256": "5f0357ab91f27fc3106912cdbbda2a16675d68a6f88b37fc13ed4f8e9056335e"
+    },
+    {
+      "case": "dialog",
+      "lang": "es_ES",
+      "width": 480,
+      "height": 272,
+      "file": "locale-dialog-es_ES-480x272.png",
+      "rgbaFnv1a": "2775332a",
+      "pngSha256": "5594f7613b066f473b43264c186aac147974aa8590b78baf300c303269920f9c"
+    },
+    {
+      "case": "battle",
+      "lang": "es_ES",
+      "width": 480,
+      "height": 272,
+      "file": "locale-battle-es_ES-480x272.png",
+      "rgbaFnv1a": "cb5ddd58",
+      "pngSha256": "7073561b3102d162e2b03a6bd6fccd773010cbc728bd997a75652f4dad0819ff"
+    },
+    {
+      "case": "bag",
+      "lang": "es_ES",
+      "width": 480,
+      "height": 272,
+      "file": "locale-bag-es_ES-480x272.png",
+      "rgbaFnv1a": "f986708a",
+      "pngSha256": "6b267bed02cef8bfaa8f42b9b504cd877182f4a1a643061695bbf8de3c9812a3"
+    },
+    {
+      "case": "options",
+      "lang": "es_ES",
+      "width": 480,
+      "height": 272,
+      "file": "locale-options-es_ES-480x272.png",
+      "rgbaFnv1a": "41fe93fc",
+      "pngSha256": "f4da3d85f8d39a0f6764fd7859166f644dc687b6fa185ae999572251e4c3880e"
+    },
+    {
+      "case": "title",
+      "lang": "es_ES",
+      "width": 960,
+      "height": 544,
+      "file": "locale-title-es_ES-960x544.png",
+      "rgbaFnv1a": "29a0e287",
+      "pngSha256": "6439b9ddb45c7b2796b3713bbb5f80a8a73fd584e39dae1c1626b218ec76cb0c"
+    },
+    {
+      "case": "dialog",
+      "lang": "es_ES",
+      "width": 960,
+      "height": 544,
+      "file": "locale-dialog-es_ES-960x544.png",
+      "rgbaFnv1a": "b0f44551",
+      "pngSha256": "7ad96c5292498aa9e98edaaac928b7f4f8f570c0c5b9afd53cffd33e5c3123e3"
+    },
+    {
+      "case": "battle",
+      "lang": "es_ES",
+      "width": 960,
+      "height": 544,
+      "file": "locale-battle-es_ES-960x544.png",
+      "rgbaFnv1a": "6e17a3c3",
+      "pngSha256": "a59b05725d7b802bde775f6910f5baf9e5f2095ee65e10ee5c091d8798d6b0eb"
+    },
+    {
+      "case": "bag",
+      "lang": "es_ES",
+      "width": 960,
+      "height": 544,
+      "file": "locale-bag-es_ES-960x544.png",
+      "rgbaFnv1a": "fb157a07",
+      "pngSha256": "822cb80694e86a26be0584e6b6e73a8acfee350bcf3bb2bd227d2c1c4e8a90e7"
+    },
+    {
+      "case": "options",
+      "lang": "es_ES",
+      "width": 960,
+      "height": 544,
+      "file": "locale-options-es_ES-960x544.png",
+      "rgbaFnv1a": "083c9065",
+      "pngSha256": "070fdbb020049f82e2e68553c194f209d12ad46506414215b18aac49568276b3"
+    },
+    {
+      "case": "title",
+      "lang": "it_IT",
+      "width": 480,
+      "height": 272,
+      "file": "locale-title-it_IT-480x272.png",
+      "rgbaFnv1a": "485233ba",
+      "pngSha256": "d2fe7c588d74d0d9e8cd4a8bfc4deb46a662660e4525407b90f578e2a686fd2a"
+    },
+    {
+      "case": "dialog",
+      "lang": "it_IT",
+      "width": 480,
+      "height": 272,
+      "file": "locale-dialog-it_IT-480x272.png",
+      "rgbaFnv1a": "2775332a",
+      "pngSha256": "5594f7613b066f473b43264c186aac147974aa8590b78baf300c303269920f9c"
+    },
+    {
+      "case": "battle",
+      "lang": "it_IT",
+      "width": 480,
+      "height": 272,
+      "file": "locale-battle-it_IT-480x272.png",
+      "rgbaFnv1a": "cb5ddd58",
+      "pngSha256": "7073561b3102d162e2b03a6bd6fccd773010cbc728bd997a75652f4dad0819ff"
+    },
+    {
+      "case": "bag",
+      "lang": "it_IT",
+      "width": 480,
+      "height": 272,
+      "file": "locale-bag-it_IT-480x272.png",
+      "rgbaFnv1a": "b13bd682",
+      "pngSha256": "8b617cf7652e2f510f5026e8f7b346c1448d232734783222b026856fd5cc1746"
+    },
+    {
+      "case": "options",
+      "lang": "it_IT",
+      "width": 480,
+      "height": 272,
+      "file": "locale-options-it_IT-480x272.png",
+      "rgbaFnv1a": "4cca9240",
+      "pngSha256": "518c2d9eaeec1ea6cb7c13efb59e10859b5bd1a09c7b130b7f844f1bdaeac9d2"
+    },
+    {
+      "case": "title",
+      "lang": "it_IT",
+      "width": 960,
+      "height": 544,
+      "file": "locale-title-it_IT-960x544.png",
+      "rgbaFnv1a": "d684265e",
+      "pngSha256": "09c760c3ab51715c779221f26e333753760dcf6adf038628f2c3b7c497b21909"
+    },
+    {
+      "case": "dialog",
+      "lang": "it_IT",
+      "width": 960,
+      "height": 544,
+      "file": "locale-dialog-it_IT-960x544.png",
+      "rgbaFnv1a": "b0f44551",
+      "pngSha256": "7ad96c5292498aa9e98edaaac928b7f4f8f570c0c5b9afd53cffd33e5c3123e3"
+    },
+    {
+      "case": "battle",
+      "lang": "it_IT",
+      "width": 960,
+      "height": 544,
+      "file": "locale-battle-it_IT-960x544.png",
+      "rgbaFnv1a": "6e17a3c3",
+      "pngSha256": "a59b05725d7b802bde775f6910f5baf9e5f2095ee65e10ee5c091d8798d6b0eb"
+    },
+    {
+      "case": "bag",
+      "lang": "it_IT",
+      "width": 960,
+      "height": 544,
+      "file": "locale-bag-it_IT-960x544.png",
+      "rgbaFnv1a": "d58e69d9",
+      "pngSha256": "af10cddf3bdc88a1ed3bbab6db472a6887838800a5bc64070ae5bf4d3c12c3d6"
+    },
+    {
+      "case": "options",
+      "lang": "it_IT",
+      "width": 960,
+      "height": 544,
+      "file": "locale-options-it_IT-960x544.png",
+      "rgbaFnv1a": "9a59a3ce",
+      "pngSha256": "2d6997c9b48b26a7f4a6b293574ea688789b0ae46e8b698ff3cff0c714ea8a78"
+    },
+    {
+      "case": "title",
+      "lang": "pt_BR",
+      "width": 480,
+      "height": 272,
+      "file": "locale-title-pt_BR-480x272.png",
+      "rgbaFnv1a": "872ac200",
+      "pngSha256": "4057b2ee8847b3c3e30849fb65758db2ddf4844e1d253a5ff4f91b151566eca2"
+    },
+    {
+      "case": "dialog",
+      "lang": "pt_BR",
+      "width": 480,
+      "height": 272,
+      "file": "locale-dialog-pt_BR-480x272.png",
+      "rgbaFnv1a": "2775332a",
+      "pngSha256": "5594f7613b066f473b43264c186aac147974aa8590b78baf300c303269920f9c"
+    },
+    {
+      "case": "battle",
+      "lang": "pt_BR",
+      "width": 480,
+      "height": 272,
+      "file": "locale-battle-pt_BR-480x272.png",
+      "rgbaFnv1a": "cb5ddd58",
+      "pngSha256": "7073561b3102d162e2b03a6bd6fccd773010cbc728bd997a75652f4dad0819ff"
+    },
+    {
+      "case": "bag",
+      "lang": "pt_BR",
+      "width": 480,
+      "height": 272,
+      "file": "locale-bag-pt_BR-480x272.png",
+      "rgbaFnv1a": "9d5d835d",
+      "pngSha256": "20a8f490cd6543404b1766c0c8f32da5ba4f125ead43b72058b7e126ccd1b225"
+    },
+    {
+      "case": "options",
+      "lang": "pt_BR",
+      "width": 480,
+      "height": 272,
+      "file": "locale-options-pt_BR-480x272.png",
+      "rgbaFnv1a": "71f67469",
+      "pngSha256": "b38b344f56180883895646f16288e024800c12e54a021803f94416f0dff8e979"
+    },
+    {
+      "case": "title",
+      "lang": "pt_BR",
+      "width": 960,
+      "height": 544,
+      "file": "locale-title-pt_BR-960x544.png",
+      "rgbaFnv1a": "ea9a35d4",
+      "pngSha256": "eee83c996b25b2fca8081bb57eaec08ba8453f6600f3407b41e78033834a419c"
+    },
+    {
+      "case": "dialog",
+      "lang": "pt_BR",
+      "width": 960,
+      "height": 544,
+      "file": "locale-dialog-pt_BR-960x544.png",
+      "rgbaFnv1a": "b0f44551",
+      "pngSha256": "7ad96c5292498aa9e98edaaac928b7f4f8f570c0c5b9afd53cffd33e5c3123e3"
+    },
+    {
+      "case": "battle",
+      "lang": "pt_BR",
+      "width": 960,
+      "height": 544,
+      "file": "locale-battle-pt_BR-960x544.png",
+      "rgbaFnv1a": "6e17a3c3",
+      "pngSha256": "a59b05725d7b802bde775f6910f5baf9e5f2095ee65e10ee5c091d8798d6b0eb"
+    },
+    {
+      "case": "bag",
+      "lang": "pt_BR",
+      "width": 960,
+      "height": 544,
+      "file": "locale-bag-pt_BR-960x544.png",
+      "rgbaFnv1a": "56c9d13d",
+      "pngSha256": "ee7619baa9e0d3ca8a9234f91d9c8fb382004f29be7d1d0cf9d55b39dbe03a42"
+    },
+    {
+      "case": "options",
+      "lang": "pt_BR",
+      "width": 960,
+      "height": 544,
+      "file": "locale-options-pt_BR-960x544.png",
+      "rgbaFnv1a": "8ec62222",
+      "pngSha256": "115055eb6489130b5ea0893a0b435413c105e1c47e7066e4d02bb434f2735ee0"
+    }
+  ]
+}
