@@ -257,7 +257,7 @@ jobs:
           path: ~/.cache/pocket-tuxemon/ppsspp-${{ env.PPSSPP_REV }}
           key: ${{ runner.os }}-ppsspp-headless-${{ env.PPSSPP_REV }}
       - name: Install the PSP and PPSSPP build dependencies
-        run: sudo apt-get update && sudo apt-get install -y llvm-18 ninja-build libpng-dev libgl1-mesa-dev
+        run: sudo apt-get update && sudo apt-get install -y llvm-18 ninja-build libpng-dev libgl1-mesa-dev libglu1-mesa-dev libx11-dev
       - name: Build the pinned PPSSPP headless host
         if: steps.cache-ppsspp.outputs.cache-hit != 'true'
         run: |
