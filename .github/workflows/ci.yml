@@ -185,7 +185,12 @@ jobs:
         with:
           submodules: recursive
       - uses: ./.github/actions/prepare
-      - name: Build the web site
+      # The Link verifier builds its own loopback-configured site. Keep it
+      # before the ordinary build so neither the uploaded artifact nor Pages
+      # can retain the development service URL.
+      - name: Play two Tux Link capability modes in headless Chrome
+        run: bun run verify:web:link
+      - name: Build the deployable web site
         run: bun run web
       - name: Play the journey in headless Chrome
         run: bun tools/verify-web-journey.ts

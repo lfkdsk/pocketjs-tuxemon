@@ -1,8 +1,8 @@
 # CI
 
 CI is a single workflow, `.github/workflows/ci.yml`. Five jobs run in
-parallel from the shared prepare action — `import`, `test` (five matrix
-legs), `journey` (sixteen matrix legs), `web` and `psp`, twenty-four runners in all —
+parallel from the shared prepare action — `import`, `test` (six matrix
+legs), `journey` (sixteen matrix legs), `web` and `psp`, twenty-five runners in all —
 and `deploy` publishes Pages once all but `psp` pass. The slowest journey leg
 (`verify:chapters`, which re-bakes and suffix-replays every chapter) sets
 the wall-clock. It runs on pushes to `main`, on pull requests, and on
@@ -39,7 +39,7 @@ Prepare with `build: "false"`, then:
 - `bun run check:l10n` and `bun run check:cjk` — the Chinese supplement is
   well formed and the baked subset covers every imported character.
 
-### test — the suite in five parallel groups
+### test — the suite in six parallel groups
 
 The suite is split into explicit groups of roughly a minute each, because
 bun's own sharding cuts the sorted file list into contiguous runs and would
@@ -50,10 +50,11 @@ bunch the slow battle and replay suites together:
 | `importer` | `tests/importer.test.ts` |
 | `replays` | `tests/g7-repository.test.ts`, `tests/g6-golden.test.ts` |
 | `locks, battle data and terrain` | `tests/g6-locks.test.ts`, `tests/battle-db-adapter.test.ts`, `tests/battle-golden.test.ts`, `tests/terrain.test.ts` |
-| `rest (a-l)` | every other test whose basename starts with `a` through `l` (79 files) |
-| `rest (m-z)` | the other half of the remainder (53 files) |
+| `browser UI visuals` | `tests/bag-menu-visual.test.ts`, `tests/start-menu-visual.test.ts` under the browser export condition |
+| `rest (a-l)` | every other test whose basename starts with `a` through `l` (100 files) |
+| `rest (m-z)` | the other half of the remainder (88 files) |
 
-The former single 132-file `rest` process reached 11.5 GiB resident memory on
+The former single `rest` process reached 11.5 GiB resident memory on
 a 16 GiB runner. The two halves run in separate processes and keep that peak
 bounded. New test files land in one half automatically — no workflow edit is needed.
 If a new file is slow enough to deserve an explicit group, add it to that
@@ -98,7 +99,13 @@ as release gates; they are too slow for every push. See [verification.md](verifi
 
 ### web — the site and a real browser
 
-`bun run web` builds the static site into `dist/web`, then
+`bun run verify:web:link` first builds a loopback-only Link site and drives
+two isolated browser profiles through both the required-capabilities-only and
+optional-replay capability modes. It pins both viewports, both languages,
+keyboard, touch, gamepad, reconnect, pending secrecy and the exact trusted
+replay prefix. `bun run web` then replaces that development build with the
+deployable, unconfigured static site in `dist/web`; this ordering prevents the
+loopback service URL from reaching either uploaded artifact. Next,
 `bun tools/verify-web-journey.ts` plays the opening journey (bedroom through
 the first battle to Route 1) in headless Chrome against the built site,
 comparing checkpoint states and framebuffer hashes against the committed
@@ -205,6 +212,7 @@ bun run verify:preview:coverage
 bun run verify:bootworld:replay
 
 # web job (needs Chrome or Chromium)
+bun run verify:web:link # builds and verifies a loopback-only Link site
 bun run web
 bun tools/verify-web-journey.ts
 bun tools/verify-web-zh.ts

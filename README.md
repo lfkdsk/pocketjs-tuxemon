@@ -733,6 +733,7 @@ bun run arena:demo      # play a deterministic random agent vs normal AI match
 bun run expedition:demo # acquire/train a team, validate it, then enter Arena
 bun run verify:web:arena # replay a tape and check controls, privacy and pixels in Chrome
 bun run verify:web:expedition # replay a journal and check controls, terminal state and pixels
+bun run verify:web:link  # build and play both strict mock Link capability modes in Chrome
 bun run verify:web:audio # stream three imported tracks in headless Chrome
 bunx tsc --noEmit       # typecheck
 bun run test            # the test suite (build first for the pixel replays)
