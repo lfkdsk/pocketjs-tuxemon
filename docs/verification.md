@@ -230,6 +230,50 @@ build and long replay are too expensive for the normal push pipeline, and
 startup plus all-map first-visit measurements still contain wall-clock
 sensitivity on shared runners.
 
+### Mobile Chrome frame time
+
+`bench:web:mobile` drives the production Web build through raw Chrome DevTools
+Protocol, without a browser automation dependency. Its full mode covers
+Cotton Town walking, repeated map switches, a wild encounter, a battle turn,
+the START/bag/Tuxepedia overlays, dense dialogue and a mock-service Web Link
+battle. Every scene has semantic assertions, so a fast run that stopped
+walking, left its intended map, missed battle or failed to open its overlay is
+rejected rather than measured.
+
+The primary sample is main-thread work for each presented frame: all reducer
+steps accumulated since the previous presentation plus PocketJS raster and
+framebuffer presentation. The receipt also records independent `requestAnimationFrame`
+intervals, Long Tasks, end state, maps and scene counters. Full acceptance uses
+390×844 portrait and 844×390 landscape CSS viewports at DPR 3, Chrome 4× and 6×
+CPU throttling, a 3 s warm-up and at least 60 s per sample. A same-window
+baseline/candidate/candidate/baseline sequence supplies two samples from each
+build for every cell. Aggregation takes the median of sample p50/p95/p99 and
+long-frame proportions. The absolute p95 limits are 16.7 ms at 4× and 33 ms at
+6×; the paired guard also refuses a candidate above
+`baseline p95 * 1.08 + 0.5 ms`.
+
+Build immutable baseline and candidate sites before entering a timed window,
+then run the complete matrix like this (Link builds must use the same loopback
+service origin):
+
+```sh
+MOBILE_WEB_BASELINE_SITE=<baseline-site> \
+MOBILE_WEB_CANDIDATE_SITE=<candidate-site> \
+MOBILE_WEB_BASELINE_LINK_SITE=<baseline-link-site> \
+MOBILE_WEB_CANDIDATE_LINK_SITE=<candidate-link-site> \
+MOBILE_WEB_OUTPUT=<receipt.json> \
+bun run bench:web:mobile --full
+```
+
+For a repeatable local regression gate, use `--gate`. It defaults to three
+alternating ABBA/BAAB windows of the landscape 6× Cotton Town cell, applies the
+same absolute and paired limits, and can select another bounded set through
+`MOBILE_WEB_SCENARIOS`, `MOBILE_WEB_VIEWPORTS` and `MOBILE_WEB_THROTTLES`.
+`--profile` records the ten largest JavaScript and wasm self-time nodes. Keep
+other builds and benchmarks stopped during every timed batch. The reference
+matrix, hotspot attribution and remaining full-frame upload limit are in the
+[mobile Web performance report](../findings/G27-MOBILE-PERF.md).
+
 ### Cold startup and Chinese first-open investigation
 
 An interleaved five-process comparison at 480×272 isolates the localization
