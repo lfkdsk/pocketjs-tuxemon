@@ -24,8 +24,11 @@ const OUT = resolve(ROOT, "dist/web-chunks-verify");
 const MANIFEST = JSON.parse(readFileSync(
   join(SITE, "pocket-tuxemon", "pocket-tuxemon.pak-manifest.json"),
   "utf8",
-)) as { chunks: Array<{ id: string }> };
+)) as { chunks: Array<{ id: string; background?: boolean }> };
 const EXPECTED_CHUNKS = MANIFEST.chunks.length;
+const BACKGROUND_CHUNK_IDS = MANIFEST.chunks
+  .filter((chunk) => chunk.background === true)
+  .map((chunk) => chunk.id);
 const chromeFlag = process.argv.indexOf("--chrome");
 const CHROME = chromeFlag >= 0 ? process.argv[chromeFlag + 1]! :
   process.env.CHROME ?? Bun.which("google-chrome") ?? Bun.which("chromium") ?? "google-chrome";
@@ -306,13 +309,33 @@ async function drive(
 
 async function waitForBackground(browser: BrowserSession, label: string): Promise<RunResult["stats"]> {
   const deadline = Date.now() + 90_000;
+  let latest: RunResult["stats"] | undefined;
   while (Date.now() < deadline) {
     const stats = await browser.evaluate<RunResult["stats"]>("globalThis.__pocketPlayer.pakChunks.stats()");
+    latest = stats;
+    const resident = new Set(stats.resident);
     if (stats.pending.length === 0 && stats.queued.length === 0 &&
-        stats.resident.length === EXPECTED_CHUNKS && Object.keys(stats.failures).length === 0) return stats;
+        BACKGROUND_CHUNK_IDS.every((id) => resident.has(id)) &&
+        Object.keys(stats.failures).length === 0) return stats;
     await Bun.sleep(50);
   }
-  throw new Error(`verify-web-chunks: ${label} background queue did not finish`);
+  const resident = new Set(latest?.resident ?? []);
+  const missingBackground = BACKGROUND_CHUNK_IDS.filter((id) => !resident.has(id));
+  throw new Error(`verify-web-chunks: ${label} background queue did not finish: ${JSON.stringify({
+    resident: latest?.resident.length ?? 0,
+    expectedBackground: BACKGROUND_CHUNK_IDS.length,
+    missingBackground,
+    pending: latest?.pending ?? [],
+    queued: latest?.queued ?? [],
+    failures: latest?.failures ?? {},
+  })}`);
+}
+
+function hasCompleteBackground(stats: RunResult["stats"]): boolean {
+  const resident = new Set(stats.resident);
+  return stats.pending.length === 0 && stats.queued.length === 0 &&
+    Object.keys(stats.failures).length === 0 &&
+    BACKGROUND_CHUNK_IDS.every((id) => resident.has(id));
 }
 
 async function singleRun(label: string, lang: "en" | "zh", delayMs: number): Promise<RunResult> {
@@ -375,10 +398,9 @@ const assertions = {
   storageDuringWait: delayedEn.storageRoundTrip && delayedZh.storageRoundTrip,
   noChunkFailures: [instantEn, instantZh, delayedEn, delayedZh]
     .every((run) => run.errors.length === 0 && Object.keys(run.stats.failures).length === 0),
-  backgroundComplete: delayedEnBackground.pending.length === 0 && delayedEnBackground.queued.length === 0 &&
-    delayedEnBackground.resident.length === EXPECTED_CHUNKS,
+  backgroundComplete: hasCompleteBackground(delayedEnBackground),
   warmCacheNoChunkRequests: (chunkRequests.get("warm-en")?.length ?? 0) === 0 &&
-    warmStats.pending.length === 0 && warmStats.queued.length === 0 && warmStats.resident.length === EXPECTED_CHUNKS,
+    hasCompleteBackground(warmStats),
   noDuplicateChunkRequests: ["delayed-en", "warm-en"].every((label) => {
     const requests = chunkRequests.get(label) ?? [];
     return requests.length === new Set(requests).size;
@@ -389,6 +411,7 @@ const report = {
   format: "pocket-tuxemon-web-chunk-verification/v1",
   delayMs: DELAY_MS,
   expectedChunks: EXPECTED_CHUNKS,
+  expectedBackgroundChunks: BACKGROUND_CHUNK_IDS.length,
   runs: { instantEn, delayedEn, instantZh, delayedZh },
   delayedEnBackground,
   warmStats,
