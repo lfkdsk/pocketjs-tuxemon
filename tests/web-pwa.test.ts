@@ -155,6 +155,8 @@ describe("Web PWA finalizer", () => {
       expect(firstWorker).toContain("url.origin !== scopeUrl.origin || isReplayRequest(url)");
       expect(firstWorker).toContain("encodeURIComponent(scopePath)");
       expect(firstWorker).toContain("await verifiedResponse(asset, response)");
+      expect(firstWorker).toContain("return await verifiedResponse(asset, cached)");
+      expect(firstWorker).toContain("await content.delete(url.href)");
       expect(firstWorker).not.toContain("OFFLINE_CHUNK_MISSING");
       expect(() => new Function(firstWorker)).not.toThrow();
 

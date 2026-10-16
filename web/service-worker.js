@@ -37,10 +37,26 @@ async function fetchVerified(asset, signal) {
   }));
 }
 
+async function installResponse(asset) {
+  const url = new URL(asset.url, scopeUrl);
+  if (url.pathname.startsWith(`${scopePath}chunks/`) && /-[0-9a-f]{64}\.pak\.gz$/.test(url.pathname)) {
+    const content = await caches.open(CONTENT_CACHE);
+    const cached = await content.match(url.href);
+    if (cached) {
+      try {
+        return await verifiedResponse(asset, cached);
+      } catch {
+        await content.delete(url.href);
+      }
+    }
+  }
+  return fetchVerified(asset);
+}
+
 async function installShell() {
   const cache = await caches.open(SHELL_CACHE);
   for (const asset of BUILD.shell) {
-    const response = await fetchVerified(asset);
+    const response = await installResponse(asset);
     if (asset.url === "index.html") {
       const html = await response.clone().text();
       if (!html.includes(`data-pwa-build="${BUILD.version}"`)) {
