@@ -12,7 +12,7 @@ import { onMount } from "solid-js";
 import { getOps } from "@pocketjs/framework/host";
 import { createGameEntryReaders, createGameMapRepository } from "./ui/entry-readers.ts";
 import { enStartupData } from "./ui/en-startup-data.ts";
-import { browserPakChunks } from "./ui/web-pak.ts";
+import { browserPakChunks, browserPwaMapLoadErrorHandler } from "./ui/web-pak.ts";
 import type { ProjectShell } from "./vendor/pocket-rpgkit/src/engine/types.ts";
 import {
   GAME_ASSETS,
@@ -589,6 +589,8 @@ function TuxemonWeatherOverlay(_props: GameWorldOverlayProps) {
   );
 }
 
+const pwaMapLoadError = browserPwaMapLoadErrorHandler();
+
 mount(() => (
     <GameView
       immutableState
@@ -628,6 +630,7 @@ mount(() => (
         frameProfileMark("map-change-assets:end");
       }}
       onMapLoading={(mapId) => browserPakChunks()?.setFrameBlocked?.(mapId !== null)}
+      onMapLoadError={pwaMapLoadError}
       onStreamStats={(_layer, stats) => {
         const worldStats = stats as WorldStreamedTerrainStats;
         if (worldDiagnostics) {

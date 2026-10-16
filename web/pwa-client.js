@@ -17,6 +17,7 @@ if (config && "serviceWorker" in navigator) {
   let downloading = false;
   let resumeLanguage = null;
   let installPrompt = null;
+  let mapLoadFailure = null;
 
   const humanBytes = (bytes) => {
     const mib = bytes / (1024 * 1024);
@@ -100,18 +101,38 @@ if (config && "serviceWorker" in navigator) {
         : `${message.completed}/${message.total} files cached; ${humanBytes(message.totalBytes)} total / ` +
           `已缓存 ${message.completed}/${message.total} 个文件，总计 ${humanBytes(message.totalBytes)}`);
     } else if (message.type === "OFFLINE_CHUNK_MISSING") {
-      missingText.textContent = navigator.onLine
-        ? "This area is not available yet. Try again after the download completes. / 此区域尚未下载，请稍后重试。"
-        : "This area has not been downloaded for offline play. Reconnect to retry, or return to cached content. / 此区域尚未下载，联网后可重试，或返回已缓存内容。";
+      if (!mapLoadFailure) {
+        missingText.textContent = navigator.onLine
+          ? "This area is not available yet. Try again after the download completes. / 此区域尚未下载，请稍后重试。"
+          : "This area has not been downloaded for offline play. Reconnect to retry, or return to cached content. / 此区域尚未下载，联网后可重试，或返回已缓存内容。";
+      }
       missing.hidden = false;
       missingRetry.disabled = !navigator.onLine;
     }
   });
 
-  missingRetry.addEventListener("click", () => location.reload());
+  missingRetry.addEventListener("click", () => {
+    if (mapLoadFailure) {
+      const failure = mapLoadFailure;
+      mapLoadFailure = null;
+      missing.hidden = true;
+      failure.retry();
+      return;
+    }
+    location.reload();
+  });
   missingReturn.addEventListener("click", () => {
+    if (mapLoadFailure) {
+      const failure = mapLoadFailure;
+      mapLoadFailure = null;
+      missing.hidden = true;
+      failure.cancel();
+      return;
+    }
     const url = new URL(location.href);
     for (const key of ["chapter", "map", "x", "y", "autoplay", "speed"]) url.searchParams.delete(key);
+    url.searchParams.set("lang", "en");
+    try { localStorage.setItem("pocket-tuxemon/lang", "en"); } catch {}
     location.replace(url.pathname + (url.searchParams.size ? `?${url.searchParams}` : ""));
   });
   window.addEventListener("online", () => {
@@ -176,6 +197,15 @@ if (config && "serviceWorker" in navigator) {
     pause() {
       resumeLanguage = null;
       return send({ type: "OFFLINE_PAUSE" });
+    },
+    showMapLoadFailure(failure) {
+      if (!failure || typeof failure.retry !== "function" || typeof failure.cancel !== "function") return;
+      mapLoadFailure = failure;
+      missingText.textContent = navigator.onLine
+        ? `Could not load ${failure.mapId}. Retry now, or stay on this map. / 无法加载 ${failure.mapId}，可重试或留在当前地图。`
+        : `The content for ${failure.mapId} is not cached. Reconnect to retry, or stay on this map. / ${failure.mapId} 尚未缓存，联网后可重试，或留在当前地图。`;
+      missing.hidden = false;
+      missingRetry.disabled = !navigator.onLine;
     },
     status: requestStatus,
     view() {

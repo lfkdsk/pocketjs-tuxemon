@@ -5,6 +5,8 @@ import {
 } from "../ui/entry-readers.ts";
 import { createWebAudioChunkReader } from "../ui/weather-effects.tsx";
 import type { BrowserPakChunks } from "../ui/web-pak.ts";
+import { browserPwaMapLoadErrorHandler } from "../ui/web-pak.ts";
+import type { GameViewMapLoadFailure } from "../vendor/pocket-rpgkit/src/ui/GameView.tsx";
 
 function bridge(
   ready: Set<string>,
@@ -92,4 +94,34 @@ test("a deferred Web track is retried once after preparation, without changing i
   staged.retryReady({ retryResource: (entry) => { retries.push(entry); } });
   expect(retries).toEqual([key]);
   expect([...staged.read(key)]).toEqual([1, 2, 3]);
+});
+
+test("map load recovery is opt-in and forwards the exact controls to the PWA page", () => {
+  const globals = globalThis as typeof globalThis & {
+    __pocketPwa?: { showMapLoadFailure(failure: GameViewMapLoadFailure): void };
+  };
+  const previous = globals.__pocketPwa;
+  try {
+    delete globals.__pocketPwa;
+    expect(browserPwaMapLoadErrorHandler()).toBeUndefined();
+    const received: GameViewMapLoadFailure[] = [];
+    globals.__pocketPwa = { showMapLoadFailure: (failure) => { received.push(failure); } };
+    const handler = browserPwaMapLoadErrorHandler();
+    let retries = 0;
+    let cancels = 0;
+    const failure: GameViewMapLoadFailure = {
+      mapId: "route6",
+      error: new Error("offline"),
+      retry: () => { retries++; },
+      cancel: () => { cancels++; },
+    };
+    handler!(failure);
+    expect(received).toEqual([failure]);
+    received[0]!.retry();
+    received[0]!.cancel();
+    expect({ retries, cancels }).toEqual({ retries: 1, cancels: 1 });
+  } finally {
+    if (previous) globals.__pocketPwa = previous;
+    else delete globals.__pocketPwa;
+  }
 });
