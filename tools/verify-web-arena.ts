@@ -218,9 +218,12 @@ check(
 const normalConfig = embeddedJson(join(SITE, GAME, "index.html"), "pocket-game");
 check(
   "ordinary player keeps the chunked production bundle",
-  normalConfig.bundle === "pocket-tuxemon.js" && normalConfig.pak === null &&
-    normalConfig.pakManifest === "pocket-tuxemon.pak-manifest.json" &&
-    ordinaryRequests.some((url) => /pocket-tuxemon\.pak-manifest\.json(?:$|\?)/.test(url)) &&
+  typeof normalConfig.bundle === "string" &&
+    /^pocket-tuxemon\.[a-f0-9]{64}\.js$/.test(normalConfig.bundle) &&
+    normalConfig.pak === null &&
+    typeof normalConfig.pakManifest === "string" &&
+    /^pocket-tuxemon\.pak-manifest\.[a-f0-9]{64}\.json$/.test(normalConfig.pakManifest) &&
+    ordinaryRequests.some((url) => /pocket-tuxemon\.pak-manifest\.[a-f0-9]{64}\.json(?:$|\?)/.test(url)) &&
     ordinaryRequests.some((url) => /\/chunks\/startup-[a-f0-9]{64}\.pak\.gz(?:$|\?)/.test(url)) &&
     !ordinaryRequests.some((url) => /\/pocket-tuxemon\.pak(?:$|\?)/.test(url)),
   `${String(normalConfig.bundle)} / ${String(normalConfig.pak)} / ${String(normalConfig.pakManifest)}`,
