@@ -336,6 +336,19 @@ ${WEB_CHUNK_AWARE_STEP_SOURCE}`,
     report.screenshots.push(name);
     return bytes;
   }
+
+  async setViewport(width: number, height: number): Promise<void> {
+    await this.send("Emulation.setDeviceMetricsOverride", {
+      width,
+      height,
+      deviceScaleFactor: 1,
+      mobile: false,
+    });
+  }
+
+  async clearViewport(): Promise<void> {
+    await this.send("Emulation.clearDeviceMetricsOverride");
+  }
 }
 
 function goldBorderPixels(
@@ -804,6 +817,30 @@ async function main(): Promise<void> {
   check("missing-dialog screenshot contains the semantic gold card border",
     Number(border.nearGold) >= 300 && Number(border.topCenterDistance) <= 24,
     border);
+  const responsiveBorders: Record<string, JsonObject> = {};
+  for (const [width, height] of [[480, 272], [960, 544]] as const) {
+    await browser.setViewport(width, height);
+    const geometry = await browser.evaluate<JsonObject>(`(() => {
+      const rect = document.querySelector(".offline-missing-card").getBoundingClientRect();
+      return { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom,
+        viewportWidth: innerWidth, viewportHeight: innerHeight };
+    })()`);
+    check(`missing dialog fits the ${width}x${height} player viewport`,
+      Number(geometry.left) >= 0 && Number(geometry.top) >= 0 &&
+      Number(geometry.right) <= width && Number(geometry.bottom) <= height &&
+      Number(geometry.viewportWidth) === width && Number(geometry.viewportHeight) === height,
+      geometry);
+    const png = await browser.screenshot(`offline-missing.${width}x${height}.png`);
+    const responsiveBorder = goldBorderPixels(
+      png,
+      geometry as Parameters<typeof goldBorderPixels>[1],
+    );
+    check(`missing dialog keeps its semantic gold border at ${width}x${height}`,
+      Number(responsiveBorder.nearGold) >= 300 && Number(responsiveBorder.topCenterDistance) <= 24,
+      responsiveBorder);
+    responsiveBorders[`${width}x${height}`] = { geometry, border: responsiveBorder };
+  }
+  await browser.clearViewport();
   const returnTimeOrigin = await browser.evaluate<number>(`performance.timeOrigin`);
   await browser.evaluate(`document.getElementById("offline-missing-return").click()`);
   const recovered = await browser.waitFor<JsonObject>("Return to cached game recovery", `(() => {
@@ -821,7 +858,7 @@ async function main(): Promise<void> {
     String(recovered.location).startsWith("spyder_bedroom,") && Number(recovered.stored) === Number(saveLoad.stored) &&
     afterRecoveryFrame === recoveredFrame + 1 && browser.errors.length === beforeMissingErrors,
     { beforeMissing, recovered, afterRecoveryFrame, errors: browser.errors.slice(beforeMissingErrors) });
-  report.missing = { view: missingView, evidence: missingEvidence, border, recovered };
+  report.missing = { view: missingView, evidence: missingEvidence, border, responsiveBorders, recovered };
 
   // Start the complete English package with enough response latency to make
   // an actual transport interruption observable. The page's online listener,
