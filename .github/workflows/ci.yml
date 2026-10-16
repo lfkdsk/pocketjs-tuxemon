@@ -128,6 +128,12 @@ jobs:
           # frame zero through the Kernel/Billie Data Center epilogue.
           - name: Kernel-quest journey from J3 save and frame zero
             run: bun run verify:j4:mainline
+          # German needs different confirm edges for translated dialog pages.
+          # Transcribe those edges in memory, then require the complete
+          # language-neutral reducer state to match English at every campaign
+          # boundary and after all 230,322 source frames.
+          - name: German complete journey matches English state
+            run: bun run verify:de:mainline
           # No renderer or PNG writes: replay the authoritative tapes once
           # and reject any golden checkpoint whose map/tile/frame drifted.
           - name: Golden screenshot checkpoints match their tapes
