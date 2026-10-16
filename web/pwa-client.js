@@ -55,12 +55,19 @@ if (config && "serviceWorker" in navigator) {
   const missingRetry = document.getElementById("offline-missing-retry");
   const missingReturn = document.getElementById("offline-missing-return");
   let downloading = false;
+  let activeLanguage = null;
   let resumeLanguage = null;
   let installPrompt = null;
   let mapLoadFailure = null;
   let mapPrepareAttempts = 0;
+  let mapPreparePolls = 0;
+  let mapPrepareRecoveryState = "waiting";
+  let mapPrepareTimer = null;
   let lastMapPrepareEntry = null;
   let workerBuild = null;
+  const MAP_PREPARE_POLL_LIMIT = 64;
+  const MAP_PREPARE_POLL_BASE_MS = 25;
+  const MAP_PREPARE_POLL_MAX_MS = 1000;
 
   const mapIdForEntry = (entry) => {
     const match = /^maps\/(.+)\.rkm$/.exec(entry);
@@ -81,13 +88,27 @@ if (config && "serviceWorker" in navigator) {
   // succeeds or Return reloads the already cached game page.
   let chunks = null;
   const installMapPrepareRecovery = () => {
+    mapPrepareTimer = null;
     const next = globalThis.__pocketPak;
     if (!next || typeof next.prepare !== "function") {
-      setTimeout(installMapPrepareRecovery, 25);
+      if (mapPreparePolls >= MAP_PREPARE_POLL_LIMIT) {
+        mapPrepareRecoveryState = "unavailable";
+        setStatus("Offline map recovery unavailable / 离线地图恢复暂不可用");
+        return;
+      }
+      const delay = Math.min(
+        MAP_PREPARE_POLL_BASE_MS * (2 ** mapPreparePolls),
+        MAP_PREPARE_POLL_MAX_MS,
+      );
+      mapPreparePolls++;
+      mapPrepareTimer = setTimeout(installMapPrepareRecovery, delay);
       return;
     }
     chunks = next;
-    if (chunks.__pocketPwaMapPrepare) return;
+    if (chunks.__pocketPwaMapPrepare) {
+      mapPrepareRecoveryState = "wrapped";
+      return;
+    }
     const prepare = chunks.prepare.bind(chunks);
     Object.defineProperty(chunks, "__pocketPwaMapPrepare", { value: prepare });
     chunks.prepare = (entry) => {
@@ -119,6 +140,7 @@ if (config && "serviceWorker" in navigator) {
         });
       });
     };
+    mapPrepareRecoveryState = "wrapped";
   };
   installMapPrepareRecovery();
 
@@ -130,8 +152,19 @@ if (config && "serviceWorker" in navigator) {
   const setStatus = (text) => {
     status.textContent = text;
   };
-  const setDownloading = (value) => {
+  const languageNames = (language) => {
+    const entry = languages.find(([code]) => code === language);
+    return { en: entry?.[1] ?? language, zh: entry?.[2] ?? language };
+  };
+  const switchedDownloadStatus = (language) => {
+    const active = languageNames(language);
+    const selected = languageNames(select.value);
+    return `Downloading ${active.en} continues; ${selected.en} is selected next / ` +
+      `正在继续下载${active.zh}；接下来选择${selected.zh}`;
+  };
+  const setDownloading = (value, language = null) => {
     downloading = value;
+    activeLanguage = value ? (language ?? activeLanguage ?? select.value) : null;
     button.textContent = value ? "Pause / 暂停" : "Download or resume / 下载或继续";
     button.setAttribute("aria-pressed", String(value));
   };
@@ -149,6 +182,26 @@ if (config && "serviceWorker" in navigator) {
       setStatus("Offline controls unavailable / 离线控制暂不可用");
     });
   };
+  const startDownload = (language) => {
+    resumeLanguage = language;
+    setDownloading(true, language);
+    return send({ type: "OFFLINE_DOWNLOAD", language }).catch((error) => {
+      if (activeLanguage !== language) return;
+      resumeLanguage = null;
+      setDownloading(false);
+      const names = languageNames(language);
+      setStatus(`Could not start ${names.en}: ${error.message} / 无法开始下载${names.zh}`);
+    });
+  };
+  const pauseDownload = () => {
+    const language = activeLanguage;
+    resumeLanguage = null;
+    return send({ type: "OFFLINE_PAUSE" }).catch(() => {
+      if (activeLanguage !== language) return;
+      setDownloading(false);
+      setStatus("Could not pause download; controls reset / 无法暂停下载，控制已重置");
+    });
+  };
 
   const pageLanguage = document.documentElement.getAttribute("data-page-lang") ||
     document.documentElement.lang || "en";
@@ -156,20 +209,18 @@ if (config && "serviceWorker" in navigator) {
   select.value = preferred;
   setStatus(idleLabel());
   select.addEventListener("change", () => {
-    if (!downloading) setStatus(idleLabel());
+    if (downloading && activeLanguage) {
+      setStatus(switchedDownloadStatus(activeLanguage));
+      return;
+    }
+    setStatus(idleLabel());
     requestStatus();
   });
   button.addEventListener("click", () => {
     if (downloading) {
-      resumeLanguage = null;
-      void send({ type: "OFFLINE_PAUSE" });
+      void pauseDownload();
     } else {
-      resumeLanguage = select.value;
-      setDownloading(true);
-      void send({ type: "OFFLINE_DOWNLOAD", language: select.value }).catch((error) => {
-        setDownloading(false);
-        setStatus(`Download could not start: ${error.message} / 无法开始下载`);
-      });
+      void startDownload(select.value);
     }
   });
 
@@ -177,46 +228,53 @@ if (config && "serviceWorker" in navigator) {
     const message = event.data;
     if (!message || typeof message !== "object") return;
     if (typeof message.build === "string") workerBuild = message.build;
-    if (message.type === "OFFLINE_PROGRESS" && message.language === select.value) {
-      setDownloading(true);
-      setStatus(
-        `${message.completed}/${message.total} files, ${humanBytes(message.bytes)}/${humanBytes(message.totalBytes)}` +
-        ` / ${message.completed}/${message.total} 个文件`,
-      );
-    } else if (message.type === "OFFLINE_COMPLETE" && message.language === select.value) {
+    const activeMessage = activeLanguage !== null && message.language === activeLanguage;
+    if (message.type === "OFFLINE_PROGRESS" && activeMessage) {
+      const active = languageNames(message.language);
+      const selected = languageNames(select.value);
+      setDownloading(true, message.language);
+      const counts = `${message.completed}/${message.total}`;
+      const bytes = `${humanBytes(message.bytes)}/${humanBytes(message.totalBytes)}`;
+      setStatus(message.language === select.value
+        ? `Downloading ${active.en}: ${counts} files, ${bytes} / 正在下载${active.zh}：${counts} 个文件`
+        : `Downloading ${active.en}: ${counts} files, ${bytes}; ${selected.en} is selected next / ` +
+          `正在下载${active.zh}：${counts} 个文件；接下来选择${selected.zh}`);
+    } else if (message.type === "OFFLINE_COMPLETE" && activeMessage) {
+      const completed = languageNames(message.language);
+      const selected = languageNames(select.value);
       resumeLanguage = null;
       setDownloading(false);
-      setStatus(`Ready offline (${humanBytes(message.totalBytes)}) / 已可离线游玩`);
-    } else if (message.type === "OFFLINE_PAUSED" && message.language === select.value) {
+      setStatus(message.language === select.value
+        ? `Ready offline for ${completed.en} (${humanBytes(message.totalBytes)}) / ${completed.zh}已可离线游玩`
+        : `${completed.en} is ready offline; ${selected.en} is selected / ` +
+          `${completed.zh}已可离线游玩；当前选择${selected.zh}`);
+    } else if (message.type === "OFFLINE_PAUSED" && activeMessage) {
+      const paused = languageNames(message.language);
+      const selected = languageNames(select.value);
       setDownloading(false);
-      setStatus(`Paused at ${message.completed}/${message.total}; press to resume / 已暂停，可继续`);
-    } else if (message.type === "OFFLINE_ERROR" && message.language === select.value) {
+      setStatus(message.language === select.value
+        ? `${paused.en} paused at ${message.completed}/${message.total}; press to resume / ${paused.zh}下载已暂停，可继续`
+        : `${paused.en} paused; ${selected.en} is selected / ${paused.zh}下载已暂停；当前选择${selected.zh}`);
+    } else if (message.type === "OFFLINE_ERROR" && activeMessage) {
+      const interrupted = languageNames(message.language);
       setDownloading(false);
-      setStatus(`Download interrupted; reconnect to resume / 下载已中断，联网后可继续`);
-    } else if (message.type === "OFFLINE_STATUS" && message.language === select.value) {
+      setStatus(`${interrupted.en} download interrupted; reconnect to resume / ` +
+        `${interrupted.zh}下载已中断，联网后将继续`);
+    } else if (message.type === "OFFLINE_STATUS" && message.language === select.value && !downloading) {
       setStatus(message.complete
         ? `Ready offline (${humanBytes(message.totalBytes)}) / 已可离线游玩`
         : `${message.completed}/${message.total} files cached; ${humanBytes(message.totalBytes)} total / ` +
           `已缓存 ${message.completed}/${message.total} 个文件，总计 ${humanBytes(message.totalBytes)}`);
-    } else if (message.type === "OFFLINE_CHUNK_MISSING") {
-      if (!mapLoadFailure) {
-        missingText.textContent = navigator.onLine
-          ? "This area is not available yet. Try again after the download completes. / 此区域尚未下载，请稍后重试。"
-          : "This area has not been downloaded for offline play. Reconnect to retry, or return to cached content. / 此区域尚未下载，联网后可重试，或返回已缓存内容。";
-      }
-      missing.hidden = false;
-      missingRetry.disabled = !navigator.onLine;
+    } else if (message.type === "OFFLINE_ERROR" && message.language === select.value && !downloading) {
+      setStatus("Could not check offline content / 无法检查离线内容");
     }
   });
 
   missingRetry.addEventListener("click", () => {
-    if (mapLoadFailure) {
-      const failure = mapLoadFailure;
-      missingRetry.disabled = true;
-      void failure.retry();
-      return;
-    }
-    location.reload();
+    const failure = mapLoadFailure;
+    if (!failure) return;
+    missingRetry.disabled = true;
+    void failure.retry();
   });
   const returnToCachedGame = () => {
     const url = new URL(location.href);
@@ -226,23 +284,24 @@ if (config && "serviceWorker" in navigator) {
     location.replace(url.pathname + (url.searchParams.size ? `?${url.searchParams}` : ""));
   };
   missingReturn.addEventListener("click", () => {
-    if (mapLoadFailure) {
-      mapLoadFailure = null;
-      missing.hidden = true;
-      returnToCachedGame();
-      return;
-    }
+    if (!mapLoadFailure) return;
+    mapLoadFailure = null;
+    missing.hidden = true;
     returnToCachedGame();
   });
   window.addEventListener("online", () => {
     missingRetry.disabled = false;
-    if (resumeLanguage) {
-      setDownloading(true);
-      void send({ type: "OFFLINE_DOWNLOAD", language: resumeLanguage });
+    if (resumeLanguage && !downloading) {
+      void startDownload(resumeLanguage);
     }
   });
   window.addEventListener("offline", () => {
     missingRetry.disabled = true;
+  });
+  window.addEventListener("pagehide", () => {
+    if (mapPrepareTimer !== null) clearTimeout(mapPrepareTimer);
+    mapPrepareTimer = null;
+    if (mapPrepareRecoveryState === "waiting") mapPrepareRecoveryState = "cancelled";
   });
 
   window.addEventListener("beforeinstallprompt", (event) => {
@@ -289,13 +348,10 @@ if (config && "serviceWorker" in navigator) {
     build: config.build,
     download(language = select.value) {
       select.value = language;
-      resumeLanguage = language;
-      setDownloading(true);
-      return send({ type: "OFFLINE_DOWNLOAD", language });
+      return startDownload(language);
     },
     pause() {
-      resumeLanguage = null;
-      return send({ type: "OFFLINE_PAUSE" });
+      return pauseDownload();
     },
     showMapLoadFailure(failure) {
       if (!failure || typeof failure.retry !== "function") return;
@@ -308,12 +364,16 @@ if (config && "serviceWorker" in navigator) {
         workerBuild,
         language: select.value,
         downloading,
+        activeLanguage,
+        resumeLanguage,
         status: status.textContent,
         missing: !missing.hidden,
         missingMap: mapLoadFailure?.mapId ?? null,
         missingEntry: mapLoadFailure?.entry ?? null,
         mapPrepareWrapped: !!chunks?.__pocketPwaMapPrepare,
         mapPrepareAttempts,
+        mapPreparePolls,
+        mapPrepareRecoveryState,
         lastMapPrepareEntry,
       };
     },
