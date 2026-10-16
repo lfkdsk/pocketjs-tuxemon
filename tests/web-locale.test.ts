@@ -50,13 +50,13 @@ afterEach(() => {
 describe("web locale bootstrap", () => {
   test("browser language selects and persists a supported canonical page code", () => {
     expect(runDetection("https://example.test/game/", ["de-DE", "en-US"]).stored).toBe("de");
-    expect(runDetection("https://example.test/game/", ["pt-PT"]).stored).toBe("pt-BR");
+    expect(runDetection("https://example.test/game/", ["pt-PT"]).stored).toBe("pt-br");
   });
 
   test("URL remains highest priority and aliases are canonicalized for page and guest", () => {
     const result = runDetection("https://example.test/game/?chapter=one&lang=pt_BR#play", ["de-DE"], "fr");
     expect(result.stored).toBe("fr");
-    expect(result.replaced).toEqual(["/game/?chapter=one&lang=pt-BR#play"]);
+    expect(result.replaced).toEqual(["/game/?chapter=one&lang=pt-br#play"]);
   });
 
   test("player awaits the selected locale chunk before evaluating the guest", () => {
@@ -65,7 +65,7 @@ describe("web locale bootstrap", () => {
       "utf8",
     );
     const patched = injectLocaleBootstrapBarrier(source);
-    const barrier = patched.indexOf("await pakChunks.prepare(localeEntry)");
+    const barrier = patched.indexOf("await globalThis.__pocketPak.prepare(");
     const evaluate = patched.indexOf("new Function(`${source}");
     expect(barrier).toBeGreaterThan(0);
     expect(evaluate).toBeGreaterThan(barrier);
@@ -75,7 +75,24 @@ describe("web locale bootstrap", () => {
       fr: "l10n/fr_FR/project-shell.json",
       es: "l10n/es_ES/project-shell.json",
       it: "l10n/it_IT/project-shell.json",
-      "pt-BR": "l10n/pt_BR/project-shell.json",
+      "pt-br": "l10n/pt_BR/project-shell.json",
     });
+  });
+
+  test("bootstrap barrier also patches the bundled player spelling", () => {
+    const source = "async boot(){let J={},C='';Function(`${C}\n//# sourceURL=${J.app}.js`)()}";
+    const patched = injectLocaleBootstrapBarrier(source);
+    expect(patched).toContain("await globalThis.__pocketPak.prepare(J.localeBootstrap");
+    expect(patched.indexOf("__pocketPak.prepare(")).toBeLessThan(patched.indexOf("Function(`${C}"));
+    expect(injectLocaleBootstrapBarrier(patched)).toBe(patched);
+  });
+
+  test("web manifest declares every canonical page language code", () => {
+    const web = JSON.parse(readFileSync(resolve(ROOT, "web.json"), "utf8")) as {
+      games: { "pocket-tuxemon": { languages: Array<{ code: string }> } };
+    };
+    expect(web.games["pocket-tuxemon"].languages.map(({ code }) => code)).toEqual([
+      "en", "zh", "de", "fr", "es", "it", "pt-br",
+    ]);
   });
 });

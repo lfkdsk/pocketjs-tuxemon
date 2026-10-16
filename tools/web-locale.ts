@@ -8,18 +8,18 @@ export const WEB_LOCALE_BOOTSTRAP: Readonly<Record<string, string>> = {
   fr: "l10n/fr_FR/project-shell.json",
   es: "l10n/es_ES/project-shell.json",
   it: "l10n/it_IT/project-shell.json",
-  "pt-BR": "l10n/pt_BR/project-shell.json",
+  "pt-br": "l10n/pt_BR/project-shell.json",
 };
 
 const BROWSER_LANGUAGE_SCRIPT = `<script id="pocket-tuxemon-browser-language">
 (function(){
   "use strict";
-  var aliases={en:"en",zh:"zh",de:"de",fr:"fr",es:"es",it:"it",pt:"pt-BR"};
+  var aliases={en:"en",zh:"zh",de:"de",fr:"fr",es:"es",it:"it",pt:"pt-br"};
   function normalize(value){
     if(!value)return null;
     var text=String(value).replace(/_/g,"-").toLowerCase();
     if(text==="zh"||text==="zh-cn"||text==="zh-hans")return "zh";
-    if(text==="pt"||text.indexOf("pt-")===0)return "pt-BR";
+    if(text==="pt"||text.indexOf("pt-")===0)return "pt-br";
     var root=text.split("-")[0];
     return aliases[root]||null;
   }
@@ -51,12 +51,16 @@ export function injectBrowserLanguageDetection(html: string): string {
 
 /** Await the selected locale's bootstrap chunk before evaluating main.tsx. */
 export function injectLocaleBootstrapBarrier(playerSource: string): string {
-  if (playerSource.includes("config.localeBootstrap?.[globalThis.__pocketPageLang")) return playerSource;
-  const marker = "    initAuthUI(config);\n    new Function(`${source}\\n//# sourceURL=${config.app}.js`)();";
-  const replacement = "    initAuthUI(config);\n" +
-    "    const localeEntry = config.localeBootstrap?.[globalThis.__pocketPageLang ?? \"en\"];\n" +
-    "    if (pakChunks && localeEntry) await pakChunks.prepare(localeEntry);\n" +
-    "    new Function(`${source}\\n//# sourceURL=${config.app}.js`)();";
-  if (!playerSource.includes(marker)) throw new Error("web locale: player boot marker changed");
-  return playerSource.replace(marker, replacement);
+  if (playerSource.includes("__pocketPak.prepare(")) return playerSource;
+  // web.ts receives the bundled shared player, while the unit test exercises
+  // the readable source. Bun removes `new` and turns the escaped newline into
+  // a literal newline, so match either spelling and retain its local names.
+  const evaluate = /(?:new\s+)?Function\(\`\$\{([A-Za-z_$][\w$]*)\}(?:\\n|\n)\/\/# sourceURL=\$\{([A-Za-z_$][\w$]*)\.app\}\.js\`\)\(\)/;
+  const match = evaluate.exec(playerSource);
+  if (!match) throw new Error("web locale: player boot marker changed");
+  const config = match[2]!;
+  const localeEntry = `${config}.localeBootstrap?.[globalThis.__pocketPageLang ?? "en"]`;
+  const barrier = `(globalThis.__pocketPak && ${localeEntry} ? ` +
+    `await globalThis.__pocketPak.prepare(${localeEntry}) : void 0),`;
+  return playerSource.replace(match[0], barrier + match[0]);
 }

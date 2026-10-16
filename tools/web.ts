@@ -177,7 +177,9 @@ const expeditionReplayStyles = `<style>
 </style>`;
 
 const playerPath = join(gameDir, "index.html");
-const playerScriptPath = join(gameDir, "player.js");
+// The kit emits one shared player next to all game directories; each game
+// page references it as ../player.js.
+const playerScriptPath = join(root, "dist", "web", "player.js");
 await Bun.write(
   playerScriptPath,
   injectLocaleBootstrapBarrier(await Bun.file(playerScriptPath).text()),

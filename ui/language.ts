@@ -35,7 +35,7 @@ export const LANGUAGES: readonly LanguageInfo[] = [
   { lang: "fr_FR", code: "fr", label: "Français", sub: "Français" },
   { lang: "es_ES", code: "es", label: "Español", sub: "Español" },
   { lang: "it_IT", code: "it", label: "Italiano", sub: "Italiano" },
-  { lang: "pt_BR", code: "pt-BR", label: "Português", sub: "Português (Brasil)" },
+  { lang: "pt_BR", code: "pt-br", label: "Português", sub: "Português (Brasil)" },
 ] as const;
 
 const LANGUAGE_BY_LANG = new Map(LANGUAGES.map((entry) => [entry.lang, entry]));
