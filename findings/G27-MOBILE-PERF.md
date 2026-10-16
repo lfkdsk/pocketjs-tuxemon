@@ -15,7 +15,7 @@ the complete 960×544 RGBA image through `putImageData` on every presented frame
 That is 2,088,960 bytes per presentation. A dirty-region raster/readback/upload
 contract is the next material step, and this work was explicitly outside the
 allowed PocketJS scope. The result is therefore **BLOCKED**, despite the clean
-correctness and non-Web performance gates.
+functional gates and bounded host regression comparisons.
 
 `.github/workflows/ci.yml` was not changed. No service worker, Web manifest,
 PocketJS source or `bun.lock` was changed.
