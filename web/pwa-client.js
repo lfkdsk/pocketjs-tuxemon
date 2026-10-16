@@ -60,6 +60,54 @@ if (config && "serviceWorker" in navigator) {
   let mapLoadFailure = null;
   let workerBuild = null;
 
+  const mapIdForEntry = (entry) => {
+    const match = /^maps\/(.+)\.rkm$/.exec(entry);
+    return match ? match[1] : null;
+  };
+  const showMapLoadFailure = (failure) => {
+    mapLoadFailure = failure;
+    missingText.textContent = navigator.onLine
+      ? `Could not load ${failure.mapId}. Retry now, or stay on this map. / 无法加载 ${failure.mapId}，可重试或留在当前地图。`
+      : `The content for ${failure.mapId} is not cached. Reconnect to retry, or stay on this map. / ${failure.mapId} 尚未缓存，联网后可重试，或留在当前地图。`;
+    missing.hidden = false;
+    missingRetry.disabled = !navigator.onLine;
+  };
+
+  // The game captures this browser-only object by reference. Wrap only map
+  // prepares after the first playable map: native builds retain their exact
+  // bundle, while a failed Web fetch parks the same reducer frame until Retry
+  // succeeds or Return reloads the already cached game page.
+  const chunks = globalThis.__pocketPak;
+  if (chunks && typeof chunks.prepare === "function" && !chunks.__pocketPwaMapPrepare) {
+    const prepare = chunks.prepare.bind(chunks);
+    Object.defineProperty(chunks, "__pocketPwaMapPrepare", { value: prepare });
+    chunks.prepare = (entry) => prepare(entry).catch((error) => {
+      const mapId = typeof entry === "string" ? mapIdForEntry(entry) : null;
+      if (!mapId) throw error;
+      return new Promise((resolve) => {
+        const failure = {
+          mapId,
+          entry,
+          error,
+          async retry() {
+            try {
+              await prepare(entry);
+              if (mapLoadFailure === failure) {
+                mapLoadFailure = null;
+                missing.hidden = true;
+              }
+              resolve();
+            } catch (nextError) {
+              failure.error = nextError;
+              showMapLoadFailure(failure);
+            }
+          },
+        };
+        showMapLoadFailure(failure);
+      });
+    });
+  }
+
   const humanBytes = (bytes) => {
     const mib = bytes / (1024 * 1024);
     return `${mib.toFixed(mib < 10 ? 1 : 0)} MiB`;
@@ -150,9 +198,8 @@ if (config && "serviceWorker" in navigator) {
   missingRetry.addEventListener("click", () => {
     if (mapLoadFailure) {
       const failure = mapLoadFailure;
-      mapLoadFailure = null;
-      missing.hidden = true;
-      failure.retry();
+      missingRetry.disabled = true;
+      void failure.retry();
       return;
     }
     location.reload();
@@ -166,10 +213,8 @@ if (config && "serviceWorker" in navigator) {
   };
   missingReturn.addEventListener("click", () => {
     if (mapLoadFailure) {
-      const failure = mapLoadFailure;
       mapLoadFailure = null;
       missing.hidden = true;
-      failure.cancel();
       returnToCachedGame();
       return;
     }
@@ -239,13 +284,8 @@ if (config && "serviceWorker" in navigator) {
       return send({ type: "OFFLINE_PAUSE" });
     },
     showMapLoadFailure(failure) {
-      if (!failure || typeof failure.retry !== "function" || typeof failure.cancel !== "function") return;
-      mapLoadFailure = failure;
-      missingText.textContent = navigator.onLine
-        ? `Could not load ${failure.mapId}. Retry now, or stay on this map. / 无法加载 ${failure.mapId}，可重试或留在当前地图。`
-        : `The content for ${failure.mapId} is not cached. Reconnect to retry, or stay on this map. / ${failure.mapId} 尚未缓存，联网后可重试，或留在当前地图。`;
-      missing.hidden = false;
-      missingRetry.disabled = !navigator.onLine;
+      if (!failure || typeof failure.retry !== "function") return;
+      showMapLoadFailure(failure);
     },
     status: requestStatus,
     view() {
@@ -256,6 +296,8 @@ if (config && "serviceWorker" in navigator) {
         downloading,
         status: status.textContent,
         missing: !missing.hidden,
+        missingMap: mapLoadFailure?.mapId ?? null,
+        missingEntry: mapLoadFailure?.entry ?? null,
       };
     },
   };

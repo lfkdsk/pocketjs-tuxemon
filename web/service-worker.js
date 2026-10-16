@@ -2,11 +2,11 @@
 // remains readable so the cache policy can be audited without opening output.
 
 const BUILD = __POCKET_TUXEMON_PWA_BUILD__;
-const SHELL_PREFIX = "pocket-tuxemon:shell:v1:";
-const SHELL_CACHE = SHELL_PREFIX + BUILD.version;
-const CONTENT_CACHE = "pocket-rpgkit:pak-chunks:v1";
 const scopeUrl = new URL(self.registration.scope);
 const scopePath = scopeUrl.pathname.endsWith("/") ? scopeUrl.pathname : `${scopeUrl.pathname}/`;
+const SHELL_PREFIX = `pocket-tuxemon:shell:v1:${encodeURIComponent(scopePath)}:`;
+const SHELL_CACHE = SHELL_PREFIX + BUILD.version;
+const CONTENT_CACHE = "pocket-rpgkit:pak-chunks:v1";
 const shellByUrl = new Map(BUILD.shell.map((asset) => [new URL(asset.url, scopeUrl).href, asset]));
 const indexUrl = new URL("index.html", scopeUrl).href;
 const manifestUrl = new URL(BUILD.contentManifest, scopeUrl).href;
@@ -79,10 +79,12 @@ async function currentPage(request) {
   try {
     const response = await fetch(request);
     if (response.ok) {
-      const html = await response.clone().text();
+      const asset = shellByUrl.get(indexUrl);
+      const verified = asset ? await verifiedResponse(asset, response) : response;
+      const html = await verified.clone().text();
       if (html.includes(`data-pwa-build="${BUILD.version}"`)) {
-        await cache.put(indexUrl, response.clone());
-        return response;
+        await cache.put(indexUrl, verified.clone());
+        return verified;
       }
       // A newer page must never execute under this release's stable URLs.
       void self.registration.update();
@@ -107,22 +109,13 @@ async function shellAsset(request, asset) {
   return response;
 }
 
-async function contentAsset(request, clientId) {
+async function contentAsset(request) {
   const cache = await caches.open(CONTENT_CACHE);
   const cached = await cache.match(request.url);
   if (cached) return cached;
-  const notifyMissing = async () => {
-    if (!clientId) return;
-    const client = await self.clients.get(clientId);
-    client?.postMessage({ type: "OFFLINE_CHUNK_MISSING", file: new URL(request.url).pathname,
-      build: BUILD.version });
-  };
   try {
     const response = await fetch(request);
-    if (!response.ok) {
-      await notifyMissing();
-      return response;
-    }
+    if (!response.ok) return response;
     const match = /-([0-9a-f]{64})\.pak\.gz$/.exec(new URL(request.url).pathname);
     if (!match) return response;
     const bytes = await response.clone().arrayBuffer();
@@ -131,7 +124,6 @@ async function contentAsset(request, clientId) {
     await cache.put(request.url, response.clone());
     return response;
   } catch {
-    await notifyMissing();
     return new Response("offline content not downloaded", {
       status: 503,
       headers: { "content-type": "text/plain; charset=utf-8", "x-pocket-offline": "missing" },
@@ -174,7 +166,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
   if (url.pathname.startsWith(`${scopePath}chunks/`) && /-[0-9a-f]{64}\.pak\.gz$/.test(url.pathname)) {
-    event.respondWith(contentAsset(request, event.clientId));
+    event.respondWith(contentAsset(request));
   }
 });
 
