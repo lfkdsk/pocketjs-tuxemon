@@ -77,8 +77,11 @@ summary:
   The three event-heavy
   maps cross a 128 KiB compact-decode cap, trading a small amount of storage
   for bounded first-visit latency on QuickJS. Indexed battle art plus its lazy
-  database occupies 3,516,960 B in the pak. The current bilingual Web game pak
-  is 97,049,200 B, including English and Chinese content, CJK font atlases, all
+  database occupies 3,516,960 B in the pak. The current seven-language Web
+  source pak is 136,356,304 B. It publishes an English base as a 6,586,991 B
+  gzip startup pack plus 2,124 deferred chunks (29,315,968 B gzip); a
+  non-English boot fetches only its selected 208,194–220,173 B locale
+  bootstrap. The source includes the locale content, CJK font atlases, all
   content-resolvable audio, its attribution list and demo data. The desktop
   launcher keeps render-critical textures, fonts and the three small WAV
   effects in its 37,855,968 B startup pak. It moves 2,951 lazy data entries
@@ -255,6 +258,30 @@ first battle, Route 1 — in headless Chrome against the built site
 (`bun tools/verify-web-journey.ts`) and checks every checkpoint's state and
 pixels against the goldens.
 
+## German, French, Spanish, Italian, and Portuguese
+
+The game imports Tuxemon's `de_DE`, `fr_FR`, `es_ES`, `it_IT`, and `pt_BR`
+community catalogs. These translations are intentionally marked partial:
+exact coverage of the 4,321 English-backed keys used by this port is 20.27%,
+37.38%, 24.28%, 24.58%, and 20.18%, respectively. Empty, fuzzy, placeholder-
+incompatible, and authored-newline-incompatible entries fall back to English;
+the generated locale reports list every fallback and rejected key.
+
+- **Web:** use `?lang=de`, `fr`, `es`, `it`, or `pt-br`. URL selection wins
+  over the saved choice; otherwise the browser's preferred language is used
+  before English. Options (or **R**) opens the seven-language switcher and the
+  saved choice survives reloads.
+- **Desktop:** pass `--lang en|zh|de|fr|es|it|pt-BR`. The same in-game choice
+  is persisted in the app data folder and takes effect after restart.
+- **PSP:** pass `--lang=<en|zh|de|fr|es|it|pt-BR>`. The selected locale is a
+  build-time choice because this target has no locale persistence channel.
+
+All five Latin locales share Inter's OFL-licensed glyph coverage and a
+generated character inventory. Locale data is split into separate Web chunks,
+so adding languages does not add them all to the startup download. See the
+[locale acceptance report](findings/G25-LOCALES.md) for coverage, screenshots,
+fallback accounting, package measurements, and the German full-mainline replay.
+
 ## Chinese version (中文版)
 
 The game ships with a Simplified Chinese (zh_CN) build alongside English.
@@ -284,7 +311,7 @@ are stored as canonical JSON in both languages.
   press **R** in the game to open the language switcher. The choice is
   remembered in the browser, and the page reloads without the `lang`
   parameter so the stored choice wins on the next boot (priority: URL
-  parameter > stored choice > English).
+  parameter > stored choice > browser preference > English).
 - **Desktop:** `bun run desktop -- --lang zh` (or `--lang en`). The in-game
   **R** switcher writes the choice to the app's data folder and asks for a
   restart.
@@ -297,8 +324,8 @@ are stored as canonical JSON in both languages.
   choices, items, monsters, moves, battle menus, storage and daycare scenes
   — uses the separate Chinese catalog described above.
 
-Saves record the language they were written with. Loading a save from the
-other language shows a bilingual "LANGUAGE MISMATCH / 语言不匹配" prompt
+Saves record the language they were written with. Loading a save from a
+different language shows a localized language-mismatch prompt
 (which language the save is in, how to switch) before any content check,
 instead of an "another build" error. The demo menu (SELECT), the chapter
 buttons and Autoplay work in Chinese too. The Chinese build replays its own
@@ -360,10 +387,11 @@ Known limitations:
   render in Chinese from the generated `data/battle-names.zh_CN.json` table.
   Map names on the welcome sign fall back to their slug when the catalog has
   no entry.
-- **PSP ships in English and Chinese.** `bun run build:psp:zh` (see the
-  [PSP](#psp) section below) builds the Chinese package: it keeps the zh_CN
+- **PSP ships every supported locale.** `bun run build:psp:zh` remains the
+  compatibility spelling for `bun run build:psp --lang=zh` (see the
+  [PSP](#psp) section below). The Chinese package keeps the zh_CN
   shards and the five Chinese startup documents and emits `font-archive.bin`,
-  a 2bpp CJK glyph archive (~1.1 MiB, 2,581 chars × 6 strikes) the PSP reads
+  a 2bpp CJK glyph archive (~1.1 MiB, 2,645 chars × 6 strikes) the PSP reads
   on demand from the memory stick, capped at 256 resident glyphs per slot
   across six slots (~67 KiB). Without the archive installed on the memory
   stick every CJK glyph renders as tofu (the PSP section gives the path).
@@ -784,12 +812,14 @@ development. Linux builds use Clang against the pinned PSP sysroot; macOS uses
 the pinned PSP GCC wrapper by default. Set `POCKETJS_PSP_C_COMPILER` to
 `clang` or `gcc` to choose explicitly.
 
-For the Chinese build, run `bun run build:psp:zh` instead. It additionally
+Select a localized package with `bun run build:psp --lang=<zh|de|fr|es|it|pt-BR>`;
+`bun run build:psp:zh` remains the Chinese compatibility command. Each package
+keeps only its selected localized map and battle banks. Chinese additionally
 emits `dist/psp/font-archive.bin`, a 2bpp CJK glyph archive the PSP reads on
 demand from the memory stick. Copy it to `PSP/COMMON/pocketjs/font-archive.bin`
 on the memory stick (the same `ms0:` tree the external `assets.pak` rides);
-without it the Chinese build renders tofu for every CJK glyph. The English
-build does not need the archive.
+without it the Chinese build renders tofu for every CJK glyph. English and the
+five Latin builds do not need the archive.
 
 ### Saving on PSP
 

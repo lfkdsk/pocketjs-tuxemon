@@ -59,11 +59,12 @@ for (const arg of filteredArgs) {
     throw new Error(`Unknown PSP option: ${arg}`);
   }
 }
-// --zh builds the Chinese package: CJK fallback fonts stay baked, the real
-// ui/zh-data.ts and the zh_CN shards ship, and the bundle boots in Chinese
-// (the PSP host has no localStorage and mounts no fs module, so the language
-// is a build-time choice injected here rather than a runtime switch). The
-// English package (the default) is unchanged.
+// --zh remains the compatibility spelling for --lang=zh. Every non-English
+// PSP package keeps only its selected localized shards and boots in that
+// locale. The PSP host has no localStorage and mounts no fs module, so the
+// language is injected at build time rather than switched at runtime. CJK
+// fallback fonts are retained only for Chinese; Latin packages retain their
+// generated character inventory. The default English package is unchanged.
 if (args.has("--zh")) {
   if (requestedLang !== undefined && normalizeLang(requestedLang) !== "zh_CN") {
     throw new Error("--zh cannot be combined with another --lang");

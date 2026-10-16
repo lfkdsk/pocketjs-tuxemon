@@ -16,8 +16,8 @@ const pocketjs = join(root, "vendor", "pocket-rpgkit", "vendor", "pocketjs");
 const target = process.platform === "darwin" ? "macos-app" : "linux-app";
 const argv = process.argv.slice(2);
 const buildOnly = argv.includes("--build-only");
-// --lang zh (or --lang=zh) selects the Chinese content: it is staged as
-// data.fs lang.json (the bundle reads it at boot) and stripped from the
+// --lang (or --lang=...) selects one supported content locale. It is staged
+// as data.fs lang.json (the bundle reads it at boot) and stripped from the
 // passthrough so the host's flag parser never sees it.
 let lang: string | undefined;
 const passthrough: string[] = [];

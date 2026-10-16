@@ -1,16 +1,18 @@
 // Boot-time language selection for the imported game.
 //
 // Sources, in order:
-//   1. web URL ?lang=zh|en
-//   2. web localStorage / desktop lang.json (written by the in-game
-//      switcher; the web switcher also strips the URL parameter so the
+//   1. a test or build-time override
+//   2. the Web URL's ?lang= value
+//   3. Web localStorage / desktop lang.json (written by the in-game
+//      switcher; the Web switcher also strips the URL parameter so the
 //      stored choice wins on the next boot)
-//   3. default en_US
+//   4. the browser's preferred languages
+//   5. default en_US
 //
-// The kit's own UI strings stay English (KUI1 pending); this selects the
-// game content language only. A save records the language it was written
-// with (battle/extension.ts codec); loading it in the other language shows
-// a clear message instead of silently mixing content.
+// Imported content and translated feature-mode strings follow this locale;
+// untranslated chrome falls back to English. A save records the language it
+// was written with (battle/extension.ts codec); loading it in a different
+// language shows a clear message instead of silently mixing content.
 
 import { fsHost, readFileSync, write } from "@pocketjs/framework/fs";
 import type { GameLang } from "../battle/extension.ts";
