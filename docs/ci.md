@@ -131,7 +131,7 @@ checks both supported raster sizes and proves the normal page never requests
 the lazy replay assets, and `bun run verify:web:audio` plays three imported
 tracks. Any console error fails the run. The site is uploaded as the
 `web-site` artifact (14-day retention), and the journey screenshots as
-`web-journey`. The PWA verifier's JSON receipt and six screenshots are retained
+`web-journey`. The PWA verifier's JSON receipt and eight screenshots are retained
 as `web-pwa` even when a later Web step fails. On pushes to `main` the site is
 also staged as the Pages artifact.
 
