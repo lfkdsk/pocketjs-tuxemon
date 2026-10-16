@@ -37,7 +37,15 @@ const SITE = join(ROOT, "dist", "web");
 const GAME = "pocket-tuxemon";
 const OUT = join(ROOT, "dist", "tux-link-web");
 const GOLDENS = join(ROOT, "tests", "goldens", "tux-link");
-const PORT = 49_190;
+const PORT = (() => {
+  const value = process.env.TUX_LINK_VERIFY_PORT;
+  if (value === undefined) return 49_190;
+  const port = Number(value);
+  if (!Number.isInteger(port) || port < 1 || port > 65_535) {
+    throw new Error(`verify-tux-link-web: invalid TUX_LINK_VERIFY_PORT ${JSON.stringify(value)}`);
+  }
+  return port;
+})();
 const BASE = `http://127.0.0.1:${PORT}`;
 const TRUSTED_REPLAY_BASE = `${BASE}/tux/v1/replays/`;
 const UPDATE = process.argv.includes("--update");
