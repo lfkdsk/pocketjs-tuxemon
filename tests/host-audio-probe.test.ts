@@ -75,6 +75,43 @@ test("native probe requires non-zero accepted and device-clocked battle/victory 
   });
 });
 
+test("native probe attributes a play made during frame to the newly selected track", () => {
+  const host = {
+    createStream: () => 7,
+    play: (_handle: number) => undefined,
+    writePcm: (_handle: number, pcm: ArrayBuffer) => new Int16Array(pcm).length,
+    poll: () => undefined,
+  };
+  const state = {
+    interp: { audio: { bgm: { id: "music_map" } } },
+    scene: null as null | { kind: string },
+  };
+  let nextTrack = BATTLE_TRACK;
+  Object.assign(globalThis, {
+    audio: host,
+    __rpgSessionState: state,
+    frame: () => {
+      state.interp.audio.bgm.id = nextTrack;
+      state.scene = { kind: "battle" };
+      (globalThis as unknown as { audio: typeof host }).audio.play(7);
+    },
+  });
+  Function(hostAudioProbeSource())();
+
+  (globalThis as unknown as { frame: () => void }).frame();
+  nextTrack = VICTORY_TRACK;
+  (globalThis as unknown as { frame: () => void }).frame();
+
+  const probe = (globalThis as Record<string, any>)[AUDIO_PROBE_GLOBAL];
+  expect(probe.report()).toMatchObject({
+    sequence: ["music_map", BATTLE_TRACK, VICTORY_TRACK],
+    phases: {
+      [BATTLE_TRACK]: { plays: 1 },
+      [VICTORY_TRACK]: { plays: 1 },
+    },
+  });
+});
+
 test("validator rejects underrun, silent victory, and missing map restoration mutations", () => {
   const phase = {
     writes: 1,

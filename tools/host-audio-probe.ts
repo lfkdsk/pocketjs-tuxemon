@@ -53,7 +53,10 @@ p.report=()=>({native:p.native,sequence:p.sequence,mapBeforeBattle:p.mapBeforeBa
 if(native){
  const create=native.createStream;native.createStream=function(rate,channels){const handle=create(rate,channels);if(handle>=0)p.streams[handle]={channels,free:16384};return handle;};
  const write=native.writePcm;native.writePcm=function(handle,pcm){const accepted=write(handle,pcm);const b=bucket();p.writes++;b.writes++;p.acceptedFrames+=accepted;b.acceptedFrames+=accepted;const stream=p.streams[handle];if(stream)stream.free=Math.max(0,stream.free-accepted);const samples=new Int16Array(pcm);const n=Math.min(samples.length,accepted*(stream?.channels??1));for(let i=0;i<n;i++){const a=Math.abs(samples[i]);if(a!==0){p.nonZeroSamples++;b.nonZeroSamples++;}if(a>p.peak)p.peak=a;if(a>b.peak)b.peak=a;}return accepted;};
- const play=native.play;native.play=function(handle){p.plays++;bucket().plays++;return play(handle);};
+ // The audio driver can start a newly selected track inside frame(), before
+ // the frame wrapper below observes the reducer state. Refresh here so the
+ // play belongs to the track being started instead of the previous phase.
+ const play=native.play;native.play=function(handle){p.observe();p.plays++;bucket().plays++;return play(handle);};
  const poll=native.poll;native.poll=function(){const line=poll();if(typeof line==="string"){try{const event=JSON.parse(line);const b=bucket();if(event.t==="underrun"){p.underruns++;b.underruns++;}else if(event.t==="credit"&&typeof event.free==="number"){p.creditEvents++;b.creditEvents++;const stream=p.streams[event.h];if(stream){const credited=Math.max(0,event.free-stream.free);p.creditedFrames+=credited;b.creditedFrames+=credited;stream.free=event.free;}}}catch{}}return line;};
 }
 const frame=globalThis.frame;if(typeof frame==="function")globalThis.frame=function(){const out=frame.apply(this,arguments);p.observe();return out;};
