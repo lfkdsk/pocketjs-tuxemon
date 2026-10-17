@@ -234,12 +234,25 @@ before counting native PCM writes and plays, and
 `tests/host-audio-probe.test.ts:78-114` locks the frame-internal transition
 order. All four focused probe tests pass.
 
-The real PPSSPP save matrix and the ordinary release rebuild passed. The
-remaining journey first-frame/memory run, desktop QuickJS cold-start ABBA, and
-mobile Web frame ABBA have not yet been sampled: the host is running a separate
-formal mobile benchmark, and overlapping another timed workload would make
-both records invalid. Functional and component QuickJS gates are green, but a
-release-performance verdict therefore cannot yet be claimed.
+The real PPSSPP save matrix and the ordinary release rebuild passed. A separate
+PocketJS raster delivery subsequently completed at PocketJS `8de08a89`,
+component `dd8a4d27`, and game `c75661f8`. It is explicitly mergeable and
+improves the twelve heavy mobile p95 cells by 46.1–59.1%, but its own maintained
+gate still reports six 4× absolute-budget failures: town walking at 18.150 /
+17.950 ms, encounter at 20.600 / 20.800 ms, and battle turn at 18.550 /
+18.450 ms for portrait / landscape respectively.
+
+That raster chain was not published to either official baseline before this
+delivery. The final fetch still resolved component `origin/main` to
+`cbe136d9e75925a233c290e87543718107e7c5be` and game `origin/main` to
+`a9e73b982abda660b9e53bbb6683a45f5f0bc4f5`. The task explicitly prohibits
+adopting the parallel PocketJS pointer directly, so this branch cannot honestly
+claim a post-raster rebase or final post-raster PSP journey, desktop startup,
+and mobile Web ABBA. Those three measurements must be rerun after the published
+component and game bumps exist. This is an external baseline-publication block,
+not a known row-occlusion correctness failure; all completed functional,
+pixel-parity, mutation, resource, consumer, and pre-bump QuickJS gates above
+remain green.
 
 The normal PSP release was rebuilt after the instrumented save matrix. It
 contains 1,439,215 source bytes, 68,828,784 external bytes, and 1,181,392
