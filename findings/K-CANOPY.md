@@ -49,6 +49,14 @@ real imported Tuxemon maps selected by the diagnostic capture tool. Production
 launches do not set its `renderer` switch and continue to select the seamless
 renderer.
 
+The relevant code trail is explicit: `ui/world-diagnostics.ts:31` declares
+the simulation-only selector, `main.tsx:614` leaves the connected renderer in
+place unless that selector requests `legacy`, and
+`tools/capture-canopy-parity.ts:172` boots each real-game state through both
+paths. The comparison rejects reducer drift at
+`tools/capture-canopy-parity.ts:253` and counts pixels outside the player
+overlap at `tools/capture-canopy-parity.ts:272-295`.
+
 ## Component implementation
 
 `src/ui/occlusion-depth.ts` is the single definition of the ordering rule:
@@ -120,6 +128,19 @@ made its targeted test fail:
 
 The focused tests are part of the full component suite; no mutation remains in
 either delivery branch.
+
+The shared formulas are at
+`vendor/pocket-rpgkit/src/ui/occlusion-depth.ts:18-27`. The connected actor
+space is formed at `vendor/pocket-rpgkit/src/ui/world/renderer.tsx:133-143`
+and attached to the flat upper host at
+`vendor/pocket-rpgkit/src/ui/world/renderer.tsx:203-205`. Static rows bind
+the resident chunk handle at
+`vendor/pocket-rpgkit/src/ui/WorldStreamedTerrain.tsx:299-318`, while
+the viewport-sized circular row pool is maintained at
+`vendor/pocket-rpgkit/src/ui/WorldStreamedTerrain.tsx:321-374`. Preview actors
+and above animations use the same helpers at
+`vendor/pocket-rpgkit/src/ui/WorldNpcPreview.tsx:306` and
+`vendor/pocket-rpgkit/src/ui/WorldAnimatedTiles.tsx:191`.
 
 ## Golden and state impact
 
@@ -200,6 +221,18 @@ stick were also exercised; the last case displayed `SAVE FAILED`, wrote no
 file, and did not crash.
 
 ### PSP and ABBA performance
+
+The first PSP journey run reached the correct terminal at frame 3,629 and
+produced non-zero victory PCM, but exposed a pre-existing attribution error in
+the host-only audio probe: `native.play()` runs after the reducer selects a
+new track but before the probe's frame-tail observation, so every play was
+charged to the preceding phase. Replaying that exact ordering against game
+`origin/main` produced
+`mapPlays=1, battlePlays=1, victoryPlays=0`. The verifier was not weakened;
+`tools/host-audio-probe.ts:55-59` now observes the reducer state immediately
+before counting native PCM writes and plays, and
+`tests/host-audio-probe.test.ts:78-114` locks the frame-internal transition
+order. All four focused probe tests pass.
 
 The real PPSSPP save matrix and the ordinary release rebuild passed. The
 remaining journey first-frame/memory run, desktop QuickJS cold-start ABBA, and
