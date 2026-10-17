@@ -4,7 +4,7 @@
   "hz": 60,
   "worldTraversal": "seamless-v1",
   "source": {
-    "chaptersSha256": "66cf272ccae2a9c7b010b4ce70a885f1f3ee00d8a01ec35eabc14f2ec9f2ab17",
+    "chaptersSha256": "971d92f8c539c8e449509c38a149805e0b1dc5850f3b810bf1a25fcd2d1a92ef",
     "tape": {
       "gb6": {
         "file": "data/gb6-mainline-journey.json",
