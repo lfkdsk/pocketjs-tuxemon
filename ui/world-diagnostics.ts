@@ -28,6 +28,9 @@ export interface WorldRestoreRequest {
  * the production bundle evaluates. Normal launches leave it undefined, so
  * GameView receives none of the diagnostic callbacks or overlay wrapper. */
 export interface PocketTuxemonWorldDiagnostics {
+  /** Sim-only renderer selection for visual parity probes. Production
+   * launches leave this unset and always use the connected-world renderer. */
+  renderer?: "legacy" | "seamless";
   request?: WorldVisitRequest;
   acknowledged?: number;
   restoreRequest?: WorldRestoreRequest;

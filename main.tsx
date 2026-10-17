@@ -611,7 +611,9 @@ mount(() => (
         [TUXEMON_PARK_SUMMARY_SCENE_ID]: TuxemonParkSummaryScene,
       }}
       assets={assets}
-      world={createWorldRenderer({ npcPreview: { sandbox: TUXEMON_PREVIEW_HOOKS } })}
+      world={worldDiagnostics?.renderer === "legacy"
+        ? undefined
+        : createWorldRenderer({ npcPreview: { sandbox: TUXEMON_PREVIEW_HOOKS } })}
       handoffCapability={TUXEMON_HANDOFF_CAPABILITY}
       createWorldCacheDriver={(session, layout) => {
         // NPC art of the visible neighbours the session holds stays resident
