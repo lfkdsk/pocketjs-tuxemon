@@ -75,7 +75,7 @@ test("native probe requires non-zero accepted and device-clocked battle/victory 
   });
 });
 
-test("native probe attributes a play made during frame to the newly selected track", () => {
+test("native probe attributes audio started during frame to the newly selected track", () => {
   const host = {
     createStream: () => 7,
     play: (_handle: number) => undefined,
@@ -93,7 +93,9 @@ test("native probe attributes a play made during frame to the newly selected tra
     frame: () => {
       state.interp.audio.bgm.id = nextTrack;
       state.scene = { kind: "battle" };
-      (globalThis as unknown as { audio: typeof host }).audio.play(7);
+      const audio = (globalThis as unknown as { audio: typeof host }).audio;
+      audio.writePcm(7, new Int16Array([0, 1200]).buffer);
+      audio.play(7);
     },
   });
   Function(hostAudioProbeSource())();
@@ -106,8 +108,8 @@ test("native probe attributes a play made during frame to the newly selected tra
   expect(probe.report()).toMatchObject({
     sequence: ["music_map", BATTLE_TRACK, VICTORY_TRACK],
     phases: {
-      [BATTLE_TRACK]: { plays: 1 },
-      [VICTORY_TRACK]: { plays: 1 },
+      [BATTLE_TRACK]: { writes: 1, plays: 1 },
+      [VICTORY_TRACK]: { writes: 1, plays: 1 },
     },
   });
 });
