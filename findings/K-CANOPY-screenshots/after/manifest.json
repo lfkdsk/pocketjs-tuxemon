@@ -1,0 +1,272 @@
+{
+  "format": "pocket-tuxemon/canopy-parity/v1",
+  "cases": [
+    {
+      "id": "town",
+      "mapId": "taba_town",
+      "x": 14,
+      "y": 4
+    },
+    {
+      "id": "route",
+      "mapId": "rubberduck_route_01",
+      "x": 27,
+      "y": 11
+    },
+    {
+      "id": "seam",
+      "mapId": "spyder_flower_city",
+      "x": 38,
+      "y": 4
+    }
+  ],
+  "viewports": [
+    {
+      "width": 480,
+      "height": 272
+    },
+    {
+      "width": 960,
+      "height": 544
+    }
+  ],
+  "settleFrames": 180,
+  "captures": {
+    "town.480x272.legacy": {
+      "stateHash": "f7e988b25880db59f370f411f3e81507e3d3e40343b26c68264de913f52eb501",
+      "camera": [
+        0,
+        0
+      ],
+      "playerRect": [
+        224,
+        48,
+        16,
+        32
+      ],
+      "file": "town.legacy.480x272.png",
+      "cropFile": "town.legacy.480x272.crop-3x.png",
+      "rgbaFnv1a": "5b13c95e"
+    },
+    "town.480x272.seamless": {
+      "stateHash": "f7e988b25880db59f370f411f3e81507e3d3e40343b26c68264de913f52eb501",
+      "camera": [
+        928,
+        0
+      ],
+      "playerRect": [
+        224,
+        48,
+        16,
+        32
+      ],
+      "file": "town.seamless.480x272.png",
+      "cropFile": "town.seamless.480x272.crop-3x.png",
+      "rgbaFnv1a": "5b13c95e"
+    },
+    "route.480x272.legacy": {
+      "stateHash": "c802dc3618244a5482221000d1c26f1c60bb2a0bd94c6efdfdc4a7739e234289",
+      "camera": [
+        200,
+        48
+      ],
+      "playerRect": [
+        232,
+        112,
+        16,
+        32
+      ],
+      "file": "route.legacy.480x272.png",
+      "cropFile": "route.legacy.480x272.crop-3x.png",
+      "rgbaFnv1a": "a39a6a6d"
+    },
+    "route.480x272.seamless": {
+      "stateHash": "c802dc3618244a5482221000d1c26f1c60bb2a0bd94c6efdfdc4a7739e234289",
+      "camera": [
+        200,
+        48
+      ],
+      "playerRect": [
+        232,
+        112,
+        16,
+        32
+      ],
+      "file": "route.seamless.480x272.png",
+      "cropFile": "route.seamless.480x272.crop-3x.png",
+      "rgbaFnv1a": "a39a6a6d"
+    },
+    "seam.480x272.legacy": {
+      "stateHash": "feab7c3c6a1ea6ce9c56c6e4767d4daaada4aeb69ce965daeb1ae9af38766e36",
+      "camera": [
+        160,
+        0
+      ],
+      "playerRect": [
+        448,
+        48,
+        16,
+        32
+      ],
+      "file": "seam.legacy.480x272.png",
+      "cropFile": "seam.legacy.480x272.crop-3x.png",
+      "rgbaFnv1a": "f6bb6b66"
+    },
+    "seam.480x272.seamless": {
+      "stateHash": "feab7c3c6a1ea6ce9c56c6e4767d4daaada4aeb69ce965daeb1ae9af38766e36",
+      "camera": [
+        1016,
+        576
+      ],
+      "playerRect": [
+        232,
+        112,
+        16,
+        32
+      ],
+      "file": "seam.seamless.480x272.png",
+      "cropFile": "seam.seamless.480x272.crop-3x.png",
+      "rgbaFnv1a": "1e604c57"
+    },
+    "town.960x544.legacy": {
+      "stateHash": "f7e988b25880db59f370f411f3e81507e3d3e40343b26c68264de913f52eb501",
+      "camera": [
+        0,
+        0
+      ],
+      "playerRect": [
+        224,
+        48,
+        16,
+        32
+      ],
+      "file": "town.legacy.960x544.png",
+      "cropFile": "town.legacy.960x544.crop-3x.png",
+      "rgbaFnv1a": "320b479b"
+    },
+    "town.960x544.seamless": {
+      "stateHash": "f7e988b25880db59f370f411f3e81507e3d3e40343b26c68264de913f52eb501",
+      "camera": [
+        928,
+        0
+      ],
+      "playerRect": [
+        224,
+        48,
+        16,
+        32
+      ],
+      "file": "town.seamless.960x544.png",
+      "cropFile": "town.seamless.960x544.crop-3x.png",
+      "rgbaFnv1a": "320b479b"
+    },
+    "route.960x544.legacy": {
+      "stateHash": "c802dc3618244a5482221000d1c26f1c60bb2a0bd94c6efdfdc4a7739e234289",
+      "camera": [
+        0,
+        0
+      ],
+      "playerRect": [
+        544,
+        160,
+        16,
+        32
+      ],
+      "file": "route.legacy.960x544.png",
+      "cropFile": "route.legacy.960x544.crop-3x.png",
+      "rgbaFnv1a": "35055e80"
+    },
+    "route.960x544.seamless": {
+      "stateHash": "c802dc3618244a5482221000d1c26f1c60bb2a0bd94c6efdfdc4a7739e234289",
+      "camera": [
+        0,
+        0
+      ],
+      "playerRect": [
+        544,
+        160,
+        16,
+        32
+      ],
+      "file": "route.seamless.960x544.png",
+      "cropFile": "route.seamless.960x544.crop-3x.png",
+      "rgbaFnv1a": "35055e80"
+    },
+    "seam.960x544.legacy": {
+      "stateHash": "feab7c3c6a1ea6ce9c56c6e4767d4daaada4aeb69ce965daeb1ae9af38766e36",
+      "camera": [
+        0,
+        0
+      ],
+      "playerRect": [
+        768,
+        48,
+        16,
+        32
+      ],
+      "file": "seam.legacy.960x544.png",
+      "cropFile": "seam.legacy.960x544.crop-3x.png",
+      "rgbaFnv1a": "0ecec85f"
+    },
+    "seam.960x544.seamless": {
+      "stateHash": "feab7c3c6a1ea6ce9c56c6e4767d4daaada4aeb69ce965daeb1ae9af38766e36",
+      "camera": [
+        776,
+        440
+      ],
+      "playerRect": [
+        472,
+        248,
+        16,
+        32
+      ],
+      "file": "seam.seamless.960x544.png",
+      "cropFile": "seam.seamless.960x544.crop-3x.png",
+      "rgbaFnv1a": "76d32de6"
+    }
+  },
+  "comparisons": {
+    "town.480x272": {
+      "alignment": "full-frame",
+      "differentPixels": 0,
+      "outsidePlayer": 0,
+      "bounds": null,
+      "file": "town.480x272.comparison-3x.png"
+    },
+    "route.480x272": {
+      "alignment": "full-frame",
+      "differentPixels": 0,
+      "outsidePlayer": 0,
+      "bounds": null,
+      "file": "route.480x272.comparison-3x.png"
+    },
+    "seam.480x272": {
+      "alignment": "player-centered",
+      "differentPixels": 0,
+      "outsidePlayer": 0,
+      "bounds": null,
+      "file": "seam.480x272.comparison-3x.png"
+    },
+    "town.960x544": {
+      "alignment": "full-frame",
+      "differentPixels": 0,
+      "outsidePlayer": 0,
+      "bounds": null,
+      "file": "town.960x544.comparison-3x.png"
+    },
+    "route.960x544": {
+      "alignment": "full-frame",
+      "differentPixels": 0,
+      "outsidePlayer": 0,
+      "bounds": null,
+      "file": "route.960x544.comparison-3x.png"
+    },
+    "seam.960x544": {
+      "alignment": "player-centered",
+      "differentPixels": 0,
+      "outsidePlayer": 0,
+      "bounds": null,
+      "file": "seam.960x544.comparison-3x.png"
+    }
+  }
+}
