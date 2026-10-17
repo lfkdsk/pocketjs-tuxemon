@@ -1,0 +1,347 @@
+{
+  "format": "pocket-tuxemon/perf-canopy-psp-receipt/v1",
+  "verdict": "FAIL",
+  "variants": {
+    "baseline": {
+      "label": "A",
+      "gameCommit": "b955710e9a35232d003eea3b45cd666e4ad6d57e",
+      "gameSubject": "docs: report textured quad raster fast path",
+      "rpgkitCommit": "dd8a4d27216834e6776996360db324e653cde287"
+    },
+    "candidate": {
+      "label": "B",
+      "gameCommit": "3c7a0fe6615f017b4f86bbcfc2cf6155d1f1c2bd",
+      "gameSubject": "docs: record canopy baseline blocker",
+      "rpgkitCommit": "692bf785d3b0f0da99aa8608fd8111625486d324"
+    },
+    "pocketjsCommit": "8de08a89cc2a7848b5561a2241fe879511d50f79"
+  },
+  "buildEquivalence": {
+    "contentHashesSharedByAAndB": {
+      "desktopPakSha256": "7c2b217be24ba82b9a30e521ac5b9cd441826d536d07e657d0616d053d47ebee",
+      "pspAssetsPakSha256": "bc546df22cef9ae546ec523c18b6b8cffd88de299044d4a8879165812e81260a",
+      "pspEmbeddedPakSha256": "9f2bd7d59bf6b4364a3c652d0d013fc2686593a19f6e6fca84636d8f5ec50d78",
+      "webPakManifestSha256": "de00647150ebec674a4f791881f9cc0f2c6290b784aa2fe21929629e11ae79b0",
+      "webChunkFilenameAndSizeCount": 2124,
+      "webChunkFilenameAndSizeDigest": "396859eff5f9d80b21697a9bb188f059c88bec0ef7202c2450184c4908caa609"
+    },
+    "javascriptHashes": {
+      "desktop": {
+        "A": "5de84cca03a68f4742bd620ee0fdd3c2bddca2b864c81c0d7ad4adfaf2a811e5",
+        "B": "553ceddd7942412e886f541d62c7c075112de074728c322c3da29c6f3700a7d0"
+      },
+      "pspPlain": {
+        "A": "c973458d140681020ef25962fdf8ac0768916c52f830f2daf9e423b24af5eefd",
+        "B": "abd306e528e823ed93408d6ecc5097ab2d36d7aa7976dbbf62ac262a9d81ad59"
+      },
+      "pspFlowerCity": {
+        "A": "ea036e6a14a524c82bace6da1b5110a483d3b8571c2a5fddd5d4176b2e16d857",
+        "B": "08f6205a0622e3c10479291e5a6c804c4412aa33fff6f607cecaee402add90cd"
+      }
+    },
+    "webWasm": {
+      "rawBuildA": {
+        "bytes": 430182,
+        "sha256": "2382be792e55502333ffa765d9c9942eed31fafee3e084ef202e0daba729acc2"
+      },
+      "rawBuildB": {
+        "bytes": 430171,
+        "sha256": "13ee66682cf355f3dc01843ad203565fa0363ec178056e8c34170a0baff683f1"
+      },
+      "formalGateSharedSha256": "13ee66682cf355f3dc01843ad203565fa0363ec178056e8c34170a0baff683f1",
+      "note": "The shared PocketJS source commit produced nondeterministic Wasm bytes in separate builds, so both formal Web sites used the candidate-built Wasm."
+    }
+  },
+  "psp": {
+    "protocol": {
+      "emulator": "PPSSPPHeadless a2f4ce214f224c6c26b3319409ec50205ff8253d",
+      "renderer": "software",
+      "order": ["A1", "B1", "B2", "A2"],
+      "isolatedMemoryStickPerLeg": true,
+      "guestMetricsSource": "PocketJS-bench.jsonl",
+      "hostPeakRssSource": "GNU time -v maximum resident set size"
+    },
+    "plainBench": {
+      "windowsPerLeg": 22,
+      "framesPerWindow": 300,
+      "legs": {
+        "A1": {
+          "bootToFrame0Us": 6384788,
+          "steadyWorkP95Us": 7133,
+          "steadyAvgWorkUs": 7131,
+          "steadyAvgJsUs": 6112,
+          "steadyAvgDrawUs": 779,
+          "steadyAvgRenderUs": 235,
+          "qjsLiveBytes": 10773625,
+          "qjsPeakBytes": 14113641,
+          "arenaBumpBytes": 21563504,
+          "hostPeakRssKiB": 101172
+        },
+        "B1": {
+          "bootToFrame0Us": 6382948,
+          "steadyWorkP95Us": 7360,
+          "steadyAvgWorkUs": 7358,
+          "steadyAvgJsUs": 6138,
+          "steadyAvgDrawUs": 942,
+          "steadyAvgRenderUs": 274,
+          "qjsLiveBytes": 10899342,
+          "qjsPeakBytes": 14247233,
+          "arenaBumpBytes": 21709648,
+          "hostPeakRssKiB": 101428
+        },
+        "B2": {
+          "bootToFrame0Us": 6382948,
+          "steadyWorkP95Us": 7360,
+          "steadyAvgWorkUs": 7358,
+          "steadyAvgJsUs": 6138,
+          "steadyAvgDrawUs": 942,
+          "steadyAvgRenderUs": 274,
+          "qjsLiveBytes": 10899342,
+          "qjsPeakBytes": 14247233,
+          "arenaBumpBytes": 21709648,
+          "hostPeakRssKiB": 100916
+        },
+        "A2": {
+          "bootToFrame0Us": 6384788,
+          "steadyWorkP95Us": 7133,
+          "steadyAvgWorkUs": 7131,
+          "steadyAvgJsUs": 6112,
+          "steadyAvgDrawUs": 779,
+          "steadyAvgRenderUs": 235,
+          "qjsLiveBytes": 10773625,
+          "qjsPeakBytes": 14113641,
+          "arenaBumpBytes": 21563504,
+          "hostPeakRssKiB": 101308
+        }
+      },
+      "aggregateMedianOfVariantLegs": {
+        "bootToFrame0Us": {"A": 6384788, "B": 6382948, "deltaPercent": -0.028818497967353363},
+        "steadyWorkP95Us": {"A": 7133, "B": 7360, "deltaPercent": 3.1823917005467495},
+        "steadyAvgWorkUs": {"A": 7131, "B": 7358, "deltaPercent": 3.183284251858076},
+        "steadyAvgJsUs": {"A": 6112, "B": 6138, "deltaPercent": 0.4253926701570654},
+        "steadyAvgDrawUs": {"A": 779, "B": 942, "deltaPercent": 20.92426187419769},
+        "steadyAvgRenderUs": {"A": 235, "B": 274, "deltaPercent": 16.595744680851055},
+        "qjsLiveBytes": {"A": 10773625, "B": 10899342, "deltaPercent": 1.1668960076111734},
+        "qjsPeakBytes": {"A": 14113641, "B": 14247233, "deltaPercent": 0.9465452607162028},
+        "arenaBumpBytes": {"A": 21563504, "B": 21709648, "deltaPercent": 0.6777377183225797},
+        "hostPeakRssKiB": {"A": 101240, "B": 101172, "deltaPercent": -0.06716712761754007}
+      }
+    },
+    "flowerCityJourney": {
+      "tapeFrames": 7666,
+      "hostFramesPerLeg": 7667,
+      "terminal": {
+        "map": "spyder_mansion",
+        "position": [1, 13],
+        "stateSha256": "c0b36ae2112df49774377c30e728d03a929fba771746bf54cb14e684742a8a87"
+      },
+      "legs": {
+        "A1": {
+          "bootToFrame0Us": 8581942,
+          "avgFrameIntervalUs": 328183,
+          "maxFrameIntervalUs": 2313523,
+          "avgWorkUs": 321297,
+          "maxWorkUs": 2301419,
+          "avgJsUs": 319899,
+          "avgDrawUs": 1035,
+          "avgRenderUs": 160,
+          "qjsLiveBytes": 17893448,
+          "qjsPeakBytes": 20362829,
+          "arenaBumpBytes": 33328800,
+          "hostPeakRssKiB": 102196,
+          "wallSeconds": 188.12
+        },
+        "B1": {
+          "bootToFrame0Us": 8613579,
+          "avgFrameIntervalUs": 335501,
+          "maxFrameIntervalUs": 2340101,
+          "avgWorkUs": 328129,
+          "maxWorkUs": 2328544,
+          "avgJsUs": 326461,
+          "avgDrawUs": 1245,
+          "avgRenderUs": 198,
+          "qjsLiveBytes": 18052217,
+          "qjsPeakBytes": 20483774,
+          "arenaBumpBytes": 33534992,
+          "hostPeakRssKiB": 102196,
+          "wallSeconds": 187.70
+        },
+        "B2": {
+          "bootToFrame0Us": 8613579,
+          "avgFrameIntervalUs": 335501,
+          "maxFrameIntervalUs": 2340101,
+          "avgWorkUs": 328129,
+          "maxWorkUs": 2328544,
+          "avgJsUs": 326461,
+          "avgDrawUs": 1245,
+          "avgRenderUs": 198,
+          "qjsLiveBytes": 18052217,
+          "qjsPeakBytes": 20483774,
+          "arenaBumpBytes": 33534992,
+          "hostPeakRssKiB": 102196,
+          "wallSeconds": 183.40
+        },
+        "A2": {
+          "bootToFrame0Us": 8581942,
+          "avgFrameIntervalUs": 328183,
+          "maxFrameIntervalUs": 2313523,
+          "avgWorkUs": 321297,
+          "maxWorkUs": 2301419,
+          "avgJsUs": 319899,
+          "avgDrawUs": 1035,
+          "avgRenderUs": 160,
+          "qjsLiveBytes": 17893448,
+          "qjsPeakBytes": 20362829,
+          "arenaBumpBytes": 33328800,
+          "hostPeakRssKiB": 102452,
+          "wallSeconds": 188.02
+        }
+      },
+      "aggregateMedianOfVariantLegs": {
+        "bootToFrame0Us": {"A": 8581942, "B": 8613579, "deltaPercent": 0.3686461642364858},
+        "avgFrameIntervalUs": {"A": 328183, "B": 335501, "deltaPercent": 2.2298534659016545},
+        "maxFrameIntervalUs": {"A": 2313523, "B": 2340101, "deltaPercent": 1.1488107099000056},
+        "avgWorkUs": {"A": 321297, "B": 328129, "deltaPercent": 2.12638150994251},
+        "maxWorkUs": {"A": 2301419, "B": 2328544, "deltaPercent": 1.178620668378949},
+        "avgJsUs": {"A": 319899, "B": 326461, "deltaPercent": 2.0512724328616283},
+        "avgDrawUs": {"A": 1035, "B": 1245, "deltaPercent": 20.28985507246377},
+        "avgRenderUs": {"A": 160, "B": 198, "deltaPercent": 23.750000000000004},
+        "qjsLiveBytes": {"A": 17893448, "B": 18052217, "deltaPercent": 0.887302436064874},
+        "qjsPeakBytes": {"A": 20362829, "B": 20483774, "deltaPercent": 0.593949887807832},
+        "arenaBumpBytes": {"A": 33328800, "B": 33534992, "deltaPercent": 0.6186601377787371},
+        "hostPeakRssKiB": {"A": 102324, "B": 102196, "deltaPercent": -0.12509284234393236},
+        "wallSeconds": {"A": 188.07, "B": 185.55, "deltaPercent": -1.339926623065868}
+      }
+    }
+  },
+  "desktopQuickJs": {
+    "coldStartup": {
+      "protocol": {
+        "freshProcesses": 80,
+        "windowsPerViewport": 10,
+        "samplesPerVariantPerViewport": 20,
+        "order": "alternating ABBA/BAAB",
+        "p95Definition": "linear interpolation at (n - 1) * 0.95"
+      },
+      "sortedStartupMs": {
+        "480x272": {
+          "A": [223.906, 226.584, 226.936, 227.092, 227.51, 227.865, 228.004, 228.374, 229.361, 230.124, 230.242, 230.693, 231.243, 231.477, 231.62, 231.899, 232.483, 232.687, 232.887, 235.416],
+          "B": [228.576, 229.164, 229.85, 230.194, 230.38, 230.425, 230.779, 231.385, 231.911, 232.754, 233.152, 233.194, 233.558, 233.68, 234.213, 234.54, 235.147, 237.769, 240.835, 241.943]
+        },
+        "960x544": {
+          "A": [225.28, 225.478, 227.525, 227.964, 228.007, 228.037, 229.994, 230.841, 230.89, 231.418, 231.505, 231.913, 232.017, 232.543, 232.654, 233.87, 234.309, 234.664, 234.989, 236.019],
+          "B": [225.725, 228.744, 229.638, 229.89, 231.578, 233.65, 233.707, 233.71, 234.28, 234.348, 234.847, 235.002, 235.049, 235.142, 235.528, 235.736, 236.305, 237.646, 240.184, 240.246]
+        }
+      },
+      "summary": {
+        "480x272": {
+          "medianMs": {"A": 230.183, "B": 232.953},
+          "p95Ms": {"A": 233.01345, "B": 240.8904, "deltaPercent": 3.3804701},
+          "pairedMedianDeltaPercent": 0.9348332555538574,
+          "pairedMedianDelta95Percent": [0.5994303779566224, 2.608218481976976],
+          "budgetFailures": {"A": 0, "B": 0}
+        },
+        "960x544": {
+          "medianMs": {"A": 231.4615, "B": 234.5975},
+          "p95Ms": {"A": 235.0405, "B": 240.1871, "deltaPercent": 2.1896652},
+          "pairedMedianDeltaPercent": 1.4471850754156357,
+          "pairedMedianDelta95Percent": [0.5463978148269266, 2.0854736879077462],
+          "budgetFailures": {"A": 0, "B": 0}
+        }
+      }
+    },
+    "productionBccb": {
+      "order": ["B", "C", "C", "B"],
+      "labels": {"B": "baseline", "C": "candidate"},
+      "terminalStateSha256AllLegs": "2ae4650cc8be15cd1f794b9440f79903220bd745f3725af020619490dbd1eba9",
+      "legs": {
+        "480x272": {
+          "A": {
+            "qjsCpuP50Ms": [0.828, 0.818],
+            "qjsCpuP95Ms": [4.096, 4.066],
+            "totalP50Ms": [0.848, 0.841],
+            "totalP95Ms": [4.222, 4.159],
+            "drawTotalMs": [94.804, 95.541],
+            "objects": [120000, 120000],
+            "qjsUsedMiB": [22.79, 22.79],
+            "qjsMallocMiB": [28.79, 28.79]
+          },
+          "B": {
+            "qjsCpuP50Ms": [0.822, 0.847],
+            "qjsCpuP95Ms": [4.171, 4.255],
+            "totalP50Ms": [0.85, 0.877],
+            "totalP95Ms": [4.42, 4.557],
+            "drawTotalMs": [133.771, 133.119],
+            "objects": [124527, 124527],
+            "qjsUsedMiB": [23.33, 23.33],
+            "qjsMallocMiB": [29.49, 29.49]
+          }
+        },
+        "960x544": {
+          "A": {
+            "qjsCpuP50Ms": [0.802, 0.821],
+            "qjsCpuP95Ms": [6.484, 6.468],
+            "totalP50Ms": [0.823, 0.844],
+            "totalP95Ms": [6.55, 6.533],
+            "drawTotalMs": [110.197, 110.255],
+            "objects": [133225, 133225],
+            "qjsUsedMiB": [24.47, 24.47],
+            "qjsMallocMiB": [31.47, 31.47]
+          },
+          "B": {
+            "qjsCpuP50Ms": [0.843, 0.824],
+            "qjsCpuP95Ms": [6.515, 6.649],
+            "totalP50Ms": [0.873, 0.852],
+            "totalP95Ms": [6.619, 6.71],
+            "drawTotalMs": [197.133, 196.825],
+            "objects": [145093, 145041],
+            "qjsUsedMiB": [25.86, 25.85],
+            "qjsMallocMiB": [33.28, 33.26]
+          }
+        }
+      },
+      "aggregateMedianOfVariantLegs": {
+        "480x272": {
+          "qjsCpuP50Ms": {"A": 0.823, "B": 0.8345, "deltaPercent": 1.397326853},
+          "qjsCpuP95Ms": {"A": 4.081, "B": 4.213, "deltaPercent": 3.234501348},
+          "totalP50Ms": {"A": 0.8445, "B": 0.8635, "deltaPercent": 2.249851983},
+          "totalP95Ms": {"A": 4.1905, "B": 4.4885, "deltaPercent": 7.111323231},
+          "drawTotalMs": {"A": 95.1725, "B": 133.445, "deltaPercent": 40.21382227},
+          "objects": {"A": 120000, "B": 124527, "deltaPercent": 3.7725}
+        },
+        "960x544": {
+          "qjsCpuP50Ms": {"A": 0.8115, "B": 0.8335, "deltaPercent": 2.711028959},
+          "qjsCpuP95Ms": {"A": 6.476, "B": 6.582, "deltaPercent": 1.636812847},
+          "totalP50Ms": {"A": 0.8335, "B": 0.8625, "deltaPercent": 3.479304139},
+          "totalP95Ms": {"A": 6.5415, "B": 6.6645, "deltaPercent": 1.880302683},
+          "drawTotalMs": {"A": 110.226, "B": 196.979, "deltaPercent": 78.704661332},
+          "objects": {"A": 133225, "B": 145067, "deltaPercent": 8.888722087}
+        }
+      }
+    }
+  },
+  "mobileWeb": {
+    "protocol": {
+      "mode": "gate",
+      "chrome": "138.0.7204.92",
+      "windows": 3,
+      "legs": 12,
+      "order": "alternating ABBA/BAAB",
+      "viewportCssPx": [844, 390],
+      "devicePixelRatio": 3,
+      "cpuThrottle": 6,
+      "warmupMs": 3000,
+      "sampleMs": 15000,
+      "scenario": "city-walk"
+    },
+    "workMs": {
+      "A": {"p50": 24.899999618530273, "p95": 29.324999570846558, "p99": 32.11799992084503, "over16_7": 0.9919584262761452, "over33": 0.006037414965986395},
+      "B": {"p50": 25.84999990463257, "p95": 31.449999809265137, "p99": 35.43750010013581, "over16_7": 0.9916304804594481, "over33": 0.026277717804873733}
+    },
+    "p95DeltaPercent": 7.2463768,
+    "absoluteLimitMs": 33,
+    "relativeLimitMs": 32.17099953651429,
+    "gatePass": true,
+    "failures": []
+  }
+}
