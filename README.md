@@ -42,7 +42,9 @@ summary:
   transition.
   Neighbouring maps preview statically decidable
   NPCs, and a completed handoff saves a frozen snapshot of the map just left
-  so actors behind the player do not jump back to their entry poses.
+  so actors behind the player do not jump back to their entry poses. Static
+  canopies and animated upper tiles interleave by row with active, preview and
+  frozen actors using Tuxemon's two-pixel foot rule, including across seams.
 - **Battles (P2, complete):** the battle database and 590 battle
   textures are imported from Tuxemon's YAML, and `battle/` is a pure
   reducer whose results match Tuxemon's own Python engine on 8,560 recorded
