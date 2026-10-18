@@ -1,0 +1,233 @@
+{
+  "format": "pocket-tuxemon/canopy-perf-final/v1",
+  "verdict": "PASS",
+  "publication": {
+    "gameBranch": "perf/canopy-row-sync",
+    "componentBranch": "perf/canopy-row-sync"
+  },
+  "revisions": {
+    "rasterBaseline": {
+      "game": "b955710e9a35232d003eea3b45cd666e4ad6d57e",
+      "component": "dd8a4d27216834e6776996360db324e653cde287"
+    },
+    "preFix": {
+      "game": "3c7a0fe6615f017b4f86bbcfc2cf6155d1f1c2bd",
+      "component": "692bf785d3b0f0da99aa8608fd8111625486d324"
+    },
+    "finalMeasuredImplementation": {
+      "game": "8908ac086160ba783d0d2bbe5cc3dbfae05f200e",
+      "component": "e72978932c27a0723cdc15ca60016bf55fa69cfc",
+      "pocketjs": "8de08a89cc2a7848b5561a2241fe879511d50f79"
+    }
+  },
+  "implementation": {
+    "tileQuantizedUpperWindow": true,
+    "oneVisibleChunkFilterAndSortPerSync": true,
+    "unchangedRowAndImageWritesSuppressed": true,
+    "depthBoundaryBands": true,
+    "directDepthBoundaryInversion": true,
+    "occluderStyleIdentityCache": true,
+    "ordinaryUpperDebugNameSuppression": true,
+    "idlePoolRowsHidden": true
+  },
+  "psp": {
+    "protocol": {
+      "order": ["baseline", "final", "final", "baseline"],
+      "renderer": "PPSSPP software",
+      "isolatedMemoryStickPerLeg": true,
+      "windowsPerLeg": 38,
+      "framesPerWindow": 300,
+      "warmupWindowsExcluded": 1
+    },
+    "ordinaryBench": {
+      "workP95Us": {
+        "baseline": 7162,
+        "final": 7287,
+        "deltaPercent": 1.7453225356045798,
+        "limitPercent": 3,
+        "pass": true
+      },
+      "relativeToPreFixWorkP95Percent": -0.9918478260869608,
+      "steadyAverageWorkDeltaPercent": 1.739,
+      "steadyAverageJsDeltaPercent": 2.011,
+      "steadyAverageDrawDeltaPercent": -0.642,
+      "steadyAverageRenderDeltaPercent": 2.772,
+      "bootToFrame0DeltaPercent": -0.051,
+      "qjsLiveDeltaPercent": 0.164,
+      "qjsPeakDeltaPercent": 0.296,
+      "arenaBumpDeltaPercent": 0.171,
+      "hostPeakRssDeltaPercent": -1.028,
+      "workOver16ms": 0
+    },
+    "preFixFlowerCityReference": {
+      "tapeFrames": 7666,
+      "hostFrames": 7667,
+      "terminalMap": "spyder_mansion",
+      "terminalPosition": [1, 13],
+      "terminalStateSha256": "c0b36ae2112df49774377c30e728d03a929fba771746bf54cb14e684742a8a87",
+      "averageWorkDeltaPercent": 2.12638150994251,
+      "bootDeltaPercent": 0.3686461642364858,
+      "arenaBumpDeltaPercent": 0.6186679972934627,
+      "hostPeakRssDeltaPercent": -0.12509410252694346,
+      "pass": true,
+      "source": "findings/PERF-CANOPY-PSP-receipt.json"
+    },
+    "saveVerifier": {
+      "normalSaveLoadFieldEqual": true,
+      "continuedFramesAfterLoad": 30,
+      "legacyRawJson": true,
+      "autosaveRestart": true,
+      "readOnlyMemoryStickVisibleFailure": true,
+      "result": "ALL PHASES PASS"
+    },
+    "finalReleaseRebuiltWithoutTrace": true
+  },
+  "desktop": {
+    "protocol": {
+      "cpu": 15,
+      "order": ["baseline", "final", "final", "baseline"],
+      "reuseHost": true,
+      "terminalStateSha256": "2ae4650cc8be15cd1f794b9440f79903220bd745f3725af020619490dbd1eba9"
+    },
+    "viewports": {
+      "480x272": {
+        "quickjsCpuP95Ms": {
+          "baseline": 3.99,
+          "final": 4.0785,
+          "deltaPercent": 2.218045112781941,
+          "limitPercent": 3,
+          "pass": true
+        },
+        "relativeToPreFixQuickjsCpuP95Percent": -3.1924994065986256,
+        "totalP95DeltaPercentDiagnostic": 4.008360998401583,
+        "drawTotalDeltaPercentDiagnostic": 16.498364612111406
+      },
+      "960x544": {
+        "quickjsCpuP95Ms": {
+          "baseline": 6.4385,
+          "final": 6.4155,
+          "deltaPercent": -0.35722606197094997,
+          "limitPercent": 3,
+          "pass": true
+        },
+        "relativeToPreFixQuickjsCpuP95Percent": -2.5296262534184155,
+        "totalP95DeltaPercentDiagnostic": -0.19241129839144833,
+        "drawTotalDeltaPercentDiagnostic": 40.43010944271963
+      }
+    },
+    "coldStartup": {
+      "samples": 80,
+      "budgetMs": 250,
+      "budgetFailures": 0,
+      "pairedMedianDeltaPercent": {
+        "480x272": -0.17994631384715687,
+        "960x544": -0.03148622239188548
+      },
+      "rawP95DeltaPercent": {
+        "480x272": -1.3078898233866765,
+        "960x544": -0.04710792310812506
+      }
+    }
+  },
+  "mobileWeb": {
+    "protocol": "three alternating BCCB windows, city-walk, 844x390, DPR 3, 6x throttle",
+    "workMs": {
+      "baseline": {"p50": 24.725000143051147, "p95": 28.90750012397766, "p99": 31.905500559806818},
+      "final": {"p50": 24.40000057220459, "p95": 29.407500123977663, "p99": 32.548999953269956}
+    },
+    "p95DeltaPercent": 1.729655813942068,
+    "finalOver16_7": 0.9931628056628057,
+    "finalOver33": 0.006950595849720676,
+    "longTasks": 0,
+    "pass": true
+  },
+  "correctness": {
+    "canopyParity": {
+      "viewports": ["480x272", "960x544"],
+      "differentPixels": 0,
+      "outsidePlayerPixels": 0,
+      "comparisonSha256": "21e87105d8565bcde9d94082cc7803d1a781a73ee3a0e220a83b11f6ef404c7e",
+      "matchesCommittedReference": true,
+      "visuallyInspected": true
+    },
+    "goldenFilesChanged": 0,
+    "importDeterminism": {
+      "files": 5077,
+      "bytes": 69622876,
+      "sha256": "6c262abb4bf2e9fa856d40c3990b74f9e25986d117b3e0bf98af7a551788d7e0"
+    },
+    "mainline": {
+      "frames": 230322,
+      "terminalMap": "spyder_datacenter",
+      "terminalPosition": [7, 4],
+      "terminalSha256": "1977c1b0f3bd1bba2c4e5ad82332599c4fc72f0acd84d9437868976fbfb5c736",
+      "chapters": 20,
+      "builtReplayCheckpoints": 242
+    }
+  },
+  "resourceInvariants": {
+    "oneUploadPerResidentUpperTexture": true,
+    "rowBindingsReuseTextureHandles": true,
+    "nodesBoundedByViewport": true,
+    "fixtureMaxClipBands": 6,
+    "independentOfVisitedMapCount": true
+  },
+  "mutations": [
+    {
+      "name": "unquantized-window",
+      "expectedFailure": "rowSyncs expected 1, received 2",
+      "caught": true
+    },
+    {
+      "name": "repeated-row-sort",
+      "expectedFailure": "chunkSorts expected 7, received 12",
+      "caught": true
+    },
+    {
+      "name": "per-row-bands",
+      "expectedFailure": "rowNodes expected <= 6, received 20",
+      "caught": true
+    }
+  ],
+  "gates": {
+    "component": {
+      "testsPassed": 4624,
+      "testsFailed": 0,
+      "testsSkipped": 0,
+      "assertions": 731821,
+      "files": 304,
+      "typescript": true,
+      "buildsAndWeb": true
+    },
+    "quickjsDrift": {
+      "singleComparisons": 8,
+      "largestPositiveMedianPercent": 0.439206,
+      "cumulativeRegressions": 0,
+      "cumulativeInconclusive": 0,
+      "errors": 0,
+      "pass": true
+    },
+    "wander": {
+      "testsPassed": 523,
+      "testsFailed": 0,
+      "testsSkipped": 0,
+      "typescriptBuildWebSmoke": true
+    },
+    "game": {
+      "ciTestPartitions": 10,
+      "testsPassed": 2023,
+      "testsFailed": 0,
+      "testsSkipped": 0,
+      "journeyCommandsPassed": 17,
+      "webJobAndExtraVerifiers": true,
+      "pspSaveAndRelease": true
+    }
+  },
+  "artifactHashes": {
+    "baselineDesktopJs": "5de84cca03a68f4742bd620ee0fdd3c2bddca2b864c81c0d7ad4adfaf2a811e5",
+    "finalDesktopJs": "93e2c2a66ab50aade7e240eab932d24f5f90eb5e61611e14af5acf85e9b9fffe",
+    "sharedDesktopPak": "7c2b217be24ba82b9a30e521ac5b9cd441826d536d07e657d0616d053d47ebee",
+    "sharedPspExternalPak": "bc546df22cef9ae546ec523c18b6b8cffd88de299044d4a8879165812e81260a",
+    "sharedPspEmbeddedPak": "9f2bd7d59bf6b4364a3c652d0d013fc2686593a19f6e6fca84636d8f5ec50d78"
+  }
+}
