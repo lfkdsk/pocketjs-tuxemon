@@ -590,6 +590,96 @@ describe("Web PWA runtime behavior", () => {
     }
   });
 
+  test("counts a chunk cached after the initial scan exactly once", async () => {
+    const fixture = makeFixture();
+    try {
+      const build = finalizeWebPwa({
+        root: fixture.root,
+        siteDir: fixture.siteDir,
+        gameId: "pocket-tuxemon",
+        manifest: fixture.manifest,
+      });
+      const scope = "https://example.test/pocket-tuxemon/";
+      const caches = new MemoryCacheStorage();
+      const network = new RouteFetch();
+      network.routes = releaseRoutes(fixture, build, scope);
+      const worker = new ServiceWorkerHarness(readFileSync(build.serviceWorkerPath, "utf8"), scope, caches, network);
+      await worker.install();
+
+      const racedChunk = fixture.manifest.chunks.find((chunk) => chunk.id === "locale:en_US")!;
+      const racedUrl = new URL(racedChunk.file, scope).href;
+      const racedBody = network.routes.get(racedUrl)!;
+      const content = await caches.open("pocket-rpgkit:pak-chunks:v1");
+      const messages: any[] = [];
+      let injected = false;
+      await worker.message(
+        { type: "OFFLINE_DOWNLOAD", language: "en" },
+        { postMessage: (message: any) => {
+          messages.push(message);
+          if (!injected && message.type === "OFFLINE_PROGRESS" && message.completed === 1) {
+            injected = true;
+            void content.put(racedUrl, new Response(Buffer.from(racedBody)));
+          }
+        } },
+      );
+
+      const progress = messages.filter((message) => message.type === "OFFLINE_PROGRESS");
+      const complete = messages.find((message) => message.type === "OFFLINE_COMPLETE");
+      expect(injected).toBeTrue();
+      expect(network.calls.filter((url) => url === racedUrl)).toHaveLength(0);
+      expect(progress.at(-1)).toMatchObject({ completed: 5, total: 5 });
+      expect(complete).toMatchObject({ completed: 5, total: 5 });
+      expect(messages.some((message) => message.type === "OFFLINE_ERROR")).toBeFalse();
+    } finally {
+      rmSync(fixture.temp, { recursive: true, force: true });
+    }
+  });
+
+  test("reports an error instead of completion when a verified chunk disappears", async () => {
+    const fixture = makeFixture();
+    try {
+      const build = finalizeWebPwa({
+        root: fixture.root,
+        siteDir: fixture.siteDir,
+        gameId: "pocket-tuxemon",
+        manifest: fixture.manifest,
+      });
+      const scope = "https://example.test/pocket-tuxemon/";
+      const caches = new MemoryCacheStorage();
+      const network = new RouteFetch();
+      network.routes = releaseRoutes(fixture, build, scope);
+      const worker = new ServiceWorkerHarness(readFileSync(build.serviceWorkerPath, "utf8"), scope, caches, network);
+      await worker.install();
+
+      const disappearingChunk = fixture.manifest.chunks.find((chunk) => chunk.id === "locale:en_US")!;
+      const disappearingUrl = new URL(disappearingChunk.file, scope).href;
+      const content = await caches.open("pocket-rpgkit:pak-chunks:v1");
+      await content.put(disappearingUrl, new Response(Buffer.from(network.routes.get(disappearingUrl)!)));
+      const messages: any[] = [];
+      let removed = false;
+      await worker.message(
+        { type: "OFFLINE_DOWNLOAD", language: "en" },
+        { postMessage: (message: any) => {
+          messages.push(message);
+          if (!removed && message.type === "OFFLINE_PROGRESS" && message.completed === message.total) {
+            removed = true;
+            void content.delete(disappearingUrl);
+          }
+        } },
+      );
+
+      expect(removed).toBeTrue();
+      expect(await content.match(disappearingUrl)).toBeUndefined();
+      expect(messages.some((message) => message.type === "OFFLINE_COMPLETE")).toBeFalse();
+      expect(messages.find((message) => message.type === "OFFLINE_ERROR")).toMatchObject({
+        completed: 4,
+        total: 5,
+      });
+    } finally {
+      rmSync(fixture.temp, { recursive: true, force: true });
+    }
+  });
+
   test("tracks the in-flight language across selector changes and terminal messages", async () => {
     const client = await runPwaClient();
     client.posted.length = 0;
