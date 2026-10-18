@@ -207,11 +207,17 @@ async function notify(source, message) {
   if (source && "postMessage" in source) source.postMessage({ ...message, build: BUILD.version });
 }
 
-async function cachedContentProgress(language) {
+async function cachedContentProgress(language, verify = false) {
   const manifest = await manifestFromShell();
   const chunks = chunksForLanguage(manifest, language);
   const cache = await caches.open(CONTENT_CACHE);
   const completedUrls = new Set();
+  if (verify) {
+    const urls = chunks.map((chunk) => new URL(chunk.file, manifestUrl).href);
+    if (new Set(urls).size !== urls.length) {
+      throw new Error("offline package manifest contains duplicate chunk URLs");
+    }
+  }
   let completed = 1;
   let bytes = manifest.startup.bytes;
   for (const chunk of chunks) {
@@ -219,7 +225,7 @@ async function cachedContentProgress(language) {
     const cached = await cache.match(url);
     if (!cached) continue;
     try {
-      await verifiedResponse(chunk, cached);
+      if (verify) await verifiedResponse(chunk, cached);
       if (completedUrls.has(url)) continue;
       completedUrls.add(url);
       completed++;
@@ -282,7 +288,7 @@ async function downloadLanguage(language, source) {
   activeDownload = token;
   let progress = null;
   try {
-    progress = await cachedContentProgress(language);
+    progress = await cachedContentProgress(language, true);
     const cache = await caches.open(CONTENT_CACHE);
     await notify(source, { type: "OFFLINE_PROGRESS", language, ...publicContentProgress(progress) });
     let cursor = 0;
@@ -291,7 +297,9 @@ async function downloadLanguage(language, source) {
       progress.completedUrls.add(url);
       progress.completed++;
       progress.bytes += chunk.bytes;
-      await notify(source, { type: "OFFLINE_PROGRESS", language, ...publicContentProgress(progress) });
+      if (activeDownload === token && !controller.signal.aborted) {
+        await notify(source, { type: "OFFLINE_PROGRESS", language, ...publicContentProgress(progress) });
+      }
     };
     const unmarkCompleted = (chunk, url) => {
       if (!progress.completedUrls.delete(url)) return;
@@ -331,6 +339,9 @@ async function downloadLanguage(language, source) {
     const missing = await reconcileCachedContent(progress, cache);
     if (missing.length > 0 || progress.completed !== progress.total) {
       throw new Error(`offline package is missing ${missing.length} verified chunk(s): ${missing.join(", ")}`);
+    }
+    if (activeDownload !== token || controller.signal.aborted) {
+      throw new DOMException("download paused", "AbortError");
     }
     await notify(source, { type: "OFFLINE_COMPLETE", language, ...publicContentProgress(progress) });
   } catch (error) {
