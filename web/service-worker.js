@@ -308,7 +308,9 @@ async function downloadLanguage(language, source) {
     };
     const downloadNext = async () => {
       while (cursor < progress.chunks.length) {
-        if (activeDownload !== token) throw new DOMException("download paused", "AbortError");
+        if (activeDownload !== token || controller.signal.aborted) {
+          throw new DOMException("download paused", "AbortError");
+        }
         const chunk = progress.chunks[cursor++];
         const url = new URL(chunk.file, manifestUrl).href;
         const cached = await cache.match(url);

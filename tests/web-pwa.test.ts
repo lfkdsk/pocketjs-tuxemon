@@ -99,9 +99,12 @@ const requestUrl = (request: unknown): string => {
 
 class MemoryCache {
   private readonly entries = new Map<string, Response>();
+  readonly matchCalls: string[] = [];
 
   async match(request: unknown): Promise<Response | undefined> {
-    return this.entries.get(requestUrl(request))?.clone();
+    const url = requestUrl(request);
+    this.matchCalls.push(url);
+    return this.entries.get(url)?.clone();
   }
 
   async put(request: unknown, response: Response): Promise<void> {
@@ -641,6 +644,61 @@ describe("Web PWA runtime behavior", () => {
         totalBytes: expected.bytes,
       });
       expect(messages.some((message) => message.type === "OFFLINE_ERROR")).toBeFalse();
+    } finally {
+      rmSync(fixture.temp, { recursive: true, force: true });
+    }
+  });
+
+  test("stops cached chunk work immediately when an offline download is paused", async () => {
+    const fixture = makeFixture();
+    try {
+      const build = finalizeWebPwa({
+        root: fixture.root,
+        siteDir: fixture.siteDir,
+        gameId: "pocket-tuxemon",
+        manifest: fixture.manifest,
+      });
+      const scope = "https://example.test/pocket-tuxemon/";
+      const caches = new MemoryCacheStorage();
+      const network = new RouteFetch();
+      network.routes = releaseRoutes(fixture, build, scope);
+      const worker = new ServiceWorkerHarness(readFileSync(build.serviceWorkerPath, "utf8"), scope, caches, network);
+      await worker.install();
+      network.calls.length = 0;
+
+      const content = await caches.open("pocket-rpgkit:pak-chunks:v1");
+      const selected = fixture.manifest.chunks.filter((chunk) =>
+        chunk.id === "locale:en_US" || chunk.id === "map:en_US:bedroom" ||
+        (!chunk.id.startsWith("locale:") && !chunk.id.startsWith("map:")));
+      const messages: any[] = [];
+      let matchCallsAtPause = -1;
+      await worker.message(
+        { type: "OFFLINE_DOWNLOAD", language: "en" },
+        { postMessage: (message: any) => {
+          messages.push(message);
+          if (message.type !== "OFFLINE_PROGRESS" || matchCallsAtPause >= 0) return;
+          for (const chunk of selected) {
+            const url = new URL(chunk.file, scope).href;
+            void content.put(url, new Response(Buffer.from(network.routes.get(url)!)));
+          }
+          matchCallsAtPause = content.matchCalls.length;
+          void worker.message({ type: "OFFLINE_PAUSE" });
+        } },
+      );
+
+      expect(matchCallsAtPause).toBeGreaterThanOrEqual(0);
+      expect(content.matchCalls).toHaveLength(matchCallsAtPause);
+      expect(network.calls).toEqual([]);
+      expect(messages.map((message) => message.type)).toEqual([
+        "OFFLINE_PROGRESS",
+        "OFFLINE_PAUSED",
+      ]);
+      expect(messages.at(-1)).toMatchObject({
+        type: "OFFLINE_PAUSED",
+        completed: 1,
+        total: 5,
+      });
+      expect(messages.some((message) => message.type === "OFFLINE_COMPLETE")).toBeFalse();
     } finally {
       rmSync(fixture.temp, { recursive: true, force: true });
     }
