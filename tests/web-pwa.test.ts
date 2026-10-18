@@ -625,10 +625,21 @@ describe("Web PWA runtime behavior", () => {
 
       const progress = messages.filter((message) => message.type === "OFFLINE_PROGRESS");
       const complete = messages.find((message) => message.type === "OFFLINE_COMPLETE");
+      const expected = offlinePackages(fixture.manifest).en!;
       expect(injected).toBeTrue();
       expect(network.calls.filter((url) => url === racedUrl)).toHaveLength(0);
-      expect(progress.at(-1)).toMatchObject({ completed: 5, total: 5 });
-      expect(complete).toMatchObject({ completed: 5, total: 5 });
+      expect(progress.at(-1)).toMatchObject({
+        completed: expected.chunks,
+        total: expected.chunks,
+        bytes: expected.bytes,
+        totalBytes: expected.bytes,
+      });
+      expect(complete).toMatchObject({
+        completed: expected.chunks,
+        total: expected.chunks,
+        bytes: expected.bytes,
+        totalBytes: expected.bytes,
+      });
       expect(messages.some((message) => message.type === "OFFLINE_ERROR")).toBeFalse();
     } finally {
       rmSync(fixture.temp, { recursive: true, force: true });
@@ -674,6 +685,9 @@ describe("Web PWA runtime behavior", () => {
       expect(messages.find((message) => message.type === "OFFLINE_ERROR")).toMatchObject({
         completed: 4,
         total: 5,
+        bytes: offlinePackages(fixture.manifest).en!.bytes - disappearingChunk.bytes,
+        totalBytes: offlinePackages(fixture.manifest).en!.bytes,
+        error: expect.stringContaining(disappearingChunk.file),
       });
     } finally {
       rmSync(fixture.temp, { recursive: true, force: true });
