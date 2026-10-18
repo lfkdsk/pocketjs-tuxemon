@@ -211,21 +211,68 @@ async function cachedContentProgress(language) {
   const manifest = await manifestFromShell();
   const chunks = chunksForLanguage(manifest, language);
   const cache = await caches.open(CONTENT_CACHE);
+  const completedUrls = new Set();
   let completed = 1;
   let bytes = manifest.startup.bytes;
   for (const chunk of chunks) {
-    if (await cache.match(new URL(chunk.file, manifestUrl).href)) {
+    const url = new URL(chunk.file, manifestUrl).href;
+    const cached = await cache.match(url);
+    if (!cached) continue;
+    try {
+      await verifiedResponse(chunk, cached);
+      if (completedUrls.has(url)) continue;
+      completedUrls.add(url);
       completed++;
       bytes += chunk.bytes;
+    } catch {
+      // Invalid entries are replaced by downloadLanguage and never count as progress.
     }
   }
   return {
     chunks,
+    completedUrls,
     completed,
     bytes,
     total: chunks.length + 1,
     totalBytes: manifest.startup.bytes + chunks.reduce((sum, chunk) => sum + chunk.bytes, 0),
   };
+}
+
+function publicContentProgress(progress) {
+  return {
+    completed: progress.completed,
+    bytes: progress.bytes,
+    total: progress.total,
+    totalBytes: progress.totalBytes,
+    chunks: undefined,
+  };
+}
+
+async function reconcileCachedContent(progress, cache) {
+  const completedUrls = new Set();
+  const missing = [];
+  let bytes = progress.totalBytes - progress.chunks.reduce((sum, chunk) => sum + chunk.bytes, 0);
+  for (const chunk of progress.chunks) {
+    const url = new URL(chunk.file, manifestUrl).href;
+    const cached = await cache.match(url);
+    if (cached) {
+      try {
+        await verifiedResponse(chunk, cached);
+        if (!completedUrls.has(url)) {
+          completedUrls.add(url);
+          bytes += chunk.bytes;
+        }
+        continue;
+      } catch {
+        // Report invalid entries with missing ones; neither is an offline-ready chunk.
+      }
+    }
+    missing.push(chunk.file);
+  }
+  progress.completedUrls = completedUrls;
+  progress.completed = completedUrls.size + 1;
+  progress.bytes = bytes;
+  return missing;
 }
 
 async function downloadLanguage(language, source) {
@@ -237,8 +284,20 @@ async function downloadLanguage(language, source) {
   try {
     progress = await cachedContentProgress(language);
     const cache = await caches.open(CONTENT_CACHE);
-    await notify(source, { type: "OFFLINE_PROGRESS", language, ...progress, chunks: undefined });
+    await notify(source, { type: "OFFLINE_PROGRESS", language, ...publicContentProgress(progress) });
     let cursor = 0;
+    const markCompleted = async (chunk, url) => {
+      if (progress.completedUrls.has(url)) return;
+      progress.completedUrls.add(url);
+      progress.completed++;
+      progress.bytes += chunk.bytes;
+      await notify(source, { type: "OFFLINE_PROGRESS", language, ...publicContentProgress(progress) });
+    };
+    const unmarkCompleted = (chunk, url) => {
+      if (!progress.completedUrls.delete(url)) return;
+      progress.completed--;
+      progress.bytes -= chunk.bytes;
+    };
     const downloadNext = async () => {
       while (cursor < progress.chunks.length) {
         if (activeDownload !== token) throw new DOMException("download paused", "AbortError");
@@ -248,35 +307,39 @@ async function downloadLanguage(language, source) {
         if (cached) {
           try {
             await verifiedResponse(chunk, cached);
+            await markCompleted(chunk, url);
             continue;
           } catch {
             await cache.delete(url);
-            progress.completed--;
-            progress.bytes -= chunk.bytes;
+            unmarkCompleted(chunk, url);
           }
+        } else {
+          unmarkCompleted(chunk, url);
         }
         const response = await fetchVerified({ ...chunk, url }, controller.signal);
         await cache.put(url, response);
         const stored = await cache.match(url);
         if (!stored) throw new Error(`browser did not retain ${chunk.file}`);
-        progress.completed++;
-        progress.bytes += chunk.bytes;
-        await notify(source, { type: "OFFLINE_PROGRESS", language, ...progress, chunks: undefined });
+        await verifiedResponse(chunk, stored);
+        await markCompleted(chunk, url);
       }
     };
     await Promise.all(Array.from(
       { length: Math.min(DOWNLOAD_CONCURRENCY, progress.chunks.length) },
       () => downloadNext(),
     ));
-    await notify(source, { type: "OFFLINE_COMPLETE", language, ...progress, chunks: undefined });
+    const missing = await reconcileCachedContent(progress, cache);
+    if (missing.length > 0 || progress.completed !== progress.total) {
+      throw new Error(`offline package is missing ${missing.length} verified chunk(s): ${missing.join(", ")}`);
+    }
+    await notify(source, { type: "OFFLINE_COMPLETE", language, ...publicContentProgress(progress) });
   } catch (error) {
     controller.abort();
     const paused = error?.name === "AbortError" || activeDownload !== token;
     await notify(source, {
       type: paused ? "OFFLINE_PAUSED" : "OFFLINE_ERROR",
       language,
-      ...(progress ?? {}),
-      chunks: undefined,
+      ...(progress ? publicContentProgress(progress) : {}),
       error: paused ? undefined : String(error?.message || error),
     });
   } finally {
@@ -300,8 +363,7 @@ self.addEventListener("message", (event) => {
       notify(event.source, {
         type: "OFFLINE_STATUS",
         language: message.language,
-        ...progress,
-        chunks: undefined,
+        ...publicContentProgress(progress),
         complete: progress.completed === progress.total,
       })).catch((error) => notify(event.source, {
         type: "OFFLINE_ERROR",
